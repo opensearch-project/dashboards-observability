@@ -60,6 +60,9 @@ jobs:
           ls
           cd plugins
           ls
+          echo "Hello"
+          cd dashboards-observability
+          ls
           cd OpenSearch-Dashboards/plugins/dashboards-observability
           yarn osd bootstrap
 
