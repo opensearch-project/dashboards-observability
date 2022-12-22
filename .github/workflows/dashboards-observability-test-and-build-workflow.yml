@@ -1,13 +1,7 @@
 
 name: Test and Build Observability Dashboards Plugin
 
-on: 
-  pull_request:
-  push:
-    paths:
-      - '.'
-      - '.github/workflows/dashboards-observability-test-build-workflow.yml'
-
+on: [pull_request, push]
 
 env:
   PLUGIN_NAME: dashboards-observability
@@ -56,19 +50,11 @@ jobs:
       - name: Checkout Dashboards Observability
         uses: actions/checkout@v2
         with:
-          path: Opensearch-Dashboards/plugins/dashboards-observability
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
 
 
       - name: Plugin Bootstrap
         run: |
-          ls
-          cd Opensearch-Dashboards
-          ls
-          cd plugins
-          ls
-          echo "Hello"
-          cd dashboards-observability
-          ls
           cd OpenSearch-Dashboards/plugins/dashboards-observability
           yarn osd bootstrap
 
