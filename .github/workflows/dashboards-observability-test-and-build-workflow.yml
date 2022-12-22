@@ -1,7 +1,13 @@
 
 name: Test and Build Observability Dashboards Plugin
 
-on: [pull_request, push]
+on: 
+  pull_request:
+  push:
+    paths:
+      - '.'
+      - '.github/workflows/dashboards-observability-test-build-workflow.yml'
+
 
 env:
   PLUGIN_NAME: dashboards-observability
@@ -27,6 +33,7 @@ jobs:
         with:
           repository: opensearch-project/OpenSearch-Dashboards
           ref: ${{ env.OPENSEARCH_VERSION }}
+          path: OpenSearch-Dashboards
 
       - name: Get node and yarn versions
         id: versions_step
