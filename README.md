@@ -43,43 +43,39 @@ Observability is collection of plugins and applications that let you visualize d
 | [![untriaged open][untriaged-badge]][untriaged-link]           |
 | [![nolabel open][nolabel-badge]][nolabel-link]                 |
 
-[dco-badge]: https://github.com/opensearch-project/observability/actions/workflows/dco.yml/badge.svg
-[dco-badge-link]: https://github.com/opensearch-project/observability/actions/workflows/dco.yml
-[link-check-badge]: https://github.com/opensearch-project/observability/actions/workflows/link-checker.yml/badge.svg
-[link-check-link]: https://github.com/opensearch-project/observability/actions/workflows/link-checker.yml
-[dashboard-build-badge]: https://github.com/opensearch-project/observability/actions/workflows/dashboards-observability-test-and-build-workflow.yml/badge.svg
-[dashboard-build-link]: https://github.com/opensearch-project/observability/actions/workflows/dashboards-observability-test-and-build-workflow.yml
-[opensearch-build-badge]: https://github.com/opensearch-project/observability/actions/workflows/opensearch-observability-test-and-build-workflow.yml/badge.svg
-[opensearch-build-link]: https://github.com/opensearch-project/observability/actions/workflows/opensearch-observability-test-and-build-workflow.yml
-[dashboard-codecov-badge]: https://codecov.io/gh/opensearch-project/observability/branch/main/graphs/badge.svg?flag=dashboards-observability
-[opensearch-codecov-badge]: https://codecov.io/gh/opensearch-project/observability/branch/main/graphs/badge.svg?flag=opensearch-observability
-[codecov-link]: https://codecov.io/gh/opensearch-project/observability
+[dco-badge]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dco.yml/badge.svg
+[dco-badge-link]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dco.yml
+[link-check-badge]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/link-checker.yml/badge.svg
+[link-check-link]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/link-checker.yml
+[dashboard-build-badge]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dashboards-observability-test-and-build-workflow.yml/badge.svg
+[dashboard-build-link]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dashboards-observability-test-and-build-workflow.yml
+[dashboard-codecov-badge]: https://codecov.io/gh/opensearch-project/dashboards-observability/branch/main/graphs/badge.svg?flag=dashboards-observability
+[codecov-link]: https://codecov.io/gh/opensearch-project/dashboards-observability
 [cypress-test-badge]: https://img.shields.io/badge/Cypress%20tests-in%20progress-yellow
 [cypress-test-link]: https://github.com/opensearch-project/opensearch-build/issues/1124
 [cypress-code-badge]: https://img.shields.io/badge/Cypress%20code-blue
-[cypress-code-link]: https://github.com/opensearch-project/observability/blob/main/dashboards-observability/.cypress/CYPRESS_TESTS.md
+[cypress-code-link]: https://github.com/opensearch-project/dashboards-observability/blob/main/dashboards-observability/.cypress/CYPRESS_TESTS.md
 [opensearch-it-badge]: https://img.shields.io/badge/OpenSearch%20Plugin%20IT%20tests-in%20progress-yellow
 [opensearch-it-link]: https://github.com/opensearch-project/opensearch-build/issues/1124
 [opensearch-it-code-badge]: https://img.shields.io/badge/OpenSearch%20IT%20code-blue
-[opensearch-it-code-link]: https://github.com/opensearch-project/observability/blob/main/opensearch-observability/src/test/kotlin/org/opensearch/observability/ObservabilityPluginIT.kt
 [bwc-tests-badge]: https://img.shields.io/badge/BWC%20tests-in%20progress-yellow
-[bwc-tests-link]: https://github.com/opensearch-project/observability/issues/276
-[good-first-badge]: https://img.shields.io/github/issues/opensearch-project/observability/good%20first%20issue.svg
-[good-first-link]: https://github.com/opensearch-project/observability/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+
-[feature-badge]: https://img.shields.io/github/issues/opensearch-project/observability/feature.svg
-[feature-link]: https://github.com/opensearch-project/observability/issues?q=is%3Aopen+is%3Aissue+label%3Afeature
-[bug-badge]: https://img.shields.io/github/issues/opensearch-project/observability/bug.svg
-[bug-link]: https://github.com/opensearch-project/observability/issues?q=is%3Aopen+is%3Aissue+label%3Abug+
-[enhancement-badge]: https://img.shields.io/github/issues/opensearch-project/observability/enhancement.svg
-[enhancement-link]: https://github.com/opensearch-project/observability/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement+
-[untriaged-badge]: https://img.shields.io/github/issues/opensearch-project/observability/untriaged.svg
-[untriaged-link]: https://github.com/opensearch-project/observability/issues?q=is%3Aopen+is%3Aissue+label%3Auntriaged+
-[nolabel-badge]: https://img.shields.io/github/issues-search/opensearch-project/observability?color=yellow&label=no%20label%20issues&query=is%3Aopen%20is%3Aissue%20no%3Alabel
-[nolabel-link]: https://github.com/opensearch-project/observability/issues?q=is%3Aopen+is%3Aissue+no%3Alabel+
+[bwc-tests-link]: https://github.com/opensearch-project/dashboards-observability/issues/276
+[good-first-badge]: https://img.shields.io/github/issues/opensearch-project/dashboards-observability/good%20first%20issue.svg
+[good-first-link]: https://github.com/opensearch-project/dashboards-observability/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+
+[feature-badge]: https://img.shields.io/github/issues/opensearch-project/dashboards-observability/feature.svg
+[feature-link]: https://github.com/opensearch-project/dashboards-observability/issues?q=is%3Aopen+is%3Aissue+label%3Afeature
+[bug-badge]: https://img.shields.io/github/issues/opensearch-project/dashboards-observability/bug.svg
+[bug-link]: https://github.com/opensearch-project/dashboards-observability/issues?q=is%3Aopen+is%3Aissue+label%3Abug+
+[enhancement-badge]: https://img.shields.io/github/issues/opensearch-project/dashboards-observability/enhancement.svg
+[enhancement-link]: https://github.com/opensearch-project/dashboards-observability/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement+
+[untriaged-badge]: https://img.shields.io/github/issues/opensearch-project/dashboards-observability/untriaged.svg
+[untriaged-link]: https://github.com/opensearch-project/dashboards-observability/issues?q=is%3Aopen+is%3Aissue+label%3Auntriaged+
+[nolabel-badge]: https://img.shields.io/github/issues-search/opensearch-project/dashboards-observability?color=yellow&label=no%20label%20issues&query=is%3Aopen%20is%3Aissue%20no%3Alabel
+[nolabel-link]: https://github.com/opensearch-project/dashboards-observability/issues?q=is%3Aopen+is%3Aissue+no%3Alabel+
 
 ## Plugin Components
 
-The Observability plugin has four components: Trace Analytics, Event Analytics, Operational Panels, and Notebooks.
+The Dashboards Observability plugin has four components: Trace Analytics, Event Analytics, Operational Panels, and Notebooks.
 
 ### Trace Analytics
 
