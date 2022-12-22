@@ -17,9 +17,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout Plugin
-        uses: actions/checkout@v1
-
       # Enable longer filenames for windows
       - name: Enable longer filenames
         if: ${{ matrix.os == 'windows-latest' }}
@@ -50,13 +47,11 @@ jobs:
           echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
           npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
 
-      - name: Move Observability to Plugins Dir
-        run: |
-          ls
-          cd ..
-          echo 'HELLO'
-          ls
-          mv dashboards-observability OpenSearch-Dashboards/plugins/dashboards-observability
+      - name: Checkout Dashboards Observability
+        uses: actions/checkout@v2
+        with:
+          path: Opensearch-Dashboards/plugins/dashboards-observability
+
 
       - name: Plugin Bootstrap
         run: |
