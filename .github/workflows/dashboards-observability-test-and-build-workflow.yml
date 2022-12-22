@@ -55,6 +55,11 @@ jobs:
 
       - name: Plugin Bootstrap
         run: |
+          ls
+          cd Opensearch-Dashboards
+          ls
+          cd plugins
+          ls
           cd OpenSearch-Dashboards/plugins/dashboards-observability
           yarn osd bootstrap
 
