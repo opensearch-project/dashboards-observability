@@ -51,7 +51,7 @@ jobs:
           npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
 
       - name: Move Observability to Plugins Dir
-        run: mv dashboards-observability OpenSearch-Dashboards/plugins/dashboards-observability
+        run: mv . OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Plugin Bootstrap
         run: |
