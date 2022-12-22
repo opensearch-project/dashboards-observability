@@ -52,6 +52,7 @@ jobs:
 
       - name: Move Observability to Plugins Dir
         run: |
+          ls
           cd ..
           echo 'HELLO'
           ls
