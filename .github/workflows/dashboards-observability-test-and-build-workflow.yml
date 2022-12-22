@@ -53,8 +53,7 @@ jobs:
       - name: Move Observability to Plugins Dir
         run: |
           cd ..
-          ls
-          mv . OpenSearch-Dashboards/plugins/dashboards-observability
+          mv dashboards-observability OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Plugin Bootstrap
         run: |
