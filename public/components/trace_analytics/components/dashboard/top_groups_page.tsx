@@ -1,4 +1,9 @@
-import { EuiAccordion, EuiButtonGroup, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTableRow } from '@elastic/eui';
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FilterType } from '../common/filters/filters';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';

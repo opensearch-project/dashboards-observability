@@ -1,14 +1,13 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from "@elastic/eui";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TraceAnalyticsMode } from "../../home";
 
-export type mode = {
-    id: string;
-    title: string;
-}
-
 const labels = new Map([['jaeger', 'Jaeger'], ['data_prepper', 'Data Prepper']]);
-
 
 export function DataSourcePicker(props: {modes: {
     id: string;
