@@ -18,8 +18,15 @@ import {
   observabilityEventsPluginOrder,
   observabilityEventsTitle,
   observabilityID,
+  observabilityMetricsID,
+  observabilityMetricsPluginOrder,
+  observabilityMetricsTitle, observabilityNotebooksID, observabilityNotebooksPluginOrder, observabilityNotebooksTitle,
+  observabilityOperationalPanelsID, observabilityOperationalPanelsPluginOrder, observabilityOperationalPanelsTitle,
   observabilityPluginOrder,
   observabilityTitle,
+  observabilityTraceAnalyticsID,
+  observabilityTraceAnalyticsPluginOrder,
+  observabilityTraceAnalyticsTitle,
 } from '../common/constants/shared';
 import PPLService from './services/requests/ppl';
 import DSLService from './services/requests/dsl';
@@ -149,11 +156,43 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     });
 
     core.application.register({
+      id: observabilityTraceAnalyticsID,
+      title: observabilityTraceAnalyticsTitle,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      order: observabilityTraceAnalyticsPluginOrder,
+      mount: appMountWithStartPage('/trace_analytics'),
+    });
+
+    core.application.register({
       id: observabilityEventsID,
       title: observabilityEventsTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       order: observabilityEventsPluginOrder,
       mount: appMountWithStartPage('/event_analytics'),
+    });
+
+    core.application.register({
+      id: observabilityMetricsID,
+      title: observabilityMetricsTitle,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      order: observabilityMetricsPluginOrder,
+      mount: appMountWithStartPage('/metrics_analytics'),
+    });
+
+    core.application.register({
+      id: observabilityOperationalPanelsID,
+      title: observabilityOperationalPanelsTitle,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      order: observabilityOperationalPanelsPluginOrder,
+      mount: appMountWithStartPage('/operational_panels'),
+    });
+
+    core.application.register({
+      id: observabilityNotebooksID,
+      title: observabilityNotebooksTitle,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      order: observabilityNotebooksPluginOrder,
+      mount: appMountWithStartPage('/notebooks'),
     });
 
     core.application.register({
