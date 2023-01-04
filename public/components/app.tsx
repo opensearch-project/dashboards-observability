@@ -3,13 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { I18nProvider } from '@osd/i18n/react';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { QueryManager } from 'common/query_manager';
 import { CoreStart } from '../../../../src/core/public';
-import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import store from '../framework/redux/store';
 import { AppPluginStartDependencies } from '../types';
 import { AppRoutesWrapper } from './routes_wrapper';
