@@ -52,7 +52,7 @@ export function DashboardContent(props: DashboardProps) {
     setQuery,
     setFilters,
     mode,
-    setMode
+    setMode,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -94,9 +94,28 @@ export function DashboardContent(props: DashboardProps) {
 
   const refresh = async (currService?: string) => {
     setLoading(true);
-    const DSL = filtersToDsl(mode, filters, query, processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page, appConfigs);
-    const timeFilterDSL = filtersToDsl(mode, [], '',processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page, appConfigs);
-    const latencyTrendStartTime = dateMath.parse(endTime, { roundUp: true })?.subtract(24, 'hours').toISOString()!;
+    const DSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page,
+      appConfigs
+    );
+    const timeFilterDSL = filtersToDsl(
+      mode,
+      [],
+      '',
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page,
+      appConfigs
+    );
+    const latencyTrendStartTime = dateMath
+      .parse(endTime, { roundUp: true })
+      ?.subtract(24, 'hours')
+      .toISOString()!;
     const latencyTrendDSL = filtersToDsl(
       mode,
       filters,
@@ -107,7 +126,7 @@ export function DashboardContent(props: DashboardProps) {
       appConfigs
     );
     const fixedInterval = minFixedInterval(startTime, endTime);
-    if (mode === 'jaeger') { 
+    if (mode === 'jaeger') {
       handleJaegerDashboardRequest(
         http,
         DSL,
@@ -116,7 +135,7 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setJaegerTableItems,
         mode,
-        setPercentileMap,
+        setPercentileMap
       ).then(() => setLoading(false));
       handleJaegerErrorDashboardRequest(
         http,
@@ -126,7 +145,7 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setJaegerErrorTableItems,
         mode,
-        setPercentileMap,
+        setPercentileMap
       ).then(() => setLoading(false));
     } else if (mode === 'data_prepper') {
       handleDashboardRequest(
@@ -137,11 +156,10 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setTableItems,
         mode,
-        setPercentileMap,
+        setPercentileMap
       ).then(() => setLoading(false));
     }
 
-    
     handleDashboardThroughputPltRequest(
       http,
       DSL,
@@ -164,7 +182,13 @@ export function DashboardContent(props: DashboardProps) {
     serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
       (must: any) => must?.term?.serviceName == null
     );
-    handleServiceMapRequest(http, serviceMapDSL, mode, setServiceMap, currService || filteredService);
+    handleServiceMapRequest(
+      http,
+      serviceMapDSL,
+      mode,
+      setServiceMap,
+      currService || filteredService
+    );
   };
 
   const addFilter = (filter: FilterType) => {
@@ -224,14 +248,19 @@ export function DashboardContent(props: DashboardProps) {
     const newFilters = [...filters, percentileFilter, ...additionalFilters];
     setFilters(newFilters);
   };
-  
-  const modes = [{id: 'jaeger', title: 'Jaeger'}, {id: 'data_prepper', title: 'Data Prepper'}]
+
+  const modes = [
+    { id: 'jaeger', title: 'Jaeger' },
+    { id: 'data_prepper', title: 'Data Prepper' },
+  ];
 
   return (
     <>
-      {setMode !== undefined ? 
-      <DataSourcePicker modes={modes} selectedMode={mode} setMode={setMode}/>
-      : <div/>} 
+      {setMode !== undefined ? (
+        <DataSourcePicker modes={modes} selectedMode={mode} setMode={setMode} />
+      ) : (
+        <div />
+      )}
       <SearchBar
         query={query}
         filters={filters}
@@ -249,49 +278,50 @@ export function DashboardContent(props: DashboardProps) {
       <EuiSpacer size="m" />
       {mode !== 'none' ? (
         <div>
-          { mode === 'data_prepper' ? (
-          <>
-            <DashboardTable
-              items={tableItems}
-              filters={filters}
-              addFilter={addFilter}
-              addPercentileFilter={addPercentileFilter}
-              setRedirect={setRedirect}
-              loading={loading}
-              page={page}
-            />
-            <EuiSpacer />
-            <EuiFlexGroup alignItems="baseline">
-              <EuiFlexItem grow={4}>
-                <ServiceMap
-                  addFilter={addFilter}
-                  serviceMap={serviceMap}
-                  idSelected={serviceMapIdSelected}
-                  setIdSelected={setServiceMapIdSelected}
-                  currService={filteredService}
-                  page={page}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem>
-                    <ErrorRatePlt
-                      items={errorRatePltItems}
-                      setStartTime={setStartTime}
-                      setEndTime={setEndTime}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <ThroughputPlt
-                      items={throughputPltItems}
-                      setStartTime={setStartTime}
-                      setEndTime={setEndTime}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </> ) : ( 
+          {mode === 'data_prepper' ? (
+            <>
+              <DashboardTable
+                items={tableItems}
+                filters={filters}
+                addFilter={addFilter}
+                addPercentileFilter={addPercentileFilter}
+                setRedirect={setRedirect}
+                loading={loading}
+                page={page}
+              />
+              <EuiSpacer />
+              <EuiFlexGroup alignItems="baseline">
+                <EuiFlexItem grow={4}>
+                  <ServiceMap
+                    addFilter={addFilter}
+                    serviceMap={serviceMap}
+                    idSelected={serviceMapIdSelected}
+                    setIdSelected={setServiceMapIdSelected}
+                    currService={filteredService}
+                    page={page}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column">
+                    <EuiFlexItem>
+                      <ErrorRatePlt
+                        items={errorRatePltItems}
+                        setStartTime={setStartTime}
+                        setEndTime={setEndTime}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <ThroughputPlt
+                        items={throughputPltItems}
+                        setStartTime={setStartTime}
+                        setEndTime={setEndTime}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : (
             <TopGroupsPage
               filters={filters}
               addFilter={addFilter}
@@ -307,10 +337,9 @@ export function DashboardContent(props: DashboardProps) {
               setStartTime={setStartTime}
               setEndTime={setEndTime}
             />
-          )
-          }
+          )}
         </div>
-        ) : (
+      ) : (
         <MissingConfigurationMessage />
       )}
     </>

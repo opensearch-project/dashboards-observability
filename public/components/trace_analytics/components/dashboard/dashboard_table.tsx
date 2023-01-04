@@ -350,7 +350,7 @@ export function DashboardTable(props: {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={10}>
-          <PanelTitle title={props.title || "Latency by trace group"} totalItems={totalItems} />
+          <PanelTitle title={props.title || 'Latency by trace group'} totalItems={totalItems} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
