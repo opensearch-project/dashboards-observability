@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './workspace_panel.scss';
-
 import React, { useState, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiPanel, EuiSwitch } from '@elastic/eui';

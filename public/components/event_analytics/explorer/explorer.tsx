@@ -95,7 +95,6 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { DataGrid } from './events_views/data_grid';
-import './explorer.scss';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { PatternsTable } from './log_patterns/patterns_table';
 import { NoResults } from './no_results';
@@ -104,6 +103,7 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { QueryManager } from '../../../../common/query_manager';
+import { uiSettingsService } from '../../../../common/utils';
 
 const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
@@ -1469,7 +1469,7 @@ export const Explorer = ({
         query,
       }}
     >
-      <div className="dscAppContainer">
+      <div className={`dscAppContainer${uiSettingsService.get('theme:darkMode') && ' explorer-dark'}`}>
         <Search
           key="search-component"
           query={appLogEvents ? generateViewQuery(tempQuery) : query[RAW_QUERY]}

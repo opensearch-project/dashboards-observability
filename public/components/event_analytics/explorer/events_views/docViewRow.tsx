@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './docView.scss';
 import moment from 'moment';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { toPairs, uniqueId, has, forEach, isEqual } from 'lodash';
-import { EuiButtonEmpty, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DocFlyout } from './doc_flyout';
