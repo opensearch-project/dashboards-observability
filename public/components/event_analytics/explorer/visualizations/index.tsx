@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './app.scss';
-
 import { isEmpty } from 'lodash';
-
 import React from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { QueryManager } from 'common/query_manager';
