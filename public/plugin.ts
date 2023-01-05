@@ -168,8 +168,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       );
     };
 
-    const customCategory: AppCategory = Object.assign({}, DEFAULT_APP_CATEGORIES.observability, {euiIconType: ""})
-
     core.application.register({
       id: observabilityApplicationsID,
       title: observabilityApplicationsTitle,
