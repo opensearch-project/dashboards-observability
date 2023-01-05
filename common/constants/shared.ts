@@ -43,11 +43,11 @@ export const observabilityMetricsTitle = 'Metrics Analytics';
 export const observabilityMetricsPluginOrder = 5093;
 
 export const observabilityOperationalPanelsID = 'observability-operational-panels';
-export const observabilityOperationalPanelsTitle = 'OperationalPanels Analytics';
+export const observabilityOperationalPanelsTitle = 'Operational Panels';
 export const observabilityOperationalPanelsPluginOrder = 5094;
 
 export const observabilityNotebooksID = 'observability-notebooks';
-export const observabilityNotebooksTitle = 'Notebooks Analytics';
+export const observabilityNotebooksTitle = 'Notebooks';
 export const observabilityNotebooksPluginOrder = 5095;
 
 // Shared Constants

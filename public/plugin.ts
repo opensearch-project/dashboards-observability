@@ -118,11 +118,36 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       );
     };
 
+    const createNotebook: DashboardCreatorFn = () => {
+      window.location = core.http.basePath.prepend(
+        '/app/observability-dashboards#/notebooks/create'
+      );
+    };
+
+    const createPanel: DashboardCreatorFn = () => {
+      window.location = core.http.basePath.prepend(
+        '/app/observability-dashboards#/operational_panels/create'
+      );
+    };
+
     dashboard.registerDashboardListSource(id, () => combinedDashboardList);
+
+    dashboard.registerDashboardItemCreator({
+      id: 'observaility-notebook',
+      defaultText: 'Notebook',
+      creatorFn: createNotebook,
+    });
+
     dashboard.registerDashboardItemCreator({
       id: 'observaility-application',
-      defaultText: 'Analytics Application',
+      defaultText: 'Observability App',
       creatorFn: createAppAnalytics,
+    });
+
+    dashboard.registerDashboardItemCreator({
+      id: 'observaility-panel',
+      defaultText: 'Operational Panel',
+      creatorFn: createPanel,
     });
 
     const appMountWithStartPage = (startPage?: string) => async (params: AppMountParameters) => {
