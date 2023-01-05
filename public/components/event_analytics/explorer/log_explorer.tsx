@@ -4,7 +4,6 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import './log_explorer.scss';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector, batch } from 'react-redux';
 import { uniqueId, map, isEmpty } from 'lodash';

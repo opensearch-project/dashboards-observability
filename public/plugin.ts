@@ -3,14 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  AppCategory,
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin, PluginInitializerContext,
-} from '../../../src/core/public';
+import './index.scss';
+
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,

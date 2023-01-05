@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './sidebar.scss';
-
 import React, { useState } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiTitle, EuiSpacer, EuiFieldSearch, EuiAccordion } from '@elastic/eui';
