@@ -52,7 +52,6 @@ export function DashboardContent(props: DashboardProps) {
     setQuery,
     setFilters,
     mode,
-    setMode,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -249,18 +248,8 @@ export function DashboardContent(props: DashboardProps) {
     setFilters(newFilters);
   };
 
-  const modes = [
-    { id: 'jaeger', title: 'Jaeger' },
-    { id: 'data_prepper', title: 'Data Prepper' },
-  ];
-
   return (
     <>
-      {setMode !== undefined ? (
-        <DataSourcePicker modes={modes} selectedMode={mode} setMode={setMode} />
-      ) : (
-        <div />
-      )}
       <SearchBar
         query={query}
         filters={filters}

@@ -257,28 +257,6 @@ export function ErrorRatesTable(props: {
         <EuiFlexItem grow={10}>
           <PanelTitle title={props.title || 'Latency by trace group'} totalItems={totalItems} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="dashboard-table-percentile-button-1"
-            onClick={() => props.addPercentileFilter('lte')}
-          >
-            <EuiText size="xs">
-              <span style={{ color: '#957ac9' }}>&#x25a1;</span> &lt; 95 percentile
-            </EuiText>
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="dashboard-table-percentile-button-2"
-            onClick={() => props.addPercentileFilter('gte')}
-          >
-            <EuiText size="xs">
-              <span style={{ color: '#957ac9' }}>&#x25a0;</span> &gt;= 95 percentile
-            </EuiText>
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} />
       </EuiFlexGroup>
     );
   };
@@ -314,8 +292,8 @@ export function ErrorRatesTable(props: {
             items={props.items.filter((item) => item.dashboard_error_rate > 0)}
             columns={columns}
             pagination={{
-              initialPageSize: 10,
-              pageSizeOptions: [5, 10, 15],
+              initialPageSize: 5,
+              pageSizeOptions: [5],
             }}
             sorting={sorting}
             onTableChange={onTableChange}

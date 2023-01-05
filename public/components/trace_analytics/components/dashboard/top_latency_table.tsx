@@ -426,8 +426,8 @@ export function LatencyTable(props: {
             items={props.items}
             columns={columns}
             pagination={{
-              initialPageSize: 10,
-              pageSizeOptions: [5, 10, 15],
+              initialPageSize: 5,
+              pageSizeOptions: [5],
             }}
             sorting={sorting}
             onTableChange={onTableChange}

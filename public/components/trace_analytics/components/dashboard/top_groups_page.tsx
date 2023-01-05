@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FilterType } from '../common/filters/filters';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
@@ -40,7 +40,7 @@ export function TopGroupsPage(props: {
   return (
     <>
       {idSelected === 'error_rate' ? (
-        <EuiPanel>
+        <>
           <EuiSpacer size="m" />
           <ErrorRatePlt
             items={props.jaegerErrorRatePltItems}
@@ -51,14 +51,13 @@ export function TopGroupsPage(props: {
             toggleButtons={toggleButtons}
           />
           <ErrorRatesTable
-            title={'Top Service and Operation Error Rates'}
+            title={'Top 5 Service and Operation Error Rates'}
             items={props.jaegerErrorTableItems}
             {...props}
           />
-        </EuiPanel>
+        </>
       ) : (
-        <EuiPanel>
-          <EuiSpacer size="m" />
+        <>
           <ThroughputPlt
             items={props.throughPutItems}
             setStartTime={props.setStartTime}
@@ -68,11 +67,11 @@ export function TopGroupsPage(props: {
             toggleButtons={toggleButtons}
           />
           <LatencyTable
-            title={'Top Service and Operation Latency'}
+            title={'Top 5 Service and Operation Latency'}
             items={props.jaegerTableItems}
             {...props}
           />
-        </EuiPanel>
+        </>
       )}
     </>
   );

@@ -7,6 +7,7 @@ import { EuiBreadcrumb, EuiTitle } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
 import { TraceAnalyticsComponentDeps } from '../../home';
+import { DataSourcePicker } from '../dashboard/mode_picker';
 import { ServicesContent } from './services_content';
 
 export interface ServicesProps extends TraceAnalyticsComponentDeps {
@@ -22,6 +23,7 @@ export function Services(props: ServicesProps) {
       <EuiTitle size="l">
         <h2 style={{ fontWeight: 430 }}>Services</h2>
       </EuiTitle>
+      <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />
       <ServicesContent {...props} />
     </>
   );

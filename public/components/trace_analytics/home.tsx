@@ -30,6 +30,11 @@ export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'none'
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
+  modes: {
+    id: string;
+    title: string;
+  }[];
+  setMode: (mode: TraceAnalyticsMode) => void
 }
 
 export const Home = (props: HomeProps) => {
@@ -69,6 +74,11 @@ export const Home = (props: HomeProps) => {
     handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist)
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
   }, []);
+
+  const modes = [
+    { id: 'jaeger', title: 'Jaeger' },
+    { id: 'data_prepper', title: 'Data Prepper' },
+  ];
 
   // useEffect(() => {
   //   if (dataPrepperIndicesExist) {
@@ -135,6 +145,8 @@ export const Home = (props: HomeProps) => {
     endTime,
     setEndTime: setEndTimeWithStorage,
     mode,
+    modes,
+    setMode: (mode: TraceAnalyticsMode) => {setMode(mode)}
   };
 
   return (
@@ -144,7 +156,7 @@ export const Home = (props: HomeProps) => {
         path={['/trace_analytics', '/trace_analytics/home']}
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} setMode={(mode: TraceAnalyticsMode) => {setMode(mode)}} {...commonProps} />
+            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} />
           </ObservabilitySideBar>
         )}
       />
