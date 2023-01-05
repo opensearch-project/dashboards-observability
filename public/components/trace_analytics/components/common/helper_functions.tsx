@@ -76,6 +76,7 @@ export function MissingConfigurationMessage() {
   );
 }
 
+// Processes time (like 'now-5y') to microseconds for jaeger since this is how they store the start time. Otherwise leave it the same.
 export function processTimeStamp(time: string, mode: TraceAnalyticsMode) {
   if (mode === 'jaeger') {
     const timeMoment = dateMath.parse(time)!;
@@ -100,9 +101,9 @@ export function nanoToMilliSec(nano: number) {
   return nano / 1000000;
 }
 
-export function microToMilliSec(nano: number) {
-  if (typeof nano !== 'number') return 0;
-  return nano / 1000;
+export function microToMilliSec(micro: number) {
+  if (typeof micro !== 'number') return 0;
+  return micro / 1000;
 }
 
 export function milliToMicroSec(ms: number) {

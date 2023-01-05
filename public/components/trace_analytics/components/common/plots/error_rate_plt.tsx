@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonGroup, EuiHorizontalRule, EuiPanel, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiHorizontalRule, EuiPanel, EuiFlexGroup, EuiSpacer, EuiButtonGroupOptionProps } from '@elastic/eui';
 import moment from 'moment';
 import React, { useMemo, useState } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
@@ -20,7 +20,7 @@ export function ErrorRatePlt(props: {
   setEndTime: (endTime: string) => void;
   setIdSelected: (mode: string) => void;
   idSelected: string;
-  toggleButtons: any[];
+  toggleButtons: EuiButtonGroupOptionProps[];
 }) {
   const getLayout = () =>
     ({
