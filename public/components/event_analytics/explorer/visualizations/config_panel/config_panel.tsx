@@ -19,7 +19,6 @@ import { getVisTypeData } from '../../../../visualizations/charts/helpers/viz_ty
 import { TabContext } from '../../../hooks';
 import { reset as resetVisualizationConfig } from '../../../redux/slices/viualization_config_slice';
 import { getDefaultSpec } from '../visualization_specs/default_spec';
-import './config_panel.scss';
 
 const CONFIG_LAYOUT_TEMPLATE = `
 {
