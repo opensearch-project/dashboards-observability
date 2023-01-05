@@ -4,6 +4,7 @@
  */
 
 import {
+  AppCategory,
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -172,10 +173,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       );
     };
 
+    const customCategory: AppCategory = Object.assign({}, DEFAULT_APP_CATEGORIES.observability, {euiIconType: "visLine"})
+
     core.application.register({
       id: observabilityApplicationsID,
       title: observabilityApplicationsTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: customCategory,
       order: observabilityApplicationsPluginOrder,
       mount: appMountWithStartPage('/application_analytics'),
     });
@@ -183,7 +186,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     core.application.register({
       id: observabilityTraceAnalyticsID,
       title: observabilityTraceAnalyticsTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: customCategory,
       order: observabilityTraceAnalyticsPluginOrder,
       mount: appMountWithStartPage('/trace_analytics'),
     });
@@ -191,7 +194,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     core.application.register({
       id: observabilityEventsID,
       title: observabilityEventsTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: customCategory,
       order: observabilityEventsPluginOrder,
       mount: appMountWithStartPage('/event_analytics'),
     });
@@ -199,7 +202,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     core.application.register({
       id: observabilityMetricsID,
       title: observabilityMetricsTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: customCategory,
       order: observabilityMetricsPluginOrder,
       mount: appMountWithStartPage('/metrics_analytics'),
     });
@@ -207,7 +210,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     core.application.register({
       id: observabilityOperationalPanelsID,
       title: observabilityOperationalPanelsTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: customCategory,
       order: observabilityOperationalPanelsPluginOrder,
       mount: appMountWithStartPage('/operational_panels'),
     });
@@ -215,7 +218,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     core.application.register({
       id: observabilityNotebooksID,
       title: observabilityNotebooksTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: customCategory,
       order: observabilityNotebooksPluginOrder,
       mount: appMountWithStartPage('/notebooks'),
     });
