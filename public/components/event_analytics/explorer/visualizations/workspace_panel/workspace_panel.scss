@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@import '../variables';
+
 .ws__header-dark {
   background-color: transparent;
 }
@@ -20,6 +22,9 @@
 }
 
 #vis__mainContent .ws__central--canvas {
-  background-color: #FFF;
   border-right: 1px solid #D3DAE6;
+}
+
+.explorer-dark #vis__mainContent .ws__central--canvas {
+  border-right: 1px solid $border-color-on-dark;
 }

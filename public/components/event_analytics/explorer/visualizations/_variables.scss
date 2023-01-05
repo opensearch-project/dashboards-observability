@@ -3,8 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-$lnsPanelMinWidth: $euiSize * 18;
-
-// These sizes also match canvas' page thumbnails for consistency
-$lnsSuggestionHeight: 100px;
-$lnsSuggestionWidth: 150px;
+// dark mode border color
+$border-color-on-dark: #343741;
