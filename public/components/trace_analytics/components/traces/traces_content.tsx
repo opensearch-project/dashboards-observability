@@ -31,6 +31,8 @@ export function TracesContent(props: TracesProps) {
     setStartTime,
     setEndTime,
     mode,
+    dataPrepperIndicesExist,
+    jaegerIndicesExist,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [redirect, setRedirect] = useState(true);
@@ -49,7 +51,7 @@ export function TracesContent(props: TracesProps) {
   }, []);
 
   useEffect(() => {
-    if (!redirect && mode !== 'none') refresh();
+    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh();
   }, [filters, appConfigs]);
 
   const refresh = async (sort?: PropertySort) => {
@@ -83,6 +85,8 @@ export function TracesContent(props: TracesProps) {
         mode={mode}
         loading={loading}
         traceIdColumnAction={traceIdColumnAction}
+        jaegerIndicesExist
+        dataPrepperIndicesExist
       />
     </>
   );

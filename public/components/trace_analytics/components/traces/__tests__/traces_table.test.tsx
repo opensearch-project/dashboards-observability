@@ -19,7 +19,9 @@ describe('Traces table component', () => {
       <TracesTable
         items={[]}
         refresh={refresh}
-        indicesExist={false}
+        dataPrepperIndicesExist={false}
+        jaegerIndicesExist={false}
+        mode='data_prepper'
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -30,7 +32,9 @@ describe('Traces table component', () => {
       <TracesTable
         items={[]}
         refresh={refresh}
-        indicesExist={true}
+        dataPrepperIndicesExist={true}
+        jaegerIndicesExist={false}
+        mode='data_prepper'
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -58,7 +62,9 @@ describe('Traces table component', () => {
       <TracesTable
         items={tableItems}
         refresh={refresh}
-        indicesExist={true}
+        dataPrepperIndicesExist={true}
+        jaegerIndicesExist={false}
+        mode='data_prepper'
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />

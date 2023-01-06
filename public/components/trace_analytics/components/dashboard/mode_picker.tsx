@@ -22,11 +22,10 @@ export function DataSourcePicker(props: {
 }) {
   const { modes, selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [selected, setSelected] = useState(selectedMode);
 
   const trigger = {
-    label: labels.get(selected),
-    title: selected,
+    label: labels.get(selectedMode),
+    title: selectedMode,
     'data-test-subj': 'indexPattern-switch-link',
     className: 'dscIndexPattern__triggerButton',
   };
@@ -70,7 +69,7 @@ export function DataSourcePicker(props: {
               label: x.title,
               key: x.id,
               value: x.id,
-              checked: x.id === selected ? 'on' : undefined,
+              checked: x.id === selectedMode ? 'on' : undefined,
             }))}
             onChange={(choices) => {
               const choice = choices.find(({ checked }) => checked) as unknown as {
@@ -79,7 +78,6 @@ export function DataSourcePicker(props: {
                 key: TraceAnalyticsMode;
               };
               setMode(choice.key);
-              setSelected(choice.key);
               setPopoverIsOpen(false);
               sessionStorage.setItem('TraceAnalyticsMode', choice.key);
             }}

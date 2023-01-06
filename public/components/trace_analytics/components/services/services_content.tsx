@@ -38,6 +38,8 @@ export function ServicesContent(props: ServicesProps) {
     setStartTime,
     setEndTime,
     mode,
+    dataPrepperIndicesExist,
+    jaegerIndicesExist,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
@@ -69,7 +71,7 @@ export function ServicesContent(props: ServicesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && mode !== 'none') refresh(newFilteredService);
+    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
   }, [filters, appConfigs]);
 
   const refresh = async (currService?: string) => {
@@ -127,6 +129,8 @@ export function ServicesContent(props: ServicesProps) {
         loading={loading}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
+        jaegerIndicesExist
+        dataPrepperIndicesExist
       />
       <EuiSpacer size="m" />
       { mode === 'data_prepper' ? 

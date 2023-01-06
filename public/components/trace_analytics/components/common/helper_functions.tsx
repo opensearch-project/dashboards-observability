@@ -51,14 +51,14 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
   );
 }
 
-export function MissingConfigurationMessage() {
+export function MissingConfigurationMessage(props: {mode: TraceAnalyticsMode}) {
   return (
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
         body={
           <EuiText>
-            {`The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME} or ${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
+            {`The indices required for trace analytics (${props.mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME} and ${props.mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
           </EuiText>
         }
         actions={

@@ -34,6 +34,8 @@ interface ServicesTableProps {
   addFilter: (filter: FilterType) => void;
   setRedirect: (redirect: boolean) => void;
   mode: TraceAnalyticsMode;
+  jaegerIndicesExist: boolean;
+  dataPrepperIndicesExist: boolean;
 }
 
 export function ServicesTable(props: ServicesTableProps) {
@@ -45,6 +47,8 @@ export function ServicesTable(props: ServicesTableProps) {
     traceColumnAction,
     addFilter,
     setRedirect,
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
   } = props;
   const renderTitleBar = (totalItems?: number) => {
     return (
@@ -170,10 +174,10 @@ export function ServicesTable(props: ServicesTableProps) {
             }}
             loading={loading}
           />
-        ) : mode !== 'none' ? (
+        ) : ((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
           <NoMatchMessage size="xl" />
         ) : (
-          <MissingConfigurationMessage />
+          <MissingConfigurationMessage mode={mode}/>
         )}
       </EuiPanel>
     </>

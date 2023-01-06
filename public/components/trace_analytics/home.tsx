@@ -26,7 +26,7 @@ export interface TraceAnalyticsCoreDeps {
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
 
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'none'
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper'
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
@@ -34,7 +34,9 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
     id: string;
     title: string;
   }[];
-  setMode: (mode: TraceAnalyticsMode) => void
+  setMode: (mode: TraceAnalyticsMode) => void;
+  jaegerIndicesExist: boolean;
+  dataPrepperIndicesExist: boolean;
 }
 
 export const Home = (props: HomeProps) => {
@@ -80,15 +82,13 @@ export const Home = (props: HomeProps) => {
     { id: 'data_prepper', title: 'Data Prepper' },
   ];
 
-  // useEffect(() => {
-  //   if (dataPrepperIndicesExist) {
-  //     setMode('data_prepper');
-  //   } else if (jaegerIndicesExist) {
-  //     setMode('jaeger');
-  //   } else {
-  //     setMode('none');
-  //   }
-  // }, [jaegerIndicesExist, dataPrepperIndicesExist]);
+  useEffect(() => {
+    if (dataPrepperIndicesExist) {
+      setMode('data_prepper');
+    } else if (jaegerIndicesExist) {
+      setMode('jaeger');
+    }
+  }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const dashboardBreadcrumbs = [
     {
@@ -146,7 +146,9 @@ export const Home = (props: HomeProps) => {
     setEndTime: setEndTimeWithStorage,
     mode,
     modes,
-    setMode: (mode: TraceAnalyticsMode) => {setMode(mode)}
+    setMode: (mode: TraceAnalyticsMode) => {setMode(mode)},
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
   };
 
   return (

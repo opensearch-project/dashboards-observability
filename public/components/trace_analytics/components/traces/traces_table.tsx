@@ -34,6 +34,8 @@ interface TracesTableProps {
   mode: TraceAnalyticsMode;
   loading: boolean;
   traceIdColumnAction: any;
+  jaegerIndicesExist: boolean;
+  dataPrepperIndicesExist: boolean;
 }
 
 export function TracesTable(props: TracesTableProps) {
@@ -280,10 +282,10 @@ export function TracesTable(props: TracesTableProps) {
             onTableChange={onTableChange}
             loading={loading}
           />
-        ) : mode !== 'none' ? (
+        ) : ((mode === 'data_prepper' && props.dataPrepperIndicesExist) || (mode === 'jaeger' && props.jaegerIndicesExist)) ? (
           <NoMatchMessage size="xl" />
         ) : (
-          <MissingConfigurationMessage />
+          <MissingConfigurationMessage mode={mode}/>
         )}
       </EuiPanel>
     </>

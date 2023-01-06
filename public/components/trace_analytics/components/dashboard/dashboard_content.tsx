@@ -32,7 +32,6 @@ import { ThroughputPlt } from '../common/plots/throughput_plt';
 import { SearchBar } from '../common/search_bar';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
-import { DataSourcePicker } from './mode_picker';
 import { TopGroupsPage } from './top_groups_page';
 
 export function DashboardContent(props: DashboardProps) {
@@ -52,6 +51,8 @@ export function DashboardContent(props: DashboardProps) {
     setQuery,
     setFilters,
     mode,
+    dataPrepperIndicesExist,
+    jaegerIndicesExist,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -88,7 +89,7 @@ export function DashboardContent(props: DashboardProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && mode !== 'none') refresh(newFilteredService);
+    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
   }, [filters, startTime, endTime, appConfigs]);
 
   const refresh = async (currService?: string) => {
@@ -265,7 +266,7 @@ export function DashboardContent(props: DashboardProps) {
         mode={mode}
       />
       <EuiSpacer size="m" />
-      {mode !== 'none' ? (
+      {((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
           {mode === 'data_prepper' ? (
             <>
@@ -329,7 +330,7 @@ export function DashboardContent(props: DashboardProps) {
           )}
         </div>
       ) : (
-        <MissingConfigurationMessage />
+        <MissingConfigurationMessage mode={mode}/>
       )}
     </>
   );
