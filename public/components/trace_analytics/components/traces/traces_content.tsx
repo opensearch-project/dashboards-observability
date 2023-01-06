@@ -85,8 +85,8 @@ export function TracesContent(props: TracesProps) {
         mode={mode}
         loading={loading}
         traceIdColumnAction={traceIdColumnAction}
-        jaegerIndicesExist
-        dataPrepperIndicesExist
+        jaegerIndicesExist={jaegerIndicesExist}
+        dataPrepperIndicesExist={dataPrepperIndicesExist}
       />
     </>
   );

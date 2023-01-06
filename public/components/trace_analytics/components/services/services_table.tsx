@@ -157,7 +157,9 @@ export function ServicesTable(props: ServicesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {items?.length > 0 ? (
+        {!((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
+          <MissingConfigurationMessage mode={mode}/>
+        ) : ( items?.length > 0 ? (
           <EuiInMemoryTable
             tableLayout="auto"
             items={items}
@@ -174,11 +176,9 @@ export function ServicesTable(props: ServicesTableProps) {
             }}
             loading={loading}
           />
-        ) : ((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
-          <NoMatchMessage size="xl" />
         ) : (
-          <MissingConfigurationMessage mode={mode}/>
-        )}
+          <NoMatchMessage size="xl" />
+        ))}
       </EuiPanel>
     </>
   );

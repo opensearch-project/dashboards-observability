@@ -129,11 +129,11 @@ export function ServicesContent(props: ServicesProps) {
         loading={loading}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
-        jaegerIndicesExist
-        dataPrepperIndicesExist
+        jaegerIndicesExist={jaegerIndicesExist}
+        dataPrepperIndicesExist={dataPrepperIndicesExist}
       />
       <EuiSpacer size="m" />
-      { mode === 'data_prepper' ? 
+      { (mode === 'data_prepper' && dataPrepperIndicesExist) ? 
         <ServiceMap
           addFilter={addFilter}
           serviceMap={serviceMap}

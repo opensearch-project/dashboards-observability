@@ -269,7 +269,9 @@ export function TracesTable(props: TracesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {items?.length > 0 ? (
+        {!((mode === 'data_prepper' && props.dataPrepperIndicesExist) || (mode === 'jaeger' && props.jaegerIndicesExist)) ? (
+          <MissingConfigurationMessage mode={mode}/>
+        ) : items?.length > 0 ? (
           <EuiInMemoryTable
             tableLayout="auto"
             items={items}
@@ -282,10 +284,8 @@ export function TracesTable(props: TracesTableProps) {
             onTableChange={onTableChange}
             loading={loading}
           />
-        ) : ((mode === 'data_prepper' && props.dataPrepperIndicesExist) || (mode === 'jaeger' && props.jaegerIndicesExist)) ? (
-          <NoMatchMessage size="xl" />
         ) : (
-          <MissingConfigurationMessage mode={mode}/>
+          <NoMatchMessage size="xl" />
         )}
       </EuiPanel>
     </>
