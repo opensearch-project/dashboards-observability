@@ -173,7 +173,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       );
     };
 
-    const customCategory: AppCategory = Object.assign({}, DEFAULT_APP_CATEGORIES.observability, {euiIconType: "visLine"})
+    const customCategory: AppCategory = Object.assign({}, DEFAULT_APP_CATEGORIES.observability, {euiIconType: ""})
 
     core.application.register({
       id: observabilityApplicationsID,
@@ -221,14 +221,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       category: customCategory,
       order: observabilityNotebooksPluginOrder,
       mount: appMountWithStartPage('/notebooks'),
-    });
-
-    core.application.register({
-      id: observabilityID,
-      title: observabilityTitle,
-      category: DEFAULT_APP_CATEGORIES.plugins,
-      order: observabilityPluginOrder,
-      mount: appMountWithStartPage(),
     });
 
     // Return methods that should be available to other plugins
