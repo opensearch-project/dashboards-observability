@@ -25,7 +25,6 @@ describe('Metrics Grid Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer);
 
-  let flag = 0;
   it('renders Metrics Grid Component', async () => {
     httpClientMock.get = jest.fn(() => Promise.resolve((sampleMetric as unknown) as HttpResponse));
     httpClientMock.post = jest.fn(() =>
