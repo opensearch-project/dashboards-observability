@@ -158,6 +158,18 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         setPercentileMap
       ).then(() => setLoading(false));
+      // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
+      const serviceMapDSL = _.cloneDeep(DSL);
+      serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
+        (must: any) => must?.term?.serviceName == null
+      );
+      handleServiceMapRequest(
+        http,
+        serviceMapDSL,
+        mode,
+        setServiceMap,
+        currService || filteredService
+      );
     }
 
     handleDashboardThroughputPltRequest(
@@ -176,18 +188,6 @@ export function DashboardContent(props: DashboardProps) {
       errorRatePltItems,
       setErrorRatePltItems,
       mode
-    );
-    // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
-    const serviceMapDSL = _.cloneDeep(DSL);
-    serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
-      (must: any) => must?.term?.serviceName == null
-    );
-    handleServiceMapRequest(
-      http,
-      serviceMapDSL,
-      mode,
-      setServiceMap,
-      currService || filteredService
     );
   };
 
