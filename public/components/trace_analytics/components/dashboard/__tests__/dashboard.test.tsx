@@ -62,6 +62,52 @@ describe('Dashboard component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  it('renders empty jaeger dashboard', () => {
+    const core = coreStartMock;
+    const setQuery = jest.fn();
+    const setFilters = jest.fn();
+    const setStartTime = jest.fn();
+    const setEndTime = jest.fn();
+    const wrapper = mount(
+      <Dashboard
+        http={core.http}
+        chrome={core.chrome}
+        parentBreadcrumbs={[
+          {
+            text: 'test',
+            href: 'test#/',
+          },
+        ]}
+        childBreadcrumbs={[
+          {
+            text: 'Trace analytics',
+            href: '#/trace_analytics/home',
+          },
+          {
+            text: 'Dashboard',
+            href: '#/trace_analytics/home',
+          },
+        ]}
+        query=""
+        setQuery={setQuery}
+        filters={[]}
+        appConfigs={[]}
+        setFilters={setFilters}
+        startTime="now-5m"
+        setStartTime={setStartTime}
+        endTime="now"
+        setEndTime={setEndTime}
+        page="dashboard"
+        mode="jaeger"
+        dataPrepperIndicesExist={false}
+        jaegerIndicesExist={true}
+        modes={modes}
+      />
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
   it('renders dashboard', () => {
     const core = coreStartMock;
     const setQuery = jest.fn();

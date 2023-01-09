@@ -103,4 +103,49 @@ describe('Traces component', () => {
 
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('renders jaeger traces page', () => {
+    const core = coreStartMock;
+    const setQuery = jest.fn();
+    const setFilters = jest.fn();
+    const setStartTime = jest.fn();
+    const setEndTime = jest.fn();
+    const traceIdColumnAction = (item: any) =>
+      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const childBreadcrumbs = [
+      {
+        text: 'Trace analytics',
+        href: '#/trace_analytics/home',
+      },
+      {
+        text: 'Traces',
+        href: '#/trace_analytics/traces',
+      },
+    ];
+    const wrapper = mount(
+      <Traces
+        http={core.http}
+        chrome={core.chrome}
+        parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
+        childBreadcrumbs={childBreadcrumbs}
+        traceIdColumnAction={traceIdColumnAction}
+        query=""
+        setQuery={setQuery}
+        filters={[]}
+        appConfigs={[]}
+        setFilters={setFilters}
+        startTime="now-5m"
+        setStartTime={setStartTime}
+        endTime="now"
+        setEndTime={setEndTime}
+        mode='jaeger'
+        page="traces"
+        modes={modes}
+        dataPrepperIndicesExist={false}
+        jaegerIndicesExist={true}
+      />
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
 });
