@@ -46,10 +46,23 @@ exports[`Services component renders empty services page 1`] = `
       },
     }
   }
+  dataPrepperIndicesExist={true}
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
   mode="data_prepper"
+  modes={
+    Array [
+      Object {
+        "id": "jaeger",
+        "title": "Jaeger",
+      },
+      Object {
+        "id": "data_prepper",
+        "title": "Data Prepper",
+      },
+    ]
+  }
   nameColumnAction={[Function]}
   page="services"
   parentBreadcrumbs={
@@ -96,6 +109,123 @@ exports[`Services component renders empty services page 1`] = `
       Services
     </h2>
   </EuiTitle>
+  <DataSourcePicker
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
+    selectedMode="data_prepper"
+  >
+    <EuiPopover
+      anchorClassName="eui-textTruncate"
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonEmpty
+          className="dscIndexPattern__triggerButton"
+          color="text"
+          data-test-subj="indexPattern-switch-link"
+          flush="left"
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={[Function]}
+          title="data_prepper"
+        >
+          Data Prepper
+        </EuiButtonEmpty>
+      }
+      className="eui-textTruncate"
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="s"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+      >
+        <div
+          className="euiPopover__anchor eui-textTruncate"
+        >
+          <EuiButtonEmpty
+            className="dscIndexPattern__triggerButton"
+            color="text"
+            data-test-subj="indexPattern-switch-link"
+            flush="left"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            title="data_prepper"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+              data-test-subj="indexPattern-switch-link"
+              disabled={false}
+              onClick={[Function]}
+              title="data_prepper"
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconSide="right"
+                iconSize="m"
+                iconType="arrowDown"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
+              >
+                <span
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <EuiIconEmpty
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </EuiIconEmpty>
+                  </EuiIcon>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    Data Prepper
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonEmpty>
+        </div>
+      </div>
+    </EuiPopover>
+  </DataSourcePicker>
   <ServicesContent
     appConfigs={Array []}
     childBreadcrumbs={
@@ -141,10 +271,23 @@ exports[`Services component renders empty services page 1`] = `
         },
       }
     }
+    dataPrepperIndicesExist={true}
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
     mode="data_prepper"
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
     nameColumnAction={[Function]}
     page="services"
     parentBreadcrumbs={
@@ -181,6 +324,7 @@ exports[`Services component renders empty services page 1`] = `
       appConfigs={Array []}
       endTime="now"
       filters={Array []}
+      mode="data_prepper"
       page="services"
       query=""
       refresh={[Function]}
@@ -784,6 +928,7 @@ exports[`Services component renders empty services page 1`] = `
       <Filters
         appConfigs={Array []}
         filters={Array []}
+        mode="data_prepper"
         page="services"
         setFilters={
           [MockFunction] {
@@ -983,6 +1128,7 @@ exports[`Services component renders empty services page 1`] = `
     </EuiSpacer>
     <ServicesTable
       addFilter={[Function]}
+      dataPrepperIndicesExist={true}
       items={Array []}
       loading={false}
       mode="data_prepper"
@@ -1703,10 +1849,23 @@ exports[`Services component renders services page 1`] = `
       },
     }
   }
+  dataPrepperIndicesExist={true}
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
   mode="data_prepper"
+  modes={
+    Array [
+      Object {
+        "id": "jaeger",
+        "title": "Jaeger",
+      },
+      Object {
+        "id": "data_prepper",
+        "title": "Data Prepper",
+      },
+    ]
+  }
   nameColumnAction={[Function]}
   page="services"
   parentBreadcrumbs={
@@ -1753,6 +1912,128 @@ exports[`Services component renders services page 1`] = `
       Services
     </h2>
   </EuiTitle>
+  <DataSourcePicker
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
+    selectedMode="data_prepper"
+  >
+    <EuiPopover
+      anchorClassName="eui-textTruncate"
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonEmpty
+          className="dscIndexPattern__triggerButton"
+          color="text"
+          data-test-subj="indexPattern-switch-link"
+          flush="left"
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={[Function]}
+          title="data_prepper"
+        >
+          Data Prepper
+        </EuiButtonEmpty>
+      }
+      className="eui-textTruncate"
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="s"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+      >
+        <div
+          className="euiPopover__anchor eui-textTruncate"
+        >
+          <EuiButtonEmpty
+            className="dscIndexPattern__triggerButton"
+            color="text"
+            data-test-subj="indexPattern-switch-link"
+            flush="left"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            title="data_prepper"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+              data-test-subj="indexPattern-switch-link"
+              disabled={false}
+              onClick={[Function]}
+              title="data_prepper"
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconSide="right"
+                iconSize="m"
+                iconType="arrowDown"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
+              >
+                <span
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <EuiIconArrowDown
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
+                          fillRule="non-zero"
+                        />
+                      </svg>
+                    </EuiIconArrowDown>
+                  </EuiIcon>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    Data Prepper
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonEmpty>
+        </div>
+      </div>
+    </EuiPopover>
+  </DataSourcePicker>
   <ServicesContent
     appConfigs={Array []}
     childBreadcrumbs={
@@ -1798,10 +2079,23 @@ exports[`Services component renders services page 1`] = `
         },
       }
     }
+    dataPrepperIndicesExist={true}
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
     mode="data_prepper"
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
     nameColumnAction={[Function]}
     page="services"
     parentBreadcrumbs={
@@ -1838,6 +2132,7 @@ exports[`Services component renders services page 1`] = `
       appConfigs={Array []}
       endTime="now"
       filters={Array []}
+      mode="data_prepper"
       page="services"
       query=""
       refresh={[Function]}
@@ -2459,6 +2754,7 @@ exports[`Services component renders services page 1`] = `
       <Filters
         appConfigs={Array []}
         filters={Array []}
+        mode="data_prepper"
         page="services"
         setFilters={
           [MockFunction] {
@@ -2663,6 +2959,7 @@ exports[`Services component renders services page 1`] = `
     </EuiSpacer>
     <ServicesTable
       addFilter={[Function]}
+      dataPrepperIndicesExist={true}
       items={Array []}
       loading={false}
       mode="data_prepper"

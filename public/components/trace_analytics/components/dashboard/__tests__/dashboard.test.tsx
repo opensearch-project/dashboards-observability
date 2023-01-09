@@ -12,6 +12,10 @@ import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Dashboard component', () => {
   configure({ adapter: new Adapter() });
+  const modes = [
+    { id: 'jaeger', title: 'Jaeger' },
+    { id: 'data_prepper', title: 'Data Prepper' },
+  ];
 
   it('renders empty dashboard', () => {
     const core = coreStartMock;
@@ -50,6 +54,8 @@ describe('Dashboard component', () => {
         setEndTime={setEndTime}
         page="dashboard"
         mode="data_prepper"
+        dataPrepperIndicesExist={true}
+        modes={modes}
       />
     );
 
@@ -93,6 +99,8 @@ describe('Dashboard component', () => {
         setEndTime={setEndTime}
         page="dashboard"
         mode="data_prepper"
+        dataPrepperIndicesExist={true}
+        modes={modes}
       />
     );
 

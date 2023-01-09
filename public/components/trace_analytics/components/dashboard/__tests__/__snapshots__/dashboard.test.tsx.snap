@@ -46,10 +46,23 @@ exports[`Dashboard component renders dashboard 1`] = `
       },
     }
   }
+  dataPrepperIndicesExist={true}
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
   mode="data_prepper"
+  modes={
+    Array [
+      Object {
+        "id": "jaeger",
+        "title": "Jaeger",
+      },
+      Object {
+        "id": "data_prepper",
+        "title": "Data Prepper",
+      },
+    ]
+  }
   page="dashboard"
   parentBreadcrumbs={
     Array [
@@ -94,6 +107,128 @@ exports[`Dashboard component renders dashboard 1`] = `
       Dashboard
     </h2>
   </EuiTitle>
+  <DataSourcePicker
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
+    selectedMode="data_prepper"
+  >
+    <EuiPopover
+      anchorClassName="eui-textTruncate"
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonEmpty
+          className="dscIndexPattern__triggerButton"
+          color="text"
+          data-test-subj="indexPattern-switch-link"
+          flush="left"
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={[Function]}
+          title="data_prepper"
+        >
+          Data Prepper
+        </EuiButtonEmpty>
+      }
+      className="eui-textTruncate"
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="s"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+      >
+        <div
+          className="euiPopover__anchor eui-textTruncate"
+        >
+          <EuiButtonEmpty
+            className="dscIndexPattern__triggerButton"
+            color="text"
+            data-test-subj="indexPattern-switch-link"
+            flush="left"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            title="data_prepper"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+              data-test-subj="indexPattern-switch-link"
+              disabled={false}
+              onClick={[Function]}
+              title="data_prepper"
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconSide="right"
+                iconSize="m"
+                iconType="arrowDown"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
+              >
+                <span
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <EuiIconArrowDown
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
+                          fillRule="non-zero"
+                        />
+                      </svg>
+                    </EuiIconArrowDown>
+                  </EuiIcon>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    Data Prepper
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonEmpty>
+        </div>
+      </div>
+    </EuiPopover>
+  </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
     childBreadcrumbs={
@@ -139,10 +274,23 @@ exports[`Dashboard component renders dashboard 1`] = `
         },
       }
     }
+    dataPrepperIndicesExist={true}
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
     mode="data_prepper"
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
     page="dashboard"
     parentBreadcrumbs={
       Array [
@@ -177,6 +325,7 @@ exports[`Dashboard component renders dashboard 1`] = `
       appConfigs={Array []}
       endTime="now"
       filters={Array []}
+      mode="data_prepper"
       page="dashboard"
       query=""
       refresh={[Function]}
@@ -798,6 +947,7 @@ exports[`Dashboard component renders dashboard 1`] = `
       <Filters
         appConfigs={Array []}
         filters={Array []}
+        mode="data_prepper"
         page="dashboard"
         setFilters={
           [MockFunction] {
@@ -1822,30 +1972,58 @@ exports[`Dashboard component renders dashboard 1`] = `
                               }
                             }
                           >
-                            <PanelTitle
-                              title="Trace error rate over time"
+                            <EuiFlexGroup
+                              gutterSize="xs"
+                              justifyContent="spaceBetween"
                             >
-                              <EuiText
-                                size="m"
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
-                                <div
-                                  className="euiText euiText--medium"
+                                <PanelTitle
+                                  title="Trace error rate over time"
                                 >
-                                  <span
-                                    className="panel-title"
+                                  <EuiText
+                                    size="m"
                                   >
-                                    Trace error rate over time
-                                  </span>
-                                </div>
-                              </EuiText>
-                            </PanelTitle>
-                            <EuiHorizontalRule
-                              margin="m"
+                                    <div
+                                      className="euiText euiText--medium"
+                                    >
+                                      <span
+                                        className="panel-title"
+                                      >
+                                        Trace error rate over time
+                                      </span>
+                                    </div>
+                                  </EuiText>
+                                </PanelTitle>
+                                <EuiButtonGroup
+                                  buttonSize="s"
+                                  color="text"
+                                  onChange={[Function]}
+                                >
+                                  <fieldset
+                                    className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                                    disabled={false}
+                                  >
+                                    <EuiScreenReaderOnly>
+                                      <legend
+                                        className="euiScreenReaderOnly"
+                                      />
+                                    </EuiScreenReaderOnly>
+                                    <div
+                                      className="euiButtonGroup__buttons"
+                                    />
+                                  </fieldset>
+                                </EuiButtonGroup>
+                              </div>
+                            </EuiFlexGroup>
+                            <EuiSpacer
+                              size="m"
                             >
-                              <hr
-                                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+                              <div
+                                className="euiSpacer euiSpacer--m"
                               />
-                            </EuiHorizontalRule>
+                            </EuiSpacer>
                             <NoMatchMessage
                               size="s"
                             >
@@ -1954,23 +2132,51 @@ exports[`Dashboard component renders dashboard 1`] = `
                               }
                             }
                           >
-                            <PanelTitle
-                              title="Traces over time"
+                            <EuiFlexGroup
+                              gutterSize="xs"
+                              justifyContent="spaceBetween"
                             >
-                              <EuiText
-                                size="m"
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
-                                <div
-                                  className="euiText euiText--medium"
+                                <PanelTitle
+                                  title="Traces over time"
                                 >
-                                  <span
-                                    className="panel-title"
+                                  <EuiText
+                                    size="m"
                                   >
-                                    Traces over time
-                                  </span>
-                                </div>
-                              </EuiText>
-                            </PanelTitle>
+                                    <div
+                                      className="euiText euiText--medium"
+                                    >
+                                      <span
+                                        className="panel-title"
+                                      >
+                                        Traces over time
+                                      </span>
+                                    </div>
+                                  </EuiText>
+                                </PanelTitle>
+                                <EuiButtonGroup
+                                  buttonSize="s"
+                                  color="text"
+                                  onChange={[Function]}
+                                >
+                                  <fieldset
+                                    className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                                    disabled={false}
+                                  >
+                                    <EuiScreenReaderOnly>
+                                      <legend
+                                        className="euiScreenReaderOnly"
+                                      />
+                                    </EuiScreenReaderOnly>
+                                    <div
+                                      className="euiButtonGroup__buttons"
+                                    />
+                                  </fieldset>
+                                </EuiButtonGroup>
+                              </div>
+                            </EuiFlexGroup>
                             <EuiHorizontalRule
                               margin="m"
                             >
@@ -2112,10 +2318,23 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       },
     }
   }
+  dataPrepperIndicesExist={true}
   endTime="now"
   filters={Array []}
   http={[MockFunction]}
   mode="data_prepper"
+  modes={
+    Array [
+      Object {
+        "id": "jaeger",
+        "title": "Jaeger",
+      },
+      Object {
+        "id": "data_prepper",
+        "title": "Data Prepper",
+      },
+    ]
+  }
   page="dashboard"
   parentBreadcrumbs={
     Array [
@@ -2160,6 +2379,123 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       Dashboard
     </h2>
   </EuiTitle>
+  <DataSourcePicker
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
+    selectedMode="data_prepper"
+  >
+    <EuiPopover
+      anchorClassName="eui-textTruncate"
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonEmpty
+          className="dscIndexPattern__triggerButton"
+          color="text"
+          data-test-subj="indexPattern-switch-link"
+          flush="left"
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={[Function]}
+          title="data_prepper"
+        >
+          Data Prepper
+        </EuiButtonEmpty>
+      }
+      className="eui-textTruncate"
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="s"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+      >
+        <div
+          className="euiPopover__anchor eui-textTruncate"
+        >
+          <EuiButtonEmpty
+            className="dscIndexPattern__triggerButton"
+            color="text"
+            data-test-subj="indexPattern-switch-link"
+            flush="left"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            title="data_prepper"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
+              data-test-subj="indexPattern-switch-link"
+              disabled={false}
+              onClick={[Function]}
+              title="data_prepper"
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconSide="right"
+                iconSize="m"
+                iconType="arrowDown"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
+              >
+                <span
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <EuiIconEmpty
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </EuiIconEmpty>
+                  </EuiIcon>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    Data Prepper
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonEmpty>
+        </div>
+      </div>
+    </EuiPopover>
+  </DataSourcePicker>
   <DashboardContent
     appConfigs={Array []}
     childBreadcrumbs={
@@ -2205,10 +2541,23 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         },
       }
     }
+    dataPrepperIndicesExist={true}
     endTime="now"
     filters={Array []}
     http={[MockFunction]}
     mode="data_prepper"
+    modes={
+      Array [
+        Object {
+          "id": "jaeger",
+          "title": "Jaeger",
+        },
+        Object {
+          "id": "data_prepper",
+          "title": "Data Prepper",
+        },
+      ]
+    }
     page="dashboard"
     parentBreadcrumbs={
       Array [
@@ -2243,6 +2592,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       appConfigs={Array []}
       endTime="now"
       filters={Array []}
+      mode="data_prepper"
       page="dashboard"
       query=""
       refresh={[Function]}
@@ -2846,6 +3196,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       <Filters
         appConfigs={Array []}
         filters={Array []}
+        mode="data_prepper"
         page="dashboard"
         setFilters={
           [MockFunction] {
@@ -3861,30 +4212,58 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                               }
                             }
                           >
-                            <PanelTitle
-                              title="Trace error rate over time"
+                            <EuiFlexGroup
+                              gutterSize="xs"
+                              justifyContent="spaceBetween"
                             >
-                              <EuiText
-                                size="m"
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
-                                <div
-                                  className="euiText euiText--medium"
+                                <PanelTitle
+                                  title="Trace error rate over time"
                                 >
-                                  <span
-                                    className="panel-title"
+                                  <EuiText
+                                    size="m"
                                   >
-                                    Trace error rate over time
-                                  </span>
-                                </div>
-                              </EuiText>
-                            </PanelTitle>
-                            <EuiHorizontalRule
-                              margin="m"
+                                    <div
+                                      className="euiText euiText--medium"
+                                    >
+                                      <span
+                                        className="panel-title"
+                                      >
+                                        Trace error rate over time
+                                      </span>
+                                    </div>
+                                  </EuiText>
+                                </PanelTitle>
+                                <EuiButtonGroup
+                                  buttonSize="s"
+                                  color="text"
+                                  onChange={[Function]}
+                                >
+                                  <fieldset
+                                    className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                                    disabled={false}
+                                  >
+                                    <EuiScreenReaderOnly>
+                                      <legend
+                                        className="euiScreenReaderOnly"
+                                      />
+                                    </EuiScreenReaderOnly>
+                                    <div
+                                      className="euiButtonGroup__buttons"
+                                    />
+                                  </fieldset>
+                                </EuiButtonGroup>
+                              </div>
+                            </EuiFlexGroup>
+                            <EuiSpacer
+                              size="m"
                             >
-                              <hr
-                                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+                              <div
+                                className="euiSpacer euiSpacer--m"
                               />
-                            </EuiHorizontalRule>
+                            </EuiSpacer>
                             <NoMatchMessage
                               size="s"
                             >
@@ -3993,23 +4372,51 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                               }
                             }
                           >
-                            <PanelTitle
-                              title="Traces over time"
+                            <EuiFlexGroup
+                              gutterSize="xs"
+                              justifyContent="spaceBetween"
                             >
-                              <EuiText
-                                size="m"
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                               >
-                                <div
-                                  className="euiText euiText--medium"
+                                <PanelTitle
+                                  title="Traces over time"
                                 >
-                                  <span
-                                    className="panel-title"
+                                  <EuiText
+                                    size="m"
                                   >
-                                    Traces over time
-                                  </span>
-                                </div>
-                              </EuiText>
-                            </PanelTitle>
+                                    <div
+                                      className="euiText euiText--medium"
+                                    >
+                                      <span
+                                        className="panel-title"
+                                      >
+                                        Traces over time
+                                      </span>
+                                    </div>
+                                  </EuiText>
+                                </PanelTitle>
+                                <EuiButtonGroup
+                                  buttonSize="s"
+                                  color="text"
+                                  onChange={[Function]}
+                                >
+                                  <fieldset
+                                    className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                                    disabled={false}
+                                  >
+                                    <EuiScreenReaderOnly>
+                                      <legend
+                                        className="euiScreenReaderOnly"
+                                      />
+                                    </EuiScreenReaderOnly>
+                                    <div
+                                      className="euiButtonGroup__buttons"
+                                    />
+                                  </fieldset>
+                                </EuiButtonGroup>
+                              </div>
+                            </EuiFlexGroup>
                             <EuiHorizontalRule
                               margin="m"
                             >

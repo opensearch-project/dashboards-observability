@@ -11,6 +11,10 @@ import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Traces component', () => {
   configure({ adapter: new Adapter() });
+  const modes = [
+    { id: 'jaeger', title: 'Jaeger' },
+    { id: 'data_prepper', title: 'Data Prepper' },
+  ];
 
   it('renders empty traces page', () => {
     const core = coreStartMock;
@@ -48,6 +52,8 @@ describe('Traces component', () => {
         setEndTime={setEndTime}
         page="traces"
         mode='data_prepper'
+        dataPrepperIndicesExist={true}
+        modes={modes}
       />
     );
 
@@ -90,6 +96,8 @@ describe('Traces component', () => {
         setEndTime={setEndTime}
         mode='data_prepper'
         page="traces"
+        modes={modes}
+        dataPrepperIndicesExist={true}
       />
     );
 

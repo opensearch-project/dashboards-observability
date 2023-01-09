@@ -11,6 +11,10 @@ import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Services component', () => {
   configure({ adapter: new Adapter() });
+  const modes = [
+    { id: 'jaeger', title: 'Jaeger' },
+    { id: 'data_prepper', title: 'Data Prepper' },
+  ];
 
   it('renders empty services page', () => {
     const core = coreStartMock;
@@ -50,6 +54,8 @@ describe('Services component', () => {
         setEndTime={setEndTime}
         page="services"
         mode='data_prepper'
+        dataPrepperIndicesExist={true}
+        modes={modes}
       />
     );
 
@@ -94,6 +100,8 @@ describe('Services component', () => {
         setEndTime={setEndTime}
         page="services"
         mode='data_prepper'
+        dataPrepperIndicesExist={true}
+        modes={modes}
       />
     );
 
