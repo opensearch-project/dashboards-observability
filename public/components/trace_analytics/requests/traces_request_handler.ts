@@ -263,7 +263,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         orientation: BarOrientation.horizontal,
         hoverinfo: 'none',
         showlegend: false,
-        spanId: hit._source.spanId,
+        spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
       },
       {
         x: [duration],
@@ -278,7 +278,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         type: 'bar',
         orientation: BarOrientation.horizontal,
         hovertemplate: '%{x}<extra></extra>',
-        spanId: hit._source.spanId,
+        spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
       }
     );
   });
