@@ -544,39 +544,6 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
             },
             Object {
               "align": "right",
-              "field": "24_hour_latency_trend",
-              "name": <EuiToolTip
-                content={
-                  <EuiText
-                    size="xs"
-                  >
-                    24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.
-                  </EuiText>
-                }
-                delay="regular"
-                position="top"
-              >
-                <React.Fragment>
-                  <div>
-                    24-hour latency trend
-                     
-                    <EuiIcon
-                      className="eui-alignTop"
-                      color="subdued"
-                      size="s"
-                      type="questionInCircle"
-                    />
-                  </div>
-                  <div>
-                     
-                  </div>
-                </React.Fragment>
-              </EuiToolTip>,
-              "render": [Function],
-              "sortable": false,
-            },
-            Object {
-              "align": "right",
               "field": "dashboard_error_rate",
               "name": <EuiToolTip
                 content={
@@ -787,39 +754,6 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                 </EuiToolTip>,
                 "render": [Function],
                 "sortable": true,
-              },
-              Object {
-                "align": "right",
-                "field": "24_hour_latency_trend",
-                "name": <EuiToolTip
-                  content={
-                    <EuiText
-                      size="xs"
-                    >
-                      24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.
-                    </EuiText>
-                  }
-                  delay="regular"
-                  position="top"
-                >
-                  <React.Fragment>
-                    <div>
-                      24-hour latency trend
-                       
-                      <EuiIcon
-                        className="eui-alignTop"
-                        color="subdued"
-                        size="s"
-                        type="questionInCircle"
-                      />
-                    </div>
-                    <div>
-                       
-                    </div>
-                  </React.Fragment>
-                </EuiToolTip>,
-                "render": [Function],
-                "sortable": false,
               },
               Object {
                 "align": "right",
@@ -1099,7 +1033,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                 Object {
                                   "isSortAscending": undefined,
                                   "isSorted": false,
-                                  "key": "_data_s_dashboard_error_rate_4",
+                                  "key": "_data_s_dashboard_error_rate_3",
                                   "name": <EuiToolTip
                                     content={
                                       <EuiText
@@ -1132,7 +1066,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                 Object {
                                   "isSortAscending": undefined,
                                   "isSorted": false,
-                                  "key": "_data_s_dashboard_traces_5",
+                                  "key": "_data_s_dashboard_traces_4",
                                   "name": <EuiToolTip
                                     content={
                                       <EuiText
@@ -1673,113 +1607,16 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="right"
-                          data-test-subj="tableHeaderCell_24_hour_latency_trend_3"
-                          key="_data_h_24_hour_latency_trend_3"
-                        >
-                          <th
-                            className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_24_hour_latency_trend_3"
-                            role="columnheader"
-                            scope="col"
-                            style={
-                              Object {
-                                "width": undefined,
-                              }
-                            }
-                          >
-                            <CellContents
-                              className="euiTableCellContent euiTableCellContent--alignRight"
-                              showSortMsg={false}
-                            >
-                              <span
-                                className="euiTableCellContent euiTableCellContent--alignRight"
-                              >
-                                <EuiInnerText>
-                                  <EuiI18n
-                                    default="{innerText}; {description}"
-                                    token="euiTableHeaderCell.titleTextWithDesc"
-                                    values={
-                                      Object {
-                                        "description": undefined,
-                                        "innerText": "24-hour latency trend  ",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiTableCellContent__text"
-                                      title="24-hour latency trend  "
-                                    >
-                                      <EuiToolTip
-                                        content={
-                                          <EuiText
-                                            size="xs"
-                                          >
-                                            24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.
-                                          </EuiText>
-                                        }
-                                        delay="regular"
-                                        position="top"
-                                      >
-                                        <span
-                                          className="euiToolTipAnchor"
-                                          onKeyUp={[Function]}
-                                          onMouseOut={[Function]}
-                                          onMouseOver={[Function]}
-                                        >
-                                          <div>
-                                            24-hour latency trend
-                                             
-                                            <EuiIcon
-                                              className="eui-alignTop"
-                                              color="subdued"
-                                              size="s"
-                                              type="questionInCircle"
-                                            >
-                                              <EuiIconEmpty
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                                focusable="false"
-                                                role="img"
-                                                style={null}
-                                              >
-                                                <svg
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                                  focusable="false"
-                                                  height={16}
-                                                  role="img"
-                                                  style={null}
-                                                  viewBox="0 0 16 16"
-                                                  width={16}
-                                                  xmlns="http://www.w3.org/2000/svg"
-                                                />
-                                              </EuiIconEmpty>
-                                            </EuiIcon>
-                                          </div>
-                                          <div>
-                                             
-                                          </div>
-                                        </span>
-                                      </EuiToolTip>
-                                    </span>
-                                  </EuiI18n>
-                                </EuiInnerText>
-                              </span>
-                            </CellContents>
-                          </th>
-                        </EuiTableHeaderCell>
-                        <EuiTableHeaderCell
-                          align="right"
-                          data-test-subj="tableHeaderCell_dashboard_error_rate_4"
+                          data-test-subj="tableHeaderCell_dashboard_error_rate_3"
                           isSorted={false}
-                          key="_data_h_dashboard_error_rate_4"
+                          key="_data_h_dashboard_error_rate_3"
                           onSort={[Function]}
                         >
                           <th
                             aria-live="polite"
                             aria-sort="none"
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_dashboard_error_rate_4"
+                            data-test-subj="tableHeaderCell_dashboard_error_rate_3"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1879,16 +1716,16 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="right"
-                          data-test-subj="tableHeaderCell_dashboard_traces_5"
+                          data-test-subj="tableHeaderCell_dashboard_traces_4"
                           isSorted={false}
-                          key="_data_h_dashboard_traces_5"
+                          key="_data_h_dashboard_traces_4"
                           onSort={[Function]}
                         >
                           <th
                             aria-live="polite"
                             aria-sort="none"
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_dashboard_traces_5"
+                            data-test-subj="tableHeaderCell_dashboard_traces_4"
                             role="columnheader"
                             scope="col"
                             style={
@@ -2679,116 +2516,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="right"
-                            key="_data_column_24_hour_latency_trend_0_3"
-                            mobileOptions={
-                              Object {
-                                "header": <EuiToolTip
-                                  content={
-                                    <EuiText
-                                      size="xs"
-                                    >
-                                      24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.
-                                    </EuiText>
-                                  }
-                                  delay="regular"
-                                  position="top"
-                                >
-                                  <React.Fragment>
-                                    <div>
-                                      24-hour latency trend
-                                       
-                                      <EuiIcon
-                                        className="eui-alignTop"
-                                        color="subdued"
-                                        size="s"
-                                        type="questionInCircle"
-                                      />
-                                    </div>
-                                    <div>
-                                       
-                                    </div>
-                                  </React.Fragment>
-                                </EuiToolTip>,
-                                "render": undefined,
-                              }
-                            }
-                            setScopeRow={false}
-                            textOnly={false}
-                          >
-                            <td
-                              className="euiTableRowCell"
-                              style={
-                                Object {
-                                  "width": undefined,
-                                }
-                              }
-                            >
-                              <div
-                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                <EuiToolTip
-                                  content={
-                                    <EuiText
-                                      size="xs"
-                                    >
-                                      24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.
-                                    </EuiText>
-                                  }
-                                  delay="regular"
-                                  position="top"
-                                >
-                                  <span
-                                    className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
-                                    onMouseOut={[Function]}
-                                    onMouseOver={[Function]}
-                                  >
-                                    <div>
-                                      24-hour latency trend
-                                       
-                                      <EuiIcon
-                                        className="eui-alignTop"
-                                        color="subdued"
-                                        size="s"
-                                        type="questionInCircle"
-                                      >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                    </div>
-                                    <div>
-                                       
-                                    </div>
-                                  </span>
-                                </EuiToolTip>
-                              </div>
-                              <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
-                              >
-                                -
-                              </div>
-                            </td>
-                          </EuiTableRowCell>
-                          <EuiTableRowCell
-                            align="right"
-                            key="_data_column_dashboard_error_rate_0_4"
+                            key="_data_column_dashboard_error_rate_0_3"
                             mobileOptions={
                               Object {
                                 "header": <EuiToolTip
@@ -2907,7 +2635,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="right"
-                            key="_data_column_dashboard_traces_0_5"
+                            key="_data_column_dashboard_traces_0_4"
                             mobileOptions={
                               Object {
                                 "header": <EuiToolTip

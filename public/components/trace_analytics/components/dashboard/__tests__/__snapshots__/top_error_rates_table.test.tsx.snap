@@ -323,39 +323,6 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
             },
             Object {
               "align": "right",
-              "field": "24_hour_error_trend",
-              "name": <EuiToolTip
-                content={
-                  <EuiText
-                    size="xs"
-                  >
-                    24 hour time series view of hourly average, hourly percentile, and hourly range of error rates for traces within a trace group.
-                  </EuiText>
-                }
-                delay="regular"
-                position="top"
-              >
-                <React.Fragment>
-                  <div>
-                    24-hour error rate trend
-                     
-                    <EuiIcon
-                      className="eui-alignTop"
-                      color="subdued"
-                      size="s"
-                      type="questionInCircle"
-                    />
-                  </div>
-                  <div>
-                     
-                  </div>
-                </React.Fragment>
-              </EuiToolTip>,
-              "render": [Function],
-              "sortable": false,
-            },
-            Object {
-              "align": "right",
               "field": "dashboard_error_rate",
               "name": <EuiToolTip
                 content={
@@ -385,7 +352,7 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                 </React.Fragment>
               </EuiToolTip>,
               "render": [Function],
-              "sortable": true,
+              "sortable": false,
             },
             Object {
               "align": "right",
@@ -532,39 +499,6 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
               },
               Object {
                 "align": "right",
-                "field": "24_hour_error_trend",
-                "name": <EuiToolTip
-                  content={
-                    <EuiText
-                      size="xs"
-                    >
-                      24 hour time series view of hourly average, hourly percentile, and hourly range of error rates for traces within a trace group.
-                    </EuiText>
-                  }
-                  delay="regular"
-                  position="top"
-                >
-                  <React.Fragment>
-                    <div>
-                      24-hour error rate trend
-                       
-                      <EuiIcon
-                        className="eui-alignTop"
-                        color="subdued"
-                        size="s"
-                        type="questionInCircle"
-                      />
-                    </div>
-                    <div>
-                       
-                    </div>
-                  </React.Fragment>
-                </EuiToolTip>,
-                "render": [Function],
-                "sortable": false,
-              },
-              Object {
-                "align": "right",
                 "field": "dashboard_error_rate",
                 "name": <EuiToolTip
                   content={
@@ -594,7 +528,7 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                   </React.Fragment>
                 </EuiToolTip>,
                 "render": [Function],
-                "sortable": true,
+                "sortable": false,
               },
               Object {
                 "align": "right",
@@ -773,40 +707,7 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                                 Object {
                                   "isSortAscending": undefined,
                                   "isSorted": false,
-                                  "key": "_data_s_dashboard_error_rate_3",
-                                  "name": <EuiToolTip
-                                    content={
-                                      <EuiText
-                                        size="xs"
-                                      >
-                                        Error rate based on count of trace errors within a trace group in the selected time range.
-                                      </EuiText>
-                                    }
-                                    delay="regular"
-                                    position="top"
-                                  >
-                                    <React.Fragment>
-                                      <div>
-                                        Error rate
-                                         
-                                        <EuiIcon
-                                          className="eui-alignTop"
-                                          color="subdued"
-                                          size="s"
-                                          type="questionInCircle"
-                                        />
-                                      </div>
-                                      <div>
-                                         
-                                      </div>
-                                    </React.Fragment>
-                                  </EuiToolTip>,
-                                  "onSort": [Function],
-                                },
-                                Object {
-                                  "isSortAscending": undefined,
-                                  "isSorted": false,
-                                  "key": "_data_s_dashboard_traces_4",
+                                  "key": "_data_s_dashboard_traces_3",
                                   "name": <EuiToolTip
                                     content={
                                       <EuiText
@@ -1191,12 +1092,12 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="right"
-                          data-test-subj="tableHeaderCell_24_hour_error_trend_2"
-                          key="_data_h_24_hour_error_trend_2"
+                          data-test-subj="tableHeaderCell_dashboard_error_rate_2"
+                          key="_data_h_dashboard_error_rate_2"
                         >
                           <th
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_24_hour_error_trend_2"
+                            data-test-subj="tableHeaderCell_dashboard_error_rate_2"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1219,20 +1120,20 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                                     values={
                                       Object {
                                         "description": undefined,
-                                        "innerText": "24-hour error rate trend  ",
+                                        "innerText": "Error rate  ",
                                       }
                                     }
                                   >
                                     <span
                                       className="euiTableCellContent__text"
-                                      title="24-hour error rate trend  "
+                                      title="Error rate  "
                                     >
                                       <EuiToolTip
                                         content={
                                           <EuiText
                                             size="xs"
                                           >
-                                            24 hour time series view of hourly average, hourly percentile, and hourly range of error rates for traces within a trace group.
+                                            Error rate based on count of trace errors within a trace group in the selected time range.
                                           </EuiText>
                                         }
                                         delay="regular"
@@ -1245,7 +1146,7 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                                           onMouseOver={[Function]}
                                         >
                                           <div>
-                                            24-hour error rate trend
+                                            Error rate
                                              
                                             <EuiIcon
                                               className="eui-alignTop"
@@ -1288,125 +1189,16 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="right"
-                          data-test-subj="tableHeaderCell_dashboard_error_rate_3"
+                          data-test-subj="tableHeaderCell_dashboard_traces_3"
                           isSorted={false}
-                          key="_data_h_dashboard_error_rate_3"
+                          key="_data_h_dashboard_traces_3"
                           onSort={[Function]}
                         >
                           <th
                             aria-live="polite"
                             aria-sort="none"
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_dashboard_error_rate_3"
-                            role="columnheader"
-                            scope="col"
-                            style={
-                              Object {
-                                "width": undefined,
-                              }
-                            }
-                          >
-                            <button
-                              className="euiTableHeaderButton"
-                              data-test-subj="tableHeaderSortButton"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <CellContents
-                                className="euiTableCellContent euiTableCellContent--alignRight"
-                                isSorted={false}
-                                showSortMsg={true}
-                              >
-                                <span
-                                  className="euiTableCellContent euiTableCellContent--alignRight"
-                                >
-                                  <EuiInnerText>
-                                    <EuiI18n
-                                      default="{innerText}; {description}"
-                                      token="euiTableHeaderCell.titleTextWithDesc"
-                                      values={
-                                        Object {
-                                          "description": undefined,
-                                          "innerText": "Error rate  ",
-                                        }
-                                      }
-                                    >
-                                      <span
-                                        className="euiTableCellContent__text"
-                                        title="Error rate  "
-                                      >
-                                        <EuiToolTip
-                                          content={
-                                            <EuiText
-                                              size="xs"
-                                            >
-                                              Error rate based on count of trace errors within a trace group in the selected time range.
-                                            </EuiText>
-                                          }
-                                          delay="regular"
-                                          position="top"
-                                        >
-                                          <span
-                                            className="euiToolTipAnchor"
-                                            onKeyUp={[Function]}
-                                            onMouseOut={[Function]}
-                                            onMouseOver={[Function]}
-                                          >
-                                            <div>
-                                              Error rate
-                                               
-                                              <EuiIcon
-                                                className="eui-alignTop"
-                                                color="subdued"
-                                                size="s"
-                                                type="questionInCircle"
-                                              >
-                                                <EuiIconEmpty
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  />
-                                                </EuiIconEmpty>
-                                              </EuiIcon>
-                                            </div>
-                                            <div>
-                                               
-                                            </div>
-                                          </span>
-                                        </EuiToolTip>
-                                      </span>
-                                    </EuiI18n>
-                                  </EuiInnerText>
-                                </span>
-                              </CellContents>
-                            </button>
-                          </th>
-                        </EuiTableHeaderCell>
-                        <EuiTableHeaderCell
-                          align="right"
-                          data-test-subj="tableHeaderCell_dashboard_traces_4"
-                          isSorted={false}
-                          key="_data_h_dashboard_traces_4"
-                          onSort={[Function]}
-                        >
-                          <th
-                            aria-live="polite"
-                            aria-sort="none"
-                            className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_dashboard_traces_4"
+                            data-test-subj="tableHeaderCell_dashboard_traces_3"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1752,116 +1544,7 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="right"
-                            key="_data_column_24_hour_error_trend_0_2"
-                            mobileOptions={
-                              Object {
-                                "header": <EuiToolTip
-                                  content={
-                                    <EuiText
-                                      size="xs"
-                                    >
-                                      24 hour time series view of hourly average, hourly percentile, and hourly range of error rates for traces within a trace group.
-                                    </EuiText>
-                                  }
-                                  delay="regular"
-                                  position="top"
-                                >
-                                  <React.Fragment>
-                                    <div>
-                                      24-hour error rate trend
-                                       
-                                      <EuiIcon
-                                        className="eui-alignTop"
-                                        color="subdued"
-                                        size="s"
-                                        type="questionInCircle"
-                                      />
-                                    </div>
-                                    <div>
-                                       
-                                    </div>
-                                  </React.Fragment>
-                                </EuiToolTip>,
-                                "render": undefined,
-                              }
-                            }
-                            setScopeRow={false}
-                            textOnly={false}
-                          >
-                            <td
-                              className="euiTableRowCell"
-                              style={
-                                Object {
-                                  "width": undefined,
-                                }
-                              }
-                            >
-                              <div
-                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                <EuiToolTip
-                                  content={
-                                    <EuiText
-                                      size="xs"
-                                    >
-                                      24 hour time series view of hourly average, hourly percentile, and hourly range of error rates for traces within a trace group.
-                                    </EuiText>
-                                  }
-                                  delay="regular"
-                                  position="top"
-                                >
-                                  <span
-                                    className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
-                                    onMouseOut={[Function]}
-                                    onMouseOver={[Function]}
-                                  >
-                                    <div>
-                                      24-hour error rate trend
-                                       
-                                      <EuiIcon
-                                        className="eui-alignTop"
-                                        color="subdued"
-                                        size="s"
-                                        type="questionInCircle"
-                                      >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading eui-alignTop"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                    </div>
-                                    <div>
-                                       
-                                    </div>
-                                  </span>
-                                </EuiToolTip>
-                              </div>
-                              <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
-                              >
-                                -
-                              </div>
-                            </td>
-                          </EuiTableRowCell>
-                          <EuiTableRowCell
-                            align="right"
-                            key="_data_column_dashboard_error_rate_0_3"
+                            key="_data_column_dashboard_error_rate_0_2"
                             mobileOptions={
                               Object {
                                 "header": <EuiToolTip
@@ -1980,7 +1663,7 @@ exports[`Error Rates Table component renders top error rates table with data 1`]
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="right"
-                            key="_data_column_dashboard_traces_0_4"
+                            key="_data_column_dashboard_traces_0_3"
                             mobileOptions={
                               Object {
                                 "header": <EuiToolTip
