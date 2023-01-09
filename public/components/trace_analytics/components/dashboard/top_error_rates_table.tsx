@@ -129,41 +129,6 @@ export function ErrorRatesTable(props: {
         render: (item) => (item === 0 || item ? _.round(item, 2) : '-'),
       },
       {
-        field: '24_hour_error_trend',
-        name: (
-          <EuiToolTip
-            content={
-              <EuiText size="xs">
-                24 hour time series view of hourly average, hourly percentile, and hourly range of
-                error rates for traces within a trace group.
-              </EuiText>
-            }
-          >
-            <>
-              {/* <div style={{ marginRight: 44 }}>24-hour</div> */}
-              <div>
-                24-hour error rate trend{' '}
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignTop"
-                />
-              </div>
-              <div>&nbsp;</div>
-            </>
-          </EuiToolTip>
-        ),
-        align: 'right',
-        sortable: false,
-        render: (item, row) =>
-          item ? (
-            <LatencyTrendCell item={item} traceGroupName={row.dashboard_trace_group_name} />
-          ) : (
-            '-'
-          ),
-      },
-      {
         field: 'dashboard_error_rate',
         name: (
           <EuiToolTip
@@ -189,7 +154,7 @@ export function ErrorRatesTable(props: {
           </EuiToolTip>
         ),
         align: 'right',
-        sortable: true,
+        sortable: false,
         render: (item) =>
           item === 0 || item ? <EuiText size="s">{`${_.round(item, 2)}%`}</EuiText> : '-',
       },

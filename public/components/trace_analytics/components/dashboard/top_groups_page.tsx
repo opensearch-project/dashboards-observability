@@ -51,7 +51,7 @@ export function TopGroupsPage(props: {
             toggleButtons={toggleButtons}
           />
           <ErrorRatesTable
-            title={'Top 5 Service and Operation Error Rates'}
+            title={'Top 5 Service and Operation Errors'}
             items={props.jaegerErrorTableItems}
             {...props}
           />

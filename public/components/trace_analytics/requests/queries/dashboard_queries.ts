@@ -117,8 +117,17 @@ export const getJaegerDashboardQuery = () => {
               field: "operationName"
             },
           ],
+          order: {
+            'lat': 'desc'
+          },
+          size: 5
         },
         aggs: {
+          lat: {
+            avg: {
+              field: 'duration'
+            }
+          },
           average_latency: {
           scripted_metric: {
             init_script: 'state.traceIDToLatencyMap = [:];',
@@ -185,18 +194,6 @@ export const getJaegerDashboardQuery = () => {
               },
               script: 'params.errors / params.total * 100',
             },
-          },
-          sort_by_latency: {
-            bucket_sort: {
-              sort: [
-                {
-                  "average_latency.value": {
-                    "order": "desc"
-                  }
-                }
-              ],
-              size: 5
-            }
           },
         },
       },
@@ -226,6 +223,10 @@ export const getJaegerErrorDashboardQuery = () => {
               field: "operationName"
             },
           ],
+          order: {
+            'error_count': 'desc'
+          },
+          size: 5
         },
         aggs: {
           average_latency: {
@@ -294,19 +295,7 @@ export const getJaegerErrorDashboardQuery = () => {
               },
               script: 'params.errors / params.total * 100',
             },
-          },
-          sort_by_latency: {
-            bucket_sort: {
-              sort: [
-                {
-                  "error_rate.value": {
-                    "order": "desc"
-                  }
-                }
-              ],
-              size: 5
-            }
-          },
+          }
         },
       },
   },
@@ -527,7 +516,7 @@ export const getJaegerErrorTrendQuery = () => {
 };
 
 
-export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode) => {
+export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buckets?: any[]) => {
   if (mode === 'data_prepper') { 
     return {
       size: 0,
@@ -564,7 +553,7 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode) => {
       },
     };
   } else if (mode === 'jaeger') { 
-    return {
+    const query = {
       size: 0,
       query: {
         bool: {
@@ -580,6 +569,7 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode) => {
           }],
           should: [],
           must_not: [],
+          minimum_should_match: 1,
         },
       },
       aggs: {
@@ -604,7 +594,46 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode) => {
       },
       }
   },
-  }
+    }
+    if (buckets) {
+      // query.query.bool.should[0]
+      buckets.forEach((item) => {
+        query.query.bool.should.push({
+          bool:{
+          must: [
+            {
+            term: {
+              'process.serviceName': item[0]
+            }},{
+            term: {
+              'operationName': item[1]
+            },
+          }]
+        }})
+      })
+    }
+    return query
+
+    // if (serviceName) {
+    //   query.query.bool.must.push({
+    //     term: {
+    //       "process.serviceName": serviceName,
+    //     },
+    //   });
+    // }
+    // {
+    //   bool: {
+        // must: [
+        //   {
+        //   term: {
+        //     'process.serviceName': 'redis'
+        //   }},{
+        //   term: {
+        //     'operationName': 'GetDriver'
+        //   },
+        // }]
+    
+    // }}
 };
 };
 
@@ -816,6 +845,10 @@ export const getDashboardErrorTopGroupsQuery = (mode: TraceAnalyticsMode) => {
               "field": "operationName"
             }
           ],
+          order: {
+            'error_count': 'desc'
+          }, 
+          size: 5
         },
         aggs: {
           error_count: {
@@ -845,19 +878,7 @@ export const getDashboardErrorTopGroupsQuery = (mode: TraceAnalyticsMode) => {
               },
               script: 'params.errors / params.total * 100',
             },
-          },
-          sort_by_errors: {
-            bucket_sort: {
-              sort: [
-                {
-                  "error_rate.value": {
-                    "order": "desc"
-                  }
-                }
-              ],
-              size: 5
-            }
-          },
+          }
         },
       },
     },
@@ -886,8 +907,17 @@ export const getDashboardThroughputTopGroupsQuery = (mode: TraceAnalyticsMode) =
               "field": "operationName"
             }
           ],
+          order: {
+            'lat': 'desc'
+          },
+          size: 5
         },
         aggs: {
+          lat: {
+            avg: {
+              field: 'duration'
+            }
+          },
           trace_count: {
             cardinality: {
               field: mode === 'jaeger' ? 'traceID': 'traceId',
@@ -930,19 +960,7 @@ export const getDashboardThroughputTopGroupsQuery = (mode: TraceAnalyticsMode) =
                 return Math.round(average_latency_nanos / 10) / 100.0;
               `,
             },
-          },
-          sort_by_latency: {
-            bucket_sort: {
-              sort: [
-                {
-                  "average_latency.value": {
-                    "order": "desc"
-                  }
-                }
-              ],
-              size: 5
-            }
-          },
+          }
         },
       },
     },

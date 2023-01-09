@@ -243,41 +243,6 @@ export function LatencyTable(props: {
         render: (item) => (item === 0 || item ? _.round(item, 2) : '-'),
       },
       {
-        field: '24_hour_latency_trend',
-        name: (
-          <EuiToolTip
-            content={
-              <EuiText size="xs">
-                24 hour time series view of hourly average, hourly percentile, and hourly range of
-                latency for traces within a trace group.
-              </EuiText>
-            }
-          >
-            <>
-              {/* <div style={{ marginRight: 44 }}>24-hour</div> */}
-              <div>
-                24-hour latency trend{' '}
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignTop"
-                />
-              </div>
-              <div>&nbsp;</div>
-            </>
-          </EuiToolTip>
-        ),
-        align: 'right',
-        sortable: false,
-        render: (item, row) =>
-          item ? (
-            <LatencyTrendCell item={item} traceGroupName={row.dashboard_trace_group_name} />
-          ) : (
-            '-'
-          ),
-      },
-      {
         field: 'dashboard_error_rate',
         name: (
           <EuiToolTip
