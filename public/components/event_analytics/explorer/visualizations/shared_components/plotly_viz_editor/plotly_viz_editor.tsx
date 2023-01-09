@@ -30,9 +30,6 @@
  * GitHub history for details.
  */
 
-import './plotly_vis.scss';
-import './plotly_editor.scss';
-
 import React, { useCallback } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
