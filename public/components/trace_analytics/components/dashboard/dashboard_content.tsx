@@ -107,7 +107,7 @@ export function DashboardContent(props: DashboardProps) {
     }
     setFilteredService(newFilteredService);
     if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
-  }, [filters, startTime, endTime, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
+  }, [filters, startTime, endTime, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);

@@ -140,6 +140,8 @@ export const Home = (props: HomeProps) => {
   const traceIdColumnAction = (item: any) =>
     location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
 
+  const [appConfigs, _] = useState([]);
+
   const commonProps: TraceAnalyticsComponentDeps = {
     parentBreadcrumbs: props.parentBreadcrumbs,
     http: props.http,
@@ -147,7 +149,7 @@ export const Home = (props: HomeProps) => {
     query,
     setQuery: setQueryWithStorage,
     filters,
-    appConfigs: [],
+    appConfigs: appConfigs,
     setFilters: setFiltersWithStorage,
     startTime,
     setStartTime: setStartTimeWithStorage,

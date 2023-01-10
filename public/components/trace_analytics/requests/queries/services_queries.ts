@@ -260,11 +260,6 @@ export const getServiceMetricsQuery = (DSL: any, serviceNames: string[], map: Se
                           },
                         },
                       },
-                      // {
-                      //   terms: {
-                      //     name: targetResource,
-                      //   },
-                      // },
                     ],
                   },
                 },
