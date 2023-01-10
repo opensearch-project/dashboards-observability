@@ -136,25 +136,6 @@ export const handleJaegerDashboardRequest = async (
   mode,
   setPercentileMap?
 ) => {
-  // latency_variance should only be affected by timefilter
-  // const latencyVariances = await handleDslRequest(
-  //   http,
-  //   timeFilterDSL,
-  //   getDashboardTraceGroupPercentiles(mode),
-  //   mode
-  // )
-  //   .then((response) => {
-  //     const map: any = {};
-  //     response.aggregations.trace_group.buckets.forEach((traceGroup) => {
-  //       map[traceGroup.key_as_string] = Object.values(
-  //         traceGroup.latency_variance_micros.values
-  //       ).map((nano: number) => _.round(microToMilliSec(Math.max(0, nano)), 2));
-  //     });
-  //     return map;
-  //   })
-  //   .catch((error) => console.error(error));
-  // if (setPercentileMap) setPercentileMap(latencyVariances);
-
   const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode)
     .then((response) => {
       const map: any = {};
@@ -220,7 +201,6 @@ export const handleJaegerDashboardRequest = async (
             dashboard_trace_group_name: bucket.key,
             dashboard_average_latency: bucket.average_latency?.value,
             dashboard_traces: bucket.trace_count.value,
-            // dashboard_latency_variance: latencyVariances[bucket.key_as_string],
             dashboard_error_rate: bucket.error_rate.value,
             ...latencyTrend,
           };
@@ -244,10 +224,10 @@ export const handleJaegerDashboardRequest = async (
           return map;
         })
         .catch((error) => console.error(error));
-      newItems.forEach((item) => {
-        item.dashboard_latency_variance = latencies[item.dashboard_key_as_string]
-      })
-      setItems(newItems);
+        newItems.forEach((item) => {
+          item.dashboard_latency_variance = latencies[item.dashboard_key_as_string]
+        })
+        setItems(newItems);
     })
     .catch((error) => console.error(error));
 };

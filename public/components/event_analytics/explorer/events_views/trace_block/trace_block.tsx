@@ -42,6 +42,7 @@ export const TraceBlock = ({ http, hit, logTraceId }: props) => {
       </>
     );
   }
+  const mode = (!hit.traceID || hit.traceID.length === 0) ? 'data_prepper' : 'jaeger'
 
-  return <TraceDetailRender traceId={hit.traceID || logTraceId} http={http} mode={(!hit.traceID || hit.traceID.length === 0) ? 'data_prepper' : 'jaeger'}/>;
+  return <TraceDetailRender traceId={hit.traceID || logTraceId} http={http} mode={mode}/>;
 };

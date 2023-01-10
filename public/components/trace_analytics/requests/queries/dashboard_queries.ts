@@ -118,12 +118,12 @@ export const getJaegerDashboardQuery = () => {
             },
           ],
           order: {
-            'lat': 'desc'
+            'latency': 'desc'
           },
           size: 5
         },
         aggs: {
-          lat: {
+          latency: {
             avg: {
               field: 'duration'
             }
@@ -596,7 +596,6 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buck
   },
     }
     if (buckets) {
-      // query.query.bool.should[0]
       buckets.forEach((item) => {
         query.query.bool.should.push({
           bool:{
@@ -613,28 +612,7 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buck
       })
     }
     return query
-
-    // if (serviceName) {
-    //   query.query.bool.must.push({
-    //     term: {
-    //       "process.serviceName": serviceName,
-    //     },
-    //   });
-    // }
-    // {
-    //   bool: {
-        // must: [
-        //   {
-        //   term: {
-        //     'process.serviceName': 'redis'
-        //   }},{
-        //   term: {
-        //     'operationName': 'GetDriver'
-        //   },
-        // }]
-    
-    // }}
-};
+  };
 };
 
 export const getErrorRatePltQuery = (mode: TraceAnalyticsMode, fixedInterval) => {
@@ -908,12 +886,12 @@ export const getDashboardThroughputTopGroupsQuery = (mode: TraceAnalyticsMode) =
             }
           ],
           order: {
-            'lat': 'desc'
+            'latency': 'desc'
           },
           size: 5
         },
         aggs: {
-          lat: {
+          latencies: {
             avg: {
               field: 'duration'
             }
