@@ -414,16 +414,30 @@ export const Explorer = ({
       curQuery![FILTERED_PATTERN]
     );
 
-    await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          finalQuery,
-          [RAW_QUERY]: rawQueryStr,
-          [SELECTED_TIMESTAMP]: curTimestamp,
-        },
-      })
-    );
+    batch(() => {
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            finalQuery,
+            [RAW_QUERY]: rawQueryStr,
+            [SELECTED_TIMESTAMP]: curTimestamp,
+          },
+        })
+      );
+      if (selectedContentTabId === TAB_CHART_ID) {
+        // parse stats section on every search
+        const statsTokens = queryManager.queryParser().parse(rawQueryStr).getStats();
+        const updatedDataConfig = getDefaultVisConfig(statsTokens);
+        dispatch(
+          changeVizConfig({
+            tabId,
+            vizId: curVisId,
+            data: { dataConfig: { ...updatedDataConfig } },
+          })
+        );
+      }
+    });
 
     // search
     if (finalQuery.match(PPL_STATS_REGEX)) {
@@ -1112,21 +1126,8 @@ export const Explorer = ({
         await updateQueryInStore(tempQuery);
       }
       await fetchData();
-
-      if (selectedContentTabId === TAB_CHART_ID) {
-        // parse stats section on every search
-        const statsTokens = queryManager.queryParser().parse(tempQuery).getStats();
-        const updatedDataConfig = getDefaultVisConfig(statsTokens);
-        await dispatch(
-          changeVizConfig({
-            tabId,
-            vizId: curVisId,
-            data: { dataConfig: { ...updatedDataConfig } },
-          })
-        );
-      }
     },
-    [tempQuery, query, selectedContentTabId, curVisId]
+    [tempQuery, query]
   );
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
