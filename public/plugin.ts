@@ -91,7 +91,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         title: item.name,
         type: 'Observability Panel',
         description: '...',
-        url: `observability-dashboards#/operational_panels/${item.id}`,
+        url: `observability-applications#/operational_panels/${item.id}`,
         listType: 'observabiliity-panel',
       };
     };
@@ -102,7 +102,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         title: item.name,
         type: 'Observability Application',
         description: item.description,
-        url: `observability-dashboards#/application_analytics/${item.id}`,
+        url: `observability-applications#/application_analytics/${item.id}`,
         listType: 'observability-application',
       };
     };
@@ -181,6 +181,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       category: customCategory,
       order: observabilityApplicationsPluginOrder,
       mount: appMountWithStartPage('/application_analytics'),
+      appRoute: "/app/observability-dashboards#/application_analytics",
+      defaultPath: "/",
     });
 
     core.application.register({
@@ -189,6 +191,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       category: customCategory,
       order: observabilityTraceAnalyticsPluginOrder,
       mount: appMountWithStartPage('/trace_analytics'),
+      appRoute: "/app/observability-dashboards#/trace_analytics",
+      defaultPath: "/home",
     });
 
     core.application.register({
@@ -197,14 +201,18 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       category: customCategory,
       order: observabilityEventsPluginOrder,
       mount: appMountWithStartPage('/event_analytics'),
+      appRoute: "/app/observability-dashboards#/event_analytics",
+      defaultPath: "/",
     });
 
     core.application.register({
-      id: observabilityMetricsID,
+      id: observabilityID,
       title: observabilityMetricsTitle,
       category: customCategory,
       order: observabilityMetricsPluginOrder,
       mount: appMountWithStartPage('/metrics_analytics'),
+      appRoute: "/app/observability-dashboards#/metrics_analytics",
+      defaultPath: "/",
     });
 
     core.application.register({
@@ -213,6 +221,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       category: customCategory,
       order: observabilityOperationalPanelsPluginOrder,
       mount: appMountWithStartPage('/operational_panels'),
+      appRoute: "/app/observability-dashboards#/operational_panels",
+      defaultPath: "/",
     });
 
     core.application.register({
@@ -221,6 +231,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       category: customCategory,
       order: observabilityNotebooksPluginOrder,
       mount: appMountWithStartPage('/notebooks'),
+      appRoute: "/app/observability-dashboards#/notebooks",
+      defaultPath: "/",
     });
 
     // Return methods that should be available to other plugins

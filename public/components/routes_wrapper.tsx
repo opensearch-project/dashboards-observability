@@ -8,6 +8,7 @@ import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as CustomPanelsHome } from './custom_panels/home';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
+import { Home as MetricsHome } from './metrics';
 import { EventAnalytics } from './event_analytics';
 import { I18nProvider } from '@osd/i18n/react';
 import React, { useEffect } from 'react';
@@ -35,13 +36,6 @@ export const AppRoutesWrapper = ({
     href: '#/operational_panels/',
   };
 
-  const history = useHistory();
-  useEffect(() => {
-    if (startPage && history) {
-      history.replace(startPage!);
-    }
-  }, []);
-
   return (
     <I18nProvider>
       <>
@@ -60,6 +54,7 @@ export const AppRoutesWrapper = ({
                   dslService={dslService}
                   savedObjects={savedObjects}
                   timestampUtils={timestampUtils}
+                  queryManager={queryManager}
                 />
               );
             }}
@@ -122,6 +117,25 @@ export const AppRoutesWrapper = ({
                   notifications={notifications}
                   queryManager={queryManager}
                   {...props}
+                />
+              );
+            }}
+          />
+          <Route
+            path="/metrics_analytics/"
+            render={(props) => {
+              chrome.setBreadcrumbs([
+                parentBreadcrumb,
+                { text: 'Metrics analytics', href: '#/metrics_analytics/' },
+              ]);
+              return (
+                <MetricsHome
+                  http={http}
+                  chrome={chrome}
+                  parentBreadcrumb={parentBreadcrumb}
+                  renderProps={props}
+                  pplService={pplService}
+                  savedObjects={savedObjects}
                 />
               );
             }}

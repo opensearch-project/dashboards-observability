@@ -12,7 +12,7 @@ import store from '../framework/redux/store';
 import { AppPluginStartDependencies } from '../types';
 import { AppRoutesWrapper } from './routes_wrapper';
 
-interface ObservabilityAppDeps {
+export interface ObservabilityAppDeps {
   coreStart: CoreStart;
   depsStart: AppPluginStartDependencies;
   pplService: any;
