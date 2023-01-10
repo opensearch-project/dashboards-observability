@@ -427,18 +427,8 @@ export const Explorer = ({
 
     // search
     if (finalQuery.match(PPL_STATS_REGEX)) {
-      const cusVisIds = userVizConfigs ? Object.keys(userVizConfigs) : [];
       getVisualizations();
       getAvailableFields(`search source=${curIndex}`);
-      for (const visId of cusVisIds) {
-        dispatch(
-          changeVisualizationConfig({
-            tabId,
-            vizId: visId,
-            data: { ...userVizConfigs[visId] },
-          })
-        );
-      }
     } else {
       if (!selectedIntervalRef.current || selectedIntervalRef.current.text === 'Auto') {
         findAutoInterval(startingTime, endingTime);
