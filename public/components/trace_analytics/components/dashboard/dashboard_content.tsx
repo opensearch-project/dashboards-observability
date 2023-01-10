@@ -53,6 +53,7 @@ export function DashboardContent(props: DashboardProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    toasts,
     setToast,
   } = props;
   const [tableItems, setTableItems] = useState([]);
@@ -71,10 +72,10 @@ export function DashboardContent(props: DashboardProps) {
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
 
   useEffect(() => {
-    if (showTimeoutToast === true) {
+    if (showTimeoutToast === true && toasts.length === 0) {
       setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.')
-      setShowTimeoutToast(false);
     }
+    setShowTimeoutToast(false);
   }, [showTimeoutToast])
 
   useEffect(() => {
@@ -152,6 +153,11 @@ export function DashboardContent(props: DashboardProps) {
         setJaegerTableItems,
         mode,
         () => setShowTimeoutToast(true),
+        // () => {
+        //   if (toasts.length === 0) { 
+        //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
+        //   }
+        // },
         setPercentileMap
       ).finally(() => setLoading(false))
       handleJaegerErrorDashboardRequest(
@@ -163,6 +169,11 @@ export function DashboardContent(props: DashboardProps) {
         setJaegerErrorTableItems,
         mode,
         () => setShowTimeoutToast(true),
+        // () => {
+        //   if (toasts.length === 0) { 
+        //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
+        //   }
+        // },
         setPercentileMap
       ).finally(() => setLoading(false));
     } else if (mode === 'data_prepper') {

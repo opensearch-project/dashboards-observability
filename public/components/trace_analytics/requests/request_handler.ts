@@ -28,7 +28,7 @@ export function handleDslRequest(http: CoreStart['http'], DSL: any, bodyQuery: a
     body = {...bodyQuery, index: ((mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME)) }
   }
   if (mode === 'jaeger' && timeout) {
-    const id = setTimeout(() => setShowTimeoutToast!(), 20000);
+    const id = setTimeout(() => setShowTimeoutToast!(), 30000);
     return http
       .post(TRACE_ANALYTICS_DSL_ROUTE, {
         body: JSON.stringify(body),

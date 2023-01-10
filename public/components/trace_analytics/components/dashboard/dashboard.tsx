@@ -4,6 +4,7 @@
  */
 
 import { EuiBreadcrumb, EuiTitle } from '@elastic/eui';
+import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React from 'react';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsMode } from '../../home';
 import { DashboardContent } from './dashboard_content';
@@ -12,6 +13,7 @@ import { DataSourcePicker } from './mode_picker';
 export interface DashboardProps extends TraceAnalyticsComponentDeps {
   childBreadcrumbs: EuiBreadcrumb[];
   page: 'dashboard' | 'app';
+  toasts: Toast[];
   setToast?: (
     title: string,
     color?: string,
