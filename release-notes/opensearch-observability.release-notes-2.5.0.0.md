@@ -1,6 +1,6 @@
 ## Version 2.5.0.0 Release Notes
 
-Compatible with OpenSearch and OpenSearch Dashboards Version 2.5. ([#1205]())
+Compatible with OpenSearch and OpenSearch Dashboards Version 2.5.0
 
 ### Infrastructure
 
