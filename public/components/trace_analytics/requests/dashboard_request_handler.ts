@@ -134,10 +134,10 @@ export const handleJaegerDashboardRequest = async (
   items,
   setItems,
   mode,
-  setToast,
+  setShowTimeoutToast,
   setPercentileMap?
 ) => {
-  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode, true)
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -197,7 +197,7 @@ export const handleJaegerDashboardRequest = async (
       setToast('hello')
     });
 
-  await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode)
+  await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -218,7 +218,9 @@ export const handleJaegerDashboardRequest = async (
         http,
         timeFilterDSL,
         getDashboardTraceGroupPercentiles(mode, newItems.map(a => a.dashboard_trace_group_name)),
-        mode
+        mode,
+        true,
+        setShowTimeoutToast,
       )
         .then((response) => {
           const map: any = {};
@@ -246,9 +248,10 @@ export const handleJaegerErrorDashboardRequest = async (
   items,
   setItems,
   mode,
+  setShowTimeoutToast,
   setPercentileMap?
 ) => {
-  const errorTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerErrorTrendQuery(), mode)
+  const errorTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerErrorTrendQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -303,7 +306,7 @@ export const handleJaegerErrorDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getJaegerErrorDashboardQuery(), mode)
+  await handleDslRequest(http, DSL, getJaegerErrorDashboardQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {

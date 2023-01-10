@@ -138,6 +138,7 @@ export const Home = (props: HomeProps) => {
     endTime,
     setEndTime,
     mode: 'data_prepper',
+    dataPrepperIndicesExist:  indicesExist 
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {

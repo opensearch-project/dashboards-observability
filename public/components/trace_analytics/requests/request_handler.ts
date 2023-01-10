@@ -14,7 +14,7 @@ import {
 } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../home';
 
-export function handleDslRequest(http: CoreStart['http'], DSL: any, bodyQuery: any, mode: TraceAnalyticsMode, timeout: boolean = false) {
+export function handleDslRequest(http: CoreStart['http'], DSL: any, bodyQuery: any, mode: TraceAnalyticsMode, timeout?: boolean, setShowTimeoutToast?: () => void) {
   if (DSL?.query) {
     bodyQuery.query.bool.must.push(...DSL.query.bool.must);
     bodyQuery.query.bool.filter.push(...DSL.query.bool.filter);
@@ -28,19 +28,15 @@ export function handleDslRequest(http: CoreStart['http'], DSL: any, bodyQuery: a
     body = {...bodyQuery, index: ((mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME)) }
   }
   if (mode === 'jaeger' && timeout) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 20000);
+    const id = setTimeout(() => setShowTimeoutToast!(), 20000);
     return http
       .post(TRACE_ANALYTICS_DSL_ROUTE, {
         body: JSON.stringify(body),
-        signal: controller.signal
       }).then((res) => {
-        clearTimeout(id);
         return res;
       })
       .catch((error) => {
         console.log(error)
-        clearTimeout(id)
       })
       .finally(() => clearTimeout(id));
   }

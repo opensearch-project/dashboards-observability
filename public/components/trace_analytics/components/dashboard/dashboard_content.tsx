@@ -68,6 +68,14 @@ export function DashboardContent(props: DashboardProps) {
   const [filteredService, setFilteredService] = useState('');
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [showTimeoutToast, setShowTimeoutToast] = useState(false);
+
+  useEffect(() => {
+    if (showTimeoutToast === true) {
+      setToast!('Too much data scanned. Decrease the time range or add filters to speed it up.', 'danger')
+      setShowTimeoutToast(false);
+    }
+  }, [showTimeoutToast])
 
   useEffect(() => {
     chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
@@ -143,7 +151,7 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setJaegerTableItems,
         mode,
-        setToast!,
+        () => setShowTimeoutToast(true),
         setPercentileMap
       ).finally(() => setLoading(false))
       handleJaegerErrorDashboardRequest(
@@ -154,6 +162,7 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setJaegerErrorTableItems,
         mode,
+        () => setShowTimeoutToast(true),
         setPercentileMap
       ).finally(() => setLoading(false));
     } else if (mode === 'data_prepper') {
