@@ -1156,7 +1156,7 @@ exports[`Dashboard component renders dashboard 1`] = `
         addPercentileFilter={[Function]}
         filters={Array []}
         items={Array []}
-        loading={false}
+        loading={true}
         page="dashboard"
         setRedirect={[Function]}
       >
@@ -3400,7 +3400,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         addPercentileFilter={[Function]}
         filters={Array []}
         items={Array []}
-        loading={false}
+        loading={true}
         page="dashboard"
         setRedirect={[Function]}
       >
@@ -5678,7 +5678,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         }
         jaegerErrorTableItems={Array []}
         jaegerTableItems={Array []}
-        loading={false}
+        loading={true}
         page="dashboard"
         setEndTime={[MockFunction]}
         setRedirect={[Function]}
@@ -6053,7 +6053,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
           }
           jaegerErrorTableItems={Array []}
           jaegerTableItems={Array []}
-          loading={false}
+          loading={true}
           page="dashboard"
           setEndTime={[MockFunction]}
           setRedirect={[Function]}

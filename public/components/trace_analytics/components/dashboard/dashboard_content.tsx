@@ -72,7 +72,7 @@ export function DashboardContent(props: DashboardProps) {
 
   useEffect(() => {
     if (showTimeoutToast === true) {
-      setToast!('Too much data scanned. Decrease the time range or add filters to speed it up.', 'danger')
+      setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.')
       setShowTimeoutToast(false);
     }
   }, [showTimeoutToast])
