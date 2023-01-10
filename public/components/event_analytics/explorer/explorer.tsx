@@ -414,31 +414,35 @@ export const Explorer = ({
       curQuery![FILTERED_PATTERN]
     );
 
-    await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          finalQuery,
-          [RAW_QUERY]: rawQueryStr,
-          [SELECTED_TIMESTAMP]: curTimestamp,
-        },
-      })
-    );
-
-    // search
-    if (finalQuery.match(PPL_STATS_REGEX)) {
-      const cusVisIds = userVizConfigs ? Object.keys(userVizConfigs) : [];
-      getVisualizations();
-      getAvailableFields(`search source=${curIndex}`);
-      for (const visId of cusVisIds) {
+    batch(() => {
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            finalQuery,
+            [RAW_QUERY]: rawQueryStr,
+            [SELECTED_TIMESTAMP]: curTimestamp,
+          },
+        })
+      );
+      if (selectedContentTabId === TAB_CHART_ID) {
+        // parse stats section on every search
+        const statsTokens = queryManager.queryParser().parse(rawQueryStr).getStats();
+        const updatedDataConfig = getDefaultVisConfig(statsTokens);
         dispatch(
-          changeVisualizationConfig({
+          changeVizConfig({
             tabId,
-            vizId: visId,
-            data: { ...userVizConfigs[visId] },
+            vizId: curVisId,
+            data: { dataConfig: { ...updatedDataConfig } },
           })
         );
       }
+    });
+
+    // search
+    if (finalQuery.match(PPL_STATS_REGEX)) {
+      getVisualizations();
+      getAvailableFields(`search source=${curIndex}`);
     } else {
       if (!selectedIntervalRef.current || selectedIntervalRef.current.text === 'Auto') {
         findAutoInterval(startingTime, endingTime);
@@ -1122,21 +1126,8 @@ export const Explorer = ({
         await updateQueryInStore(tempQuery);
       }
       await fetchData();
-
-      if (selectedContentTabId === TAB_CHART_ID) {
-        // parse stats section on every search
-        const statsTokens = queryManager.queryParser().parse(tempQuery).getStats();
-        const updatedDataConfig = getDefaultVisConfig(statsTokens);
-        await dispatch(
-          changeVizConfig({
-            tabId,
-            vizId: curVisId,
-            data: { dataConfig: { ...updatedDataConfig } },
-          })
-        );
-      }
     },
-    [tempQuery, query, selectedContentTabId, curVisId]
+    [tempQuery, query]
   );
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
