@@ -134,9 +134,10 @@ export const handleJaegerDashboardRequest = async (
   items,
   setItems,
   mode,
+  setToast,
   setPercentileMap?
 ) => {
-  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode)
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode, true)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -189,7 +190,12 @@ export const handleJaegerDashboardRequest = async (
       });
       return map;
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.log("error here")
+      console.error(error)
+      
+      setToast('hello')
+    });
 
   await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode)
     .then((response) => {

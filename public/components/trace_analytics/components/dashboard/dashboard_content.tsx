@@ -53,6 +53,7 @@ export function DashboardContent(props: DashboardProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    setToast,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -83,14 +84,21 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     let newFilteredService = '';
     for (const filter of filters) {
-      if (filter.field === 'serviceName') {
-        newFilteredService = filter.value;
-        break;
+      if (mode === 'data_prepper') { 
+        if (filter.field === 'serviceName') {
+          newFilteredService = filter.value;
+          break;
+        }
+      } else if (mode === 'jaeger') {
+        if (filter.field === 'process.serviceName') {
+          newFilteredService = filter.value;
+          break;
+        }
       }
     }
     setFilteredService(newFilteredService);
     if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
-  }, [filters, startTime, endTime, appConfigs]);
+  }, [filters, startTime, endTime, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
@@ -135,8 +143,9 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setJaegerTableItems,
         mode,
+        setToast!,
         setPercentileMap
-      ).then(() => setLoading(false));
+      ).finally(() => setLoading(false))
       handleJaegerErrorDashboardRequest(
         http,
         DSL,
@@ -146,7 +155,7 @@ export function DashboardContent(props: DashboardProps) {
         setJaegerErrorTableItems,
         mode,
         setPercentileMap
-      ).then(() => setLoading(false));
+      ).finally(() => setLoading(false));
     } else if (mode === 'data_prepper') {
       handleDashboardRequest(
         http,

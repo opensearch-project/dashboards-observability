@@ -12,6 +12,12 @@ import { DataSourcePicker } from './mode_picker';
 export interface DashboardProps extends TraceAnalyticsComponentDeps {
   childBreadcrumbs: EuiBreadcrumb[];
   page: 'dashboard' | 'app';
+  setToast?: (
+    title: string,
+    color?: string,
+    text?: React.ReactChild | undefined,
+    side?: string | undefined
+  ) => void;
 }
 
 export function Dashboard(props: DashboardProps) {

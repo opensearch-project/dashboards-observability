@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import { EuiGlobalToastList } from '@elastic/eui';
+import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import React, { ReactChild, useEffect, useState } from 'react';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
@@ -71,11 +73,18 @@ export const Home = (props: HomeProps) => {
     setEndTime(newEndTime);
     sessionStorage.setItem('TraceAnalyticsEndTime', newEndTime);
   };
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
+    if (!text) text = '';
+    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+  };
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist)
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
   }, []);
+
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger' },
@@ -153,12 +162,19 @@ export const Home = (props: HomeProps) => {
 
   return (
     <>
+      <EuiGlobalToastList
+          toasts={toasts}
+          dismissToast={(removedToast) => {
+            setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
+          }}
+          toastLifeTimeMs={6000}
+      />
       <Route
         exact
         path={['/trace_analytics', '/trace_analytics/home']}
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} />
+            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} setToast={setToast} />
           </ObservabilitySideBar>
         )}
       />
