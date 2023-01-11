@@ -26,11 +26,12 @@ import { calculateTicks, NoMatchMessage, PanelTitle } from '../common/helper_fun
 import { BoxPlt } from '../common/plots/box_plt';
 import { LatencyTrendCell } from './latency_trend_cell';
 
-export function DashboardTable(props: {
+export function LatencyTable(props: {
   title?: string;
   items: any[];
   filters: FilterType[];
   addFilter: (filter: FilterType) => void;
+  addFilters: (filter: FilterType[]) => void;
   addPercentileFilter: (condition?: 'gte' | 'lte', additionalFilters?: FilterType[]) => void;
   setRedirect: (redirect: boolean) => void;
   loading: boolean;
@@ -85,7 +86,7 @@ export function DashboardTable(props: {
           >
             <>
               <div>
-                Trace group name{' '}
+                Service and Operation Name{' '}
                 <EuiIcon
                   size="s"
                   color="subdued"
@@ -103,15 +104,24 @@ export function DashboardTable(props: {
           item ? (
             <EuiLink
               data-test-subj="dashboard-table-trace-group-name-button"
-              onClick={() =>
-                props.addFilter({
-                  field: 'traceGroup',
-                  operator: 'is',
-                  value: item,
-                  inverted: false,
-                  disabled: false,
-                })
-              }
+              onClick={() => {
+                props.addFilters([
+                  {
+                    field: 'process.serviceName',
+                    operator: 'is',
+                    value: item[0],
+                    inverted: false,
+                    disabled: false,
+                  },
+                  {
+                    field: 'operationName',
+                    operator: 'is',
+                    value: item[1],
+                    inverted: false,
+                    disabled: false,
+                  },
+                ]);
+              }}
             >
               {item.length < 48 ? (
                 decodeURI(item)
@@ -233,41 +243,6 @@ export function DashboardTable(props: {
         render: (item) => (item === 0 || item ? _.round(item, 2) : '-'),
       },
       {
-        field: '24_hour_latency_trend',
-        name: (
-          <EuiToolTip
-            content={
-              <EuiText size="xs">
-                24 hour time series view of hourly average, hourly percentile, and hourly range of
-                latency for traces within a trace group.
-              </EuiText>
-            }
-          >
-            <>
-              {/* <div style={{ marginRight: 44 }}>24-hour</div> */}
-              <div>
-                24-hour latency trend{' '}
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignTop"
-                />
-              </div>
-              <div>&nbsp;</div>
-            </>
-          </EuiToolTip>
-        ),
-        align: 'right',
-        sortable: false,
-        render: (item, row) =>
-          item ? (
-            <LatencyTrendCell item={item} traceGroupName={row.dashboard_trace_group_name} />
-          ) : (
-            '-'
-          ),
-      },
-      {
         field: 'dashboard_error_rate',
         name: (
           <EuiToolTip
@@ -327,13 +302,22 @@ export function DashboardTable(props: {
           <EuiLink
             data-test-subj="dashboard-table-traces-button"
             onClick={() => {
-              props.addFilter({
-                field: 'traceGroup',
-                operator: 'is',
-                value: row.dashboard_trace_group_name,
-                inverted: false,
-                disabled: false,
-              });
+              props.addFilters([
+                {
+                  field: 'process.serviceName',
+                  operator: 'is',
+                  value: row.dashboard_trace_group_name[0],
+                  inverted: false,
+                  disabled: false,
+                },
+                {
+                  field: 'operationName',
+                  operator: 'is',
+                  value: row.dashboard_trace_group_name[1],
+                  inverted: false,
+                  disabled: false,
+                },
+              ]);
               if (props.page !== 'app') {
                 props.setRedirect(true);
                 location.assign('#/trace_analytics/traces');
@@ -407,8 +391,8 @@ export function DashboardTable(props: {
             items={props.items}
             columns={columns}
             pagination={{
-              initialPageSize: 10,
-              pageSizeOptions: [5, 10, 15],
+              initialPageSize: 5,
+              pageSizeOptions: [5],
             }}
             sorting={sorting}
             onTableChange={onTableChange}
