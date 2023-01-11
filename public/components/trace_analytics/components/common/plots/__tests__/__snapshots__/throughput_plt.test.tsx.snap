@@ -10,9 +10,19 @@ exports[`Throughput plot component renders throughput plot 1`] = `
       }
     }
   >
-    <PanelTitle
-      title="Traces over time"
-    />
+    <EuiFlexGroup
+      gutterSize="xs"
+      justifyContent="spaceBetween"
+    >
+      <PanelTitle
+        title="Traces over time"
+      />
+      <EuiButtonGroup
+        buttonSize="s"
+        color="text"
+        onChange={[Function]}
+      />
+    </EuiFlexGroup>
     <EuiHorizontalRule
       margin="m"
     />
