@@ -5,6 +5,7 @@
 
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
 import { TEST_SERVICE_MAP, TEST_SERVICE_MAP_GRAPH } from '../../../../../../test/constants';
 import {
@@ -37,7 +38,7 @@ describe('Helper functions', () => {
 
   it('renders no match and missing configuration messages', () => {
     const noMatchMessage = shallow(<NoMatchMessage size="s" />);
-    const missingConfigurationMessage = shallow(<MissingConfigurationMessage />);
+    const missingConfigurationMessage = shallow(<MissingConfigurationMessage mode='data_prepper'/>)
     expect(noMatchMessage).toMatchSnapshot();
     expect(missingConfigurationMessage).toMatchSnapshot();
   });
@@ -120,6 +121,7 @@ describe('Helper functions', () => {
   it('converts filters to DSL', () => {
     const getTestDslFromFilters = (field = 'traceGroup', operator = 'exists') =>
       filtersToDsl(
+        'data_prepper',
         [
           {
             field,
@@ -148,6 +150,7 @@ describe('Helper functions', () => {
     );
 
     const customDSL = filtersToDsl(
+      'data_prepper',
       [
         {
           field: 'serviceName',
