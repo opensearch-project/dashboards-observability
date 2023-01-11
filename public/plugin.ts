@@ -126,8 +126,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     const dashboardNotebooks = fetchNotebooks();
     const combinedDashboardList = concat(dashboardAppAnalytics, dashboardObservabilityPanels, dashboardNotebooks);
 
-    dashboardNotebooks.subscribe((list) => console.log("notebooks list", list))
-
     const createAppAnalytics: DashboardCreatorFn = () => {
       window.location = core.http.basePath.prepend(
         '/app/observability-dashboards#/application_analytics/create'

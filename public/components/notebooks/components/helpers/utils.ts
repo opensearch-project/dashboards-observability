@@ -18,7 +18,6 @@ import {from} from "rxjs";
 // Fetches path and id for all stored notebooks
 export const fetchNotebooksList = (http: HttpSetup) => {
   return from(http.get(`${NOTEBOOKS_API_PREFIX}/`)).pipe(
-    tap((res) => console.log("notebooks rx", res)),
     map((res) => res.data),
     catchError((err) => {
       console.error('Issue in fetching the operational panels', err.body.message);
