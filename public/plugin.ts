@@ -5,12 +5,14 @@
 
 import './index.scss';
 
+import { concat, from } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext
+  PluginInitializerContext,
 } from '../../../src/core/public';
 import {
   observabilityID,
@@ -25,15 +27,12 @@ import { AppPluginStartDependencies, ObservabilitySetup, ObservabilityStart } fr
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
-import { DashboardCreatorFn } from '../../../src/plugins/opensearch_dashboards_react/public/context/types';
+import { DashboardCreatorFn, DashboardListItem } from './types';
 import { fetchPanelsList } from './components/custom_panels/helpers/utils';
 import { fetchAppsList } from './components/application_analytics/helpers/utils';
 import { fetchNotebooksList } from './components/notebooks/components/helpers/utils';
 import { QueryManager } from '../common/query_manager';
 import { DashboardSetup } from '../../../src/plugins/dashboard/public';
-import { DashboardListItem } from '../../../src/plugins/dashboard/common/types';
-import { concat, from } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
 
 export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -92,7 +91,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         title: item.name,
         type: 'Observability Panel',
         description: '...',
-        url: `observability-applications#/operational_panels/${item.id}`,
+        url: `observability-dashboards#/operational_panels/${item.id}`,
         listType: 'observabiliity-panel',
       };
     };
@@ -103,7 +102,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         title: item.name,
         type: 'Observability Application',
         description: item.description,
-        url: `observability-applications#/application_analytics/${item.id}`,
+        url: `observability-dashboards#/application_analytics/${item.id}`,
         listType: 'observability-application',
       };
     };
@@ -114,7 +113,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         title: item.path,
         type: 'Notebook',
         description: '...',
-        url: `observability-applications#/notebooks/${item.id}`,
+        url: `observability-dashboards#/notebooks/${item.id}`,
         listType: 'observability-notebook',
       };
     };
@@ -124,13 +123,19 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     const dashboardAppAnalytics = fetchApplicationAnalytics();
     const dashboardObservabilityPanels = fetchObservabilityPanels();
     const dashboardNotebooks = fetchNotebooks();
-    const combinedDashboardList = concat(dashboardAppAnalytics, dashboardObservabilityPanels, dashboardNotebooks);
+    const combinedDashboardList = concat(
+      dashboardAppAnalytics,
+      dashboardObservabilityPanels,
+      dashboardNotebooks
+    );
 
-    const createAppAnalytics: DashboardCreatorFn = () => {
-      window.location = core.http.basePath.prepend(
-        '/app/observability-dashboards#/application_analytics/create'
-      );
+    const createAppAnalytics: DashboardCreatorFn = (_history) => {
+      return (event: MouseEvent) =>
+        (window.location.href = core.http.basePath.prepend(
+          '/app/observability-dashboards#/application_analytics/create'
+        ));
     };
+
     //
     // const createNotebook: DashboardCreatorFn = () => {
     //   window.location = core.http.basePath.prepend(
@@ -193,8 +198,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         );
       },
     });
-
-
 
     // Return methods that should be available to other plugins
     return {};
