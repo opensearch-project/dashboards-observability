@@ -6,6 +6,7 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.5.0
 
 - Add log pattern table ([#1187](https://github.com/opensearch-project/observability/pull/1187))
 - Implementing search feature ([#1286](https://github.com/opensearch-project/observability/pull/1286))
+- Traces jaeger ([#150](https://github.com/opensearch-project/dashboards-observability/pull/150))
 
 ### Infrastructure
 
