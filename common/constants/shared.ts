@@ -37,7 +37,7 @@ export const observabilityEventsPluginOrder = 5091;
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/observability-plugin/ppl/commands/';
+  'https://opensearch.org/docs/latest/search-plugins/sql/ppl/index';
 export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
