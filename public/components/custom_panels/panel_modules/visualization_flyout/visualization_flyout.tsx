@@ -9,6 +9,8 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiDatePicker,
   EuiDatePickerRange,
   EuiFlexGroup,
@@ -26,11 +28,17 @@ import {
   EuiTitle,
   EuiToolTip,
   ShortDate,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { FlyoutContainers } from '../../../common/flyout_containers';
-import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
+import {
+  createDashboardVizObject,
+  displayVisualization,
+  getQueryResponse,
+  isDateValid,
+} from '../../helpers/utils';
 import { convertDateTime } from '../../helpers/utils';
 import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -42,6 +50,8 @@ import {
 } from '../../../../../common/types/custom_panels';
 import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
+import { DashboardStart } from '../../../../../../../src/plugins/dashboard/public';
+import { NOTEBOOKS_API_PREFIX } from '../../../../../common/constants/notebooks';
 
 /*
  * VisaulizationFlyout - This module create a flyout to add visualization
@@ -61,6 +71,7 @@ import { uiSettingsService } from '../../../../../common/utils';
 
 interface VisualizationFlyoutProps {
   panelId: string;
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   pplFilterValue: string;
   closeFlyout: () => void;
   start: ShortDate;
@@ -81,6 +92,7 @@ interface VisualizationFlyoutProps {
 
 export const VisaulizationFlyout = ({
   panelId,
+  DashboardContainerByValueRenderer,
   appId = '',
   pplFilterValue,
   closeFlyout,
@@ -104,7 +116,12 @@ export const VisaulizationFlyout = ({
   const [isPreviewError, setIsPreviewError] = useState('');
   const [savedVisualizations, setSavedVisualizations] = useState<SavedVisualizationType[]>([]);
   const [visualizationOptions, setVisualizationOptions] = useState<EuiSelectOption[]>([]);
-  const [selectValue, setSelectValue] = useState('');
+  // const [selectValue, setSelectValue] = useState('');
+
+  const [visOptions, setVisOptions] = useState<EuiComboBoxOptionOption[]>([]); // options for loading saved visualizations
+  const [selectedVisOption, setSelectedVisOption] = useState<EuiComboBoxOptionOption[]>([]);
+  const [visInput, setVisInput] = useState(undefined);
+  const [visType, setVisType] = useState('');
 
   // DateTimePicker States
   const startDate = convertDateTime(start, true, false);
@@ -115,7 +132,7 @@ export const VisaulizationFlyout = ({
       return false;
     }
 
-    if (selectValue === '') {
+    if (selectedVisOption.length === 0) {
       setToast('Please make a valid selection', 'danger', undefined, 'left');
       return false;
     }
@@ -131,7 +148,7 @@ export const VisaulizationFlyout = ({
         .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/replace`, {
           body: JSON.stringify({
             panelId,
-            savedVisualizationId: selectValue,
+            savedVisualizationId: selectedVisOption[0].key,
             oldVisualizationId: replaceVisualizationId,
           }),
         })
@@ -148,7 +165,8 @@ export const VisaulizationFlyout = ({
         .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
           body: JSON.stringify({
             panelId,
-            savedVisualizationId: selectValue,
+            savedVisualizationId: selectedVisOption[0].key,
+            newVisualizationType: selectedVisOption[0].className,
           }),
         })
         .then(async (res) => {
@@ -166,18 +184,33 @@ export const VisaulizationFlyout = ({
   const onRefreshPreview = () => {
     if (!isInputValid()) return;
 
-    getQueryResponse(
-      pplService,
-      pplQuery,
-      newVisualizationType,
-      start,
-      end,
-      setPreviewData,
-      setPreviewLoading,
-      setIsPreviewError,
-      pplFilterValue,
-      newVisualizationTimeField
-    );
+    if (selectedVisOption[0].className === 'observability')
+      getQueryResponse(
+        pplService,
+        pplQuery,
+        newVisualizationType,
+        start,
+        end,
+        setPreviewData,
+        setPreviewLoading,
+        setIsPreviewError,
+        pplFilterValue,
+        newVisualizationTimeField
+      );
+    else {
+      setPreviewArea(
+        <>
+          {timeRange}
+          <br />
+          {/* {selectedVisOption[0].key} */}
+          <DashboardContainerByValueRenderer
+            // key={htmlIdGenerator()()}
+            input={createDashboardVizObject(selectedVisOption[0].key, start, end)}
+            // onInputUpdated={setVisInput}
+          />
+        </>
+      );
+    }
   };
 
   const timeRange = (
@@ -226,9 +259,9 @@ export const VisaulizationFlyout = ({
     </EuiFlyoutHeader>
   );
 
-  const onChangeSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectValue(e.target.value);
-  };
+  // const onChangeSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSelectValue(e.target.value);
+  // };
 
   const emptySavedVisualizations = (
     <EuiCallOut iconType="help">
@@ -237,16 +270,27 @@ export const VisaulizationFlyout = ({
   );
 
   const flyoutBody =
-    savedVisualizations.length > 0 ? (
+    _.flatten(_.map(visOptions, 'options')).length > 0 ? (
       <EuiFlyoutBody>
         <>
           <EuiSpacer size="s" />
           <EuiFormRow label="Visualization name">
-            <EuiSelect
+            {/* <EuiSelect
               hasNoInitialSelection
               onChange={(e) => onChangeSelection(e)}
               options={visualizationOptions}
               value={selectValue}
+            /> */}
+            <EuiComboBox
+              placeholder="Find visualization"
+              singleSelection={{ asPlainText: true }}
+              options={visOptions}
+              selectedOptions={selectedVisOption}
+              onChange={(newOption: EuiComboBoxOptionOption[]) => {
+                if (newOption.length > 0) setVisType(newOption[0].className);
+                setSelectedVisOption(newOption);
+                // setIsOutputStale(true);
+              }}
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
@@ -291,31 +335,78 @@ export const VisaulizationFlyout = ({
     </EuiFlyoutFooter>
   );
 
-  // Fetch all saved visualizations
-  const fetchSavedVisualizations = async () => {
-    return http
+  // fetch OSD visualizations and observability vsualizations
+  const fetchVisualizations = async () => {
+    let opt1: EuiComboBoxOptionOption[] = [];
+    let opt2: EuiComboBoxOptionOption[] = [];
+    await http
+      .get(`${NOTEBOOKS_API_PREFIX}/visualizations`)
+      .then((res) => {
+        opt1 = res.savedVisualizations.map((vizObject) => ({
+          label: vizObject.label,
+          key: vizObject.key,
+          className: 'dashboards',
+        }));
+      })
+      .catch((err) => console.error('Fetching dashboard visualization issue', err.body.message));
+
+    await http
       .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
       .then((res) => {
-        if (res.visualizations.length > 0) {
-          setSavedVisualizations(res.visualizations);
-          const filterAppVis = res.visualizations.filter((vis: SavedVisualizationType) => {
-            return appId
-              ? vis.hasOwnProperty('application_id')
-                ? vis.application_id === appId
-                : false
-              : !vis.hasOwnProperty('application_id');
-          });
-          setVisualizationOptions(
-            filterAppVis.map((visualization: SavedVisualizationType) => {
-              return { value: visualization.id, text: visualization.name };
-            })
-          );
-        }
+        const noAppVisualizations = res.visualizations.filter((vis) => {
+          return !!!vis.application_id;
+        });
+        setSavedVisualizations(noAppVisualizations);
+        opt2 = noAppVisualizations.map((vizObject) => ({
+          label: vizObject.name,
+          key: vizObject.id,
+          className: 'observability',
+        }));
       })
-      .catch((err) => {
-        console.error('Issue in fetching the operational panels', err);
-      });
+      .catch((err) =>
+        console.error('Fetching observability visualization issue', err.body.message)
+      );
+
+    const allVisualizations = [
+      { label: 'Dashboards Visualizations', options: opt1 },
+      { label: 'Observability Visualizations', options: opt2 },
+    ];
+    setVisOptions(allVisualizations);
+
+    // const selectedObject = _.filter([...opt1, ...opt2], {
+    //   key: para.visSavedObjId,
+    // });
+    // if (selectedObject.length > 0) {
+    //   setVisType(selectedObject.className);
+    //   setSelectedVisOption(selectedObject);
+    // }
   };
+
+  // // Fetch all saved visualizations
+  // const fetchSavedVisualizations = async () => {
+  //   return http
+  //     .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
+  //     .then((res) => {
+  //       if (res.visualizations.length > 0) {
+  //         setSavedVisualizations(res.visualizations);
+  //         const filterAppVis = res.visualizations.filter((vis: SavedVisualizationType) => {
+  //           return appId
+  //             ? vis.hasOwnProperty('application_id')
+  //               ? vis.application_id === appId
+  //               : false
+  //             : !vis.hasOwnProperty('application_id');
+  //         });
+  //         setVisualizationOptions(
+  //           filterAppVis.map((visualization: SavedVisualizationType) => {
+  //             return { value: visualization.id, text: visualization.name };
+  //           })
+  //         );
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error('Issue in fetching the operational panels', err);
+  //     });
+  // };
 
   useEffect(() => {
     const previewTemplate = (
@@ -347,23 +438,29 @@ export const VisaulizationFlyout = ({
 
   // On change of selected visualization change options
   useEffect(() => {
-    for (let i = 0; i < savedVisualizations.length; i++) {
-      const visualization = savedVisualizations[i];
-      if (visualization.id === selectValue) {
-        setPPLQuery(visualization.query);
-        setNewVisualizationTitle(visualization.name);
-        setNewVisualizationType(visualization.type);
-        setPreviewMetaData(visualization);
-        setNewVisualizationTimeField(visualization.timeField);
-        break;
+    if (selectedVisOption.length > 0 && selectedVisOption[0].className === 'observability')
+      for (let i = 0; i < savedVisualizations.length; i++) {
+        const visualization = savedVisualizations[i];
+        if (visualization.id === selectedVisOption[0].key) {
+          setPPLQuery(visualization.query);
+          setNewVisualizationTitle(visualization.name);
+          setNewVisualizationType(visualization.type);
+          setPreviewMetaData(visualization);
+          setNewVisualizationTimeField(visualization.timeField);
+          break;
+        }
       }
-    }
-  }, [selectValue]);
+  }, [selectedVisOption]);
 
   // load saved visualizations
   useEffect(() => {
-    fetchSavedVisualizations();
+    // fetchSavedVisualizations();
+    fetchVisualizations();
   }, []);
+
+  useEffect(() => {
+    console.log('viz options', visOptions);
+  }, [visOptions]);
 
   return (
     <FlyoutContainers

@@ -28,6 +28,7 @@ import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 
 /*
  * "Home" module is initial page for Operantional Panels
@@ -42,6 +43,7 @@ import { isNameValid } from './helpers/utils';
 
 interface PanelHomeProps {
   http: CoreStart['http'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
   pplService: PPLService;
@@ -51,6 +53,7 @@ interface PanelHomeProps {
 
 export const Home = ({
   http,
+  DashboardContainerByValueRenderer,
   chrome,
   parentBreadcrumbs,
   pplService,
@@ -326,6 +329,7 @@ export const Home = ({
             <CustomPanelView
               panelId={props.match.params.id}
               http={http}
+              DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
               pplService={pplService}
               dslService={dslService}
               chrome={chrome}

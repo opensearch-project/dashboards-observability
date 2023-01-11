@@ -5,7 +5,7 @@
 /* eslint-disable no-console */
 
 import dateMath from '@elastic/datemath';
-import { ShortDate } from '@elastic/eui';
+import { ShortDate, htmlIdGenerator } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import _ from 'lodash';
 import { Moment } from 'moment-timezone';
@@ -21,6 +21,8 @@ import { getVizContainerProps } from '../../../components/visualizations/charts/
 import { QueryManager } from '../../../../common/query_manager';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { removeBacktick } from '../../../../common/utils';
+import { DashboardContainerInput } from '../../../../../../src/plugins/dashboard/public';
+import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -461,4 +463,50 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       })}
     />
   );
+};
+
+export const createDashboardVizObject = (
+  objectId: string,
+  startTime: ShortDate,
+  endTime: ShortDate
+) => {
+  const vizUniqueId = htmlIdGenerator()();
+  // a dashboard container object for new visualization
+  const newVizObject: DashboardContainerInput = {
+    viewMode: ViewMode.VIEW,
+    panels: {
+      '1': {
+        gridData: {
+          x: 0,
+          y: 0,
+          w: 50,
+          h: 20,
+          i: '1',
+        },
+        type: 'visualization',
+        explicitInput: {
+          id: '1',
+          savedObjectId: objectId,
+        },
+      },
+    },
+    isFullScreenMode: false,
+    filters: [],
+    useMargins: false,
+    id: vizUniqueId,
+    timeRange: {
+      to: endTime,
+      from: startTime,
+    },
+    title: 'embed_viz_' + vizUniqueId,
+    query: {
+      query: '',
+      language: 'lucene',
+    },
+    refreshConfig: {
+      pause: true,
+      value: 15,
+    },
+  };
+  return newVizObject;
 };

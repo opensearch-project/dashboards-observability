@@ -28,11 +28,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import {
+  createDashboardVizObject,
   displayVisualization,
   renderCatalogVisualization,
   renderSavedVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
+import { DashboardStart } from '../../../../../../../src/plugins/dashboard/public';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -57,9 +59,11 @@ import './visualization_container.scss';
 
 interface Props {
   http: CoreStart['http'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   editMode: boolean;
   visualizationId: string;
   savedVisualizationId: string;
+  visualizationType: string | undefined;
   pplService: PPLService;
   fromTime: string;
   toTime: string;
@@ -76,9 +80,11 @@ interface Props {
 
 export const VisualizationContainer = ({
   http,
+  DashboardContainerByValueRenderer,
   editMode,
   visualizationId,
   savedVisualizationId,
+  visualizationType,
   pplService,
   fromTime,
   toTime,
@@ -95,7 +101,7 @@ export const VisualizationContainer = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [disablePopover, setDisablePopover] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
-  const [visualizationType, setVisualizationType] = useState('');
+  const [visualizationChartType, setvisualizationChartType] = useState('');
   const [visualizationMetaData, setVisualizationMetaData] = useState();
   const [visualizationData, setVisualizationData] = useState<Plotly.Data[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -199,7 +205,7 @@ export const VisualizationContainer = ({
         pplFilterValue,
         spanParam,
         setVisualizationTitle,
-        setVisualizationType,
+        setvisualizationChartType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
@@ -215,7 +221,7 @@ export const VisualizationContainer = ({
         pplFilterValue,
         spanParam,
         setVisualizationTitle,
-        setVisualizationType,
+        setvisualizationChartType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
@@ -237,22 +243,37 @@ export const VisualizationContainer = ({
             </EuiText>
           </div>
         ) : (
-          displayVisualization(visualizationMetaData, visualizationData, visualizationType)
+          displayVisualization(visualizationMetaData, visualizationData, visualizationChartType)
         )}
       </div>
     ),
-    [onRefresh, isLoading, isError, visualizationData, visualizationType, visualizationMetaData]
+    [
+      onRefresh,
+      isLoading,
+      isError,
+      visualizationData,
+      visualizationChartType,
+      visualizationMetaData,
+    ]
   );
 
   useEffect(() => {
-    loadVisaulization();
+    if (visualizationType !== 'dashboards') loadVisaulization();
   }, [onRefresh]);
 
   useEffect(() => {
     editMode ? setDisablePopover(true) : setDisablePopover(false);
   }, [editMode]);
 
-  return (
+  return visualizationType !== undefined && visualizationType === 'dashboards' ? (
+    <>
+      <DashboardContainerByValueRenderer
+        // key={htmlIdGenerator()()}
+        input={createDashboardVizObject(savedVisualizationId, fromTime, toTime)}
+        // onInputUpdated={setVisInput}
+      />
+    </>
+  ) : (
     <>
       <EuiPanel
         data-test-subj={`${visualizationTitle}VisualizationPanel`}

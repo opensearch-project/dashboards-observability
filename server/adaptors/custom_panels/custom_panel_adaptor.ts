@@ -331,7 +331,8 @@ export class CustomPanelsAdaptor {
     client: ILegacyScopedClusterClient,
     panelId: string,
     savedVisualizationId: string,
-    oldVisualizationId?: string
+    oldVisualizationId?: string,
+    newVisualizationType = 'observability'
   ) => {
     try {
       const allPanelVisualizations = await this.getVisualizations(client, panelId);
@@ -361,6 +362,7 @@ export class CustomPanelsAdaptor {
           id: 'panel_viz_' + uuidv4(),
           savedVisualizationId,
           ...newDimensions,
+          visualizationType: newVisualizationType,
         },
       ];
       const updatePanelResponse = await this.updatePanel(client, panelId, {

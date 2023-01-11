@@ -16,6 +16,7 @@ import { VisualizationType } from '../../../../../common/types/custom_panels';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
 import './panel_grid.scss';
 import { mergeLayoutAndVisualizations } from '../../helpers/utils';
+import { DashboardStart } from '../../../../../../../src/plugins/dashboard/public';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -43,6 +44,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface PanelGridProps {
   http: CoreStart['http'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   chrome: CoreStart['chrome'];
   panelId: string;
   updateAvailabilityVizId?: any;
@@ -64,6 +66,7 @@ interface PanelGridProps {
 export const PanelGrid = (props: PanelGridProps) => {
   const {
     http,
+    DashboardContainerByValueRenderer,
     chrome,
     panelId,
     updateAvailabilityVizId,
@@ -97,9 +100,11 @@ export const PanelGrid = (props: PanelGridProps) => {
         <VisualizationContainer
           key={panelVisualization.id}
           http={http}
+          DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
           editMode={editMode}
           visualizationId={panelVisualization.id}
           savedVisualizationId={panelVisualization.savedVisualizationId}
+          visualizationType={panelVisualization.visualizationType}
           pplService={pplService}
           fromTime={startTime}
           toTime={endTime}

@@ -122,6 +122,9 @@ export const App = ({
                   return (
                     <CustomPanelsHome
                       http={http}
+                      DashboardContainerByValueRenderer={
+                        DepsStart.dashboard.DashboardContainerByValueRenderer
+                      }
                       chrome={chrome}
                       parentBreadcrumbs={[parentBreadcrumb, customPanelBreadcrumb]}
                       pplService={pplService}

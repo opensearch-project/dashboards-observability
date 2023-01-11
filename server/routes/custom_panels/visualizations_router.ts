@@ -97,6 +97,7 @@ export function VisualizationsRouter(router: IRouter) {
         body: schema.object({
           panelId: schema.string(),
           savedVisualizationId: schema.string(),
+          newVisualizationType: schema.string(),
         }),
       },
     },
@@ -113,7 +114,9 @@ export function VisualizationsRouter(router: IRouter) {
         const newVisualizations = await customPanelBackend.addVisualization(
           opensearchNotebooksClient,
           request.body.panelId,
-          request.body.savedVisualizationId
+          request.body.savedVisualizationId,
+          undefined,
+          request.body.newVisualizationType
         );
         return response.ok({
           body: {

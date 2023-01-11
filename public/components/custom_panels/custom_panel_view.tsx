@@ -60,6 +60,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -90,6 +91,7 @@ interface CustomPanelViewProps {
   panelId: string;
   page: 'app' | 'operationalPanels';
   http: CoreStart['http'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   pplService: PPLService;
   dslService: DSLService;
   chrome: CoreStart['chrome'];
@@ -120,6 +122,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     page,
     appId,
     http,
+    DashboardContainerByValueRenderer,
     pplService,
     dslService,
     chrome,
@@ -443,6 +446,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     flyout = (
       <VisaulizationFlyout
         panelId={panelId}
+        DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
         closeFlyout={closeFlyout}
         pplFilterValue={pplFilterValue}
         start={startTime}
@@ -645,6 +649,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
             )}
             <PanelGrid
               http={http}
+              DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
               panelId={panelId}
               updateAvailabilityVizId={updateAvailabilityVizId}
               chrome={chrome}
