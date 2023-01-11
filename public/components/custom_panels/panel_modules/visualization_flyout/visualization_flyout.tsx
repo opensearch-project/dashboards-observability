@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
 import _ from 'lodash';
@@ -180,33 +181,39 @@ export const VisaulizationFlyout = ({
   };
 
   const timeRange = (
-    <EuiFormRow label="Panel Time Range" fullWidth>
-      <EuiDatePickerRange
-        className="date-picker-preview"
-        fullWidth
-        readOnly
-        startDateControl={
-          <EuiDatePicker
-            selected={startDate}
-            startDate={startDate}
-            endDate={endDate}
-            isInvalid={startDate > endDate}
-            aria-label="Start date"
-            dateFormat={uiSettingsService.get('dateFormat')}
-          />
-        }
-        endDateControl={
-          <EuiDatePicker
-            selected={endDate}
-            startDate={startDate}
-            endDate={endDate}
-            isInvalid={startDate > endDate}
-            aria-label="End date"
-            dateFormat={uiSettingsService.get('dateFormat')}
-          />
-        }
-      />
-    </EuiFormRow>
+    <EuiToolTip
+      position="bottom"
+      content="Picker is disabled. Please edit date/time from panel"
+      display="block"
+    >
+      <EuiFormRow label="Panel Time Range" fullWidth>
+        <EuiDatePickerRange
+          className="date-picker-preview"
+          fullWidth
+          readOnly
+          startDateControl={
+            <EuiDatePicker
+              selected={startDate}
+              startDate={startDate}
+              endDate={endDate}
+              isInvalid={startDate > endDate}
+              aria-label="Start date"
+              dateFormat={uiSettingsService.get('dateFormat')}
+            />
+          }
+          endDateControl={
+            <EuiDatePicker
+              selected={endDate}
+              startDate={startDate}
+              endDate={endDate}
+              isInvalid={startDate > endDate}
+              aria-label="End date"
+              dateFormat={uiSettingsService.get('dateFormat')}
+            />
+          }
+        />
+      </EuiFormRow>
+    </EuiToolTip>
   );
 
   const flyoutHeader = (

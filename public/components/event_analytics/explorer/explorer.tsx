@@ -95,7 +95,6 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { DataGrid } from './events_views/data_grid';
-import './explorer.scss';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { PatternsTable } from './log_patterns/patterns_table';
 import { NoResults } from './no_results';
@@ -104,6 +103,7 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { QueryManager } from '../../../../common/query_manager';
+import { uiSettingsService } from '../../../../common/utils';
 
 const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
@@ -414,31 +414,35 @@ export const Explorer = ({
       curQuery![FILTERED_PATTERN]
     );
 
-    await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          finalQuery,
-          [RAW_QUERY]: rawQueryStr,
-          [SELECTED_TIMESTAMP]: curTimestamp,
-        },
-      })
-    );
-
-    // search
-    if (finalQuery.match(PPL_STATS_REGEX)) {
-      const cusVisIds = userVizConfigs ? Object.keys(userVizConfigs) : [];
-      getVisualizations();
-      getAvailableFields(`search source=${curIndex}`);
-      for (const visId of cusVisIds) {
+    batch(() => {
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            finalQuery,
+            [RAW_QUERY]: rawQueryStr,
+            [SELECTED_TIMESTAMP]: curTimestamp,
+          },
+        })
+      );
+      if (selectedContentTabId === TAB_CHART_ID) {
+        // parse stats section on every search
+        const statsTokens = queryManager.queryParser().parse(rawQueryStr).getStats();
+        const updatedDataConfig = getDefaultVisConfig(statsTokens);
         dispatch(
-          changeVisualizationConfig({
+          changeVizConfig({
             tabId,
-            vizId: visId,
-            data: { ...userVizConfigs[visId] },
+            vizId: curVisId,
+            data: { dataConfig: { ...updatedDataConfig } },
           })
         );
       }
+    });
+
+    // search
+    if (finalQuery.match(PPL_STATS_REGEX)) {
+      getVisualizations();
+      getAvailableFields(`search source=${curIndex}`);
     } else {
       if (!selectedIntervalRef.current || selectedIntervalRef.current.text === 'Auto') {
         findAutoInterval(startingTime, endingTime);
@@ -1122,21 +1126,8 @@ export const Explorer = ({
         await updateQueryInStore(tempQuery);
       }
       await fetchData();
-
-      if (selectedContentTabId === TAB_CHART_ID) {
-        // parse stats section on every search
-        const statsTokens = queryManager.queryParser().parse(tempQuery).getStats();
-        const updatedDataConfig = getDefaultVisConfig(statsTokens);
-        await dispatch(
-          changeVizConfig({
-            tabId,
-            vizId: curVisId,
-            data: { dataConfig: { ...updatedDataConfig } },
-          })
-        );
-      }
     },
-    [tempQuery, query, selectedContentTabId, curVisId]
+    [tempQuery, query]
   );
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
@@ -1478,7 +1469,7 @@ export const Explorer = ({
         query,
       }}
     >
-      <div className="dscAppContainer">
+      <div className={`dscAppContainer${uiSettingsService.get('theme:darkMode') && ' explorer-dark'}`}>
         <Search
           key="search-component"
           query={appLogEvents ? generateViewQuery(tempQuery) : query[RAW_QUERY]}

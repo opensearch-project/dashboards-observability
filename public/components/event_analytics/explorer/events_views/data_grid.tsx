@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './data_grid.scss';
-
 import React, { useMemo, useState, useEffect, useRef, RefObject } from 'react';
 import { IExplorerFields } from '../../../../../common/types/explorer';
 import { DEFAULT_COLUMNS, PAGE_SIZE } from '../../../../../common/constants/explorer';

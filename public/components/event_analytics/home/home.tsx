@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './home.scss';
-
 import React, { useState, ReactElement, useRef, useEffect } from 'react';
 import { useDispatch, batch, useSelector } from 'react-redux';
 import { uniqueId } from 'lodash';

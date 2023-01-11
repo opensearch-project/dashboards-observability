@@ -3,31 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './index.scss';
+
+import { concat, from } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import {
-  AppCategory,
   AppMountParameters,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin, PluginInitializerContext,
+  Plugin,
+  PluginInitializerContext,
 } from '../../../src/core/public';
 import {
-  observabilityApplicationsID,
-  observabilityApplicationsPluginOrder,
-  observabilityApplicationsTitle,
-  observabilityEventsID,
-  observabilityEventsPluginOrder,
-  observabilityEventsTitle,
   observabilityID,
-  observabilityMetricsID,
-  observabilityMetricsPluginOrder,
-  observabilityMetricsTitle, observabilityNotebooksID, observabilityNotebooksPluginOrder, observabilityNotebooksTitle,
-  observabilityOperationalPanelsID, observabilityOperationalPanelsPluginOrder, observabilityOperationalPanelsTitle,
   observabilityPluginOrder,
   observabilityTitle,
-  observabilityTraceAnalyticsID,
-  observabilityTraceAnalyticsPluginOrder,
-  observabilityTraceAnalyticsTitle,
 } from '../common/constants/shared';
 import PPLService from './services/requests/ppl';
 import DSLService from './services/requests/dsl';
@@ -37,14 +27,12 @@ import { AppPluginStartDependencies, ObservabilitySetup, ObservabilityStart } fr
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
-import { DashboardCreatorFn } from '../../../src/plugins/opensearch_dashboards_react/public/context/types';
+import { DashboardCreatorFn, DashboardListItem } from './types';
 import { fetchPanelsList } from './components/custom_panels/helpers/utils';
 import { fetchAppsList } from './components/application_analytics/helpers/utils';
+import { fetchNotebooksList } from './components/notebooks/components/helpers/utils';
 import { QueryManager } from '../common/query_manager';
 import { DashboardSetup } from '../../../src/plugins/dashboard/public';
-import { DashboardListItem } from '../../../src/plugins/dashboard/common/types';
-import { concat, from } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
 
 export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -85,6 +73,18 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       );
     };
 
+    // Fetches all saved Custom Panels
+    const fetchNotebooks = () => {
+      return from(fetchNotebooksList(core.http)).pipe(
+        mergeMap((item) => item),
+        map(convertNotebookToDashboardListItem),
+        catchError((err) => {
+          console.error('Issue in fetching the notebooks', err);
+          return from([]);
+        })
+      );
+    };
+
     const convertPanelToDashboardListItem = (item: any): DashboardListItem => {
       return {
         id: item.id,
@@ -107,120 +107,96 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       };
     };
 
+    const convertNotebookToDashboardListItem = (item: any): DashboardListItem => {
+      return {
+        id: item.id,
+        title: item.path,
+        type: 'Notebook',
+        description: '...',
+        url: `observability-dashboards#/notebooks/${item.id}`,
+        listType: 'observability-notebook',
+      };
+    };
+
     const id: string = this.initializerContext.opaqueId.description!;
 
     const dashboardAppAnalytics = fetchApplicationAnalytics();
     const dashboardObservabilityPanels = fetchObservabilityPanels();
-    const combinedDashboardList = concat(dashboardAppAnalytics, dashboardObservabilityPanels);
+    const dashboardNotebooks = fetchNotebooks();
+    const combinedDashboardList = concat(
+      dashboardAppAnalytics,
+      dashboardObservabilityPanels,
+      dashboardNotebooks
+    );
 
-    const createAppAnalytics: DashboardCreatorFn = () => {
-      window.location = core.http.basePath.prepend(
-        '/app/observability-dashboards#/application_analytics/create'
-      );
+    const createAppAnalytics: DashboardCreatorFn = (_history) => {
+      return (event: MouseEvent) =>
+        (window.location.href = core.http.basePath.prepend(
+          '/app/observability-dashboards#/application_analytics/create'
+        ));
     };
 
-    const createNotebook: DashboardCreatorFn = () => {
-      window.location = core.http.basePath.prepend(
-        '/app/observability-dashboards#/notebooks/create'
-      );
-    };
-
-    const createPanel: DashboardCreatorFn = () => {
-      window.location = core.http.basePath.prepend(
-        '/app/observability-dashboards#/operational_panels/create'
-      );
-    };
+    //
+    // const createNotebook: DashboardCreatorFn = () => {
+    //   window.location = core.http.basePath.prepend(
+    //     '/app/observability-dashboards#/notebooks/create'
+    //   );
+    // };
+    //
+    // const createPanel: DashboardCreatorFn = () => {
+    //   window.location = core.http.basePath.prepend(
+    //     '/app/observability-dashboards#/operational_panels/create'
+    //   );
+    // };
 
     dashboard.registerDashboardListSource(id, () => combinedDashboardList);
-
-    dashboard.registerDashboardItemCreator({
-      id: 'observaility-notebook',
-      defaultText: 'Notebook',
-      creatorFn: createNotebook,
-    });
+    //
+    // dashboard.registerDashboardItemCreator({
+    //   id: 'observaility-notebook',
+    //   defaultText: 'Notebook',
+    //   creatorFn: createNotebook,
+    // });
 
     dashboard.registerDashboardItemCreator({
       id: 'observaility-application',
       defaultText: 'Observability App',
       creatorFn: createAppAnalytics,
     });
-
-    dashboard.registerDashboardItemCreator({
-      id: 'observaility-panel',
-      defaultText: 'Operational Panel',
-      creatorFn: createPanel,
-    });
-
-    const appMountWithStartPage = (startPage?: string) => async (params: AppMountParameters) => {
-      const { Observability } = await import('./components/index');
-      const [coreStart, depsStart] = await core.getStartServices();
-      const pplService = new PPLService(coreStart.http);
-      const dslService = new DSLService(coreStart.http);
-      const savedObjects = new SavedObjects(coreStart.http);
-      const timestampUtils = new TimestampUtils(dslService);
-      const qm = new QueryManager();
-
-      return Observability(
-        coreStart,
-        depsStart as AppPluginStartDependencies,
-        params,
-        pplService,
-        dslService,
-        savedObjects,
-        timestampUtils,
-        qm,
-        startPage
-      );
-    };
-
-    const customCategory: AppCategory = Object.assign({}, DEFAULT_APP_CATEGORIES.observability, {euiIconType: ""})
+    //
+    // dashboard.registerDashboardItemCreator({
+    //   id: 'observaility-panel',
+    //   defaultText: 'Operational Panel',
+    //   creatorFn: createPanel,
+    // });
 
     core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: customCategory,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('/application_analytics'),
-    });
-
-    core.application.register({
-      id: observabilityTraceAnalyticsID,
-      title: observabilityTraceAnalyticsTitle,
-      category: customCategory,
-      order: observabilityTraceAnalyticsPluginOrder,
-      mount: appMountWithStartPage('/trace_analytics'),
-    });
-
-    core.application.register({
-      id: observabilityEventsID,
-      title: observabilityEventsTitle,
-      category: customCategory,
-      order: observabilityEventsPluginOrder,
-      mount: appMountWithStartPage('/event_analytics'),
-    });
-
-    core.application.register({
-      id: observabilityMetricsID,
-      title: observabilityMetricsTitle,
-      category: customCategory,
-      order: observabilityMetricsPluginOrder,
-      mount: appMountWithStartPage('/metrics_analytics'),
-    });
-
-    core.application.register({
-      id: observabilityOperationalPanelsID,
-      title: observabilityOperationalPanelsTitle,
-      category: customCategory,
-      order: observabilityOperationalPanelsPluginOrder,
-      mount: appMountWithStartPage('/operational_panels'),
-    });
-
-    core.application.register({
-      id: observabilityNotebooksID,
-      title: observabilityNotebooksTitle,
-      category: customCategory,
-      order: observabilityNotebooksPluginOrder,
-      mount: appMountWithStartPage('/notebooks'),
+      id: observabilityID,
+      title: observabilityTitle,
+      category: {
+        id: 'opensearch',
+        label: 'OpenSearch Plugins',
+        order: 2000,
+      },
+      order: observabilityPluginOrder,
+      async mount(params: AppMountParameters) {
+        const { Observability } = await import('./components/index');
+        const [coreStart, depsStart] = await core.getStartServices();
+        const pplService = new PPLService(coreStart.http);
+        const dslService = new DSLService(coreStart.http);
+        const savedObjects = new SavedObjects(coreStart.http);
+        const timestampUtils = new TimestampUtils(dslService, pplService);
+        const qm = new QueryManager();
+        return Observability(
+          coreStart,
+          depsStart as AppPluginStartDependencies,
+          params,
+          pplService,
+          dslService,
+          savedObjects,
+          timestampUtils,
+          qm
+        );
+      },
     });
 
     // Return methods that should be available to other plugins

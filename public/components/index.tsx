@@ -11,8 +11,8 @@ import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
 
 export const Observability = (
-  CoreStartProp: CoreStart,
-  DepsStart: AppPluginStartDependencies,
+  coreStart: CoreStart,
+  depsStart: AppPluginStartDependencies,
   AppMountParametersProp: AppMountParameters,
   pplService: any,
   dslService: any,
@@ -23,8 +23,8 @@ export const Observability = (
 ) => {
   ReactDOM.render(
     <App
-      coreStart={CoreStartProp}
-      depsStart={DepsStart}
+      coreStart={coreStart}
+      depsStart={depsStart}
       pplService={pplService}
       dslService={dslService}
       savedObjects={savedObjects}

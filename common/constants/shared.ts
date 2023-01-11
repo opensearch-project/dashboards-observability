@@ -26,34 +26,10 @@ export const observabilityID = 'observability-dashboards';
 export const observabilityTitle = 'Observability';
 export const observabilityPluginOrder = 6000;
 
-export const observabilityApplicationsID = 'observability-applications';
-export const observabilityApplicationsTitle = 'Application Analytics';
-export const observabilityApplicationsPluginOrder = 5090;
-
-export const observabilityTraceAnalyticsID = 'observability-trace-analytics';
-export const observabilityTraceAnalyticsTitle = 'Trace Analytics';
-export const observabilityTraceAnalyticsPluginOrder = 5091;
-
-export const observabilityEventsID = 'observability-events';
-export const observabilityEventsTitle = 'Event Analytics';
-export const observabilityEventsPluginOrder = 5092;
-
-export const observabilityMetricsID = 'observability-metrics';
-export const observabilityMetricsTitle = 'Metrics Analytics';
-export const observabilityMetricsPluginOrder = 5093;
-
-export const observabilityOperationalPanelsID = 'observability-operational-panels';
-export const observabilityOperationalPanelsTitle = 'Operational Panels';
-export const observabilityOperationalPanelsPluginOrder = 5094;
-
-export const observabilityNotebooksID = 'observability-notebooks';
-export const observabilityNotebooksTitle = 'Notebooks';
-export const observabilityNotebooksPluginOrder = 5095;
-
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/observability-plugin/ppl/commands/';
+  'https://opensearch.org/docs/latest/search-plugins/sql/ppl/index';
 export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';

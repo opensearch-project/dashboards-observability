@@ -157,8 +157,12 @@ const pplServiceRequestor = async (
       setVisualizationData(res);
     })
     .catch((error: Error) => {
-      setIsError(error.stack || 'Issue in fetching visualization');
-      console.error(error);
+      const errorMessage = JSON.parse(error.body.message);
+      setIsError(
+        errorMessage.error.reason + '. ' + errorMessage.error.details ||
+          'Issue in fetching visualization'
+      );
+      console.error(error.body);
     })
     .finally(() => {
       setIsLoading(false);
@@ -449,7 +453,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   const mixedUserConfigs = {
     availabilityConfig: {
-      ...(metaData.user_configs?.availabilityConfig || {})
+      ...(metaData.user_configs?.availabilityConfig || {}),
     },
     dataConfig: {
       ...finalDataConfig,
