@@ -58,3 +58,25 @@
 .panels-title-text {
   @include euiTextTruncate;
 }
+
+.osd-viz-panel {
+  .euiPanel {
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .react-grid-layout {
+    height: 100% !important;
+    position: unset !important;
+  }
+  .react-grid-item {
+    height: 90% !important;
+    width: 95% !important;
+    top: 20px !important;
+    left: 1vw !important;
+    right: 1vw !important;
+  }
+  .react-resizable-handle {
+    background-image: none !important;
+    visibility: hidden;
+  }
+}

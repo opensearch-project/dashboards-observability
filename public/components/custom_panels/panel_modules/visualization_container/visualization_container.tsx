@@ -195,38 +195,42 @@ export const VisualizationContainer = ({
   }
 
   const loadVisaulization = async () => {
-    if (catalogVisualization)
-      await renderCatalogVisualization(
-        http,
-        pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
-        spanParam,
-        setVisualizationTitle,
-        setvisualizationChartType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError
-      );
-    else
-      await renderSavedVisualization(
-        http,
-        pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
-        spanParam,
-        setVisualizationTitle,
-        setvisualizationChartType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError
-      );
+    console.log('loadVisaulization called', visualizationType, savedVisualizationId);
+    if (visualizationType !== 'dashboards') {
+      console.log('Im here', visualizationType, savedVisualizationId);
+      if (catalogVisualization)
+        await renderCatalogVisualization(
+          http,
+          pplService,
+          savedVisualizationId,
+          fromTime,
+          toTime,
+          pplFilterValue,
+          spanParam,
+          setVisualizationTitle,
+          setvisualizationChartType,
+          setVisualizationData,
+          setVisualizationMetaData,
+          setIsLoading,
+          setIsError
+        );
+      else
+        await renderSavedVisualization(
+          http,
+          pplService,
+          savedVisualizationId,
+          fromTime,
+          toTime,
+          pplFilterValue,
+          spanParam,
+          setVisualizationTitle,
+          setvisualizationChartType,
+          setVisualizationData,
+          setVisualizationMetaData,
+          setIsLoading,
+          setIsError
+        );
+    }
   };
 
   const memoisedVisualizationBox = useMemo(
@@ -258,22 +262,14 @@ export const VisualizationContainer = ({
   );
 
   useEffect(() => {
-    if (visualizationType !== 'dashboards') loadVisaulization();
+    loadVisaulization();
   }, [onRefresh]);
 
   useEffect(() => {
     editMode ? setDisablePopover(true) : setDisablePopover(false);
   }, [editMode]);
 
-  return visualizationType !== undefined && visualizationType === 'dashboards' ? (
-    <>
-      <DashboardContainerByValueRenderer
-        // key={htmlIdGenerator()()}
-        input={createDashboardVizObject(savedVisualizationId, fromTime, toTime)}
-        // onInputUpdated={setVisInput}
-      />
-    </>
-  ) : (
+  return (
     <>
       <EuiPanel
         data-test-subj={`${visualizationTitle}VisualizationPanel`}
@@ -320,7 +316,16 @@ export const VisualizationContainer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-        {memoisedVisualizationBox}
+        {visualizationType !== undefined && visualizationType === 'dashboards' ? (
+          <div className="osd-viz-panel">
+            <DashboardContainerByValueRenderer
+              // key={htmlIdGenerator()()}
+              input={createDashboardVizObject(savedVisualizationId, fromTime, toTime)}
+            />
+          </div>
+        ) : (
+          memoisedVisualizationBox
+        )}
       </EuiPanel>
       {modal}
     </>
