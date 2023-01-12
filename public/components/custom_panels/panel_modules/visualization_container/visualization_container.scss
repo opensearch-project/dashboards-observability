@@ -70,13 +70,16 @@
   }
   .react-grid-item {
     height: 90% !important;
-    width: 95% !important;
-    top: 20px !important;
-    left: 1vw !important;
-    right: 1vw !important;
+    width: unset !important;
+    top: 1vh !important;
+    left: 0.5vw !important;
+    right: 45px !important;
   }
   .react-resizable-handle {
     background-image: none !important;
     visibility: hidden;
+  }
+  .embPanel__title {
+    font-size: 0.85rem;
   }
 }

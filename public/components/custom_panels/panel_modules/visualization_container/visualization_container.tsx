@@ -195,9 +195,7 @@ export const VisualizationContainer = ({
   }
 
   const loadVisaulization = async () => {
-    console.log('loadVisaulization called', visualizationType, savedVisualizationId);
     if (visualizationType !== 'dashboards') {
-      console.log('Im here', visualizationType, savedVisualizationId);
       if (catalogVisualization)
         await renderCatalogVisualization(
           http,

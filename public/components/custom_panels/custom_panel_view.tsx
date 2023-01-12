@@ -334,6 +334,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   const buildBaseQuery = async () => {
     const indices: string[] = [];
     for (let i = 0; i < panelVisualizations.length; i++) {
+      if (panelVisualizations[i].visualizationType === 'dashboards') return;
+
       const visualizationId = panelVisualizations[i].savedVisualizationId;
       // TODO: create route to get list of visualizations in one call
       const visData: SavedVisualizationType = await fetchVisualizationById(

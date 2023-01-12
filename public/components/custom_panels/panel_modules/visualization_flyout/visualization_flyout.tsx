@@ -454,13 +454,8 @@ export const VisaulizationFlyout = ({
 
   // load saved visualizations
   useEffect(() => {
-    // fetchSavedVisualizations();
     fetchVisualizations();
   }, []);
-
-  useEffect(() => {
-    console.log('viz options', visOptions);
-  }, [visOptions]);
 
   return (
     <FlyoutContainers
