@@ -235,11 +235,19 @@ export function ServiceView(props: ServiceViewProps) {
 
   useEffect(() => {
     const spanDSL = filtersToDsl(mode, props.filters, props.query, processTimeStamp(props.startTime, mode), processTimeStamp(props.endTime, mode));
-    spanDSL.query.bool.must.push({
-      term: {
-        "process.serviceName": props.serviceName,
-      },
-    });
+    if (mode === 'data_prepper') {
+      spanDSL.query.bool.must.push({
+        term: {
+          "serviceName": props.serviceName,
+        },
+      });
+    } else if (mode === 'jaeger') {
+      spanDSL.query.bool.must.push({
+        term: {
+          "process.serviceName": props.serviceName,
+        },
+      });
+    }
     spanFilters.map(({ field, value }) => {
       if (value != null) {
         spanDSL.query.bool.must.push({

@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiSpacer } from '@elastic/eui';
-import { data } from 'jquery';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
