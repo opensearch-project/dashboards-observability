@@ -49,7 +49,9 @@ export function ServiceView(props: ServiceViewProps) {
   const refresh = () => {
     const DSL = filtersToDsl(mode, props.filters, props.query, processTimeStamp(props.startTime, mode), processTimeStamp(props.endTime, mode));
     handleServiceViewRequest(props.serviceName, props.http, DSL, setFields, mode);
-    handleServiceMapRequest(props.http, DSL, mode, setServiceMap, props.serviceName);
+    if (mode === 'data_prepper') {
+      handleServiceMapRequest(props.http, DSL, mode, setServiceMap, props.serviceName);
+    }
   };
 
   useEffect(() => {

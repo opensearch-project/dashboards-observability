@@ -5,6 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiSpacer } from '@elastic/eui';
+import { data } from 'jquery';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
@@ -72,7 +73,7 @@ export function ServicesContent(props: ServicesProps) {
     }
     setFilteredService(newFilteredService);
     if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
-  }, [filters, appConfigs]);
+  }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
