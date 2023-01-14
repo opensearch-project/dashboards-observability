@@ -24,7 +24,7 @@ export function registerVizRoute(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('notebooks', 'visualization', 'count');
+      // addRequestToMetric('notebooks', 'visualization', 'count');
       const params: RequestParams.Search = {
         index: '.kibana',
         size: NOTEBOOKS_FETCH_SIZE,
@@ -44,7 +44,7 @@ export function registerVizRoute(router: IRouter) {
           body: { savedVisualizations: vizResponse },
         });
       } catch (error) {
-        addRequestToMetric('notebooks', 'visualization', error);
+        // addRequestToMetric('notebooks', 'visualization', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,

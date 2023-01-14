@@ -60,6 +60,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -90,6 +91,7 @@ interface CustomPanelViewProps {
   panelId: string;
   page: 'app' | 'operationalPanels';
   http: CoreStart['http'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   pplService: PPLService;
   dslService: DSLService;
   chrome: CoreStart['chrome'];
@@ -103,7 +105,6 @@ interface CustomPanelViewProps {
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
-  onEditClick: (savedVisualizationId: string) => any;
   startTime: string;
   endTime: string;
   setStartTime: any;
@@ -120,6 +121,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     page,
     appId,
     http,
+    DashboardContainerByValueRenderer,
     pplService,
     dslService,
     chrome,
@@ -134,7 +136,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     deleteCustomPanel,
     cloneCustomPanel,
     setToast,
-    onEditClick,
     onAddClick,
   } = props;
   const [openPanelName, setOpenPanelName] = useState('');
@@ -331,6 +332,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   const buildBaseQuery = async () => {
     const indices: string[] = [];
     for (let i = 0; i < panelVisualizations.length; i++) {
+      if (panelVisualizations[i].visualizationType === 'dashboards') return;
+
       const visualizationId = panelVisualizations[i].savedVisualizationId;
       // TODO: create route to get list of visualizations in one call
       const visData: SavedVisualizationType = await fetchVisualizationById(
@@ -443,6 +446,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     flyout = (
       <VisaulizationFlyout
         panelId={panelId}
+        DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
         closeFlyout={closeFlyout}
         pplFilterValue={pplFilterValue}
         start={startTime}
@@ -645,6 +649,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
             )}
             <PanelGrid
               http={http}
+              DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
               panelId={panelId}
               updateAvailabilityVizId={updateAvailabilityVizId}
               chrome={chrome}
@@ -659,7 +664,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
               pplFilterValue={pplFilterValue}
               showFlyout={showFlyout}
               editActionType={editActionType}
-              onEditClick={onEditClick}
             />
           </EuiPageContentBody>
         </EuiPageBody>

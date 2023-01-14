@@ -18,6 +18,7 @@ export interface VisualizationType {
   y: number;
   w: number;
   h: number;
+  visualizationType?: string;
 }
 
 export interface PanelType {

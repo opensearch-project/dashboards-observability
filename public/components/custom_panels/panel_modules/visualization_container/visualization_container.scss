@@ -58,3 +58,28 @@
 .panels-title-text {
   @include euiTextTruncate;
 }
+
+.osd-viz-panel {
+  .euiPanel {
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .react-grid-layout {
+    height: 100% !important;
+    position: unset !important;
+  }
+  .react-grid-item {
+    height: 90% !important;
+    width: unset !important;
+    top: 1vh !important;
+    left: 0.5vw !important;
+    right: 45px !important;
+  }
+  .react-resizable-handle {
+    background-image: none !important;
+    visibility: hidden;
+  }
+  .embPanel__title {
+    font-size: 0.85rem;
+  }
+}
