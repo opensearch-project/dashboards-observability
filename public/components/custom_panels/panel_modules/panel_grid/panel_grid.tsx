@@ -54,7 +54,6 @@ interface PanelGridProps {
   pplService: PPLService;
   startTime: string;
   endTime: string;
-  onEditClick: (savedVisualizationId: string) => any;
   onRefresh: boolean;
   cloneVisualization: (visualzationTitle: string, savedVisualizationId: string) => void;
   pplFilterValue: string;
@@ -76,7 +75,6 @@ export const PanelGrid = (props: PanelGridProps) => {
     pplService,
     startTime,
     endTime,
-    onEditClick,
     onRefresh,
     cloneVisualization,
     pplFilterValue,
@@ -109,7 +107,6 @@ export const PanelGrid = (props: PanelGridProps) => {
           fromTime={startTime}
           toTime={endTime}
           onRefresh={onRefresh}
-          onEditClick={onEditClick}
           cloneVisualization={cloneVisualization}
           pplFilterValue={pplFilterValue}
           showFlyout={showFlyout}

@@ -105,7 +105,6 @@ interface CustomPanelViewProps {
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
-  onEditClick: (savedVisualizationId: string) => any;
   startTime: string;
   endTime: string;
   setStartTime: any;
@@ -137,7 +136,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     deleteCustomPanel,
     cloneCustomPanel,
     setToast,
-    onEditClick,
     onAddClick,
   } = props;
   const [openPanelName, setOpenPanelName] = useState('');
@@ -666,7 +664,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
               pplFilterValue={pplFilterValue}
               showFlyout={showFlyout}
               editActionType={editActionType}
-              onEditClick={onEditClick}
             />
           </EuiPageContentBody>
         </EuiPageBody>

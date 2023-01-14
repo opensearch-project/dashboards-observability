@@ -185,6 +185,7 @@ export function VisualizationsRouter(router: IRouter) {
           panelId: schema.string(),
           savedVisualizationId: schema.string(),
           oldVisualizationId: schema.string(),
+          newVisualizationType: schema.string(),
         }),
       },
     },
@@ -202,7 +203,8 @@ export function VisualizationsRouter(router: IRouter) {
           opensearchNotebooksClient,
           request.body.panelId,
           request.body.savedVisualizationId,
-          request.body.oldVisualizationId
+          request.body.oldVisualizationId,
+          request.body.newVisualizationType
         );
         return response.ok({
           body: {

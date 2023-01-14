@@ -35,6 +35,7 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { DashboardStart } from '../../../../../../../src/plugins/dashboard/public';
+import { uiSettingsService } from '../../../../../common/utils';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -70,7 +71,6 @@ interface Props {
   onRefresh: boolean;
   pplFilterValue: string;
   usedInNotebooks?: boolean;
-  onEditClick: (savedVisualizationId: string) => any;
   cloneVisualization?: (visualzationTitle: string, savedVisualizationId: string) => void;
   showFlyout?: (isReplacement?: boolean | undefined, replaceVizId?: string | undefined) => void;
   removeVisualization?: (visualizationId: string) => void;
@@ -91,7 +91,6 @@ export const VisualizationContainer = ({
   onRefresh,
   pplFilterValue,
   usedInNotebooks,
-  onEditClick,
   cloneVisualization,
   showFlyout,
   removeVisualization,
@@ -113,6 +112,20 @@ export const VisualizationContainer = ({
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
+
+  const onEditObservabilityViz = (savedVisualizationId: string) => {
+    window.location.assign(`#/event_analytics/explorer/${savedVisualizationId}`);
+  };
+
+  const onEditDashboardsViz = (savedVisualizationId: string) => {
+    window.location.assign(
+      uiSettingsService
+        .getBasePath()
+        .prepend(
+          `/app/visualize#/edit/8f4d0c00-4c86-11e8-b3d7-01146121b73d/${savedVisualizationId}`
+        )
+    );
+  };
 
   let modal;
 
@@ -149,7 +162,9 @@ export const VisualizationContainer = ({
       disabled={disablePopover}
       onClick={() => {
         closeActionsMenu();
-        onEditClick(savedVisualizationId);
+        visualizationType === 'dashboards'
+          ? onEditDashboardsViz(savedVisualizationId)
+          : onEditObservabilityViz(savedVisualizationId);
       }}
     >
       Edit

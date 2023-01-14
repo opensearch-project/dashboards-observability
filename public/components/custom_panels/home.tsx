@@ -73,10 +73,6 @@ export const Home = ({
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`#/event_analytics/explorer/${savedVisualizationId}`);
-  };
-
   // Fetches all saved Custom Panels
   const fetchCustomPanels = () => {
     setLoading(true);
@@ -338,7 +334,6 @@ export const Home = ({
               cloneCustomPanel={cloneCustomPanel}
               deleteCustomPanel={deleteCustomPanel}
               setToast={setToast}
-              onEditClick={onEditClick}
               startTime={start}
               endTime={end}
               setStartTime={setStart}

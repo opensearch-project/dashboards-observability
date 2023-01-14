@@ -150,6 +150,7 @@ export const VisaulizationFlyout = ({
             panelId,
             savedVisualizationId: selectedVisOption[0].key,
             oldVisualizationId: replaceVisualizationId,
+            newVisualizationType: selectedVisOption[0].className,
           }),
         })
         .then(async (res) => {
@@ -202,7 +203,6 @@ export const VisaulizationFlyout = ({
         <>
           {timeRange}
           <br />
-          {/* {selectedVisOption[0].key} */}
           <DashboardContainerByValueRenderer
             // key={htmlIdGenerator()()}
             input={createDashboardVizObject(selectedVisOption[0].key, start, end)}
@@ -259,10 +259,6 @@ export const VisaulizationFlyout = ({
     </EuiFlyoutHeader>
   );
 
-  // const onChangeSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   setSelectValue(e.target.value);
-  // };
-
   const emptySavedVisualizations = (
     <EuiCallOut iconType="help">
       <p>No saved visualizations found!</p>
@@ -275,12 +271,6 @@ export const VisaulizationFlyout = ({
         <>
           <EuiSpacer size="s" />
           <EuiFormRow label="Visualization name">
-            {/* <EuiSelect
-              hasNoInitialSelection
-              onChange={(e) => onChangeSelection(e)}
-              options={visualizationOptions}
-              value={selectValue}
-            /> */}
             <EuiComboBox
               placeholder="Find visualization"
               singleSelection={{ asPlainText: true }}
@@ -372,41 +362,7 @@ export const VisaulizationFlyout = ({
       { label: 'Observability Visualizations', options: opt2 },
     ];
     setVisOptions(allVisualizations);
-
-    // const selectedObject = _.filter([...opt1, ...opt2], {
-    //   key: para.visSavedObjId,
-    // });
-    // if (selectedObject.length > 0) {
-    //   setVisType(selectedObject.className);
-    //   setSelectedVisOption(selectedObject);
-    // }
   };
-
-  // // Fetch all saved visualizations
-  // const fetchSavedVisualizations = async () => {
-  //   return http
-  //     .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
-  //     .then((res) => {
-  //       if (res.visualizations.length > 0) {
-  //         setSavedVisualizations(res.visualizations);
-  //         const filterAppVis = res.visualizations.filter((vis: SavedVisualizationType) => {
-  //           return appId
-  //             ? vis.hasOwnProperty('application_id')
-  //               ? vis.application_id === appId
-  //               : false
-  //             : !vis.hasOwnProperty('application_id');
-  //         });
-  //         setVisualizationOptions(
-  //           filterAppVis.map((visualization: SavedVisualizationType) => {
-  //             return { value: visualization.id, text: visualization.name };
-  //           })
-  //         );
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.error('Issue in fetching the operational panels', err);
-  //     });
-  // };
 
   useEffect(() => {
     const previewTemplate = (
