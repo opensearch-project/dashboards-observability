@@ -10,7 +10,7 @@
     "cypress:run": "TZ=America/Los_Angeles cypress run",
     "cypress:open": "TZ=America/Los_Angeles cypress open",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
-    "postinstall": "husky install && antlr4ts -visitor ./common/query_manager/antlr/grammar/OpenSearchPPLLexer.g4 -Xexact-output-dir -o ./common/query_manager/antlr/output && antlr4ts -visitor ./common/query_manager/antlr/grammar/OpenSearchPPLParser.g4 -Xexact-output-dir -o ./common/query_manager/antlr/output",
+    "prepare": "husky install",
     "lint:es": "node ../../scripts/eslint",
     "lint": "yarn lint:es"
   },
