@@ -9,7 +9,16 @@
     "test": "../../node_modules/.bin/jest --config ./test/jest.config.js",
     "cypress:run": "TZ=America/Los_Angeles cypress run",
     "cypress:open": "TZ=America/Los_Angeles cypress open",
-    "plugin-helpers": "node ../../scripts/plugin_helpers"
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "prepare": "husky install",
+    "lint:es": "node ../../scripts/eslint",
+    "lint": "yarn lint:es"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "yarn lint --fix",
+      "git add"
+    ]
   },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.4.1",
@@ -36,7 +45,9 @@
     "antlr4ts-cli": "^0.5.0-alpha.4",
     "cypress": "^5.0.0",
     "eslint": "^6.8.0",
+    "husky": "6.0.0",
     "jest-dom": "^4.0.0",
+    "lint-staged": "^13.1.0",
     "performance-now": "^2.1.0"
   },
   "resolutions": {
@@ -49,5 +60,10 @@
     "json-schema": "^0.4.0",
     "qs": "~6.5.3",
     "minimatch": "^3.0.5"
-  }
+  },
+  "eslintIgnore": [
+    "common/query_manager/antlr/output/*",
+    "node_modules/*",
+    "target/*"
+  ]
 }
