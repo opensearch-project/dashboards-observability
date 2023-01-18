@@ -6,6 +6,7 @@
 import './search.scss';
 
 import React, { useState } from 'react';
+import { isEqual } from 'lodash';
 import {
   EuiFlexGroup,
   EuiButton,
@@ -16,7 +17,7 @@ import {
   EuiBadge,
   EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut
+  EuiCallOut,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
@@ -26,6 +27,7 @@ import { PPLReferenceFlyout } from '../helpers';
 import { uiSettingsService } from '../../../../common/utils';
 import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
+import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -68,7 +70,6 @@ export const Search = (props: any) => {
     showSavePanelOptionsList,
     showSaveButton = true,
     handleTimeRangePickerRefresh,
-    liveTailButton,
     isLiveTailPopoverOpen,
     closeLiveTailPopover,
     popoverItems,
@@ -84,14 +85,9 @@ export const Search = (props: any) => {
     liveTailName,
     searchError = null,
     curVisId,
-    spanValue,
     setSubType,
-    metricMeasure,
-    setMetricMeasure,
-    setMetricLabel,
-    metricChecked,
   } = props;
-  
+
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -221,15 +217,12 @@ export const Search = (props: any) => {
                   showOptionList={
                     showSavePanelOptionsList &&
                     searchBarConfigs[selectedSubTabId]?.showSavePanelOptionsList
-                    
                   }
                   curVisId={curVisId}
-                  spanValue={spanValue}
                   setSubType={setSubType}
-                  metricMeasure={metricMeasure}
-                  setMetricMeasure={setMetricMeasure}
-                  setMetricLabel={setMetricLabel}
-                  metricChecked={metricChecked}
+                  isSaveAsMetricEnabled={
+                    isEqual(curVisId, 'line') && tempQuery.match(PPL_SPAN_REGEX) !== null
+                  }
                 />
                 <EuiPopoverFooter>
                   <EuiFlexGroup justifyContent="flexEnd">
@@ -262,17 +255,19 @@ export const Search = (props: any) => {
           </>
         )}
       </EuiFlexGroup>
-      { searchError && searchError.error && (
+      {searchError && searchError.error && (
         <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
           <EuiFlexItem>
-            <EuiCallOut title={JSON.parse(searchError.message).error.reason} color="danger" iconType="alert">
-              <p>
-                {JSON.parse(searchError.message).error.details}
-              </p>
+            <EuiCallOut
+              title={JSON.parse(searchError.message).error.reason}
+              color="danger"
+              iconType="alert"
+            >
+              <p>{JSON.parse(searchError.message).error.details}</p>
             </EuiCallOut>
           </EuiFlexItem>
-        </EuiFlexGroup>)
-      }
+        </EuiFlexGroup>
+      )}
       {flyout}
     </div>
   );

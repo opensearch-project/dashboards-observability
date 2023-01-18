@@ -78,7 +78,6 @@ export const querySearch = (query, rangeSelected) => {
     .type(query, { delay: 50 });
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.get(rangeSelected).click();
-  cy.wait(delay * 2);
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
 };
 

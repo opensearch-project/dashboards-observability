@@ -4,21 +4,17 @@
  */
 
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   EuiTitle,
   EuiComboBox,
   EuiFormRow,
-  EuiSpacer,
   EuiFieldText,
   EuiSwitch,
   EuiToolTip,
-  EuiSelect,
 } from '@elastic/eui';
 import { useEffect } from 'react';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import SavedObjects from '../../../../services/saved_objects/event_analytics/saved_objects';
-import { UNITS_OF_MEASURE } from '../../../../../common/constants/explorer';
 
 interface ISavedPanelProps {
   selectedOptions: any;
@@ -28,12 +24,8 @@ interface ISavedPanelProps {
   savePanelName: string;
   showOptionList: boolean;
   curVisId: string;
-  spanValue: boolean;
   setSubType: any;
-  metricMeasure: string;
-  setMetricMeasure: any;
-  setMetricLabel: any;
-  metricChecked: boolean;
+  isSaveAsMetricEnabled: boolean;
 }
 
 interface CustomPanelOptions {
@@ -50,59 +42,36 @@ export const SavePanel = ({
   savedObjects,
   savePanelName,
   showOptionList,
-  curVisId,
-  spanValue,
   setSubType,
-  metricMeasure,
-  setMetricMeasure,
-  setMetricLabel,
-  metricChecked,
+  isSaveAsMetricEnabled,
 }: ISavedPanelProps) => {
   const [options, setOptions] = useState([]);
   const [checked, setChecked] = useState(false);
-  const [measure, setMeasure] = useState('');
-  const [label, setLabel] = useState([]);
+  const [svpnlError, setSvpnlError] = useState(null);
 
-  const getCustomPabnelList = async (savedObjects: SavedObjects) => {
-    const optionRes = await savedObjects
+  const getCustomPabnelList = async (svobj: SavedObjects) => {
+    const optionRes = await svobj
       .fetchCustomPanels()
       .then((res: any) => {
         return res;
       })
-      .catch((error: any) => console.error(error));
+      .catch((error: any) => setSvpnlError(error));
     setOptions(optionRes?.panels || []);
   };
 
   useEffect(() => {
     getCustomPabnelList(savedObjects);
-  }, []);
+  });
 
   const onToggleChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setChecked(e.target.checked);
     if (e.target.checked) {
-      setSubType("metric")
+      setSubType('metric');
     } else {
-      setSubType("visualization")
+      setSubType('visualization');
     }
   };
 
-  const onMeasureChange = (selectedMeasures: string) => {
-    setMeasure(selectedMeasures);
-    setMetricMeasure(selectedMeasures);
-  };
-
-  const onLabelChange = (selectedLabels: React.SetStateAction<never[]>) => {
-    setLabel(selectedLabels);
-    setMetricLabel(selectedLabels);
-  };
-
-  useEffect(() => {
-    if (metricChecked) {
-      setChecked(true);
-      setMeasure(metricMeasure);
-    }
-  }, [])
-  
   return (
     <>
       {showOptionList && (
@@ -113,8 +82,8 @@ export const SavePanel = ({
           <EuiFormRow helpText="Search existing dashboards or applications by name">
             <EuiComboBox
               placeholder="Select dashboards/applications"
-              onChange={(options) => {
-                handleOptionChange(options);
+              onChange={(daOptions) => {
+                handleOptionChange(daOptions);
               }}
               selectedOptions={selectedOptions}
               options={options.map((option: CustomPanelOptions) => {
@@ -146,18 +115,17 @@ export const SavePanel = ({
       {showOptionList && (
         <>
           <EuiFormRow display="columnCompressedSwitch">
-          <EuiToolTip
-          content="Only Time Series visualization and a query including stats/span can be saved as Metric" >
-            <EuiSwitch
-              showLabel={true}
-              label="Save as Metric"
-              checked={checked}
-              onChange={onToggleChange}
-              compressed
-              disabled = {!((isEqual(curVisId, 'line')) && spanValue)}
-            />
-          </EuiToolTip>
-          </EuiFormRow>        
+            <EuiToolTip content="Only Time Series visualization and a query including stats/span can be saved as Metric">
+              <EuiSwitch
+                showLabel={true}
+                label="Save as Metric"
+                checked={checked}
+                onChange={onToggleChange}
+                compressed
+                disabled={!isSaveAsMetricEnabled}
+              />
+            </EuiToolTip>
+          </EuiFormRow>
         </>
       )}
     </>

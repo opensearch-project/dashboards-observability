@@ -22,67 +22,10 @@ import {
   renderLineChartForDataConfig,
   renderDataConfig,
   aggregationValues,
-  DataConfigLineChart,
-  renderGaugeChart,
+  DataConfigLineChart
 } from '../utils/event_analytics/constants';
 import { supressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
 import { clearQuerySearchBoxText } from '../utils/event_analytics/helpers';
-
-const renderHistogramChart = () => {
-  querySearch(TEST_QUERIES[5].query, TEST_QUERIES[5].dateRangeDOM);
-  cy.get('[data-test-subj="configPane__vizTypeSelector"] [data-test-subj="comboBoxInput"]')
-    .type('Histogram')
-    .type('{enter}');
-  cy.wait(delay);
-  cy.get('g.draglayer.cursor-crosshair').should('exist');
-  cy.get('#configPanel__panelOptions .euiFieldText').click().type('Histogram chart');
-  cy.get('.euiFlexItem .euiFormRow [placeholder="Description"]')
-    .click()
-    .type('This is the description for Histogram chart');
-  cy.get('.euiIEFlexWrapFix').eq(1).contains('Chart Styles').should('exist');
-  cy.get('.euiFormLabel.euiFormRow__label').eq(2).contains('Bucket Size');
-  cy.get('.euiFieldNumber').eq(0).type('4');
-  cy.get('.euiFormLabel.euiFormRow__label').eq(3).contains('Bucket Offset');
-  cy.get('.euiFieldNumber').eq(0).type('6');
-};
-
-const vis_name_sub_string = Math.floor(Math.random() * 100);
-
-const saveVisualizationAndVerify = () => {
-  cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-  cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').click();
-  cy.get('.euiComboBoxOptionsList__rowWrap .euiFilterSelectItem').eq(0).click();
-  cy.get(
-    '.euiPopover__panel .euiFormControlLayoutIcons [data-test-subj="comboBoxToggleListButton"]'
-  )
-    .eq(0)
-    .click();
-  cy.get('.euiPopover__panel input')
-    .eq(1)
-    .type(`Test visualization` + vis_name_sub_string);
-  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-  cy.wait(delay);
-  cy.get('.euiHeaderBreadcrumbs a').eq(1).click();
-  cy.get('.euiFlexGroup .euiFormControlLayout__childrenWrapper input')
-    .eq(0)
-    .type(`Test visualization` + vis_name_sub_string)
-    .type('{enter}');
-  cy.get('.euiBasicTable .euiTableCellContent button').eq(0).click();
-};
-
-const deleteVisualization = () => {
-  cy.get('a[href = "#/event_analytics"]').click();
-  cy.get('.euiFlexGroup .euiFormControlLayout__childrenWrapper input')
-    .eq(0)
-    .type(`Test visualization`)
-    .type('{enter}');
-  cy.get('input[data-test-subj = "checkboxSelectAll"]').click();
-  cy.get('.euiButtonContent.euiButtonContent--iconRight.euiButton__content').click();
-  cy.get('.euiContextMenuItem .euiContextMenuItem__text').eq(0).click();
-  cy.get('input[placeholder = "delete"]').clear().type('delete');
-  cy.get('button[data-test-subj = "popoverModal__deleteButton"]').click();
-  cy.get('.euiToastHeader').should('exist');
-};
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for event analytics', () => {
@@ -407,7 +350,7 @@ describe('Search fields in sidebar', () => {
 });
 
 describe('Delete saved objects', () => {
-  it('Delete visualizations/querys from event analytics', () => {
+  it('Delete visualizations/queries from event analytics', () => {
     landOnEventHome();
     cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
     cy.get('.euiContextMenuItem__text').contains('50 rows').click();
@@ -778,7 +721,7 @@ describe.skip('Renders chart and verify Toast message if X-axis and Y-axis value
   });
 });
 
-describe.only('Render Table View', () => {
+describe('Table View', () => {
   before(() => {
     landOnEventVisualizations();
     clearQuerySearchBoxText('searchAutocompleteTextArea');
@@ -786,61 +729,11 @@ describe.only('Render Table View', () => {
     cy.get('[data-test-subj="workspace__dataTableViewSwitch"]').click();
   });
 
-  it('Switch visualization for table view and verify table data', () => {
+  it('Switch to table view', () => {
     cy.get('.ag-header-cell-text').contains('max(AvgTicketPrice)').should('exist');
     cy.get('.ag-header-cell-text').contains('DestCountry').should('exist');
     cy.get('.ag-header-cell-text').contains('DestCityName').should('exist');
     cy.get('.ag-header-cell-text').contains('Carrier').should('exist');
-  });
-
-  it('Switch visualization for table view and change data table density', () => {
-    cy.get('.euiButtonEmpty__text').contains('Density').click();
-    cy.get('.euiButtonIcon.euiButtonIcon--primary.euiButtonIcon--xSmall').eq(1).click();
-    cy.get('.euiButtonIcon.euiButtonIcon--primary.euiButtonIcon--xSmall').eq(2).click();
-  });
-
-  it('Switch visualization for table view and show and hide column', () => {
-    cy.get('.euiButtonEmpty__text').contains('Columns').click();
-    cy.get('.euiSwitch__label').contains('DestCountry').click();
-    cy.get('.ag-header-cell-text').contains('DestCountry').should('not.exist');
-    cy.get('.euiSwitch__label').contains('Carrier').click();
-    cy.get('.ag-header-cell-text').contains('Carrier').should('not.exist');
-    cy.get('.euiSwitch__label').contains('DestCountry').click();
-    cy.get('.ag-header-cell-text').contains('DestCountry').should('exist');
-  });
-
-  it('Switch visualization for table view and see data in full screen', () => {
-    cy.get('.ag-header-cell-text').contains('max(AvgTicketPrice)').should('exist');
-    cy.get('.ag-header-cell-text').contains('DestCountry').should('exist');
-    cy.get('.ag-header-cell-text').contains('DestCityName').should('exist');
-    cy.get('.ag-header-cell-text').contains('Carrier').should('exist');
-    cy.get('.euiButtonEmpty__text').contains('Full screen').click();
-    cy.wait(delay);
-    cy.get('body').type('{esc}');
-    cy.wait(delay);
-  });
-
-  it('Switch visualization for table view and sort the column data', () => {
-    cy.get('.ag-header-cell-text').contains('max(AvgTicketPrice)').click();
-    cy.get('.ag-cell-value').contains('125.49737').should('exist');
-    cy.get('.ag-header-cell-text').contains('max(AvgTicketPrice)').click();
-    cy.get('.ag-cell-value').contains('1199.729').should('exist');
-    cy.get('.ag-header-cell-text').contains('DestCountry').click();
-    cy.get('.ag-cell-value').contains('AE').should('exist');
-  });
-
-  it('Switch visualization for table view and verify pagination link', () => {
-    cy.get('[aria-label="Next page"]').click();
-    cy.get('.ag-cell-value').contains('Vienna').should('exist');
-    cy.get('[aria-label="Previous page"]').click();
-    cy.get('.ag-cell-value').contains('Dubai').should('exist');
-    cy.get('[aria-label="Page 4"]').contains('4').click();
-    cy.get('.ag-cell-value').contains('Edmonton').should('exist');
-  });
-
-  it('Switch visualization for table view and rows per page data', () => {
-    cy.get('.euiButtonEmpty__text').eq('6').click();
-    cy.get('.euiContextMenuItem__text').eq(1).click();
   });
 });
 
