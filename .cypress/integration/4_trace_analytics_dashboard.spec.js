@@ -201,12 +201,12 @@ describe('Latency by trace group table', () =>{
   it('Verify columns in Latency by trace group table along with pagination functionality', () => {
     cy.get('span.panel-title').eq(0).should('exist');
     cy.wait(delay);
-    cy.get('span[title="Trace group name"]').should('exist');
-    cy.get('span[title="Latency variance (ms)"]').should('exist');
-    cy.get('span[title="Average latency (ms)"]').should('exist');
-    cy.get('span[title="24-hour latency trend"]').should('exist');
-    cy.get('span[title="Error rate"] .euiToolTipAnchor').should('exist');
-    cy.get('span[title="Traces"] .euiToolTipAnchor').should('exist');
+    cy.get('[data-test-subj="tableHeaderCell_dashboard_trace_group_name_0"]').should('exist');
+    cy.get('[data-test-subj="tableHeaderCell_dashboard_latency_variance_1"]').should('exist');
+    cy.get('[data-test-subj="tableHeaderCell_dashboard_average_latency_2"]').should('exist');
+    cy.get('[data-test-subj="tableHeaderCell_24_hour_latency_trend_3"]').should('exist');
+    cy.get('[data-test-subj="tableHeaderCell_dashboard_error_rate_4"]').should('exist');
+    cy.get('[data-test-subj="tableHeaderCell_dashboard_traces_5"]').should('exist');
     cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
     cy.get('.euiIcon.euiIcon--medium.euiIcon--inherit.euiContextMenu__icon').eq(0).should('exist').click();
     cy.get('[data-test-subj="pagination-button-next"]').should('exist').click();
