@@ -181,7 +181,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.contains('analytics-service, frontend-client, recommendation').should('exist');
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     cy.get('.panel-title').contains('Spans').should('exist');
-    cy.get('.panel-title-count').contains('5').should('exist');
+    cy.get('.panel-title-count').contains('8').should('exist');
     verify_traces_spans_data_grid_cols_exists();
   });
 
@@ -189,8 +189,8 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiSwitch.euiSwitch--compressed.euiSwitch--mini .euiSwitch__button').eq(3).click();
-    cy.get('.euiButtonEmpty__text').eq(3).click().should('have.text', '2 columns hidden');
-    count_table_row(5);
+    cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').should('have.text', '2 columns hidden');
+    count_table_row(8);
   });
 
   it('Show all button Spans table', () => {
@@ -231,8 +231,8 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-startTime"]').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-endTime').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-status.code"]').click();
-    cy.get('.euiButtonEmpty__text').eq(5).contains('8 fields sorted').should('exist');
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
+    cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('have.text', '8 fields sorted');
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('exist').click();
   });
 });
@@ -255,15 +255,16 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('[data-test-subj="spanDetailFlyout"] .euiTitle.euiTitle--medium').contains('Span detail').should('exist');
     cy.get('.euiFlyoutBody .panel-title').contains('Overview').should('exist');
     cy.get('.euiTextColor.euiTextColor--subdued').contains('Span ID').should('exist');
-    cy.get('.euiDescriptionList__description .euiFlexItem').eq(0).contains('d03fecfa0f55b77c').should('exist');
+    cy.get('[data-test-subj="parentSpanId"]').contains('d03fecfa0f55b77c').should('exist');
     cy.get('.euiFlyoutBody__overflowContent .panel-title').contains('Span attributes').should('exist');
     cy.get('.euiDescriptionList__description .euiFlexItem').eq(0).trigger('mouseover').click();
     cy.get('[aria-label="span-flyout-filter-icon"]').click();
     cy.get('.euiFlyout__closeButton.euiFlyout__closeButton--inside').click();
-    cy.get('.euiBadge__content .euiBadge__text').contains('spanId: d03fecfa0f55b77c').should('exist');
+    cy.get('.euiBadge__content .euiBadge__text').contains('spanId: 277a5934acf55dcf').should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
-    count_table_row(5);
+    cy.wait(delay);
+    count_table_row(8);
   });
 
   it('Render Spans table and verify Column functionality', () => {

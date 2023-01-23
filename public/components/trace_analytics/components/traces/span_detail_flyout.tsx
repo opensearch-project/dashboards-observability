@@ -91,7 +91,7 @@ export function SpanDetailFlyout(props: {
                 )}
               </EuiCopy>
             </EuiFlexItem>
-            <EuiFlexItem>{span.parentSpanId}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="parentSpanId">{span.parentSpanId}</EuiFlexItem>
           </EuiFlexGroup>
         ) : (
           '-'
@@ -114,7 +114,7 @@ export function SpanDetailFlyout(props: {
         'status.code',
         'Errors',
         span['status.code'] === 2 ? (
-          <EuiText color="danger" size="s" style={{fontWeight: 700}}>
+          <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
         ) : (
@@ -154,13 +154,13 @@ export function SpanDetailFlyout(props: {
         return getListItem(key, key, value);
       });
 
-    const eventsComponent = _.isEmpty(span['events']) ? null : (
+    const eventsComponent = _.isEmpty(span.events) ? null : (
       <>
         <EuiText size="m">
           <span className="panel-title">Event</span>
         </EuiText>
         <EuiCodeBlock language="json" paddingSize="s" isCopyable overflowHeight={400}>
-          {JSON.stringify(span['events'], null, 2)}
+          {JSON.stringify(span.events, null, 2)}
         </EuiCodeBlock>
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
