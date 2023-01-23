@@ -5,15 +5,19 @@
 
 import './index.scss';
 
-import { concat, from } from 'rxjs';
+import { concat, from, Observable } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import {
+  AppCategory,
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '../../../src/core/public';
+import { Home as AppAnalytics } from './components/application_analytics/home';
+
 import {
   observabilityID,
   observabilityPluginOrder,
@@ -23,21 +27,19 @@ import PPLService from './services/requests/ppl';
 import DSLService from './services/requests/dsl';
 import TimestampUtils from './services/timestamp/timestamp';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
-import { AppPluginStartDependencies, ObservabilitySetup, ObservabilityStart } from './types';
+import { AppPluginStartDependencies } from './types';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
-import { DashboardCreatorFn, DashboardListItem } from './types';
-import { fetchPanelsList } from './components/custom_panels/helpers/utils';
+import { DashboardListItem } from './types';
 import { fetchAppsList } from './components/application_analytics/helpers/utils';
-import { fetchNotebooksList } from './components/notebooks/components/helpers/utils';
 import { QueryManager } from '../common/query_manager';
 import { DashboardSetup } from '../../../src/plugins/dashboard/public';
 
-export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
+export class ObservabilityPlugin {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): ObservabilitySetup {
+  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
     uiSettingsService.init(core.uiSettings, core.notifications);
 
     // redirect legacy notebooks URL to current URL under observability
@@ -51,49 +53,16 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     }
 
     // Fetches all saved Applications
-    const fetchApplicationAnalytics = () => {
+    const fetchApplicationAnalytics: (
+      search?: string,
+      size?: number
+    ) => Observable<DashboardListItem> = () => {
       return from(fetchAppsList(core.http)).pipe(
         map(convertAppAnalyticToDashboardListItem),
         catchError((err) => {
-          console.error('Issue in fetching the app analytics list', err);
           return from([]);
         })
       );
-    };
-
-    // Fetches all saved Custom Panels
-    const fetchObservabilityPanels = () => {
-      return from(fetchPanelsList(core.http)).pipe(
-        mergeMap((item) => item),
-        map(convertPanelToDashboardListItem),
-        catchError((err) => {
-          console.error('Issue in fetching the operational panels', err);
-          return from([]);
-        })
-      );
-    };
-
-    // Fetches all saved Custom Panels
-    const fetchNotebooks = () => {
-      return from(fetchNotebooksList(core.http)).pipe(
-        mergeMap((item) => item),
-        map(convertNotebookToDashboardListItem),
-        catchError((err) => {
-          console.error('Issue in fetching the notebooks', err);
-          return from([]);
-        })
-      );
-    };
-
-    const convertPanelToDashboardListItem = (item: any): DashboardListItem => {
-      return {
-        id: item.id,
-        title: item.name,
-        type: 'Observability Panel',
-        description: '...',
-        url: `observability-dashboards#/operational_panels/${item.id}`,
-        listType: 'observabiliity-panel',
-      };
     };
 
     const convertAppAnalyticToDashboardListItem = (item: any): DashboardListItem => {
@@ -103,71 +72,19 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
         type: 'Observability Application',
         description: item.description,
         url: `observability-dashboards#/application_analytics/${item.id}`,
+        editUrl: `observability-dashboards#/application_analytics/${item.id}`,
+        deleteUrl: undefined,
         listType: 'observability-application',
+        updated_at: item.dateModified,
       };
     };
 
-    const convertNotebookToDashboardListItem = (item: any): DashboardListItem => {
-      return {
-        id: item.id,
-        title: item.path,
-        type: 'Notebook',
-        description: '...',
-        url: `observability-dashboards#/notebooks/${item.id}`,
-        listType: 'observability-notebook',
-      };
-    };
-
-    const id: string = this.initializerContext.opaqueId.description!;
-
-    const dashboardAppAnalytics = fetchApplicationAnalytics();
-    const dashboardObservabilityPanels = fetchObservabilityPanels();
-    const dashboardNotebooks = fetchNotebooks();
-    const combinedDashboardList = concat(
-      dashboardAppAnalytics,
-      dashboardObservabilityPanels,
-      dashboardNotebooks
-    );
-
-    const createAppAnalytics: DashboardCreatorFn = (_history) => {
-      return (event: MouseEvent) =>
-        (window.location.href = core.http.basePath.prepend(
-          '/app/observability-dashboards#/application_analytics/create'
-        ));
-    };
-
-    //
-    // const createNotebook: DashboardCreatorFn = () => {
-    //   window.location = core.http.basePath.prepend(
-    //     '/app/observability-dashboards#/notebooks/create'
-    //   );
-    // };
-    //
-    // const createPanel: DashboardCreatorFn = () => {
-    //   window.location = core.http.basePath.prepend(
-    //     '/app/observability-dashboards#/operational_panels/create'
-    //   );
-    // };
-
-    dashboard.registerDashboardListSource(id, () => combinedDashboardList);
-    //
-    // dashboard.registerDashboardItemCreator({
-    //   id: 'observaility-notebook',
-    //   defaultText: 'Notebook',
-    //   creatorFn: createNotebook,
-    // });
-
-    dashboard.registerDashboardItemCreator({
-      id: 'observaility-application',
-      defaultText: 'Observability App',
-      creatorFn: createAppAnalytics,
+    dashboard.registerDashboardProvider({
+      id: 'observability-application',
+      listItemsFn: fetchApplicationAnalytics,
+      createLinkText: 'Observability Application',
+      createUrl: '/app/observability-dashboards#/application_analytics/create',
     });
-    //
-    // dashboard.registerDashboardItemCreator({
-    //   id: 'observaility-panel',
-    //   defaultText: 'Operational Panel',
-    //   creatorFn: createPanel,
-    // });
 
     core.application.register({
       id: observabilityID,
@@ -202,7 +119,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     // Return methods that should be available to other plugins
     return {};
   }
-  public start(core: CoreStart): ObservabilityStart {
+  public start(core: CoreStart): {} {
     return {};
   }
   public stop() {}

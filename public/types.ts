@@ -35,7 +35,10 @@ export interface DashboardListItem {
   type: string; // item type display string
   description: string; // item description
   url: string; // redirect url to item detail
-  listType: string; // item type key
+  editUrl: string; // redirect url to item edit
+  deleteUrl?: string; // redirect url to item delete
+  listType: string; // item type key,
+  updated_at: number | string; // last-modified time of item
 }
 
 export type DashboardListItems = DashboardListItem[];
