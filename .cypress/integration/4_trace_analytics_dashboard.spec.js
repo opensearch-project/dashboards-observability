@@ -5,9 +5,9 @@
 
 /// <reference types="cypress" />
 
-import { testDataSet, delay, setTimeFilter } from '../utils/constants';
+import { testDataSet, delay, setTimeFilter, jaegerTestDataSet } from '../utils/constants';
 
-describe('Dump test data', () => {
+describe('Dump data prepper test data', () => {
   it('Indexes test data', () => {
     const dumpDataSet = (mapping_url, data_url, index) => {
       cy.request({
@@ -65,197 +65,256 @@ describe('Dump test data', () => {
   });
 });
 
-describe('Testing dashboard table empty state', () => {
-  beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
-      onBeforeLoad: (win) => {
-        win.sessionStorage.clear();
-      },
-    });
-    cy.wait(delay * 3);
-  });
+// describe('Dump jaeger test data', () => {
+//   it('Indexes test data', () => {
+//     const dumpDataSet = (mapping_url, data_url, index) => {
+//       cy.request({
+//         method: 'POST',
+//         failOnStatusCode: false,
+//         url: 'api/console/proxy',
+//         headers: {
+//           'content-type': 'application/json;charset=UTF-8',
+//           'osd-xsrf': true,
+//         },
+//         qs: {
+//           path: `${index}`,
+//           method: 'PUT',
+//         },
+//       });
 
-  it('Renders empty state', () => {
-    cy.contains(' (0)').should('exist');
-    cy.contains('No matches').should('exist');
-  });
-});
+//       cy.request(mapping_url).then((response) => {
+//         cy.request({
+//           method: 'POST',
+//           form: true,
+//           url: 'api/console/proxy',
+//           headers: {
+//             'content-type': 'application/json;charset=UTF-8',
+//             'osd-xsrf': true,
+//           },
+//           qs: {
+//             path: `${index}/_mapping`,
+//             method: 'POST',
+//           },
+//           body: response.body,
+//         });
+//       });
 
-describe('Testing dashboard table', () => {
-  beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
-      onBeforeLoad: (win) => {
-        win.sessionStorage.clear();
-      },
-    });
-    setTimeFilter();
-  });
+//       cy.request(data_url).then((response) => {
+//         cy.request({
+//           method: 'POST',
+//           form: true,
+//           url: 'api/console/proxy',
+//           headers: {
+//             'content-type': 'application/json;charset=UTF-8',
+//             'osd-xsrf': true,
+//           },
+//           qs: {
+//             path: `${index}/_bulk`,
+//             method: 'POST',
+//           },
+//           body: response.body,
+//         });
+//       });
+//     };
 
-  it('Renders the dashboard table', () => {
-    cy.contains(' (10)').should('exist');
-    cy.contains('client_cancel_order').should('exist');
-    cy.contains('166.44').should('exist');
-    cy.contains('7.14%').should('exist');
-  });
+//     jaegerTestDataSet.forEach(({ mapping_url, data_url, index }) =>
+//       dumpDataSet(mapping_url, data_url, index)
+//     );
+//   });
+// });
 
-  it('Has working breadcrumbs', () => {
-    cy.get('.euiBreadcrumb').contains('Dashboard').click();
-    cy.wait(delay);
-    cy.get('.euiTitle').contains('Dashboard').should('exist');
-    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
-    cy.wait(delay);
-    cy.get('.euiTitle').contains('Dashboard').should('exist');
-    cy.get('.euiBreadcrumb').contains('Observability').click();
-    cy.wait(delay);
-    cy.get('.euiTitle').contains('Event analytics').should('exist');
-  });
+// describe('Testing dashboard table empty state', () => {
+//   beforeEach(() => {
+//     cy.visit('app/observability-dashboards#/trace_analytics/home', {
+//       onBeforeLoad: (win) => {
+//         win.sessionStorage.clear();
+//       },
+//     });
+//     cy.wait(delay * 3);
+//   });
 
-  it('Adds the percentile filters', () => {
-    cy.contains(' >= 95 percentile').click({ force: true });
-    cy.wait(delay);
-    cy.contains(' >= 95 percentile').click({ force: true });
-    cy.wait(delay);
+//   it('Renders empty state', () => {
+//     cy.contains(' (0)').should('exist');
+//     cy.contains('No matches').should('exist');
+//   });
+// });
 
-    cy.contains('Latency percentile within trace group: >= 95th').should('exist');
-    cy.contains(' (7)').should('exist');
-    cy.contains('318.69').should('exist');
+// describe('Testing dashboard table', () => {
+//   beforeEach(() => {
+//     cy.visit('app/observability-dashboards#/trace_analytics/home', {
+//       onBeforeLoad: (win) => {
+//         win.sessionStorage.clear();
+//       },
+//     });
+//     setTimeFilter();
+//   });
 
-    cy.contains(' < 95 percentile').click({ force: true });
-    cy.wait(delay);
-    cy.contains(' < 95 percentile').click({ force: true });
-    cy.wait(delay);
+//   it('Renders the dashboard table', () => {
+//     cy.contains(' (10)').should('exist');
+//     cy.contains('client_cancel_order').should('exist');
+//     cy.contains('166.44').should('exist');
+//     cy.contains('7.14%').should('exist');
+//   });
 
-    cy.contains('Latency percentile within trace group: < 95th').should('exist');
-    cy.contains(' (8)').should('exist');
-    cy.contains('383.05').should('exist');
-  });
+//   it('Has working breadcrumbs', () => {
+//     cy.get('.euiBreadcrumb').contains('Dashboard').click();
+//     cy.wait(delay);
+//     cy.get('.euiTitle').contains('Dashboard').should('exist');
+//     cy.get('.euiBreadcrumb').contains('Trace analytics').click();
+//     cy.wait(delay);
+//     cy.get('.euiTitle').contains('Dashboard').should('exist');
+//     cy.get('.euiBreadcrumb').contains('Observability').click();
+//     cy.wait(delay);
+//     cy.get('.euiTitle').contains('Event analytics').should('exist');
+//   });
 
-  it('Opens latency trend popover', () => {
-    setTimeFilter(true);
-    cy.get('.euiButtonIcon[aria-label="Open popover"]').first().click();
-    cy.get('text.ytitle[data-unformatted="Hourly latency (ms)"]').should('exist');
-  });
+//   it('Adds the percentile filters', () => {
+//     cy.contains(' >= 95 percentile').click({ force: true });
+//     cy.wait(delay);
+//     cy.contains(' >= 95 percentile').click({ force: true });
+//     cy.wait(delay);
 
-  it('Redirects to traces table with filter', () => {
-    cy.wait(delay * 5);
-    cy.get('.euiLink').contains('13').click();
-    cy.wait(delay);
+//     cy.contains('Latency percentile within trace group: >= 95th').should('exist');
+//     cy.contains(' (7)').should('exist');
+//     cy.contains('318.69').should('exist');
 
-    cy.get('h2.euiTitle').contains('Traces').should('exist');
-    cy.contains(' (13)').should('exist');
-    cy.contains('client_create_order').should('exist');
+//     cy.contains(' < 95 percentile').click({ force: true });
+//     cy.wait(delay);
+//     cy.contains(' < 95 percentile').click({ force: true });
+//     cy.wait(delay);
 
-    cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
-    cy.wait(delay);
+//     cy.contains('Latency percentile within trace group: < 95th').should('exist');
+//     cy.contains(' (8)').should('exist');
+//     cy.contains('383.05').should('exist');
+//   });
 
-    cy.contains('client_create_order').should('exist');
-  });
-});
+//   it('Opens latency trend popover', () => {
+//     setTimeFilter(true);
+//     cy.get('.euiButtonIcon[aria-label="Open popover"]').first().click();
+//     cy.get('text.ytitle[data-unformatted="Hourly latency (ms)"]').should('exist');
+//   });
 
-describe('Testing plots', () => {
-  beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
-      onBeforeLoad: (win) => {
-        win.sessionStorage.clear();
-      },
-    });
-    setTimeFilter();
-  });
+//   it('Redirects to traces table with filter', () => {
+//     cy.wait(delay * 5);
+//     cy.get('.euiLink').contains('13').click();
+//     cy.wait(delay);
 
-  it('Renders service map', () => {
-    // plotly scale texts are in attribute "data-unformatted"
-    cy.get('text.ytitle[data-unformatted="Latency (ms)"]').should('exist');
-    cy.get('text[data-unformatted="200"]').should('exist');
-    cy.get('.vis-network').should('exist');
+//     cy.get('h2.euiTitle').contains('Traces').should('exist');
+//     cy.contains(' (13)').should('exist');
+//     cy.contains('client_create_order').should('exist');
 
-    cy.get('.euiButton__text[title="Error rate"]').click();
-    cy.get('text.ytitle[data-unformatted="Error rate"]').should('exist');
-    cy.get('text[data-unformatted="10%"]').should('exist');
+//     cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
+//     cy.wait(delay);
 
-    cy.get('.euiButton__text[title="Throughput"]').click();
-    cy.get('text.ytitle[data-unformatted="Throughput"]').should('exist');
-    cy.get('text[data-unformatted="50"]').should('exist');
+//     cy.contains('client_create_order').should('exist');
+//   });
+// });
 
-    cy.get('input[type="search"]').eq(1).focus().type('payment{enter}');
-    cy.wait(delay);
-  });
+// describe('Testing plots', () => {
+//   beforeEach(() => {
+//     cy.visit('app/observability-dashboards#/trace_analytics/home', {
+//       onBeforeLoad: (win) => {
+//         win.sessionStorage.clear();
+//       },
+//     });
+//     setTimeFilter();
+//   });
 
-  it('Renders plots', () => {
-    cy.get('text.ytitle[data-unformatted="Error rate (%)"]').should('exist');
-    cy.get('text.annotation-text[data-unformatted="Now: 14.81%"]').should('exist');
-    cy.get('text.ytitle[data-unformatted="Throughput (n)"]').should('exist');
-    cy.get('text.annotation-text[data-unformatted="Now: 108"]').should('exist');
-  });
-});
+//   it('Renders service map', () => {
+//     // plotly scale texts are in attribute "data-unformatted"
+//     cy.get('text.ytitle[data-unformatted="Latency (ms)"]').should('exist');
+//     cy.get('text[data-unformatted="200"]').should('exist');
+//     cy.get('.vis-network').should('exist');
 
-describe('Latency by trace group table', () =>{
-  beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
-      onBeforeLoad: (win) => {
-        win.sessionStorage.clear();
-      },
-    });
-    setTimeFilter();
-  });
+//     cy.get('.euiButton__text[title="Error rate"]').click();
+//     cy.get('text.ytitle[data-unformatted="Error rate"]').should('exist');
+//     cy.get('text[data-unformatted="10%"]').should('exist');
 
-  it('Verify columns in Latency by trace group table along with pagination functionality', () => {
-    cy.get('span.panel-title').eq(0).should('exist');
-    cy.wait(delay);
-    cy.get('[data-test-subj="tableHeaderCell_dashboard_trace_group_name_0"]').should('exist');
-    cy.get('[data-test-subj="tableHeaderCell_dashboard_latency_variance_1"]').should('exist');
-    cy.get('[data-test-subj="tableHeaderCell_dashboard_average_latency_2"]').should('exist');
-    cy.get('[data-test-subj="tableHeaderCell_24_hour_latency_trend_3"]').should('exist');
-    cy.get('[data-test-subj="tableHeaderCell_dashboard_error_rate_4"]').should('exist');
-    cy.get('[data-test-subj="tableHeaderCell_dashboard_traces_5"]').should('exist');
-    cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
-    cy.get('.euiIcon.euiIcon--medium.euiIcon--inherit.euiContextMenu__icon').eq(0).should('exist').click();
-    cy.get('[data-test-subj="pagination-button-next"]').should('exist').click();
-    cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').contains('mysql').should('exist');
-  });
+//     cy.get('.euiButton__text[title="Throughput"]').click();
+//     cy.get('text.ytitle[data-unformatted="Throughput"]').should('exist');
+//     cy.get('text[data-unformatted="50"]').should('exist');
 
-  it('Sorts the Latency by trace group table', () => {
-    cy.get('span[title*="Trace group name"]').click();
-    cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]').eq(0).contains('/**').should('exist');
-    cy.wait(delay);
-  });
+//     cy.get('input[type="search"]').eq(1).focus().type('payment{enter}');
+//     cy.wait(delay);
+//   });
 
-  it('Verify tooltips in Latency by trace group table', () => {
-    cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(0).trigger('mouseover');
-    cy.contains('Traces of all requests that share a common API and operation at the start of distributed tracing instrumentation.').should('be.visible');
-    cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(1).trigger('mouseover');
-    cy.contains('Range of latencies for traces within a trace group in the selected time range.').should('be.visible');
-    cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(2).trigger('mouseover');
-    cy.contains('Average latency of traces within a trace group in the selected time range.').should('be.visible');
-    cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(3).trigger('mouseover');
-    cy.contains('24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.').should('be.visible');
-    cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(4).trigger('mouseover');
-    cy.contains('Error rate based on count of trace errors within a trace group in the selected time range.').should('be.visible');
-    cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(5).trigger('mouseover');
-    cy.contains('Count of traces with unique trace identifiers in the selected time range.').should('be.visible');
-  });
+//   it('Renders plots', () => {
+//     cy.get('text.ytitle[data-unformatted="Error rate (%)"]').should('exist');
+//     cy.get('text.annotation-text[data-unformatted="Now: 14.81%"]').should('exist');
+//     cy.get('text.ytitle[data-unformatted="Throughput (n)"]').should('exist');
+//     cy.get('text.annotation-text[data-unformatted="Now: 108"]').should('exist');
+//   });
+// });
 
-  it('Verify Search engine on Trace dashboard', () => {
-    cy.get('.euiFieldSearch.euiFieldSearch--fullWidth').click().type('client_pay_order{enter}');
-    cy.wait(delay);
-    cy.get('.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent').contains('211.04').should('exist');
-    cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').click();
-    cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
-    cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
-    cy.get('.euiContextMenuPanelTitle').contains('Edit filter').should('exist');
-    cy.get('.euiButton.euiButton--primary.euiButton--fill').click();
-    cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
-    cy.get('.euiContextMenuItem__text').eq(1).contains('Exclude results').click();
-    cy.get('.euiTextColor.euiTextColor--danger').should('exist');
-    cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
-    cy.get('.euiContextMenuItem__text').eq(1).contains('Include results').click();
-    cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
-    cy.get('.euiContextMenuItem__text').eq(2).contains('Temporarily disable').click();
-    cy.get('.euiBadge.euiBadge--iconRight.globalFilterItem.globalFilterItem-isDisabled').should('exist').click();
-    cy.get('.euiContextMenuItem__text').eq(2).contains('Re-enable').click();
-    cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
-    cy.get('.euiContextMenuItem__text').eq(3).contains('Delete').click();
-  });
-});
+// here
+// describe('Latency by trace group table', () =>{
+//   beforeEach(() => {
+//     cy.visit('app/observability-dashboards#/trace_analytics/home', {
+//       onBeforeLoad: (win) => {
+//         win.sessionStorage.clear();
+//       },
+//     });
+//     setTimeFilter();
+//   });
+
+//   it('Verify columns in Latency by trace group table along with pagination functionality', () => {
+//     cy.get('span.panel-title').eq(0).should('exist');
+//     cy.wait(delay);
+//     cy.get('[data-test-subj="tableHeaderCell_dashboard_trace_group_name_0"]').should('exist');
+//     cy.get('[data-test-subj="tableHeaderCell_dashboard_latency_variance_1"]').should('exist');
+//     cy.get('[data-test-subj="tableHeaderCell_dashboard_average_latency_2"]').should('exist');
+//     cy.get('[data-test-subj="tableHeaderCell_24_hour_latency_trend_3"]').should('exist');
+//     cy.get('[data-test-subj="tableHeaderCell_dashboard_error_rate_4"]').should('exist');
+//     cy.get('[data-test-subj="tableHeaderCell_dashboard_traces_5"]').should('exist');
+//     cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
+//     cy.get('.euiIcon.euiIcon--medium.euiIcon--inherit.euiContextMenu__icon').eq(0).should('exist').click();
+//     cy.get('[data-test-subj="pagination-button-next"]').should('exist').click();
+//     cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').contains('mysql').should('exist');
+//   });
+
+//   it('Sorts the Latency by trace group table', () => {
+//     cy.get('span[title*="Trace group name"]').click();
+//     cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]').eq(0).contains('/**').should('exist');
+//     cy.wait(delay);
+//   });
+
+//   it('Verify tooltips in Latency by trace group table', () => {
+//     cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(0).trigger('mouseover');
+//     cy.contains('Traces of all requests that share a common API and operation at the start of distributed tracing instrumentation.').should('be.visible');
+//     cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(1).trigger('mouseover');
+//     cy.contains('Range of latencies for traces within a trace group in the selected time range.').should('be.visible');
+//     cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(2).trigger('mouseover');
+//     cy.contains('Average latency of traces within a trace group in the selected time range.').should('be.visible');
+//     cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(3).trigger('mouseover');
+//     cy.contains('24 hour time series view of hourly average, hourly percentile, and hourly range of latency for traces within a trace group.').should('be.visible');
+//     cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(4).trigger('mouseover');
+//     cy.contains('Error rate based on count of trace errors within a trace group in the selected time range.').should('be.visible');
+//     cy.get('.euiIcon.euiIcon--small.euiIcon--subdued.euiIcon-isLoaded.eui-alignTop').eq(5).trigger('mouseover');
+//     cy.contains('Count of traces with unique trace identifiers in the selected time range.').should('be.visible');
+//   });
+
+//   it('Verify Search engine on Trace dashboard', () => {
+//     cy.get('.euiFieldSearch.euiFieldSearch--fullWidth').click().type('client_pay_order{enter}');
+//     cy.wait(delay);
+//     cy.get('.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent').contains('211.04').should('exist');
+//     cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').click();
+//     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
+//     cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
+//     cy.get('.euiContextMenuPanelTitle').contains('Edit filter').should('exist');
+//     cy.get('.euiButton.euiButton--primary.euiButton--fill').click();
+//     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
+//     cy.get('.euiContextMenuItem__text').eq(1).contains('Exclude results').click();
+//     cy.get('.euiTextColor.euiTextColor--danger').should('exist');
+//     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
+//     cy.get('.euiContextMenuItem__text').eq(1).contains('Include results').click();
+//     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
+//     cy.get('.euiContextMenuItem__text').eq(2).contains('Temporarily disable').click();
+//     cy.get('.euiBadge.euiBadge--iconRight.globalFilterItem.globalFilterItem-isDisabled').should('exist').click();
+//     cy.get('.euiContextMenuItem__text').eq(2).contains('Re-enable').click();
+//     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
+//     cy.get('.euiContextMenuItem__text').eq(3).contains('Delete').click();
+//   });
+// });
 
 describe('Testing filters on trace analytics page', () =>{
   beforeEach(() => {
@@ -278,7 +337,7 @@ describe('Testing filters on trace analytics page', () =>{
   })
 
   it('Verify Add filter section', () => {
-    cy.get('.euiPopover.euiPopover--anchorDownLeft').contains('+ Add filter').click();
+    cy.get('[data-test-subj="addfilter"]').contains('+ Add filter').click();
     cy.get('.euiPopoverTitle').contains('Add filter').should('exist');
     cy.wait(delay);
     cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(0).trigger('mouseover').click();

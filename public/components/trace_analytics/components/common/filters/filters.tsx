@@ -224,6 +224,7 @@ export function Filters(props: FiltersOwnProps) {
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="downLeft"
+        data-test-subj="addfilter"
         withTitle
       >
         <EuiPopoverTitle>{'Add filter'}</EuiPopoverTitle>
@@ -248,9 +249,9 @@ export function Filters(props: FiltersOwnProps) {
       const value =
         typeof filter.value === 'string'
           ? filter.value
-          : Array.isArray(filter.value)  // combo box
+          : Array.isArray(filter.value) // combo box
           ? filter.value[0].label
-          : `${filter.value.from} to ${filter.value.to}`;  // range selector
+          : `${filter.value.from} to ${filter.value.to}`; // range selector
       const filterLabel = filter.inverted ? (
         <>
           <EuiTextColor color={disabled ? 'default' : 'danger'}>{'NOT '}</EuiTextColor>
