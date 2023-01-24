@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiLink } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { EuiGlobalToastList } from '@elastic/eui';
+import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import React, { ReactChild, useEffect, useState } from 'react';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
   ChromeStart,
-  CoreStart,
   HttpStart,
 } from '../../../../../src/core/public';
 import { ObservabilitySideBar } from '../common/side_nav';
@@ -18,7 +18,7 @@ import { SearchBarProps } from './components/common/search_bar';
 import { Dashboard } from './components/dashboard';
 import { Services, ServiceView } from './components/services';
 import { Traces, TraceView } from './components/traces';
-import { handleIndicesExistRequest } from './requests/request_handler';
+import { handleDataPrepperIndicesExistRequest, handleJaegerIndicesExistRequest } from './requests/request_handler';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
@@ -28,12 +28,23 @@ export interface TraceAnalyticsCoreDeps {
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
 
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper'
+
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
-  indicesExist: boolean;
+  mode: TraceAnalyticsMode;
+  modes: {
+    id: string;
+    title: string;
+  }[];
+  setMode: (mode: TraceAnalyticsMode) => void;
+  jaegerIndicesExist: boolean;
+  dataPrepperIndicesExist: boolean;
 }
 
 export const Home = (props: HomeProps) => {
-  const [indicesExist, setIndicesExist] = useState(true);
+  const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
+  const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
+  const [mode, setMode] = useState<TraceAnalyticsMode>(sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode || 'jaeger')
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
   const [query, setQuery] = useState<string>(sessionStorage.getItem('TraceAnalyticsQuery') || '');
   const [filters, setFilters] = useState<FilterType[]>(
@@ -62,10 +73,31 @@ export const Home = (props: HomeProps) => {
     setEndTime(newEndTime);
     sessionStorage.setItem('TraceAnalyticsEndTime', newEndTime);
   };
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
+    if (!text) text = '';
+    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+  };
 
   useEffect(() => {
-    handleIndicesExistRequest(props.http, setIndicesExist);
+    handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist)
+    handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
   }, []);
+
+
+  const modes = [
+    { id: 'jaeger', title: 'Jaeger' },
+    { id: 'data_prepper', title: 'Data Prepper' },
+  ];
+
+  useEffect(() => {
+    if (dataPrepperIndicesExist) {
+      setMode('data_prepper');
+    } else if (jaegerIndicesExist) {
+      setMode('jaeger');
+    }
+  }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const dashboardBreadcrumbs = [
     {
@@ -108,6 +140,8 @@ export const Home = (props: HomeProps) => {
   const traceIdColumnAction = (item: any) =>
     location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
 
+  const [appConfigs, _] = useState([]);
+
   const commonProps: TraceAnalyticsComponentDeps = {
     parentBreadcrumbs: props.parentBreadcrumbs,
     http: props.http,
@@ -115,23 +149,34 @@ export const Home = (props: HomeProps) => {
     query,
     setQuery: setQueryWithStorage,
     filters,
-    appConfigs: [],
+    appConfigs: appConfigs,
     setFilters: setFiltersWithStorage,
     startTime,
     setStartTime: setStartTimeWithStorage,
     endTime,
     setEndTime: setEndTimeWithStorage,
-    indicesExist,
+    mode,
+    modes,
+    setMode: (mode: TraceAnalyticsMode) => {setMode(mode)},
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
   };
 
   return (
     <>
+      <EuiGlobalToastList
+          toasts={toasts}
+          dismissToast={(removedToast) => {
+            setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
+          }}
+          toastLifeTimeMs={6000}
+      />
       <Route
         exact
         path={['/trace_analytics', '/trace_analytics/home']}
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} />
+            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} setToast={setToast} toasts={toasts} />
           </ObservabilitySideBar>
         )}
       />
@@ -157,6 +202,7 @@ export const Home = (props: HomeProps) => {
             chrome={props.chrome}
             http={props.http}
             traceId={decodeURIComponent(routerProps.match.params.id)}
+            mode={mode}
           />
         )}
       />

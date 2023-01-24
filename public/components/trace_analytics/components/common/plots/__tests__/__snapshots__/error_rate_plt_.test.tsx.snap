@@ -10,11 +10,21 @@ exports[`Error rate plot component renders error rate plot 1`] = `
       }
     }
   >
-    <PanelTitle
-      title="Trace error rate over time"
-    />
-    <EuiHorizontalRule
-      margin="m"
+    <EuiFlexGroup
+      gutterSize="xs"
+      justifyContent="spaceBetween"
+    >
+      <PanelTitle
+        title="Trace error rate over time"
+      />
+      <EuiButtonGroup
+        buttonSize="s"
+        color="text"
+        onChange={[Function]}
+      />
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="m"
     />
     <Plt
       data={
