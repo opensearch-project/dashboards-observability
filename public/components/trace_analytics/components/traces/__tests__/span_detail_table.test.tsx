@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { HttpResponse } from '../../../../../../../../src/core/public';
-import { TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
+import { TEST_JAEGER_SPAN_RESPONSE, TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { SpanDetailTable } from '../span_detail_table';
 
@@ -27,6 +27,7 @@ describe('<SpanDetailTable /> spec', () => {
         hiddenColumns={['traceId', 'traceGroup']}
         DSL={{}}
         openFlyout={() => {}}
+        mode='data_prepper'
       />
     );
     utils.update();
@@ -48,6 +49,28 @@ describe('<SpanDetailTable /> spec', () => {
           hiddenColumns={['traceId', 'traceGroup']}
           DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+          mode='data_prepper'
+        />,
+        container
+      );
+    });
+    expect(container).toMatchSnapshot();
+  });
+
+  it('renders the jaeger component with data', async () => {
+    const setCurrentSpan = jest.fn();
+    httpClientMock.post = jest.fn(() =>
+      Promise.resolve((TEST_JAEGER_SPAN_RESPONSE as unknown) as HttpResponse)
+    );
+    let container = document.createElement('div');
+    await act(() => {
+      ReactDOM.render(
+        <SpanDetailTable
+          http={httpClientMock}
+          hiddenColumns={['traceID', 'traceGroup']}
+          DSL={{}}
+          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+          mode='jaeger'
         />,
         container
       );

@@ -22,7 +22,7 @@ interface props {
 }
 
 export const TraceBlock = ({ http, hit, logTraceId }: props) => {
-  if (logTraceId === '' || !isValidTraceId(logTraceId)) {
+  if ((!hit.traceID || hit.traceID.length === 0) && (logTraceId === '' || !isValidTraceId(logTraceId))){
     return (
       <>
         <EuiCallOut iconType="help" title="No Trace Id found in the event.">
@@ -42,6 +42,7 @@ export const TraceBlock = ({ http, hit, logTraceId }: props) => {
       </>
     );
   }
+  const mode = (!hit.traceID || hit.traceID.length === 0) ? 'data_prepper' : 'jaeger'
 
-  return <TraceDetailRender traceId={logTraceId} http={http} />;
+  return <TraceDetailRender traceId={hit.traceID || logTraceId} http={http} mode={mode}/>;
 };

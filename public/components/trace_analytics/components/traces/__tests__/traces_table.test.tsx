@@ -19,7 +19,9 @@ describe('Traces table component', () => {
       <TracesTable
         items={[]}
         refresh={refresh}
-        indicesExist={false}
+        dataPrepperIndicesExist={false}
+        jaegerIndicesExist={false}
+        mode='data_prepper'
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -30,7 +32,9 @@ describe('Traces table component', () => {
       <TracesTable
         items={[]}
         refresh={refresh}
-        indicesExist={true}
+        dataPrepperIndicesExist={true}
+        jaegerIndicesExist={false}
+        mode='data_prepper'
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -58,7 +62,40 @@ describe('Traces table component', () => {
       <TracesTable
         items={tableItems}
         refresh={refresh}
-        indicesExist={true}
+        dataPrepperIndicesExist={true}
+        jaegerIndicesExist={false}
+        mode='data_prepper'
+        loading={false}
+        traceIdColumnAction={traceIdColumnAction}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+
+    wrapper.find('button[data-test-subj="tableHeaderSortButton"]').at(0).simulate('click');
+  });
+
+  it('renders jaeger traces table', () => {
+    jest.mock('../../../../../../common/constants/trace_analytics', () => ({ TRACES_MAX_NUM: 1 }));
+    const tableItems = [
+      {
+        trace_id: '00079a615e31e61766fcb20b557051c1',
+        trace_group: 'HTTP GET',
+        latency: 19.91,
+        last_updated: '11/10/2020 09:55:45',
+        error_count: 'Yes',
+        actions: '#',
+      },
+    ];
+    const traceIdColumnAction = (item: any) =>
+      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const refresh = jest.fn();
+    const wrapper = mount(
+      <TracesTable
+        items={tableItems}
+        refresh={refresh}
+        dataPrepperIndicesExist={false}
+        jaegerIndicesExist={true}
+        mode='jaeger'
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
