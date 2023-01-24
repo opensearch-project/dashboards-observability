@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DocFlyout } from './doc_flyout';
 import { HttpStart } from '../../../../../../../src/core/public';
-import { OTEL_TRACE_ID, DATE_PICKER_FORMAT } from '../../../../../common/constants/explorer';
+import { OTEL_TRACE_ID, DATE_PICKER_FORMAT, JAEGER_TRACE_ID } from '../../../../../common/constants/explorer';
 import { SurroundingFlyout } from './surrounding_flyout';
 import PPLService from '../../../../services/requests/ppl';
 import { isValidTraceId } from '../../utils';
@@ -77,13 +77,13 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
         <span>
           <dl className="source truncate-by-height">
             {toPairs(doc).map((entry: string[]) => {
-              const isTraceField = entry[0] === OTEL_TRACE_ID;
+              const isTraceField = (entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID);
               return (
                 <span key={uniqueId('grid-desc')}>
                   <dt>{entry[0]}:</dt>
                   <dd>
                     <span>
-                      {isTraceField && isValidTraceId(entry[1]) && !isFlyout ? (
+                      {isTraceField && (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) && !isFlyout ? (
                         <EuiLink onClick={tracesFlyout}>{entry[1]}</EuiLink>
                       ) : (
                         entry[1]

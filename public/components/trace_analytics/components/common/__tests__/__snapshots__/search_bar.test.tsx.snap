@@ -375,6 +375,7 @@ exports[`Search bar components renders search bar 1`] = `
   appConfigs={Array []}
   endTime="now"
   filters={Array []}
+  mode="data_prepper"
   page="dashboard"
   query="test"
   refresh={[MockFunction]}
@@ -974,6 +975,7 @@ exports[`Search bar components renders search bar 1`] = `
   <Filters
     appConfigs={Array []}
     filters={Array []}
+    mode="data_prepper"
     page="dashboard"
     setFilters={[MockFunction]}
   >
