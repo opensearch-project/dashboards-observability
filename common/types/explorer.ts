@@ -290,7 +290,7 @@ export interface PatternTableData {
   pattern: string;
   sampleLog: string;
   anomalyCount?: number;
-};
+}
 
 export interface ConfigListEntry {
   label: string;
@@ -380,7 +380,7 @@ export interface VisMeta {
 }
 
 export interface VisualizationState {
-  query: Query;
+  queryState: Query;
   visData: any;
   visConfMetadata: ConfigList;
   visMeta: VisMeta;

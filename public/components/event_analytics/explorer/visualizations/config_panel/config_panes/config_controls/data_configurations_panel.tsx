@@ -277,7 +277,7 @@ export const DataConfigPanelItem = ({
 
   const updateChart = useCallback(() => {
     const [newQueryString, nextQueryState] = prepareNextVisState({
-      queryState,
+      queryState: query,
       visConfig: {
         ...configList,
       },
@@ -298,7 +298,7 @@ export const DataConfigPanelItem = ({
         });
       },
     });
-  }, [configList, queryState, visualizations]);
+  }, [configList, query, visualizations]);
 
   const updateVisUIState = ({
     visData,
