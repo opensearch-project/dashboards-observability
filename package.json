@@ -59,7 +59,8 @@
     "ansi-regex": "^5.0.1",
     "json-schema": "^0.4.0",
     "qs": "~6.5.3",
-    "minimatch": "^3.0.5"
+    "minimatch": "^3.0.5",
+    "debug": "^3.1.0"
   },
   "eslintIgnore": [
     "common/query_manager/antlr/output/*",
