@@ -16,7 +16,7 @@ export const readDataReportToFile = async (
 ) => {
   const blob = new Blob([stream]);
   const url = URL.createObjectURL(blob);
-  let link = document.createElement('a');
+  const link = document.createElement('a');
   link.setAttribute('href', url);
   link.setAttribute('download', fileName);
   document.body.appendChild(link);
@@ -25,18 +25,18 @@ export const readDataReportToFile = async (
 };
 
 const getFileFormatPrefix = (fileFormat: string) => {
-  var fileFormatPrefix = 'data:' + fileFormat + ';base64,';
+  const fileFormatPrefix = 'data:' + fileFormat + ';base64,';
   return fileFormatPrefix;
 };
 
 const readStreamToFile = async (stream: string, fileFormat: string, fileName: string) => {
-  let link = document.createElement('a');
+  const link = document.createElement('a');
   if (fileName.includes('csv')) {
     readDataReportToFile(stream, fileFormat, fileName);
     return;
   }
-  let fileFormatPrefix = getFileFormatPrefix(fileFormat);
-  let url = fileFormatPrefix + stream;
+  const fileFormatPrefix = getFileFormatPrefix(fileFormat);
+  const url = fileFormatPrefix + stream;
   if (typeof link.download !== 'string') {
     window.open(url, '_blank');
     return;
@@ -126,7 +126,6 @@ export const generateInContextReport = async (
     }
   } catch (error) {
     props.setToast('Tenant error', 'danger', 'Failed to get user tenant.');
-    console.log(`failed to get user tenant: ${error}`);
   }
 
   const reportSource = 'Notebook';
@@ -157,7 +156,7 @@ export const generateInContextReport = async (
       },
     },
   };
-  fetch('../api/reporting/generateReport', {
+  await fetch('../api/reporting/generateReport', {
     headers: {
       'Content-Type': 'application/json',
       'osd-xsrf': 'true',
