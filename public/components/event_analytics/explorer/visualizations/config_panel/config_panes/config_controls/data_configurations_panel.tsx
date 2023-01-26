@@ -216,7 +216,8 @@ export const DataConfigPanelItem = ({
    * @param query PPL query string.
    * @returns stats information of a parsed query.
    */
-  const getStatsTokens = (query: string) => queryManager!.queryParser().parse(query).getStats();
+  const getStatsTokens = (queryString: string) =>
+    queryManager!.queryParser().parse(queryString).getStats();
 
   /**
    * Builds new query based on existing query stats and new configurations.
@@ -249,7 +250,7 @@ export const DataConfigPanelItem = ({
         prevQuery[SELECTED_DATE_RANGE][1] || 'now',
         !isEmpty(visConfig.span?.time_field)
           ? visConfig.span?.time_field[0].name
-          : prevQuery['selectedTimestamp'],
+          : prevQuery.selectedTimestamp,
         false,
         ''
       ),
@@ -262,23 +263,23 @@ export const DataConfigPanelItem = ({
    * @returns next visualization state.
    */
   const prepareNextVisState = ({
-    query,
+    queryState,
     visConfig,
   }: {
-    query: Query;
+    queryState: Query;
     visConfig: ConfigList;
   }): Array<string | Query> => {
     const newQuery: string = getNewQueryString(
-      query[RAW_QUERY],
+      queryState[RAW_QUERY],
       visConfig,
-      getStatsTokens(query[RAW_QUERY])
+      getStatsTokens(queryState[RAW_QUERY])
     );
-    return [newQuery, getNextQueryState(query, newQuery, visConfig)];
+    return [newQuery, getNextQueryState(queryState, newQuery, visConfig)];
   };
 
   const updateChart = useCallback(() => {
     const [newQueryString, nextQueryState] = prepareNextVisState({
-      query,
+      queryState: query,
       visConfig: {
         ...configList,
       },
@@ -286,11 +287,11 @@ export const DataConfigPanelItem = ({
     console.log('newQueryString: ', newQueryString);
     handleQueryChange(newQueryString);
     getVisualizations({
-      query: nextQueryState[FINAL_QUERY],
+      queryState: nextQueryState[FINAL_QUERY],
       callback: (res) => {
         updateVisUIState({
           visData: res,
-          query: nextQueryState,
+          queryState: nextQueryState,
           visConfMetadata: {
             ...configList,
           },
@@ -302,8 +303,13 @@ export const DataConfigPanelItem = ({
     });
   }, [configList, query, visualizations]);
 
-  const updateVisUIState = ({ visData, query, visConfMetadata, visMeta }: VisualizationState) => {
-    fillVisDataInStore({ visData: visData, query, visConfMetadata, visMeta });
+  const updateVisUIState = ({
+    visData,
+    queryState,
+    visConfMetadata,
+    visMeta,
+  }: VisualizationState) => {
+    fillVisDataInStore({ visData, queryState, visConfMetadata, visMeta });
   };
 
   const isPositionButtonVisible = (sectionName: string) =>
@@ -321,7 +327,7 @@ export const DataConfigPanelItem = ({
       isEqual(sectionName, GROUPBY)
     )
       return filter(fieldOptionList, (i) => i.type === TIMESTAMP);
-    
+
     if (
       sectionName === AGGREGATIONS ||
       sectionName === BREAKDOWNS ||
@@ -504,6 +510,7 @@ export const DataConfigPanelItem = ({
                     });
                   }}
                   aria-label="interval field"
+                  data-test-subj="valueFieldNumber"
                 />
               </EuiFormRow>
               <EuiFormRow label="Unit">
