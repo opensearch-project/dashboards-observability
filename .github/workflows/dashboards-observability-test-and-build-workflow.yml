@@ -6,7 +6,7 @@ on: [pull_request, push]
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_VERSION: '1.3'
-  OPENSEARCH_PLUGIN_VERSION: 1.3.7.0
+  OPENSEARCH_PLUGIN_VERSION: 1.3.8.0
 
 jobs:
 
@@ -18,9 +18,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout Plugin
-        uses: actions/checkout@v1
-
       # Enable longer filenames for windows
       - name: Enable longer filenames
         if: ${{ matrix.os == 'windows-latest' }}
@@ -51,8 +48,10 @@ jobs:
           echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
           npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
 
-      - name: Move Observability to Plugins Dir
-        run: mv dashboards-observability OpenSearch-Dashboards/plugins/dashboards-observability
+      - name: Checkout Dashboards Observability
+        uses: actions/checkout@v2
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Plugin Bootstrap
         run: |
