@@ -92,10 +92,12 @@ export const Home = (props: HomeProps) => {
   ];
 
   useEffect(() => {
-    if (dataPrepperIndicesExist) {
-      setMode('data_prepper');
-    } else if (jaegerIndicesExist) {
-      setMode('jaeger');
+    if (!sessionStorage.getItem('TraceAnalyticsMode')){
+      if (dataPrepperIndicesExist) {
+        setMode('data_prepper');
+      } else if (jaegerIndicesExist) {
+        setMode('jaeger');
+      }
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
