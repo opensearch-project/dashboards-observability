@@ -52,7 +52,7 @@ export function TracesContent(props: TracesProps) {
 
   useEffect(() => {
     if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh();
-  }, [filters, appConfigs]);
+  }, [filters, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
 
   const refresh = async (sort?: PropertySort) => {
     setLoading(true);
