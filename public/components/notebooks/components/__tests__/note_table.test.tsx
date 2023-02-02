@@ -9,6 +9,16 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { NoteTable } from '../note_table';
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn().mockReturnValue({
+    pathname: '/notebooks',
+    search: '',
+    hash: '',
+    state: null,
+    key: '',
+  }),
+}));
+
 describe('<NoteTable /> spec', () => {
   configure({ adapter: new Adapter() });
 
