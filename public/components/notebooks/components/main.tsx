@@ -310,15 +310,23 @@ export class Main extends React.Component<MainProps, MainState> {
           <Switch>
             <Route
               exact
-              path={['/notebooks/create', '/notebooks/edit/:id+']}
-              render={(routerProps) => (
-                <CreateNotebookPage
-                  existingNotebookId={decodeURIComponent(routerProps.match.params.id) || ''}
-                  parentBreadcrumb={this.props.parentBreadcrumb}
-                  setBreadcrumbs={this.props.setBreadcrumbs}
-                  createNotebook={this.createNotebook}
-                  renameNotebook={this.renameNotebook}
-                />
+              path={['/notebooks/create', '/notebooks']}
+              render={(props) => (
+                <ObservabilitySideBar>
+                  <NoteTable
+                    loading={this.state.loading}
+                    fetchNotebooks={this.fetchNotebooks}
+                    addSampleNotebooks={this.addSampleNotebooks}
+                    notebooks={this.state.data}
+                    createNotebook={this.createNotebook}
+                    renameNotebook={this.renameNotebook}
+                    cloneNotebook={this.cloneNotebook}
+                    deleteNotebook={this.deleteNotebook}
+                    parentBreadcrumb={this.props.parentBreadcrumb}
+                    setBreadcrumbs={this.props.setBreadcrumbs}
+                    setToast={this.setToast}
+                  />
+                </ObservabilitySideBar>
               )}
             />
             <Route
@@ -339,27 +347,6 @@ export class Main extends React.Component<MainProps, MainState> {
                   location={this.props.location}
                   history={this.props.history}
                 />
-              )}
-            />
-            <Route
-              exact
-              path="/notebooks"
-              render={(props) => (
-                <ObservabilitySideBar>
-                  <NoteTable
-                    loading={this.state.loading}
-                    fetchNotebooks={this.fetchNotebooks}
-                    addSampleNotebooks={this.addSampleNotebooks}
-                    notebooks={this.state.data}
-                    createNotebook={this.createNotebook}
-                    renameNotebook={this.renameNotebook}
-                    cloneNotebook={this.cloneNotebook}
-                    deleteNotebook={this.deleteNotebook}
-                    parentBreadcrumb={this.props.parentBreadcrumb}
-                    setBreadcrumbs={this.props.setBreadcrumbs}
-                    setToast={this.setToast}
-                  />
-                </ObservabilitySideBar>
               )}
             />
           </Switch>

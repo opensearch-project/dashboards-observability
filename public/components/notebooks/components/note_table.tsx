@@ -43,6 +43,7 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 import { pageStyles } from '../../../../common/constants/shared';
+import { useHistory, useLocation } from 'react-router-dom';
 
 interface NoteTableProps {
   loading: boolean;
@@ -64,6 +65,8 @@ export function NoteTable(props: NoteTableProps) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedNotebooks, setSelectedNotebooks] = useState<NotebookType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const history = useHistory();
   const { notebooks, createNotebook, renameNotebook, cloneNotebook, deleteNotebook } = props;
 
   useEffect(() => {
@@ -76,6 +79,13 @@ export function NoteTable(props: NoteTableProps) {
     ]);
     props.fetchNotebooks();
   }, []);
+
+  useEffect(() => {
+    const url = window.location.hash.split('/')
+    if (url[url.length-1] === 'create') { 
+      createNote();
+    }
+  }, [location]);
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -108,6 +118,25 @@ export function NoteTable(props: NoteTableProps) {
       toastMessage
     );
     closeModal();
+  };
+
+  const createNote = () => {
+    setModalLayout(
+      getCustomModal(
+        onCreate,
+        () => {
+          closeModal()
+          history.push('/notebooks')
+        },
+        'Name',
+        'Create notebook',
+        'Cancel',
+        'Create',
+        undefined,
+        CREATE_NOTE_MESSAGE
+      )
+    );
+    showModal();
   };
 
   const renameNote = () => {
