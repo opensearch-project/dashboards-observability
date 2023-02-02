@@ -17,6 +17,7 @@ jest.mock('react-router-dom', () => ({
     state: null,
     key: '',
   }),
+  useHistory: jest.fn()
 }));
 
 describe('<NoteTable /> spec', () => {
