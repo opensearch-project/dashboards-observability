@@ -417,7 +417,9 @@ exports[`Panels Table Component renders empty panel table container 1`] = `
                         <div
                           className="euiTextAlign euiTextAlign--center"
                         >
-                          <h2>
+                          <h2
+                            data-test-subj="customPanels__noPanelsHome"
+                          >
                             No Operational Panels
                           </h2>
                           <EuiSpacer
