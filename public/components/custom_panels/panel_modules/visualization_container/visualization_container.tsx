@@ -93,7 +93,6 @@ export const VisualizationContainer = ({
   spanParam,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [disablePopover, setDisablePopover] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
   const [visualizationType, setVisualizationType] = useState('');
   const [visualizationMetaData, setVisualizationMetaData] = useState();
@@ -140,7 +139,7 @@ export const VisualizationContainer = ({
     <EuiContextMenuItem
       data-test-subj="editVizContextMenuItem"
       key="Edit"
-      disabled={disablePopover}
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         onEditClick(savedVisualizationId);
@@ -151,7 +150,7 @@ export const VisualizationContainer = ({
     <EuiContextMenuItem
       key="Replace"
       data-test-subj="replaceVizContextMenuItem"
-      disabled={disablePopover}
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         showFlyout(true, visualizationId);
@@ -162,7 +161,7 @@ export const VisualizationContainer = ({
     <EuiContextMenuItem
       key="Duplicate"
       data-test-subj="duplicateVizContextMenuItem"
-      disabled={disablePopover}
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         cloneVisualization(visualizationTitle, savedVisualizationId);
@@ -176,7 +175,7 @@ export const VisualizationContainer = ({
     <EuiContextMenuItem
       data-test-subj="showCatalogPPLQuery"
       key="view_query"
-      disabled={disablePopover}
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         showModal();
@@ -250,12 +249,6 @@ export const VisualizationContainer = ({
     loadVisaulization();
   }, [onRefresh]);
 
-  useEffect(() => {
-    // editMode ? setDisablePopover(true) : setDisablePopover(false);
-    if (editMode) setDisablePopover(true);
-    else setDisablePopover(false);
-  }, [editMode]);
-
   return (
     <>
       <EuiPanel
@@ -277,7 +270,7 @@ export const VisualizationContainer = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
-              {disablePopover ? (
+              {editMode ? (
                 <EuiIcon
                   data-test-subj="removeVisualizationButton"
                   type="crossInACircleFilled"
