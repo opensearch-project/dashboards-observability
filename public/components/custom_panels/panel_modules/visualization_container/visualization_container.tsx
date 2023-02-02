@@ -150,6 +150,7 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="Replace"
+      data-test-subj="replaceVizContextMenuItem"
       disabled={disablePopover}
       onClick={() => {
         closeActionsMenu();
@@ -160,6 +161,7 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="Duplicate"
+      data-test-subj="duplicateVizContextMenuItem"
       disabled={disablePopover}
       onClick={() => {
         closeActionsMenu();
@@ -170,7 +172,7 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  let showModelPanel = [
+  const showModelPanel = [
     <EuiContextMenuItem
       data-test-subj="showCatalogPPLQuery"
       key="view_query"
@@ -249,7 +251,9 @@ export const VisualizationContainer = ({
   }, [onRefresh]);
 
   useEffect(() => {
-    editMode ? setDisablePopover(true) : setDisablePopover(false);
+    // editMode ? setDisablePopover(true) : setDisablePopover(false);
+    if (editMode) setDisablePopover(true);
+    else setDisablePopover(false);
   }, [editMode]);
 
   return (
@@ -268,13 +272,14 @@ export const VisualizationContainer = ({
             >
               <EuiText grow={false} className="panels-title-text">
                 <EuiToolTip delay="long" position="top" content={visualizationTitle}>
-                  <h5>{visualizationTitle}</h5>
+                  <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
               {disablePopover ? (
                 <EuiIcon
+                  data-test-subj="removeVisualizationButton"
                   type="crossInACircleFilled"
                   onClick={() => {
                     removeVisualization(visualizationId);

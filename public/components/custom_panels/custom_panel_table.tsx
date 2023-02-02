@@ -212,6 +212,7 @@ export const CustomPanelTable = ({
   const popoverItems: ReactElement[] = [
     <EuiContextMenuItem
       key="rename"
+      data-test-subj="renameContextMenuItem"
       disabled={customPanels.length === 0 || selectedCustomPanels.length !== 1}
       onClick={() => {
         setIsActionsPopoverOpen(false);
@@ -222,6 +223,7 @@ export const CustomPanelTable = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="duplicate"
+      data-test-subj="duplicateContextMenuItem"
       disabled={customPanels.length === 0 || selectedCustomPanels.length !== 1}
       onClick={() => {
         setIsActionsPopoverOpen(false);
@@ -376,7 +378,7 @@ export const CustomPanelTable = ({
               <>
                 <EuiSpacer size="xxl" />
                 <EuiText textAlign="center">
-                  <h2>No Operational Panels</h2>
+                  <h2 data-test-subj="customPanels__noPanelsHome">No Operational Panels</h2>
                   <EuiSpacer size="m" />
                   <EuiText color="subdued">
                     Use operational panels to dive deeper into observability
