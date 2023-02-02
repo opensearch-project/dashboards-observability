@@ -20,7 +20,6 @@ import {
 import { ObservabilitySideBar } from '../../common/side_nav';
 import { Notebook } from './notebook';
 import { NoteTable } from './note_table';
-import { CreateNotebookPage } from './create';
 
 /*
  * "Main" component renders the whole Notebooks as a single page application

@@ -281,6 +281,26 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setState({ isModalVisible: true });
   };
 
+  showRenameModal = () => {
+    this.setState({
+      modalLayout: getCustomModal(
+        (newName: string) => {
+          this.props.renameNotebook(newName, this.props.openedNoteId);
+          this.setState({ isModalVisible: false });
+          this.loadNotebook();
+        },
+        () => this.setState({ isModalVisible: false }),
+        'Name',
+        'Rename notebook',
+        'Cancel',
+        'Rename',
+        this.state.path,
+        CREATE_NOTE_MESSAGE
+      ),
+    });
+    this.setState({ isModalVisible: true });
+  };
+
   showCloneModal = () => {
     this.setState({
       modalLayout: getCustomModal(
@@ -565,7 +585,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       .get(`${NOTEBOOKS_API_PREFIX}/note/` + this.props.openedNoteId)
       .then(async (res) => {
         this.setBreadcrumbs(res.path);
-        sessionStorage.setItem('NotebooksName', res.path);
         let index = 0;
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output
@@ -812,9 +831,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           {
             name: 'Rename notebook',
             onClick: () => {
-              window.location.assign(
-                `${this.props.parentBreadcrumb!.href}notebooks/edit/${this.props.openedNoteId}`
-              );
+              this.setState({ isNoteActionsPopoverOpen: false });
+              this.showRenameModal();
             },
           },
           {
