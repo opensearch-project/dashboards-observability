@@ -106,12 +106,7 @@
 }
 
 #vis__mainContent {
-  .explorer__insights {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: 50% 50%;
-    height: 100%;
-
+  .explorer__insights, .explorer__configPanel-markdown {
     .explorerFieldSelector,
     .explorer__vizDataConfig {
       padding: $euiSizeS;
@@ -143,6 +138,13 @@
       }
     }
   }
+}
+
+#vis__mainContent .explorer__insights {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  height: 100%;
 }
 
 .sidebarHeight {

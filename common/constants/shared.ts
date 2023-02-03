@@ -191,3 +191,5 @@ export const PLOT_MARGIN = {
 };
 
 export const WAITING_TIME_ON_USER_ACTIONS = 300;
+
+export const MARKDOWN_VIS_ID = 'text';

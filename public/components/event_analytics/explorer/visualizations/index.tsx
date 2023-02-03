@@ -18,7 +18,11 @@ import { WorkspacePanel } from './workspace_panel';
 import { ConfigPanel } from './config_panel';
 import { Sidebar } from '../sidebar';
 import { DataConfigPanelItem } from './config_panel/config_panes/config_controls/data_configurations_panel';
-import { PPL_STATS_REGEX, VIS_CHART_TYPES } from '../../../../../common/constants/shared';
+import {
+  PPL_STATS_REGEX,
+  VIS_CHART_TYPES,
+  MARKDOWN_VIS_ID,
+} from '../../../../../common/constants/shared';
 import { TreemapConfigPanelItem } from './config_panel/config_panes/config_controls/treemap_config_panel_item';
 import { LogsViewConfigPanelItem } from './config_panel/config_panes/config_controls/logs_view_config_panel_item';
 
@@ -52,6 +56,7 @@ export const ExplorerVisualizations = ({
   queryManager,
 }: IExplorerVisualizationsProps) => {
   const { vis } = visualizations;
+  const isMarkDown = vis.id === MARKDOWN_VIS_ID;
   const fieldOptionList = explorerFields.availableFields.map((field) => ({
     ...field,
     label: field.name,
@@ -96,13 +101,13 @@ export const ExplorerVisualizations = ({
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
             <EuiResizablePanel
-              initialSize={20}
-              minSize="17%"
+              initialSize={isMarkDown ? 12 : 20}
+              minSize={isMarkDown ? '10%' : '17%'}
               mode={['collapsible', { position: 'top' }]}
               paddingSize="none"
               className="vis__leftPanel"
             >
-              <div className="explorer__insights">
+              <div className={isMarkDown ? 'explorer__configPanel-markdown' : 'explorer__insights'}>
                 <div className="explorerFieldSelector">
                   <Sidebar
                     query={query}
@@ -120,18 +125,20 @@ export const ExplorerVisualizations = ({
                     }
                   />
                 </div>
-                <div
-                  className="explorer__vizDataConfig"
-                  data-test-subj="explorer__vizDataConfig-panel"
-                >
-                  {renderDataConfigContainer()}
-                </div>
+                {!isMarkDown && (
+                  <div
+                    className="explorer__vizDataConfig"
+                    data-test-subj="explorer__vizDataConfig-panel"
+                  >
+                    {renderDataConfigContainer()}
+                  </div>
+                )}
               </div>
             </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel
               className="ws__central--canvas"
-              initialSize={60}
+              initialSize={isMarkDown ? 68 : 60}
               minSize="55%"
               mode="main"
               paddingSize="none"
