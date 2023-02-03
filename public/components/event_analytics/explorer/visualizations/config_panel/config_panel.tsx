@@ -59,6 +59,7 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
   );
   const { data, vis } = visualizations;
   const { userConfigs } = data;
+  const isAppAnalyticsConfigPanel = data.appData?.fromApp;
 
   const [vizConfigs, setVizConfigs] = useState({
     dataConfig: {},
@@ -136,17 +137,26 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
         spec: vizConfigs.layoutConfig,
         setToast,
       },
-      availabilityConfig: {
-        visualizations,
-        curVisId,
-        onConfigChange: handleConfigChange('availabilityConfig'),
-        vizState: vizConfigs.availabilityConfig,
-      },
+      ...(isAppAnalyticsConfigPanel && {
+        availabilityConfig: {
+          visualizations,
+          curVisId,
+          onConfigChange: handleConfigChange('availabilityConfig'),
+          vizState: vizConfigs.availabilityConfig,
+        },
+      }),
     };
   }, [visualizations, vizConfigs, setToast, curVisId]);
 
   const tabs: EuiTabbedContentTab[] = useMemo(() => {
-    return vis.editorconfig.panelTabs.map((tab: PanelTabType) => {
+    // hide availability for event analytics, only show availability in App Analytics
+    let tabsToRender: EuiTabbedContentTab[] = vis.editorconfig.panelTabs;
+    if (!isAppAnalyticsConfigPanel) {
+      tabsToRender = vis.editorconfig.panelTabs.filter(
+        (pnltb: PanelTabType) => pnltb.id !== 'availability-panel'
+      );
+    }
+    return tabsToRender.map((tab: PanelTabType) => {
       const Editor = tab.editor;
       return {
         id: tab.id,

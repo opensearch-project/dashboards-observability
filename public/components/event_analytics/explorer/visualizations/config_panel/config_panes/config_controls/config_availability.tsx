@@ -61,7 +61,7 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
     </EuiFlexGroup>
   );
 
-  const hasSpanInApp =
+  const isAvailabilityBtnVisible =
     visualizations.data.query.finalQuery.search(PPL_SPAN_REGEX) > 0 &&
     visualizations.data.appData.fromApp &&
     ['bar', 'line'].includes(visualizations.vis.id);
@@ -124,7 +124,7 @@ export const ConfigAvailability = ({ visualizations, onConfigChange, vizState = 
           data-test-subj="addAvailabilityButton"
           size="s"
           onClick={handleAddAvailability}
-          disabled={!hasSpanInApp}
+          disabled={!isAvailabilityBtnVisible}
         >
           {addButtonText}
         </EuiButton>
