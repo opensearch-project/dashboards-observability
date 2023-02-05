@@ -1503,7 +1503,6 @@ export const Explorer = ({
           stopLive={stopLive}
           setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
           liveTailName={liveTailNameRef.current}
-          searchError={explorerVisualizations}
           curVisId={curVisId}
           setSubType={setSubType}
         />
