@@ -37,7 +37,11 @@ import {
   CREATE_PANEL_MESSAGE,
   CUSTOM_PANELS_API_PREFIX,
 } from '../../../common/constants/custom_panels';
-import { SavedVisualizationType, VisualizationType } from '../../../common/types/custom_panels';
+import {
+  SavedVisualizationType,
+  VisualizationType,
+  VizContainerError,
+} from '../../../common/types/custom_panels';
 import { PanelGrid } from './panel_modules/panel_grid';
 import { getCustomModal } from './helpers/modal_containers';
 import PPLService from '../../services/requests/ppl';
@@ -60,6 +64,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import _ from 'lodash';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -336,12 +341,15 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       const visData: SavedVisualizationType = await fetchVisualizationById(
         http,
         visualizationId,
-        (value: string) => setToast(value, 'danger')
+        (error: VizContainerError) => setToast(error.errorMessage, 'danger')
       );
-      const moreIndices = parseForIndices(visData.query);
-      for (let j = 0; j < moreIndices.length; j++) {
-        if (!indices.includes(moreIndices[j])) {
-          indices.push(moreIndices[j]);
+
+      if (!_.isEmpty(visData)) {
+        const moreIndices = parseForIndices(visData.query);
+        for (let j = 0; j < moreIndices.length; j++) {
+          if (!indices.includes(moreIndices[j])) {
+            indices.push(moreIndices[j]);
+          }
         }
       }
     }

@@ -45,3 +45,8 @@ export interface pplResponse {
   size: number;
   status: number;
 }
+
+export interface VizContainerError {
+  errorMessage: string;
+  errorDetails?: string;
+}
