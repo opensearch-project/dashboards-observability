@@ -126,7 +126,7 @@ export function NoteTable(props: NoteTableProps) {
         onCreate,
         () => {
           closeModal()
-          history.push('/notebooks')
+          history.goBack();
         },
         'Name',
         'Create notebook',
@@ -380,7 +380,7 @@ export function NoteTable(props: NoteTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton fill href="#/notebooks/create"
+                    <EuiButton href="#/notebooks/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
                     >
