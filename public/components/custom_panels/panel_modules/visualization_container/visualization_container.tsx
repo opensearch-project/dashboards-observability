@@ -33,6 +33,8 @@ import {
   renderSavedVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
+import { VizContainerError } from '../../../../../common/types/custom_panels';
+import _ from 'lodash';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -99,42 +101,67 @@ export const VisualizationContainer = ({
   const [visualizationMetaData, setVisualizationMetaData] = useState();
   const [visualizationData, setVisualizationData] = useState<Plotly.Data[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState('');
+  const [isError, setIsError] = useState({} as VizContainerError);
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState(<></>);
+  // let modal;
 
   const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
+  const showModal = (modalType: string) => {
+    if (modalType === 'catalogModal')
+      setModalContent(
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <h1>{visualizationMetaData.name}</h1>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-  let modal;
+          <EuiModalBody>
+            This PPL Query is generated in runtime from selected data source
+            <EuiSpacer />
+            <EuiCodeBlock language="html" isCopyable>
+              {visualizationMetaData.query}
+            </EuiCodeBlock>
+          </EuiModalBody>
 
-  if (isModalVisible) {
-    modal = (
-      <EuiModal onClose={closeModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h1>{visualizationMetaData.name}</h1>
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+          <EuiModalFooter>
+            <EuiButton onClick={closeModal} fill>
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      );
+    else
+      setModalContent(
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <h1>{isError.errorMessage}</h1>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-        <EuiModalBody>
-          This PPL Query is generated in runtime from selected data source
-          <EuiSpacer />
-          <EuiCodeBlock language="html" isCopyable>
-            {visualizationMetaData.query}
-          </EuiCodeBlock>
-        </EuiModalBody>
+          <EuiModalBody>
+            Error Details
+            <EuiSpacer />
+            <EuiCodeBlock language="html" isCopyable>
+              {isError.errorDetails}
+            </EuiCodeBlock>
+          </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill>
-            Close
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    );
-  }
+          <EuiModalFooter>
+            <EuiButton onClick={closeModal} fill>
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      );
+
+    setIsModalVisible(true);
+  };
 
   let popoverPanel = [
     <EuiContextMenuItem
@@ -177,7 +204,7 @@ export const VisualizationContainer = ({
       disabled={disablePopover}
       onClick={() => {
         closeActionsMenu();
-        showModal();
+        showModal('catalogModal');
       }}
     >
       View query
@@ -228,13 +255,20 @@ export const VisualizationContainer = ({
       <div className="visualization-div">
         {isLoading ? (
           <EuiLoadingChart size="xl" mono className="visualization-loading-chart" />
-        ) : isError !== '' ? (
+        ) : !_.isEmpty(isError) ? (
           <div className="visualization-error-div">
             <EuiIcon type="alert" color="danger" size="s" />
             <EuiSpacer size="s" />
             <EuiText size="s">
-              <p>{isError}</p>
+              <p>{isError.errorMessage}</p>
             </EuiText>
+            {isError.hasOwnProperty('errorDetails') && isError.errorDetails !== '' ? (
+              <EuiButton color="danger" onClick={() => showModal('errorModal')} size="s">
+                See error details
+              </EuiButton>
+            ) : (
+              <></>
+            )}
           </div>
         ) : (
           displayVisualization(visualizationMetaData, visualizationData, visualizationType)
@@ -301,7 +335,7 @@ export const VisualizationContainer = ({
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>
-      {modal}
+      {isModalVisible && modalContent}
     </>
   );
 };

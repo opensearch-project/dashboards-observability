@@ -39,6 +39,7 @@ import {
   pplResponse,
   SavedVisualizationType,
   VisualizationType,
+  VizContainerError,
 } from '../../../../../common/types/custom_panels';
 import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
@@ -101,7 +102,7 @@ export const VisaulizationFlyout = ({
   const [previewData, setPreviewData] = useState<pplResponse>({} as pplResponse);
   const [previewArea, setPreviewArea] = useState(<></>);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [isPreviewError, setIsPreviewError] = useState('');
+  const [isPreviewError, setIsPreviewError] = useState({} as VizContainerError);
   const [savedVisualizations, setSavedVisualizations] = useState<SavedVisualizationType[]>([]);
   const [visualizationOptions, setVisualizationOptions] = useState<EuiSelectOption[]>([]);
   const [selectValue, setSelectValue] = useState('');
@@ -325,12 +326,12 @@ export const VisaulizationFlyout = ({
           <EuiFlexItem>
             {previewLoading ? (
               <EuiLoadingChart size="xl" mono className="visualization-loading-chart-preview" />
-            ) : isPreviewError !== '' ? (
-              <div className="visualization-error-div-preview">
+            ) : !_.isEmpty(isPreviewError) ? (
+              <div className="visualization-error-div">
                 <EuiIcon type="alert" color="danger" size="s" />
                 <EuiSpacer size="s" />
                 <EuiText size="s">
-                  <p>{isPreviewError}</p>
+                  <p>{isPreviewError.error}</p>
                 </EuiText>
               </div>
             ) : (
