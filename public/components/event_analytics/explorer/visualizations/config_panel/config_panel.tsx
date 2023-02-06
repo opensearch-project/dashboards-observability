@@ -222,6 +222,7 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
           selectedOptions={[getSelectedVisDById(curVisId)]}
           singleSelection
           onChange={(visType) => {
+            handleDiscardConfig(); // currently reset all viz configurations
             setCurVisId(visType[0].id);
           }}
           fullWidth
