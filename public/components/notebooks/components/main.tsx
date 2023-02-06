@@ -308,26 +308,8 @@ export class Main extends React.Component<MainProps, MainState> {
           />
           <Switch>
             <Route
-              path="/notebooks/:id"
-              render={(props) => (
-                <Notebook
-                  pplService={this.props.pplService}
-                  openedNoteId={props.match.params.id}
-                  DashboardContainerByValueRenderer={this.props.DashboardContainerByValueRenderer}
-                  http={this.props.http}
-                  parentBreadcrumb={this.props.parentBreadcrumb}
-                  setBreadcrumbs={this.props.setBreadcrumbs}
-                  renameNotebook={this.renameNotebook}
-                  cloneNotebook={this.cloneNotebook}
-                  deleteNotebook={this.deleteNotebook}
-                  setToast={this.setToast}
-                  location={this.props.location}
-                  history={this.props.history}
-                />
-              )}
-            />
-            <Route
-              path="/notebooks"
+              exact
+              path={['/notebooks/create', '/notebooks']}
               render={(props) => (
                 <ObservabilitySideBar>
                   <NoteTable
@@ -344,6 +326,26 @@ export class Main extends React.Component<MainProps, MainState> {
                     setToast={this.setToast}
                   />
                 </ObservabilitySideBar>
+              )}
+            />
+            <Route
+              exact
+              path="/notebooks/:id"
+              render={(props) => (
+                <Notebook
+                  pplService={this.props.pplService}
+                  openedNoteId={props.match.params.id}
+                  DashboardContainerByValueRenderer={this.props.DashboardContainerByValueRenderer}
+                  http={this.props.http}
+                  parentBreadcrumb={this.props.parentBreadcrumb}
+                  setBreadcrumbs={this.props.setBreadcrumbs}
+                  renameNotebook={this.renameNotebook}
+                  cloneNotebook={this.cloneNotebook}
+                  deleteNotebook={this.deleteNotebook}
+                  setToast={this.setToast}
+                  location={this.props.location}
+                  history={this.props.history}
+                />
               )}
             />
           </Switch>

@@ -43,6 +43,7 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 import { pageStyles } from '../../../../common/constants/shared';
+import { useHistory, useLocation } from 'react-router-dom';
 
 interface NoteTableProps {
   loading: boolean;
@@ -64,6 +65,8 @@ export function NoteTable(props: NoteTableProps) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedNotebooks, setSelectedNotebooks] = useState<NotebookType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const history = useHistory();
   const { notebooks, createNotebook, renameNotebook, cloneNotebook, deleteNotebook } = props;
 
   useEffect(() => {
@@ -76,6 +79,13 @@ export function NoteTable(props: NoteTableProps) {
     ]);
     props.fetchNotebooks();
   }, []);
+
+  useEffect(() => {
+    const url = window.location.hash.split('/')
+    if (url[url.length-1] === 'create') { 
+      createNote();
+    }
+  }, [location]);
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -114,7 +124,10 @@ export function NoteTable(props: NoteTableProps) {
     setModalLayout(
       getCustomModal(
         onCreate,
-        closeModal,
+        () => {
+          closeModal()
+          history.goBack();
+        },
         'Name',
         'Create notebook',
         'Cancel',
@@ -306,7 +319,7 @@ export function NoteTable(props: NoteTableProps) {
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill onClick={() => createNote()}>
+                    <EuiButton fill href="#/notebooks/create">
                       Create notebook
                     </EuiButton>
                   </EuiFlexItem>
@@ -367,10 +380,9 @@ export function NoteTable(props: NoteTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiButton href="#/notebooks/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
-                      onClick={() => createNote()}
                     >
                       Create notebook
                     </EuiButton>
