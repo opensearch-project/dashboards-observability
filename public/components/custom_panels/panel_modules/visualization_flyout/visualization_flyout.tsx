@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
+  EuiCodeBlock,
   EuiDatePicker,
   EuiDatePickerRange,
   EuiFlexGroup,
@@ -19,6 +20,11 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLoadingChart,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSelect,
   EuiSelectOption,
   EuiSpacer,
@@ -27,7 +33,7 @@ import {
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
-import _ from 'lodash';
+import _, { isError } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
@@ -110,6 +116,38 @@ export const VisaulizationFlyout = ({
   // DateTimePicker States
   const startDate = convertDateTime(start, true, false);
   const endDate = convertDateTime(end, false, false);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState(<></>);
+
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = (modalType: string) => {
+    setModalContent(
+      <EuiModal onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h1>{isPreviewError.errorMessage}</h1>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          Error Details
+          <EuiSpacer />
+          <EuiCodeBlock language="html" isCopyable>
+            {isPreviewError.errorDetails}
+          </EuiCodeBlock>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButton onClick={closeModal} fill>
+            Close
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+
+    setIsModalVisible(true);
+  };
 
   const isInputValid = () => {
     if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast, 'left')) {
@@ -331,8 +369,16 @@ export const VisaulizationFlyout = ({
                 <EuiIcon type="alert" color="danger" size="s" />
                 <EuiSpacer size="s" />
                 <EuiText size="s">
-                  <p>{isPreviewError.error}</p>
+                  <p>{isPreviewError.errorMessage}</p>
                 </EuiText>
+                {isPreviewError.hasOwnProperty('errorDetails') &&
+                isPreviewError.errorDetails !== '' ? (
+                  <EuiButton color="danger" onClick={() => showModal('errorModal')} size="s">
+                    See error details
+                  </EuiButton>
+                ) : (
+                  <></>
+                )}
               </div>
             ) : (
               <div className="visualization-div-preview">
@@ -367,12 +413,15 @@ export const VisaulizationFlyout = ({
   }, []);
 
   return (
-    <FlyoutContainers
-      closeFlyout={closeFlyout}
-      flyoutHeader={flyoutHeader}
-      flyoutBody={flyoutBody}
-      flyoutFooter={flyoutFooter}
-      ariaLabel="addVisualizationFlyout"
-    />
+    <>
+      <FlyoutContainers
+        closeFlyout={closeFlyout}
+        flyoutHeader={flyoutHeader}
+        flyoutBody={flyoutBody}
+        flyoutFooter={flyoutFooter}
+        ariaLabel="addVisualizationFlyout"
+      />
+      {isModalVisible && modalContent}
+    </>
   );
 };

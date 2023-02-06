@@ -107,7 +107,6 @@ export const VisualizationContainer = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
-  // let modal;
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {
@@ -263,7 +262,12 @@ export const VisualizationContainer = ({
               <p>{isError.errorMessage}</p>
             </EuiText>
             {isError.hasOwnProperty('errorDetails') && isError.errorDetails !== '' ? (
-              <EuiButton color="danger" onClick={() => showModal('errorModal')} size="s">
+              <EuiButton
+                className="viz-error-btn"
+                color="danger"
+                onClick={() => showModal('errorModal')}
+                size="s"
+              >
                 See error details
               </EuiButton>
             ) : (
