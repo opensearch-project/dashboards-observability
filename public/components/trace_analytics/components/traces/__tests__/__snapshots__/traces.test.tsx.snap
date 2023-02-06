@@ -1127,7 +1127,7 @@ exports[`Traces component renders empty traces page 1`] = `
     <TracesTable
       dataPrepperIndicesExist={true}
       items={Array []}
-      loading={false}
+      loading={true}
       mode="data_prepper"
       refresh={[Function]}
       traceIdColumnAction={[Function]}
@@ -2427,7 +2427,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
       dataPrepperIndicesExist={false}
       items={Array []}
       jaegerIndicesExist={true}
-      loading={false}
+      loading={true}
       mode="jaeger"
       refresh={[Function]}
       traceIdColumnAction={[Function]}
@@ -3724,7 +3724,7 @@ exports[`Traces component renders traces page 1`] = `
     <TracesTable
       dataPrepperIndicesExist={true}
       items={Array []}
-      loading={false}
+      loading={true}
       mode="data_prepper"
       refresh={[Function]}
       traceIdColumnAction={[Function]}
