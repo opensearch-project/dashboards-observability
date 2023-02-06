@@ -738,7 +738,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
             onMouseOver={[Function]}
           >
             <EuiSwitch
-              checked={true}
+              checked={false}
               compressed={true}
               disabled={true}
               label="Save as Metric"
@@ -751,7 +751,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                 className="euiSwitch euiSwitch--compressed"
               >
                 <button
-                  aria-checked={true}
+                  aria-checked={false}
                   aria-labelledby="random_html_id"
                   className="euiSwitch__button"
                   disabled={true}
