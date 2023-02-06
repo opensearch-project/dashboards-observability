@@ -9,6 +9,7 @@ import { VisualizationChart } from './visualization_chart';
 import { VisCanvassPlaceholder } from '../event_analytics/explorer/visualizations/shared_components';
 import { IVisualizationContainerProps } from '../../../common/types/explorer';
 import { VIS_CHART_TYPES, VISUALIZATION_ERROR } from '../../../common/constants/shared';
+import { AGGREGATIONS, GROUPBY } from '../../../common/constants/explorer';
 
 export const Visualization = ({
   visualizations,
@@ -41,7 +42,7 @@ export const Visualization = ({
     if (dimensions.length < 1 && isEmpty(span)) return [false, VISUALIZATION_ERROR.INVALID_DATA];
 
     // heatmap
-    if (vis.id === VIS_CHART_TYPES.HeatMap(series.length !== 1 || dimensions.length !== 2))
+    if (vis.id === VIS_CHART_TYPES.HeatMap && (series.length !== 1 || dimensions.length !== 2))
       return [false, VISUALIZATION_ERROR.INVALID_DATA];
 
     return [true, ''];

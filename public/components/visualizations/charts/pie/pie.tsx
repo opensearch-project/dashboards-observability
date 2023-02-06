@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { find, isEmpty, forEach } from 'lodash';
+import { find, forEach } from 'lodash';
 import React, { useMemo } from 'react';
 import { DEFAULT_PALETTE, HEX_CONTRAST_COLOR } from '../../../../../common/constants/colors';
 import {
@@ -18,7 +18,6 @@ import {
   ConfigListEntry,
   IVisualizationContainerProps,
 } from '../../../../../common/types/explorer';
-import { EmptyPlaceholder } from '../../../event_analytics/explorer/visualizations/shared_components/empty_placeholder';
 import { getPropName, getTooltipHoverInfo } from '../../../event_analytics/utils/utils';
 import { Plt } from '../../plotly/plot';
 import { removeBacktick } from '../../../../../common/utils';
@@ -72,18 +71,15 @@ export const Pie = ({ visualizations, layout, config }: any) => {
     xaxes = dimensions;
   }
 
-  if (isEmpty(xaxes) || isEmpty(series)) {
-    return <EmptyPlaceholder icon={icontype} />;
-  }
-
   const invertHex = (hex: string) =>
-    (Number(`0x1${hex}`) ^ HEX_CONTRAST_COLOR).toString(16).substr(1).toUpperCase();
+    (Number(`0x1${hex}`) ^ HEX_CONTRAST_COLOR).toString(16).substr(1).toUpperCase(); // eslint-disable-line no-bitwise
 
   const labelsOfXAxis = xaxes.reduce((prev, cur) => {
     if (backtickRemovedVisData[removeBacktick(cur.name)]) {
       if (prev.length === 0) return backtickRemovedVisData[removeBacktick(cur.name)].flat();
       return prev.map(
-        (item: string | number, index: number) => `${item}, ${backtickRemovedVisData[removeBacktick(cur.name)][index]}`
+        (item: string | number, index: number) =>
+          `${item}, ${backtickRemovedVisData[removeBacktick(cur.name)][index]}`
       );
     }
   }, []);
@@ -98,7 +94,11 @@ export const Pie = ({ visualizations, layout, config }: any) => {
           colorTheme.name !== DEFAULT_PALETTE
             ? {
                 marker: {
-                  colors: [...Array(backtickRemovedVisData[removeBacktick(fieldName)].length).fill(colorTheme.childColor)],
+                  colors: [
+                    ...Array(backtickRemovedVisData[removeBacktick(fieldName)].length).fill(
+                      colorTheme.childColor
+                    ),
+                  ],
                   line: {
                     color: hexColor,
                     width: 1,
