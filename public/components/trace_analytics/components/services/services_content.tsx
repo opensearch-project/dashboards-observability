@@ -72,7 +72,7 @@ export function ServicesContent(props: ServicesProps) {
     }
     setFilteredService(newFilteredService);
     if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
-  }, [filters, appConfigs]);
+  }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
