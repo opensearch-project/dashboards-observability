@@ -363,10 +363,11 @@ export const onTimeChange = (
   setStart: React.Dispatch<React.SetStateAction<string>>,
   setEnd: React.Dispatch<React.SetStateAction<string>>
 ) => {
-  const recentlyUsedRangeObject = recentlyUsedRanges.filter((recentlyUsedRange) => {
+  let recentlyUsedRangeObject = recentlyUsedRanges.filter((recentlyUsedRange) => {
     const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
     return !isDuplicate;
   });
+
   recentlyUsedRangeObject.unshift({ start, end });
   setStart(start);
   setEnd(end);
