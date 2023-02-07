@@ -4,15 +4,19 @@
  */
 /* eslint-disable no-console */
 
+import { Indices } from 'elasticsearch';
+import DSLService from 'public/services/requests/dsl';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   TRACE_ANALYTICS_DSL_ROUTE,
   TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE,
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
   JAEGER_INDEX_NAME,
-  DATA_PREPPER_INDEX_NAME
+  DATA_PREPPER_INDEX_NAME,
+  DATA_PREPPER_MAPPING
 } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../home';
+import _ from 'lodash';
 
 export function handleDslRequest(http: CoreStart['http'], DSL: any, bodyQuery: any, mode: TraceAnalyticsMode, timeout?: boolean, setShowTimeoutToast?: () => void) {
   if (DSL?.query) {
@@ -58,4 +62,15 @@ export async function handleDataPrepperIndicesExistRequest(http: CoreStart['http
     .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE)
     .then((exists) => setDataPrepperIndicesExist(exists))
     .catch(() => setDataPrepperIndicesExist(false));
+}
+
+export async function getValidDataPrepperSpanIndices(dslService: DSLService, setValidDataPrepperIndices) {
+  const indices = await dslService.fetchFieldsForall()
+  const dataPrepperIndices = [];
+  for (const property in indices) {
+    if (_.isEqual(indices[property].mappings, DATA_PREPPER_MAPPING)) {
+      dataPrepperIndices.push(property)
+    }
+  }
+  setValidDataPrepperIndices(dataPrepperIndices)
 }

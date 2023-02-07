@@ -5,6 +5,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import DSLService from 'public/services/requests/dsl';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import {
@@ -18,7 +19,7 @@ import { SearchBarProps } from './components/common/search_bar';
 import { Dashboard } from './components/dashboard';
 import { Services, ServiceView } from './components/services';
 import { Traces, TraceView } from './components/traces';
-import { handleDataPrepperIndicesExistRequest, handleJaegerIndicesExistRequest } from './requests/request_handler';
+import { getValidDataPrepperSpanIndices, handleDataPrepperIndicesExistRequest, handleJaegerIndicesExistRequest } from './requests/request_handler';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
@@ -26,7 +27,9 @@ export interface TraceAnalyticsCoreDeps {
   chrome: ChromeStart;
 }
 
-interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
+interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {
+  dslService: DSLService
+}
 
 export type TraceAnalyticsMode = 'jaeger' | 'data_prepper'
 
@@ -42,7 +45,8 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
 }
 
 export const Home = (props: HomeProps) => {
-  const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
+  const [dataPrepperIndices, setDataPrepperIndices] = useState<string[]>([]);
+  const dataPrepperIndicesExist = dataPrepperIndices.length !== 0;
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
   const [mode, setMode] = useState<TraceAnalyticsMode>(sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode || 'jaeger')
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
@@ -81,7 +85,8 @@ export const Home = (props: HomeProps) => {
   };
 
   useEffect(() => {
-    handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist)
+    // handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist)
+    getValidDataPrepperSpanIndices(props.dslService, setDataPrepperIndices);
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
   }, []);
 
@@ -159,7 +164,7 @@ export const Home = (props: HomeProps) => {
     setEndTime: setEndTimeWithStorage,
     mode,
     modes,
-    setMode: (mode: TraceAnalyticsMode) => {setMode(mode)},
+    setMode: (traceMode: TraceAnalyticsMode) => {setMode(traceMode)},
     jaegerIndicesExist,
     dataPrepperIndicesExist,
   };
@@ -178,7 +183,7 @@ export const Home = (props: HomeProps) => {
         path={['/trace_analytics', '/trace_analytics/home']}
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} setToast={setToast} toasts={toasts} />
+            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} setToast={setToast} toasts={toasts} dslService={props.dslService} />
           </ObservabilitySideBar>
         )}
       />

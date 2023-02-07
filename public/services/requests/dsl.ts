@@ -38,4 +38,14 @@ export default class DSLService {
       })
       .catch((error) => console.error(error));
   };
+
+  fetchFieldsForall = async () => {
+    return this.http
+      .get(`${DSL_BASE}${DSL_MAPPING}`, {
+        query: {
+          format: 'json',
+        },
+      })
+      .catch((error) => console.error(error));
+  };
 }

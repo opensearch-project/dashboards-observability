@@ -5,6 +5,7 @@
 
 import { EuiBreadcrumb, EuiTitle } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import DSLService from 'public/services/requests/dsl';
 import React from 'react';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsMode } from '../../home';
 import { DashboardContent } from './dashboard_content';
@@ -20,6 +21,7 @@ export interface DashboardProps extends TraceAnalyticsComponentDeps {
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
+  dslService: DSLService
 }
 
 export function Dashboard(props: DashboardProps) {

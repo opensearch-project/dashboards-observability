@@ -139,6 +139,7 @@ export const App = ({
                     chrome={chrome}
                     http={http}
                     parentBreadcrumbs={[parentBreadcrumb]}
+                    dslService={dslService}
                   />
                 )}
               />
