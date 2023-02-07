@@ -284,7 +284,7 @@ export const DataConfigPanelItem = ({
     });
     handleQueryChange(newQueryString);
     getVisualizations({
-      queryState: nextQueryState[FINAL_QUERY],
+      query: nextQueryState[FINAL_QUERY],
       callback: (res) => {
         updateVisUIState({
           visData: res,
@@ -386,19 +386,6 @@ export const DataConfigPanelItem = ({
               )}
               {/* Show input fields for dimensions */}
               {!isAggregations && getCommonDimensionsField(selectedObj, name)}
-              {isPositionButtonVisible(name) && (
-                <EuiFormRow label="Side">
-                  <ButtonGroupItem
-                    legend="Side"
-                    groupOptions={[
-                      { id: 'left', label: 'Left' },
-                      { id: 'right', label: 'Right' },
-                    ]}
-                    idSelected={selectedObj.side || 'right'}
-                    handleButtonChange={(id: string) => updateList(id, 'side')}
-                  />
-                </EuiFormRow>
-              )}
             </EuiPanel>
             <EuiSpacer size="s" />
           </div>
