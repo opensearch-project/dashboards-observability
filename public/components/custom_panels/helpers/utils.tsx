@@ -19,7 +19,11 @@ import {
 import PPLService from '../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
-import { VisualizationType, SavedVisualizationType } from '../../../../common/types/custom_panels';
+import {
+  VisualizationType,
+  SavedVisualizationType,
+  VizContainerError,
+} from '../../../../common/types/custom_panels';
 import { Visualization } from '../../visualizations/visualization';
 import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
 import { QueryManager } from '../../../../common/query_manager';
@@ -138,20 +142,21 @@ const pplServiceRequestor = async (
   type: string,
   setVisualizationData: React.Dispatch<React.SetStateAction<any[]>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<string>>
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
   await pplService
     .fetch({ query: finalQuery, format: 'viz' })
     .then((res) => {
-      if (res === undefined) setIsError('Please check the validity of PPL Filter');
+      if (res === undefined)
+        setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
       setVisualizationData(res);
     })
     .catch((error: Error) => {
       const errorMessage = JSON.parse(error.body.message);
-      setIsError(
-        errorMessage.error.reason + '. ' + errorMessage.error.details ||
-          'Issue in fetching visualization'
-      );
+      setIsError({
+        errorMessage: errorMessage.error.reason || 'Issue in fetching visualization',
+        errorDetails: errorMessage.error.details,
+      });
       console.error(error.body);
     })
     .finally(() => {
@@ -163,7 +168,7 @@ const pplServiceRequestor = async (
 export const fetchVisualizationById = async (
   http: CoreStart['http'],
   savedVisualizationId: string,
-  setIsError: (value: string) => void
+  setIsError: (error: VizContainerError) => void
 ) => {
   let savedVisualization = {} as SavedVisualizationType;
   await http
@@ -172,7 +177,9 @@ export const fetchVisualizationById = async (
       savedVisualization = res.visualization;
     })
     .catch((err) => {
-      setIsError(`Could not locate saved visualization id:${savedVisualizationId}`);
+      setIsError({
+        errorMessage: `Could not locate saved visualization id: ${savedVisualizationId}`,
+      });
       console.error('Issue in fetching the saved Visualization by Id', err);
     });
   return savedVisualization;
@@ -187,19 +194,19 @@ export const getQueryResponse = (
   endTime: string,
   setVisualizationData: React.Dispatch<React.SetStateAction<any[]>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<string>>,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   filterQuery = '',
   timestampField = 'timestamp'
 ) => {
   setIsLoading(true);
-  setIsError('');
+  setIsError({} as VizContainerError);
 
   let finalQuery = '';
   try {
     finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
   } catch (error) {
     const errorMessage = 'Issue in building final query';
-    setIsError(errorMessage);
+    setIsError({ errorMessage: errorMessage });
     console.error(errorMessage, error);
     setIsLoading(false);
     return;
@@ -222,13 +229,14 @@ export const renderSavedVisualization = async (
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<string>>
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
   setIsLoading(true);
-  setIsError('');
+  setIsError({} as VizContainerError);
 
   let visualization = {} as SavedVisualizationType;
   let updatedVisualizationQuery = '';
+
   visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
 
   if (_.isEmpty(visualization)) {
@@ -311,11 +319,11 @@ export const renderCatalogVisualization = async (
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<string>>,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   spanResolution?: string
 ) => {
   setIsLoading(true);
-  setIsError('');
+  setIsError({} as VizContainerError);
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
