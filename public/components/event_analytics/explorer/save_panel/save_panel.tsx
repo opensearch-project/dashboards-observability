@@ -61,7 +61,7 @@ export const SavePanel = ({
 
   useEffect(() => {
     getCustomPabnelList(savedObjects);
-  });
+  }, []);
 
   const onToggleChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setChecked(e.target.checked);

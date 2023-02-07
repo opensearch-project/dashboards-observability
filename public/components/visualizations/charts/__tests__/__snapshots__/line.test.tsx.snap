@@ -522,75 +522,121 @@ exports[`Line component Renders line component 1`] = `
     }
   }
 >
-  <VisCanvassPlaceholder
-    icon="visBarVerticalStacked"
-    message="Missing mandatory series"
+  <Plt
+    config={Object {}}
+    data={
+      Array [
+        Object {
+          "mode": "text",
+          "showlegend": false,
+          "text": Array [],
+          "x": Array [],
+          "y": Array [],
+        },
+      ]
+    }
+    layout={
+      Object {
+        "autosize": true,
+        "colorway": Array [
+          "#8C55A3",
+        ],
+        "height": 220,
+        "legend": Object {
+          "orientation": "v",
+        },
+        "margin": Object {
+          "b": 30,
+          "l": 30,
+          "pad": 4,
+          "r": 5,
+          "t": 50,
+        },
+        "shapes": Array [],
+        "showlegend": true,
+        "title": "",
+        "xaxis": Object {
+          "automargin": true,
+          "tickangle": 0,
+          "tickfont": Object {},
+        },
+        "yaxis": Object {
+          "automargin": true,
+          "tickfont": Object {},
+        },
+      }
+    }
   >
-    <EuiText
-      className="lnsChart__empty"
-      color="subdued"
-      data-test-subj="vizWorkspace__noData"
-      size="xs"
-      textAlign="center"
+    <PlotlyComponent
+      config={
+        Object {
+          "displayModeBar": false,
+        }
+      }
+      data={
+        Array [
+          Object {
+            "mode": "text",
+            "showlegend": false,
+            "text": Array [],
+            "x": Array [],
+            "y": Array [],
+          },
+        ]
+      }
+      debug={false}
+      divId="explorerPlotComponent"
+      layout={
+        Object {
+          "autosize": true,
+          "barmode": "stack",
+          "colorway": Array [
+            "#8C55A3",
+          ],
+          "height": 220,
+          "hovermode": "closest",
+          "legend": Object {
+            "orientation": "v",
+          },
+          "margin": Object {
+            "b": 30,
+            "l": 30,
+            "pad": 4,
+            "r": 5,
+            "t": 50,
+          },
+          "shapes": Array [],
+          "showlegend": true,
+          "title": "",
+          "xaxis": Object {
+            "automargin": true,
+            "tickangle": 0,
+            "tickfont": Object {},
+          },
+          "yaxis": Object {
+            "automargin": true,
+            "tickfont": Object {},
+          },
+        }
+      }
+      style={
+        Object {
+          "height": "100%",
+          "width": "100%",
+        }
+      }
+      useResizeHandler={true}
     >
       <div
-        className="euiText euiText--extraSmall lnsChart__empty"
-        data-test-subj="vizWorkspace__noData"
-      >
-        <EuiTextAlign
-          textAlign="center"
-        >
-          <div
-            className="euiTextAlign euiTextAlign--center"
-          >
-            <EuiTextColor
-              color="subdued"
-              component="div"
-            >
-              <div
-                className="euiTextColor euiTextColor--subdued"
-              >
-                <EuiIcon
-                  color="subdued"
-                  size="xxl"
-                  type="visBarVerticalStacked"
-                >
-                  <EuiIconEmpty
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon-isLoading"
-                    focusable="false"
-                    role="img"
-                    style={null}
-                  >
-                    <svg
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon-isLoading"
-                      focusable="false"
-                      height={16}
-                      role="img"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
-                    />
-                  </EuiIconEmpty>
-                </EuiIcon>
-                <EuiSpacer
-                  size="l"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <p>
-                  Missing mandatory series
-                </p>
-              </div>
-            </EuiTextColor>
-          </div>
-        </EuiTextAlign>
-      </div>
-    </EuiText>
-  </VisCanvassPlaceholder>
+        id="explorerPlotComponent"
+        style={
+          Object {
+            "height": "100%",
+            "width": "100%",
+          }
+        }
+      />
+    </PlotlyComponent>
+  </Plt>
 </Line>
 `;
