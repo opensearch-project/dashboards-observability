@@ -147,7 +147,8 @@ export const sampleVisualizations = [
   {
     name: '[Logs] Max and average bytes by host',
     description: '',
-    query: 'source = opensearch_dashboards_sample_data_logs | stats max(bytes), avg(bytes) by host',
+    query:
+      'source = opensearch_dashboards_sample_data_logs | stats max(bytes), avg(bytes) by span(timestamp, 1M)',
     type: 'line',
     selected_date_range: {
       start: 'now/y',
