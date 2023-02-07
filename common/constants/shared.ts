@@ -192,3 +192,8 @@ export const PLOT_MARGIN = {
 };
 
 export const WAITING_TIME_ON_USER_ACTIONS = 300;
+
+export const VISUALIZATION_ERROR = {
+  NO_DATA: 'No data found.',
+  INVALID_DATA: 'Invalid visualization data',
+};

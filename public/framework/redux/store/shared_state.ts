@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { uniqueId } from 'lodash';
+import { htmlIdGenerator } from '@elastic/eui';
 import { TAB_ID_TXT_PFX } from '../../../../common/constants/explorer';
 
-export const initialTabId: string = uniqueId(TAB_ID_TXT_PFX);
+export const initialTabId: string = htmlIdGenerator(TAB_ID_TXT_PFX)();

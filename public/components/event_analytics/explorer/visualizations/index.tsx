@@ -52,6 +52,7 @@ export const ExplorerVisualizations = ({
   queryManager,
 }: IExplorerVisualizationsProps) => {
   const { vis } = visualizations;
+  const isMarkDown = vis.id === VIS_CHART_TYPES.Text;
   const fieldOptionList = explorerFields.availableFields.map((field) => ({
     ...field,
     label: field.name,
@@ -96,13 +97,13 @@ export const ExplorerVisualizations = ({
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
             <EuiResizablePanel
-              initialSize={20}
-              minSize="17%"
+              initialSize={isMarkDown ? 12 : 20}
+              minSize={isMarkDown ? '10%' : '17%'}
               mode={['collapsible', { position: 'top' }]}
               paddingSize="none"
               className="vis__leftPanel"
             >
-              <div className="explorer__insights">
+              <div className={isMarkDown ? 'explorer__configPanel-markdown' : 'explorer__insights'}>
                 <div className="explorerFieldSelector">
                   <Sidebar
                     query={query}
@@ -126,12 +127,20 @@ export const ExplorerVisualizations = ({
                 >
                   {renderDataConfigContainer()}
                 </div>
+                {!isMarkDown && (
+                  <div
+                    className="explorer__vizDataConfig"
+                    data-test-subj="explorer__vizDataConfig-panel"
+                  >
+                    {renderDataConfigContainer()}
+                  </div>
+                )}
               </div>
             </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel
               className="ws__central--canvas"
-              initialSize={60}
+              initialSize={isMarkDown ? 68 : 60}
               minSize="55%"
               mode="main"
               paddingSize="none"
