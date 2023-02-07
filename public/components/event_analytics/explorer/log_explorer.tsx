@@ -6,10 +6,16 @@
 
 import './log_explorer.scss';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector, batch } from 'react-redux';
-import { uniqueId, map, isEmpty } from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
+import { map, isEmpty } from 'lodash';
 import $ from 'jquery';
-import { EuiIcon, EuiText, EuiTabbedContentTab, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiTabbedContentTab,
+  EuiTabbedContent,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { Explorer } from './explorer';
 import { ILogExplorerProps } from '../../../../common/types/explorer';
 import {
@@ -111,7 +117,7 @@ export const LogExplorer = ({
 
   const addNewTab = async (where: string) => {
     // get a new tabId
-    const tabId = uniqueId(TAB_ID_TXT_PFX);
+    const tabId = htmlIdGenerator(TAB_ID_TXT_PFX)();
 
     // create a new tab
     await initializeTabData(dispatch, tabId, where);

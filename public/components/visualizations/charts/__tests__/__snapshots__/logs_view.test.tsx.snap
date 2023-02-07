@@ -551,15 +551,15 @@ exports[`Logs View component Renders logs view component 1`] = `
               className="osdDocTableHeader"
             >
               <th
-                key="datagrid-header-5"
+                key="datagrid-header-4"
               />
               <th
-                key="datagrid-header-6"
+                key="datagrid-header-5"
               >
                 Time
               </th>
               <th
-                key="datagrid-header-7"
+                key="datagrid-header-6"
               >
                 _source
               </th>

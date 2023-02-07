@@ -98,24 +98,27 @@ export const Bar = ({ visualizations, layout, config }: any) => {
   const plotlyColorway =
     queriedVizData[fields[lastIndex].name].length < 16 ? PLOTLY_COLOR : [LONG_CHART_COLOR];
 
-  if (isEmpty(series))
-    return <VisCanvassPlaceholder message="Missing aggregations" icon={icontype} />;
-
   const addStylesToTraces = (traces, traceStyles) => {
-    const { barOrientation, fillOpacity, tooltipMode, tooltipText, lineWidth } = traceStyles;
+    const {
+      barOrientation: barOrient,
+      fillOpacity: opac,
+      tooltipMode: tltpMode,
+      tooltipText: tltpText,
+      lineWidth: lwidth,
+    } = traceStyles;
     return traces.map((trace, idx: number) => {
       const selectedColor = getSelectedColorTheme(trace.aggName, idx);
       return {
         ...trace,
         type,
-        orientation: barOrientation,
-        hoverinfo: tooltipMode === 'hidden' ? 'none' : tooltipText,
+        orientation: barOrient,
+        hoverinfo: tltpMode === 'hidden' ? 'none' : tltpText,
         ...{
           marker: {
-            color: hexToRgb(selectedColor, fillOpacity),
+            color: hexToRgb(selectedColor, opac),
             line: {
               color: selectedColor,
-              width: lineWidth,
+              width: lwidth,
             },
           },
         },

@@ -29,6 +29,7 @@ import {
   EuiPageContentHeaderSection,
   EuiText,
   EuiHorizontalRule,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { Search } from '../../common/search/search';
@@ -124,7 +125,7 @@ export const Home = (props: IHomeProps) => {
   };
 
   const deleteHistoryList = async () => {
-    const objectIdsToDelete = selectedHistories.map((history) => history.data.objectId);
+    const objectIdsToDelete = selectedHistories.map((hstry) => hstry.data.objectId);
     await savedObjects
       .deleteSavedObjectsList({ objectIdList: objectIdsToDelete })
       .then(async (res) => {
@@ -145,7 +146,7 @@ export const Home = (props: IHomeProps) => {
 
   const addNewTab = async () => {
     // get a new tabId
-    const tabId = uniqueId(TAB_ID_TXT_PFX);
+    const tabId = htmlIdGenerator(TAB_ID_TXT_PFX)();
 
     // create a new tab
     await batch(() => {
@@ -281,7 +282,6 @@ export const Home = (props: IHomeProps) => {
       setToast(`Sample events added successfully.`);
     } catch (error: any) {
       setToast(`Cannot add sample events data, error: ${error}`, 'danger');
-      console.error(error.body.message);
     } finally {
       setIsTableLoading(false);
     }

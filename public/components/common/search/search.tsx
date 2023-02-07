@@ -82,7 +82,6 @@ export const Search = (props: any) => {
     stopLive,
     setIsLiveTailPopoverOpen,
     liveTailName,
-    searchError = null,
     curVisId,
     spanValue,
     setSubType,
@@ -263,17 +262,6 @@ export const Search = (props: any) => {
           </>
         )}
       </EuiFlexGroup>
-      { searchError && searchError.error && (
-        <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
-          <EuiFlexItem>
-            <EuiCallOut title={JSON.parse(searchError.message).error.reason} color="danger" iconType="alert">
-              <p>
-                {JSON.parse(searchError.message).error.details}
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        </EuiFlexGroup>)
-      }
       {flyout}
     </div>
   );
