@@ -11,7 +11,11 @@ import _ from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
-import { PPL_DATE_FORMAT, PPL_INDEX_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_DATE_FORMAT,
+  PPL_INDEX_REGEX,
+  PPL_WHERE_CLAUSE_REGEX,
+} from '../../../../common/constants/shared';
 import PPLService from '../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
@@ -68,7 +72,7 @@ export const mergeLayoutAndVisualizations = (
 
   for (let i = 0; i < newVisualizationList.length; i++) {
     for (let j = 0; j < layout.length; j++) {
-      if (newVisualizationList[i].id == layout[j].i) {
+      if (newVisualizationList[i].id === layout[j].i) {
         newPanelVisualizations.push({
           ...newVisualizationList[i],
           x: layout[j].x,
@@ -301,7 +305,7 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
-//Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
+// Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async (
   http: CoreStart['http'],
   pplService: PPLService,
@@ -367,14 +371,15 @@ export const onTimeChange = (
   setStart: React.Dispatch<React.SetStateAction<string>>,
   setEnd: React.Dispatch<React.SetStateAction<string>>
 ) => {
-  const recentlyUsedRange = recentlyUsedRanges.filter((recentlyUsedRange) => {
+  let recentlyUsedRangeObject = recentlyUsedRanges.filter((recentlyUsedRange) => {
     const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
     return !isDuplicate;
   });
-  recentlyUsedRange.unshift({ start, end });
+
+  recentlyUsedRangeObject.unshift({ start, end });
   setStart(start);
   setEnd(end);
-  setRecentlyUsedRanges(recentlyUsedRange.slice(0, 9));
+  setRecentlyUsedRanges(recentlyUsedRangeObject.slice(0, 9));
 };
 
 // Function to check date validity
@@ -400,6 +405,11 @@ const checkIndexExists = (query: string) => {
   return PPL_INDEX_REGEX.test(query);
 };
 
+// Check if the filter query starts with a where clause
+const checkWhereClauseExists = (query: string) => {
+  return PPL_WHERE_CLAUSE_REGEX.test(query);
+};
+
 // Check PPL Query in Panel UI
 // Validate if the query doesn't contain any Index
 export const isPPLFilterValid = (
@@ -413,6 +423,10 @@ export const isPPLFilterValid = (
 ) => {
   if (checkIndexExists(query)) {
     setToast('Please remove index from PPL Filter', 'danger', undefined);
+    return false;
+  }
+  if (!checkWhereClauseExists(query)) {
+    setToast('PPL filters should start with a where clause', 'danger', undefined);
     return false;
   }
   return true;
@@ -429,7 +443,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
   };
   let finalDimensions = [...(realTimeParsedStats.dimensions || [])];
-  let breakdowns = [...(dataConfig.breakdowns || [])];
+  const breakdowns = [...(dataConfig.breakdowns || [])];
 
   // filter out breakdowns from dimnesions
   if (hasBreakdowns) {
