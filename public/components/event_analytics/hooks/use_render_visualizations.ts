@@ -4,16 +4,13 @@
  */
 
 import { batch, useDispatch } from 'react-redux';
+import { VisualizationState } from 'common/types/explorer';
 import { updateFields, sortFields } from '../redux/slices/field_slice';
 import { render as renderExplorerVis } from '../redux/slices/visualization_slice';
 import { fetchSuccess } from '../redux/slices/query_result_slice';
-import {
-  QUERIED_FIELDS,
-  SELECTED_FIELDS,
-} from '../../../../common/constants/explorer';
+import { QUERIED_FIELDS, SELECTED_FIELDS } from '../../../../common/constants/explorer';
 import { change as changeVizConfig } from '../redux/slices/viualization_config_slice';
 import { changeQuery } from '../redux/slices/query_slice';
-import { VisualizationState } from 'common/types/explorer';
 
 export interface IVisualizationParams {
   query: string;
@@ -52,7 +49,7 @@ export const useRenderVisualization = ({ pplService, requestParams }) => {
       },
       'viz',
       (res: any) => {
-        callback && callback(res);
+        if (callback) callback(res);
       },
       (error: any) => {
         dispatch(
@@ -65,13 +62,18 @@ export const useRenderVisualization = ({ pplService, requestParams }) => {
     );
   };
 
-  const fillVisDataInStore = ({ visData, query, visConfMetadata, visMeta }: VisualizationState) => {
+  const fillVisDataInStore = ({
+    visData,
+    queryState,
+    visConfMetadata,
+    visMeta,
+  }: VisualizationState) => {
     batch(() => {
       // query
       dispatch(
         changeQuery({
           tabId: requestParams.tabId,
-          query,
+          query: queryState,
         })
       );
 
