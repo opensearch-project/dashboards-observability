@@ -13,26 +13,26 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { isArray, isEmpty } from 'lodash';
+import { isArray, isEmpty, lowerCase } from 'lodash';
 import {
   AGGREGATIONS,
   CUSTOM_LABEL,
   GROUPBY,
   SPAN,
-  DATA_CONFIG_HINTS_INFO
+  DATA_CONFIG_HINTS_INFO,
 } from '../../../../../../../../common/constants/explorer';
 import { VIS_CHART_TYPES } from '../../../../../../../../common/constants/shared';
 import {
   ConfigListEntry,
   DataConfigPanelFieldProps,
 } from '../../../../../../../../common/types/explorer';
-import { removeBacktick } from '../../../../../../../../common/utils'
+import { removeBacktick } from '../../../../../../../../common/utils';
 
 const HIDE_ADD_BUTTON_VIZ_TYPES = [
   VIS_CHART_TYPES.HeatMap,
   VIS_CHART_TYPES.Line,
   VIS_CHART_TYPES.Scatter,
-  VIS_CHART_TYPES.Pie
+  VIS_CHART_TYPES.Pie,
 ];
 
 export const DataConfigPanelFields = ({
@@ -55,10 +55,10 @@ export const DataConfigPanelFields = ({
     if (visType === VIS_CHART_TYPES.HeatMap)
       return name === AGGREGATIONS ? list.length >= 1 : list.length >= 2;
     // condition for line and scatter for dimensions section.
-    return name === GROUPBY && (list.length >= 1 || !isEmpty(time_field));
+    return name === GROUPBY && (list.length >= 1 || !isEmpty(timeField));
   };
 
-  const { time_field, unit, interval } = dimensionSpan;
+  const { time_field: timeField, unit, interval } = dimensionSpan;
 
   const tooltipIcon = <EuiIcon type="iInCircle" color="text" size="m" className="info-icon" />;
   const crossIcon = (index: number, configName: string) => (
@@ -68,6 +68,7 @@ export const DataConfigPanelFields = ({
       aria-label="clear-field"
       iconSize="s"
       onClick={() => handleServiceRemove(index, configName)}
+      data-test-subj="viz-config-delete-btn"
     />
   );
 
@@ -83,7 +84,7 @@ export const DataConfigPanelFields = ({
   );
 
   return (
-    <div className="panel_section">
+    <div className="panel_section" data-test-subj={`vizConfigSection-${lowerCase(sectionName)}`}>
       <div style={{ display: 'flex' }}>
         <EuiTitle size="xxs" className="panel_title">
           <h3>{sectionName}</h3>
@@ -91,15 +92,16 @@ export const DataConfigPanelFields = ({
         {infoToolTip(tooltipIcon, DATA_CONFIG_HINTS_INFO[`${sectionName}`])}
       </div>
       <EuiSpacer size="s" />
-      {sectionName === GROUPBY && dimensionSpan && !isEmpty(time_field) && (
-        <EuiPanel paddingSize="s" className="panelItem_button">
+      {sectionName === GROUPBY && dimensionSpan && !isEmpty(timeField) && (
+        <EuiPanel paddingSize="s" className="panelItem_button" data-test-subj="viz-config-section">
           <EuiText size="s" className="field_text">
             <EuiLink
               role="button"
               tabIndex={0}
               onClick={() => handleServiceEdit(list.length - 1, GROUPBY, true)}
+              data-test-subj="viz-config-add-btn"
             >
-              {`${SPAN}(${time_field[0]?.name}, ${interval} ${unit[0]?.value})`}
+              {`${SPAN}(${timeField[0]?.name}, ${interval} ${unit[0]?.value})`}
             </EuiLink>
           </EuiText>
           {crossIcon(-1, SPAN)}
@@ -109,14 +111,21 @@ export const DataConfigPanelFields = ({
       {isArray(list) &&
         list.map((obj: ConfigListEntry, index: number) => (
           <Fragment key={index}>
-            <EuiPanel paddingSize="s" className="panelItem_button">
+            <EuiPanel
+              paddingSize="s"
+              className="panelItem_button"
+              data-test-subj="viz-config-section"
+            >
               <EuiText size="s" className="field_text">
                 <EuiLink
                   role="button"
                   tabIndex={0}
                   onClick={() => handleServiceEdit(index, sectionName, false)}
+                  data-test-subj="viz-config-add-btn"
                 >
-                  {removeBacktick(obj[CUSTOM_LABEL] || `${isAggregation ? obj.aggregation : ''} ${obj.label}`)}
+                  {removeBacktick(
+                    obj[CUSTOM_LABEL] || `${isAggregation ? obj.aggregation : ''} ${obj.label}`
+                  )}
                 </EuiLink>
               </EuiText>
               {isAggregation
@@ -127,7 +136,7 @@ export const DataConfigPanelFields = ({
           </Fragment>
         ))}
       {!hideClickToAddButton(sectionName) && (
-        <EuiPanel className="panelItem_button" grow>
+        <EuiPanel className="panelItem_button" data-test-subj="viz-config-section" grow>
           <EuiText size="s">{addButtonText}</EuiText>
           <EuiButtonIcon
             iconType="plusInCircle"
@@ -135,6 +144,7 @@ export const DataConfigPanelFields = ({
             iconSize="s"
             color="primary"
             onClick={() => handleServiceAdd(sectionName)}
+            data-test-subj="viz-config-add-btn"
           />
         </EuiPanel>
       )}

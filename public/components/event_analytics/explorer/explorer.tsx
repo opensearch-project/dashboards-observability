@@ -104,6 +104,7 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { QueryManager } from '../../../../common/query_manager';
+import { uiSettingsService } from '../../../../common/utils';
 
 const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
@@ -187,10 +188,8 @@ export const Explorer = ({
     value: string;
   }>();
   const [viewLogPatterns, setViewLogPatterns] = useState(false);
-  const [spanValue, setSpanValue] = useState(false);
   const [subType, setSubType] = useState('visualization');
   const [metricMeasure, setMetricMeasure] = useState('');
-  const [metricLabel, setMetricLabel] = useState([]);
   const [metricChecked, setMetricChecked] = useState(false);
   const queryRef = useRef();
   const appBasedRef = useRef('');
@@ -570,7 +569,10 @@ export const Explorer = ({
       await updateQueryInStore(patternSelectQuery);
       // Passing in empty string will remove pattern query
       const patternErrorHandler = getErrorHandler('Error fetching patterns');
-      getPatterns(selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y', patternErrorHandler);
+      getPatterns(
+        selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
+        patternErrorHandler
+      );
     }
   };
 
@@ -645,7 +647,10 @@ export const Explorer = ({
       getErrorHandler('Error overriding default pattern')
     );
     setIsOverridingPattern(false);
-    await getPatterns(selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y', getErrorHandler('Error fetching patterns'));
+    await getPatterns(
+      selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
+      getErrorHandler('Error fetching patterns')
+    );
   };
 
   const totalHits: number = useMemo(() => {
@@ -850,7 +855,10 @@ export const Explorer = ({
                                               })
                                             );
                                             await getPatterns(
-                                              selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
+                                              selectedIntervalRef.current?.value.replace(
+                                                /^auto_/,
+                                                ''
+                                              ) || 'y',
                                               getErrorHandler('Error fetching patterns')
                                             );
                                           }}
@@ -1253,7 +1261,7 @@ export const Explorer = ({
               ? JSON.stringify(userVizConfigs[curVisId])
               : JSON.stringify({}),
             description: vizDescription,
-            subType: subType,
+            subType,
           })
           .then((res: any) => {
             setToast(
@@ -1288,7 +1296,7 @@ export const Explorer = ({
               ? JSON.stringify(userVizConfigs[curVisId])
               : JSON.stringify({}),
             description: vizDescription,
-            subType: subType,
+            subType,
           })
           .then((res: any) => {
             batch(() => {
@@ -1430,24 +1438,16 @@ export const Explorer = ({
     [tempQuery]
   );
 
-  const generateViewQuery = (query: string) => {
-    if (query.includes(appBaseQuery)) {
-      if (query.includes('|')) {
+  const generateViewQuery = (queryString: string) => {
+    if (queryString.includes(appBaseQuery)) {
+      if (queryString.includes('|')) {
         // Some scenarios have ' | ' after base query and some have '| '
-        return query.replace(' | ', '| ').replace(appBaseQuery + '| ', '');
+        return queryString.replace(' | ', '| ').replace(appBaseQuery + '| ', '');
       }
       return '';
     }
-    return query;
+    return queryString;
   };
-
-  useEffect(() => {
-    if (isEqual(selectedContentTabId, TAB_CHART_ID)) {
-      const statsTokens = queryManager.queryParser().parse(tempQuery).getStats();
-      const updatedDataConfig = getDefaultVisConfig(statsTokens);
-      setSpanValue(!isEqual(typeof updatedDataConfig.span, 'undefined'));
-    }
-  }, [tempQuery, selectedContentTabId, curVisId]);
 
   return (
     <TabContext.Provider
@@ -1469,7 +1469,9 @@ export const Explorer = ({
         query,
       }}
     >
-      <div className="dscAppContainer">
+      <div
+        className={`dscAppContainer${uiSettingsService.get('theme:darkMode') && ' explorer-dark'}`}
+      >
         <Search
           key="search-component"
           query={appLogEvents ? generateViewQuery(tempQuery) : query[RAW_QUERY]}
@@ -1504,12 +1506,7 @@ export const Explorer = ({
           liveTailName={liveTailNameRef.current}
           searchError={explorerVisualizations}
           curVisId={curVisId}
-          spanValue={spanValue}
           setSubType={setSubType}
-          metricMeasure={metricMeasure}
-          setMetricMeasure={setMetricMeasure}
-          setMetricLabel={setMetricLabel}
-          metricChecked={metricChecked}
         />
         <EuiTabbedContent
           className="mainContentTabs"
