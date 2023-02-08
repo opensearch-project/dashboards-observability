@@ -10,11 +10,13 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsType,
 } from '../../../src/core/server';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { setupRoutes } from './routes/index';
 import { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import { migrations } from '../../../src/core/server/ui_settings/saved_objects/migrations';
 
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
@@ -30,10 +32,7 @@ export class ObservabilityPlugin
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
       {
-        plugins: [
-          PPLPlugin,
-          OpenSearchObservabilityPlugin,
-        ],
+        plugins: [PPLPlugin, OpenSearchObservabilityPlugin],
       }
     );
 
@@ -44,6 +43,34 @@ export class ObservabilityPlugin
         observabilityClient: openSearchObservabilityClient,
       };
     });
+
+    const obsPanelType: SavedObjectsType = {
+      name: 'observability-panel',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: {
+            type: 'keyword',
+          },
+        },
+      },
+      management: {
+        importableAndExportable: true,
+        getInAppUrl() {
+          return {
+            path: `/app/management/observability/settings`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj) {
+          return `Observability Settings [${obj.id}]`;
+        },
+      },
+      migrations: {},
+    };
+
+    core.savedObjects.registerType(obsPanelType);
 
     // Register server side APIs
     setupRoutes({ router, client: openSearchObservabilityClient });

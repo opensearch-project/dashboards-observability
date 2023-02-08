@@ -7,13 +7,14 @@
 import { EuiBreadcrumb, EuiGlobalToastList, EuiLink, ShortDate } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
-import React, { ReactChild, useState } from 'react';
+import React, { ReactChild, useEffect, useState } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext } from 'react-router';
 import { Route, RouteComponentProps } from 'react-router-dom';
+import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, SavedObjectsClient } from '../../../../../src/core/public';
 import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_DOCUMENTATION_URL,
@@ -28,6 +29,11 @@ import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
+
+interface ObservabilityPanelAttrs {
+  id: string;
+  name: string;
+}
 
 /*
  * "Home" module is initial page for Operantional Panels
@@ -47,6 +53,7 @@ interface PanelHomeProps {
   pplService: PPLService;
   dslService: DSLService;
   renderProps: RouteComponentProps<any, StaticContext, any>;
+  savedObjects: SavedObjectsClientContract;
 }
 
 export const Home = ({
@@ -56,6 +63,7 @@ export const Home = ({
   pplService,
   dslService,
   renderProps,
+  savedObjects,
 }: PanelHomeProps) => {
   const [customPanelData, setcustomPanelData] = useState<CustomPanelListType[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -63,6 +71,10 @@ export const Home = ({
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
+
+  useEffect(() => {
+    console.log('CustomPanels:Home savedObjects', { savedObjects });
+  }, [savedObjects]);
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -75,8 +87,15 @@ export const Home = ({
   };
 
   // Fetches all saved Custom Panels
-  const fetchCustomPanels = () => {
+  const fetchCustomPanels = async () => {
     setLoading(true);
+
+    const savedObjectPanels = await savedObjects.client.find<ObservabilityPanelAttrs>({
+      type: 'observability-panel',
+    });
+
+    console.log({ savedObjectPanels });
+
     http
       .get(`${CUSTOM_PANELS_API_PREFIX}/panels`)
       .then((res) => {
@@ -89,11 +108,21 @@ export const Home = ({
   };
 
   // Creates a new CustomPanel
-  const createCustomPanel = (newCustomPanelName: string) => {
+  const createCustomPanel = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
       return;
     }
+
+    await savedObjects.client.create<ObservabilityPanelAttrs>(
+      'observability-panel',
+      {
+        title: newCustomPanelName,
+      },
+      {
+        id: newCustomPanelName,
+      }
+    );
 
     return http
       .post(`${CUSTOM_PANELS_API_PREFIX}/panels`, {
