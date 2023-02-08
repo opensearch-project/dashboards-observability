@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './toolbar_button.scss';
 import React from 'react';
 import classNames from 'classnames';
 import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';

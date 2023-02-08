@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './data_configurations_panel.scss';
-
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,

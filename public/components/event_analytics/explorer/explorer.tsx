@@ -95,7 +95,6 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { DataGrid } from './events_views/data_grid';
-import './explorer.scss';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { PatternsTable } from './log_patterns/patterns_table';
 import { NoResults } from './no_results';
