@@ -4,9 +4,6 @@
  */
 
 .explorer__vizDataConfig {
-  @include euiYScrollWithShadows;
-
-  background: $euiColorLightestShade;
   border-left: $euiBorderThin;
   border-right: $euiBorderThin;
   position: relative;
