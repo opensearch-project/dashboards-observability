@@ -123,7 +123,12 @@ export const ExplorerVisualizations = ({
                     }
                   />
                 </div>
-                <div className="explorer__vizDataConfig">{renderDataConfigContainer()}</div>
+                <div
+                  className="explorer__vizDataConfig"
+                  data-test-subj="explorer__vizDataConfig-panel"
+                >
+                  {renderDataConfigContainer()}
+                </div>
               </div>
             </EuiResizablePanel>
             <EuiResizableButton />

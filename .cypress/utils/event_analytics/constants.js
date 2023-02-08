@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { COMMAND_TIMEOUT_LONG, supressResizeObserverIssue, TIMEOUT_DELAY } from '../constants';
+import { COMMAND_TIMEOUT_LONG, supressResizeObserverIssue } from '../constants';
 
 export const delay = 1000;
 export const YEAR_TO_DATE_DOM_ID = '[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]';
@@ -20,6 +20,7 @@ export const TEST_QUERIES = [
   },
   {
     query: 'source = opensearch_dashboards_sample_data_logs',
+    dateRangeDOM: YEAR_TO_DATE_DOM_ID,
   },
   {
     query:
@@ -78,30 +79,25 @@ export const querySearch = (query, rangeSelected) => {
     .type(query, { delay: 50 });
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.get(rangeSelected).click();
-  cy.wait(delay * 2);
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
 };
 
 export const landOnEventHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics`);
-  cy.wait(delay);
 };
 
 export const landOnEventExplorer = () => {
   cy.visit(
     `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/explorer`
   );
-  supressResizeObserverIssue();
-  cy.wait(delay);
 };
 
 export const landOnEventVisualizations = () => {
   cy.visit(
     `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/explorer`
   );
+  supressResizeObserverIssue(); // have to add
   cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
-  supressResizeObserverIssue();
-  cy.wait(delay);
 };
 
 export const landOnPanels = () => {
@@ -252,3 +248,20 @@ export const renderGaugeChart = () => {
     .type('Gauge')
     .type('{enter}');
 };
+
+export const HOST_TEXT_1 = "artifacts.opensearch.org";
+export const HOST_TEXT_2 = "www.opensearch.org";
+export const HOST_TEXT_3 = "cdn.opensearch-opensearch-opensearch.org";
+export const HOST_TEXT_4 = "opensearch-opensearch-opensearch.org";
+export const AGENT_TEXT_1 = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)";
+export const AGENT_TEXT_2 = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24";
+export const AGENT_TEXT_3 = "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1";
+export const BAR_LEG_TEXT_1 = `${AGENT_TEXT_1},count()`;
+export const BAR_LEG_TEXT_2 = `${AGENT_TEXT_2},count()`;
+export const BAR_LEG_TEXT_3 = `${AGENT_TEXT_3},count()`;
+export const VIS_TYPE_PIE = 'Pie';
+export const VIS_TYPE_VBAR = 'Vertical bar';
+export const VIS_TYPE_HBAR = 'Horizontal bar';
+export const VIS_TYPE_HEATMAP = 'Heatmap';
+export const FIELD_HOST = 'host';
+export const FIELD_AGENT = 'agent';
