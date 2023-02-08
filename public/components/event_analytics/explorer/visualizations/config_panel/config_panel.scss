@@ -3,14 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.lnsConfigPanel__addLayerBtn {
-  color: transparentize($euiColorMediumShade, 0.3);
-  // Remove EuiButton's default shadow to make button more subtle
-  // sass-lint:disable-block no-important
-  box-shadow: none !important;
-  border-color: $euiColorLightShade;
-}
-
 //
 // LAYOUT
 //
@@ -140,7 +132,7 @@ $vis-editor-sidebar-min-width: 350px;
   
   .cp__rightHeader, .cp__rightSettings {
     padding: 8px;
-    background-color: #FFF;
+    background-color: transparent;
   }
 
   .cp__rightHeader {
@@ -195,4 +187,11 @@ $vis-editor-sidebar-min-width: 350px;
 
 .color-theme-combo-box-option .euiFlexItem.euiFlexItem--flexGrowZero {
   display: none;
+}
+
+// dark mode
+.explorer-dark {
+  .panel_section, .cp__rightHeader {
+    border-bottom: 1px solid $border-color-on-dark;
+  }
 }
