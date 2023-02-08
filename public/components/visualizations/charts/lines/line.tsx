@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { find, isEmpty, last, forEach } from 'lodash';
+import { isEmpty, last } from 'lodash';
 import React, { useMemo } from 'react';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
@@ -64,7 +64,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
   const tooltipMode =
     tooltipOptions.tooltipMode !== undefined ? tooltipOptions.tooltipMode : 'show';
   const tooltipText = tooltipOptions.tooltipText !== undefined ? tooltipOptions.tooltipText : 'all';
-  const lastIndex = fields.length - 1;
   const visType: string = name;
   const mode =
     chartStyles.style || (visType === VIS_CHART_TYPES.Line ? DefaultModeLine : DefaultModeScatter);
@@ -84,20 +83,23 @@ export const Line = ({ visualizations, layout, config }: any) => {
     (colorTheme.length > 0 &&
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
-  const timestampField = find(fields, (field) => field.type === 'timestamp');
-  let xaxis = [timestampField];
-
-  if (isEmpty(series)) return <VisCanvassPlaceholder message='Missing mandatory series' icon={icontype} />;
 
   const addStylesToTraces = (traces, traceStyles) => {
-    const { fillOpacity, tooltipMode, tooltipText, lineWidth, lineShape, markerSize } = traceStyles;
+    const {
+      fillOpacity: opac,
+      tooltipMode: tltpMode,
+      tooltipText: tltpText,
+      lineWidth: lwidth,
+      lineShape: lshape,
+      markerSize: mkrSize,
+    } = traceStyles;
     return traces.map((trace, idx: number) => {
       const selectedColor = getSelectedColorTheme(trace.aggName, idx);
-      const fillColor = hexToRgb(selectedColor, fillOpacity);
+      const fillColor = hexToRgb(selectedColor, opac);
 
       return {
         ...trace,
-        hoverinfo: tooltipMode === 'hidden' ? 'none' : tooltipText,
+        hoverinfo: tltpMode === 'hidden' ? 'none' : tltpText,
         type: 'line',
         mode,
         ...{
@@ -105,17 +107,17 @@ export const Line = ({ visualizations, layout, config }: any) => {
           fillcolor: fillColor,
         },
         line: {
-          shape: lineShape,
-          width: lineWidth,
+          shape: lshape,
+          width: lwidth,
           color: selectedColor,
         },
         marker: {
-          size: markerSize,
+          size: mkrSize,
           ...{
             color: fillColor,
             line: {
               color: selectedColor,
-              width: lineWidth,
+              width: lwidth,
             },
           },
         },
@@ -143,16 +145,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
       transformPreprocessedDataToTraces(preprocessJsonData(jsonData, visConfig), visConfig),
       traceStyles
     );
-  }, [
-    chartStyles,
-    jsonData,
-    dimensions,
-    series,
-    span,
-    breakdowns,
-    panelOptions,
-    tooltipOptions,
-  ]);
+  }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
 
   const mergedLayout = useMemo(() => {
     const axisLabelsStyle = {

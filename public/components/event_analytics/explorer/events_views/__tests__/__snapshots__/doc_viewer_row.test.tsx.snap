@@ -22,7 +22,7 @@ exports[`Datagrid Doc viewer row component Renders Doc viewer row component 1`] 
   >
     <td
       className="osdDocTableCell__toggleDetails"
-      key="grid-td-3"
+      key="grid-td-2"
     >
       <EuiButtonIcon
         className="euiButtonIcon euiButtonIcon--text"
@@ -69,7 +69,7 @@ exports[`Datagrid Doc viewer row component Renders Doc viewer row component 1`] 
     </td>
     <td
       className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
-      key="datagrid-cell-2"
+      key="datagrid-cell-1"
     >
       45.957544288332315
     </td>
