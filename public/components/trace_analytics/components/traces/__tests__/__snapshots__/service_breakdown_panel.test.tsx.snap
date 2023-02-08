@@ -9,6 +9,7 @@ exports[`Service breakdown panel component renders empty service breakdown panel
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
       <PanelTitle
+        data-test-subj="time-spent-by-service-panel"
         title="Time spent by service"
       >
         <EuiText
@@ -94,6 +95,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
       <PanelTitle
+        data-test-subj="time-spent-by-service-panel"
         title="Time spent by service"
       >
         <EuiText
