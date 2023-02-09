@@ -85,14 +85,16 @@ export function TraceView(props: TraceViewProps) {
                   </EuiFlexGroup>
                 )}
               </EuiFlexItem>
-              { mode === 'data_prepper' ? (
+              {mode === 'data_prepper' ? (
                 <EuiFlexItem grow={false}>
                   <EuiText className="overview-title">Trace group name</EuiText>
                   <EuiText size="s" className="overview-content">
                     {fields.trace_group || '-'}
                   </EuiText>
-                </EuiFlexItem> ) : (<div/>)
-              }
+                </EuiFlexItem>
+              ) : (
+                <div />
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -150,10 +152,23 @@ export function TraceView(props: TraceViewProps) {
   >('latency');
 
   const refresh = async () => {
-    const DSL = filtersToDsl(mode, [], '', processTimeStamp('now', mode), processTimeStamp('now', mode), page);
+    const DSL = filtersToDsl(
+      mode,
+      [],
+      '',
+      processTimeStamp('now', mode),
+      processTimeStamp('now', mode),
+      page
+    );
     handleTraceViewRequest(props.traceId, props.http, fields, setFields, mode);
     handlePayloadRequest(props.traceId, props.http, payloadData, setPayloadData, mode);
-    handleServicesPieChartRequest(props.traceId, props.http, setServiceBreakdownData, setColorMap, mode);
+    handleServicesPieChartRequest(
+      props.traceId,
+      props.http,
+      setServiceBreakdownData,
+      setColorMap,
+      mode
+    );
     handleServiceMapRequest(props.http, DSL, mode, setServiceMap);
   };
 
@@ -206,7 +221,7 @@ export function TraceView(props: TraceViewProps) {
       },
     ]);
     refresh();
-  }, []);
+  }, [props.mode]);
 
   return (
     <>
@@ -250,15 +265,17 @@ export function TraceView(props: TraceViewProps) {
             ) : null}
           </EuiPanel>
           <EuiSpacer />
-          { mode === 'data_prepper' ? 
+          {mode === 'data_prepper' ? (
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}
               page={page}
-            /> : (<div/>)
-          }
+            />
+          ) : (
+            <div />
+          )}
         </EuiPageBody>
       </EuiPage>
     </>
