@@ -64,7 +64,7 @@ export function TracesTable(props: TracesTableProps) {
           render: (item) => (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={10}>
-                <EuiLink onClick={() => traceIdColumnAction(item)}>
+                <EuiLink data-test-subj='trace-link' onClick={() => traceIdColumnAction(item)}>
                   {item.length < 24 ? (
                     item
                   ) : (

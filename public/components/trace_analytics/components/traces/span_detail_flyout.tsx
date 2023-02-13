@@ -88,36 +88,64 @@ export function SpanDetailFlyout(props: {
         (mode === 'data_prepper' ? span.parentSpanId : span.references.length) ? (
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}>
+              <EuiCopy
+                textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+              >
                 {(copy) => (
                   <EuiButtonIcon aria-label="copy-button" onClick={copy} iconType="copyClipboard" />
                 )}
               </EuiCopy>
             </EuiFlexItem>
-            <EuiFlexItem>{mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="parentSpanId">
+              {mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
+            </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
           '-'
         )
       ),
-      getListItem('serviceName', 'Service', (mode === 'data_prepper' ? span.serviceName : span.process['serviceName']) || '-'),
-      getListItem('name', 'Operation', (mode === 'data_prepper' ? span.name : span.operationName) || '-'),
+      getListItem(
+        'serviceName',
+        'Service',
+        (mode === 'data_prepper' ? span.serviceName : span.process.serviceName) || '-'
+      ),
+      getListItem(
+        'name',
+        'Operation',
+        (mode === 'data_prepper' ? span.name : span.operationName) || '-'
+      ),
       getListItem(
         'durationInNanos',
         'Duration',
-        `${(mode === 'data_prepper' ? _.round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2) : _.round(microToMilliSec(Math.max(0, span.duration)), 2))} ms`
+        `${
+          mode === 'data_prepper'
+            ? _.round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
+            : _.round(microToMilliSec(Math.max(0, span.duration)), 2)
+        } ms`
       ),
       getListItem(
         'startTime',
         'Start time',
-        mode === 'data_prepper' ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT) : moment(_.round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(TRACE_ANALYTICS_DATE_FORMAT)
+        mode === 'data_prepper'
+          ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
+          : moment(_.round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
+              TRACE_ANALYTICS_DATE_FORMAT
+            )
       ),
-      getListItem('endTime', 'End time',  mode === 'data_prepper' ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT) : moment(_.round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(TRACE_ANALYTICS_DATE_FORMAT)),
+      getListItem(
+        'endTime',
+        'End time',
+        mode === 'data_prepper'
+          ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
+          : moment(_.round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
+              TRACE_ANALYTICS_DATE_FORMAT
+            )
+      ),
       getListItem(
         'status.code',
         'Errors',
-        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag['error']) ? (
-          <EuiText color="danger" size="s" style={{fontWeight: 700}}>
+        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag.error) ? (
+          <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
         ) : (
@@ -162,13 +190,13 @@ export function SpanDetailFlyout(props: {
         return getListItem(key, key, value);
       });
 
-    const eventsComponent = _.isEmpty(span['events']) ? null : (
+    const eventsComponent = _.isEmpty(span.events) ? null : (
       <>
         <EuiText size="m">
           <span className="panel-title">Event</span>
         </EuiText>
         <EuiCodeBlock language="json" paddingSize="s" isCopyable overflowHeight={400}>
-          {JSON.stringify(span['events'], null, 2)}
+          {JSON.stringify(span.events, null, 2)}
         </EuiCodeBlock>
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />

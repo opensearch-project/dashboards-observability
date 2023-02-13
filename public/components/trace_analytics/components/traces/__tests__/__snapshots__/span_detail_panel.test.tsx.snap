@@ -63,9 +63,12 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
   mode="data_prepper"
   setData={[MockFunction]}
 >
-  <EuiPanel>
+  <EuiPanel
+    data-test-subj="span-gantt-chart-panel"
+  >
     <div
       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      data-test-subj="span-gantt-chart-panel"
     >
       <EuiFlexGroup>
         <div

@@ -2656,10 +2656,12 @@ exports[`Traces table component renders traces table 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrow10"
                                       >
                                         <EuiLink
+                                          data-test-subj="trace-link"
                                           onClick={[Function]}
                                         >
                                           <button
                                             className="euiLink euiLink--primary"
+                                            data-test-subj="trace-link"
                                             disabled={false}
                                             onClick={[Function]}
                                             type="button"

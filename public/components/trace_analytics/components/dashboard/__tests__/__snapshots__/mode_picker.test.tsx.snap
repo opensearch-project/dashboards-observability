@@ -541,12 +541,14 @@ exports[`Mode picker component renders mode picker 2`] = `
                                     Array [
                                       Object {
                                         "checked": "on",
+                                        "data-test-subj": "jaeger-mode",
                                         "key": "jaeger",
                                         "label": "Jaeger",
                                         "value": "jaeger",
                                       },
                                       Object {
                                         "checked": undefined,
+                                        "data-test-subj": "data_prepper-mode",
                                         "key": "data_prepper",
                                         "label": "Data Prepper",
                                         "value": "data_prepper",
@@ -585,12 +587,14 @@ exports[`Mode picker component renders mode picker 2`] = `
                                           Array [
                                             Object {
                                               "checked": "on",
+                                              "data-test-subj": "jaeger-mode",
                                               "key": "jaeger",
                                               "label": "Jaeger",
                                               "value": "jaeger",
                                             },
                                             Object {
                                               "checked": undefined,
+                                              "data-test-subj": "data_prepper-mode",
                                               "key": "data_prepper",
                                               "label": "Data Prepper",
                                               "value": "data_prepper",
@@ -714,12 +718,14 @@ exports[`Mode picker component renders mode picker 2`] = `
                                           Array [
                                             Object {
                                               "checked": "on",
+                                              "data-test-subj": "jaeger-mode",
                                               "key": "jaeger",
                                               "label": "Jaeger",
                                               "value": "jaeger",
                                             },
                                             Object {
                                               "checked": undefined,
+                                              "data-test-subj": "data_prepper-mode",
                                               "key": "data_prepper",
                                               "label": "Data Prepper",
                                               "value": "data_prepper",
@@ -735,12 +741,14 @@ exports[`Mode picker component renders mode picker 2`] = `
                                           Array [
                                             Object {
                                               "checked": "on",
+                                              "data-test-subj": "jaeger-mode",
                                               "key": "jaeger",
                                               "label": "Jaeger",
                                               "value": "jaeger",
                                             },
                                             Object {
                                               "checked": undefined,
+                                              "data-test-subj": "data_prepper-mode",
                                               "key": "data_prepper",
                                               "label": "Data Prepper",
                                               "value": "data_prepper",

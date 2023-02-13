@@ -30,10 +30,12 @@ export function TopGroupsPage(props: {
     {
       id: 'error_rate',
       label: 'Error rate',
+      'data-test-subj': 'errors-toggle'
     },
     {
       id: 'throughput',
       label: 'Throughput',
+      'data-test-subj': 'throughput-toggle'
     },
   ];
   const [idSelected, setIdSelected] = useState('error_rate');
