@@ -70,6 +70,7 @@ export function DataSourcePicker(props: {
               key: x.id,
               value: x.id,
               checked: x.id === selectedMode ? 'on' : undefined,
+              "data-test-subj": x.id + '-mode',
             }))}
             onChange={(choices) => {
               const choice = choices.find(({ checked }) => checked) as unknown as {

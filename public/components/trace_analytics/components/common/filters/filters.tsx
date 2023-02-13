@@ -52,7 +52,7 @@ export function Filters(props: FiltersOwnProps) {
     props.setFilters(newFilters);
   };
 
-  const validFilterFields = useMemo(() => getValidFilterFields(props.mode, props.page), [props.page]);
+  const validFilterFields = useMemo(() => getValidFilterFields(props.mode, props.page), [props.page, props.mode]);
   const filterFieldOptions = useMemo(
     () => getFilterFields(props.mode, props.page).map((field) => ({ label: field })),
     [props.page]
@@ -201,6 +201,7 @@ export function Filters(props: FiltersOwnProps) {
         anchorPosition="rightUp"
         panelPaddingSize="none"
         withTitle
+        data-test-subj='global-filter-button'
       >
         <EuiContextMenu initialPanelId={0} panels={globalPopoverPanels} />
       </EuiPopover>
@@ -226,6 +227,7 @@ export function Filters(props: FiltersOwnProps) {
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="downLeft"
+        data-test-subj="addfilter"
         withTitle
       >
         <EuiPopoverTitle>{'Add filter'}</EuiPopoverTitle>
