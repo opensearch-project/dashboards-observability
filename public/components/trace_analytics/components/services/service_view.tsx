@@ -22,7 +22,6 @@ import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsMode } from '../../home';
 import {
-  checkIfServiceExists,
   handleServiceMapRequest,
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
