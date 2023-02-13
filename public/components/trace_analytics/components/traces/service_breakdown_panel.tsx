@@ -68,7 +68,7 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
   return (
     <>
       <EuiPanel>
-        <PanelTitle title="Time spent by service" />
+        <PanelTitle title="Time spent by service" data-test-subj='time-spent-by-service-panel'/>
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" alignItems="center">
           <EuiFlexItem>
