@@ -73,6 +73,7 @@ exports[`Visualization Container Component renders add visualization container 1
                         onMouseOver={[Function]}
                       >
                         <h5
+                          data-test-subj="visualizationHeader"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         />
@@ -90,12 +91,14 @@ exports[`Visualization Container Component renders add visualization container 1
                 className="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
               >
                 <EuiIcon
+                  data-test-subj="removeVisualizationButton"
                   onClick={[Function]}
                   type="crossInACircleFilled"
                 >
                   <EuiIconEmpty
                     aria-hidden={true}
                     className="euiIcon euiIcon--medium euiIcon-isLoading"
+                    data-test-subj="removeVisualizationButton"
                     focusable="false"
                     onClick={[Function]}
                     role="img"
@@ -104,6 +107,7 @@ exports[`Visualization Container Component renders add visualization container 1
                     <svg
                       aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading"
+                      data-test-subj="removeVisualizationButton"
                       focusable="false"
                       height={16}
                       onClick={[Function]}

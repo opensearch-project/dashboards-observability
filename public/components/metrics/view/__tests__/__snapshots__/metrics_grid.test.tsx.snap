@@ -570,6 +570,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                                         onMouseOver={[Function]}
                                       >
                                         <h5
+                                          data-test-subj="visualizationHeader"
                                           onBlur={[Function]}
                                           onFocus={[Function]}
                                         />
@@ -819,6 +820,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                                         onMouseOver={[Function]}
                                       >
                                         <h5
+                                          data-test-subj="visualizationHeader"
                                           onBlur={[Function]}
                                           onFocus={[Function]}
                                         />
@@ -1069,6 +1071,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                                         onMouseOver={[Function]}
                                       >
                                         <h5
+                                          data-test-subj="visualizationHeader"
                                           onBlur={[Function]}
                                           onFocus={[Function]}
                                         >
