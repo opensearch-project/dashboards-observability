@@ -38,6 +38,7 @@ export const AddVisualizationPopover = ({
         items: [
           {
             name: 'Select existing visualization',
+            'data-test-subj': 'selectExistingVizContextMenuItem',
             onClick: () => {
               if (closeVizPopover != null) {
                 closeVizPopover();
@@ -47,6 +48,7 @@ export const AddVisualizationPopover = ({
           },
           {
             name: 'Create new visualization',
+            'data-test-subj': 'createNewVizContextMenuItem',
             onClick: () => {
               advancedVisualization();
             },
