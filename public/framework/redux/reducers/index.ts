@@ -15,7 +15,7 @@ import { explorerVisualizationConfigReducer } from '../../../components/event_an
 import { patternsReducer } from '../../../components/event_analytics/redux/slices/patterns_slice';
 import { metricsReducers } from '../../../components/metrics/redux/slices/metrics_slice';
 
-const rootReducer = combineReducers({
+const combinedReducer = combineReducers({
   // explorer reducers
   queries: queriesReducer,
   queryResults: queryResultsReducer,
@@ -30,4 +30,4 @@ const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-export const combinedReducer = rootReducer;
+export const rootReducer = combinedReducer;

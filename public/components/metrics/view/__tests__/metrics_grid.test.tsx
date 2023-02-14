@@ -17,7 +17,7 @@ import {
   samplePPLResponse,
 } from '../../../../../test/metrics_contants';
 import { createStore } from '@reduxjs/toolkit';
-import rootReducer from '../../../../framework/redux/reducers';
+import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 import { HttpResponse } from '../../../../../../../src/core/public';
 

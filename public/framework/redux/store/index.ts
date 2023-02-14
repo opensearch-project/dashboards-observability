@@ -15,14 +15,14 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import { combinedReducer } from '../reducers';
+import { rootReducer } from '../reducers';
 
 const persistConfig = {
   key: 'root',
   storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, combinedReducer);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const dataStore = configureStore({
   reducer: persistedReducer,
