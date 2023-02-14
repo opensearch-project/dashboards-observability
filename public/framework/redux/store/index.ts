@@ -4,7 +4,6 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import rootReducer from '../reducers';
 import storage from 'redux-persist/lib/storage/session';
 import {
   persistStore,
@@ -16,15 +15,16 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
+import { combinedReducer } from '../reducers';
 
 const persistConfig = {
   key: 'root',
   storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedReducer = persistReducer(persistConfig, combinedReducer);
 
-const store = configureStore({
+const dataStore = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -38,12 +38,12 @@ const store = configureStore({
 
 if (process.env.NODE_ENV === 'development' && module.hot) {
   module.hot.accept('./rootReducer', () => {
-    store.replaceReducer(persistReducer(persistConfig, require('./rootReducer').default));
+    store.replaceReducer(persistReducer(persistConfig, require('./rootReducer').default)); // eslint-disable-line @typescript-eslint/no-var-requires
   });
 }
 
-export type AppDispatch = typeof store.dispatch;
+export type AppDispatch = typeof dataStore.dispatch;
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(dataStore);
 
-export default store;
+export const store = dataStore;

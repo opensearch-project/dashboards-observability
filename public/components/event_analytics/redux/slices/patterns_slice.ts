@@ -2,9 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable import/no-default-export */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { fetchSuccess as fetchSuccessReducer } from '../reducers';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import { REDUX_EXPL_SLICE_PATTERNS } from '../../../../../common/constants/explorer';
@@ -32,6 +31,9 @@ export const patternsSlice = createSlice({
 
 export const { setPatterns, remove, reset, init } = patternsSlice.actions;
 
-export const selectPatterns = (state) => state.patterns;
+export const selectPatterns = createSelector(
+  (state) => state.patterns,
+  (patternState) => patternState
+);
 
-export default patternsSlice.reducer;
+export const patternsReducer = patternsSlice.reducer;
