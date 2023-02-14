@@ -51,7 +51,10 @@ export class ObservabilityPlugin
       mappings: {
         properties: {
           title: {
-            type: 'keyword',
+            type: 'text',
+          },
+          description: {
+            type: 'text',
           },
         },
       },
@@ -67,7 +70,10 @@ export class ObservabilityPlugin
           return `Observability Settings [${obj.id}]`;
         },
       },
-      migrations: {},
+      migrations: {
+        '3.0.0': (doc) => ({ ...doc, description: '' }),
+        '3.0.1': (doc) => ({ ...doc, description: 'Some Description Text' }),
+      },
     };
 
     core.savedObjects.registerType(obsPanelType);

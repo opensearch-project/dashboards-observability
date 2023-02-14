@@ -33,6 +33,9 @@ import { isNameValid } from './helpers/utils';
 interface ObservabilityPanelAttrs {
   id: string;
   name: string;
+  attributes: {
+    description: string;
+  };
 }
 
 /*
@@ -114,15 +117,17 @@ export const Home = ({
       return;
     }
 
-    await savedObjects.client.create<ObservabilityPanelAttrs>(
-      'observability-panel',
-      {
-        title: newCustomPanelName,
-      },
-      {
-        id: newCustomPanelName,
-      }
-    );
+    savedObjects.client
+      .create<ObservabilityPanelAttrs>(
+        'observability-panel',
+        {
+          title: newCustomPanelName,
+          description: newCustomPanelName,
+        },
+        {}
+      )
+      .then((res) => console.log('created panel', { res }))
+      .catch((err) => console.log('created panel err', { err }));
 
     return http
       .post(`${CUSTOM_PANELS_API_PREFIX}/panels`, {
@@ -247,7 +252,9 @@ export const Home = ({
   };
 
   // Deletes an existing Operational Panel
-  const deleteCustomPanel = (customPanelId: string, customPanelName: string) => {
+  const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
+    await savedObjects.client.delete({ type: 'observability-panel', id: customPanelId });
+
     return http
       .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
       .then((res) => {
