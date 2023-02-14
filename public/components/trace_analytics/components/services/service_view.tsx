@@ -47,7 +47,13 @@ export function ServiceView(props: ServiceViewProps) {
   const [redirect, setRedirect] = useState(false);
 
   const refresh = () => {
-    const DSL = filtersToDsl(mode, props.filters, props.query, processTimeStamp(props.startTime, mode), processTimeStamp(props.endTime, mode));
+    const DSL = filtersToDsl(
+      mode,
+      props.filters,
+      props.query,
+      processTimeStamp(props.startTime, mode),
+      processTimeStamp(props.endTime, mode)
+    );
     handleServiceViewRequest(props.serviceName, props.http, DSL, setFields, mode);
     if (mode === 'data_prepper') {
       handleServiceMapRequest(props.http, DSL, mode, setServiceMap, props.serviceName);
@@ -74,7 +80,7 @@ export function ServiceView(props: ServiceViewProps) {
 
   useEffect(() => {
     if (!redirect) refresh();
-  }, [props.startTime, props.endTime, props.serviceName]);
+  }, [props.startTime, props.endTime, props.serviceName, props.mode]);
 
   const renderTitle = (
     serviceName: string,
@@ -113,7 +119,7 @@ export function ServiceView(props: ServiceViewProps) {
                   {props.serviceName || '-'}
                 </EuiText>
               </EuiFlexItem>
-              { mode === 'data_prepper' ? 
+              {mode === 'data_prepper' ? (
                 <EuiFlexItem grow={false}>
                   <EuiText className="overview-title">Number of connected services</EuiText>
                   <EuiText size="s" className="overview-content">
@@ -121,9 +127,11 @@ export function ServiceView(props: ServiceViewProps) {
                       ? fields.number_of_connected_services
                       : 0}
                   </EuiText>
-                </EuiFlexItem> : <EuiFlexItem/>
-              }
-              { mode === 'data_prepper' ? 
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem />
+              )}
+              {mode === 'data_prepper' ? (
                 <EuiFlexItem grow={false}>
                   <EuiText className="overview-title">Connected services</EuiText>
                   <EuiText size="s" className="overview-content">
@@ -139,8 +147,10 @@ export function ServiceView(props: ServiceViewProps) {
                           })
                       : '-'}
                   </EuiText>
-                </EuiFlexItem> : <EuiFlexItem/>
-              }
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem />
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -234,17 +244,23 @@ export function ServiceView(props: ServiceViewProps) {
   };
 
   useEffect(() => {
-    const spanDSL = filtersToDsl(mode, props.filters, props.query, processTimeStamp(props.startTime, mode), processTimeStamp(props.endTime, mode));
+    const spanDSL = filtersToDsl(
+      mode,
+      props.filters,
+      props.query,
+      processTimeStamp(props.startTime, mode),
+      processTimeStamp(props.endTime, mode)
+    );
     if (mode === 'data_prepper') {
       spanDSL.query.bool.must.push({
         term: {
-          "serviceName": props.serviceName,
+          serviceName: props.serviceName,
         },
       });
     } else if (mode === 'jaeger') {
       spanDSL.query.bool.must.push({
         term: {
-          "process.serviceName": props.serviceName,
+          'process.serviceName': props.serviceName,
         },
       });
     }
@@ -325,15 +341,17 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiSpacer size="xl" />
           {overview}
           <EuiSpacer />
-          { mode === 'data_prepper' ? 
+          {mode === 'data_prepper' ? (
             <ServiceMap
               serviceMap={serviceMap}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}
               currService={props.serviceName}
               page="serviceView"
-            /> : <div/>
-          }   
+            />
+          ) : (
+            <div />
+          )}
           <EuiSpacer />
           <EuiPanel>
             <PanelTitle title="Spans" totalItems={total} />
