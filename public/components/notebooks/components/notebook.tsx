@@ -863,6 +863,22 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         title: 'Reporting',
         items: [
           {
+            name: 'Download PDF',
+            icon: <EuiIcon type="download" />,
+            onClick: () => {
+              this.setState({ isReportingActionsPopoverOpen: false });
+              generateInContextReport('pdf', this.props, this.toggleReportingLoadingModal);
+            },
+          },
+          {
+            name: 'Download PNG',
+            icon: <EuiIcon type="download" />,
+            onClick: () => {
+              this.setState({ isReportingActionsPopoverOpen: false });
+              generateInContextReport('png', this.props, this.toggleReportingLoadingModal);
+            },
+          },
+          {
             name: 'Create report definition',
             icon: <EuiIcon type="calendar" />,
             onClick: () => {
