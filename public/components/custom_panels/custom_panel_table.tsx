@@ -101,7 +101,6 @@ export const CustomPanelTable = ({
   useEffect(() => {
     const url = window.location.hash.split('/')
     if (url[url.length-1] === 'create') { 
-      console.log("enters if condition");
       createPanel();
     }
   }, [location]);
@@ -146,7 +145,6 @@ export const CustomPanelTable = ({
           closeModal()
           history.goBack();
         },
-        // closeModal,
         'Name',
         'Create operational panel',
         'Cancel',
@@ -340,7 +338,6 @@ export const CustomPanelTable = ({
                       fill
                       href="#/operational_panels/create"                      
                       data-test-subj="customPanels__createNewPanels"
-                      // onClick={() => createPanel()}
                     >
                       Create panel
                     </EuiButton>
@@ -406,8 +403,7 @@ export const CustomPanelTable = ({
                     <EuiButton
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
-                      onClick={() => createPanel()}
-                      // href="#/operational_panels/create"
+                      href="#/operational_panels/create"
                     >
                       Create panel
                     </EuiButton>

@@ -10,7 +10,7 @@ import _ from 'lodash';
 import React, { ReactChild, useState } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext, Switch } from 'react-router';
-import { Route, RouteComponentProps } from 'react-router-dom';
+import { Route, RouteComponentProps, useHistory } from 'react-router-dom';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
@@ -63,6 +63,7 @@ export const Home = ({
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
+  const history = useHistory();
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -92,10 +93,10 @@ export const Home = ({
   const createCustomPanel = (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
+      history.goBack();
       return;
     }
 
-    console.log("enters createCustomPanel ");
     return http
       .post(`${CUSTOM_PANELS_API_PREFIX}/panels`, {
         body: JSON.stringify({
@@ -288,7 +289,6 @@ export const Home = ({
     }
   };
 
-  console.log("renderProps.match.path: ", renderProps.match.path);
   return (
     <div>
       <EuiGlobalToastList
