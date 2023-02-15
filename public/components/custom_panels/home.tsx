@@ -9,7 +9,7 @@ import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
 import React, { ReactChild, useState } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
-import { StaticContext } from 'react-router';
+import { StaticContext, Switch } from 'react-router';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
@@ -95,6 +95,7 @@ export const Home = ({
       return;
     }
 
+    console.log("enters createCustomPanel ");
     return http
       .post(`${CUSTOM_PANELS_API_PREFIX}/panels`, {
         body: JSON.stringify({
@@ -287,6 +288,7 @@ export const Home = ({
     }
   };
 
+  console.log("renderProps.match.path: ", renderProps.match.path);
   return (
     <div>
       <EuiGlobalToastList
@@ -297,9 +299,10 @@ export const Home = ({
         side={toastRightSide ? 'right' : 'left'}
         toastLifeTimeMs={6000}
       />
+      <Switch>
       <Route
         exact
-        path={renderProps.match.path}
+        path={['/operational_panels/create', '/operational_panels']}
         render={(props) => {
           return (
             <ObservabilitySideBar>
@@ -344,6 +347,7 @@ export const Home = ({
           );
         }}
       />
+      </Switch>
     </div>
   );
 };

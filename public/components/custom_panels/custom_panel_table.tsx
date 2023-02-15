@@ -43,6 +43,7 @@ import { CustomPanelListType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { useHistory, useLocation } from 'react-router-dom';
 
 /*
  * "CustomPanelTable" module, used to view all the saved panels
@@ -89,11 +90,21 @@ export const CustomPanelTable = ({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelListType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     setBreadcrumbs(parentBreadcrumbs);
     fetchCustomPanels();
   }, []);
+
+  useEffect(() => {
+    const url = window.location.hash.split('/')
+    if (url[url.length-1] === 'create') { 
+      console.log("enters if condition");
+      createPanel();
+    }
+  }, [location]);
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -131,7 +142,11 @@ export const CustomPanelTable = ({
     setModalLayout(
       getCustomModal(
         onCreate,
-        closeModal,
+        () => {
+          closeModal()
+          history.goBack();
+        },
+        // closeModal,
         'Name',
         'Create operational panel',
         'Cancel',
@@ -323,8 +338,9 @@ export const CustomPanelTable = ({
                   <EuiFlexItem>
                     <EuiButton
                       fill
-                      onClick={() => createPanel()}
+                      href="#/operational_panels/create"                      
                       data-test-subj="customPanels__createNewPanels"
+                      // onClick={() => createPanel()}
                     >
                       Create panel
                     </EuiButton>
@@ -391,6 +407,7 @@ export const CustomPanelTable = ({
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
                       onClick={() => createPanel()}
+                      // href="#/operational_panels/create"
                     >
                       Create panel
                     </EuiButton>
