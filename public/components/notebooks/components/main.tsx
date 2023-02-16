@@ -95,6 +95,7 @@ export class Main extends React.Component<MainProps, MainState> {
   createNotebook = (newNoteName: string) => {
     if (newNoteName.length >= 50 || newNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
+      window.location.assign('#/notebooks');
       return;
     }
     const newNoteObject = {
@@ -330,7 +331,7 @@ export class Main extends React.Component<MainProps, MainState> {
             />
             <Route
               exact
-              path="/notebooks/:id"
+              path={['/notebooks/:id', '/notebooks/edit/:id']}
               render={(props) => (
                 <Notebook
                   pplService={this.props.pplService}
