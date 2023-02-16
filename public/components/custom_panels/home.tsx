@@ -93,7 +93,7 @@ export const Home = ({
   const createCustomPanel = (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
-      history.goBack();
+      window.location.assign(`${_.last(parentBreadcrumbs)!.href}`);
       return;
     }
 
