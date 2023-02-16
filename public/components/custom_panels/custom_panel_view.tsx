@@ -406,19 +406,29 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const cancelButton = (
-    <EuiButton iconType="cross" color="danger" onClick={() => editPanel('cancel')}>
+    <EuiButton
+      data-test-subj="cancelPanelButton"
+      iconType="cross"
+      color="danger"
+      onClick={() => editPanel('cancel')}
+    >
       Cancel
     </EuiButton>
   );
 
   const saveButton = (
-    <EuiButton iconType="save" onClick={() => editPanel('save')}>
+    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
       Save
     </EuiButton>
   );
 
   const editButton = (
-    <EuiButton iconType="pencil" onClick={() => editPanel('edit')} disabled={editDisabled}>
+    <EuiButton
+      data-test-subj="editPanelButton"
+      iconType="pencil"
+      onClick={() => editPanel('edit')}
+      disabled={editDisabled}
+    >
       Edit
     </EuiButton>
   );
@@ -437,6 +447,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   // Panel Actions Button
   const panelActionsButton = (
     <EuiButton
+      data-test-subj="panelActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPanelsMenuPopover(true)}
@@ -478,6 +489,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       items: [
         {
           name: 'Reload panel',
+          'data-test-subj': 'reloadPanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
             fetchCustomPanel();
@@ -485,6 +497,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         },
         {
           name: 'Rename panel',
+          'data-test-subj': 'renamePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
             renamePanel();
@@ -492,6 +505,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         },
         {
           name: 'Duplicate panel',
+          'data-test-subj': 'duplicatePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
             clonePanel();
@@ -499,6 +513,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         },
         {
           name: 'Delete panel',
+          'data-test-subj': 'deletePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
             deletePanel();
@@ -550,7 +565,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
               <>
                 <EuiPageHeaderSection>
                   <EuiTitle size="l">
-                    <h1>{openPanelName}</h1>
+                    <h1 data-test-subj="panelNameHeader">{openPanelName}</h1>
                   </EuiTitle>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />

@@ -50,6 +50,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
             grow={false}
           >
             <EuiButton
+              data-test-subj="closeFlyoutButton"
               onClick={[MockFunction]}
             >
               Cancel
@@ -59,6 +60,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
             grow={false}
           >
             <EuiButton
+              data-test-subj="addFlyoutButton"
               fill={true}
               onClick={[Function]}
             >
@@ -189,6 +191,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                         >
                           <button
                             class="euiButton euiButton--primary"
+                            data-test-subj="closeFlyoutButton"
                             type="button"
                           >
                             <span
@@ -207,6 +210,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                         >
                           <button
                             class="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="addFlyoutButton"
                             type="button"
                           >
                             <span
@@ -399,6 +403,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                 >
                                   <button
                                     class="euiButton euiButton--primary"
+                                    data-test-subj="closeFlyoutButton"
                                     type="button"
                                   >
                                     <span
@@ -417,6 +422,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                 >
                                   <button
                                     class="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="addFlyoutButton"
                                     type="button"
                                   >
                                     <span
@@ -541,6 +547,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                   >
                                     <button
                                       class="euiButton euiButton--primary"
+                                      data-test-subj="closeFlyoutButton"
                                       type="button"
                                     >
                                       <span
@@ -559,6 +566,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                   >
                                     <button
                                       class="euiButton euiButton--primary euiButton--fill"
+                                      data-test-subj="addFlyoutButton"
                                       type="button"
                                     >
                                       <span
@@ -683,6 +691,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                     >
                                       <button
                                         class="euiButton euiButton--primary"
+                                        data-test-subj="closeFlyoutButton"
                                         type="button"
                                       >
                                         <span
@@ -701,6 +710,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                     >
                                       <button
                                         class="euiButton euiButton--primary euiButton--fill"
+                                        data-test-subj="addFlyoutButton"
                                         type="button"
                                       >
                                         <span
@@ -813,6 +823,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                       >
                                         <button
                                           class="euiButton euiButton--primary"
+                                          data-test-subj="closeFlyoutButton"
                                           type="button"
                                         >
                                           <span
@@ -831,6 +842,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                       >
                                         <button
                                           class="euiButton euiButton--primary euiButton--fill"
+                                          data-test-subj="addFlyoutButton"
                                           type="button"
                                         >
                                           <span
@@ -1041,10 +1053,12 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiButton
+                                          data-test-subj="closeFlyoutButton"
                                           onClick={[MockFunction]}
                                         >
                                           <EuiButtonDisplay
                                             baseClassName="euiButton"
+                                            data-test-subj="closeFlyoutButton"
                                             disabled={false}
                                             element="button"
                                             isDisabled={false}
@@ -1053,6 +1067,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                           >
                                             <button
                                               className="euiButton euiButton--primary"
+                                              data-test-subj="closeFlyoutButton"
                                               disabled={false}
                                               onClick={[MockFunction]}
                                               style={
@@ -1093,11 +1108,13 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiButton
+                                          data-test-subj="addFlyoutButton"
                                           fill={true}
                                           onClick={[Function]}
                                         >
                                           <EuiButtonDisplay
                                             baseClassName="euiButton"
+                                            data-test-subj="addFlyoutButton"
                                             disabled={false}
                                             element="button"
                                             fill={true}
@@ -1107,6 +1124,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
                                           >
                                             <button
                                               className="euiButton euiButton--primary euiButton--fill"
+                                              data-test-subj="addFlyoutButton"
                                               disabled={false}
                                               onClick={[Function]}
                                               style={
@@ -1277,6 +1295,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
             grow={false}
           >
             <EuiButton
+              data-test-subj="closeFlyoutButton"
               onClick={[MockFunction]}
             >
               Cancel
@@ -1286,6 +1305,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
             grow={false}
           >
             <EuiButton
+              data-test-subj="addFlyoutButton"
               fill={true}
               onClick={[Function]}
             >
@@ -1420,6 +1440,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                         >
                           <button
                             class="euiButton euiButton--primary"
+                            data-test-subj="closeFlyoutButton"
                             type="button"
                           >
                             <span
@@ -1438,6 +1459,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                         >
                           <button
                             class="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="addFlyoutButton"
                             type="button"
                           >
                             <span
@@ -1634,6 +1656,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                 >
                                   <button
                                     class="euiButton euiButton--primary"
+                                    data-test-subj="closeFlyoutButton"
                                     type="button"
                                   >
                                     <span
@@ -1652,6 +1675,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                 >
                                   <button
                                     class="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="addFlyoutButton"
                                     type="button"
                                   >
                                     <span
@@ -1780,6 +1804,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                   >
                                     <button
                                       class="euiButton euiButton--primary"
+                                      data-test-subj="closeFlyoutButton"
                                       type="button"
                                     >
                                       <span
@@ -1798,6 +1823,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                   >
                                     <button
                                       class="euiButton euiButton--primary euiButton--fill"
+                                      data-test-subj="addFlyoutButton"
                                       type="button"
                                     >
                                       <span
@@ -1926,6 +1952,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                     >
                                       <button
                                         class="euiButton euiButton--primary"
+                                        data-test-subj="closeFlyoutButton"
                                         type="button"
                                       >
                                         <span
@@ -1944,6 +1971,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                     >
                                       <button
                                         class="euiButton euiButton--primary euiButton--fill"
+                                        data-test-subj="addFlyoutButton"
                                         type="button"
                                       >
                                         <span
@@ -2060,6 +2088,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                       >
                                         <button
                                           class="euiButton euiButton--primary"
+                                          data-test-subj="closeFlyoutButton"
                                           type="button"
                                         >
                                           <span
@@ -2078,6 +2107,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                       >
                                         <button
                                           class="euiButton euiButton--primary euiButton--fill"
+                                          data-test-subj="addFlyoutButton"
                                           type="button"
                                         >
                                           <span
@@ -2292,10 +2322,12 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiButton
+                                          data-test-subj="closeFlyoutButton"
                                           onClick={[MockFunction]}
                                         >
                                           <EuiButtonDisplay
                                             baseClassName="euiButton"
+                                            data-test-subj="closeFlyoutButton"
                                             disabled={false}
                                             element="button"
                                             isDisabled={false}
@@ -2304,6 +2336,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                           >
                                             <button
                                               className="euiButton euiButton--primary"
+                                              data-test-subj="closeFlyoutButton"
                                               disabled={false}
                                               onClick={[MockFunction]}
                                               style={
@@ -2344,11 +2377,13 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiButton
+                                          data-test-subj="addFlyoutButton"
                                           fill={true}
                                           onClick={[Function]}
                                         >
                                           <EuiButtonDisplay
                                             baseClassName="euiButton"
+                                            data-test-subj="addFlyoutButton"
                                             disabled={false}
                                             element="button"
                                             fill={true}
@@ -2358,6 +2393,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
                                           >
                                             <button
                                               className="euiButton euiButton--primary euiButton--fill"
+                                              data-test-subj="addFlyoutButton"
                                               disabled={false}
                                               onClick={[Function]}
                                               style={
