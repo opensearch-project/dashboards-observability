@@ -319,10 +319,12 @@ export const VisaulizationFlyout = ({
     <EuiFlyoutFooter>
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={closeFlyout}>Cancel</EuiButton>
+          <EuiButton data-test-subj="closeFlyoutButton" onClick={closeFlyout}>
+            Cancel
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={addVisualization} fill>
+          <EuiButton data-test-subj="addFlyoutButton" onClick={addVisualization} fill>
             Add
           </EuiButton>
         </EuiFlexItem>
