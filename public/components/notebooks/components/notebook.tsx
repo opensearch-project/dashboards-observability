@@ -679,6 +679,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   componentDidMount() {
+    if (this.props.location.pathname.split('/').at(-2) === 'edit') {
+      this.showRenameModal();
+    }
     this.setBreadcrumbs('');
     this.loadNotebook();
     this.checkIfReportingPluginIsInstalled();
