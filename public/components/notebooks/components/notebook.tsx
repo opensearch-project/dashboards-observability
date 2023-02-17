@@ -288,8 +288,18 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           this.props.renameNotebook(newName, this.props.openedNoteId);
           this.setState({ isModalVisible: false });
           this.loadNotebook();
+          this.props.history.replace({
+            ...this.props.location,
+            pathname: this.props.location.pathname.substring(0, this.props.location.pathname.lastIndexOf("/")),
+          });
         },
-        () => this.setState({ isModalVisible: false }),
+        () => {
+          this.setState({ isModalVisible: false });
+          this.props.history.replace({
+            ...this.props.location,
+            pathname: this.props.location.pathname.substring(0, this.props.location.pathname.lastIndexOf("/")),
+          });
+        },
         'Name',
         'Rename notebook',
         'Cancel',
@@ -679,12 +689,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   componentDidMount() {
-    if (this.props.location.pathname.split('/').at(-2) === 'edit') {
-      this.showRenameModal();
-    }
     this.setBreadcrumbs('');
     this.loadNotebook();
     this.checkIfReportingPluginIsInstalled();
+    if (this.props.location.pathname.split('/').at(-1) === 'edit') {
+      this.showRenameModal();
+    }
     const searchParams = queryString.parse(this.props.location.search);
     const view = searchParams['view'];
     if (!view) {
@@ -694,6 +704,14 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       this.setState({ selectedViewId: 'output_only' });
     } else if (view === 'input_only') {
       this.setState({ selectedViewId: 'input_only' });
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.location !== this.props.location) {
+      if (this.props.location.pathname.split('/').at(-1) === 'edit') {
+        this.showRenameModal();
+      }
     }
   }
 
@@ -835,7 +853,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             name: 'Rename notebook',
             onClick: () => {
               this.setState({ isNoteActionsPopoverOpen: false });
-              this.showRenameModal();
+              this.props.history.replace({
+                ...this.props.location,
+                pathname: this.props.location.pathname + '/edit'
+              });
             },
           },
           {
