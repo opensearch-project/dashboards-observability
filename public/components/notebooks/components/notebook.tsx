@@ -707,7 +707,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     // If the URL changes to /edit or the notebook name is loaded in with the URL as /edit.
     // This second condition is to update the rename modal with the loaded notebook name on page laod
     // if the page if first loaded in as /edit.
-    if (prevProps.location !== this.props.location || prevState.path !== this.state.path) {
+    if (prevProps.location.pathname !== this.props.location.pathname || prevState.path !== this.state.path) {
       if (this.props.location.pathname.split('/').at(-1) === 'edit') {
         this.showRenameModal();
       }
