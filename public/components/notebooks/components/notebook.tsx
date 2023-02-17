@@ -47,6 +47,7 @@ import {
 } from './helpers/reporting_context_menu_helper';
 import { zeppelinParagraphParser } from './helpers/zeppelin_parser';
 import { Paragraphs } from './paragraph_components/paragraphs';
+import { Location } from 'history';
 const panelStyles: CSS.Properties = {
   float: 'left',
   width: '100%',
@@ -287,7 +288,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         (newName: string) => {
           this.props.renameNotebook(newName, this.props.openedNoteId);
           this.setState({ isModalVisible: false });
-          this.loadNotebook();
           this.props.history.replace({
             ...this.props.location,
             pathname: this.props.location.pathname.substring(0, this.props.location.pathname.lastIndexOf("/")),
@@ -692,9 +692,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setBreadcrumbs('');
     this.loadNotebook();
     this.checkIfReportingPluginIsInstalled();
-    if (this.props.location.pathname.split('/').at(-1) === 'edit') {
-      this.showRenameModal();
-    }
     const searchParams = queryString.parse(this.props.location.search);
     const view = searchParams['view'];
     if (!view) {
@@ -707,8 +704,11 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.location !== this.props.location) {
+  componentDidUpdate(prevProps: NotebookProps, prevState: NotebookState) {
+    // If the URL changes to /edit or the notebook name is loaded in with the URL as /edit.
+    // This second condition is to update the rename modal with the loaded notebook name on page laod
+    // if the page if first loaded in as /edit.
+    if (prevProps.location !== this.props.location || prevState.path !== this.state.path) {
       if (this.props.location.pathname.split('/').at(-1) === 'edit') {
         this.showRenameModal();
       }
