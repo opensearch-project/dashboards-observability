@@ -47,7 +47,6 @@ import {
 } from './helpers/reporting_context_menu_helper';
 import { zeppelinParagraphParser } from './helpers/zeppelin_parser';
 import { Paragraphs } from './paragraph_components/paragraphs';
-import { Location } from 'history';
 const panelStyles: CSS.Properties = {
   float: 'left',
   width: '100%',
