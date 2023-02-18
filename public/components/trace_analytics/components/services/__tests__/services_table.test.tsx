@@ -6,7 +6,7 @@
 import React from 'react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { ServicesTable } from '../services_table';
+import { ServicesTable } from '../data_prepper_services_table';
 
 describe('Services table component', () => {
   configure({ adapter: new Adapter() });
@@ -25,7 +25,7 @@ describe('Services table component', () => {
         addFilter={addFilter}
         jaegerIndicesExist={false}
         dataPrepperIndicesExist={true}
-        mode='data_prepper'
+        mode="data_prepper"
         setRedirect={setRedirect}
         loading={false}
       />
@@ -48,7 +48,7 @@ describe('Services table component', () => {
         addFilter={addFilter}
         jaegerIndicesExist={true}
         dataPrepperIndicesExist={false}
-        mode='jaeger'
+        mode="jaeger"
         setRedirect={setRedirect}
         loading={false}
       />
@@ -79,7 +79,7 @@ describe('Services table component', () => {
         items={tableItems}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
-        mode='data_prepper'
+        mode="data_prepper"
         dataPrepperIndicesExist={true}
         jaegerIndicesExist={false}
         addFilter={addFilter}
@@ -111,7 +111,7 @@ describe('Services table component', () => {
         items={tableItems}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
-        mode='jaeger'
+        mode="jaeger"
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         addFilter={addFilter}

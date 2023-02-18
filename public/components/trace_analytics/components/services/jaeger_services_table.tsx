@@ -21,34 +21,21 @@ import React, { useMemo } from 'react';
 import { TraceAnalyticsMode } from '../../home';
 import { FilterType } from '../common/filters/filters';
 import {
-  MissingConfigurationMessage,
+  MissingConfigurationMessageJaeger,
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
+import { ServicesTableProps } from './services_content';
 
-interface ServicesTableProps {
-  items: any[];
-  loading: boolean;
-  nameColumnAction: (item: any) => any;
-  traceColumnAction: any;
-  addFilter: (filter: FilterType) => void;
-  setRedirect: (redirect: boolean) => void;
-  mode: TraceAnalyticsMode;
-  jaegerIndicesExist: boolean;
-  dataPrepperIndicesExist: boolean;
-}
-
-export function ServicesTable(props: ServicesTableProps) {
+export function JaegerServicesTable(props: ServicesTableProps) {
   const {
     items,
-    mode,
     loading,
     nameColumnAction,
     traceColumnAction,
     addFilter,
     setRedirect,
-    jaegerIndicesExist,
-    dataPrepperIndicesExist,
+    indexExists,
   } = props;
   const renderTitleBar = (totalItems?: number) => {
     return (
@@ -97,36 +84,6 @@ export function ServicesTable(props: ServicesTableProps) {
           truncateText: true,
           render: (item: any) => (item === 0 || item ? <EuiI18nNumber value={item} /> : '-'),
         },
-        ...(mode === 'data_prepper'
-          ? [
-              {
-                field: 'number_of_connected_services',
-                name: 'No. of connected services',
-                align: 'right',
-                sortable: true,
-                truncateText: true,
-                width: '80px',
-                render: (item: any) => (item === 0 || item ? item : '-'),
-              },
-            ]
-          : []),
-        ...(mode === 'data_prepper'
-          ? [
-              {
-                field: 'connected_services',
-                name: 'Connected services',
-                align: 'left',
-                sortable: true,
-                truncateText: true,
-                render: (item: any) =>
-                  item ? (
-                    <EuiText size="s">{_.truncate(item.join(', '), { length: 50 })}</EuiText>
-                  ) : (
-                    '-'
-                  ),
-              },
-            ]
-          : []),
         {
           field: 'traces',
           name: 'Traces',
@@ -140,7 +97,7 @@ export function ServicesTable(props: ServicesTableProps) {
                   onClick={() => {
                     setRedirect(true);
                     addFilter({
-                      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+                      field: 'process.serviceName',
                       operator: 'is',
                       value: row.name,
                       inverted: false,
@@ -169,11 +126,8 @@ export function ServicesTable(props: ServicesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!(
-          (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-          (mode === 'jaeger' && jaegerIndicesExist)
-        ) ? (
-          <MissingConfigurationMessage mode={mode} />
+        {!indexExists ? (
+          <MissingConfigurationMessageJaeger />
         ) : items?.length > 0 ? (
           <EuiInMemoryTable
             tableLayout="auto"

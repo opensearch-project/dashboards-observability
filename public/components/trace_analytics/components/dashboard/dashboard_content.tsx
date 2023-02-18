@@ -23,7 +23,8 @@ import {
   getPercentileFilter,
   milliToNanoSec,
   minFixedInterval,
-  MissingConfigurationMessage,
+  MissingConfigurationMessageDataPrepper,
+  MissingConfigurationMessageJaeger,
   processTimeStamp,
 } from '../common/helper_functions';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
@@ -73,10 +74,14 @@ export function DashboardContent(props: DashboardProps) {
 
   useEffect(() => {
     if (showTimeoutToast === true && toasts.length === 0) {
-      setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.')
+      setToast!(
+        'Query took too long to execute.',
+        'danger',
+        'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.'
+      );
     }
     setShowTimeoutToast(false);
-  }, [showTimeoutToast])
+  }, [showTimeoutToast]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
@@ -93,7 +98,7 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     let newFilteredService = '';
     for (const filter of filters) {
-      if (mode === 'data_prepper') { 
+      if (mode === 'data_prepper') {
         if (filter.field === 'serviceName') {
           newFilteredService = filter.value;
           break;
@@ -106,8 +111,22 @@ export function DashboardContent(props: DashboardProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
-  }, [filters, startTime, endTime, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
+    if (
+      !redirect &&
+      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+        (mode === 'jaeger' && jaegerIndicesExist))
+    )
+      refresh(newFilteredService);
+  }, [
+    filters,
+    startTime,
+    endTime,
+    appConfigs,
+    redirect,
+    mode,
+    dataPrepperIndicesExist,
+    jaegerIndicesExist,
+  ]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
@@ -154,12 +173,12 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         // () => {
-        //   if (toasts.length === 0) { 
+        //   if (toasts.length === 0) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
         setPercentileMap
-      ).finally(() => setLoading(false))
+      ).finally(() => setLoading(false));
       handleJaegerErrorDashboardRequest(
         http,
         DSL,
@@ -170,7 +189,7 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         // () => {
-        //   if (toasts.length === 0) { 
+        //   if (toasts.length === 0) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
@@ -278,6 +297,82 @@ export function DashboardContent(props: DashboardProps) {
     setFilters(newFilters);
   };
 
+  const renderDashboardPage = () => {
+    switch (mode) {
+      case 'data_prepper':
+        if (!dataPrepperIndicesExist) {
+          return <MissingConfigurationMessageDataPrepper />;
+        }
+        return (
+          <>
+            <DashboardTable
+              items={tableItems}
+              filters={filters}
+              addFilter={addFilter}
+              addPercentileFilter={addPercentileFilter}
+              setRedirect={setRedirect}
+              loading={loading}
+              page={page}
+            />
+            <EuiSpacer />
+            <EuiFlexGroup alignItems="baseline">
+              <EuiFlexItem grow={4}>
+                <ServiceMap
+                  addFilter={addFilter}
+                  serviceMap={serviceMap}
+                  idSelected={serviceMapIdSelected}
+                  setIdSelected={setServiceMapIdSelected}
+                  currService={filteredService}
+                  page={page}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <ErrorRatePlt
+                      items={errorRatePltItems}
+                      setStartTime={setStartTime}
+                      setEndTime={setEndTime}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <ThroughputPlt
+                      items={throughputPltItems}
+                      setStartTime={setStartTime}
+                      setEndTime={setEndTime}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        );
+      case 'jaeger':
+        if (!jaegerIndicesExist) {
+          return <MissingConfigurationMessageJaeger />;
+        }
+        return (
+          <TopGroupsPage
+            filters={filters}
+            addFilter={addFilter}
+            addFilters={addFilters}
+            addPercentileFilter={addPercentileFilter}
+            setRedirect={setRedirect}
+            loading={loading}
+            page={page}
+            throughPutItems={throughputPltItems}
+            jaegerErrorRatePltItems={errorRatePltItems}
+            jaegerTableItems={jaegerTableItems}
+            jaegerErrorTableItems={jaegerErrorTableItems}
+            setStartTime={setStartTime}
+            setEndTime={setEndTime}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <SearchBar
@@ -295,72 +390,7 @@ export function DashboardContent(props: DashboardProps) {
         mode={mode}
       />
       <EuiSpacer size="m" />
-      {((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
-        <div>
-          {mode === 'data_prepper' ? (
-            <>
-              <DashboardTable
-                items={tableItems}
-                filters={filters}
-                addFilter={addFilter}
-                addPercentileFilter={addPercentileFilter}
-                setRedirect={setRedirect}
-                loading={loading}
-                page={page}
-              />
-              <EuiSpacer />
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={4}>
-                  <ServiceMap
-                    addFilter={addFilter}
-                    serviceMap={serviceMap}
-                    idSelected={serviceMapIdSelected}
-                    setIdSelected={setServiceMapIdSelected}
-                    currService={filteredService}
-                    page={page}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem>
-                      <ErrorRatePlt
-                        items={errorRatePltItems}
-                        setStartTime={setStartTime}
-                        setEndTime={setEndTime}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <ThroughputPlt
-                        items={throughputPltItems}
-                        setStartTime={setStartTime}
-                        setEndTime={setEndTime}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ) : (
-            <TopGroupsPage
-              filters={filters}
-              addFilter={addFilter}
-              addFilters={addFilters}
-              addPercentileFilter={addPercentileFilter}
-              setRedirect={setRedirect}
-              loading={loading}
-              page={page}
-              throughPutItems={throughputPltItems}
-              jaegerErrorRatePltItems={errorRatePltItems}
-              jaegerTableItems={jaegerTableItems}
-              jaegerErrorTableItems={jaegerErrorTableItems}
-              setStartTime={setStartTime}
-              setEndTime={setEndTime}
-            />
-          )}
-        </div>
-      ) : (
-        <MissingConfigurationMessage mode={mode}/>
-      )}
+      {renderDashboardPage()}
     </>
   );
 }

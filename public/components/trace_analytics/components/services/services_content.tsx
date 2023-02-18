@@ -17,7 +17,18 @@ import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
-import { ServicesTable } from './services_table';
+import { DataPrepperServicesTable } from './data_prepper_services_table';
+import { JaegerServicesTable } from './jaeger_services_table';
+
+export interface ServicesTableProps {
+  items: any[];
+  loading: boolean;
+  nameColumnAction: (item: any) => any;
+  traceColumnAction: any;
+  addFilter: (filter: FilterType) => void;
+  setRedirect: (redirect: boolean) => void;
+  indexExists: boolean;
+}
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -71,12 +82,25 @@ export function ServicesContent(props: ServicesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
+    if (
+      !redirect &&
+      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+        (mode === 'jaeger' && jaegerIndicesExist))
+    )
+      refresh(newFilteredService);
   }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
-    const DSL = filtersToDsl(mode, filters, query,processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page, appConfigs);
+    const DSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page,
+      appConfigs
+    );
     // service map should not be filtered by service name
     const serviceMapDSL = _.cloneDeep(DSL);
     serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
@@ -84,7 +108,13 @@ export function ServicesContent(props: ServicesProps) {
     );
     await Promise.all([
       handleServicesRequest(http, DSL, setTableItems, mode),
-      handleServiceMapRequest(http, serviceMapDSL, mode, setServiceMap, currService || filteredService),
+      handleServiceMapRequest(
+        http,
+        serviceMapDSL,
+        mode,
+        setServiceMap,
+        currService || filteredService
+      ),
     ]);
     setLoading(false);
   };
@@ -104,6 +134,48 @@ export function ServicesContent(props: ServicesProps) {
     setFilters(newFilters);
   };
 
+  const renderServiceContent = () => {
+    switch (mode) {
+      case 'data_prepper':
+        return (
+          <>
+            <DataPrepperServicesTable
+              items={tableItems}
+              addFilter={addFilter}
+              setRedirect={setRedirect}
+              loading={loading}
+              nameColumnAction={nameColumnAction}
+              traceColumnAction={traceColumnAction}
+              indexExists={dataPrepperIndicesExist}
+            />
+            <EuiSpacer size="m" />
+            <ServiceMap
+              addFilter={addFilter}
+              serviceMap={serviceMap}
+              idSelected={serviceMapIdSelected}
+              setIdSelected={setServiceMapIdSelected}
+              currService={filteredService}
+              page={page}
+            />
+          </>
+        );
+      case 'jaeger':
+        return (
+          <JaegerServicesTable
+            items={tableItems}
+            addFilter={addFilter}
+            setRedirect={setRedirect}
+            loading={loading}
+            nameColumnAction={nameColumnAction}
+            traceColumnAction={traceColumnAction}
+            indexExists={jaegerIndicesExist}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <SearchBar
@@ -121,28 +193,7 @@ export function ServicesContent(props: ServicesProps) {
         mode={mode}
       />
       <EuiSpacer size="m" />
-      <ServicesTable
-        items={tableItems}
-        addFilter={addFilter}
-        setRedirect={setRedirect}
-        mode={mode}
-        loading={loading}
-        nameColumnAction={nameColumnAction}
-        traceColumnAction={traceColumnAction}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-      />
-      <EuiSpacer size="m" />
-      { (mode === 'data_prepper' && dataPrepperIndicesExist) ? 
-        <ServiceMap
-          addFilter={addFilter}
-          serviceMap={serviceMap}
-          idSelected={serviceMapIdSelected}
-          setIdSelected={setServiceMapIdSelected}
-          currService={filteredService}
-          page={page}
-        /> : (<div/>)
-      }
+      {renderServiceContent()}
     </>
   );
 }

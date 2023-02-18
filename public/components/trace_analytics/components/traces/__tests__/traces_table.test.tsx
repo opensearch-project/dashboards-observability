@@ -6,7 +6,7 @@
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { TracesTable } from '../traces_table';
+import { TracesTable } from '../data_prepper_traces_table';
 
 describe('Traces table component', () => {
   configure({ adapter: new Adapter() });
@@ -21,7 +21,7 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={false}
-        mode='data_prepper'
+        mode="data_prepper"
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -34,7 +34,7 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={true}
         jaegerIndicesExist={false}
-        mode='data_prepper'
+        mode="data_prepper"
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -64,7 +64,7 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={true}
         jaegerIndicesExist={false}
-        mode='data_prepper'
+        mode="data_prepper"
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -95,7 +95,7 @@ describe('Traces table component', () => {
         refresh={refresh}
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
-        mode='jaeger'
+        mode="jaeger"
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
