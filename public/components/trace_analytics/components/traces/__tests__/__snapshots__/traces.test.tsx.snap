@@ -1128,11 +1128,10 @@ exports[`Traces component renders empty traces page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <TracesTable
-      dataPrepperIndicesExist={true}
+    <DataPrepperTracesTable
+      indexExists={true}
       items={Array []}
       loading={true}
-      mode="data_prepper"
       refresh={[Function]}
       traceIdColumnAction={[Function]}
     >
@@ -1268,7 +1267,7 @@ exports[`Traces component renders empty traces page 1`] = `
           </NoMatchMessage>
         </div>
       </EuiPanel>
-    </TracesTable>
+    </DataPrepperTracesTable>
   </TracesContent>
 </Traces>
 `;
@@ -2431,12 +2430,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <TracesTable
-      dataPrepperIndicesExist={false}
+    <JaegerTracesTable
+      indexExists={true}
       items={Array []}
-      jaegerIndicesExist={true}
       loading={true}
-      mode="jaeger"
       refresh={[Function]}
       traceIdColumnAction={[Function]}
     >
@@ -2572,7 +2569,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
           </NoMatchMessage>
         </div>
       </EuiPanel>
-    </TracesTable>
+    </JaegerTracesTable>
   </TracesContent>
 </Traces>
 `;
@@ -3733,11 +3730,10 @@ exports[`Traces component renders traces page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <TracesTable
-      dataPrepperIndicesExist={true}
+    <DataPrepperTracesTable
+      indexExists={true}
       items={Array []}
       loading={true}
-      mode="data_prepper"
       refresh={[Function]}
       traceIdColumnAction={[Function]}
     >
@@ -3873,7 +3869,7 @@ exports[`Traces component renders traces page 1`] = `
           </NoMatchMessage>
         </div>
       </EuiPanel>
-    </TracesTable>
+    </DataPrepperTracesTable>
   </TracesContent>
 </Traces>
 `;

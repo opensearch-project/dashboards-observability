@@ -6,7 +6,8 @@
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { TracesTable } from '../data_prepper_traces_table';
+import { DataPrepperTracesTable } from '../data_prepper_traces_table';
+import { JaegerTracesTable } from '../jaeger_traces_table';
 
 describe('Traces table component', () => {
   configure({ adapter: new Adapter() });
@@ -16,12 +17,10 @@ describe('Traces table component', () => {
     const traceIdColumnAction = (item: any) =>
       location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
     const noIndicesTable = mount(
-      <TracesTable
+      <DataPrepperTracesTable
         items={[]}
         refresh={refresh}
-        dataPrepperIndicesExist={false}
-        jaegerIndicesExist={false}
-        mode="data_prepper"
+        indexExists={false}
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -29,12 +28,10 @@ describe('Traces table component', () => {
     expect(noIndicesTable).toMatchSnapshot();
 
     const emptyTable = mount(
-      <TracesTable
+      <DataPrepperTracesTable
         items={[]}
         refresh={refresh}
-        dataPrepperIndicesExist={true}
-        jaegerIndicesExist={false}
-        mode="data_prepper"
+        indexExists={true}
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -59,12 +56,10 @@ describe('Traces table component', () => {
       location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
     const refresh = jest.fn();
     const wrapper = mount(
-      <TracesTable
+      <DataPrepperTracesTable
         items={tableItems}
         refresh={refresh}
-        dataPrepperIndicesExist={true}
-        jaegerIndicesExist={false}
-        mode="data_prepper"
+        indexExists={true}
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />
@@ -90,12 +85,10 @@ describe('Traces table component', () => {
       location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
     const refresh = jest.fn();
     const wrapper = mount(
-      <TracesTable
+      <JaegerTracesTable
         items={tableItems}
         refresh={refresh}
-        dataPrepperIndicesExist={false}
-        jaegerIndicesExist={true}
-        mode="jaeger"
+        indexExists={true}
         loading={false}
         traceIdColumnAction={traceIdColumnAction}
       />

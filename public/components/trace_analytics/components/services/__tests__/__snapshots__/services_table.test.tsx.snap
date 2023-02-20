@@ -1,13 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Services table component renders empty jaeger services table message 1`] = `
-<ServicesTable
+<JaegerServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={false}
+  indexExists={true}
   items={Array []}
-  jaegerIndicesExist={true}
   loading={false}
-  mode="jaeger"
   nameColumnAction={[Function]}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
@@ -144,17 +142,15 @@ exports[`Services table component renders empty jaeger services table message 1`
       </NoMatchMessage>
     </div>
   </EuiPanel>
-</ServicesTable>
+</JaegerServicesTable>
 `;
 
 exports[`Services table component renders empty services table message 1`] = `
-<ServicesTable
+<DataPrepperServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={true}
+  indexExists={true}
   items={Array []}
-  jaegerIndicesExist={false}
   loading={false}
-  mode="data_prepper"
   nameColumnAction={[Function]}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
@@ -291,13 +287,13 @@ exports[`Services table component renders empty services table message 1`] = `
       </NoMatchMessage>
     </div>
   </EuiPanel>
-</ServicesTable>
+</DataPrepperServicesTable>
 `;
 
 exports[`Services table component renders jaeger services table 1`] = `
-<ServicesTable
+<JaegerServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={false}
+  indexExists={true}
   items={
     Array [
       Object {
@@ -309,9 +305,7 @@ exports[`Services table component renders jaeger services table 1`] = `
       },
     ]
   }
-  jaegerIndicesExist={true}
   loading={false}
-  mode="jaeger"
   nameColumnAction={[Function]}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
@@ -1700,13 +1694,13 @@ exports[`Services table component renders jaeger services table 1`] = `
       </EuiInMemoryTable>
     </div>
   </EuiPanel>
-</ServicesTable>
+</JaegerServicesTable>
 `;
 
 exports[`Services table component renders services table 1`] = `
-<ServicesTable
+<DataPrepperServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={true}
+  indexExists={true}
   items={
     Array [
       Object {
@@ -1723,9 +1717,7 @@ exports[`Services table component renders services table 1`] = `
       },
     ]
   }
-  jaegerIndicesExist={false}
   loading={false}
-  mode="data_prepper"
   nameColumnAction={[Function]}
   setRedirect={[MockFunction]}
   traceColumnAction={[Function]}
@@ -3342,5 +3334,5 @@ exports[`Services table component renders services table 1`] = `
       </EuiInMemoryTable>
     </div>
   </EuiPanel>
-</ServicesTable>
+</DataPrepperServicesTable>
 `;

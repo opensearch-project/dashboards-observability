@@ -6,7 +6,8 @@
 import React from 'react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { ServicesTable } from '../data_prepper_services_table';
+import { DataPrepperServicesTable } from '../data_prepper_services_table';
+import { JaegerServicesTable } from '../jaeger_services_table';
 
 describe('Services table component', () => {
   configure({ adapter: new Adapter() });
@@ -18,14 +19,12 @@ describe('Services table component', () => {
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
-      <ServicesTable
+      <DataPrepperServicesTable
         items={[]}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
         addFilter={addFilter}
-        jaegerIndicesExist={false}
-        dataPrepperIndicesExist={true}
-        mode="data_prepper"
+        indexExists={true}
         setRedirect={setRedirect}
         loading={false}
       />
@@ -41,14 +40,12 @@ describe('Services table component', () => {
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
-      <ServicesTable
+      <JaegerServicesTable
         items={[]}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
         addFilter={addFilter}
-        jaegerIndicesExist={true}
-        dataPrepperIndicesExist={false}
-        mode="jaeger"
+        indexExists={true}
         setRedirect={setRedirect}
         loading={false}
       />
@@ -75,13 +72,11 @@ describe('Services table component', () => {
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
-      <ServicesTable
+      <DataPrepperServicesTable
         items={tableItems}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
-        mode="data_prepper"
-        dataPrepperIndicesExist={true}
-        jaegerIndicesExist={false}
+        indexExists={true}
         addFilter={addFilter}
         setRedirect={setRedirect}
         loading={false}
@@ -107,13 +102,11 @@ describe('Services table component', () => {
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
     const wrapper = mount(
-      <ServicesTable
+      <JaegerServicesTable
         items={tableItems}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
-        mode="jaeger"
-        dataPrepperIndicesExist={false}
-        jaegerIndicesExist={true}
+        indexExists={true}
         addFilter={addFilter}
         setRedirect={setRedirect}
         loading={false}

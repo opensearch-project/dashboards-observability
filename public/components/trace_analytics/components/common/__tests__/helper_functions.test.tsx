@@ -19,7 +19,8 @@ import {
   getServiceMapTargetResources,
   milliToNanoSec,
   minFixedInterval,
-  MissingConfigurationMessage,
+  MissingConfigurationMessageDataPrepper,
+  MissingConfigurationMessageJaeger,
   nanoToMilliSec,
   NoMatchMessage,
   PanelTitle,
@@ -38,9 +39,13 @@ describe('Helper functions', () => {
 
   it('renders no match and missing configuration messages', () => {
     const noMatchMessage = shallow(<NoMatchMessage size="s" />);
-    const missingConfigurationMessage = shallow(<MissingConfigurationMessage mode='data_prepper'/>)
+    const missingConfigurationMessageDataPrepper = shallow(
+      <MissingConfigurationMessageDataPrepper />
+    );
+    const missingConfigurationMessageJaeger = shallow(<MissingConfigurationMessageJaeger />);
     expect(noMatchMessage).toMatchSnapshot();
-    expect(missingConfigurationMessage).toMatchSnapshot();
+    expect(missingConfigurationMessageDataPrepper).toMatchSnapshot();
+    expect(missingConfigurationMessageJaeger).toMatchSnapshot();
   });
 
   it('renders benchmark', () => {
