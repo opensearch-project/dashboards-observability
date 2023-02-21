@@ -282,10 +282,9 @@ export const DataConfigPanelItem = ({
         ...configList,
       },
     });
-    console.log('newQueryString: ', newQueryString);
     handleQueryChange(newQueryString);
     getVisualizations({
-      queryState: nextQueryState[FINAL_QUERY],
+      query: nextQueryState[FINAL_QUERY],
       callback: (res) => {
         updateVisUIState({
           visData: res,
