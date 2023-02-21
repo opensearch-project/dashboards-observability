@@ -5,7 +5,7 @@
 
 import { I18nProvider } from '@osd/i18n/react';
 import { QueryManager } from 'common/query_manager';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { CoreStart } from '../../../../src/core/public';
@@ -127,6 +127,7 @@ export const App = ({
                       pplService={pplService}
                       dslService={dslService}
                       renderProps={props}
+                      savedObjects={CoreStartProp.savedObjects}
                     />
                   );
                 }}
