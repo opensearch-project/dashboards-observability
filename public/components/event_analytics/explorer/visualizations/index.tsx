@@ -121,12 +121,6 @@ export const ExplorerVisualizations = ({
                     }
                   />
                 </div>
-                <div
-                  className="explorer__vizDataConfig"
-                  data-test-subj="explorer__vizDataConfig-panel"
-                >
-                  {renderDataConfigContainer()}
-                </div>
                 {!isMarkDown && (
                   <div
                     className="explorer__vizDataConfig"
