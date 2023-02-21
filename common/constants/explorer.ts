@@ -23,7 +23,7 @@ export const SELECTED_FIELDS = 'selectedFields';
 export const UNSELECTED_FIELDS = 'unselectedFields';
 export const AVAILABLE_FIELDS = 'availableFields';
 export const QUERIED_FIELDS = 'queriedFields';
-export const TAB_ID_TXT_PFX = 'query-panel-';
+export const TAB_ID_TXT_PFX = 'explorer-tab-';
 export const TAB_TITLE = 'New query';
 export const TAB_CHART_TITLE = 'Visualizations';
 export const TAB_EVENT_TITLE = 'Events';
@@ -299,4 +299,4 @@ export const UNITS_OF_MEASURE = [
   'farenheit (F)',
   'meters (m)',
   'kilometers (k)',
-]
+];
