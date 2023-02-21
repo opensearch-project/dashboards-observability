@@ -61,11 +61,16 @@ describe('Testing traces table', () => {
 
 describe('Testing trace view', () => {
   beforeEach(() => {
-    cy.visit(`app/observability-dashboards#/trace_analytics/traces/${TRACE_ID}`, {
+    cy.visit(`app/observability-dashboards#/trace_analytics/traces`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
     });
+    setTimeFilter();
+    cy.get('input[type="search"]').focus().type(`${TRACE_ID}`);
+    cy.get('.euiButton__text').contains('Refresh').click();
+    cy.wait(delay);
+    cy.get('[data-test-subj="trace-link"]').eq(0).click();
   });
 
   it('Renders the trace view', () => {
@@ -152,4 +157,34 @@ describe('Testing traces table', () => {
       expect(total).to.equal(expected_row_count);
     });
   });
+});
+
+describe('Testing switch mode to jaeger', () => {
+  beforeEach(() => {
+    cy.visit('app/observability-dashboards#/trace_analytics/traces', {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+    setTimeFilter();
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='jaeger-mode']").click();
+  });
+
+  it('Verifies columns and data', () => {
+    cy.contains('08ee9fd9bf964384').should('exist');
+    cy.contains('0.012').should('exist');
+    cy.contains('No').should('exist');
+    cy.contains('01/24/2023 08:33:35').should('exist');
+    cy.contains('Latency (ms)').should('exist');
+    cy.contains('Trace ID').should('exist');
+    cy.contains('Errors').should('exist');
+    cy.contains('Last updated').should('exist');
+  });
+
+  it('Verifies Trace View', () => {
+    cy.contains('08ee9fd9bf964384').click();
+    cy.contains("Time spent by service").should('exist');
+    cy.get("[data-test-subj='span-gantt-chart-panel']").should('exist');
+  })
 });
