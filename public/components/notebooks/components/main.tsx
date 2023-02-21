@@ -95,6 +95,7 @@ export class Main extends React.Component<MainProps, MainState> {
   createNotebook = (newNoteName: string) => {
     if (newNoteName.length >= 50 || newNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
+      window.location.assign('#/notebooks');
       return;
     }
     const newNoteObject = {
