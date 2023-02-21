@@ -87,8 +87,8 @@ export const Home = (props: HomeProps) => {
 
 
   const modes = [
-    { id: 'jaeger', title: 'Jaeger' },
-    { id: 'data_prepper', title: 'Data Prepper' },
+    { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
+    { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
   ];
 
   useEffect(() => {

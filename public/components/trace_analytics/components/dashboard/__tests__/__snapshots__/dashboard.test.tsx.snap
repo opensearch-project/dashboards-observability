@@ -1001,6 +1001,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                       />
                     }
                     closePopover={[Function]}
+                    data-test-subj="global-filter-button"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -1010,6 +1011,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
                       withTitle={true}
                     >
                       <div
@@ -1087,6 +1089,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                       </EuiButtonEmpty>
                     }
                     closePopover={[Function]}
+                    data-test-subj="addfilter"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -1096,6 +1099,7 @@ exports[`Dashboard component renders dashboard 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorDownLeft"
+                      data-test-subj="addfilter"
                       withTitle={true}
                     >
                       <div
@@ -3250,6 +3254,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                       />
                     }
                     closePopover={[Function]}
+                    data-test-subj="global-filter-button"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -3259,6 +3264,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
                       withTitle={true}
                     >
                       <div
@@ -3331,6 +3337,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                       </EuiButtonEmpty>
                     }
                     closePopover={[Function]}
+                    data-test-subj="addfilter"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -3340,6 +3347,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorDownLeft"
+                      data-test-subj="addfilter"
                       withTitle={true}
                     >
                       <div
@@ -5515,6 +5523,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                       />
                     }
                     closePopover={[Function]}
+                    data-test-subj="global-filter-button"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -5524,6 +5533,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
                       withTitle={true}
                     >
                       <div
@@ -5601,6 +5611,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                       </EuiButtonEmpty>
                     }
                     closePopover={[Function]}
+                    data-test-subj="addfilter"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -5610,6 +5621,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorDownLeft"
+                      data-test-subj="addfilter"
                       withTitle={true}
                     >
                       <div
@@ -5711,10 +5723,12 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
           toggleButtons={
             Array [
               Object {
+                "data-test-subj": "errors-toggle",
                 "id": "error_rate",
                 "label": "Error rate",
               },
               Object {
+                "data-test-subj": "throughput-toggle",
                 "id": "throughput",
                 "label": "Throughput",
               },
@@ -5770,10 +5784,12 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                     options={
                       Array [
                         Object {
+                          "data-test-subj": "errors-toggle",
                           "id": "error_rate",
                           "label": "Error rate",
                         },
                         Object {
+                          "data-test-subj": "throughput-toggle",
                           "id": "throughput",
                           "label": "Throughput",
                         },
@@ -5794,6 +5810,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                       >
                         <EuiButtonGroupButton
                           color="text"
+                          data-test-subj="errors-toggle"
                           element="label"
                           id="error_rate"
                           isDisabled={false}
@@ -5809,6 +5826,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             baseClassName="euiButtonGroupButton"
                             className="euiButtonGroupButton-isSelected"
                             color="text"
+                            data-test-subj="errors-toggle"
                             element="label"
                             fill={true}
                             htmlFor="random_html_id"
@@ -5826,6 +5844,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                           >
                             <label
                               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                              data-test-subj="errors-toggle"
                               disabled={false}
                               htmlFor="random_html_id"
                               onClick={[Function]}
@@ -5874,6 +5893,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                         </EuiButtonGroupButton>
                         <EuiButtonGroupButton
                           color="text"
+                          data-test-subj="throughput-toggle"
                           element="label"
                           id="throughput"
                           isDisabled={false}
@@ -5889,6 +5909,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                             baseClassName="euiButtonGroupButton"
                             className=""
                             color="text"
+                            data-test-subj="throughput-toggle"
                             element="label"
                             fill={false}
                             htmlFor="random_html_id"
@@ -5906,6 +5927,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
                           >
                             <label
                               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                              data-test-subj="throughput-toggle"
                               disabled={false}
                               htmlFor="random_html_id"
                               onClick={[Function]}
