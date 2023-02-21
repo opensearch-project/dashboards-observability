@@ -43,6 +43,7 @@ exports[`Filter component renders filters 1`] = `
                 />
               }
               closePopover={[Function]}
+              data-test-subj="global-filter-button"
               display="inlineBlock"
               hasArrow={true}
               isOpen={false}
@@ -52,6 +53,7 @@ exports[`Filter component renders filters 1`] = `
             >
               <div
                 className="euiPopover euiPopover--anchorRightUp"
+                data-test-subj="global-filter-button"
                 withTitle={true}
               >
                 <div
@@ -124,6 +126,7 @@ exports[`Filter component renders filters 1`] = `
                 </EuiButtonEmpty>
               }
               closePopover={[Function]}
+              data-test-subj="addfilter"
               display="inlineBlock"
               hasArrow={true}
               isOpen={false}
@@ -133,6 +136,7 @@ exports[`Filter component renders filters 1`] = `
             >
               <div
                 className="euiPopover euiPopover--anchorDownLeft"
+                data-test-subj="addfilter"
                 withTitle={true}
               >
                 <div

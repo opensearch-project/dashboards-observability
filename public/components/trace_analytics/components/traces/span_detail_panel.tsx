@@ -239,7 +239,7 @@ export function SpanDetailPanel(props: {
 
   return (
     <>
-      <EuiPanel>
+      <EuiPanel data-test-subj='span-gantt-chart-panel'>
         <EuiFlexGroup>
           <EuiFlexItem>
             <PanelTitle title="Spans" totalItems={data.gantt.length / 2} />
