@@ -22,6 +22,5 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.6.0
 
 ### Maintenance
 
-- Increment version to 2.4.1-SNAPSHOT ([#1278](https://github.com/opensearch-project/dashboards-observability/pull/1278))
 - Cypress test update and related linting fixes ([#220](https://github.com/opensearch-project/dashboards-observability/pull/220))
 - upgrade cypress to 6 ([#249](https://github.com/opensearch-project/dashboards-observability/pull/249))
