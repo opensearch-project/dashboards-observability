@@ -32,6 +32,7 @@ import {
 import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import {
   CREATE_PANEL_MESSAGE,
@@ -89,11 +90,20 @@ export const CustomPanelTable = ({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelListType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     setBreadcrumbs(parentBreadcrumbs);
     fetchCustomPanels();
   }, []);
+
+  useEffect(() => {
+    const url = window.location.hash.split('/');
+    if (url[url.length - 1] === 'create') {
+      createPanel();
+    }
+  }, [location]);
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -131,7 +141,10 @@ export const CustomPanelTable = ({
     setModalLayout(
       getCustomModal(
         onCreate,
-        closeModal,
+        () => {
+          closeModal();
+          history.goBack();
+        },
         'Name',
         'Create operational panel',
         'Cancel',
@@ -323,7 +336,7 @@ export const CustomPanelTable = ({
                   <EuiFlexItem>
                     <EuiButton
                       fill
-                      onClick={() => createPanel()}
+                      href="#/operational_panels/create"
                       data-test-subj="customPanels__createNewPanels"
                     >
                       Create panel

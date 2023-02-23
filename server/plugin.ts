@@ -49,6 +49,7 @@ export class ObservabilityPlugin
       hidden: false,
       namespaceType: 'single',
       mappings: {
+        dynamic: false,
         properties: {
           title: {
             type: 'text',
@@ -73,6 +74,7 @@ export class ObservabilityPlugin
       migrations: {
         '3.0.0': (doc) => ({ ...doc, description: '' }),
         '3.0.1': (doc) => ({ ...doc, description: 'Some Description Text' }),
+        '3.0.2': (doc) => ({ ...doc, dateCreated: parseInt(doc.dateCreated || '0', 10) }),
       },
     };
 

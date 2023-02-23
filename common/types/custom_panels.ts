@@ -8,6 +8,9 @@ export interface CustomPanelListType {
   id: string;
   dateCreated: number;
   dateModified: number;
+  visualizations: VisualizationType[];
+  timeRange: { to: string; from: string };
+  queryFilter: { query: string; language: string };
   applicationId?: string;
 }
 
@@ -39,7 +42,7 @@ export interface SavedVisualizationType {
   user_configs: any;
 }
 
-export interface pplResponse {
+export interface PplResponse {
   data: any;
   metadata: any;
   size: number;

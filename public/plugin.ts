@@ -20,8 +20,13 @@ import { convertLegacyNotebooksUrl } from './components/notebooks/components/hel
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
 import { QueryManager } from '../common/query_manager';
-export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
-  public setup(core: CoreSetup): ObservabilitySetup {
+import { DashboardSetup } from '../../../src/plugins/dashboard/public';
+import { SavedObject } from '../../../src/core/public';
+
+export class ObservabilityPlugin {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
     uiSettingsService.init(core.uiSettings, core.notifications);
 
     // redirect legacy notebooks URL to current URL under observability
@@ -33,6 +38,45 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     if (window.location.pathname.includes('trace-analytics-dashboards')) {
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
+
+    // // Fetches all saved Applications
+    // const fetchApplicationAnalytics: (
+    //   search?: string,
+    //   size?: number
+    // ) => Observable<DashboardListItem> = () => {
+    //   return from(fetchAppsList(core.http)).pipe(
+    //     map(convertAppAnalyticToDashboardListItem),
+    //     catchError((err) => {
+    //       return from([]);
+    //     })
+    //   );
+    // };
+    //
+    // const convertAppAnalyticToDashboardListItem = (item: any): DashboardListItem => {
+    //   return {
+    //     id: item.id,
+    //     title: item.name,
+    //     type: 'Observability Application',
+    //     description: item.description,
+    //     url: `observability-dashboards#/application_analytics/${item.id}`,
+    //     editUrl: `observability-dashboards#/application_analytics/${item.id}`,
+    //     deleteUrl: undefined,
+    //     listType: 'observability-application',
+    //     updated_at: item.dateModified,
+    //   };
+    // };
+
+    dashboard.registerDashboardProvider({
+      savedObjectsType: 'observability-panel',
+      savedObjectsName: 'Observability Panel',
+      editUrlFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}/edit`,
+      viewUrlFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}`,
+      createLinkText: 'Observability Panel',
+      createSortText: 'Observability Panel',
+      createUrl: '/app/observability-dashboards#/operational_panels/create',
+    });
 
     core.application.register({
       id: observabilityID,

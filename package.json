@@ -12,6 +12,7 @@
     "plugin-helpers": "node ../../scripts/plugin_helpers",
     "prepare": "husky install",
     "lint:es": "node ../../scripts/eslint",
+    "lint:staged": "node_modules/.bin/lint-staged",
     "lint": "yarn lint:es"
   },
   "lint-staged": {
