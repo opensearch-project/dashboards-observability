@@ -36,11 +36,22 @@ import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
 
-interface ObservabilityPanelAttrs {
+export interface ObservabilityPanelAttrs {
   id: string;
   name: string;
   attributes: {
     description: string;
+    dateCreated: string;
+    timeRange: {
+      to: string;
+      from: string;
+    };
+    queryFilter: {
+      query: string;
+      language: string;
+    };
+    visualizations: object;
+    applicationId: string;
   };
 }
 
@@ -99,7 +110,7 @@ export const Home = ({
     return {
       id: obj.id,
       name: obj.attributes.title,
-      dateCreated: new Date(obj.updated_at).getTime(),
+      dateCreated: obj.attributes.dateCreated,
       dateModified: new Date(obj.updated_at).getTime(),
     };
   };
@@ -141,9 +152,15 @@ export const Home = ({
       description: '',
       dateCreated: new Date().getTime(),
       dateModified: new Date().getTime(),
-      queryFilter: { query: '', language: '' },
+      timeRange: {
+        to: 'now',
+        from: 'now-1d',
+      },
+      queryFilter: {
+        query: '',
+        language: 'ppl',
+      },
       visualizations: [],
-      timeRange: { to: '', from: '' },
       applicationId: '',
     };
     console.log('new panel', newPanel);

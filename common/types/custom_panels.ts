@@ -8,10 +8,6 @@ export interface CustomPanelListType {
   id: string;
   dateCreated: number;
   dateModified: number;
-  visualizations: VisualizationType[];
-  timeRange: { to: string; from: string };
-  queryFilter: { query: string; language: string };
-  applicationId?: string;
 }
 
 export interface VisualizationType {

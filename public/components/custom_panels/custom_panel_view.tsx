@@ -31,7 +31,11 @@ import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
 import DSLService from '../../services/requests/dsl';
-import { CoreStart, SavedObjectsClientContract } from '../../../../../src/core/public';
+import {
+  CoreStart,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
@@ -64,6 +68,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { ObservabilityPanelAttrs } from './home';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -179,16 +184,18 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   // DateTimePicker States
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
 
-  const savedObjectToCustomPanel = (obj): CustomPanelListType => {
+  const savedObjectToCustomPanel = (
+    obj: SimpleSavedObject<ObservabilityPanelAttrs>
+  ): CustomPanelListType => {
     return {
       id: obj.id,
       name: obj.attributes.title,
-      dateCreated: new Date(obj.updated_at).getTime(),
+      dateCreated: obj.attributes.dateCreated,
       dateModified: new Date(obj.updated_at).getTime(),
-      queryFilter: { query: '', language: '' },
-      visualizations: [],
-      timeRange: { to: '', from: '' },
-      applicationId: '',
+      queryFilter: obj.attributes.queryFilter,
+      visualizations: obj.attributes.visualizations,
+      timeRange: obj.attributes.timeRange,
+      applicationId: obj.attributes.appId,
     };
   };
 
