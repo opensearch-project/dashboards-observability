@@ -15,6 +15,7 @@ import {
   INDEX,
   SELECTED_DATE_RANGE,
   SELECTED_TIMESTAMP,
+  sampleLogPatternData,
 } from '../../../../../../common/constants/explorer';
 
 describe('Pattern table component', () => {
@@ -23,12 +24,7 @@ describe('Pattern table component', () => {
   it('Renders pattern table', async () => {
     const tableData = [
       {
-        count: 5,
-        Pattern: '[a-zA-Zd]',
-        sampleLog:
-          '218.148.135.12 - - [2018-07-22T04:18:12.345Z] "GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz_1 HTTP/1.1" 200 4531 "-" \
-           "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-        anomalyCount: 0,
+        ...sampleLogPatternData,
       },
     ];
 

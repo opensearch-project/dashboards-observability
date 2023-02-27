@@ -19,7 +19,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { PatternTableData } from 'common/types/explorer';
 import { PPL_PATTERNS_DOCUMENTATION_URL } from '../../../../../common/constants/shared';
+
+interface PatternsHeaderProps {
+  patternsData: { patternTableData: PatternTableData[] };
+  patternRegexInput: string;
+  setPatternRegexInput: (pattern: string) => void;
+  onPatternApply: () => void;
+  setIsPatternConfigPopoverOpen: (flag: boolean) => void;
+  isPatternConfigPopoverOpen: boolean;
+}
 
 export const PatternsHeader = ({
   patternsData,
@@ -28,7 +38,7 @@ export const PatternsHeader = ({
   onPatternApply,
   setIsPatternConfigPopoverOpen,
   isPatternConfigPopoverOpen,
-}: any) => {
+}: PatternsHeaderProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>

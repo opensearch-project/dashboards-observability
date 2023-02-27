@@ -20,9 +20,9 @@ exports[`Pattern table component Renders pattern table 1`] = `
   tableData={
     Array [
       Object {
-        "Pattern": "[a-zA-Zd]",
         "anomalyCount": 0,
         "count": 5,
+        "pattern": "[a-zA-Zd]",
         "sampleLog": "218.148.135.12 - - [2018-07-22T04:18:12.345Z] \\"GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz_1 HTTP/1.1\\" 200 4531 \\"-\\"            \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\"",
       },
     ]
@@ -66,9 +66,9 @@ exports[`Pattern table component Renders pattern table 1`] = `
     items={
       Array [
         Object {
-          "Pattern": "[a-zA-Zd]",
           "anomalyCount": 0,
           "count": 5,
+          "pattern": "[a-zA-Zd]",
           "sampleLog": "218.148.135.12 - - [2018-07-22T04:18:12.345Z] \\"GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz_1 HTTP/1.1\\" 200 4531 \\"-\\"            \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\"",
         },
       ]
@@ -160,9 +160,9 @@ exports[`Pattern table component Renders pattern table 1`] = `
       items={
         Array [
           Object {
-            "Pattern": "[a-zA-Zd]",
             "anomalyCount": 0,
             "count": 5,
+            "pattern": "[a-zA-Zd]",
             "sampleLog": "218.148.135.12 - - [2018-07-22T04:18:12.345Z] \\"GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz_1 HTTP/1.1\\" 200 4531 \\"-\\"            \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\"",
           },
         ]
@@ -689,9 +689,9 @@ exports[`Pattern table component Renders pattern table 1`] = `
                   <EuiKeyboardAccessible>
                     <EuiTableRow
                       className="customRowClass"
-                      data-test-subj="row-undefined"
+                      data-test-subj="row-[a-zA-Zd]"
                       isSelectable={true}
-                      isSelected={true}
+                      isSelected={false}
                       onClick={[Function]}
                       onKeyDown={[Function]}
                       onKeyUp={[Function]}
@@ -699,8 +699,8 @@ exports[`Pattern table component Renders pattern table 1`] = `
                       tabIndex="0"
                     >
                       <tr
-                        className="euiTableRow customRowClass euiTableRow-isSelectable euiTableRow-isSelected euiTableRow-isClickable"
-                        data-test-subj="row-undefined"
+                        className="euiTableRow customRowClass euiTableRow-isSelectable euiTableRow-isClickable"
+                        data-test-subj="row-[a-zA-Zd]"
                         onClick={[Function]}
                         onKeyDown={[Function]}
                         onKeyUp={[Function]}
