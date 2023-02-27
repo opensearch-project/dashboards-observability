@@ -95,7 +95,7 @@ export const PatternsHeader = ({
                 <EuiButton
                   size="s"
                   fill
-                  onClick={async () => {
+                  onClick={() => {
                     setIsPatternConfigPopoverOpen(false);
                     onPatternApply();
                   }}
