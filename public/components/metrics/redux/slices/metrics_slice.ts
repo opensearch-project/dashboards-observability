@@ -86,7 +86,7 @@ const updateLayoutBySelection = (state: any, newMetric: any) => {
 const updateLayoutByDeSelection = (state: any, newMetric: any) => {
   const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);
 
-  let newMetricsLayout = [] as MetricType[];
+  const newMetricsLayout = [] as MetricType[];
   let heightSubtract = 0;
 
   sortedMetricsLayout.map((metricLayout: MetricType) => {
@@ -101,7 +101,7 @@ const updateLayoutByDeSelection = (state: any, newMetric: any) => {
 };
 
 const filterDeletedLayoutIds = (state: any, payload: any) => {
-  let deletedMetricIds: string[] = [];
+  const deletedMetricIds: string[] = [];
   const payloadIds = payload.map((metric: any) => metric.id);
   state.metricsLayout.map((metricLayout: MetricType) => {
     if (!payloadIds.includes(metricLayout.id)) deletedMetricIds.push(metricLayout.id);
@@ -173,4 +173,4 @@ export const allAvailableMetricsSelector = (state) =>
 
 export const metricsLayoutSelector = (state) => state.metrics.metricsLayout;
 
-export default metricSlice.reducer;
+export const metricsReducers = metricSlice.reducer;
