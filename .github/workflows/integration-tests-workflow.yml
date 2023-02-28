@@ -33,7 +33,7 @@ jobs:
           distribution: 'corretto'
           java-version: '11'
 
-      - name: Download job scheduler artifact 
+      - name: Download job scheduler artifact
         uses: peternied/download-file@v2
         with:
           url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-job-scheduler-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
@@ -78,13 +78,11 @@ jobs:
       - name: Run OpenSearch
         run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
         shell: bash
-        with:
-          wait: 600
 
-      # - name: Sleep while OpenSearch starts
-      #   uses: peternied/action-sleep@v1
-      #   with:
-      #     seconds: 60
+      - name: Sleep while OpenSearch starts
+        uses: peternied/action-sleep@v1
+        with:
+          seconds: 60
 
       - name: Checkout OpenSearch Dashboards
         uses: actions/checkout@v2
