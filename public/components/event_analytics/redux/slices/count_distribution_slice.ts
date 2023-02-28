@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import { REDUX_EXPL_SLICE_COUNT_DISTRIBUTION } from '../../../../../common/constants/explorer';
 
@@ -26,6 +26,9 @@ export const countDistributionSlice = createSlice({
 
 export const { render } = countDistributionSlice.actions;
 
-export const selectCountDistribution = (state) => state.countDistribution;
+export const selectCountDistribution = createSelector(
+  (state) => state.countDistribution,
+  (countDisState) => countDisState
+);
 
-export default countDistributionSlice.reducer;
+export const countDistributionReducer = countDistributionSlice.reducer;

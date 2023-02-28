@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import {
   APP_ANALYTICS_TAB_ID_REGEX,
   FILTERED_PATTERN,
@@ -77,6 +77,9 @@ export const queriesSlice = createSlice({
 
 export const { changeQuery, changeDateRange, remove, init } = queriesSlice.actions;
 
-export const selectQueries = (state) => state.queries;
+export const selectQueries = createSelector(
+  (state) => state.queries,
+  (queryState) => queryState
+);
 
-export default queriesSlice.reducer;
+export const queriesReducer = queriesSlice.reducer;
