@@ -21,8 +21,6 @@ jobs:
         os: [ubuntu-latest]
         java: [11]
         include:
-          - os: windows-latest
-            cypress_cache_folder: ~/AppData/Local/Cypress/Cache
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
 
@@ -80,11 +78,13 @@ jobs:
       - name: Run OpenSearch
         run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
         shell: bash
-
-      - name: Sleep while OpenSearch starts
-        uses: peternied/action-sleep@v1
         with:
-          seconds: 30
+          wait: 600
+
+      # - name: Sleep while OpenSearch starts
+      #   uses: peternied/action-sleep@v1
+      #   with:
+      #     seconds: 60
 
       - name: Checkout OpenSearch Dashboards
         uses: actions/checkout@v2
