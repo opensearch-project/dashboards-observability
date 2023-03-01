@@ -1,12 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Traces table component renders empty traces table message 1`] = `
-<TracesTable
-  dataPrepperIndicesExist={false}
+<DataPrepperTracesTable
+  indexExists={false}
   items={Array []}
-  jaegerIndicesExist={false}
   loading={false}
-  mode="data_prepper"
   refresh={[MockFunction]}
   traceIdColumnAction={[Function]}
 >
@@ -68,9 +66,7 @@ exports[`Traces table component renders empty traces table message 1`] = `
           className="euiHorizontalRule euiHorizontalRule--full"
         />
       </EuiHorizontalRule>
-      <MissingConfigurationMessage
-        mode="data_prepper"
-      >
+      <MissingConfigurationMessageDataPrepper>
         <EuiEmptyPrompt
           actions={
             <EuiButton
@@ -219,19 +215,17 @@ exports[`Traces table component renders empty traces table message 1`] = `
             </EuiButton>
           </div>
         </EuiEmptyPrompt>
-      </MissingConfigurationMessage>
+      </MissingConfigurationMessageDataPrepper>
     </div>
   </EuiPanel>
-</TracesTable>
+</DataPrepperTracesTable>
 `;
 
 exports[`Traces table component renders empty traces table message 2`] = `
-<TracesTable
-  dataPrepperIndicesExist={true}
+<DataPrepperTracesTable
+  indexExists={true}
   items={Array []}
-  jaegerIndicesExist={false}
   loading={false}
-  mode="data_prepper"
   refresh={[MockFunction]}
   traceIdColumnAction={[Function]}
 >
@@ -367,12 +361,12 @@ exports[`Traces table component renders empty traces table message 2`] = `
       </NoMatchMessage>
     </div>
   </EuiPanel>
-</TracesTable>
+</DataPrepperTracesTable>
 `;
 
 exports[`Traces table component renders jaeger traces table 1`] = `
-<TracesTable
-  dataPrepperIndicesExist={false}
+<JaegerTracesTable
+  indexExists={true}
   items={
     Array [
       Object {
@@ -385,9 +379,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
       },
     ]
   }
-  jaegerIndicesExist={true}
   loading={false}
-  mode="jaeger"
   refresh={[MockFunction]}
   traceIdColumnAction={[Function]}
 >
@@ -1742,12 +1734,12 @@ exports[`Traces table component renders jaeger traces table 1`] = `
       </EuiInMemoryTable>
     </div>
   </EuiPanel>
-</TracesTable>
+</JaegerTracesTable>
 `;
 
 exports[`Traces table component renders traces table 1`] = `
-<TracesTable
-  dataPrepperIndicesExist={true}
+<DataPrepperTracesTable
+  indexExists={true}
   items={
     Array [
       Object {
@@ -1761,9 +1753,7 @@ exports[`Traces table component renders traces table 1`] = `
       },
     ]
   }
-  jaegerIndicesExist={false}
   loading={false}
-  mode="data_prepper"
   refresh={[MockFunction]}
   traceIdColumnAction={[Function]}
 >
@@ -3356,5 +3346,5 @@ exports[`Traces table component renders traces table 1`] = `
       </EuiInMemoryTable>
     </div>
   </EuiPanel>
-</TracesTable>
+</DataPrepperTracesTable>
 `;

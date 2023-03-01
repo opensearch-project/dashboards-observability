@@ -11,7 +11,16 @@ import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { SearchBar } from '../common/search_bar';
 import { TracesProps } from './traces';
-import { TracesTable } from './traces_table';
+import { DataPrepperTracesTable } from './data_prepper_traces_table';
+import { JaegerTracesTable } from './jaeger_traces_table';
+
+export interface TracesTableProps {
+  items: any[];
+  refresh: (sort?: PropertySort) => void;
+  loading: boolean;
+  traceIdColumnAction: any;
+  indexExists: boolean;
+}
 
 export function TracesContent(props: TracesProps) {
   const {
@@ -51,15 +60,62 @@ export function TracesContent(props: TracesProps) {
   }, []);
 
   useEffect(() => {
-    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh();
+    if (
+      !redirect &&
+      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+        (mode === 'jaeger' && jaegerIndicesExist))
+    )
+      refresh();
   }, [filters, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
 
   const refresh = async (sort?: PropertySort) => {
     setLoading(true);
-    const DSL = filtersToDsl(mode, filters, query, processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page, appConfigs);
-    const timeFilterDSL = filtersToDsl(mode, [], '', processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page);
+    const DSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page,
+      appConfigs
+    );
+    const timeFilterDSL = filtersToDsl(
+      mode,
+      [],
+      '',
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page
+    );
     await handleTracesRequest(http, DSL, timeFilterDSL, tableItems, setTableItems, mode, sort);
     setLoading(false);
+  };
+
+  const tracesTable = () => {
+    switch (mode) {
+      case 'data_prepper':
+        return (
+          <DataPrepperTracesTable
+            items={tableItems}
+            refresh={refresh}
+            loading={loading}
+            traceIdColumnAction={traceIdColumnAction}
+            indexExists={dataPrepperIndicesExist}
+          />
+        );
+      case 'jaeger':
+        return (
+          <JaegerTracesTable
+            items={tableItems}
+            refresh={refresh}
+            loading={loading}
+            traceIdColumnAction={traceIdColumnAction}
+            indexExists={jaegerIndicesExist}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -79,15 +135,7 @@ export function TracesContent(props: TracesProps) {
         mode={mode}
       />
       <EuiSpacer size="m" />
-      <TracesTable
-        items={tableItems}
-        refresh={refresh}
-        mode={mode}
-        loading={loading}
-        traceIdColumnAction={traceIdColumnAction}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-      />
+      {tracesTable()}
     </>
   );
 }

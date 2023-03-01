@@ -51,14 +51,39 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
   );
 }
 
-export function MissingConfigurationMessage(props: {mode: TraceAnalyticsMode}) {
+export function MissingConfigurationMessageDataPrepper() {
   return (
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
         body={
           <EuiText>
-            {`The indices required for trace analytics (${props.mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME} and ${props.mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
+            {`The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
+          </EuiText>
+        }
+        actions={
+          <EuiButton
+            color="primary"
+            iconSide="right"
+            iconType="popout"
+            onClick={() => window.open(TRACE_ANALYTICS_DOCUMENTATION_LINK, '_blank')}
+          >
+            Learn more
+          </EuiButton>
+        }
+      />
+    </>
+  );
+}
+
+export function MissingConfigurationMessageJaeger() {
+  return (
+    <>
+      <EuiEmptyPrompt
+        title={<h2>Trace Analytics not set up</h2>}
+        body={
+          <EuiText>
+            {`The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
           </EuiText>
         }
         actions={
@@ -381,7 +406,7 @@ export const filtersToDsl = (
 
       let filterQuery = {};
       let field = filter.field;
-      if (field === 'latency'){
+      if (field === 'latency') {
         if (mode === 'data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
@@ -391,7 +416,7 @@ export const filtersToDsl = (
         if (mode === 'data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
-          field = 'tag.error'
+          field = 'tag.error';
         }
       }
       let value;

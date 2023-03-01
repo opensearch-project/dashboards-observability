@@ -1130,12 +1130,11 @@ exports[`Services component renders empty services page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <ServicesTable
+    <DataPrepperServicesTable
       addFilter={[Function]}
-      dataPrepperIndicesExist={true}
+      indexExists={true}
       items={Array []}
       loading={true}
-      mode="data_prepper"
       nameColumnAction={[Function]}
       setRedirect={[Function]}
       traceColumnAction={[Function]}
@@ -1272,7 +1271,7 @@ exports[`Services component renders empty services page 1`] = `
           </NoMatchMessage>
         </div>
       </EuiPanel>
-    </ServicesTable>
+    </DataPrepperServicesTable>
     <EuiSpacer
       size="m"
     >
@@ -2967,13 +2966,11 @@ exports[`Services component renders jaeger services page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <ServicesTable
+    <JaegerServicesTable
       addFilter={[Function]}
-      dataPrepperIndicesExist={false}
+      indexExists={true}
       items={Array []}
-      jaegerIndicesExist={true}
       loading={true}
-      mode="jaeger"
       nameColumnAction={[Function]}
       setRedirect={[Function]}
       traceColumnAction={[Function]}
@@ -3110,15 +3107,7 @@ exports[`Services component renders jaeger services page 1`] = `
           </NoMatchMessage>
         </div>
       </EuiPanel>
-    </ServicesTable>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <div />
+    </JaegerServicesTable>
   </ServicesContent>
 </Services>
 `;
@@ -4281,12 +4270,11 @@ exports[`Services component renders services page 1`] = `
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
-    <ServicesTable
+    <DataPrepperServicesTable
       addFilter={[Function]}
-      dataPrepperIndicesExist={true}
+      indexExists={true}
       items={Array []}
       loading={true}
-      mode="data_prepper"
       nameColumnAction={[Function]}
       setRedirect={[Function]}
       traceColumnAction={[Function]}
@@ -4423,7 +4411,7 @@ exports[`Services component renders services page 1`] = `
           </NoMatchMessage>
         </div>
       </EuiPanel>
-    </ServicesTable>
+    </DataPrepperServicesTable>
     <EuiSpacer
       size="m"
     >
