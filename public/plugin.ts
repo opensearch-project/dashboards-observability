@@ -5,7 +5,19 @@
 
 import './index.scss';
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import { concat, from, Observable } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
+import {
+  AppCategory,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../src/core/public';
+import { Home as AppAnalytics } from './components/application_analytics/home';
+
 import {
   observabilityID,
   observabilityPluginOrder,
@@ -15,13 +27,19 @@ import PPLService from './services/requests/ppl';
 import DSLService from './services/requests/dsl';
 import TimestampUtils from './services/timestamp/timestamp';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
-import { AppPluginStartDependencies, ObservabilitySetup, ObservabilityStart } from './types';
+import { AppPluginStartDependencies } from './types';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
+import { DashboardListItem } from './types';
+import { fetchAppsList } from './components/application_analytics/helpers/utils';
 import { QueryManager } from '../common/query_manager';
-export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
-  public setup(core: CoreSetup): ObservabilitySetup {
+import { DashboardSetup } from '../../../src/plugins/dashboard/public';
+
+export class ObservabilityPlugin {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
     uiSettingsService.init(core.uiSettings, core.notifications);
 
     // redirect legacy notebooks URL to current URL under observability
@@ -33,6 +51,40 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     if (window.location.pathname.includes('trace-analytics-dashboards')) {
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
+
+    // Fetches all saved Applications
+    const fetchApplicationAnalytics: (
+      search?: string,
+      size?: number
+    ) => Observable<DashboardListItem> = () => {
+      return from(fetchAppsList(core.http)).pipe(
+        map(convertAppAnalyticToDashboardListItem),
+        catchError((err) => {
+          return from([]);
+        })
+      );
+    };
+
+    const convertAppAnalyticToDashboardListItem = (item: any): DashboardListItem => {
+      return {
+        id: item.id,
+        title: item.name,
+        type: 'Observability Application',
+        description: item.description,
+        url: `observability-dashboards#/application_analytics/${item.id}`,
+        editUrl: `observability-dashboards#/application_analytics/${item.id}`,
+        deleteUrl: undefined,
+        listType: 'observability-application',
+        updated_at: item.dateModified,
+      };
+    };
+
+    dashboard.registerDashboardProvider({
+      id: 'observability-application',
+      listItemsFn: fetchApplicationAnalytics,
+      createLinkText: 'Observability Application',
+      createUrl: '/app/observability-dashboards#/application_analytics/create',
+    });
 
     core.application.register({
       id: observabilityID,
@@ -67,7 +119,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     // Return methods that should be available to other plugins
     return {};
   }
-  public start(core: CoreStart): ObservabilityStart {
+  public start(core: CoreStart): {} {
     return {};
   }
   public stop() {}

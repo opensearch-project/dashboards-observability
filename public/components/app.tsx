@@ -21,8 +21,8 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 
 interface ObservabilityAppDeps {
-  CoreStartProp: CoreStart;
-  DepsStart: AppPluginStartDependencies;
+  coreStart: CoreStart;
+  depsStart: AppPluginStartDependencies;
   pplService: any;
   dslService: any;
   savedObjects: any;
@@ -36,15 +36,15 @@ if (window.Cypress) {
 }
 
 export const App = ({
-  CoreStartProp,
-  DepsStart,
+  coreStart,
+  depsStart,
   pplService,
   dslService,
   savedObjects,
   timestampUtils,
   queryManager,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications } = CoreStartProp;
+  const { chrome, http, notifications } = coreStart;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
@@ -105,7 +105,7 @@ export const App = ({
                   <NotebooksHome
                     {...props}
                     DashboardContainerByValueRenderer={
-                      DepsStart.dashboard.DashboardContainerByValueRenderer
+                      depsStart.dashboard.DashboardContainerByValueRenderer
                     }
                     http={http}
                     pplService={pplService}
