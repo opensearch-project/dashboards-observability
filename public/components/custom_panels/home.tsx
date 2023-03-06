@@ -9,8 +9,8 @@ import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
 import React, { ReactChild, useState } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
-import { StaticContext } from 'react-router';
-import { Route, RouteComponentProps } from 'react-router-dom';
+import { StaticContext, Switch } from 'react-router';
+import { Route, RouteComponentProps, useHistory } from 'react-router-dom';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
@@ -63,6 +63,7 @@ export const Home = ({
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
+  const history = useHistory();
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -92,6 +93,7 @@ export const Home = ({
   const createCustomPanel = (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
+      window.location.assign(`${_.last(parentBreadcrumbs)!.href}`);
       return;
     }
 
@@ -297,9 +299,10 @@ export const Home = ({
         side={toastRightSide ? 'right' : 'left'}
         toastLifeTimeMs={6000}
       />
+      <Switch>
       <Route
         exact
-        path={renderProps.match.path}
+        path={['/operational_panels/create', '/operational_panels']}
         render={(props) => {
           return (
             <ObservabilitySideBar>
@@ -344,6 +347,7 @@ export const Home = ({
           );
         }}
       />
+      </Switch>
     </div>
   );
 };
