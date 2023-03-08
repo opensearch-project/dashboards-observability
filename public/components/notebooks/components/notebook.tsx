@@ -287,9 +287,18 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         (newName: string) => {
           this.props.renameNotebook(newName, this.props.openedNoteId);
           this.setState({ isModalVisible: false });
-          this.loadNotebook();
+          this.props.history.replace({
+            ...this.props.location,
+            pathname: this.props.location.pathname.substring(0, this.props.location.pathname.lastIndexOf("/")),
+          });
         },
-        () => this.setState({ isModalVisible: false }),
+        () => {
+          this.setState({ isModalVisible: false });
+          this.props.history.replace({
+            ...this.props.location,
+            pathname: this.props.location.pathname.substring(0, this.props.location.pathname.lastIndexOf("/")),
+          });
+        },
         'Name',
         'Rename notebook',
         'Cancel',
@@ -694,6 +703,17 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   }
 
+  componentDidUpdate(prevProps: NotebookProps, prevState: NotebookState) {
+    // If the URL changes to /edit or the notebook name is loaded in with the URL as /edit.
+    // This second condition is to update the rename modal with the loaded notebook name on page load
+    // if the page if first loaded in as /edit.
+    if (prevProps.location.pathname !== this.props.location.pathname || prevState.path !== this.state.path) {
+      if (this.props.location.pathname.split('/').at(-1) === 'edit') {
+        this.showRenameModal();
+      }
+    }
+  }
+
   render() {
     const createdText = (
       <div>
@@ -832,7 +852,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             name: 'Rename notebook',
             onClick: () => {
               this.setState({ isNoteActionsPopoverOpen: false });
-              this.showRenameModal();
+              this.props.history.replace({
+                ...this.props.location,
+                pathname: this.props.location.pathname + '/edit'
+              });
             },
           },
           {
