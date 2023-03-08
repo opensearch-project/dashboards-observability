@@ -17,6 +17,7 @@ export const COMPONENTS = [
   'notebooks',
   'trace_analytics',
   'metrics_analytics',
+  'placeholder',
 ] as const;
 export const REQUESTS = ['create', 'get', 'update', 'delete'] as const;
 
