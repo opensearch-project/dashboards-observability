@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import PPLService from '../../../../services/requests/ppl';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
-import rootReducer from '../../../../framework/redux/reducers';
+import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 import { Sidebar } from '../sidebar';
 import thunk from 'redux-thunk';

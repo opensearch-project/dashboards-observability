@@ -14,7 +14,7 @@ import {
   sampleVisualizationById,
 } from '../../../../../test/metrics_contants';
 import { createStore } from '@reduxjs/toolkit';
-import rootReducer from '../../../../framework/redux/reducers';
+import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 import { HttpResponse } from '../../../../../../../src/core/public';
 import { MetricsExportPanel } from '../metrics_export_panel';
@@ -27,7 +27,7 @@ describe('Export Metrics Panel Component', () => {
   it('renders Export Metrics Panel Component', async () => {
     let httpFlag = 1;
     httpClientMock.get = jest.fn(() => {
-      if (httpFlag == 1) {
+      if (httpFlag === 1) {
         httpFlag += 1;
         return Promise.resolve((samplePanelOptions as unknown) as HttpResponse);
       } else {
@@ -39,7 +39,7 @@ describe('Export Metrics Panel Component', () => {
     const visualizationsMetaData: any = [];
     const setVisualizationsMetaData = jest.fn();
     const sortedMetricsLayout = sampleSortedMetricsLayout;
-    const selectedPanelOptions: EuiComboBoxOptionOption<unknown>[] = [];
+    const selectedPanelOptions: Array<EuiComboBoxOptionOption<unknown>> = [];
     const setSelectedPanelOptions = jest.fn();
 
     const wrapper = mount(

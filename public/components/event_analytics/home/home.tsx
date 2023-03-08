@@ -4,8 +4,7 @@
  */
 
 import React, { useState, ReactElement, useRef, useEffect } from 'react';
-import { useDispatch, batch, useSelector } from 'react-redux';
-import { uniqueId } from 'lodash';
+import { useDispatch, batch, connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPage,
@@ -45,7 +44,13 @@ import {
   EVENT_ANALYTICS,
   SAVED_OBJECTS,
 } from '../../../../common/constants/shared';
-import { EmptyTabParams, SavedQueryRes, SavedVizRes } from '../../../../common/types/explorer';
+import {
+  EmptyTabParams,
+  ExplorerData as IExplorerData,
+  IQuery,
+  SavedQueryRes,
+  SavedVizRes,
+} from '../../../../common/types/explorer';
 import { HttpStart } from '../../../../../../src/core/public';
 import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
 import { addTab, selectQueryTabs } from '../redux/slices/query_tab_slice';
@@ -72,23 +77,25 @@ interface IHomeProps {
   ) => void;
   getExistingEmptyTab: (params: EmptyTabParams) => string;
   http: HttpStart;
+  queries: IQuery;
+  explorerData: IExplorerData;
+  tabsState: any;
 }
 
-export const Home = (props: IHomeProps) => {
-  const { pplService, dslService, savedObjects, setToast, getExistingEmptyTab, http } = props;
+const EventAnalyticsHome = (props: IHomeProps) => {
+  const {
+    pplService,
+    dslService,
+    savedObjects,
+    setToast,
+    getExistingEmptyTab,
+    http,
+    queries,
+    explorerData,
+    tabsState,
+  } = props;
   const history = useHistory();
   const dispatch = useDispatch();
-
-  const queries = useSelector(selectQueries);
-  const explorerData = useSelector(selectQueryResult);
-  const tabIds = useSelector(selectQueryTabs).queryTabIds;
-  const queryRef = useRef();
-  const tabIdsRef = useRef();
-  const explorerDataRef = useRef();
-  queryRef.current = queries;
-  tabIdsRef.current = tabIds;
-  explorerDataRef.current = explorerData;
-
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDateRange, setSelectedDateRange] = useState<string[]>(['now-15m', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
@@ -180,9 +187,9 @@ export const Home = (props: IHomeProps) => {
 
   const handleQuerySearch = async () => {
     const emptyTabId = getExistingEmptyTab({
-      tabIds: tabIdsRef.current,
-      queries: queryRef.current,
-      explorerData: explorerDataRef.current,
+      tabIds: tabsState.queryTabIds,
+      queries,
+      explorerData,
     });
     const newTabId = emptyTabId ? emptyTabId : await addNewTab();
 
@@ -199,9 +206,9 @@ export const Home = (props: IHomeProps) => {
 
   const handleHistoryClick = async (objectId: string) => {
     const emptyTabId = getExistingEmptyTab({
-      tabIds: tabIdsRef.current,
-      queries: queryRef.current,
-      explorerData: explorerDataRef.current,
+      tabIds: tabsState.queryTabIds,
+      queries,
+      explorerData,
     });
     const newTabId = emptyTabId ? emptyTabId : await addNewTab();
     batch(() => {
@@ -358,7 +365,7 @@ export const Home = (props: IHomeProps) => {
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <Search
-                  query={queryRef.current![RAW_QUERY]}
+                  query={queries[RAW_QUERY]}
                   tempQuery={searchQuery}
                   handleQueryChange={handleQueryChange}
                   handleQuerySearch={handleQuerySearch}
@@ -475,3 +482,13 @@ export const Home = (props: IHomeProps) => {
     </>
   );
 };
+
+const mapStateToProps = (state) => {
+  return {
+    queries: selectQueries(state),
+    explorerData: selectQueryResult(state),
+    tabsState: selectQueryTabs(state),
+  };
+};
+
+export const Home = connect(mapStateToProps)(EventAnalyticsHome);

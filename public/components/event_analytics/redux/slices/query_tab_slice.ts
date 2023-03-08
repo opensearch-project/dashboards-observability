@@ -3,22 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-  createSlice
-} from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
+import { assign } from 'lodash';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
-import { 
+import {
   SELECTED_QUERY_TAB,
   QUERY_TAB_IDS,
   NEW_SELECTED_QUERY_TAB,
-  REDUX_EXPL_SLICE_QUERY_TABS
+  REDUX_EXPL_SLICE_QUERY_TABS,
 } from '../../../../../common/constants/explorer';
-import { assign } from 'lodash';
 
 const initialState = {
   queryTabIds: [initialTabId],
   selectedQueryTab: initialTabId,
-  tabNames: {}
+  tabNames: {},
 };
 
 export const queryTabsSlice = createSlice({
@@ -39,24 +37,22 @@ export const queryTabsSlice = createSlice({
     },
     updateTabName: (state, { payload }) => {
       const newTabNames = {
-        [payload.tabId]: payload.tabName
+        [payload.tabId]: payload.tabName,
       };
       assign(state.tabNames, newTabNames);
     },
     setSelectedQueryTab: (state, { payload }) => {
       state[SELECTED_QUERY_TAB] = payload.tabId;
-    }
+    },
   },
-  extraReducers: (builder) => {}
+  extraReducers: (builder) => {},
 });
 
-export const {
-  addTab,
-  removeTab,
-  setSelectedQueryTab,
-  updateTabName
-} = queryTabsSlice.actions;
+export const { addTab, removeTab, setSelectedQueryTab, updateTabName } = queryTabsSlice.actions;
 
-export const selectQueryTabs = (state) => state.explorerTabs;
+export const selectQueryTabs = createSelector(
+  (state) => state.explorerTabs,
+  (tabState) => tabState
+);
 
-export default queryTabsSlice.reducer;
+export const queryTabReducer = queryTabsSlice.reducer;

@@ -11,7 +11,7 @@ import { SearchBar } from '../search_bar';
 import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import thunk from 'redux-thunk';
-import rootReducer from '../../../../framework/redux/reducers';
+import { rootReducer } from '../../../../framework/redux/reducers';
 
 describe('Search Bar Component', () => {
   configure({ adapter: new Adapter() });

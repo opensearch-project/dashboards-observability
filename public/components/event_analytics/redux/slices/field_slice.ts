@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { forEach } from 'lodash';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import {
@@ -64,6 +64,9 @@ export const fieldSlice = createSlice({
 
 export const { init, reset, remove, updateFields, sortFields } = fieldSlice.actions;
 
-export const selectFields = (state) => state.fields;
+export const selectFields = createSelector(
+  (state) => state.fields,
+  (selectFieldsState) => selectFieldsState
+);
 
-export default fieldSlice.reducer;
+export const fieldsReducer = fieldSlice.reducer;

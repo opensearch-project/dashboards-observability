@@ -1,0 +1,777 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Patterns header component Renders header of log patterns 1`] = `
+<PatternsHeader
+  isPatternConfigPopoverOpen={true}
+  onPatternApply={[MockFunction]}
+  patternRegexInput="[a-zA-Zd]"
+  patternsData={
+    Object {
+      "patternTableData": Array [
+        Object {
+          "anomalyCount": 0,
+          "count": 5,
+          "pattern": "[a-zA-Zd]",
+          "sampleLog": "218.148.135.12 - - [2018-07-22T04:18:12.345Z] \\"GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz_1 HTTP/1.1\\" 200 4531 \\"-\\"            \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\"",
+        },
+      ],
+    }
+  }
+  setIsPatternConfigPopoverOpen={[MockFunction]}
+  setPatternRegexInput={[MockFunction]}
+>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h3
+              className="euiTitle euiTitle--small"
+              style={
+                Object {
+                  "margin": "0px",
+                }
+              }
+            >
+              Patterns
+               
+              <span
+                className="pattern-header-count"
+              >
+                (
+                1
+                )
+              </span>
+            </h3>
+          </EuiTitle>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiPopover
+            anchorPosition="upCenter"
+            button={
+              <EuiButtonIcon
+                iconType="gear"
+                onClick={[Function]}
+              />
+            }
+            closePopover={[Function]}
+            display="inlineBlock"
+            hasArrow={true}
+            isOpen={true}
+            ownFocus={true}
+            panelPaddingSize="m"
+          >
+            <div
+              className="euiPopover euiPopover--anchorUpCenter euiPopover-isOpen"
+            >
+              <div
+                className="euiPopover__anchor"
+              >
+                <EuiButtonIcon
+                  iconType="gear"
+                  onClick={[Function]}
+                >
+                  <button
+                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="gear"
+                    >
+                      <EuiIconEmpty
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        role="img"
+                        style={null}
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                      </EuiIconEmpty>
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
+              </div>
+              <EuiPortal>
+                <Portal
+                  containerInfo={
+                    <div>
+                      <div
+                        data-focus-guard="true"
+                        style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                        tabindex="-1"
+                      />
+                      <div
+                        data-focus-lock-disabled="disabled"
+                      >
+                        <div
+                          aria-describedby="random_html_id"
+                          aria-live="off"
+                          aria-modal="true"
+                          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen"
+                          data-autofocus="true"
+                          role="dialog"
+                          style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+                          tabindex="0"
+                        >
+                          <div
+                            class="euiPopover__panelArrow euiPopover__panelArrow--top"
+                            style="left: 10px; top: 0px;"
+                          />
+                          <p
+                            class="euiScreenReaderOnly"
+                            id="random_html_id"
+                          >
+                            You are in a dialog. To close this dialog, hit escape.
+                          </p>
+                          <div>
+                            <h3
+                              class="euiTitle euiTitle--xxsmall"
+                            >
+                              Pattern regex
+                            </h3>
+                            <div
+                              class="euiText euiText--small"
+                            >
+                              Log patterns allow you to cluster your logs, to help
+                            </div>
+                            <div
+                              class="euiText euiText--small"
+                            >
+                              summarize large volume of logs.
+                            </div>
+                            <div
+                              class="euiSpacer euiSpacer--s"
+                            />
+                            <div
+                              class="euiFormRow"
+                              id="random_html_id-row"
+                            >
+                              <div
+                                class="euiFormRow__fieldWrapper"
+                              >
+                                <div
+                                  class="euiFormControlLayout"
+                                >
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-describedby="random_html_id-help-0"
+                                      class="euiFieldText"
+                                      id="random_html_id"
+                                      type="text"
+                                      value="[a-zA-Zd]"
+                                    />
+                                  </div>
+                                </div>
+                                <div
+                                  class="euiFormHelpText euiFormRow__text"
+                                  id="random_html_id-help-0"
+                                >
+                                  <div
+                                    class="euiText euiText--small"
+                                  >
+                                    Pattern regex is used to reduce logs into log groups.
+                                     
+                                    <a
+                                      class="euiLink euiLink--primary"
+                                      href="https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description"
+                                      rel="noopener noreferrer"
+                                      target="_blank"
+                                    >
+                                      help
+                                      <svg
+                                        aria-hidden="true"
+                                        aria-label="External link"
+                                        class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                      <span
+                                        class="euiScreenReaderOnly"
+                                      >
+                                        (opens in a new tab or window)
+                                      </span>
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="euiPopoverFooter"
+                            >
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <button
+                                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        Cancel
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Apply
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        data-focus-guard="true"
+                        style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                        tabindex="-1"
+                      />
+                    </div>
+                  }
+                >
+                  <EuiFocusTrap
+                    clickOutsideDisables={true}
+                    disabled={true}
+                    initialFocus={[Function]}
+                    noIsolation={true}
+                    onClickOutside={[Function]}
+                    onEscapeKey={[Function]}
+                    returnFocus={false}
+                    scrollLock={false}
+                  >
+                    <ForwardRef
+                      enabled={false}
+                      initialFocus={[Function]}
+                      noIsolation={true}
+                      onClickOutside={[Function]}
+                      onEscapeKey={[Function]}
+                      returnFocus={false}
+                      scrollLock={false}
+                    >
+                      <ForwardRef
+                        enabled={false}
+                        initialFocus={[Function]}
+                        noIsolation={true}
+                        onClickOutside={[Function]}
+                        onEscapeKey={[Function]}
+                        returnFocus={false}
+                        scrollLock={false}
+                        sideCar={[Function]}
+                      >
+                        <ForwardRef(FocusLockUI)
+                          as={
+                            Object {
+                              "$$typeof": Symbol(react.forward_ref),
+                              "classNames": Object {
+                                "fullWidth": "width-before-scroll-bar",
+                                "zeroRight": "right-scroll-bar-position",
+                              },
+                              "defaultProps": Object {
+                                "enabled": true,
+                                "inert": false,
+                                "removeScrollBar": true,
+                              },
+                              "render": [Function],
+                            }
+                          }
+                          autoFocus={true}
+                          crossFrame={true}
+                          disabled={true}
+                          lockProps={
+                            Object {
+                              "allowPinchZoom": undefined,
+                              "as": undefined,
+                              "enabled": false,
+                              "inert": undefined,
+                              "shards": undefined,
+                              "sideCar": [Function],
+                              "style": undefined,
+                            }
+                          }
+                          noFocusGuards={false}
+                          persistentFocus={false}
+                          returnFocus={false}
+                          sideCar={[Function]}
+                        >
+                          <div
+                            data-focus-guard={true}
+                            key="guard-first"
+                            style={
+                              Object {
+                                "height": "0px",
+                                "left": "1px",
+                                "overflow": "hidden",
+                                "padding": 0,
+                                "position": "fixed",
+                                "top": "1px",
+                                "width": "1px",
+                              }
+                            }
+                            tabIndex={-1}
+                          />
+                          <ForwardRef
+                            data-focus-lock-disabled="disabled"
+                            enabled={false}
+                            inert={false}
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            removeScrollBar={true}
+                            sideCar={[Function]}
+                          >
+                            <div
+                              data-focus-lock-disabled="disabled"
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              onScrollCapture={[Function]}
+                              onTouchMoveCapture={[Function]}
+                              onWheelCapture={[Function]}
+                            >
+                              <EuiPanel
+                                aria-describedby="random_html_id"
+                                aria-live="off"
+                                aria-modal="true"
+                                className="euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen"
+                                hasShadow={false}
+                                paddingSize="m"
+                                panelRef={[Function]}
+                                role="dialog"
+                                style={
+                                  Object {
+                                    "left": -22,
+                                    "top": -16,
+                                    "willChange": "transform, opacity",
+                                    "zIndex": 2000,
+                                  }
+                                }
+                                tabIndex={0}
+                              >
+                                <div
+                                  aria-describedby="random_html_id"
+                                  aria-live="off"
+                                  aria-modal="true"
+                                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen"
+                                  role="dialog"
+                                  style={
+                                    Object {
+                                      "left": -22,
+                                      "top": -16,
+                                      "willChange": "transform, opacity",
+                                      "zIndex": 2000,
+                                    }
+                                  }
+                                  tabIndex={0}
+                                >
+                                  <div
+                                    className="euiPopover__panelArrow euiPopover__panelArrow--top"
+                                    style={
+                                      Object {
+                                        "left": 10,
+                                        "top": 0,
+                                      }
+                                    }
+                                  />
+                                  <EuiScreenReaderOnly>
+                                    <p
+                                      className="euiScreenReaderOnly"
+                                      id="random_html_id"
+                                    >
+                                      <EuiI18n
+                                        default="You are in a dialog. To close this dialog, hit escape."
+                                        token="euiPopover.screenReaderAnnouncement"
+                                      >
+                                        You are in a dialog. To close this dialog, hit escape.
+                                      </EuiI18n>
+                                    </p>
+                                  </EuiScreenReaderOnly>
+                                  <EuiMutationObserver
+                                    observerOptions={
+                                      Object {
+                                        "attributes": true,
+                                        "characterData": true,
+                                        "childList": true,
+                                        "subtree": true,
+                                      }
+                                    }
+                                    onMutation={[Function]}
+                                  >
+                                    <div>
+                                      <EuiTitle
+                                        size="xxs"
+                                      >
+                                        <h3
+                                          className="euiTitle euiTitle--xxsmall"
+                                        >
+                                          Pattern regex
+                                        </h3>
+                                      </EuiTitle>
+                                      <EuiText
+                                        size="s"
+                                      >
+                                        <div
+                                          className="euiText euiText--small"
+                                        >
+                                          Log patterns allow you to cluster your logs, to help
+                                        </div>
+                                      </EuiText>
+                                      <EuiText
+                                        size="s"
+                                      >
+                                        <div
+                                          className="euiText euiText--small"
+                                        >
+                                          summarize large volume of logs.
+                                        </div>
+                                      </EuiText>
+                                      <EuiSpacer
+                                        size="s"
+                                      >
+                                        <div
+                                          className="euiSpacer euiSpacer--s"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText={
+                                          <EuiText
+                                            size="s"
+                                          >
+                                            Pattern regex is used to reduce logs into log groups.
+                                             
+                                            <EuiLink
+                                              href="https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description"
+                                              target="_blank"
+                                            >
+                                              help
+                                            </EuiLink>
+                                          </EuiText>
+                                        }
+                                        labelType="label"
+                                      >
+                                        <div
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
+                                          >
+                                            <EuiFieldText
+                                              aria-describedby="random_html_id-help-0"
+                                              id="random_html_id"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value="[a-zA-Zd]"
+                                            >
+                                              <EuiFormControlLayout
+                                                fullWidth={false}
+                                                inputId="random_html_id"
+                                              >
+                                                <div
+                                                  className="euiFormControlLayout"
+                                                >
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl>
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText"
+                                                        id="random_html_id"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value="[a-zA-Zd]"
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
+                                                </div>
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                              key="0"
+                                            >
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                <EuiText
+                                                  size="s"
+                                                >
+                                                  <div
+                                                    className="euiText euiText--small"
+                                                  >
+                                                    Pattern regex is used to reduce logs into log groups.
+                                                     
+                                                    <EuiLink
+                                                      href="https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description"
+                                                      target="_blank"
+                                                    >
+                                                      <a
+                                                        className="euiLink euiLink--primary"
+                                                        href="https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description"
+                                                        rel="noopener noreferrer"
+                                                        target="_blank"
+                                                      >
+                                                        help
+                                                        <EuiIcon
+                                                          aria-label="External link"
+                                                          className="euiLink__externalIcon"
+                                                          size="s"
+                                                          type="popout"
+                                                        >
+                                                          <EuiIconEmpty
+                                                            aria-hidden={true}
+                                                            aria-label="External link"
+                                                            className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              aria-label="External link"
+                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            />
+                                                          </EuiIconEmpty>
+                                                        </EuiIcon>
+                                                        <EuiScreenReaderOnly>
+                                                          <span
+                                                            className="euiScreenReaderOnly"
+                                                          >
+                                                            <EuiI18n
+                                                              default="(opens in a new tab or window)"
+                                                              token="euiLink.newTarget.screenReaderOnlyText"
+                                                            >
+                                                              (opens in a new tab or window)
+                                                            </EuiI18n>
+                                                          </span>
+                                                        </EuiScreenReaderOnly>
+                                                      </a>
+                                                    </EuiLink>
+                                                  </div>
+                                                </EuiText>
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
+                                        </div>
+                                      </EuiFormRow>
+                                      <EuiPopoverFooter>
+                                        <div
+                                          className="euiPopoverFooter"
+                                        >
+                                          <EuiFlexGroup
+                                            justifyContent="flexEnd"
+                                          >
+                                            <div
+                                              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                            >
+                                              <EuiFlexItem
+                                                grow={false}
+                                              >
+                                                <div
+                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                >
+                                                  <EuiButtonEmpty
+                                                    onClick={[Function]}
+                                                    size="s"
+                                                  >
+                                                    <button
+                                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                                                      disabled={false}
+                                                      onClick={[Function]}
+                                                      type="button"
+                                                    >
+                                                      <EuiButtonContent
+                                                        className="euiButtonEmpty__content"
+                                                        iconSide="left"
+                                                        iconSize="m"
+                                                        textProps={
+                                                          Object {
+                                                            "className": "euiButtonEmpty__text",
+                                                          }
+                                                        }
+                                                      >
+                                                        <span
+                                                          className="euiButtonContent euiButtonEmpty__content"
+                                                        >
+                                                          <span
+                                                            className="euiButtonEmpty__text"
+                                                          >
+                                                            Cancel
+                                                          </span>
+                                                        </span>
+                                                      </EuiButtonContent>
+                                                    </button>
+                                                  </EuiButtonEmpty>
+                                                </div>
+                                              </EuiFlexItem>
+                                              <EuiFlexItem
+                                                grow={false}
+                                              >
+                                                <div
+                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                >
+                                                  <EuiButton
+                                                    fill={true}
+                                                    onClick={[Function]}
+                                                    size="s"
+                                                  >
+                                                    <EuiButtonDisplay
+                                                      baseClassName="euiButton"
+                                                      disabled={false}
+                                                      element="button"
+                                                      fill={true}
+                                                      isDisabled={false}
+                                                      onClick={[Function]}
+                                                      size="s"
+                                                      type="button"
+                                                    >
+                                                      <button
+                                                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                                        disabled={false}
+                                                        onClick={[Function]}
+                                                        style={
+                                                          Object {
+                                                            "minWidth": undefined,
+                                                          }
+                                                        }
+                                                        type="button"
+                                                      >
+                                                        <EuiButtonContent
+                                                          className="euiButton__content"
+                                                          iconSide="left"
+                                                          textProps={
+                                                            Object {
+                                                              "className": "euiButton__text",
+                                                            }
+                                                          }
+                                                        >
+                                                          <span
+                                                            className="euiButtonContent euiButton__content"
+                                                          >
+                                                            <span
+                                                              className="euiButton__text"
+                                                            >
+                                                              Apply
+                                                            </span>
+                                                          </span>
+                                                        </EuiButtonContent>
+                                                      </button>
+                                                    </EuiButtonDisplay>
+                                                  </EuiButton>
+                                                </div>
+                                              </EuiFlexItem>
+                                            </div>
+                                          </EuiFlexGroup>
+                                        </div>
+                                      </EuiPopoverFooter>
+                                    </div>
+                                  </EuiMutationObserver>
+                                </div>
+                              </EuiPanel>
+                            </div>
+                          </ForwardRef>
+                          <div
+                            data-focus-guard={true}
+                            style={
+                              Object {
+                                "height": "0px",
+                                "left": "1px",
+                                "overflow": "hidden",
+                                "padding": 0,
+                                "position": "fixed",
+                                "top": "1px",
+                                "width": "1px",
+                              }
+                            }
+                            tabIndex={-1}
+                          />
+                        </ForwardRef(FocusLockUI)>
+                      </ForwardRef>
+                    </ForwardRef>
+                  </EuiFocusTrap>
+                </Portal>
+              </EuiPortal>
+            </div>
+          </EuiPopover>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</PatternsHeader>
+`;
