@@ -8,7 +8,6 @@ import {
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
@@ -64,9 +63,6 @@ import { SpanDetailFlyout } from '../../trace_analytics/components/traces/span_d
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { fetchAppById, initializeTabData } from '../helpers/utils';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
-import { IntegrationOverview } from './integration_overview_panel';
-import { IntegrationDetails } from './integration_details_panel';
-import { IntegrationFields } from './integration_fields_panel';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -143,17 +139,8 @@ export function Integration(props: AppDetailProps) {
   }, [appId]);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {IntegrationOverview({ appId, link: 'https://www.nginx.com/' })}
-        <EuiSpacer />
-        <EuiPageContent>
-          {IntegrationDetails({ appId })}
-          <EuiSpacer />
-          {IntegrationFields({ appId })}
-          <EuiSpacer />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPanel>
+      <PanelTitle title={appId} />
+    </EuiPanel>
   );
 }
