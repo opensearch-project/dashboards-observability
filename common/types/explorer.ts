@@ -385,3 +385,8 @@ export interface VisualizationState {
   visConfMetadata: ConfigList;
   visMeta: VisMeta;
 }
+
+export interface VisSpecificMetaData {
+  x_coordinate: string;
+  y_coordinate: string;
+}

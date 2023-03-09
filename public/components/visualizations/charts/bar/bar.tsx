@@ -117,7 +117,7 @@ export const Bar = ({ visualizations, layout, config }: any) => {
   };
 
   let bars = useMemo(() => {
-    const visConfig = {
+    const visPanelConfig = {
       dimensions,
       series,
       breakdowns,
@@ -131,9 +131,17 @@ export const Bar = ({ visualizations, layout, config }: any) => {
       tooltipText,
       lineWidth,
     };
+    const barSpecficMetaData = {
+      x_coordinate: 'x',
+      y_coordinate: 'y',
+    };
 
     return addStylesToTraces(
-      transformPreprocessedDataToTraces(preprocessJsonData(jsonData, visConfig), visConfig),
+      transformPreprocessedDataToTraces(
+        preprocessJsonData(jsonData, visPanelConfig),
+        visPanelConfig,
+        barSpecficMetaData
+      ),
       { ...traceStyles }
     );
   }, [chartStyles, jsonData, dimensions, series, breakdowns, span, tooltipOptions]);

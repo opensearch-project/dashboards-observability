@@ -137,9 +137,17 @@ export const Line = ({ visualizations, layout, config }: any) => {
       lineWidth,
       markerSize,
     };
+    const lineSpecficMetaData = {
+      x_coordinate: 'x',
+      y_coordinate: 'y',
+    };
 
     return addStylesToTraces(
-      transformPreprocessedDataToTraces(preprocessJsonData(jsonData, visConfig), visConfig),
+      transformPreprocessedDataToTraces(
+        preprocessJsonData(jsonData, visConfig),
+        visConfig,
+        lineSpecficMetaData
+      ),
       traceStyles
     );
   }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);

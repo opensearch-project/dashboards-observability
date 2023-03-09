@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, forEach } from 'lodash';
+import { isEmpty, forEach, mapKeys } from 'lodash';
 import { CUSTOM_LABEL } from '../../../../../common/constants/explorer';
-import { ConfigList, DimensionSpan } from '../../../../../common/types/explorer';
+import {
+  ConfigList,
+  DimensionSpan,
+  VisSpecificMetaData,
+} from '../../../../../common/types/explorer';
 import { removeBacktick } from '../../../../../common/utils';
 
 export const getCompleteTimespanKey = (span: DimensionSpan) => {
@@ -22,28 +26,38 @@ export const getCompleteTimespanKey = (span: DimensionSpan) => {
  * @returns traces.
  */
 export const transformPreprocessedDataToTraces = (
-  intermediateVisData: Array<any>,
-  { breakdowns, isVertical = true }: Partial<ConfigList>
+  intermediateVisData: any[],
+  { breakdowns, isVertical = true }: Partial<ConfigList>,
+  visTypeMetaData: VisSpecificMetaData
 ) => {
   const traceMap = new Map<string, any>();
   const hasBreakdown = !isEmpty(breakdowns);
   forEach(intermediateVisData, (entry) => {
     const traceKey = hasBreakdown ? [entry.breakdown, entry.aggName].join(',') : entry.aggName;
+    const xCoordinate = visTypeMetaData.x_coordinate;
+    const yCoordinate = visTypeMetaData.y_coordinate;
+
     if (isEmpty(traceMap.get(traceKey))) {
       traceMap.set(traceKey, {
-        x: isVertical ? [entry.x] : [entry.value],
-        y: isVertical ? [entry.value] : [entry.x],
+        [xCoordinate]: isVertical ? [entry.x] : [entry.value],
+        [yCoordinate]: isVertical ? [entry.value] : [entry.x],
         name: hasBreakdown ? [entry.breakdown, entry.aggName].join(',') : `${traceKey}`,
       });
     } else {
       const curTrace = traceMap.get(traceKey);
       const xaxisValue = isVertical ? entry.x : entry.value;
       const yaxisValue = isVertical ? entry.value : entry.x;
-      curTrace!.x.push(xaxisValue);
-      curTrace!.y.push(yaxisValue);
+      curTrace![xCoordinate].push(xaxisValue);
+      curTrace![yCoordinate].push(yaxisValue);
     }
   });
   return [...traceMap.values()];
+};
+
+export const removeBackTick = (entry: any) => {
+  return {
+    ...mapKeys(entry, (val: any, key: string) => removeBacktick(key)),
+  };
 };
 
 /**
@@ -56,16 +70,15 @@ export const transformPreprocessedDataToTraces = (
  * @returns intermediate visualization json data
  */
 export const preprocessJsonData = (
-  visJson: Array<any>,
+  jdbcFieldValueMapList: any[],
   { dimensions, series, breakdowns, span }: Partial<ConfigList>
 ) => {
   const seriesFlattenedEntries = [];
-  forEach(visJson, (entry) => {
-    const backtickRemovedEntry = {};
-    // remove backtick, so data in jsonData can be accessed through using field name
-    forEach(entry, (value, key) => {
-      backtickRemovedEntry[removeBacktick(key)] = value;
-    });
+  forEach(jdbcFieldValueMapList, (entry: any) => {
+    const backtickRemovedEntry = {
+      ...removeBackTick(entry),
+    };
+
     forEach(series, (sr) => {
       let tabularVizData = {};
       const serieKey = sr[CUSTOM_LABEL] ? sr[CUSTOM_LABEL] : `${sr.aggregation}(${sr.name})`;
