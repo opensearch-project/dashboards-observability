@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable react-hooks/exhaustive-deps */
 
 import {
   EuiInMemoryTable,
@@ -19,22 +18,9 @@ import React, { ReactElement, useEffect, useState } from 'react';
 
 interface AvailableIntegrationsTableProps {
   loading: boolean;
-  chrome: any;
-  parentBreadcrumbs: any;
 }
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
-  const { chrome, parentBreadcrumbs } = props;
-
-  useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Placeholder',
-        href: '#/placeholder',
-      },
-    ]);
-  }, []);
 
   const integrations = [
     {
