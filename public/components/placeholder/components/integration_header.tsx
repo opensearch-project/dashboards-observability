@@ -4,33 +4,15 @@
  */
 
 import {
-  EuiBadge,
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiInMemoryTable,
   EuiLink,
-  EuiLoadingSpinner,
-  EuiOverlayMask,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPopover,
   EuiSpacer,
-  EuiTableFieldDataColumnType,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React from 'react';
 import { CUSTOM_PANELS_DOCUMENTATION_URL } from '../../../../common/constants/custom_panels';
 
 export function IntegrationHeader() {

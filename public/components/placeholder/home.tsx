@@ -15,7 +15,6 @@ import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { isEmpty, last } from 'lodash';
 import { useDispatch } from 'react-redux';
-import { AppTable } from './components/integration_table';
 import { Application } from './components/integration';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
@@ -32,7 +31,9 @@ import {
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
-import { IntegrationOverviewPage } from './components/integration_overview_page';
+import { AvailableIntegrationOverviewPage, IntegrationOverviewPage } from './components/available_integration_overview_page';
+import { Sidebar } from './components/integration_side_nav';
+import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -386,10 +387,10 @@ export const Home = (props: HomeProps) => {
       <Switch>
         <Route
           exact
-          path={'/placeholder'}
+          path={['/placeholder', '/placeholder/available']}
           render={() => (
-            <ObservabilitySideBar>
-              <IntegrationOverviewPage
+            <Sidebar>
+              <AvailableIntegrationOverviewPage
                 loading={false}
                 applications={applicationList}
                 fetchApplications={fetchApps}
@@ -399,7 +400,27 @@ export const Home = (props: HomeProps) => {
                 moveToApp={moveToApp}
                 {...commonProps}
               />
-            </ObservabilitySideBar>
+              </Sidebar>
+    
+          )}
+        />
+        <Route
+          exact
+          path={'/placeholder/added'}
+          render={() => (
+            <Sidebar>
+              <AddedIntegrationOverviewPage
+                loading={false}
+                applications={applicationList}
+                fetchApplications={fetchApps}
+                renameApplication={renameApp}
+                deleteApplication={deleteApp}
+                clearStorage={clearStorage}
+                moveToApp={moveToApp}
+                {...commonProps}
+              />
+              </Sidebar>
+    
           )}
         />
         <Route

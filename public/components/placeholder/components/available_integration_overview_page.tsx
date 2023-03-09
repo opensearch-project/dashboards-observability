@@ -4,13 +4,14 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { AppAnalyticsComponentDeps } from '../home';
 import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
-import { AvailableIntegrationsTable } from './integration_table';
+import { AvailableIntegrationsTable } from './available_integration_table';
+import { AddedIntegrationsTable } from './added_integration_table';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -22,7 +23,7 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
   moveToApp: (id: string, type: string) => void;
 }
 
-export function IntegrationOverviewPage(props: AppTableProps) {
+export function AvailableIntegrationOverviewPage(props: AppTableProps) {
   const { chrome, parentBreadcrumbs } = props;
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function IntegrationOverviewPage(props: AppTableProps) {
     <EuiPage>
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        {AvailableIntegrationsTable({ loading: false, chrome, parentBreadcrumbs })}
+        {AvailableIntegrationsTable({loading: false})}
       </EuiPageBody>
     </EuiPage>
   );
