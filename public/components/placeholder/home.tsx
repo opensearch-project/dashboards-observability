@@ -15,7 +15,7 @@ import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { isEmpty, last } from 'lodash';
 import { useDispatch } from 'react-redux';
-import { Application } from './components/integration';
+import { Application, Integration } from './components/integration';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
@@ -31,7 +31,10 @@ import {
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
-import { AvailableIntegrationOverviewPage, IntegrationOverviewPage } from './components/available_integration_overview_page';
+import {
+  AvailableIntegrationOverviewPage,
+  IntegrationOverviewPage,
+} from './components/available_integration_overview_page';
 import { Sidebar } from './components/integration_side_nav';
 import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
 
@@ -400,8 +403,7 @@ export const Home = (props: HomeProps) => {
                 moveToApp={moveToApp}
                 {...commonProps}
               />
-              </Sidebar>
-    
+            </Sidebar>
           )}
         />
         <Route
@@ -419,15 +421,14 @@ export const Home = (props: HomeProps) => {
                 moveToApp={moveToApp}
                 {...commonProps}
               />
-              </Sidebar>
-    
+            </Sidebar>
           )}
         />
         <Route
           exact
           path={'/placeholder/:id+'}
           render={(routerProps) => (
-            <Application
+            <Integration
               disabled={false}
               appId={decodeURIComponent(routerProps.match.params.id)}
               pplService={pplService}
