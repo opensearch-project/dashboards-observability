@@ -15,9 +15,8 @@ import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { isEmpty, last } from 'lodash';
 import { useDispatch } from 'react-redux';
-import { AppTable } from './components/app_table';
+import { AppTable } from './components/integration_table';
 import { Application } from './components/integration';
-import { CreateApp } from './components/create';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
@@ -29,16 +28,11 @@ import {
   ApplicationType,
 } from '../../../common/types/application_analytics';
 import {
-  calculateAvailability,
-  fetchPanelsVizIdList,
-  isNameValid,
-  removeTabData,
-} from './helpers/utils';
-import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
+import { IntegrationOverviewPage } from './components/integration_overview_page';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -395,7 +389,7 @@ export const Home = (props: HomeProps) => {
           path={'/placeholder'}
           render={() => (
             <ObservabilitySideBar>
-              <AppTable
+              <IntegrationOverviewPage
                 loading={false}
                 applications={applicationList}
                 fetchApplications={fetchApps}
