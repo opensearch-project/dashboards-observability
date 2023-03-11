@@ -26,19 +26,11 @@ export const useRenderVisualization = ({ pplService, requestParams }) => {
     errorHandler: (error: any) => void
   ) => {
     await pplService
-      .fetch(
-        {
-          query,
-          format,
-        },
-        (error) => {
-          errorHandler(error);
-        }
-      )
+      .fetch({ query, format }, (error) => {
+        errorHandler(error);
+      })
       .then((res: any) => {
-        if (res && res.status === 200) {
-          successHandler(res);
-        }
+        successHandler(res);
       });
   };
 
