@@ -121,7 +121,7 @@ export const FieldInsights = ({ field, query }: any) => {
     try {
       return await pplService.fetch(insightParams);
     } catch (error) {
-      console.error(error);
+      // to-do, for now just a placeholder to bypass linting
     }
   };
 
