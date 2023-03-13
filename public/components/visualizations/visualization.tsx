@@ -19,7 +19,6 @@ export const Visualization = ({
   const isVisDataValid = (vs: IVisualizationContainerProps) => {
     const {
       data: {
-        rawVizData: { data: queriedVizData },
         userConfigs: {
           dataConfig: { span = {}, [GROUPBY]: dimensions = [], [AGGREGATIONS]: series = [] } = {},
         } = {},
@@ -34,10 +33,6 @@ export const Visualization = ({
 
     // bars, pie
     if (dimensions.length < 1 && isEmpty(span)) return [false, VISUALIZATION_ERROR.INVALID_DATA];
-
-    // heatmap
-    if (vis.id === VIS_CHART_TYPES.HeatMap && (series.length !== 1 || dimensions.length !== 2))
-      return [false, VISUALIZATION_ERROR.INVALID_DATA];
 
     return [true, ''];
   };

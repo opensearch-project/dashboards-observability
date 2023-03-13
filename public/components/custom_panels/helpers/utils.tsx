@@ -145,7 +145,7 @@ const pplServiceRequestor = async (
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
   await pplService
-    .fetch({ query: finalQuery, format: 'viz' })
+    .fetch({ query: finalQuery, format: 'jdbc' })
     .then((res) => {
       if (res === undefined)
         setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
@@ -206,7 +206,7 @@ export const getQueryResponse = (
     finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
   } catch (error) {
     const errorMessage = 'Issue in building final query';
-    setIsError({ errorMessage: errorMessage });
+    setIsError({ errorMessage });
     console.error(errorMessage, error);
     setIsLoading(false);
     return;
@@ -371,7 +371,7 @@ export const onTimeChange = (
   setStart: React.Dispatch<React.SetStateAction<string>>,
   setEnd: React.Dispatch<React.SetStateAction<string>>
 ) => {
-  let recentlyUsedRangeObject = recentlyUsedRanges.filter((recentlyUsedRange) => {
+  const recentlyUsedRangeObject = recentlyUsedRanges.filter((recentlyUsedRange) => {
     const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
     return !isDuplicate;
   });
@@ -479,7 +479,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
         query: { rawQuery: metaData.query },
         indexFields: {},
         userConfigs: mixedUserConfigs,
-        explorer: { explorerData: data, explorerFields: data.metadata.fields },
+        explorer: { explorerData: data, explorerFields: data.schema },
       })}
     />
   );
