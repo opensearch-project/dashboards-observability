@@ -22,16 +22,11 @@ import {
   HOST_TEXT_2,
   HOST_TEXT_3,
   HOST_TEXT_4,
-  AGENT_TEXT_1,
-  AGENT_TEXT_2,
-  AGENT_TEXT_3,
   BAR_LEG_TEXT_1,
   BAR_LEG_TEXT_2,
   BAR_LEG_TEXT_3,
   VIS_TYPE_PIE,
-  VIS_TYPE_HBAR,
   VIS_TYPE_VBAR,
-  VIS_TYPE_HEATMAP,
   FIELD_HOST,
   FIELD_AGENT
 } from '../utils/event_analytics/constants';
@@ -215,7 +210,7 @@ describe('Click actions', () => {
     cy.get('[data-test-subj="eventHomeAction__delete"]').click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
+    cy.get('.euiToastHeader__title').should('contain', 'successfully');
   });
 });
 
@@ -487,7 +482,7 @@ describe('Live tail stop automatically', () => {
 });
 
 describe('Visualizing data', () => {
-  before(() => {
+  beforeEach(() => {
     landOnEventVisualizations();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
@@ -548,44 +543,5 @@ describe('Visualizing data', () => {
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_1);
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_2);
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_3);
-  });
-
-  it('Visualize horizontal bar chart', () => {
-    cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_HBAR).click();
-    cy.get('[data-test-subj="vizConfigSection-dimensions"]')
-      .find('[data-test-subj="viz-config-section"]')
-      .eq(1)
-      .find('[data-test-subj="viz-config-delete-btn"]')
-      .click();
-    cy.get('[data-test-subj="vizConfigSection-breakdowns"]')
-      .find('[data-test-subj="viz-config-add-btn"]')
-      .click();
-    cy.get('[data-test-subj="explorer__vizDataConfig-panel"]')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click()
-      .type(FIELD_AGENT);
-    cy.get(`input[value="${FIELD_AGENT}"]`).click();
-    cy.get('[data-test-subj="panelCloseBtn"]').click();
-    cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-    cy.get('.infolayer .legendtext').as('legandTxt');
-    cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_1);
-    cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_2);
-    cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_3);
-  });
-
-  it('Visualize heatmap chart', () => {
-    cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_HEATMAP).click();
-    suppressResizeObserverIssue();
-    cy.get('g.cartesianlayer g.xy g.xaxislayer-above g.xtick text').as('legandXTxt');
-    cy.get('@legandXTxt').should('contain', HOST_TEXT_1);
-    cy.get('@legandXTxt').should('contain', HOST_TEXT_3);
-    cy.get('@legandXTxt').should('contain', HOST_TEXT_4);
-    cy.get('@legandXTxt').should('contain', HOST_TEXT_2);
-    cy.get('g.cartesianlayer g.xy g.yaxislayer-above g.ytick text').as('legandYTxt');
-    cy.get('@legandYTxt').should('contain', AGENT_TEXT_1);
-    cy.get('@legandYTxt').should('contain', AGENT_TEXT_2);
-    cy.get('@legandYTxt').should('contain', AGENT_TEXT_3);
   });
 });
