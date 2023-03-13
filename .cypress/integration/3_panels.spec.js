@@ -16,7 +16,7 @@ import {
   SAMPLE_VISUALIZATIONS_NAMES,
 } from '../utils/panel_constants';
 
-import { supressResizeObserverIssue } from '../utils/constants';
+import { suppressResizeObserverIssue } from '../utils/constants';
 
 const moveToEventsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/`);
@@ -59,7 +59,7 @@ describe('Creating visualizations', () => {
     });
     cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
     cy.wait(delay);
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
     cy.wait(delay * 2);
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
@@ -80,7 +80,7 @@ describe('Creating visualizations', () => {
     });
     cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
     cy.wait(delay);
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
     cy.wait(delay);
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
@@ -384,7 +384,7 @@ describe('Testing a panel', () => {
     });
     cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click();
 
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
     cy.wait(delay * 2);
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
@@ -420,7 +420,7 @@ describe('Testing a panel', () => {
       .contains(PPL_VISUALIZATIONS_NAMES[0])
       .should('exist');
     cy.get('button[aria-label="actionMenuButton"]').eq(0).trigger('mouseover').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('button[data-test-subj="editVizContextMenuItem"]').click();
     cy.wait(delay * 3);
     cy.url().should('match', new RegExp('(.*)#/event_analytics/explorer'));
