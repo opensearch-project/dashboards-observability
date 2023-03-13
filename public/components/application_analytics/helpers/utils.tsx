@@ -237,7 +237,7 @@ export const calculateAvailability = async (
       await pplService
         .fetch({
           query: finalQuery,
-          format: 'viz',
+          format: 'jdbc',
         })
         .then((res) => {
           const stat = res.metadata.fields.filter(
