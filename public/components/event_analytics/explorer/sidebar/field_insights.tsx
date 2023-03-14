@@ -103,14 +103,16 @@ export const FieldInsights = ({ field, query }: any) => {
           });
         }
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.error(error);
+      });
   }, []);
 
   const getInsights = async (queryStr: string) => {
     try {
       return await pplService.fetch(queryStr);
     } catch (error) {
-      // to-do, for now just a placeholder to bypass linting
+      console.error(error);
     }
   };
 
