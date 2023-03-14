@@ -9,6 +9,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui'
 import { getIndexPatternFromRawQuery } from '../../../../../common/utils/query_utils';
 import { TabContext } from '../../hooks/use_tab_context';
 
+interface IInsightsReq {
+  id: string;
+  name: string;
+  format: string;
+  query: string;
+}
+
+type IInsightsReqParams = Pick<IInsightsReq, 'format' | 'query'>;
+
 export const FieldInsights = ({ field, query }: any) => {
   const { pplService } = useContext(TabContext);
   const { rawQuery } = query;
@@ -62,9 +71,9 @@ export const FieldInsights = ({ field, query }: any) => {
     },
   ];
 
-  const fetchData = async (requests) => {
+  const fetchData = async (requests: IInsightsReq[]) => {
     return await Promise.all(
-      requests.map((reqQuery) => {
+      requests.map((reqQuery: IInsightsReq) => {
         const req = {
           format: reqQuery.format,
           query: reqQuery.query,
@@ -108,9 +117,9 @@ export const FieldInsights = ({ field, query }: any) => {
       });
   }, []);
 
-  const getInsights = async (queryStr: string) => {
+  const getInsights = async (insightParams: IInsightsReqParams) => {
     try {
-      return await pplService.fetch(queryStr);
+      return await pplService.fetch(insightParams);
     } catch (error) {
       console.error(error);
     }
