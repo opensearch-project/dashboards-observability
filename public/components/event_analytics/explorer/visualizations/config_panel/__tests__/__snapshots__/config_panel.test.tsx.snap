@@ -11,6 +11,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
           "fromApp": false,
         },
         "defaultAxes": Object {},
+        "explorer": Object {
+          "explorerData": Object {
+            "jsonData": Array [
+              Object {
+                "double_per_ip_bytes": 11606,
+                "host": "artifacts.opensearch.org",
+                "ip_count": 176,
+                "per_ip_bytes": 5803,
+                "resp_code": "404",
+                "sum_bytes": 1021420,
+              },
+              Object {
+                "double_per_ip_bytes": 10100,
+                "host": "www.opensearch.org",
+                "ip_count": 111,
+                "per_ip_bytes": 5050,
+                "resp_code": "404",
+                "sum_bytes": 560638,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "artifacts.opensearch.org",
+                "ip_count": 94,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "www.opensearch.org",
+                "ip_count": 78,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+              Object {
+                "double_per_ip_bytes": 11526,
+                "host": "cdn.opensearch-opensearch-opensearch.org",
+                "ip_count": 43,
+                "per_ip_bytes": 5763,
+                "resp_code": "404",
+                "sum_bytes": 247840,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "cdn.opensearch-opensearch-opensearch.org",
+                "ip_count": 34,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+              Object {
+                "double_per_ip_bytes": 8882,
+                "host": "opensearch-opensearch-opensearch.org",
+                "ip_count": 13,
+                "per_ip_bytes": 4441,
+                "resp_code": "404",
+                "sum_bytes": 57735,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "opensearch-opensearch-opensearch.org",
+                "ip_count": 6,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+            ],
+            "schema": Array [
+              Object {
+                "name": "agent",
+                "type": "string",
+              },
+              Object {
+                "name": "bytes",
+                "type": "long",
+              },
+              Object {
+                "name": "clientip",
+                "type": "ip",
+              },
+              Object {
+                "name": "event",
+                "type": "struct",
+              },
+              Object {
+                "name": "extension",
+                "type": "string",
+              },
+              Object {
+                "name": "geo",
+                "type": "struct",
+              },
+              Object {
+                "name": "host",
+                "type": "string",
+              },
+              Object {
+                "name": "index",
+                "type": "string",
+              },
+              Object {
+                "name": "ip",
+                "type": "ip",
+              },
+              Object {
+                "name": "machine",
+                "type": "struct",
+              },
+              Object {
+                "name": "memory",
+                "type": "double",
+              },
+              Object {
+                "name": "message",
+                "type": "string",
+              },
+              Object {
+                "name": "phpmemory",
+                "type": "long",
+              },
+              Object {
+                "name": "referer",
+                "type": "string",
+              },
+              Object {
+                "name": "request",
+                "type": "string",
+              },
+              Object {
+                "name": "response",
+                "type": "string",
+              },
+              Object {
+                "name": "tags",
+                "type": "string",
+              },
+              Object {
+                "name": "timestamp",
+                "type": "timestamp",
+              },
+              Object {
+                "name": "url",
+                "type": "string",
+              },
+              Object {
+                "name": "utc_time",
+                "type": "timestamp",
+              },
+            ],
+          },
+        },
         "indexFields": Object {
           "availableFields": Array [
             Object {
@@ -432,7 +584,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 2,
+                      "defaultState": 0,
                       "eleType": "slider",
                       "mapTo": "lineWidth",
                       "name": "Line width",
@@ -442,7 +594,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 70,
+                      "defaultState": 100,
                       "eleType": "slider",
                       "mapTo": "fillOpacity",
                       "name": "Fill opacity",
@@ -469,7 +621,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
             },
           ],
         },
-        "fillopacity": 70,
+        "fillopacity": 100,
         "fulllabel": "Vertical bar",
         "groupwidth": 0.7,
         "icon": [Function],
@@ -478,7 +630,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         "label": "Vertical bar",
         "labelangle": 0,
         "legendposition": "v",
-        "linewidth": 2,
+        "linewidth": 0,
         "mode": "group",
         "name": "bar",
         "orientation": "v",
@@ -755,7 +907,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -765,7 +917,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -792,7 +944,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   },
                 ],
               },
-              "fillopacity": 70,
+              "fillopacity": 100,
               "fulllabel": "Vertical bar",
               "groupwidth": 0.7,
               "icon": [Function],
@@ -802,7 +954,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "label": "Vertical bar",
               "labelangle": 0,
               "legendposition": "v",
-              "linewidth": 2,
+              "linewidth": 0,
               "mode": "group",
               "name": "bar",
               "orientation": "v",
@@ -1061,7 +1213,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -1071,7 +1223,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -1098,7 +1250,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   },
                 ],
               },
-              "fillopacity": 70,
+              "fillopacity": 100,
               "fulllabel": "Horizontal bar",
               "groupwidth": 0.7,
               "icon": [Function],
@@ -1107,7 +1259,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "label": "Horizontal bar",
               "labelangle": 0,
               "legendposition": "v",
-              "linewidth": 2,
+              "linewidth": 0,
               "mode": "group",
               "name": "horizontal_bar",
               "orientation": "h",
@@ -1339,7 +1491,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -1349,7 +1501,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -2458,7 +2610,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -2468,7 +2620,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -2495,7 +2647,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   },
                 ],
               },
-              "fillopacity": 70,
+              "fillopacity": 100,
               "fulllabel": "Vertical bar",
               "groupwidth": 0.7,
               "icon": [Function],
@@ -2505,7 +2657,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "label": "Vertical bar",
               "labelangle": 0,
               "legendposition": "v",
-              "linewidth": 2,
+              "linewidth": 0,
               "mode": "group",
               "name": "bar",
               "orientation": "v",
@@ -2796,7 +2948,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               },
                               Object {
                                 "component": [Function],
-                                "defaultState": 2,
+                                "defaultState": 0,
                                 "eleType": "slider",
                                 "mapTo": "lineWidth",
                                 "name": "Line width",
@@ -2806,7 +2958,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               },
                               Object {
                                 "component": [Function],
-                                "defaultState": 70,
+                                "defaultState": 100,
                                 "eleType": "slider",
                                 "mapTo": "fillOpacity",
                                 "name": "Fill opacity",
@@ -2833,7 +2985,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       },
                     ],
                   },
-                  "fillopacity": 70,
+                  "fillopacity": 100,
                   "fulllabel": "Vertical bar",
                   "groupwidth": 0.7,
                   "icon": [Function],
@@ -2843,7 +2995,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   "label": "Vertical bar",
                   "labelangle": 0,
                   "legendposition": "v",
-                  "linewidth": 2,
+                  "linewidth": 0,
                   "mode": "group",
                   "name": "bar",
                   "orientation": "v",
@@ -3139,7 +3291,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     },
                                     Object {
                                       "component": [Function],
-                                      "defaultState": 2,
+                                      "defaultState": 0,
                                       "eleType": "slider",
                                       "mapTo": "lineWidth",
                                       "name": "Line width",
@@ -3149,7 +3301,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     },
                                     Object {
                                       "component": [Function],
-                                      "defaultState": 70,
+                                      "defaultState": 100,
                                       "eleType": "slider",
                                       "mapTo": "fillOpacity",
                                       "name": "Fill opacity",
@@ -3177,7 +3329,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           ],
                         }
                       }
-                      fillopacity={70}
+                      fillopacity={100}
                       fulllabel="Vertical bar"
                       groupwidth={0.7}
                       icon={[Function]}
@@ -3187,7 +3339,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       key="vertical bar"
                       labelangle={0}
                       legendposition="v"
-                      linewidth={2}
+                      linewidth={0}
                       mode="group"
                       name="bar"
                       option={
@@ -3417,7 +3569,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                       Object {
                                         "component": [Function],
-                                        "defaultState": 2,
+                                        "defaultState": 0,
                                         "eleType": "slider",
                                         "mapTo": "lineWidth",
                                         "name": "Line width",
@@ -3427,7 +3579,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                       Object {
                                         "component": [Function],
-                                        "defaultState": 70,
+                                        "defaultState": 100,
                                         "eleType": "slider",
                                         "mapTo": "fillOpacity",
                                         "name": "Fill opacity",
@@ -3454,7 +3606,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               },
                             ],
                           },
-                          "fillopacity": 70,
+                          "fillopacity": 100,
                           "fulllabel": "Vertical bar",
                           "groupwidth": 0.7,
                           "icon": [Function],
@@ -3464,7 +3616,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           "label": "Vertical bar",
                           "labelangle": 0,
                           "legendposition": "v",
-                          "linewidth": 2,
+                          "linewidth": 0,
                           "mode": "group",
                           "name": "bar",
                           "orientation": "v",
@@ -3761,7 +3913,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                       Object {
                                         "component": [Function],
-                                        "defaultState": 2,
+                                        "defaultState": 0,
                                         "eleType": "slider",
                                         "mapTo": "lineWidth",
                                         "name": "Line width",
@@ -3771,7 +3923,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                       Object {
                                         "component": [Function],
-                                        "defaultState": 70,
+                                        "defaultState": 100,
                                         "eleType": "slider",
                                         "mapTo": "fillOpacity",
                                         "name": "Fill opacity",
@@ -3799,7 +3951,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             ],
                           }
                         }
-                        fillopacity={70}
+                        fillopacity={100}
                         fulllabel="Vertical bar"
                         groupwidth={0.7}
                         icon={[Function]}
@@ -3808,7 +3960,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         id="bar"
                         labelangle={0}
                         legendposition="v"
-                        linewidth={2}
+                        linewidth={0}
                         mode="group"
                         name="bar"
                         orientation="v"
@@ -4075,7 +4227,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           },
                                           Object {
                                             "component": [Function],
-                                            "defaultState": 2,
+                                            "defaultState": 0,
                                             "eleType": "slider",
                                             "mapTo": "lineWidth",
                                             "name": "Line width",
@@ -4085,7 +4237,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           },
                                           Object {
                                             "component": [Function],
-                                            "defaultState": 70,
+                                            "defaultState": 100,
                                             "eleType": "slider",
                                             "mapTo": "fillOpacity",
                                             "name": "Fill opacity",
@@ -4113,7 +4265,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 ],
                               }
                             }
-                            fillopacity={70}
+                            fillopacity={100}
                             fulllabel="Vertical bar"
                             groupwidth={0.7}
                             icon={[Function]}
@@ -4121,7 +4273,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             id="bar"
                             labelangle={0}
                             legendposition="v"
-                            linewidth={2}
+                            linewidth={0}
                             mode="group"
                             name="bar"
                             orientation="v"
@@ -4557,7 +4709,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 2,
+                          "defaultState": 0,
                           "eleType": "slider",
                           "mapTo": "lineWidth",
                           "name": "Line width",
@@ -4567,7 +4719,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 70,
+                          "defaultState": 100,
                           "eleType": "slider",
                           "mapTo": "fillOpacity",
                           "name": "Fill opacity",
@@ -4594,6 +4746,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "fromApp": false,
                     },
                     "defaultAxes": Object {},
+                    "explorer": Object {
+                      "explorerData": Object {
+                        "jsonData": Array [
+                          Object {
+                            "double_per_ip_bytes": 11606,
+                            "host": "artifacts.opensearch.org",
+                            "ip_count": 176,
+                            "per_ip_bytes": 5803,
+                            "resp_code": "404",
+                            "sum_bytes": 1021420,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 10100,
+                            "host": "www.opensearch.org",
+                            "ip_count": 111,
+                            "per_ip_bytes": 5050,
+                            "resp_code": "404",
+                            "sum_bytes": 560638,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "artifacts.opensearch.org",
+                            "ip_count": 94,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "www.opensearch.org",
+                            "ip_count": 78,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 11526,
+                            "host": "cdn.opensearch-opensearch-opensearch.org",
+                            "ip_count": 43,
+                            "per_ip_bytes": 5763,
+                            "resp_code": "404",
+                            "sum_bytes": 247840,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "cdn.opensearch-opensearch-opensearch.org",
+                            "ip_count": 34,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 8882,
+                            "host": "opensearch-opensearch-opensearch.org",
+                            "ip_count": 13,
+                            "per_ip_bytes": 4441,
+                            "resp_code": "404",
+                            "sum_bytes": 57735,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "opensearch-opensearch-opensearch.org",
+                            "ip_count": 6,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                        ],
+                        "schema": Array [
+                          Object {
+                            "name": "agent",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "bytes",
+                            "type": "long",
+                          },
+                          Object {
+                            "name": "clientip",
+                            "type": "ip",
+                          },
+                          Object {
+                            "name": "event",
+                            "type": "struct",
+                          },
+                          Object {
+                            "name": "extension",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "geo",
+                            "type": "struct",
+                          },
+                          Object {
+                            "name": "host",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "index",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "ip",
+                            "type": "ip",
+                          },
+                          Object {
+                            "name": "machine",
+                            "type": "struct",
+                          },
+                          Object {
+                            "name": "memory",
+                            "type": "double",
+                          },
+                          Object {
+                            "name": "message",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "phpmemory",
+                            "type": "long",
+                          },
+                          Object {
+                            "name": "referer",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "request",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "response",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "tags",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "timestamp",
+                            "type": "timestamp",
+                          },
+                          Object {
+                            "name": "url",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "utc_time",
+                            "type": "timestamp",
+                          },
+                        ],
+                      },
+                    },
                     "indexFields": Object {
                       "availableFields": Array [
                         Object {
@@ -5015,7 +5319,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 2,
+                                  "defaultState": 0,
                                   "eleType": "slider",
                                   "mapTo": "lineWidth",
                                   "name": "Line width",
@@ -5025,7 +5329,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 70,
+                                  "defaultState": 100,
                                   "eleType": "slider",
                                   "mapTo": "fillOpacity",
                                   "name": "Fill opacity",
@@ -5052,7 +5356,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                       ],
                     },
-                    "fillopacity": 70,
+                    "fillopacity": 100,
                     "fulllabel": "Vertical bar",
                     "groupwidth": 0.7,
                     "icon": [Function],
@@ -5061,7 +5365,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "label": "Vertical bar",
                     "labelangle": 0,
                     "legendposition": "v",
-                    "linewidth": 2,
+                    "linewidth": 0,
                     "mode": "group",
                     "name": "bar",
                     "orientation": "v",
@@ -5348,7 +5652,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -5358,7 +5662,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -5385,6 +5689,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         "fromApp": false,
                       },
                       "defaultAxes": Object {},
+                      "explorer": Object {
+                        "explorerData": Object {
+                          "jsonData": Array [
+                            Object {
+                              "double_per_ip_bytes": 11606,
+                              "host": "artifacts.opensearch.org",
+                              "ip_count": 176,
+                              "per_ip_bytes": 5803,
+                              "resp_code": "404",
+                              "sum_bytes": 1021420,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 10100,
+                              "host": "www.opensearch.org",
+                              "ip_count": 111,
+                              "per_ip_bytes": 5050,
+                              "resp_code": "404",
+                              "sum_bytes": 560638,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 0,
+                              "host": "artifacts.opensearch.org",
+                              "ip_count": 94,
+                              "per_ip_bytes": 0,
+                              "resp_code": "503",
+                              "sum_bytes": 0,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 0,
+                              "host": "www.opensearch.org",
+                              "ip_count": 78,
+                              "per_ip_bytes": 0,
+                              "resp_code": "503",
+                              "sum_bytes": 0,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 11526,
+                              "host": "cdn.opensearch-opensearch-opensearch.org",
+                              "ip_count": 43,
+                              "per_ip_bytes": 5763,
+                              "resp_code": "404",
+                              "sum_bytes": 247840,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 0,
+                              "host": "cdn.opensearch-opensearch-opensearch.org",
+                              "ip_count": 34,
+                              "per_ip_bytes": 0,
+                              "resp_code": "503",
+                              "sum_bytes": 0,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 8882,
+                              "host": "opensearch-opensearch-opensearch.org",
+                              "ip_count": 13,
+                              "per_ip_bytes": 4441,
+                              "resp_code": "404",
+                              "sum_bytes": 57735,
+                            },
+                            Object {
+                              "double_per_ip_bytes": 0,
+                              "host": "opensearch-opensearch-opensearch.org",
+                              "ip_count": 6,
+                              "per_ip_bytes": 0,
+                              "resp_code": "503",
+                              "sum_bytes": 0,
+                            },
+                          ],
+                          "schema": Array [
+                            Object {
+                              "name": "agent",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "bytes",
+                              "type": "long",
+                            },
+                            Object {
+                              "name": "clientip",
+                              "type": "ip",
+                            },
+                            Object {
+                              "name": "event",
+                              "type": "struct",
+                            },
+                            Object {
+                              "name": "extension",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "geo",
+                              "type": "struct",
+                            },
+                            Object {
+                              "name": "host",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "index",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "ip",
+                              "type": "ip",
+                            },
+                            Object {
+                              "name": "machine",
+                              "type": "struct",
+                            },
+                            Object {
+                              "name": "memory",
+                              "type": "double",
+                            },
+                            Object {
+                              "name": "message",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "phpmemory",
+                              "type": "long",
+                            },
+                            Object {
+                              "name": "referer",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "request",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "response",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "tags",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "timestamp",
+                              "type": "timestamp",
+                            },
+                            Object {
+                              "name": "url",
+                              "type": "string",
+                            },
+                            Object {
+                              "name": "utc_time",
+                              "type": "timestamp",
+                            },
+                          ],
+                        },
+                      },
                       "indexFields": Object {
                         "availableFields": Array [
                           Object {
@@ -5806,7 +6262,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   },
                                   Object {
                                     "component": [Function],
-                                    "defaultState": 2,
+                                    "defaultState": 0,
                                     "eleType": "slider",
                                     "mapTo": "lineWidth",
                                     "name": "Line width",
@@ -5816,7 +6272,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   },
                                   Object {
                                     "component": [Function],
-                                    "defaultState": 70,
+                                    "defaultState": 100,
                                     "eleType": "slider",
                                     "mapTo": "fillOpacity",
                                     "name": "Fill opacity",
@@ -5843,7 +6299,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                         ],
                       },
-                      "fillopacity": 70,
+                      "fillopacity": 100,
                       "fulllabel": "Vertical bar",
                       "groupwidth": 0.7,
                       "icon": [Function],
@@ -5852,7 +6308,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "label": "Vertical bar",
                       "labelangle": 0,
                       "legendposition": "v",
-                      "linewidth": 2,
+                      "linewidth": 0,
                       "mode": "group",
                       "name": "bar",
                       "orientation": "v",
@@ -6180,7 +6636,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 2,
+                          "defaultState": 0,
                           "eleType": "slider",
                           "mapTo": "lineWidth",
                           "name": "Line width",
@@ -6190,7 +6646,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 70,
+                          "defaultState": 100,
                           "eleType": "slider",
                           "mapTo": "fillOpacity",
                           "name": "Fill opacity",
@@ -6217,6 +6673,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "fromApp": false,
                     },
                     "defaultAxes": Object {},
+                    "explorer": Object {
+                      "explorerData": Object {
+                        "jsonData": Array [
+                          Object {
+                            "double_per_ip_bytes": 11606,
+                            "host": "artifacts.opensearch.org",
+                            "ip_count": 176,
+                            "per_ip_bytes": 5803,
+                            "resp_code": "404",
+                            "sum_bytes": 1021420,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 10100,
+                            "host": "www.opensearch.org",
+                            "ip_count": 111,
+                            "per_ip_bytes": 5050,
+                            "resp_code": "404",
+                            "sum_bytes": 560638,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "artifacts.opensearch.org",
+                            "ip_count": 94,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "www.opensearch.org",
+                            "ip_count": 78,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 11526,
+                            "host": "cdn.opensearch-opensearch-opensearch.org",
+                            "ip_count": 43,
+                            "per_ip_bytes": 5763,
+                            "resp_code": "404",
+                            "sum_bytes": 247840,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "cdn.opensearch-opensearch-opensearch.org",
+                            "ip_count": 34,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 8882,
+                            "host": "opensearch-opensearch-opensearch.org",
+                            "ip_count": 13,
+                            "per_ip_bytes": 4441,
+                            "resp_code": "404",
+                            "sum_bytes": 57735,
+                          },
+                          Object {
+                            "double_per_ip_bytes": 0,
+                            "host": "opensearch-opensearch-opensearch.org",
+                            "ip_count": 6,
+                            "per_ip_bytes": 0,
+                            "resp_code": "503",
+                            "sum_bytes": 0,
+                          },
+                        ],
+                        "schema": Array [
+                          Object {
+                            "name": "agent",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "bytes",
+                            "type": "long",
+                          },
+                          Object {
+                            "name": "clientip",
+                            "type": "ip",
+                          },
+                          Object {
+                            "name": "event",
+                            "type": "struct",
+                          },
+                          Object {
+                            "name": "extension",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "geo",
+                            "type": "struct",
+                          },
+                          Object {
+                            "name": "host",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "index",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "ip",
+                            "type": "ip",
+                          },
+                          Object {
+                            "name": "machine",
+                            "type": "struct",
+                          },
+                          Object {
+                            "name": "memory",
+                            "type": "double",
+                          },
+                          Object {
+                            "name": "message",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "phpmemory",
+                            "type": "long",
+                          },
+                          Object {
+                            "name": "referer",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "request",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "response",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "tags",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "timestamp",
+                            "type": "timestamp",
+                          },
+                          Object {
+                            "name": "url",
+                            "type": "string",
+                          },
+                          Object {
+                            "name": "utc_time",
+                            "type": "timestamp",
+                          },
+                        ],
+                      },
+                    },
                     "indexFields": Object {
                       "availableFields": Array [
                         Object {
@@ -6638,7 +7246,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 2,
+                                  "defaultState": 0,
                                   "eleType": "slider",
                                   "mapTo": "lineWidth",
                                   "name": "Line width",
@@ -6648,7 +7256,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 70,
+                                  "defaultState": 100,
                                   "eleType": "slider",
                                   "mapTo": "fillOpacity",
                                   "name": "Fill opacity",
@@ -6675,7 +7283,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                       ],
                     },
-                    "fillopacity": 70,
+                    "fillopacity": 100,
                     "fulllabel": "Vertical bar",
                     "groupwidth": 0.7,
                     "icon": [Function],
@@ -6684,7 +7292,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "label": "Vertical bar",
                     "labelangle": 0,
                     "legendposition": "v",
-                    "linewidth": 2,
+                    "linewidth": 0,
                     "mode": "group",
                     "name": "bar",
                     "orientation": "v",
@@ -6777,6 +7385,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     "fromApp": false,
                                   },
                                   "defaultAxes": Object {},
+                                  "explorer": Object {
+                                    "explorerData": Object {
+                                      "jsonData": Array [
+                                        Object {
+                                          "double_per_ip_bytes": 11606,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 176,
+                                          "per_ip_bytes": 5803,
+                                          "resp_code": "404",
+                                          "sum_bytes": 1021420,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 10100,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 111,
+                                          "per_ip_bytes": 5050,
+                                          "resp_code": "404",
+                                          "sum_bytes": 560638,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 94,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 78,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 11526,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 43,
+                                          "per_ip_bytes": 5763,
+                                          "resp_code": "404",
+                                          "sum_bytes": 247840,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 34,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 8882,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 13,
+                                          "per_ip_bytes": 4441,
+                                          "resp_code": "404",
+                                          "sum_bytes": 57735,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 6,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                      ],
+                                      "schema": Array [
+                                        Object {
+                                          "name": "agent",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "bytes",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "clientip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "event",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "extension",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "geo",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "host",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "index",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "ip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "machine",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "memory",
+                                          "type": "double",
+                                        },
+                                        Object {
+                                          "name": "message",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "phpmemory",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "referer",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "request",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "response",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "tags",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "timestamp",
+                                          "type": "timestamp",
+                                        },
+                                        Object {
+                                          "name": "url",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "utc_time",
+                                          "type": "timestamp",
+                                        },
+                                      ],
+                                    },
+                                  },
                                   "indexFields": Object {
                                     "availableFields": Array [
                                       Object {
@@ -7198,7 +7958,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 2,
+                                                "defaultState": 0,
                                                 "eleType": "slider",
                                                 "mapTo": "lineWidth",
                                                 "name": "Line width",
@@ -7208,7 +7968,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 70,
+                                                "defaultState": 100,
                                                 "eleType": "slider",
                                                 "mapTo": "fillOpacity",
                                                 "name": "Fill opacity",
@@ -7235,7 +7995,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                     ],
                                   },
-                                  "fillopacity": 70,
+                                  "fillopacity": 100,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
                                   "icon": [Function],
@@ -7244,7 +8004,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "label": "Vertical bar",
                                   "labelangle": 0,
                                   "legendposition": "v",
-                                  "linewidth": 2,
+                                  "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
                                   "orientation": "v",
@@ -7604,6 +8364,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     "fromApp": false,
                                   },
                                   "defaultAxes": Object {},
+                                  "explorer": Object {
+                                    "explorerData": Object {
+                                      "jsonData": Array [
+                                        Object {
+                                          "double_per_ip_bytes": 11606,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 176,
+                                          "per_ip_bytes": 5803,
+                                          "resp_code": "404",
+                                          "sum_bytes": 1021420,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 10100,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 111,
+                                          "per_ip_bytes": 5050,
+                                          "resp_code": "404",
+                                          "sum_bytes": 560638,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 94,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 78,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 11526,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 43,
+                                          "per_ip_bytes": 5763,
+                                          "resp_code": "404",
+                                          "sum_bytes": 247840,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 34,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 8882,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 13,
+                                          "per_ip_bytes": 4441,
+                                          "resp_code": "404",
+                                          "sum_bytes": 57735,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 6,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                      ],
+                                      "schema": Array [
+                                        Object {
+                                          "name": "agent",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "bytes",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "clientip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "event",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "extension",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "geo",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "host",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "index",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "ip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "machine",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "memory",
+                                          "type": "double",
+                                        },
+                                        Object {
+                                          "name": "message",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "phpmemory",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "referer",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "request",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "response",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "tags",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "timestamp",
+                                          "type": "timestamp",
+                                        },
+                                        Object {
+                                          "name": "url",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "utc_time",
+                                          "type": "timestamp",
+                                        },
+                                      ],
+                                    },
+                                  },
                                   "indexFields": Object {
                                     "availableFields": Array [
                                       Object {
@@ -8025,7 +8937,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 2,
+                                                "defaultState": 0,
                                                 "eleType": "slider",
                                                 "mapTo": "lineWidth",
                                                 "name": "Line width",
@@ -8035,7 +8947,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 70,
+                                                "defaultState": 100,
                                                 "eleType": "slider",
                                                 "mapTo": "fillOpacity",
                                                 "name": "Fill opacity",
@@ -8062,7 +8974,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                     ],
                                   },
-                                  "fillopacity": 70,
+                                  "fillopacity": 100,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
                                   "icon": [Function],
@@ -8071,7 +8983,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "label": "Vertical bar",
                                   "labelangle": 0,
                                   "legendposition": "v",
-                                  "linewidth": 2,
+                                  "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
                                   "orientation": "v",
@@ -8930,6 +9842,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     "fromApp": false,
                                   },
                                   "defaultAxes": Object {},
+                                  "explorer": Object {
+                                    "explorerData": Object {
+                                      "jsonData": Array [
+                                        Object {
+                                          "double_per_ip_bytes": 11606,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 176,
+                                          "per_ip_bytes": 5803,
+                                          "resp_code": "404",
+                                          "sum_bytes": 1021420,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 10100,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 111,
+                                          "per_ip_bytes": 5050,
+                                          "resp_code": "404",
+                                          "sum_bytes": 560638,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 94,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 78,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 11526,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 43,
+                                          "per_ip_bytes": 5763,
+                                          "resp_code": "404",
+                                          "sum_bytes": 247840,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 34,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 8882,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 13,
+                                          "per_ip_bytes": 4441,
+                                          "resp_code": "404",
+                                          "sum_bytes": 57735,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 6,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                      ],
+                                      "schema": Array [
+                                        Object {
+                                          "name": "agent",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "bytes",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "clientip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "event",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "extension",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "geo",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "host",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "index",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "ip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "machine",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "memory",
+                                          "type": "double",
+                                        },
+                                        Object {
+                                          "name": "message",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "phpmemory",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "referer",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "request",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "response",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "tags",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "timestamp",
+                                          "type": "timestamp",
+                                        },
+                                        Object {
+                                          "name": "url",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "utc_time",
+                                          "type": "timestamp",
+                                        },
+                                      ],
+                                    },
+                                  },
                                   "indexFields": Object {
                                     "availableFields": Array [
                                       Object {
@@ -9351,7 +10415,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 2,
+                                                "defaultState": 0,
                                                 "eleType": "slider",
                                                 "mapTo": "lineWidth",
                                                 "name": "Line width",
@@ -9361,7 +10425,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 70,
+                                                "defaultState": 100,
                                                 "eleType": "slider",
                                                 "mapTo": "fillOpacity",
                                                 "name": "Fill opacity",
@@ -9388,7 +10452,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                     ],
                                   },
-                                  "fillopacity": 70,
+                                  "fillopacity": 100,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
                                   "icon": [Function],
@@ -9397,7 +10461,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "label": "Vertical bar",
                                   "labelangle": 0,
                                   "legendposition": "v",
-                                  "linewidth": 2,
+                                  "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
                                   "orientation": "v",
@@ -10248,7 +11312,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 2,
+                                  "defaultState": 0,
                                   "eleType": "slider",
                                   "mapTo": "lineWidth",
                                   "name": "Line width",
@@ -10258,7 +11322,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 70,
+                                  "defaultState": 100,
                                   "eleType": "slider",
                                   "mapTo": "fillOpacity",
                                   "name": "Fill opacity",
@@ -10277,6 +11341,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     "fromApp": false,
                                   },
                                   "defaultAxes": Object {},
+                                  "explorer": Object {
+                                    "explorerData": Object {
+                                      "jsonData": Array [
+                                        Object {
+                                          "double_per_ip_bytes": 11606,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 176,
+                                          "per_ip_bytes": 5803,
+                                          "resp_code": "404",
+                                          "sum_bytes": 1021420,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 10100,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 111,
+                                          "per_ip_bytes": 5050,
+                                          "resp_code": "404",
+                                          "sum_bytes": 560638,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 94,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 78,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 11526,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 43,
+                                          "per_ip_bytes": 5763,
+                                          "resp_code": "404",
+                                          "sum_bytes": 247840,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 34,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 8882,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 13,
+                                          "per_ip_bytes": 4441,
+                                          "resp_code": "404",
+                                          "sum_bytes": 57735,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 6,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                      ],
+                                      "schema": Array [
+                                        Object {
+                                          "name": "agent",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "bytes",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "clientip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "event",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "extension",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "geo",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "host",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "index",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "ip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "machine",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "memory",
+                                          "type": "double",
+                                        },
+                                        Object {
+                                          "name": "message",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "phpmemory",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "referer",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "request",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "response",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "tags",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "timestamp",
+                                          "type": "timestamp",
+                                        },
+                                        Object {
+                                          "name": "url",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "utc_time",
+                                          "type": "timestamp",
+                                        },
+                                      ],
+                                    },
+                                  },
                                   "indexFields": Object {
                                     "availableFields": Array [
                                       Object {
@@ -10698,7 +11914,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 2,
+                                                "defaultState": 0,
                                                 "eleType": "slider",
                                                 "mapTo": "lineWidth",
                                                 "name": "Line width",
@@ -10708,7 +11924,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 70,
+                                                "defaultState": 100,
                                                 "eleType": "slider",
                                                 "mapTo": "fillOpacity",
                                                 "name": "Fill opacity",
@@ -10735,7 +11951,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                     ],
                                   },
-                                  "fillopacity": 70,
+                                  "fillopacity": 100,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
                                   "icon": [Function],
@@ -10744,7 +11960,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "label": "Vertical bar",
                                   "labelangle": 0,
                                   "legendposition": "v",
-                                  "linewidth": 2,
+                                  "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
                                   "orientation": "v",
@@ -12667,7 +13883,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           />
                                         </EuiSpacer>
                                         <SliderConfig
-                                          currentRange={2}
+                                          currentRange={0}
                                           handleSliderChange={[Function]}
                                           max={10}
                                           maxRange={10}
@@ -12764,7 +13980,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             showTicks={false}
                                             showValue={false}
                                             step={1}
-                                            value={2}
+                                            value={0}
                                           >
                                             <EuiRangeWrapper
                                               className="euiRange euiRange--hasInput"
@@ -12783,7 +13999,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   onChange={[Function]}
                                                   showTicks={false}
                                                   step={1}
-                                                  value={2}
+                                                  value={0}
                                                 >
                                                   <div
                                                     aria-hidden={true}
@@ -12801,7 +14017,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       showTicks={false}
                                                       step={1}
                                                       tabIndex={-1}
-                                                      value={2}
+                                                      value={0}
                                                     >
                                                       <input
                                                         aria-hidden={true}
@@ -12814,7 +14030,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                         step={1}
                                                         tabIndex={-1}
                                                         type="range"
-                                                        value={2}
+                                                        value={0}
                                                       />
                                                     </EuiRangeSlider>
                                                   </div>
@@ -12835,7 +14051,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   name="Line width"
                                                   onChange={[Function]}
                                                   step={1}
-                                                  value={2}
+                                                  value={0}
                                                 >
                                                   <EuiFieldNumber
                                                     aria-label="change lineWidth slider"
@@ -12854,7 +14070,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                         "width": "3.6em",
                                                       }
                                                     }
-                                                    value={2}
+                                                    value={0}
                                                   >
                                                     <EuiFormControlLayout
                                                       compressed={true}
@@ -12884,7 +14100,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                 }
                                                               }
                                                               type="number"
-                                                              value={2}
+                                                              value={0}
                                                             />
                                                           </EuiValidatableControl>
                                                           <EuiFormControlLayoutIcons
@@ -12908,7 +14124,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           />
                                         </EuiSpacer>
                                         <SliderConfig
-                                          currentRange={70}
+                                          currentRange={100}
                                           handleSliderChange={[Function]}
                                           max={100}
                                           maxRange={100}
@@ -13005,7 +14221,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             showTicks={false}
                                             showValue={false}
                                             step={1}
-                                            value={70}
+                                            value={100}
                                           >
                                             <EuiRangeWrapper
                                               className="euiRange euiRange--hasInput"
@@ -13024,7 +14240,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   onChange={[Function]}
                                                   showTicks={false}
                                                   step={1}
-                                                  value={70}
+                                                  value={100}
                                                 >
                                                   <div
                                                     aria-hidden={true}
@@ -13042,7 +14258,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       showTicks={false}
                                                       step={1}
                                                       tabIndex={-1}
-                                                      value={70}
+                                                      value={100}
                                                     >
                                                       <input
                                                         aria-hidden={true}
@@ -13055,7 +14271,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                         step={1}
                                                         tabIndex={-1}
                                                         type="range"
-                                                        value={70}
+                                                        value={100}
                                                       />
                                                     </EuiRangeSlider>
                                                   </div>
@@ -13076,7 +14292,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   name="Fill opacity"
                                                   onChange={[Function]}
                                                   step={1}
-                                                  value={70}
+                                                  value={100}
                                                 >
                                                   <EuiFieldNumber
                                                     aria-label="change lineWidth slider"
@@ -13095,7 +14311,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                         "width": "4.4em",
                                                       }
                                                     }
-                                                    value={70}
+                                                    value={100}
                                                   >
                                                     <EuiFormControlLayout
                                                       compressed={true}
@@ -13125,7 +14341,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                 }
                                                               }
                                                               type="number"
-                                                              value={70}
+                                                              value={100}
                                                             />
                                                           </EuiValidatableControl>
                                                           <EuiFormControlLayoutIcons
@@ -13189,6 +14405,158 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     "fromApp": false,
                                   },
                                   "defaultAxes": Object {},
+                                  "explorer": Object {
+                                    "explorerData": Object {
+                                      "jsonData": Array [
+                                        Object {
+                                          "double_per_ip_bytes": 11606,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 176,
+                                          "per_ip_bytes": 5803,
+                                          "resp_code": "404",
+                                          "sum_bytes": 1021420,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 10100,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 111,
+                                          "per_ip_bytes": 5050,
+                                          "resp_code": "404",
+                                          "sum_bytes": 560638,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "artifacts.opensearch.org",
+                                          "ip_count": 94,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "www.opensearch.org",
+                                          "ip_count": 78,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 11526,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 43,
+                                          "per_ip_bytes": 5763,
+                                          "resp_code": "404",
+                                          "sum_bytes": 247840,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "cdn.opensearch-opensearch-opensearch.org",
+                                          "ip_count": 34,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 8882,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 13,
+                                          "per_ip_bytes": 4441,
+                                          "resp_code": "404",
+                                          "sum_bytes": 57735,
+                                        },
+                                        Object {
+                                          "double_per_ip_bytes": 0,
+                                          "host": "opensearch-opensearch-opensearch.org",
+                                          "ip_count": 6,
+                                          "per_ip_bytes": 0,
+                                          "resp_code": "503",
+                                          "sum_bytes": 0,
+                                        },
+                                      ],
+                                      "schema": Array [
+                                        Object {
+                                          "name": "agent",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "bytes",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "clientip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "event",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "extension",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "geo",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "host",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "index",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "ip",
+                                          "type": "ip",
+                                        },
+                                        Object {
+                                          "name": "machine",
+                                          "type": "struct",
+                                        },
+                                        Object {
+                                          "name": "memory",
+                                          "type": "double",
+                                        },
+                                        Object {
+                                          "name": "message",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "phpmemory",
+                                          "type": "long",
+                                        },
+                                        Object {
+                                          "name": "referer",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "request",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "response",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "tags",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "timestamp",
+                                          "type": "timestamp",
+                                        },
+                                        Object {
+                                          "name": "url",
+                                          "type": "string",
+                                        },
+                                        Object {
+                                          "name": "utc_time",
+                                          "type": "timestamp",
+                                        },
+                                      ],
+                                    },
+                                  },
                                   "indexFields": Object {
                                     "availableFields": Array [
                                       Object {
@@ -13610,7 +14978,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 2,
+                                                "defaultState": 0,
                                                 "eleType": "slider",
                                                 "mapTo": "lineWidth",
                                                 "name": "Line width",
@@ -13620,7 +14988,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 70,
+                                                "defaultState": 100,
                                                 "eleType": "slider",
                                                 "mapTo": "fillOpacity",
                                                 "name": "Fill opacity",
@@ -13647,7 +15015,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                     ],
                                   },
-                                  "fillopacity": 70,
+                                  "fillopacity": 100,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
                                   "icon": [Function],
@@ -13656,7 +15024,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "label": "Vertical bar",
                                   "labelangle": 0,
                                   "legendposition": "v",
-                                  "linewidth": 2,
+                                  "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
                                   "orientation": "v",

@@ -6,15 +6,15 @@
 import { batch, useDispatch } from 'react-redux';
 import { VisualizationState } from 'common/types/explorer';
 import { updateFields, sortFields } from '../redux/slices/field_slice';
-import { render as renderExplorerVis } from '../redux/slices/visualization_slice';
 import { fetchSuccess } from '../redux/slices/query_result_slice';
 import { QUERIED_FIELDS, SELECTED_FIELDS } from '../../../../common/constants/explorer';
 import { change as changeVizConfig } from '../redux/slices/viualization_config_slice';
 import { changeQuery } from '../redux/slices/query_slice';
 
-export interface IVisualizationParams {
+export interface IVisFetchParams {
   query: string;
-  callback: (res: any) => void | null;
+  successCallback: (res: any) => any;
+  errorCallback: (err: any) => any;
 }
 
 export const useRenderVisualization = ({ pplService, requestParams }) => {
@@ -26,38 +26,23 @@ export const useRenderVisualization = ({ pplService, requestParams }) => {
     errorHandler: (error: any) => void
   ) => {
     await pplService
-      .fetch(
-        {
-          query,
-          format,
-        },
-        (error) => {
-          errorHandler(error);
-        }
-      )
+      .fetch({ query, format }, (error) => {
+        errorHandler(error);
+      })
       .then((res: any) => {
-        if (res && res.status === 200) {
-          successHandler(res);
-        }
+        successHandler(res);
       });
   };
 
-  const getVisualizations = ({ query, callback }: IVisualizationParams) => {
+  const getVisualizations = ({ query, successCallback, errorCallback }: IVisFetchParams) => {
     fetchVisualizations(
-      {
-        query,
-      },
-      'viz',
+      { query },
+      'jdbc',
       (res: any) => {
-        if (callback) callback(res);
+        successCallback(res);
       },
       (error: any) => {
-        dispatch(
-          renderExplorerVis({
-            tabId: requestParams.tabId,
-            data: error.body,
-          })
-        );
+        errorCallback(error);
       }
     );
   };
@@ -77,20 +62,12 @@ export const useRenderVisualization = ({ pplService, requestParams }) => {
         })
       );
 
-      // explorerVisualization
-      dispatch(
-        renderExplorerVis({
-          tabId: requestParams.tabId,
-          data: visData,
-        })
-      );
-
       // queryResults
       dispatch(
         fetchSuccess({
           tabId: requestParams.tabId,
           data: {
-            jsonData: visData?.jsonData || {},
+            ...visData,
           },
         })
       );

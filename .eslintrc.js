@@ -10,5 +10,12 @@ module.exports = {
     'plugin:@elastic/eui/recommended',
     'plugin:react-hooks/recommended',
   ],
+  overrides: [
+    {
+      files: ['**/*.{js,ts,tsx}'],
+      rules: {
+        'no-console': 0,
+      },
+    },
+  ],
 };
-

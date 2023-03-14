@@ -33,7 +33,7 @@ import {
   TYPING_DELAY,
   timeoutDelay
 } from '../utils/app_constants';
-import { supressResizeObserverIssue } from '../utils/constants';
+import { suppressResizeObserverIssue } from '../utils/constants';
 
 describe('Creating application', () => {
   beforeEach(() => {
@@ -233,7 +233,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-serviceTab"]').click();
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
     cy.get('[data-test-subj="app-analytics-logTab"]').click();
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
@@ -262,7 +262,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-serviceTab"]').click();
     cy.wait(delay);
     cy.get('.euiLink').contains('authentication').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('[data-test-subj="serviceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="serviceDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
@@ -279,7 +279,7 @@ describe('Viewing application', () => {
 
   it('Opens trace detail flyout when Trace ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.wait(delay);
     cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
     cy.get('[data-test-subj="traceDetailFlyoutTitle"]').should('be.visible');
@@ -300,7 +300,7 @@ describe('Viewing application', () => {
 
   it('Opens span detail flyout when Span ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.wait(delay);
     cy.get('[data-test-subj="dataGridRowCell"]').contains('5ff3516909562c60').click();
     cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
@@ -334,7 +334,7 @@ describe('Viewing application', () => {
     changeTimeTo24('months');
     cy.wait(delay * 2);
     cy.get('[data-test-subj="main-content-visTab"]').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').click().type(visOneName);
     cy.wait(delay);
@@ -351,7 +351,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[aria-label="actionMenuButton"]').click();
     cy.get('[data-test-subj="editVizContextMenuItem"]').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
     cy.get('.euiTab[id="availability-panel"]').click();
     cy.get('[title="Bar"]').click();
@@ -389,7 +389,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.wait(delay);
     cy.get('[data-test-subj="main-content-visTab"]').click();
-    supressResizeObserverIssue();
+    suppressResizeObserverIssue();
     cy.get('.euiTab[id="availability-panel"]').click();
     cy.get('[title="Bar"]').click();
     cy.focused().type('{downArrow}');

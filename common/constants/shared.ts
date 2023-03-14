@@ -160,8 +160,8 @@ export interface DefaultChartStylesProps {
 export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
   DefaultModeLine: 'lines',
   Interpolation: 'spline',
-  LineWidth: 2,
-  FillOpacity: 70,
+  LineWidth: 0,
+  FillOpacity: 100,
   MarkerSize: 5,
   ShowLegend: 'show',
   LegendPosition: 'v',

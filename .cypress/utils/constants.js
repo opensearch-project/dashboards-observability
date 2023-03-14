@@ -110,7 +110,7 @@ export const PPL_QUERY_TEXT = `%ppl
 source=opensearch_dashboards_sample_data_flights
 `
 
-export const supressResizeObserverIssue = () => {
+export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
   cy.on('uncaught:exception', (err, runnable) => {
     if (err.message.includes('ResizeObserver loop')) return false;

@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { find, forEach } from 'lodash';
 import React, { useMemo } from 'react';
-import { DEFAULT_PALETTE, HEX_CONTRAST_COLOR } from '../../../../../common/constants/colors';
+import { DEFAULT_PALETTE } from '../../../../../common/constants/colors';
 import {
   AGGREGATIONS,
   GROUPBY,
@@ -13,24 +12,17 @@ import {
   PIE_YAXIS_GAP,
   PLOTLY_PIE_COLUMN_NUMBER,
 } from '../../../../../common/constants/explorer';
-import { PLOT_MARGIN } from '../../../../../common/constants/shared';
-import {
-  ConfigListEntry,
-  IVisualizationContainerProps,
-} from '../../../../../common/types/explorer';
-import { getPropName, getTooltipHoverInfo } from '../../../event_analytics/utils/utils';
+import { PLOT_MARGIN, PLOTLY_COLOR } from '../../../../../common/constants/shared';
+import { IVisualizationContainerProps } from '../../../../../common/types/explorer';
+import { getTooltipHoverInfo } from '../../../event_analytics/utils/utils';
 import { Plt } from '../../plotly/plot';
-import { removeBacktick } from '../../../../../common/utils';
+import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
 
 export const Pie = ({ visualizations, layout, config }: any) => {
   const {
     data: {
-      defaultAxes,
-      indexFields,
-      query,
-      rawVizData: {
-        data: queriedVizData,
-        metadata: { fields },
+      explorer: {
+        explorerData: { jsonData: fieldValueMapList },
       },
       userConfigs: {
         dataConfig: {
@@ -45,7 +37,7 @@ export const Pie = ({ visualizations, layout, config }: any) => {
         layoutConfig = {},
       } = {},
     } = {},
-    vis: { mode, icontype, showlegend, legendSize, labelSize, legendposition },
+    vis: { mode, showlegend, legendSize, labelSize, legendposition },
   }: IVisualizationContainerProps = visualizations;
 
   const type = chartStyles.mode || mode;
@@ -54,65 +46,37 @@ export const Pie = ({ visualizations, layout, config }: any) => {
   const chartLegendSize = legend.size || legendSize;
   const chartLabelSize = chartStyles.labelSize || labelSize;
   const title = panelOptions.title || layoutConfig.layout?.title || '';
-  const timestampField = find(fields, (field) => field.type === 'timestamp');
 
-  const backtickRemovedVisData = {};
-  forEach(queriedVizData, (value, key) => {
-    backtickRemovedVisData[removeBacktick(key)] = value;
-  });
+  const pieTreaces = useMemo(() => {
+    const chartConfigs = {
+      dimensions,
+      series,
+      breakdowns: [], // pie doesn't support breakdowns
+      span,
+      isVertical: true,
+    };
+    const pieSpecificMetaData = {
+      x_coordinate: 'labels',
+      y_coordinate: 'values',
+    };
 
-  /**
-   * determine x axis
-   */
-  let xaxes: ConfigListEntry[] = [];
-  if (span && span.time_field && timestampField) {
-    xaxes = [timestampField, ...dimensions];
-  } else {
-    xaxes = dimensions;
-  }
-
-  const invertHex = (hex: string) =>
-    (Number(`0x1${hex}`) ^ HEX_CONTRAST_COLOR).toString(16).substr(1).toUpperCase(); // eslint-disable-line no-bitwise
-
-  const labelsOfXAxis = xaxes.reduce((prev, cur) => {
-    if (backtickRemovedVisData[removeBacktick(cur.name)]) {
-      if (prev.length === 0) return backtickRemovedVisData[removeBacktick(cur.name)].flat();
-      return prev.map(
-        (item: string | number, index: number) =>
-          `${item}, ${backtickRemovedVisData[removeBacktick(cur.name)][index]}`
-      );
-    }
-  }, []);
-
-  const hexColor = invertHex(colorTheme);
+    return transformPreprocessedDataToTraces(
+      preprocessJsonData(fieldValueMapList, chartConfigs),
+      chartConfigs,
+      pieSpecificMetaData
+    );
+  }, [chartStyles, fieldValueMapList, dimensions, series, [], span, tooltipOptions]);
 
   const pies = useMemo(
     () =>
-      series.map((field: any, index: number) => {
-        const fieldName = getPropName(field);
-        const marker =
-          colorTheme.name !== DEFAULT_PALETTE
-            ? {
-                marker: {
-                  colors: [
-                    ...Array(backtickRemovedVisData[removeBacktick(fieldName)].length).fill(
-                      colorTheme.childColor
-                    ),
-                  ],
-                  line: {
-                    color: hexColor,
-                    width: 1,
-                  },
-                },
-              }
-            : undefined;
+      pieTreaces.map((pieTrace: any, index: number) => {
         return {
-          labels: labelsOfXAxis,
-          values: backtickRemovedVisData[removeBacktick(fieldName)],
+          labels: pieTrace.labels,
+          values: pieTrace.values,
           type: 'pie',
-          name: getPropName(field),
+          name: pieTrace.name,
           hole: type === 'pie' ? 0 : 0.5,
-          text: fieldName,
+          text: pieTrace.name,
           textinfo: 'percent',
           hoverinfo: getTooltipHoverInfo({
             tooltipMode: tooltipOptions.tooltipMode,
@@ -120,28 +84,30 @@ export const Pie = ({ visualizations, layout, config }: any) => {
           }),
           automargin: true,
           textposition: 'outside',
-          title: { text: fieldName },
+          title: { text: pieTrace.name },
           domain: {
             row: Math.floor(index / PLOTLY_PIE_COLUMN_NUMBER),
             column: index % PLOTLY_PIE_COLUMN_NUMBER,
           },
-          ...marker,
+          marker: {
+            colors: [...PLOTLY_COLOR],
+          },
           outsidetextfont: {
             size: chartLabelSize,
           },
         };
       }),
-    [series, backtickRemovedVisData, chartLabelSize, labelsOfXAxis, colorTheme]
+    [chartLabelSize, colorTheme]
   );
 
   const mergedLayout = useMemo(() => {
-    const isAtleastOneFullRow = Math.floor(series.length / PLOTLY_PIE_COLUMN_NUMBER) > 0;
+    const isAtleastOneFullRow = Math.floor(pieTreaces.length / PLOTLY_PIE_COLUMN_NUMBER) > 0;
     return {
       grid: {
         xgap: PIE_XAXIS_GAP,
         ygap: PIE_YAXIS_GAP,
-        rows: Math.floor(series.length / PLOTLY_PIE_COLUMN_NUMBER) + 1,
-        columns: isAtleastOneFullRow ? PLOTLY_PIE_COLUMN_NUMBER : series.length,
+        rows: Math.floor(pieTreaces.length / PLOTLY_PIE_COLUMN_NUMBER) + 1,
+        columns: isAtleastOneFullRow ? PLOTLY_PIE_COLUMN_NUMBER : pieTreaces.length,
         pattern: 'independent',
       },
       ...layout,
@@ -168,7 +134,7 @@ export const Pie = ({ visualizations, layout, config }: any) => {
         yref: 'container',
       },
     };
-  }, [series, layoutConfig.layout, title, layout.legend]);
+  }, [layoutConfig.layout, title, layout.legend]);
 
   const mergedConfigs = useMemo(
     () => ({

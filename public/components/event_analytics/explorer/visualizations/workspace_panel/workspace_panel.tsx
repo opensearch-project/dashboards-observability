@@ -31,7 +31,7 @@ export function WorkspacePanel({ visualizations }: IWorkSpacePanel) {
           className="ws__visCanvasControl--switch"
           label="Table view"
           type="button"
-          disabled={isEmpty(visualizations?.data?.rawVizData)}
+          disabled={isEmpty(visualizations?.data?.explorer?.explorerData)}
           checked={isTableViewOn}
           onChange={() => {
             setIsTableViewOn((staleState) => !staleState);

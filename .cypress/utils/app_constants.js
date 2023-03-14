@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { supressResizeObserverIssue } from './constants';
+import { suppressResizeObserverIssue } from './constants';
 
 export const delay = 1000;
 export const timeoutDelay = 30000;
@@ -18,13 +18,13 @@ export const moveToHomePage = () => {
 export const moveToCreatePage = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/application_analytics/`);
   cy.get('.euiButton[href="#/application_analytics/create"]').eq(0).click();
-  supressResizeObserverIssue();
+  suppressResizeObserverIssue();
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Create application');
 };
 
 export const moveToApplication = (name) => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/application_analytics/`);
-  supressResizeObserverIssue();
+  suppressResizeObserverIssue();
   cy.wait(delay * 6);
   cy.get(`[data-test-subj="${name}ApplicationLink"]`).click();
   cy.wait(delay);
@@ -36,7 +36,7 @@ export const moveToEditPage = () => {
   moveToApplication(nameOne);
   cy.get('[data-test-subj="app-analytics-configTab"]').click();
   cy.get('[data-test-subj="editApplicationButton"]').click();
-  supressResizeObserverIssue();
+  suppressResizeObserverIssue();
   cy.wait(delay);
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Edit application');
 };

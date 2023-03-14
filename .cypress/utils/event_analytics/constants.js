@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { COMMAND_TIMEOUT_LONG, supressResizeObserverIssue } from '../constants';
+import { COMMAND_TIMEOUT_LONG, suppressResizeObserverIssue } from '../constants';
 
 export const delay = 1000;
 export const YEAR_TO_DATE_DOM_ID = '[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]';
@@ -77,6 +77,7 @@ export const querySearch = (query, rangeSelected) => {
     .clear()
     .focus()
     .type(query, { delay: 50 });
+  suppressResizeObserverIssue();
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.get(rangeSelected).click();
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
@@ -96,7 +97,7 @@ export const landOnEventVisualizations = () => {
   cy.visit(
     `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/explorer`
   );
-  supressResizeObserverIssue(); // have to add
+  suppressResizeObserverIssue(); // have to add
   cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
 };
 

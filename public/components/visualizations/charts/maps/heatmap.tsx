@@ -4,7 +4,7 @@
  */
 import React, { useMemo } from 'react';
 import { colorPalette } from '@elastic/eui';
-import { forEach, has, isEmpty, isEqual, uniq } from 'lodash';
+import { forEach, isEmpty, isEqual, map } from 'lodash';
 import Plotly from 'plotly.js-dist';
 import {
   HEATMAP_PALETTE_COLOR,
@@ -22,15 +22,17 @@ import { VisCanvassPlaceholder } from '../../../event_analytics/explorer/visuali
 import { Plt } from '../../plotly/plot';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import { PLOT_MARGIN } from '../../../../../common/constants/shared';
-import { getCompleteTimespanKey } from '../../../visualizations/charts/shared/common';
+import {
+  getCompleteTimespanKey,
+  removeBackTick,
+} from '../../../visualizations/charts/shared/common';
 import { removeBacktick } from '../../../../../common/utils';
 
 export const HeatMap = ({ visualizations, layout, config }: any) => {
   const {
     data: {
-      rawVizData: {
-        data: queriedVizData,
-        metadata: { fields },
+      explorer: {
+        explorerData: { jsonData: fieldValueMapList },
       },
       userConfigs: {
         dataConfig: {
@@ -48,33 +50,14 @@ export const HeatMap = ({ visualizations, layout, config }: any) => {
     vis: { icontype },
   }: IVisualizationContainerProps = visualizations;
 
-  const backtickRemovedVisData = {};
-  forEach(queriedVizData, (value, key) => {
-    backtickRemovedVisData[removeBacktick(key)] = value;
-  });
-
   const combinedDemensions = [
     ...(!isEmpty(span) ? [getCompleteTimespanKey(span)] : []),
     ...dimensions,
   ];
-  if (!isEqual(combinedDemensions.length, 2) || !isEqual(series.length, 1))
-    return <VisCanvassPlaceholder message="Invalid data, heatmap can only have exact 2 dimensions and 1 series" icon={icontype} />;
+
   const xaxisField = { ...combinedDemensions[0] };
   const yaxisField = { ...combinedDemensions[1] };
   const zMetrics = { ...series[0] };
-  if (
-    isEmpty(xaxisField) ||
-    isEmpty(yaxisField) ||
-    isEmpty(zMetrics) ||
-    isEmpty(backtickRemovedVisData[removeBacktick(xaxisField.label)]) ||
-    isEmpty(backtickRemovedVisData[removeBacktick(yaxisField.label)])
-  )
-    return <VisCanvassPlaceholder message="Invalid data" icon={icontype} />;
-
-  const uniqueYaxis = uniq(backtickRemovedVisData[removeBacktick(yaxisField.label)]);
-  const uniqueXaxis = uniq(backtickRemovedVisData[removeBacktick(xaxisField.label)]);
-  const uniqueYaxisLength = uniqueYaxis.length;
-  const uniqueXaxisLength = uniqueXaxis.length;
   const tooltipMode =
     tooltipOptions.tooltipMode !== undefined ? tooltipOptions.tooltipMode : 'show';
   const tooltipText = tooltipOptions.tooltipText !== undefined ? tooltipOptions.tooltipText : 'all';
@@ -97,51 +80,48 @@ export const HeatMap = ({ visualizations, layout, config }: any) => {
     });
   }
 
-  const calculatedHeapMapZaxis: Plotly.Data[] = useMemo(() => {
-    const heapMapZaxis = [];
-    const buckets = {};
+  const heatMapAxes = useMemo(() => {
+    const dmaps = new Map<string, any>(); // key: values of 1st and 2nd group-by fields combined
+    const uniqueXaxisVals = new Set<any>(); // any value for a field
+    const uniqueYaxisVals = new Set<any>(); // any value for a field
+    const zKey = getPropName(zMetrics);
 
-    // maps bukcets to metrics
-    for (let i = 0; i < backtickRemovedVisData[removeBacktick(xaxisField.label)].length; i++) {
-      buckets[`${backtickRemovedVisData[removeBacktick(xaxisField.label)][i]},${backtickRemovedVisData[removeBacktick(yaxisField.label)][i]}`] =
-      backtickRemovedVisData[getPropName(zMetrics)][i];
-    }
+    forEach(fieldValueMapList, (entry) => {
+      const backtickRemovedEntry = removeBackTick(entry);
+      const xKey = removeBacktick(xaxisField.label);
+      const yKey = removeBacktick(yaxisField.label);
 
-    // initialize empty 2 dimensional array, inner loop for each xaxis field, outer loop for yaxis
-    for (let i = 0; i < uniqueYaxisLength; i++) {
-      const innerBuckets = [];
-      for (let j = 0; j < uniqueXaxisLength; j++) {
-        innerBuckets.push(null);
-      }
-      heapMapZaxis.push(innerBuckets);
-    }
+      // collect unique values from all values of 1st and 2nd group-by fields
+      // for later composing 2 dimensional heatmap x, y axes
+      uniqueXaxisVals.add(backtickRemovedEntry[xKey]);
+      uniqueYaxisVals.add(backtickRemovedEntry[yKey]);
 
-    // fill in each bucket
-    for (let i = 0; i < uniqueYaxisLength; i++) {
-      for (let j = 0; j < uniqueXaxisLength; j++) {
-        if (has(buckets, `${uniqueXaxis[j]},${uniqueYaxis[i]}`)) {
-          heapMapZaxis[i][j] = buckets[`${uniqueXaxis[j]},${uniqueYaxis[i]}`];
-        }
-      }
-    }
+      // establish 1st,2nd -> data entry mapping for later filling in
+      // corresponding aggregations to 2 dimensional heatmap zaxis
+      dmaps.set(
+        `${backtickRemovedEntry[xKey]},${backtickRemovedEntry[yKey]}`,
+        backtickRemovedEntry
+      );
+    });
 
-    return heapMapZaxis;
-  }, [
-    backtickRemovedVisData,
-    uniqueYaxis,
-    uniqueXaxis,
-    uniqueYaxisLength,
-    uniqueXaxisLength,
-    xaxisField,
-    yaxisField,
-    zMetrics,
-  ]);
+    const xAxis = [...uniqueXaxisVals];
+    const yAxis = [...uniqueYaxisVals];
+    const zaxis = map(yAxis, (yvalue) => {
+      return map(xAxis, (xvalue) => {
+        return dmaps.get(`${xvalue},${yvalue}`) ? dmaps.get(`${xvalue},${yvalue}`)[zKey] : null;
+      });
+    });
 
-  const heapMapData = [
+    return {
+      z: zaxis,
+      x: xAxis,
+      y: yAxis,
+    };
+  }, [fieldValueMapList]);
+
+  const heapMapData: Plotly.Data[] = [
     {
-      z: calculatedHeapMapZaxis,
-      x: uniqueXaxis,
-      y: uniqueYaxis,
+      ...heatMapAxes,
       hoverinfo: tooltipMode === 'hidden' ? 'none' : tooltipText,
       colorscale: colorField.name === SINGLE_COLOR_PALETTE ? traceColor : colorField.name,
       type: 'heatmap',
