@@ -318,6 +318,7 @@ export interface ConfigList {
   [AGGREGATIONS]?: ConfigListEntry[];
   [BREAKDOWNS]?: ConfigListEntry[] | HistogramConfigList[];
   span?: DimensionSpan;
+  isVertical?: boolean;
 }
 
 export interface Breadcrumbs {
