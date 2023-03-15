@@ -309,3 +309,8 @@ export const sampleLogPatternData = {
            "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
   anomalyCount: 0,
 };
+
+export const TYPE_TAB_MAPPING = {
+  [SAVED_QUERY]: TAB_EVENT_ID,
+  [SAVED_VISUALIZATION]: TAB_CHART_ID,
+};

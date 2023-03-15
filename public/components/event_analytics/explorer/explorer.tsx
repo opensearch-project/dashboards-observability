@@ -47,6 +47,7 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
+  TYPE_TAB_MAPPING,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -95,11 +96,6 @@ import { QueryManager } from '../../../../common/query_manager';
 import { uiSettingsService } from '../../../../common/utils';
 import { LogPatterns } from './log_patterns/log_patterns';
 import { getDateRange } from '../utils/utils';
-
-const TYPE_TAB_MAPPING = {
-  [SAVED_QUERY]: TAB_EVENT_ID,
-  [SAVED_VISUALIZATION]: TAB_CHART_ID,
-};
 
 export const Explorer = ({
   pplService,
