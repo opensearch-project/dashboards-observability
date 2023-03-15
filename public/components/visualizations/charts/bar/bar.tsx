@@ -85,7 +85,7 @@ export const Bar = ({ visualizations, layout, config }: any) => {
   const tooltipText = tooltipOptions.tooltipText !== undefined ? tooltipOptions.tooltipText : 'all';
   const barWidth = 1 - (chartStyles.barWidth || barwidth);
   const groupWidth = 1 - (chartStyles.groupWidth || groupwidth);
-  const showLegend = legend.showLegend ?? showlegend;
+  const showLegend = legend.showLegend === 'hidden' ? false : showlegend;
   const legendPosition = legend.position || legendposition;
   const labelSize = chartStyles.labelSize || DEFAULT_BAR_CHART_STYLES.LabelSize;
   const legendSize = legend.legendSize;
@@ -183,7 +183,7 @@ export const Bar = ({ visualizations, layout, config }: any) => {
           },
         }),
       },
-      showlegend,
+      showlegend: showLegend,
       hovermode: 'closest',
       margin: PLOT_MARGIN,
     };
