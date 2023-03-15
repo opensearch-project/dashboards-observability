@@ -94,6 +94,7 @@ import { CountDistribution } from './visualizations/count_distribution';
 import { QueryManager } from '../../../../common/query_manager';
 import { uiSettingsService } from '../../../../common/utils';
 import { LogPatterns } from './log_patterns/log_patterns';
+import { getDateRange } from '../utils/utils';
 
 const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
@@ -1199,12 +1200,7 @@ export const Explorer = ({
     );
   });
 
-  const dateRange =
-    isEmpty(startTime) || isEmpty(endTime)
-      ? isEmpty(query.selectedDateRange)
-        ? ['now-15m', 'now']
-        : [query.selectedDateRange[0], query.selectedDateRange[1]]
-      : [startTime, endTime];
+  const dateRange = getDateRange(startTime, endTime, query);
 
   const handleLiveTailSearch = useCallback(
     async (startingTime: string, endingTime: string) => {
