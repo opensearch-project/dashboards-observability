@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, last } from 'lodash';
+import { last } from 'lodash';
 import React, { useMemo } from 'react';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
@@ -17,7 +17,6 @@ import { IVisualizationContainerProps } from '../../../../../common/types/explor
 import { hexToRgb } from '../../../../components/event_analytics/utils/utils';
 import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
-import { VisCanvassPlaceholder } from '../../../event_analytics/explorer/visualizations/shared_components';
 import { Plt } from '../../plotly/plot';
 import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
 
@@ -36,10 +35,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
 
   const {
     data: {
-      rawVizData: {
-        data: queriedVizData,
-        jsonData,
-        metadata: { fields },
+      explorer: {
+        explorerData: { jsonData },
       },
       userConfigs: {
         dataConfig: {
@@ -140,9 +137,17 @@ export const Line = ({ visualizations, layout, config }: any) => {
       lineWidth,
       markerSize,
     };
+    const lineSpecficMetaData = {
+      x_coordinate: 'x',
+      y_coordinate: 'y',
+    };
 
     return addStylesToTraces(
-      transformPreprocessedDataToTraces(preprocessJsonData(jsonData, visConfig), visConfig),
+      transformPreprocessedDataToTraces(
+        preprocessJsonData(jsonData, visConfig),
+        visConfig,
+        lineSpecficMetaData
+      ),
       traceStyles
     );
   }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);

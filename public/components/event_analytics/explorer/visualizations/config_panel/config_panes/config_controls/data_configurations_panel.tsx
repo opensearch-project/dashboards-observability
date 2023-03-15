@@ -47,7 +47,6 @@ import {
 import { TabContext, useRenderVisualization } from '../../../../../hooks';
 import { DataConfigItemClickPanel } from '../config_controls/data_config_item_click_panel';
 import { DataConfigPanelFields } from '../config_controls/data_config_panel_fields';
-import { ButtonGroupItem } from './config_button_group';
 import { composeFinalQuery } from '../../../../../../../../common/utils';
 
 const initialDimensionEntry = {
@@ -285,9 +284,9 @@ export const DataConfigPanelItem = ({
     handleQueryChange(newQueryString);
     getVisualizations({
       query: nextQueryState[FINAL_QUERY],
-      callback: (res) => {
+      successCallback: (res) => {
         updateVisUIState({
-          visData: res,
+          visData: { ...res },
           queryState: nextQueryState,
           visConfMetadata: {
             ...configList,
@@ -297,6 +296,7 @@ export const DataConfigPanelItem = ({
           },
         });
       },
+      errorCallback: (err) => {},
     });
   }, [configList, query, visualizations]);
 

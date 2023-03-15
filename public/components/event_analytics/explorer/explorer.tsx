@@ -423,25 +423,19 @@ export const Explorer = ({
       }
     });
 
-    // search
-    if (finalQuery.match(PPL_STATS_REGEX)) {
-      getVisualizations();
-      getAvailableFields(`search source=${curIndex}`);
+    if (!selectedIntervalRef.current || selectedIntervalRef.current.text === 'Auto') {
+      findAutoInterval(startingTime, endingTime);
+    }
+    if (isLiveTailOnRef.current) {
+      getLiveTail(undefined, getErrorHandler('Error fetching events'));
     } else {
-      if (!selectedIntervalRef.current || selectedIntervalRef.current.text === 'Auto') {
-        findAutoInterval(startingTime, endingTime);
-      }
-      if (isLiveTailOnRef.current) {
-        getLiveTail(undefined, getErrorHandler('Error fetching events'));
-      } else {
-        getEvents(undefined, getErrorHandler('Error fetching events'));
-      }
-      getCountVisualizations(selectedIntervalRef.current!.value.replace(/^auto_/, ''));
+      getEvents(undefined, getErrorHandler('Error fetching events'));
+    }
+    getCountVisualizations(selectedIntervalRef.current!.value.replace(/^auto_/, ''));
 
-      // to fetch patterns data on current query
-      if (!finalQuery.match(PATTERNS_REGEX)) {
-        getPatterns(selectedIntervalRef.current!.value.replace(/^auto_/, ''));
-      }
+    // to fetch patterns data on current query
+    if (!finalQuery.match(PATTERNS_REGEX)) {
+      getPatterns(selectedIntervalRef.current!.value.replace(/^auto_/, ''));
     }
 
     // for comparing usage if for the same tab, user changed index from one to another
@@ -1039,10 +1033,7 @@ export const Explorer = ({
         // update custom panel - query
       }
     } else if (isEqual(selectedContentTabId, TAB_CHART_ID)) {
-      if (
-        (isEmpty(currQuery![RAW_QUERY]) && isEmpty(appBaseQuery)) ||
-        isEmpty(explorerVisualizations)
-      ) {
+      if (isEmpty(currQuery![RAW_QUERY]) && isEmpty(appBaseQuery)) {
         setToast(`There is no query or(and) visualization to save`, 'danger');
         return;
       }
