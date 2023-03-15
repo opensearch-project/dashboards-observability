@@ -83,6 +83,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
             [UNSELECTED_FIELDS]: res?.schema ? [...res.schema] : [],
             [QUERIED_FIELDS]: [],
             [AVAILABLE_FIELDS]: res?.schema || [],
+            [SELECTED_FIELDS]: [],
           },
         })
       );
