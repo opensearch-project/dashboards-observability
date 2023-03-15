@@ -29,8 +29,6 @@ interface IExplorerVisualizationsProps {
   explorerVis: any;
   explorerFields: ExplorerFields;
   explorerData: any;
-  handleAddField: (field: IField) => void;
-  handleRemoveField: (field: IField) => void;
   visualizations: IVisualizationContainerProps;
   handleOverrideTimestamp: (field: IField) => void;
   callback?: any;
@@ -44,8 +42,6 @@ export const ExplorerVisualizations = ({
   explorerVis,
   explorerFields,
   explorerData,
-  handleAddField,
-  handleRemoveField,
   visualizations,
   handleOverrideTimestamp,
   callback,
@@ -111,8 +107,6 @@ export const ExplorerVisualizations = ({
                     explorerData={explorerData}
                     selectedTimestamp={visualizations?.data?.query[SELECTED_TIMESTAMP] || ''}
                     handleOverrideTimestamp={handleOverrideTimestamp}
-                    handleAddField={(field: IField) => handleAddField(field)}
-                    handleRemoveField={(field: IField) => handleRemoveField(field)}
                     isFieldToggleButtonDisabled={
                       vis.name === VIS_CHART_TYPES.LogsView
                         ? isEmpty(explorerData.jsonData) ||
