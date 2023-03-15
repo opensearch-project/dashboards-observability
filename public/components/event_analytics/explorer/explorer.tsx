@@ -612,23 +612,6 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
-  const onPatternSelection = async (pattern: string) => {
-    if (queryRef.current![FILTERED_PATTERN] === pattern) {
-      return;
-    }
-    dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          [FILTERED_PATTERN]: pattern,
-        },
-      })
-    );
-    // workaround to refresh callback and trigger fetch data
-    await setTempQuery(queryRef.current![RAW_QUERY]);
-    await handleTimeRangePickerRefresh(true);
-  };
-
   const getMainContent = () => {
     return (
       <main className="container-fluid">
