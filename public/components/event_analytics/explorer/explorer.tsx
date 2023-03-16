@@ -1264,7 +1264,9 @@ export const Explorer = ({
       }}
     >
       <div
-        className={`dscAppContainer${uiSettingsService.get('theme:darkMode') && ' explorer-dark'}`}
+        className={`obsExplorer dscAppContainer${
+          uiSettingsService.get('theme:darkMode') && ' explorer-dark'
+        }`}
       >
         <Search
           key="search-component"
