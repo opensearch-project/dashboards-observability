@@ -13,7 +13,6 @@ import { createDatatableTypeDefinition } from './data_table/data_table_type';
 import { createGaugeTypeDefinition } from './financial/gauge/gauge_type';
 import { createTreeMapDefinition } from './maps/treemap_type';
 import { createTextTypeDefinition } from './text/text_type';
-import { createLogsViewTypeDefinition } from './logs_view/logs_view_type';
 import { createMetricsTypeDefinition } from './metrics/metrics_type';
 
 export const VIS_TYPES = {
@@ -29,7 +28,6 @@ export const VIS_TYPES = {
   tree_map: createTreeMapDefinition,
   text: createTextTypeDefinition,
   scatter: createLineTypeDefinition,
-  logs_view: createLogsViewTypeDefinition,
   metrics: createMetricsTypeDefinition,
 };
 
