@@ -217,14 +217,15 @@ export const Explorer = ({
   };
 
   useEffect(() => {
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        setBrowserTabFocus(false);
-      } else {
-        setBrowserTabFocus(true);
-      }
-    });
-  });
+    const handleSetBrowserTabFocus = () => {
+      if (document.hidden) setBrowserTabFocus(false);
+      else setBrowserTabFocus(true);
+    };
+    document.addEventListener('visibilitychange', handleSetBrowserTabFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', handleSetBrowserTabFocus);
+    };
+  }, []);
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
