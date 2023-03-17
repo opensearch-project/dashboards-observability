@@ -24,7 +24,7 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
   moveToApp: (id: string, type: string) => void;
 }
 
-interface AvailableIntegrationType {
+export interface AvailableIntegrationType {
   name: string;
   description: string;
   status: string;
@@ -34,10 +34,12 @@ interface AvailableIntegrationType {
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationType[];
+  records: number;
 }
 
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationType[];
+  records: number;
 }
 
 export function AvailableIntegrationOverviewPage(props: AppTableProps) {
@@ -114,8 +116,8 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
           />
         </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ data })
-          : AvailableIntegrationsTable({ loading: false, data })}
+          ? AvailableIntegrationsCardView({ data, records: 6 })
+          : AvailableIntegrationsTable({ loading: false, data, records: 6 })}
       </EuiPageBody>
     </EuiPage>
   );
