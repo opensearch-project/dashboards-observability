@@ -75,7 +75,7 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
           />
         </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ loading: false })
+          ? AvailableIntegrationsCardView()
           : AvailableIntegrationsTable({ loading: false })}
       </EuiPageBody>
     </EuiPage>

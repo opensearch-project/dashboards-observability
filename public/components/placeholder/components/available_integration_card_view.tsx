@@ -1,26 +1,26 @@
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import {
-  EuiInMemoryTable,
-  EuiLink,
-  EuiPageContent,
-  EuiPageContentHeaderSection,
+  EuiCard,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiPanel,
+  EuiSelectOption,
   EuiSpacer,
-  EuiTableFieldDataColumnType,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
+import DSLService from 'public/services/requests/dsl';
+import PPLService from 'public/services/requests/ppl';
+import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
+import TimestampUtils from 'public/services/timestamp/timestamp';
+import React, { ReactChild, useEffect, useState } from 'react';
 
-interface AvailableIntegrationsTableProps {
-  loading: boolean;
-}
-
-export function AvailableIntegrationsCardView(props: AvailableIntegrationsTableProps) {
+export function AvailableIntegrationsCardView() {
   const integrations = [
     {
       name: 'nginx',
@@ -30,156 +30,56 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsTableP
     },
   ];
 
-  const tableColumns = [
-    {
-      field: 'name',
-      name: 'Name',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationLink`}
-          href={`#/placeholder/${record.name}`}
-        >
-          {_.truncate(record.name, { length: 100 })}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'description',
-      name: 'Description',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationDescription`}>
-          {_.truncate(record.description, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'status',
-      name: 'Status',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationStatus`}>
-          {_.truncate(record.status, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'actions',
-      name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationAction`}
-          // TO DO REPLACE WITH API CALL TO ADD
-          onClick={() => {}}
-        >
-          Add
-        </EuiLink>
-      ),
-    },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
-
-  const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
-
-  const search = {
-    box: {
-      incremental: true,
-    },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: 'Type',
-        multiSelect: false,
-        options: FILTER_OPTIONS.map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
-  };
-
-  // return (
-  //   <div>
-  //     <EuiFlexGroup alignItems="center">
-  //       <EuiFlexItem grow={1}>
-  //         <EuiTitle size="s">
-  //           <h2 style={{ fontWeight: 430 }}>Integrations (2)</h2>
-  //         </EuiTitle>
-  //       </EuiFlexItem>
-  //     </EuiFlexGroup>
-
-  //     <EuiSpacer size="m" />
-
-  //     <EuiFlexGroup
-  //       direction="column"
-  //       justifyContent="spaceBetween"
-  //       style={{ height: '100%' }}
-  //       gutterSize="none"
-  //     >
-  //       {features.map((feature) => (
-  //         <EuiFlexItem key={feature} grow={false}>
-  //           <Synopsis
-  //             id={'random'}
-  //             description={'random'}
-  //             iconUrl={'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350'}
+  const id = 'random';
+  const description = 'random';
+  const iconUrl =
+    'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350';
+  const title = 'nginx';
   //             title={feature}
   //             onClick={() => {
   //               window.location.assign(`#/placeholder/${feature}`);
   //             }}
-  //           />
-  //         </EuiFlexItem>
-  //       ))}
-  //     </EuiFlexGroup>
-  //   </div>
-  // );
+  const url = 'random';
+
+  let optionalImg;
+  if (iconUrl) {
+    optionalImg = <img alt="" className="synopsisIcon" src={iconUrl} />;
+  } else if (iconType) {
+    optionalImg = <EuiIcon color="text" size="l" title="" type={iconType} />;
+  }
+
+  // const classes = classNames('homSynopsis__card', {
+  //   'homSynopsis__card--noPanel': !wrapInPanel,
+  // });
+
   return (
-    <EuiPageContent id="availableIntegrationsArea">
-      <EuiPageContentHeaderSection>
-        <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
-          <h3>Availble Integrations</h3>
-        </EuiTitle>
-      </EuiPageContentHeaderSection>
-      <EuiSpacer />
-      {integrations.length > 0 ? (
-        <EuiInMemoryTable
-          loading={props.loading}
-          items={integrations}
-          itemId="id"
-          columns={tableColumns}
-          tableLayout="auto"
-          pagination={{
-            initialPageSize: 10,
-            pageSizeOptions: [5, 10, 15],
-          }}
-          search={search}
-          // sorting={{
-          //   sort: {
-          //     field: 'dateModified',
-          //     direction: 'desc',
-          //   },
-          // }}
-          allowNeutralSort={false}
-          isSelectable={true}
-          // selection={{
-          //   onSelectionChange: (items) => setSelectedApplications(items),
-          // }}
-        />
-      ) : (
-        <>
-          <EuiSpacer size="xxl" />
-          <EuiText textAlign="center">
-            <h2>No Integrations Available</h2>
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
-    </EuiPageContent>
+    <EuiCard
+      // className={classes}
+      layout="vertical"
+      icon={optionalImg}
+      titleSize="xs"
+      title={title}
+      description={description}
+      onClick={() => {
+        window.location.assign(`#/placeholder/${title}`);
+      }}
+      data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
+      // betaBadgeLabel={isBeta ? 'Beta' : null}
+      titleElement="h3"
+    />
   );
 }
+
+//   Synopsis.propTypes = {
+//     description: PropTypes.string.isRequired,
+//     iconUrl: PropTypes.string,
+//     iconType: PropTypes.string,
+//     title: PropTypes.string.isRequired,
+//     url: PropTypes.string,
+//     onClick: PropTypes.func,
+//     isBeta: PropTypes.bool,
+//   };
+
+//   Synopsis.defaultProps = {
+//     isBeta: false,
+//   };
