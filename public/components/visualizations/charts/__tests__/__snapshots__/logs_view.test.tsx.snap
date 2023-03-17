@@ -26,6 +26,158 @@ exports[`Logs View component Renders logs view component 1`] = `
           "fromApp": false,
         },
         "defaultAxes": Object {},
+        "explorer": Object {
+          "explorerData": Object {
+            "jsonData": Array [
+              Object {
+                "double_per_ip_bytes": 11606,
+                "host": "artifacts.opensearch.org",
+                "ip_count": 176,
+                "per_ip_bytes": 5803,
+                "resp_code": "404",
+                "sum_bytes": 1021420,
+              },
+              Object {
+                "double_per_ip_bytes": 10100,
+                "host": "www.opensearch.org",
+                "ip_count": 111,
+                "per_ip_bytes": 5050,
+                "resp_code": "404",
+                "sum_bytes": 560638,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "artifacts.opensearch.org",
+                "ip_count": 94,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "www.opensearch.org",
+                "ip_count": 78,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+              Object {
+                "double_per_ip_bytes": 11526,
+                "host": "cdn.opensearch-opensearch-opensearch.org",
+                "ip_count": 43,
+                "per_ip_bytes": 5763,
+                "resp_code": "404",
+                "sum_bytes": 247840,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "cdn.opensearch-opensearch-opensearch.org",
+                "ip_count": 34,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+              Object {
+                "double_per_ip_bytes": 8882,
+                "host": "opensearch-opensearch-opensearch.org",
+                "ip_count": 13,
+                "per_ip_bytes": 4441,
+                "resp_code": "404",
+                "sum_bytes": 57735,
+              },
+              Object {
+                "double_per_ip_bytes": 0,
+                "host": "opensearch-opensearch-opensearch.org",
+                "ip_count": 6,
+                "per_ip_bytes": 0,
+                "resp_code": "503",
+                "sum_bytes": 0,
+              },
+            ],
+            "schema": Array [
+              Object {
+                "name": "agent",
+                "type": "string",
+              },
+              Object {
+                "name": "bytes",
+                "type": "long",
+              },
+              Object {
+                "name": "clientip",
+                "type": "ip",
+              },
+              Object {
+                "name": "event",
+                "type": "struct",
+              },
+              Object {
+                "name": "extension",
+                "type": "string",
+              },
+              Object {
+                "name": "geo",
+                "type": "struct",
+              },
+              Object {
+                "name": "host",
+                "type": "string",
+              },
+              Object {
+                "name": "index",
+                "type": "string",
+              },
+              Object {
+                "name": "ip",
+                "type": "ip",
+              },
+              Object {
+                "name": "machine",
+                "type": "struct",
+              },
+              Object {
+                "name": "memory",
+                "type": "double",
+              },
+              Object {
+                "name": "message",
+                "type": "string",
+              },
+              Object {
+                "name": "phpmemory",
+                "type": "long",
+              },
+              Object {
+                "name": "referer",
+                "type": "string",
+              },
+              Object {
+                "name": "request",
+                "type": "string",
+              },
+              Object {
+                "name": "response",
+                "type": "string",
+              },
+              Object {
+                "name": "tags",
+                "type": "string",
+              },
+              Object {
+                "name": "timestamp",
+                "type": "timestamp",
+              },
+              Object {
+                "name": "url",
+                "type": "string",
+              },
+              Object {
+                "name": "utc_time",
+                "type": "timestamp",
+              },
+            ],
+          },
+        },
         "indexFields": Object {
           "availableFields": Array [
             Object {
@@ -447,7 +599,7 @@ exports[`Logs View component Renders logs view component 1`] = `
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 2,
+                      "defaultState": 0,
                       "eleType": "slider",
                       "mapTo": "lineWidth",
                       "name": "Line width",
@@ -457,7 +609,7 @@ exports[`Logs View component Renders logs view component 1`] = `
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 70,
+                      "defaultState": 100,
                       "eleType": "slider",
                       "mapTo": "fillOpacity",
                       "name": "Fill opacity",
@@ -477,7 +629,7 @@ exports[`Logs View component Renders logs view component 1`] = `
             },
           ],
         },
-        "fillopacity": 70,
+        "fillopacity": 100,
         "fulllabel": "Vertical bar",
         "groupwidth": 0.7,
         "icon": [Function],
@@ -486,7 +638,7 @@ exports[`Logs View component Renders logs view component 1`] = `
         "label": "Vertical bar",
         "labelangle": 0,
         "legendposition": "v",
-        "linewidth": 2,
+        "linewidth": 0,
         "mode": "group",
         "name": "bar",
         "orientation": "v",
@@ -535,7 +687,74 @@ exports[`Logs View component Renders logs view component 1`] = `
         }
       }
       rawQuery=""
-      rows={Array []}
+      rows={
+        Array [
+          Object {
+            "double_per_ip_bytes": 11606,
+            "host": "artifacts.opensearch.org",
+            "ip_count": 176,
+            "per_ip_bytes": 5803,
+            "resp_code": "404",
+            "sum_bytes": 1021420,
+          },
+          Object {
+            "double_per_ip_bytes": 10100,
+            "host": "www.opensearch.org",
+            "ip_count": 111,
+            "per_ip_bytes": 5050,
+            "resp_code": "404",
+            "sum_bytes": 560638,
+          },
+          Object {
+            "double_per_ip_bytes": 0,
+            "host": "artifacts.opensearch.org",
+            "ip_count": 94,
+            "per_ip_bytes": 0,
+            "resp_code": "503",
+            "sum_bytes": 0,
+          },
+          Object {
+            "double_per_ip_bytes": 0,
+            "host": "www.opensearch.org",
+            "ip_count": 78,
+            "per_ip_bytes": 0,
+            "resp_code": "503",
+            "sum_bytes": 0,
+          },
+          Object {
+            "double_per_ip_bytes": 11526,
+            "host": "cdn.opensearch-opensearch-opensearch.org",
+            "ip_count": 43,
+            "per_ip_bytes": 5763,
+            "resp_code": "404",
+            "sum_bytes": 247840,
+          },
+          Object {
+            "double_per_ip_bytes": 0,
+            "host": "cdn.opensearch-opensearch-opensearch.org",
+            "ip_count": 34,
+            "per_ip_bytes": 0,
+            "resp_code": "503",
+            "sum_bytes": 0,
+          },
+          Object {
+            "double_per_ip_bytes": 8882,
+            "host": "opensearch-opensearch-opensearch.org",
+            "ip_count": 13,
+            "per_ip_bytes": 4441,
+            "resp_code": "404",
+            "sum_bytes": 57735,
+          },
+          Object {
+            "double_per_ip_bytes": 0,
+            "host": "opensearch-opensearch-opensearch.org",
+            "ip_count": 6,
+            "per_ip_bytes": 0,
+            "resp_code": "503",
+            "sum_bytes": 0,
+          },
+        ]
+      }
       rowsAll={Array []}
       timeStampField=""
     >
@@ -565,7 +784,1376 @@ exports[`Logs View component Renders logs view component 1`] = `
               </th>
             </tr>
           </thead>
-          <tbody />
+          <tbody>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 11606,
+                  "host": "artifacts.opensearch.org",
+                  "ip_count": 176,
+                  "per_ip_bytes": 5803,
+                  "resp_code": "404",
+                  "sum_bytes": 1021420,
+                }
+              }
+              docId="doc_view15"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view15"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-30"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-29"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc23"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              176
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc24"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              1021420
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc25"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              artifacts.opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc26"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              404
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc27"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              5803
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc28"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              11606
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 10100,
+                  "host": "www.opensearch.org",
+                  "ip_count": 111,
+                  "per_ip_bytes": 5050,
+                  "resp_code": "404",
+                  "sum_bytes": 560638,
+                }
+              }
+              docId="doc_view16"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view16"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-54"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-53"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc47"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              111
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc48"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              560638
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc49"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              www.opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc50"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              404
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc51"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              5050
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc52"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              10100
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 0,
+                  "host": "artifacts.opensearch.org",
+                  "ip_count": 94,
+                  "per_ip_bytes": 0,
+                  "resp_code": "503",
+                  "sum_bytes": 0,
+                }
+              }
+              docId="doc_view17"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view17"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-78"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-77"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc71"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              94
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc72"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc73"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              artifacts.opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc74"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              503
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc75"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc76"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 0,
+                  "host": "www.opensearch.org",
+                  "ip_count": 78,
+                  "per_ip_bytes": 0,
+                  "resp_code": "503",
+                  "sum_bytes": 0,
+                }
+              }
+              docId="doc_view18"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view18"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-102"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-101"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc95"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              78
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc96"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc97"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              www.opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc98"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              503
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc99"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc100"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 11526,
+                  "host": "cdn.opensearch-opensearch-opensearch.org",
+                  "ip_count": 43,
+                  "per_ip_bytes": 5763,
+                  "resp_code": "404",
+                  "sum_bytes": 247840,
+                }
+              }
+              docId="doc_view19"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view19"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-126"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-125"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc119"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              43
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc120"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              247840
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc121"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              cdn.opensearch-opensearch-opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc122"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              404
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc123"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              5763
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc124"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              11526
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 0,
+                  "host": "cdn.opensearch-opensearch-opensearch.org",
+                  "ip_count": 34,
+                  "per_ip_bytes": 0,
+                  "resp_code": "503",
+                  "sum_bytes": 0,
+                }
+              }
+              docId="doc_view20"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view20"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-150"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-149"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc143"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              34
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc144"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc145"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              cdn.opensearch-opensearch-opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc146"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              503
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc147"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc148"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 8882,
+                  "host": "opensearch-opensearch-opensearch.org",
+                  "ip_count": 13,
+                  "per_ip_bytes": 4441,
+                  "resp_code": "404",
+                  "sum_bytes": 57735,
+                }
+              }
+              docId="doc_view21"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view21"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-174"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-173"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc167"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              13
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc168"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              57735
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc169"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              opensearch-opensearch-opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc170"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              404
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc171"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              4441
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc172"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              8882
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+            <ForwardRef
+              doc={
+                Object {
+                  "double_per_ip_bytes": 0,
+                  "host": "opensearch-opensearch-opensearch.org",
+                  "ip_count": 6,
+                  "per_ip_bytes": 0,
+                  "resp_code": "503",
+                  "sum_bytes": 0,
+                }
+              }
+              docId="doc_view22"
+              explorerFields={
+                Object {
+                  "availableFields": Array [],
+                  "queriedFields": undefined,
+                  "selectedFields": Array [],
+                  "unselectedFields": Array [],
+                }
+              }
+              key="doc_view22"
+              onFlyoutOpen={[Function]}
+              rawQuery=""
+              selectedCols={Array []}
+              timeStampField=""
+            >
+              <tr
+                className="osdDocTable__row"
+              >
+                <td
+                  className="osdDocTableCell__toggleDetails"
+                  key="grid-td-198"
+                >
+                  <EuiButtonIcon
+                    className="euiButtonIcon euiButtonIcon--text"
+                    data-click-metric-element="event_analytics.events_view.toggle_details"
+                    iconType="arrowRight"
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiButtonIcon euiButtonIcon--text"
+                      data-click-metric-element="event_analytics.events_view.toggle_details"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowRight"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </td>
+                <td
+                  className="osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+                  key="datagrid-cell-197"
+                >
+                  <div
+                    className="truncate-by-height"
+                  >
+                    <span>
+                      <dl
+                        className="source truncate-by-height"
+                      >
+                        <span
+                          key="grid-desc191"
+                        >
+                          <dt>
+                            ip_count
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              6
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc192"
+                        >
+                          <dt>
+                            sum_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc193"
+                        >
+                          <dt>
+                            host
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              opensearch-opensearch-opensearch.org
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc194"
+                        >
+                          <dt>
+                            resp_code
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              503
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc195"
+                        >
+                          <dt>
+                            per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                        <span
+                          key="grid-desc196"
+                        >
+                          <dt>
+                            double_per_ip_bytes
+                            :
+                          </dt>
+                          <dd>
+                            <span>
+                              0
+                            </span>
+                          </dd>
+                        </span>
+                      </dl>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </ForwardRef>
+          </tbody>
         </table>
       </div>
       <div />

@@ -8,7 +8,6 @@ import { batch, useDispatch, useSelector } from 'react-redux';
 import {
   FINAL_QUERY,
   QUERIED_FIELDS,
-  RAW_QUERY,
   SELECTED_FIELDS,
   SELECTED_TIMESTAMP,
 } from '../../../../common/constants/explorer';
@@ -18,7 +17,7 @@ import { render as renderExplorerVis } from '../redux/slices/visualization_slice
 import { updateFields, sortFields } from '../redux/slices/field_slice';
 import PPLService from '../../../services/requests/ppl';
 import { fetchSuccess } from '../redux/slices/query_result_slice';
-import { setPatterns, reset as patternsReset } from '../redux/slices/patterns_slice';
+import { reset as patternsReset } from '../redux/slices/patterns_slice';
 
 interface IFetchVisualizationsParams {
   pplService: PPLService;
@@ -44,19 +43,22 @@ export const useFetchVisualizations = ({
     setIsVisLoading(true);
 
     await pplService
-      .fetch({
-        query,
-        format,
-      }, (error) => {
-        errorHandler(error);
-        setIsVisLoading(false);
-      })
+      .fetch(
+        {
+          query,
+          format,
+        },
+        (error) => {
+          errorHandler(error);
+          setIsVisLoading(false);
+        }
+      )
       .then((res: any) => {
         if (res && res.status === 200) {
           successHandler(res);
         }
         setIsVisLoading(false);
-      })
+      });
   };
 
   const getCountVisualizations = (interval: string) => {

@@ -9,6 +9,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui'
 import { getIndexPatternFromRawQuery } from '../../../../../common/utils/query_utils';
 import { TabContext } from '../../hooks/use_tab_context';
 
+interface IInsightsReq {
+  id: string;
+  name: string;
+  format: string;
+  query: string;
+}
+
+type IInsightsReqParams = Pick<IInsightsReq, 'format' | 'query'>;
+
 export const FieldInsights = ({ field, query }: any) => {
   const { pplService } = useContext(TabContext);
   const { rawQuery } = query;
@@ -33,19 +42,19 @@ export const FieldInsights = ({ field, query }: any) => {
       id: 'average',
       name: 'Average overtime',
       query: `source = ${index} | stats avg(${field.name})`,
-      format: 'viz',
+      format: 'jdbc',
     },
     {
       id: 'maximum',
       name: 'Maximum overtime',
       query: `source = ${index} | stats max(${field.name})`,
-      format: 'viz',
+      format: 'jdbc',
     },
     {
       id: 'minimum',
       name: 'Minimum overtime',
       query: `source = ${index} | stats min(${field.name})`,
-      format: 'viz',
+      format: 'jdbc',
     },
   ];
   const NUMERICAL_TYPES = ['short', 'integer', 'long', 'float', 'double'];
@@ -58,13 +67,13 @@ export const FieldInsights = ({ field, query }: any) => {
       id: 'stats',
       name: 'Stats',
       query: `source = ${index} | stats avg(${field.name}), max(${field.name}), min(${field.name})`,
-      format: 'viz',
+      format: 'jdbc',
     },
   ];
 
-  const fetchData = async (requests) => {
+  const fetchData = async (requests: IInsightsReq[]) => {
     return await Promise.all(
-      requests.map((reqQuery) => {
+      requests.map((reqQuery: IInsightsReq) => {
         const req = {
           format: reqQuery.format,
           query: reqQuery.query,
@@ -80,20 +89,20 @@ export const FieldInsights = ({ field, query }: any) => {
     fetchData(requests)
       .then((res) => {
         // numerical field
-        generalReports.map((report, index) => {
-          if (!res[index]?.jsonData) return;
+        generalReports.map((report, idx) => {
+          if (!res[idx]?.jsonData) return;
           setReportContent((staleState) => {
             return {
               ...staleState,
-              [report.id]: res[index]?.jsonData || {},
+              [report.id]: res[idx]?.jsonData || {},
             };
           });
         });
         if (res.length > 2) {
           const statsRes = last(res);
           if (!statsRes?.metadata) return;
-          numericalOnlyReports.map((rep, index) => {
-            const fieldName = statsRes.metadata?.fields[index]?.name;
+          numericalOnlyReports.map((rep, idx) => {
+            const fieldName = statsRes.metadata?.fields[idx]?.name;
             setReportContent((staleState) => {
               return {
                 ...staleState,
@@ -103,12 +112,14 @@ export const FieldInsights = ({ field, query }: any) => {
           });
         }
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.error(error);
+      });
   }, []);
 
-  const getInsights = async (query: string) => {
+  const getInsights = async (insightParams: IInsightsReqParams) => {
     try {
-      return await pplService.fetch(query);
+      return await pplService.fetch(insightParams);
     } catch (error) {
       console.error(error);
     }

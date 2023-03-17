@@ -30,12 +30,11 @@ const doubleValueGetter = (params) => {
 export const DataTable = ({ visualizations }: any) => {
   const {
     data: {
-      rawVizData: {
-        jsonData = [],
-        metadata: { fields = [] } = {},
-      } = {},
+      explorer: {
+        explorerData: { jsonData = [], schema = [] },
+      },
       userConfigs: { dataConfig: { chartStyles = {} } = {} } = {},
-    } = {}
+    } = {},
   }: IVisualizationContainerProps = visualizations;
 
   const enablePagination =
@@ -72,7 +71,7 @@ export const DataTable = ({ visualizations }: any) => {
 
   const columns = useMemo(
     () =>
-      fields.map((field: IField) => {
+      schema.map((field: IField) => {
         return {
           lockVisible: true,
           columnsMenuParams: {
@@ -88,7 +87,7 @@ export const DataTable = ({ visualizations }: any) => {
           }),
         };
       }),
-    [fields]
+    [schema]
   );
 
   // ag-grid-react bindings
