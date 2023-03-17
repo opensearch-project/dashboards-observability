@@ -15,21 +15,10 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { ReactElement, useEffect, useState } from 'react';
-
-interface AvailableIntegrationsTableProps {
-  loading: boolean;
-}
+import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
-
-  const integrations = [
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-    },
-  ];
+  const integrations = props.data;
 
   const tableColumns = [
     {

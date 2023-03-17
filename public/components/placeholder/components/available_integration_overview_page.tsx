@@ -24,10 +24,71 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
   moveToApp: (id: string, type: string) => void;
 }
 
+interface AvailableIntegrationType {
+  name: string;
+  description: string;
+  status: string;
+  assetUrl?: string | undefined;
+}
+
+export interface AvailableIntegrationsTableProps {
+  loading: boolean;
+  data: AvailableIntegrationType[];
+}
+
+export interface AvailableIntegrationsCardViewProps {
+  data: AvailableIntegrationType[];
+}
+
 export function AvailableIntegrationOverviewPage(props: AppTableProps) {
   const { chrome, parentBreadcrumbs } = props;
 
   const [isCardView, setCardView] = useState(true);
+
+  const data: AvailableIntegrationType[] = [
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+    },
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+    },
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+    },
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+    },
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+    },
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+    },
+  ];
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -50,33 +111,11 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
             onChange={() => {
               setCardView(!isCardView);
             }}
-            // label="Dark mode"
-            // checked={isDarkMode}
-            // onChange={() => {
-            //   uiSettingsService.set('theme:darkMode', !isDarkMode).then((resp) => {
-            //     setIsDarkMode(!isDarkMode);
-            //     uiSettingsService.addToast({
-            //       title: 'Theme setting changes require you to reload the page to take effect.',
-            //       text: toMountPoint(
-            //         <>
-            //           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            //             <EuiFlexItem grow={false}>
-            //               <EuiButton size="s" onClick={() => window.location.reload()}>
-            //                 Reload page
-            //               </EuiButton>
-            //             </EuiFlexItem>
-            //           </EuiFlexGroup>
-            //         </>
-            //       ),
-            //       color: 'success',
-            //     });
-            //   });
-            // }}
           />
         </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView()
-          : AvailableIntegrationsTable({ loading: false })}
+          ? AvailableIntegrationsCardView({ data })
+          : AvailableIntegrationsTable({ loading: false, data })}
       </EuiPageBody>
     </EuiPage>
   );
