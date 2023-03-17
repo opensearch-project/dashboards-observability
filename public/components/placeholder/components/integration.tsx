@@ -53,20 +53,15 @@ import { TAB_EVENT_ID, TAB_CHART_ID, NEW_TAB } from '../../../../common/constant
 import { IQueryTab } from '../../../../common/types/explorer';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { AppAnalyticsComponentDeps } from '../home';
-import { CustomPanelView } from '../../custom_panels/custom_panel_view';
 import {
   ApplicationRequestType,
   ApplicationType,
 } from '../../../../common/types/application_analytics';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
-import { ServiceDetailFlyout } from './flyout_components/service_detail_flyout';
-import { SpanDetailFlyout } from '../../trace_analytics/components/traces/span_detail_flyout';
-import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
-import { fetchAppById, initializeTabData } from '../helpers/utils';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
 import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
+import { IntegrationAssets } from './integration_assets_panel';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -145,10 +140,21 @@ export function Integration(props: AppDetailProps) {
   return (
     <EuiPage>
       <EuiPageBody>
-        {IntegrationOverview({ appId, link: 'https://www.nginx.com/' })}
+        <EuiSpacer size="xl" />
+        {IntegrationOverview({
+          appId,
+          link: 'https://www.nginx.com/',
+          license: 'Apache 2.0',
+          category: 'web, http',
+          version: 2.0,
+          contributer: { name: 'Joshua Li', link: 'https://github.com/joshuali925' },
+          status: 'available',
+        })}
         <EuiSpacer />
         <EuiPageContent>
           {IntegrationDetails({ appId })}
+          <EuiSpacer />
+          {IntegrationAssets({ appId })}
           <EuiSpacer />
           {IntegrationFields({ appId })}
           <EuiSpacer />

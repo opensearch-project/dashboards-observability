@@ -5,7 +5,7 @@ import { PanelTitle } from '../../../../public/components/trace_analytics/compon
 export function IntegrationFields(props: { appId }) {
   return (
     <EuiPanel>
-      <PanelTitle title={props.appId} />
+      <PanelTitle title={props.appId + ' FIELDS'} />
     </EuiPanel>
   );
 }

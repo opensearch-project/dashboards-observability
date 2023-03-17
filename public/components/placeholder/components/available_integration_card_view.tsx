@@ -1,0 +1,185 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import {
+  EuiInMemoryTable,
+  EuiLink,
+  EuiPageContent,
+  EuiPageContentHeaderSection,
+  EuiSpacer,
+  EuiTableFieldDataColumnType,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import _ from 'lodash';
+import React, { ReactElement, useEffect, useState } from 'react';
+
+interface AvailableIntegrationsTableProps {
+  loading: boolean;
+}
+
+export function AvailableIntegrationsCardView(props: AvailableIntegrationsTableProps) {
+  const integrations = [
+    {
+      name: 'nginx',
+      description:
+        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+      status: 'Available',
+    },
+  ];
+
+  const tableColumns = [
+    {
+      field: 'name',
+      name: 'Name',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiLink
+          data-test-subj={`${record.name}IntegrationLink`}
+          href={`#/placeholder/${record.name}`}
+        >
+          {_.truncate(record.name, { length: 100 })}
+        </EuiLink>
+      ),
+    },
+    {
+      field: 'description',
+      name: 'Description',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.name}IntegrationDescription`}>
+          {_.truncate(record.description, { length: 100 })}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'status',
+      name: 'Status',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.name}IntegrationStatus`}>
+          {_.truncate(record.status, { length: 100 })}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'actions',
+      name: 'Actions',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiLink
+          data-test-subj={`${record.name}IntegrationAction`}
+          // TO DO REPLACE WITH API CALL TO ADD
+          onClick={() => {}}
+        >
+          Add
+        </EuiLink>
+      ),
+    },
+  ] as Array<EuiTableFieldDataColumnType<any>>;
+
+  const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
+
+  const search = {
+    box: {
+      incremental: true,
+    },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: 'Type',
+        multiSelect: false,
+        options: FILTER_OPTIONS.map((i) => ({
+          value: i,
+          name: i,
+          view: i,
+        })),
+      },
+    ],
+  };
+
+  // return (
+  //   <div>
+  //     <EuiFlexGroup alignItems="center">
+  //       <EuiFlexItem grow={1}>
+  //         <EuiTitle size="s">
+  //           <h2 style={{ fontWeight: 430 }}>Integrations (2)</h2>
+  //         </EuiTitle>
+  //       </EuiFlexItem>
+  //     </EuiFlexGroup>
+
+  //     <EuiSpacer size="m" />
+
+  //     <EuiFlexGroup
+  //       direction="column"
+  //       justifyContent="spaceBetween"
+  //       style={{ height: '100%' }}
+  //       gutterSize="none"
+  //     >
+  //       {features.map((feature) => (
+  //         <EuiFlexItem key={feature} grow={false}>
+  //           <Synopsis
+  //             id={'random'}
+  //             description={'random'}
+  //             iconUrl={'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350'}
+  //             title={feature}
+  //             onClick={() => {
+  //               window.location.assign(`#/placeholder/${feature}`);
+  //             }}
+  //           />
+  //         </EuiFlexItem>
+  //       ))}
+  //     </EuiFlexGroup>
+  //   </div>
+  // );
+  return (
+    <EuiPageContent id="availableIntegrationsArea">
+      <EuiPageContentHeaderSection>
+        <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
+          <h3>Availble Integrations</h3>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+      <EuiSpacer />
+      {integrations.length > 0 ? (
+        <EuiInMemoryTable
+          loading={props.loading}
+          items={integrations}
+          itemId="id"
+          columns={tableColumns}
+          tableLayout="auto"
+          pagination={{
+            initialPageSize: 10,
+            pageSizeOptions: [5, 10, 15],
+          }}
+          search={search}
+          // sorting={{
+          //   sort: {
+          //     field: 'dateModified',
+          //     direction: 'desc',
+          //   },
+          // }}
+          allowNeutralSort={false}
+          isSelectable={true}
+          // selection={{
+          //   onSelectionChange: (items) => setSelectedApplications(items),
+          // }}
+        />
+      ) : (
+        <>
+          <EuiSpacer size="xxl" />
+          <EuiText textAlign="center">
+            <h2>No Integrations Available</h2>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
+    </EuiPageContent>
+  );
+}

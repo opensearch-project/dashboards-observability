@@ -12,43 +12,25 @@ import {
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
+import logo from '../assets/nginx-svgrepo-com.svg';
 
 const pageStyles: CSS.Properties = {
   width: '80%',
 };
 
-export function IntegrationOverview(props: { appId; link }) {
+export function IntegrationOverview(props: {
+  appId;
+  link;
+  status;
+  version;
+  category;
+  contributer;
+  license;
+}) {
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }}>
+      <img src={logo} alt="React Logo" style={{ height: 53, width: 36 }} />
       <EuiPageHeaderSection style={pageStyles}>
-        {/* <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
-                  <h3>
-                    Applications<span className="panel-header-count"> ({applications.length})</span>
-                  </h3>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      button={popoverButton}
-                      isOpen={isActionsPopoverOpen}
-                      closePopover={() => setIsActionsPopoverOpen(false)}
-                    >
-                      <EuiContextMenuPanel items={popoverItems} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton fill href="#/application_analytics/create">
-                      {createButtonText}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader> */}
         <EuiPageContentHeaderSection>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
@@ -70,35 +52,37 @@ export function IntegrationOverview(props: { appId; link }) {
               <h4>Status</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">hello</EuiText>
+            <EuiText size="m">{props.status}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">hello</EuiText>
+            <EuiText size="m">{props.version}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Category</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">hello</EuiText>
+            <EuiText size="m">{props.category}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Contributer</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">hello</EuiText>
+            <EuiLink href={props.contributer.link} external={true} target="blank">
+              {props.contributer.name}
+            </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>License</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">hello</EuiText>
+            <EuiText size="m">{props.license}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeaderSection>
