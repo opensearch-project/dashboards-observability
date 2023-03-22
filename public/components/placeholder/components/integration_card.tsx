@@ -1,4 +1,5 @@
 import {
+  EuiButton,
   EuiCard,
   EuiHorizontalRule,
   EuiIcon,
@@ -45,7 +46,7 @@ export function Synopsis({
   return (
     <EuiCard
       // className={classes}
-      layout="horizontal"
+      layout="vertical"
       icon={optionalImg}
       titleSize="xs"
       title={title}
@@ -55,6 +56,11 @@ export function Synopsis({
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
       // betaBadgeLabel={isBeta ? 'Beta' : null}
       titleElement="h3"
+      footer={
+        <div>
+          <EuiButton aria-label="Go to Developers Tools">Choice One</EuiButton>
+        </div>
+      }
     />
   );
 }

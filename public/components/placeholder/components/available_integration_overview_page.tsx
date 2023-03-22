@@ -13,6 +13,7 @@ import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
+import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -25,7 +26,7 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
 }
 
 export interface AvailableIntegrationType {
-  name: string;
+  templateName: string;
   description: string;
   status: string;
   assetUrl?: string | undefined;
@@ -33,64 +34,69 @@ export interface AvailableIntegrationType {
 
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
-  data: AvailableIntegrationType[];
+  data: AvailableIntegrationsList;
   records: number;
 }
 
-export interface AvailableIntegrationsCardViewProps {
+export interface AvailableIntegrationsList {
   data: AvailableIntegrationType[];
+}
+
+export interface AvailableIntegrationsCardViewProps {
+  data: AvailableIntegrationsList;
   records: number;
 }
 
 export function AvailableIntegrationOverviewPage(props: AppTableProps) {
-  const { chrome, parentBreadcrumbs } = props;
+  const { chrome, parentBreadcrumbs, http } = props;
 
   const [isCardView, setCardView] = useState(true);
+  const [data, setData] = useState<AvailableIntegrationsList>({ data: [] });
 
-  const data: AvailableIntegrationType[] = [
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-    },
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-    },
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-    },
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-    },
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-    },
-    {
-      name: 'nginx',
-      description:
-        'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-      status: 'Available',
-      assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-    },
-  ];
+  // const data: AvailableIntegrationType[] = [
+  //   {
+  //     name: 'nginx',
+  //     description:
+  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+  //     status: 'Available',
+  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+  //   },
+  //   {
+  //     name: 'nginx',
+  //     description:
+  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+  //     status: 'Available',
+  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+  //   },
+  //   {
+  //     name: 'nginx',
+  //     description:
+  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+  //     status: 'Available',
+  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+  //   },
+  //   {
+  //     name: 'nginx',
+  //     description:
+  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+  //     status: 'Available',
+  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+  //   },
+  //   {
+  //     name: 'nginx',
+  //     description:
+  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+  //     status: 'Available',
+  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+  //   },
+  //   {
+  //     name: 'nginx',
+  //     description:
+  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
+  //     status: 'Available',
+  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
+  //   },
+  // ];
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -100,7 +106,12 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
         href: '#/placeholder',
       },
     ]);
+    handleDataRequest();
   }, []);
+
+  async function handleDataRequest() {
+    http.get(`${OBSERVABILITY_BASE}/repository`).then((exists) => setData(exists));
+  }
 
   return (
     <EuiPage>

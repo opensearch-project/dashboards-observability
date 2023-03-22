@@ -18,7 +18,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
-  const integrations = props.data;
+  const integrations = props.data.data;
 
   const tableColumns = [
     {
@@ -28,10 +28,10 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       truncateText: true,
       render: (value, record) => (
         <EuiLink
-          data-test-subj={`${record.name}IntegrationLink`}
-          href={`#/placeholder/${record.name}`}
+          data-test-subj={`${record.templateName}IntegrationLink`}
+          href={`#/placeholder/${record.templateName}`}
         >
-          {_.truncate(record.name, { length: 100 })}
+          {_.truncate(record.templateName, { length: 100 })}
         </EuiLink>
       ),
     },

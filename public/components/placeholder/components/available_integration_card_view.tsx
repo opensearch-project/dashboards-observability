@@ -1,4 +1,5 @@
 import {
+  EuiButton,
   EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -18,6 +19,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import {
+  OuiButton,
+  OuiCard,
+  OuiIcon,
+  OuiFlexGroup,
+  OuiFlexItem,
+  OuiLink,
+  OuiSpacer,
+  OuiText,
+} from '@opensearch-project/oui';
 import _ from 'lodash';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
@@ -63,12 +74,25 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                     layout="vertical"
                     icon={getImage(i.assetUrl)}
                     titleSize="xs"
-                    title={i.name}
+                    title={i.templateName}
                     description={i.description}
-                    onClick={() => {
-                      window.location.assign(`#/placeholder/${i.name}`);
-                    }}
-                    data-test-subj={`homeSynopsisLink${i.name.toLowerCase()}`}
+                    data-test-subj={`homeSynopsisLink${i.templateName.toLowerCase()}`}
+                    footer={
+                      <div>
+                        <EuiButton
+                          aria-label="Go to Developers Tools"
+                          onClick={() => {
+                            window.location.assign(`#/placeholder/${i.templateName}`);
+                          }}
+                        >
+                          View Details
+                        </EuiButton>
+                        <EuiSpacer />
+                        <EuiButton aria-label="Go to Developers Tools" onClick={() => {}}>
+                          Add
+                        </EuiButton>
+                      </div>
+                    }
                   />
                 </EuiFlexItem>
               );
@@ -80,7 +104,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     });
   };
 
-  return <>{renderRows(props.data)}</>;
+  return <>{renderRows(props.data.data)}</>;
 }
 
 //   Synopsis.propTypes = {
