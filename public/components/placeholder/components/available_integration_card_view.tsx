@@ -18,23 +18,15 @@ import {
   EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  EuiOverlayMask,
 } from '@elastic/eui';
-import {
-  OuiButton,
-  OuiCard,
-  OuiIcon,
-  OuiFlexGroup,
-  OuiFlexItem,
-  OuiLink,
-  OuiSpacer,
-  OuiText,
-} from '@opensearch-project/oui';
 import _ from 'lodash';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
+import { getCustomModal } from '../../../../public/components/custom_panels/helpers/modal_containers';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,
@@ -42,6 +34,9 @@ import {
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
   const rowNumber = props.records / 5;
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   //   console.log(rowNumber)
 
   //             title={feature}
@@ -55,6 +50,21 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
       optionalImg = <img alt="" className="synopsisIcon" src={url} />;
     }
     return optionalImg;
+  };
+
+  const getModal = () => {
+    setModalLayout(
+      getCustomModal(
+        () => {},
+        () => {},
+        'Name',
+        'Rename application',
+        'Cancel',
+        'Rename',
+        'test'
+      )
+    );
+    setIsModalVisible(true);
   };
 
   // const classes = classNames('homSynopsis__card', {
@@ -88,7 +98,12 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                           View Details
                         </EuiButton>
                         <EuiSpacer />
-                        <EuiButton aria-label="Go to Developers Tools" onClick={() => {}}>
+                        <EuiButton
+                          aria-label="Go to Developers Tools"
+                          onClick={() => {
+                            getModal();
+                          }}
+                        >
                           Add
                         </EuiButton>
                       </div>
@@ -99,6 +114,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             })}
           </EuiFlexGroup>
           <EuiSpacer />
+          {isModalVisible && modalLayout}
         </>
       );
     });
