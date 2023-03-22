@@ -15,45 +15,67 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { ReactElement, useEffect, useState } from 'react';
-
-interface AddedIntegrationsTableProps {
-  loading: boolean;
-}
+import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  const integrations = [
-    //   {
-    //     name: 'nginx',
-    //     description:
-    //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-    //     status: 'Available',
-    //   },
-    // ];
-  ];
+  const integrations = props.data.data;
 
   const tableColumns = [
     {
       field: 'name',
-      name: 'Name',
+      name: 'Asset name',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
         <EuiLink
-          data-test-subj={`${record.name}IntegrationLink`}
-          href={`#/placeholder/${record.name}`}
+          data-test-subj={`${record.templateName}IntegrationLink`}
+          href={record.dashboardUrl}
         >
-          {_.truncate(record.name, { length: 100 })}
+          {_.truncate(record.id, { length: 100 })}
         </EuiLink>
       ),
     },
     {
-      field: 'description',
-      name: 'Description',
+      field: 'source',
+      name: 'Source',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationDescription`}>
-          {_.truncate(record.description, { length: 100 })}
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {_.truncate(record.templateName, { length: 100 })}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'type',
+      name: 'Type',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {_.truncate(record.type, { length: 100 })}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'dateAdded',
+      name: 'Date Added',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {_.truncate(record.creationDate, { length: 100 })}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'author',
+      name: 'Added By',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+          {_.truncate(record.author, { length: 100 })}
         </EuiText>
       ),
     },
@@ -66,21 +88,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         <EuiText data-test-subj={`${record.name}IntegrationStatus`}>
           {_.truncate(record.status, { length: 100 })}
         </EuiText>
-      ),
-    },
-    {
-      field: 'actions',
-      name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationAction`}
-          // TO DO REPLACE WITH API CALL TO ADD
-          onClick={() => {}}
-        >
-          Add
-        </EuiLink>
       ),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
@@ -114,7 +121,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         </EuiTitle>
       </EuiPageContentHeaderSection>
       <EuiSpacer />
-      {integrations.length > 0 ? (
+      {integrations ? (
         <EuiInMemoryTable
           loading={props.loading}
           items={integrations}

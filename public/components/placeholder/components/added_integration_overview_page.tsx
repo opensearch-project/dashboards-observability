@@ -12,6 +12,7 @@ import { ApplicationType } from '../../../../common/types/application_analytics'
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
+import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -23,8 +24,23 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
   moveToApp: (id: string, type: string) => void;
 }
 
+export interface AddedIntegrationsTableProps {
+  loading: boolean;
+  data: AddedIntegrationsList;
+}
+
+export interface AddedIntegrationsList {
+  data: AddedIntegrationType[];
+}
+
+export interface AddedIntegrationType {
+  dashboardUrl: string;
+}
+
 export function AddedIntegrationOverviewPage(props: AppTableProps) {
-  const { chrome, parentBreadcrumbs } = props;
+  const { chrome, parentBreadcrumbs, http } = props;
+
+  const [data, setData] = useState<AddedIntegrationsList>({ data: [] });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -34,13 +50,18 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
         href: '#/placeholder',
       },
     ]);
+    handleDataRequest();
   }, []);
+
+  async function handleDataRequest() {
+    http.get(`${OBSERVABILITY_BASE}/store`).then((exists) => setData(exists));
+  }
 
   return (
     <EuiPage>
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        {AddedIntegrationsTable({loading: false})}
+        {AddedIntegrationsTable({ data, loading: false })}
       </EuiPageBody>
     </EuiPage>
   );
