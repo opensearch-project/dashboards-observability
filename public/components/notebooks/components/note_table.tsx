@@ -30,6 +30,7 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 import {
   CREATE_NOTE_MESSAGE,
@@ -43,7 +44,6 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 import { pageStyles } from '../../../../common/constants/shared';
-import { useHistory, useLocation } from 'react-router-dom';
 
 interface NoteTableProps {
   loading: boolean;
@@ -56,10 +56,21 @@ interface NoteTableProps {
   deleteNotebook: (noteList: string[], toastMessage?: string) => void;
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
-  setToast: (title: string, color?: string, text?: string) => void;
+  // setToast: (title: string, color?: string, text?: string) => void;
 }
 
-export function NoteTable(props: NoteTableProps) {
+export function NoteTable({
+  loading,
+  fetchNotebooks,
+  addSampleNotebooks,
+  notebooks,
+  createNotebook,
+  renameNotebook,
+  cloneNotebook,
+  deleteNotebook,
+  parentBreadcrumb,
+  setBreadcrumbs,
+}: NoteTableProps) {
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -67,22 +78,21 @@ export function NoteTable(props: NoteTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
-  const { notebooks, createNotebook, renameNotebook, cloneNotebook, deleteNotebook } = props;
 
   useEffect(() => {
-    props.setBreadcrumbs([
-      props.parentBreadcrumb,
+    setBreadcrumbs([
+      parentBreadcrumb,
       {
         text: 'Notebooks',
         href: '#/notebooks',
       },
     ]);
-    props.fetchNotebooks();
-  }, []);
+    fetchNotebooks();
+  }, [setBreadcrumbs, parentBreadcrumb, fetchNotebooks]);
 
   useEffect(() => {
-    const url = window.location.hash.split('/')
-    if (url[url.length-1] === 'create') { 
+    const url = window.location.hash.split('/');
+    if (url[url.length - 1] === 'create') {
       createNote();
     }
   }, [location]);
@@ -125,7 +135,7 @@ export function NoteTable(props: NoteTableProps) {
       getCustomModal(
         onCreate,
         () => {
-          closeModal()
+          closeModal();
           history.goBack();
         },
         'Name',
@@ -184,11 +194,11 @@ export function NoteTable(props: NoteTableProps) {
     showModal();
   };
 
-  const addSampleNotebooks = async () => {
+  const addSampleNotebooksModal = async () => {
     setModalLayout(
       getSampleNotebooksModal(closeModal, async () => {
         closeModal();
-        await props.addSampleNotebooks();
+        await addSampleNotebooks();
       })
     );
     showModal();
@@ -213,7 +223,7 @@ export function NoteTable(props: NoteTableProps) {
         renameNote();
       }}
     >
-      Rename
+      a Rename
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="duplicate"
@@ -239,7 +249,7 @@ export function NoteTable(props: NoteTableProps) {
       key="addSample"
       onClick={() => {
         setIsActionsPopoverOpen(false);
-        addSampleNotebooks();
+        addSampleNotebooksModal();
       }}
     >
       Add samples
@@ -337,7 +347,7 @@ export function NoteTable(props: NoteTableProps) {
                 />
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
-                  loading={props.loading}
+                  loading={loading}
                   items={
                     searchQuery
                       ? notebooks.filter((notebook) =>
@@ -380,7 +390,8 @@ export function NoteTable(props: NoteTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton href="#/notebooks/create"
+                    <EuiButton
+                      href="#/notebooks/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
                     >
@@ -388,7 +399,7 @@ export function NoteTable(props: NoteTableProps) {
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton fullWidth={false} onClick={() => addSampleNotebooks()}>
+                    <EuiButton fullWidth={false} onClick={() => addSampleNotebooksModal()}>
                       Add samples
                     </EuiButton>
                   </EuiFlexItem>
