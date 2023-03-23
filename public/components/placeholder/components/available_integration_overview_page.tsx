@@ -6,6 +6,8 @@
 
 import {
   EuiFlexItem,
+  EuiGlobalToastList,
+  EuiLink,
   EuiOverlayMask,
   EuiPage,
   EuiPageBody,
@@ -13,7 +15,8 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactChild, ReactElement, useEffect, useState } from 'react';
+import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { AppAnalyticsComponentDeps } from '../home';
 import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
@@ -44,7 +47,7 @@ export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
   records: number;
-  showModal: () => void;
+  showModal: (input: string) => void;
 }
 
 export interface AvailableIntegrationsList {
@@ -54,29 +57,37 @@ export interface AvailableIntegrationsList {
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
   records: number;
-  showModal: () => void;
+  showModal: (input: string) => void;
 }
 
 export function AvailableIntegrationOverviewPage(props: AppTableProps) {
   const { chrome, parentBreadcrumbs, http } = props;
 
   const [isCardView, setCardView] = useState(true);
+  const [toasts, setToasts] = useState<Toast[]>([]);
   const [data, setData] = useState<AvailableIntegrationsList>({ data: [] });
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
-  const getModal = () => {
+  const getModal = (name: string) => {
     setModalLayout(
       getAddIntegrationModal(
-        () => {},
+        () => {
+          addIntegrationRequest(name);
+          setIsModalVisible(false);
+        },
         () => {
           setIsModalVisible(false);
         },
         'Name',
+        'Namespace',
+        'Tags (optional)',
+        name,
+        'prod',
         'Add Integration Options',
         'Cancel',
-        'Create',
+        'Add',
         'test'
       )
     );
@@ -143,8 +154,39 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
     http.get(`${OBSERVABILITY_BASE}/repository`).then((exists) => setData(exists));
   }
 
+  const setToast = (title: string, color = 'success', text?: ReactChild) => {
+    if (!text) text = '';
+    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+  };
+
+  async function addIntegrationRequest(name: string) {
+    http
+      .post(`${OBSERVABILITY_BASE}/store`)
+      .then((res) => {
+        setToast(
+          `${name} integration successfully added!`,
+          'success',
+          `View the added assets from ${name} in the Added Integrations list`
+        );
+      })
+      .catch((err) =>
+        setToast(
+          'Please ask your administrator to enable Operational Panels for you.',
+          'danger',
+          <EuiLink target="_blank">Documentation</EuiLink>
+        )
+      );
+  }
+
   return (
     <EuiPage>
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={(removedToast) => {
+          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
+        }}
+        toastLifeTimeMs={6000}
+      />
       <EuiPageBody component="div">
         {IntegrationHeader()}
         <EuiFlexItem grow={false} style={{ marginBottom: 20 }}>

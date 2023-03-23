@@ -66,7 +66,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
         <EuiLink
           data-test-subj={`${record.name}IntegrationAction`}
           // TO DO REPLACE WITH API CALL TO ADD
-          onClick={() => props.showModal()}
+          onClick={() => props.showModal(record.templateName)}
         >
           Add
         </EuiLink>

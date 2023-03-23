@@ -83,7 +83,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                         <EuiButton
                           aria-label="Go to Developers Tools"
                           onClick={() => {
-                            props.showModal();
+                            props.showModal(i.templateName);
                           }}
                         >
                           Add

@@ -17,6 +17,7 @@ import {
   EuiFieldText,
   EuiButton,
 } from '@elastic/eui';
+import { string } from 'joi';
 
 /*
  * "CustomInputModalProps" component is used to create a modal with an input filed
@@ -41,6 +42,10 @@ interface CustomInputModalProps {
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
   labelTxt: string;
+  label2txt: string;
+  label3txt: string;
+  defaultName: string;
+  defaultNamespace: string;
   titletxt: string;
   btn1txt: string;
   btn2txt: string;
@@ -54,6 +59,10 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
     runModal,
     closeModal,
     labelTxt,
+    label2txt,
+    label3txt,
+    defaultName,
+    defaultNamespace,
     titletxt,
     btn1txt,
     btn2txt,
@@ -79,7 +88,7 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
               <EuiFieldText
                 data-test-subj="customModalFieldText"
                 name="input"
-                value={value}
+                value={defaultName}
                 onChange={(e) => onChange(e)}
               />
             </EuiFormRow>
@@ -87,11 +96,11 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
         </EuiModalBody>
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label={labelTxt} helpText={helpText}>
+            <EuiFormRow label={label2txt} helpText={helpText}>
               <EuiFieldText
                 data-test-subj="customModalFieldText"
                 name="input"
-                value={value}
+                value={defaultNamespace}
                 onChange={(e) => onChange(e)}
               />
             </EuiFormRow>
@@ -100,11 +109,11 @@ export const CustomInputModal = (props: CustomInputModalProps) => {
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label={labelTxt} helpText={helpText}>
+            <EuiFormRow label={label3txt} helpText={helpText}>
               <EuiFieldText
                 data-test-subj="customModalFieldText"
                 name="input"
-                value={value}
+                value={''}
                 onChange={(e) => onChange(e)}
               />
             </EuiFormRow>
@@ -140,6 +149,10 @@ export const getAddIntegrationModal = (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void,
   labelTxt: string,
+  label2Txt: string,
+  label3Txt: string,
+  defaultName: string,
+  defaultNamespace: string,
   titletxt: string,
   btn1txt: string,
   btn2txt: string,
@@ -152,6 +165,10 @@ export const getAddIntegrationModal = (
       runModal={runModal}
       closeModal={closeModal}
       labelTxt={labelTxt}
+      label2txt={label2Txt}
+      label3txt={label3Txt}
+      defaultName={defaultName}
+      defaultNamespace={defaultNamespace}
       titletxt={titletxt}
       btn1txt={btn1txt}
       btn2txt={btn2txt}

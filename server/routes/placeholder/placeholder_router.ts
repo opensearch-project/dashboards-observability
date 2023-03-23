@@ -88,6 +88,45 @@ export function registerPlaceholderRoute(router: IRouter) {
       }
     }
   );
+
+  router.post(
+    {
+      path: `${OBSERVABILITY_BASE}/store`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const random = await fetch('http://127.0.0.1:4010/store', {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          // // mode: "cors", // no-cors, *cors, same-origin
+          // // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+          // // credentials: "same-origin", // include, *same-origin, omit
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          // // redirect: "follow", // manual, *follow, error
+          // // referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+          body: '{"limit": "5"}', // body data type must match "Content-Type" header
+        });
+        return response.ok();
+        // const metrics = getMetrics();
+        // return response.ok({
+        //   body: metrics,
+        // });
+      } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+        // console.error(error);
+        // return response.custom({
+        //   statusCode: error.statusCode || 500,
+        //   body: error.message,
+        // });
+      }
+    }
+  );
   // router.get(
   //   {
   //     path: `${OBSERVABILITY_BASE}/repository`,

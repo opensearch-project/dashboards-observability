@@ -5,7 +5,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
+  EuiGlobalToastList,
   EuiHorizontalRule,
+  EuiLink,
   EuiOverlayMask,
   EuiPage,
   EuiPageBody,
@@ -29,6 +31,7 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { last } from 'lodash';
 import { VisualizationType } from 'common/types/custom_panels';
+import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { TracesContent } from '../../trace_analytics/components/traces/traces_content';
 import { DashboardContent } from '../../trace_analytics/components/dashboard/dashboard_content';
 import { ServicesContent } from '../../trace_analytics/components/services/services_content';
@@ -64,6 +67,7 @@ import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
 import { IntegrationAssets } from './integration_assets_panel';
 import { getAddIntegrationModal } from './add_integration_modal';
+import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -86,7 +90,6 @@ interface AppDetailProps extends AppAnalyticsComponentDeps {
   notifications: NotificationsStart;
   queryManager: QueryManager;
   updateApp: (appId: string, updateAppData: Partial<ApplicationRequestType>, type: string) => void;
-  setToasts: (title: string, color?: string, text?: ReactChild) => void;
   callback: (childfunction: () => void) => void;
 }
 
@@ -106,7 +109,6 @@ export function Integration(props: AppDetailProps) {
     appConfigs,
     updateApp,
     setAppConfigs,
-    setToasts,
     setFilters,
     callback,
     queryManager,
@@ -127,18 +129,26 @@ export function Integration(props: AppDetailProps) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const getModal = () => {
+  const getModal = (name: string) => {
     setModalLayout(
       getAddIntegrationModal(
-        () => {},
+        () => {
+          addIntegrationRequest(name);
+          setIsModalVisible(false);
+        },
         () => {
           setIsModalVisible(false);
         },
         'Name',
+        'Namespace',
+        'Tags (optional)',
+        name,
+        'prod',
         'Add Integration Options',
         'Cancel',
-        'Create',
+        'Add',
         'test'
       )
     );
@@ -159,8 +169,39 @@ export function Integration(props: AppDetailProps) {
     ]);
   }, [appId]);
 
+  const setToast = (title: string, color = 'success', text?: ReactChild) => {
+    if (!text) text = '';
+    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+  };
+
+  async function addIntegrationRequest(name: string) {
+    http
+      .post(`${OBSERVABILITY_BASE}/store`)
+      .then((res) => {
+        setToast(
+          `${name} integration successfully added!`,
+          'success',
+          `View the added assets from ${name} in the Added Integrations list`
+        );
+      })
+      .catch((err) =>
+        setToast(
+          'Please ask your administrator to enable Operational Panels for you.',
+          'danger',
+          <EuiLink target="_blank">Documentation</EuiLink>
+        )
+      );
+  }
+
   return (
     <EuiPage>
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={(removedToast) => {
+          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
+        }}
+        toastLifeTimeMs={6000}
+      />
       <EuiPageBody>
         <EuiSpacer size="xl" />
         {IntegrationOverview({
