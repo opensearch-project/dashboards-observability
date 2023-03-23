@@ -19,7 +19,6 @@ interface Panel {
 }
 
 interface CommonParams {
-  panelId: string;
   savedVisualizationId: string;
   selectedCustomPanels: Panel[];
 }

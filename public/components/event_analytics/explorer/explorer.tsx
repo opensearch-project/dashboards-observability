@@ -57,8 +57,10 @@ import {
 } from '../../../../common/constants/shared';
 import {
   IDefaultTimestampState,
+  IExplorerFields,
   IExplorerProps,
   IField,
+  IQuery,
   IQueryTab,
   IVisualizationContainerProps,
 } from '../../../../common/types/explorer';
@@ -96,6 +98,17 @@ import { QueryManager } from '../../../../common/query_manager';
 import { uiSettingsService } from '../../../../common/utils';
 import { LogPatterns } from './log_patterns/log_patterns';
 import { getDateRange } from '../utils/utils';
+import {
+  PPLSavedQueryClient,
+  PPLSavedVisualizationClient,
+  PanelSavedObjectClient,
+} from '../../../services/saved_objects/saved_object_client/ppl';
+import { SaveAsNewQuery } from '../../../services/saved_objects/saved_object_savers/ppl/save_as_new_query';
+import {
+  SaveAsCurrenQuery,
+  SaveAsCurrentVisualization,
+  SaveAsNewVisualization,
+} from '../../../services/saved_objects/saved_object_savers';
 
 export const Explorer = ({
   pplService,
@@ -917,218 +930,91 @@ export const Explorer = ({
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
 
-  const handleSavingObject = async () => {
-    const currQuery = queryRef.current;
-    const currFields = explorerFieldsRef.current;
-    if (isEmpty(currQuery![RAW_QUERY]) && isEmpty(appBaseQuery)) {
-      setToast('No query to save.', 'danger');
-      return;
-    }
-    if (isEmpty(selectedPanelNameRef.current)) {
-      setIsPanelTextFieldInvalid(true);
-      setToast('Name field cannot be empty.', 'danger');
-      return;
-    }
-    setIsPanelTextFieldInvalid(false);
-    if (isEqual(selectedContentTabId, TAB_EVENT_ID)) {
-      const isTabMatchingSavedType = isEqual(currQuery![SAVED_OBJECT_TYPE], SAVED_QUERY);
-      if (!isEmpty(currQuery![SAVED_OBJECT_ID]) && isTabMatchingSavedType) {
-        await savedObjects
-          .updateSavedQueryById({
-            query: currQuery![RAW_QUERY],
-            fields: currFields![SELECTED_FIELDS],
-            dateRange: currQuery![SELECTED_DATE_RANGE],
-            name: selectedPanelNameRef.current,
-            timestamp: currQuery![SELECTED_TIMESTAMP],
-            objectId: currQuery![SAVED_OBJECT_ID],
-            type: '',
-          })
-          .then((res: any) => {
-            setToast(
-              `Query '${selectedPanelNameRef.current}' has been successfully updated.`,
-              'success'
-            );
-            dispatch(
-              updateTabName({
-                tabId,
-                tabName: selectedPanelNameRef.current,
-              })
-            );
-            return res;
-          })
-          .catch((error: any) => {
-            notifications.toasts.addError(error, {
-              title: `Cannot update query '${selectedPanelNameRef.current}'`,
-            });
-          });
-      } else {
-        // create new saved query
-        savedObjects
-          .createSavedQuery({
-            query: currQuery![RAW_QUERY],
-            fields: currFields![SELECTED_FIELDS],
-            dateRange: currQuery![SELECTED_DATE_RANGE],
-            name: selectedPanelNameRef.current,
-            timestamp: currQuery![SELECTED_TIMESTAMP],
-            objectId: '',
-            type: '',
-          })
-          .then((res: any) => {
-            history.replace(`/event_analytics/explorer/${res.objectId}`);
-            setToast(
-              `New query '${selectedPanelNameRef.current}' has been successfully saved.`,
-              'success'
-            );
-            batch(() => {
-              dispatch(
-                changeQuery({
-                  tabId,
-                  query: {
-                    [SAVED_OBJECT_ID]: res.objectId,
-                    [SAVED_OBJECT_TYPE]: SAVED_QUERY,
-                  },
-                })
-              );
-              dispatch(
-                updateTabName({
-                  tabId,
-                  tabName: selectedPanelNameRef.current,
-                })
-              );
-            });
-            history.replace(`/event_analytics/explorer/${res.objectId}`);
-            return res;
-          })
-          .catch((error: any) => {
-            if (error?.body?.statusCode === 403) {
-              showPermissionErrorToast();
-            } else {
-              notifications.toasts.addError(error, {
-                title: `Cannot save query '${selectedPanelNameRef.current}'`,
-              });
-            }
-          });
-      }
-      // to-dos - update selected custom panel
-      if (!isEmpty(selectedCustomPanelOptions)) {
-        // update custom panel - query
-      }
-    } else if (isEqual(selectedContentTabId, TAB_CHART_ID)) {
-      if (isEmpty(currQuery![RAW_QUERY]) && isEmpty(appBaseQuery)) {
-        setToast(`There is no query or(and) visualization to save`, 'danger');
-        return;
-      }
-      let savingVisRes;
-      const vizDescription = userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '';
-      const isTabMatchingSavedType = isEqual(currQuery![SAVED_OBJECT_TYPE], SAVED_VISUALIZATION);
-      if (!isEmpty(currQuery![SAVED_OBJECT_ID]) && isTabMatchingSavedType) {
-        savingVisRes = await savedObjects
-          .updateSavedVisualizationById({
-            query: buildQuery('', currQuery![RAW_QUERY]),
-            fields: currFields![SELECTED_FIELDS],
-            dateRange: currQuery![SELECTED_DATE_RANGE],
-            name: selectedPanelNameRef.current,
-            timestamp: currQuery![SELECTED_TIMESTAMP],
-            objectId: currQuery![SAVED_OBJECT_ID],
-            type: curVisId,
-            userConfigs: userVizConfigs.hasOwnProperty(curVisId)
-              ? JSON.stringify(userVizConfigs[curVisId])
-              : JSON.stringify({}),
-            description: vizDescription,
-            subType,
-          })
-          .then((res: any) => {
-            setToast(
-              `Visualization '${selectedPanelNameRef.current}' has been successfully updated.`,
-              'success'
-            );
-            dispatch(
-              updateTabName({
-                tabId,
-                tabName: selectedPanelNameRef.current,
-              })
-            );
-            return res;
-          })
-          .catch((error: any) => {
-            notifications.toasts.addError(error, {
-              title: `Cannot update Visualization '${selectedPanelNameRef.current}'`,
-            });
-          });
-      } else {
-        // create new saved visualization
-        savingVisRes = await savedObjects
-          .createSavedVisualization({
-            query: buildQuery('', currQuery![RAW_QUERY]),
-            fields: currFields![SELECTED_FIELDS],
-            dateRange: currQuery![SELECTED_DATE_RANGE],
-            type: curVisId,
-            name: selectedPanelNameRef.current,
-            timestamp: currQuery![SELECTED_TIMESTAMP],
-            applicationId: appId,
-            userConfigs: userVizConfigs.hasOwnProperty(curVisId)
-              ? JSON.stringify(userVizConfigs[curVisId])
-              : JSON.stringify({}),
-            description: vizDescription,
-            subType,
-          })
-          .then((res: any) => {
-            batch(() => {
-              dispatch(
-                changeQuery({
-                  tabId,
-                  query: {
-                    [SAVED_OBJECT_ID]: res.objectId,
-                    [SAVED_OBJECT_TYPE]: SAVED_VISUALIZATION,
-                  },
-                })
-              );
-              dispatch(
-                updateTabName({
-                  tabId,
-                  tabName: selectedPanelNameRef.current,
-                })
-              );
-            });
-            if (appLogEvents) {
-              addVisualizationToPanel(res.objectId, selectedPanelNameRef.current);
-            } else {
-              history.replace(`/event_analytics/explorer/${res.objectId}`);
-            }
-            setToast(
-              `New visualization '${selectedPanelNameRef.current}' has been successfully saved.`,
-              'success'
-            );
-            return res;
-          })
-          .catch((error: any) => {
-            notifications.toasts.addError(error, {
-              title: `Cannot save Visualization '${selectedPanelNameRef.current}'`,
-            });
-          });
-      }
-      if (!has(savingVisRes, 'objectId')) return;
-      // update custom panel - visualization
-      if (!isEmpty(selectedCustomPanelOptions)) {
-        savedObjects
-          .bulkUpdateCustomPanel({
-            selectedCustomPanels: selectedCustomPanelOptions,
-            savedVisualizationId: savingVisRes.objectId,
-          })
-          .then((res: any) => {
-            setToast(
-              `Visualization '${selectedPanelNameRef.current}' has been successfully saved to operation panels.`,
-              'success'
-            );
-          })
-          .catch((error: any) => {
-            notifications.toasts.addError(error, {
-              title: `Cannot add Visualization '${selectedPanelNameRef.current}' to operation panels`,
-            });
-          });
-      }
-    }
+  const getSavingCommonParams = (
+    queryState: IQuery,
+    fields: IExplorerFields,
+    savingTitle: string
+  ) => {
+    return {
+      query: queryState[RAW_QUERY],
+      fields: fields[SELECTED_FIELDS],
+      dateRange: queryState[SELECTED_DATE_RANGE],
+      name: savingTitle,
+      timestamp: queryState[SELECTED_TIMESTAMP],
+    };
   };
+
+  const handleSavingObject = useCallback(() => {
+    const isOnEventPage = isEqual(selectedContentTabId, TAB_EVENT_ID);
+    const isObjTypeMatchQuery = isEqual(query[SAVED_OBJECT_TYPE], SAVED_QUERY);
+    const isObjTypeMatchVis = isEqual(query[SAVED_OBJECT_TYPE], SAVED_VISUALIZATION);
+    const isTabHasObjID = !isEmpty(query[SAVED_OBJECT_ID]);
+    const commonParams = getSavingCommonParams(query, explorerFields, selectedPanelNameRef.current);
+
+    let soClient;
+    if (isOnEventPage) {
+      if (isTabHasObjID && isObjTypeMatchQuery) {
+        soClient = new SaveAsCurrenQuery(
+          { tabId, notifications },
+          { dispatch, updateTabName },
+          new PPLSavedQueryClient(http),
+          {
+            ...commonParams,
+            objectId: query[SAVED_OBJECT_ID],
+          }
+        );
+      } else {
+        soClient = new SaveAsNewQuery(
+          { tabId, history, notifications, showPermissionErrorToast },
+          { batch, dispatch, changeQuery, updateTabName },
+          new PPLSavedQueryClient(http),
+          { ...commonParams }
+        );
+      }
+    } else {
+      if (isTabHasObjID && isObjTypeMatchVis) {
+        soClient = new SaveAsCurrentVisualization(
+          { tabId, history, notifications, showPermissionErrorToast },
+          { batch, dispatch, changeQuery, updateTabName },
+          new PPLSavedVisualizationClient(http),
+          new PanelSavedObjectClient(http),
+          {
+            ...commonParams,
+            objectId: query[SAVED_OBJECT_ID],
+            type: curVisId,
+            userConfigs: JSON.stringify(userVizConfigs[curVisId]),
+            description: userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '',
+            subType,
+          }
+        );
+      } else {
+        soClient = new SaveAsNewVisualization(
+          { tabId, history, notifications, showPermissionErrorToast, appLogEvents },
+          { batch, dispatch, changeQuery, updateTabName },
+          new PPLSavedVisualizationClient(http),
+          new PanelSavedObjectClient(http),
+          {
+            ...commonParams,
+            type: curVisId,
+            applicationId: appId,
+            userConfigs: JSON.stringify(userVizConfigs[curVisId]),
+            description: userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '',
+            subType,
+            selectedPanels: selectedCustomPanelOptions,
+          }
+        );
+      }
+    }
+
+    soClient.save();
+  }, [
+    query,
+    curVisId,
+    userVizConfigs,
+    selectedContentTabId,
+    explorerFields,
+    selectedCustomPanelOptions,
+  ]);
 
   const liveTailLoop = async (
     name: string,
