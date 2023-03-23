@@ -6,6 +6,7 @@
 
 import {
   EuiHorizontalRule,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -62,6 +63,7 @@ import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
 import { IntegrationAssets } from './integration_assets_panel';
+import { getAddIntegrationModal } from './add_integration_modal';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -123,6 +125,26 @@ export function Integration(props: AppDetailProps) {
     availability: { name: '', color: '', availabilityVisId: '' },
   });
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const getModal = () => {
+    setModalLayout(
+      getAddIntegrationModal(
+        () => {},
+        () => {
+          setIsModalVisible(false);
+        },
+        'Name',
+        'Add Integration Options',
+        'Cancel',
+        'Create',
+        'test'
+      )
+    );
+    setIsModalVisible(true);
+  };
+
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
@@ -149,6 +171,7 @@ export function Integration(props: AppDetailProps) {
           version: 2.0,
           contributer: { name: 'Joshua Li', link: 'https://github.com/joshuali925' },
           status: 'available',
+          getModal,
         })}
         <EuiSpacer />
         <EuiPageContent>
@@ -160,6 +183,7 @@ export function Integration(props: AppDetailProps) {
           <EuiSpacer />
         </EuiPageContent>
       </EuiPageBody>
+      {isModalVisible && modalLayout}
     </EuiPage>
   );
 }

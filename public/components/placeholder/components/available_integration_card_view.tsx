@@ -34,9 +34,6 @@ import {
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
   const rowNumber = props.records / 5;
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   //   console.log(rowNumber)
 
   //             title={feature}
@@ -50,21 +47,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
       optionalImg = <img alt="" className="synopsisIcon" src={url} />;
     }
     return optionalImg;
-  };
-
-  const getModal = () => {
-    setModalLayout(
-      getCustomModal(
-        () => {},
-        () => {},
-        'Name',
-        'Rename application',
-        'Cancel',
-        'Rename',
-        'test'
-      )
-    );
-    setIsModalVisible(true);
   };
 
   // const classes = classNames('homSynopsis__card', {
@@ -101,7 +83,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                         <EuiButton
                           aria-label="Go to Developers Tools"
                           onClick={() => {
-                            getModal();
+                            props.showModal();
                           }}
                         >
                           Add
@@ -114,7 +96,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             })}
           </EuiFlexGroup>
           <EuiSpacer />
-          {isModalVisible && modalLayout}
         </>
       );
     });

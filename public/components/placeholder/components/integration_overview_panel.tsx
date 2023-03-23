@@ -26,6 +26,7 @@ export function IntegrationOverview(props: {
   category;
   contributer;
   license;
+  getModal: () => void;
 }) {
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }}>
@@ -41,7 +42,14 @@ export function IntegrationOverview(props: {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton size="s">Add</EuiButton>
+              <EuiButton
+                size="s"
+                onClick={() => {
+                  props.getModal();
+                }}
+              >
+                Add
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageContentHeaderSection>

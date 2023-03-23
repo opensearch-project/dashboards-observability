@@ -4,7 +4,14 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiOverlayMask,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import _ from 'lodash';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { AppAnalyticsComponentDeps } from '../home';
@@ -14,6 +21,7 @@ import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { getAddIntegrationModal } from './add_integration_modal';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -36,6 +44,7 @@ export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
   records: number;
+  showModal: () => void;
 }
 
 export interface AvailableIntegrationsList {
@@ -45,6 +54,7 @@ export interface AvailableIntegrationsList {
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
   records: number;
+  showModal: () => void;
 }
 
 export function AvailableIntegrationOverviewPage(props: AppTableProps) {
@@ -52,6 +62,26 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
 
   const [isCardView, setCardView] = useState(true);
   const [data, setData] = useState<AvailableIntegrationsList>({ data: [] });
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const getModal = () => {
+    setModalLayout(
+      getAddIntegrationModal(
+        () => {},
+        () => {
+          setIsModalVisible(false);
+        },
+        'Name',
+        'Add Integration Options',
+        'Cancel',
+        'Create',
+        'test'
+      )
+    );
+    setIsModalVisible(true);
+  };
 
   // const data: AvailableIntegrationType[] = [
   //   {
@@ -127,9 +157,10 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
           />
         </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ data, records: 6 })
-          : AvailableIntegrationsTable({ loading: false, data, records: 6 })}
+          ? AvailableIntegrationsCardView({ data, records: 6, showModal: getModal })
+          : AvailableIntegrationsTable({ loading: false, data, records: 6, showModal: getModal })}
       </EuiPageBody>
+      {isModalVisible && modalLayout}
     </EuiPage>
   );
 }
