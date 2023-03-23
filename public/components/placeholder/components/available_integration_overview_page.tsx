@@ -171,9 +171,8 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
       })
       .catch((err) =>
         setToast(
-          'Please ask your administrator to enable Operational Panels for you.',
+          'Failed to load integration. Check Added Integrations table for more details',
           'danger',
-          <EuiLink target="_blank">Documentation</EuiLink>
         )
       );
   }

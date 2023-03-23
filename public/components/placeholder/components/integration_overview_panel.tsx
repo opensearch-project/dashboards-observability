@@ -18,26 +18,19 @@ const pageStyles: CSS.Properties = {
   width: '80%',
 };
 
-export function IntegrationOverview(props: {
-  appId;
-  link;
-  status;
-  version;
-  category;
-  contributer;
-  license;
-  getModal: (input: string) => void;
-}) {
+export function IntegrationOverview(props: any) {
+  const {data} = props;
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }}>
-      <img src={logo} alt="React Logo" style={{ height: 53, width: 36 }} />
+      <img src={data.data.assetUrl} alt="React Logo" style={{ height: 53, width: 53 }} />
+      <EuiSpacer size='m'/>
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                <EuiLink href={props.link} external={true} target="blank">
-                  {props.appId}
+                <EuiLink href={data.data.link} external={true} target="blank">
+                  {data.data.templateName}
                 </EuiLink>
               </EuiTitle>
             </EuiFlexItem>
@@ -45,7 +38,7 @@ export function IntegrationOverview(props: {
               <EuiButton
                 size="s"
                 onClick={() => {
-                  props.getModal(props.appId);
+                  props.getModal(data.data.templateName);
                 }}
               >
                 Add
@@ -60,29 +53,29 @@ export function IntegrationOverview(props: {
               <h4>Status</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{props.status}</EuiText>
+            <EuiText size="m">{data.data.status}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{props.version}</EuiText>
+            <EuiText size="m">{data.data.version?.resource}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Category</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{props.category}</EuiText>
+            <EuiText size="m">{data.data.components?.join(', ')}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Contributer</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiLink href={props.contributer.link} external={true} target="blank">
-              {props.contributer.name}
+            <EuiLink href={data.data.contributer?.link} external={true} target="blank">
+              {data.data.contributer?.name}
             </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -90,7 +83,7 @@ export function IntegrationOverview(props: {
               <h4>License</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{props.license}</EuiText>
+            <EuiText size="m">{data.data.license}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeaderSection>

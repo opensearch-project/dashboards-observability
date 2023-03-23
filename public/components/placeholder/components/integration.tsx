@@ -130,6 +130,7 @@ export function Integration(props: AppDetailProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [data, setData] = useState({ data: {} });
 
   const getModal = (name: string) => {
     setModalLayout(
@@ -167,7 +168,12 @@ export function Integration(props: AppDetailProps) {
         href: `${last(parentBreadcrumbs)!.href}placeholder/${appId}`,
       },
     ]);
+    handleDataRequest();
   }, [appId]);
+
+  async function handleDataRequest() {
+    http.get(`${OBSERVABILITY_BASE}/repository/id`).then((exists) => setData(exists));
+  }
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
     if (!text) text = '';
@@ -186,9 +192,8 @@ export function Integration(props: AppDetailProps) {
       })
       .catch((err) =>
         setToast(
-          'Please ask your administrator to enable Operational Panels for you.',
+          'Failed to load integration. Check Added Integrations table for more details',
           'danger',
-          <EuiLink target="_blank">Documentation</EuiLink>
         )
       );
   }
@@ -204,23 +209,14 @@ export function Integration(props: AppDetailProps) {
       />
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        {IntegrationOverview({
-          appId,
-          link: 'https://www.nginx.com/',
-          license: 'Apache 2.0',
-          category: 'web, http',
-          version: 2.0,
-          contributer: { name: 'Joshua Li', link: 'https://github.com/joshuali925' },
-          status: 'available',
-          getModal,
-        })}
+        {IntegrationOverview({data, getModal})}
         <EuiSpacer />
         <EuiPageContent>
-          {IntegrationDetails({ appId })}
+          {IntegrationDetails({ data })}
           <EuiSpacer />
-          {IntegrationAssets({ appId })}
+          {IntegrationAssets({ data })}
           <EuiSpacer />
-          {IntegrationFields({ appId })}
+          {IntegrationFields({ data })}
           <EuiSpacer />
         </EuiPageContent>
       </EuiPageBody>
