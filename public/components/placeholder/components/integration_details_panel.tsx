@@ -37,7 +37,7 @@ As Nginx is a high-speed, lightweight HTTP server engine, more and more web site
             {screenshots?.map((i, v) => {
               return (
                 <EuiFlexItem key={v}>
-                  <img alt="" className="synopsisIcon" src={i} />
+                  <img style={{ width: 100, height: 100 }}alt="" className="synopsisIcon" src={i} />
                 </EuiFlexItem>
               );
             })}

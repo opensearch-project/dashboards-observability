@@ -211,14 +211,12 @@ export function Integration(props: AppDetailProps) {
         <EuiSpacer size="xl" />
         {IntegrationOverview({data, getModal})}
         <EuiSpacer />
-        <EuiPageContent>
           {IntegrationDetails({ data })}
           <EuiSpacer />
           {IntegrationAssets({ data })}
           <EuiSpacer />
           {IntegrationFields({ data })}
           <EuiSpacer />
-        </EuiPageContent>
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>
