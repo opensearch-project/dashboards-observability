@@ -223,7 +223,7 @@ export function NoteTable({
         renameNote();
       }}
     >
-      a Rename
+      Rename
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="duplicate"
