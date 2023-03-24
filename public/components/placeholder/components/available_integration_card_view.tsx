@@ -33,7 +33,7 @@ import {
 } from './available_integration_overview_page';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  const rowNumber = props.records / 5;
+  const rowNumber = _.ceil(props.records / 5);
   //   console.log(rowNumber)
 
   //             title={feature}
@@ -44,7 +44,9 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
-      optionalImg = <img alt="" className="synopsisIcon" src={url} />;
+      optionalImg = (
+        <img style={{ height: 100, width: 100 }} alt="" className="synopsisIcon" src={url} />
+      );
     }
     return optionalImg;
   };
@@ -54,51 +56,50 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   // });
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
-    return _.times(rowNumber).map(() => {
-      return (
-        <>
-          <EuiFlexGroup gutterSize="l">
-            {integrations.map((i, v) => {
-              return (
-                <EuiFlexItem key={v}>
-                  <EuiCard
-                    // className={classes}
-                    layout="vertical"
-                    icon={getImage(i.assetUrl)}
-                    titleSize="xs"
-                    title={i.templateName}
-                    description={i.description}
-                    data-test-subj={`homeSynopsisLink${i.templateName.toLowerCase()}`}
-                    footer={
-                      <div>
-                        <EuiButton
-                          aria-label="Go to Developers Tools"
-                          onClick={() => {
-                            window.location.assign(`#/placeholder/${i.templateName}`);
-                          }}
-                        >
-                          View Details
-                        </EuiButton>
-                        <EuiSpacer />
-                        <EuiButton
-                          aria-label="Go to Developers Tools"
-                          onClick={() => {
-                            props.showModal(i.templateName);
-                          }}
-                        >
-                          Add
-                        </EuiButton>
-                      </div>
-                    }
-                  />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      );
-    });
+    return (
+      <>
+        <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
+          {integrations.map((i, v) => {
+            return (
+              <EuiFlexItem key={v} style={{ minWidth: '13rem', maxWidth: '13rem' }}>
+                <EuiCard
+                  // className={classes}
+                  layout="vertical"
+                  icon={getImage(i.assetUrl)}
+                  titleSize="xs"
+                  title={i.templateName}
+                  description={i.description}
+                  data-test-subj={`homeSynopsisLink${i.templateName.toLowerCase()}`}
+                  footer={
+                    <div>
+                      <EuiButton
+                        aria-label="Go to Developers Tools"
+                        onClick={() => {
+                          window.location.assign(`#/placeholder/${i.templateName}`);
+                        }}
+                      >
+                        View Details
+                      </EuiButton>
+                      <EuiSpacer />
+                      <EuiButton
+                        aria-label="Go to Developers Tools"
+                        onClick={() => {
+                          props.showModal(i.templateName);
+                        }}
+                        size="s"
+                      >
+                        Add
+                      </EuiButton>
+                    </div>
+                  }
+                />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </>
+    );
   };
 
   return <>{renderRows(props.data.data)}</>;
