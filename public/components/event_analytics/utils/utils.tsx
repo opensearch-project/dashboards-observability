@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import dateMath from '@elastic/datemath';
 import { uniqueId, isEmpty } from 'lodash';
 import moment from 'moment';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { HttpStart } from '../../../../../../src/core/public';
 import {
   CUSTOM_LABEL,
@@ -448,4 +448,14 @@ export const getDateRange = (
   const { selectedDateRange } = queryState;
   if (!isEmpty(selectedDateRange)) return [selectedDateRange[0], selectedDateRange[1]];
   return ['now-15m', 'now'];
+};
+
+export const getContentTabTitle = (tabID: string, tabTitle: string) => {
+  return (
+    <>
+      <EuiText data-test-subj={`${tabID}Tab`} size="s" textAlign="left" color="default">
+        <span className="tab-title">{tabTitle}</span>
+      </EuiText>
+    </>
+  );
 };

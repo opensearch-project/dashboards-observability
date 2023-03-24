@@ -42,7 +42,6 @@ export class SaveAsCurrentVisualization extends SavedQuerySaver {
   }
 
   addToPanel({ selectedPanels, saveTitle, notifications, visId }) {
-    console.log('selectedPanels: ', selectedPanels, ', visId: ', visId);
     this.panelClient
       .updateBulk({
         selectedCustomPanels: selectedPanels,
