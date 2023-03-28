@@ -61,7 +61,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
         <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
           {integrations.map((i, v) => {
             return (
-              <EuiFlexItem key={v} style={{ minWidth: '13rem', maxWidth: '13rem' }}>
+              <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
                   // className={classes}
                   layout="vertical"
