@@ -11,6 +11,7 @@ import { HashRouter, Route, Switch } from 'react-router-dom';
 import { CoreStart } from '../../../../src/core/public';
 import store from '../framework/redux/store';
 import { AppPluginStartDependencies } from '../types';
+import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
 import { MetricsListener } from './common/metrics_listener';
 import { Home as CustomPanelsHome } from './custom_panels/home';
@@ -27,7 +28,7 @@ interface ObservabilityAppDeps {
   savedObjects: any;
   timestampUtils: any;
   queryManager: QueryManager;
-  startPage?: String;
+  startPage?: string;
 }
 
 // for cypress to test redux store
@@ -45,6 +46,17 @@ export const App = ({
   queryManager,
   startPage,
 }: ObservabilityAppDeps) => {
+  const { chrome, http, notifications } = coreStart;
+  const parentBreadcrumb = {
+    text: observabilityTitle,
+    href: `${observabilityID}#/`,
+  };
+
+  const customPanelBreadcrumb = {
+    text: 'Operational panels',
+    href: '#/operational_panels/',
+  };
+
   return (
     <Provider store={store}>
       <HashRouter>
@@ -95,13 +107,14 @@ export const App = ({
                   <NotebooksHome
                     {...props}
                     DashboardContainerByValueRenderer={
-                      DepsStart.dashboard.DashboardContainerByValueRenderer
+                      depsStart.dashboard.DashboardContainerByValueRenderer
                     }
                     http={http}
                     pplService={pplService}
                     setBreadcrumbs={chrome.setBreadcrumbs}
                     parentBreadcrumb={parentBreadcrumb}
                     notifications={notifications}
+                    savedObjects={coreStart.savedObjects}
                   />
                 )}
               />
@@ -117,6 +130,7 @@ export const App = ({
                       pplService={pplService}
                       dslService={dslService}
                       renderProps={props}
+                      savedObjects={coreStart.savedObjects}
                     />
                   );
                 }}

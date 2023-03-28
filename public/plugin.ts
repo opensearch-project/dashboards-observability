@@ -10,7 +10,8 @@ import {
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-  Plugin, PluginInitializerContext,
+  Plugin,
+  PluginInitializerContext,
 } from '../../../src/core/public';
 import {
   observabilityApplicationsID,
@@ -31,19 +32,14 @@ import { AppPluginStartDependencies, ObservabilitySetup, ObservabilityStart } fr
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
-import { DashboardCreatorFn } from '../../../src/plugins/opensearch_dashboards_react/public/context/types';
-import { fetchPanelsList } from './components/custom_panels/helpers/utils';
-import { fetchAppsList } from './components/application_analytics/helpers/utils';
 import { QueryManager } from '../common/query_manager';
 import { DashboardSetup } from '../../../src/plugins/dashboard/public';
-import { DashboardListItem } from '../../../src/plugins/dashboard/common/types';
-import { concat, from } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
+import { SavedObject } from '../../../src/core/public';
 
 export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): ObservabilitySetup {
+  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
     uiSettingsService.init(core.uiSettings, core.notifications);
 
     // redirect legacy notebooks URL to current URL under observability
@@ -56,68 +52,19 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
 
-    // Fetches all saved Applications
-    const fetchApplicationAnalytics = () => {
-      return from(fetchAppsList(core.http)).pipe(
-        map(convertAppAnalyticToDashboardListItem),
-        catchError((err) => {
-          console.error('Issue in fetching the app analytics list', err);
-          return from([]);
-        })
-      );
-    };
-
-    // Fetches all saved Custom Panels
-    const fetchObservabilityPanels = () => {
-      return from(fetchPanelsList(core.http)).pipe(
-        mergeMap((item) => item),
-        map(convertPanelToDashboardListItem),
-        catchError((err) => {
-          console.error('Issue in fetching the operational panels', err);
-          return from([]);
-        })
-      );
-    };
-
-    const convertPanelToDashboardListItem = (item: any): DashboardListItem => {
-      return {
-        id: item.id,
-        title: item.name,
-        type: 'Observability Panel',
-        description: '...',
-        url: `observability-dashboards#/operational_panels/${item.id}`,
-        listType: 'observabiliity-panel',
-      };
-    };
-
-    const convertAppAnalyticToDashboardListItem = (item: any): DashboardListItem => {
-      return {
-        id: item.id,
-        title: item.name,
-        type: 'Observability Application',
-        description: item.description,
-        url: `observability-dashboards#/application_analytics/${item.id}`,
-        listType: 'observability-application',
-      };
-    };
-
     const id: string = this.initializerContext.opaqueId.description!;
 
-    const dashboardAppAnalytics = fetchApplicationAnalytics();
-    const dashboardObservabilityPanels = fetchObservabilityPanels();
-    const combinedDashboardList = concat(dashboardAppAnalytics, dashboardObservabilityPanels);
-
-    const createAppAnalytics: DashboardCreatorFn = () => {
-      window.location = core.http.basePath.prepend(
-        '/app/observability-dashboards#/application_analytics/create'
-      );
-    };
-
-    dashboard.registerDashboardListSource(id, () => combinedDashboardList);
-    dashboard.registerDashboardItemCreator({
-      id: 'observaility-application',
-      defaultText: 'Analytics Application',
-      creatorFn: createAppAnalytics,
+    dashboard.registerDashboardProvider({
+      appId: 'observability-panel',
+      savedObjectsType: 'observability-panel',
+      savedObjectsName: 'Observability Panel',
+      editUrlPathFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}/edit`,
+      viewUrlPathFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}`,
+      createLinkText: 'Observability Panel',
+      createSortText: 'Observability Panel',
+      createUrl: '/app/observability-dashboards#/operational_panels/create',
     });
 
     const appMountWithStartPage = (startPage?: string) => async (params: AppMountParameters) => {
@@ -126,7 +73,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
       const pplService = new PPLService(coreStart.http);
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
-      const timestampUtils = new TimestampUtils(dslService);
+      const timestampUtils = new TimestampUtils(dslService, pplService);
       const qm = new QueryManager();
 
       return Observability(

@@ -24,11 +24,15 @@ import {
 } from '@elastic/eui';
 import CSS from 'csstype';
 import moment from 'moment';
-import PPLService from '../../../services/requests/ppl';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
+import PPLService from '../../../services/requests/ppl';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  SavedObjectsClientContract,
+} from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import {
   CREATE_NOTE_MESSAGE,
@@ -68,7 +72,7 @@ const pageStyles: CSS.Properties = {
  * http object - for making API requests
  * setBreadcrumbs - sets breadcrumbs on top
  */
-type NotebookProps = {
+interface NotebookProps {
   pplService: PPLService;
   openedNoteId: string;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
@@ -81,15 +85,16 @@ type NotebookProps = {
   setToast: (title: string, color?: string, text?: string) => void;
   location: RouteComponentProps['location'];
   history: RouteComponentProps['history'];
-};
+  savedObjects: SavedObjectsClientContract;
+}
 
-type NotebookState = {
+interface NotebookState {
   selectedViewId: string;
   path: string;
   dateCreated: string;
   dateModified: string;
   paragraphs: any; // notebook paragraphs fetched from API
-  parsedPara: Array<ParaType>; // paragraphs parsed to a common format
+  parsedPara: ParaType[]; // paragraphs parsed to a common format
   vizPrefix: string; // prefix for visualizations in Zeppelin Adaptor
   isAddParaPopoverOpen: boolean;
   isParaActionsPopoverOpen: boolean;
@@ -101,7 +106,7 @@ type NotebookState = {
   modalLayout: React.ReactNode;
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
-};
+}
 export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props: Readonly<NotebookProps>) {
     super(props);
@@ -120,7 +125,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       isReportingActionsPopoverOpen: false,
       isReportingLoadingModalOpen: false,
       isModalVisible: false,
-      modalLayout: <EuiOverlayMask></EuiOverlayMask>,
+      modalLayout: <EuiOverlayMask />,
       showQueryParagraphError: false,
       queryParagraphErrorMessage: '',
     };
@@ -131,7 +136,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   parseAllParagraphs = () => {
-    let parsedPara = this.parseParagraphs(this.state.paragraphs);
+    const parsedPara = this.parseParagraphs(this.state.paragraphs);
     this.setState({ parsedPara });
   };
 
@@ -165,7 +170,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   // Assigns Loading, Running & inQueue for paragraphs in current notebook
   showParagraphRunning = (param: number | string) => {
-    let parsedPara = this.state.parsedPara;
+    const parsedPara = this.state.parsedPara;
     this.state.parsedPara.map((_: ParaType, index: number) => {
       if (param === 'queue') {
         parsedPara[index].inQueue = true;
@@ -183,7 +188,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   // Sets a paragraph to selected and deselects all others
   paragraphSelector = (index: number) => {
-    let parsedPara = this.state.parsedPara;
+    const parsedPara = this.state.parsedPara;
     this.state.parsedPara.map((_: ParaType, idx: number) => {
       if (index === idx) parsedPara[idx].isSelected = true;
       else parsedPara[idx].isSelected = false;
@@ -550,7 +555,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // Handles text editor value and syncs with paragraph input
   textValueEditor = (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
     if (!(evt.key === 'Enter' && evt.shiftKey)) {
-      let parsedPara = this.state.parsedPara;
+      const parsedPara = this.state.parsedPara;
       parsedPara[index].inp = evt.target.value;
       this.setState({ parsedPara });
     }
@@ -566,7 +571,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // update view mode, scrolls to paragraph and expands input if scrollToIndex is given
   updateView = (selectedViewId: string, scrollToIndex?: number) => {
     this.configureViewParameter(selectedViewId);
-    let parsedPara = [...this.state.parsedPara];
+    const parsedPara = [...this.state.parsedPara];
     this.state.parsedPara.map((para: ParaType, index: number) => {
       parsedPara[index].isInputExpanded = selectedViewId === 'input_only';
     });
@@ -683,7 +688,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.loadNotebook();
     this.checkIfReportingPluginIsInstalled();
     const searchParams = queryString.parse(this.props.location.search);
-    const view = searchParams['view'];
+    const view = searchParams.view;
     if (!view) {
       this.configureViewParameter('view_both');
     }

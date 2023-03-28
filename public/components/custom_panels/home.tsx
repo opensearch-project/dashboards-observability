@@ -7,13 +7,16 @@
 import { EuiBreadcrumb, EuiGlobalToastList, EuiLink, ShortDate } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
-import React, { ReactChild, useState } from 'react';
+import React, { ReactChild, useEffect, useState } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext } from 'react-router';
-import { Route, RouteComponentProps } from 'react-router-dom';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { concat, from, Observable, of } from 'rxjs';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
+
 import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_DOCUMENTATION_URL,
@@ -23,11 +26,36 @@ import {
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
 } from '../../../common/constants/shared';
-import { CustomPanelListType } from '../../../common/types/custom_panels';
+import { CustomPanelListType, VisualizationType } from '../../../common/types/custom_panels';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
+import { SavedObject } from '../../../../../src/core/types';
+// import { ObjectFetcher } from '../common/objectFetcher';
+
+export interface ObservabilitySavedObjectAttrs<T> {
+  id: string;
+  name: string;
+  attributes: T;
+}
+
+export interface ObservabilityPanelAttrs {
+  title: string;
+  description: string;
+  dateCreated: number;
+  dateModified: number;
+  timeRange: {
+    to: string;
+    from: string;
+  };
+  queryFilter: {
+    query: string;
+    language: string;
+  };
+  visualizations: VisualizationType[];
+  applicationId: string;
+}
 
 /*
  * "Home" module is initial page for Operantional Panels
@@ -47,6 +75,7 @@ interface PanelHomeProps {
   pplService: PPLService;
   dslService: DSLService;
   renderProps: RouteComponentProps<any, StaticContext, any>;
+  savedObjects: SavedObjectsStart;
 }
 
 export const Home = ({
@@ -56,6 +85,7 @@ export const Home = ({
   pplService,
   dslService,
   renderProps,
+  savedObjects,
 }: PanelHomeProps) => {
   const [customPanelData, setcustomPanelData] = useState<CustomPanelListType[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -63,6 +93,26 @@ export const Home = ({
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
+
+  const savedObjectToCustomPanel = (
+    obj: SavedObject<ObservabilityPanelAttrs>
+  ): CustomPanelListType => {
+    return {
+      id: obj.id,
+      title: obj.attributes.title,
+      description: '',
+      dateCreated: new Date(obj.attributes.dateCreated).getTime(),
+      dateModified: new Date(obj.updated_at || 0).getTime(),
+      visualizations: obj.attributes.visualizations,
+      queryFilter: obj.attributes.queryFilter,
+      timeRange: obj.attributes.timeRange,
+      applicationId: obj.attributes.applicationId,
+    };
+  };
+
+  useEffect(() => {
+    console.log('CustomPanels:Home savedObjects', { savedObjects });
+  }, [savedObjects]);
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -74,36 +124,68 @@ export const Home = ({
     window.location.assign(`#/event_analytics/explorer/${savedVisualizationId}`);
   };
 
-  // Fetches all saved Custom Panels
-  const fetchCustomPanels = () => {
-    setLoading(true);
-    http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/panels`)
-      .then((res) => {
-        setcustomPanelData(res.panels);
+  const fetchSavedObjectPanels$ = () =>
+    from(
+      savedObjects.client.find<ObservabilityPanelAttrs>({
+        type: 'observability-panel',
       })
-      .catch((err) => {
-        console.error('Issue in fetching the operational panels', err.body.message);
-      });
+    ).pipe(
+      mergeMap((res) => res.savedObjects),
+      map(savedObjectToCustomPanel),
+      tap((res) => console.log('panel', res))
+    );
+
+  const fetchObservabilityPanels$ = () =>
+    of(http.get(`${CUSTOM_PANELS_API_PREFIX}/panels`)).pipe(
+      mergeMap((res) => res),
+      mergeMap((res) => res.panels),
+      tap((res) => console.log('observability panels', res))
+    );
+
+  // Fetches all saved Custom Panels
+  const fetchCustomPanels = async () => {
+    setLoading(true);
+
+    const panels$: Observable<CustomPanelListType> = concat(
+      fetchSavedObjectPanels$(),
+      fetchObservabilityPanels$()
+    ).pipe(map((res) => res as CustomPanelListType));
+
+    const panels: CustomPanelListType[] = await panels$.pipe(toArray()).toPromise();
+    setcustomPanelData(panels);
+
     setLoading(false);
   };
 
   // Creates a new CustomPanel
-  const createCustomPanel = (newCustomPanelName: string) => {
+  const createCustomPanel = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
       return;
     }
 
-    return http
-      .post(`${CUSTOM_PANELS_API_PREFIX}/panels`, {
-        body: JSON.stringify({
-          panelName: newCustomPanelName,
-        }),
-      })
+    const newPanel: ObservabilityPanelAttrs = {
+      title: newCustomPanelName,
+      description: '',
+      dateCreated: new Date().getTime(),
+      dateModified: new Date().getTime(),
+      timeRange: {
+        to: 'now',
+        from: 'now-1d',
+      },
+      queryFilter: {
+        query: '',
+        language: 'ppl',
+      },
+      visualizations: [],
+      applicationId: '',
+    };
+
+    return savedObjects.client
+      .create<ObservabilityPanelAttrs>('observability-panel', newPanel, {})
       .then(async (res) => {
         setToast(`Operational Panel "${newCustomPanelName}" successfully created!`);
-        window.location.assign(`${_.last(parentBreadcrumbs)!.href}${res.newPanelId}`);
+        window.location.assign(`${_.last(parentBreadcrumbs)!.href}${res.id}`);
       })
       .catch((err) => {
         setToast(
@@ -113,7 +195,7 @@ export const Home = ({
             Documentation
           </EuiLink>
         );
-        console.error(err);
+        console.error('create error', err);
       });
   };
 
@@ -138,7 +220,7 @@ export const Home = ({
           const renamedCustomPanel = newCustomPanelData.find(
             (customPanel) => customPanel.id === editedCustomPanelId
           );
-          if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
+          if (renamedCustomPanel) renamedCustomPanel.title = editedCustomPanelName;
           return newCustomPanelData;
         });
         setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
@@ -175,10 +257,14 @@ export const Home = ({
           return [
             ...prevCustomPanelData,
             {
-              name: clonedCustomPanelName,
               id: res.clonePanelId,
+              title: clonedCustomPanelName,
+              description: res.description,
               dateCreated: res.dateCreated,
               dateModified: res.dateModified,
+              queryFilter: res.queryFilter,
+              timeRange: res.timeRange,
+              visualizations: res.visualizations,
             },
           ];
         });
@@ -218,7 +304,9 @@ export const Home = ({
   };
 
   // Deletes an existing Operational Panel
-  const deleteCustomPanel = (customPanelId: string, customPanelName: string) => {
+  const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
+    await savedObjects.client.delete('observability-panel', customPanelId);
+
     return http
       .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
       .then((res) => {
@@ -297,53 +385,56 @@ export const Home = ({
         side={toastRightSide ? 'right' : 'left'}
         toastLifeTimeMs={6000}
       />
-      <Route
-        exact
-        path={renderProps.match.path}
-        render={(props) => {
-          return (
-            <ObservabilitySideBar>
-              <CustomPanelTable
-                loading={loading}
-                fetchCustomPanels={fetchCustomPanels}
-                customPanels={customPanelData}
-                createCustomPanel={createCustomPanel}
-                setBreadcrumbs={chrome.setBreadcrumbs}
+      <Switch>
+        <Route
+          exact
+          path={['/operational_panels/create', '/operational_panels']}
+          render={(props) => {
+            return (
+              <ObservabilitySideBar>
+                <CustomPanelTable
+                  loading={loading}
+                  fetchCustomPanels={fetchCustomPanels}
+                  customPanels={customPanelData}
+                  createCustomPanel={createCustomPanel}
+                  setBreadcrumbs={chrome.setBreadcrumbs}
+                  parentBreadcrumbs={parentBreadcrumbs}
+                  renameCustomPanel={renameCustomPanel}
+                  cloneCustomPanel={cloneCustomPanel}
+                  deleteCustomPanelList={deleteCustomPanelList}
+                  addSamplePanels={addSamplePanels}
+                />
+              </ObservabilitySideBar>
+            );
+          }}
+        />
+        <Route
+          path={`${renderProps.match.path}/:id`}
+          render={(props) => {
+            return (
+              <CustomPanelView
+                panelId={props.match.params.id}
+                http={http}
+                pplService={pplService}
+                dslService={dslService}
+                chrome={chrome}
                 parentBreadcrumbs={parentBreadcrumbs}
                 renameCustomPanel={renameCustomPanel}
                 cloneCustomPanel={cloneCustomPanel}
-                deleteCustomPanelList={deleteCustomPanelList}
-                addSamplePanels={addSamplePanels}
+                deleteCustomPanel={deleteCustomPanel}
+                setToast={setToast}
+                onEditClick={onEditClick}
+                startTime={start}
+                endTime={end}
+                setStartTime={setStart}
+                setEndTime={setEnd}
+                page="operationalPanels"
+                savedObjects={savedObjects}
               />
-            </ObservabilitySideBar>
-          );
-        }}
-      />
-      <Route
-        path={`${renderProps.match.path}/:id`}
-        render={(props) => {
-          return (
-            <CustomPanelView
-              panelId={props.match.params.id}
-              http={http}
-              pplService={pplService}
-              dslService={dslService}
-              chrome={chrome}
-              parentBreadcrumbs={parentBreadcrumbs}
-              renameCustomPanel={renameCustomPanel}
-              cloneCustomPanel={cloneCustomPanel}
-              deleteCustomPanel={deleteCustomPanel}
-              setToast={setToast}
-              onEditClick={onEditClick}
-              startTime={start}
-              endTime={end}
-              setStartTime={setStart}
-              setEndTime={setEnd}
-              page="operationalPanels"
-            />
-          );
-        }}
-      />
+            );
+          }}
+        />
+      </Switch>
     </div>
   );
 };

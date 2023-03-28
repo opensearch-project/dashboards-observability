@@ -120,7 +120,7 @@ export const CustomPanelTable = ({
 
   const onDelete = async () => {
     const toastMessage = `Custom Panels ${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].name
+      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
     } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
@@ -152,7 +152,7 @@ export const CustomPanelTable = ({
         'Rename Panel',
         'Cancel',
         'Rename',
-        selectedCustomPanels[0].name,
+        selectedCustomPanels[0].title,
         CREATE_PANEL_MESSAGE
       )
     );
@@ -168,7 +168,7 @@ export const CustomPanelTable = ({
         'Duplicate Panel',
         'Cancel',
         'Duplicate',
-        selectedCustomPanels[0].name + ' (copy)',
+        selectedCustomPanels[0].title + ' (copy)',
         CREATE_PANEL_MESSAGE
       )
     );
@@ -257,7 +257,7 @@ export const CustomPanelTable = ({
 
   const tableColumns = [
     {
-      field: 'name',
+      field: 'title',
       name: 'Name',
       sortable: true,
       truncateText: true,
@@ -350,7 +350,7 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                          customPanel.name.toLowerCase().includes(searchQuery.toLowerCase())
+                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
                         )
                       : customPanels
                   }

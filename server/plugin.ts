@@ -45,6 +45,76 @@ export class ObservabilityPlugin
       };
     });
 
+    const obsNotebookType: SavedObjectsType = {
+      name: 'observability-notebook',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        dynamic: false,
+        properties: {
+          title: {
+            type: 'text',
+          },
+          description: {
+            type: 'text',
+          },
+        },
+      },
+      management: {
+        importableAndExportable: true,
+        getInAppUrl() {
+          return {
+            path: `/app/management/observability/settings`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj) {
+          return `Observability Settings [${obj.id}]`;
+        },
+      },
+      migrations: {
+        '3.0.0': (doc) => ({ ...doc, description: '' }),
+      },
+    };
+
+    core.savedObjects.registerType(obsNotebookType);
+
+    const obsPanelType: SavedObjectsType = {
+      name: 'observability-panel',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        dynamic: false,
+        properties: {
+          title: {
+            type: 'text',
+          },
+          description: {
+            type: 'text',
+          },
+        },
+      },
+      management: {
+        importableAndExportable: true,
+        getInAppUrl() {
+          return {
+            path: `/app/management/observability/settings`,
+            uiCapabilitiesPath: 'advancedSettings.show',
+          };
+        },
+        getTitle(obj) {
+          return `Observability Settings [${obj.id}]`;
+        },
+      },
+      migrations: {
+        '3.0.0': (doc) => ({ ...doc, description: '' }),
+        '3.0.1': (doc) => ({ ...doc, description: 'Some Description Text' }),
+        '3.0.2': (doc) => ({ ...doc, dateCreated: parseInt(doc.dateCreated || '0', 10) }),
+      },
+    };
+
+    core.savedObjects.registerType(obsPanelType);
+
     // Register server side APIs
     setupRoutes({ router, client: openSearchObservabilityClient });
 

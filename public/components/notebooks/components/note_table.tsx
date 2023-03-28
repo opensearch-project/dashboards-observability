@@ -43,7 +43,6 @@ import {
 } from './helpers/modal_containers';
 import { NotebookType } from './main';
 import { pageStyles } from '../../../../common/constants/shared';
-import { useHistory, useLocation } from 'react-router-dom';
 
 interface NoteTableProps {
   loading: boolean;
@@ -65,8 +64,6 @@ export function NoteTable(props: NoteTableProps) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [selectedNotebooks, setSelectedNotebooks] = useState<NotebookType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const location = useLocation();
-  const history = useHistory();
   const { notebooks, createNotebook, renameNotebook, cloneNotebook, deleteNotebook } = props;
 
   useEffect(() => {
@@ -79,13 +76,6 @@ export function NoteTable(props: NoteTableProps) {
     ]);
     props.fetchNotebooks();
   }, []);
-
-  useEffect(() => {
-    const url = window.location.hash.split('/')
-    if (url[url.length-1] === 'create') { 
-      createNote();
-    }
-  }, [location]);
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -124,10 +114,7 @@ export function NoteTable(props: NoteTableProps) {
     setModalLayout(
       getCustomModal(
         onCreate,
-        () => {
-          closeModal()
-          history.goBack();
-        },
+        closeModal,
         'Name',
         'Create notebook',
         'Cancel',
@@ -246,6 +233,7 @@ export function NoteTable(props: NoteTableProps) {
     </EuiContextMenuItem>,
   ];
 
+  const noteLink = (note) => `#/notebooks/${note.id}${note.savedObject ? '?s=1' : ''}`;
   const tableColumns = [
     {
       field: 'path',
@@ -253,7 +241,7 @@ export function NoteTable(props: NoteTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink href={`#/notebooks/${record.id}`}>{_.truncate(value, { length: 100 })}</EuiLink>
+        <EuiLink href={noteLink(record)}>{_.truncate(value, { length: 100 })}</EuiLink>
       ),
     },
     {
@@ -319,7 +307,7 @@ export function NoteTable(props: NoteTableProps) {
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/notebooks/create">
+                    <EuiButton fill onClick={() => createNote()}>
                       Create notebook
                     </EuiButton>
                   </EuiFlexItem>
@@ -380,9 +368,11 @@ export function NoteTable(props: NoteTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton href="#/notebooks/create"
+                    <EuiButton
+                      href="#/notebooks/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
+                      onClick={() => createNote()}
                     >
                       Create notebook
                     </EuiButton>

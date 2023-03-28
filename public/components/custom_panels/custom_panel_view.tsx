@@ -30,14 +30,17 @@ import { last } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
+import _ from 'lodash';
 import DSLService from '../../services/requests/dsl';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
+import { SavedObject } from '../../../../../src/core/types';
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
   CUSTOM_PANELS_API_PREFIX,
 } from '../../../common/constants/custom_panels';
 import {
+  CustomPanelListType,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
@@ -64,7 +67,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import _ from 'lodash';
+import { ObservabilityPanelAttrs } from './home';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -117,6 +120,7 @@ interface CustomPanelViewProps {
   appId?: string;
   updateAvailabilityVizId?: any;
   onAddClick?: any;
+  savedObjects?: SavedObjectsStart;
 }
 
 export const CustomPanelView = (props: CustomPanelViewProps) => {
@@ -125,6 +129,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     page,
     appId,
     http,
+    savedObjects,
     pplService,
     dslService,
     chrome,
@@ -143,7 +148,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     onAddClick,
   } = props;
   const [openPanelName, setOpenPanelName] = useState('');
-  const [panelCreatedTime, setPanelCreatedTime] = useState('');
+  const [panelCreatedTime, setPanelCreatedTime] = useState(0);
   const [pplFilterValue, setPPLFilterValue] = useState('');
   const [baseQuery, setBaseQuery] = useState('');
   const [onRefresh, setOnRefresh] = useState(false);
@@ -178,21 +183,51 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   // DateTimePicker States
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
 
+  const savedObjectToCustomPanel = (
+    obj: SavedObject<ObservabilityPanelAttrs>
+  ): CustomPanelListType => {
+    return {
+      id: obj.id,
+      title: obj.attributes.title,
+      description: '',
+      dateCreated: new Date(obj.attributes.dateCreated).getTime(),
+      dateModified: new Date(obj.updated_at!).getTime(),
+      queryFilter: obj.attributes.queryFilter,
+      visualizations: obj.attributes.visualizations,
+      timeRange: obj.attributes.timeRange,
+      applicationId: obj.attributes.applicationId,
+    };
+  };
+
   // Fetch Panel by id
   const fetchCustomPanel = async () => {
-    return http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/panels/${panelId}`)
-      .then((res) => {
-        setOpenPanelName(res.operationalPanel.name);
-        setPanelCreatedTime(res.createdTimeMs);
-        setPPLFilterValue(res.operationalPanel.queryFilter.query);
-        setStartTime(startTime ? startTime : res.operationalPanel.timeRange.from);
-        setEndTime(endTime ? endTime : res.operationalPanel.timeRange.to);
-        setPanelVisualizations(res.operationalPanel.visualizations);
-      })
-      .catch((err) => {
-        console.error('Issue in fetching the operational panels', err);
-      });
+    const savedObjecdtPanel = await savedObjects!.client.get<ObservabilityPanelAttrs>(
+      'observability-panel',
+      panelId
+    );
+
+    const panel = savedObjectToCustomPanel(savedObjecdtPanel);
+    console.log({ panel });
+    setOpenPanelName(panel.title);
+    setPanelCreatedTime(panel.dateCreated);
+    setPPLFilterValue(panel.queryFilter.query);
+    setStartTime(startTime ? startTime : panel.timeRange.from);
+    setEndTime(endTime ? endTime : panel.timeRange.to);
+    setPanelVisualizations(panel.visualizations);
+
+    // return http
+    //   .get(`${CUSTOM_PANELS_API_PREFIX}/panels/${panelId}`)
+    //   .then((res) => {
+    //     setOpenPanelName(res.operationalPanel.name);
+    //     setPanelCreatedTime(res.createdTimeMs);
+    //     setPPLFilterValue(res.operationalPanel.queryFilter.query);
+    //     setStartTime(startTime ? startTime : res.operationalPanel.timeRange.from);
+    //     setEndTime(endTime ? endTime : res.operationalPanel.timeRange.to);
+    //     setPanelVisualizations(res.operationalPanel.visualizations);
+    //   })
+    //   .catch((err) => {
+    //     console.error('Issue in fetching the operational panels', err);
+    //   });
   };
 
   const handleQueryChange = (newQuery: string) => {
@@ -585,7 +620,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
                     <EuiFlexItem grow={false}>
                       <EuiPopover
                         panelPaddingSize="none"
-                        withTitle
                         button={panelActionsButton}
                         isOpen={panelsMenuPopover}
                         closePopover={() => setPanelsMenuPopover(false)}

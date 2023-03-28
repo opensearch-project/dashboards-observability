@@ -10,8 +10,10 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
+import { concat, from, of } from 'rxjs';
+import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import PPLService from '../../../services/requests/ppl';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
+import { ChromeBreadcrumb, CoreStart, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import {
   NOTEBOOKS_API_PREFIX,
@@ -19,7 +21,11 @@ import {
 } from '../../../../common/constants/notebooks';
 import { ObservabilitySideBar } from '../../common/side_nav';
 import { Notebook } from './notebook';
+import { NotebookSO } from './notebookSO';
 import { NoteTable } from './note_table';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
+import { ObservabilityPanelAttrs } from '../../custom_panels/home';
+import { CustomPanelListType } from '../../../../common/types/custom_panels';
 
 /*
  * "Main" component renders the whole Notebooks as a single page application
@@ -39,6 +45,7 @@ type MainProps = RouteComponentProps & {
   notifications: CoreStart['notifications'];
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  savedObjects: SavedObjectsStart;
 };
 
 interface MainState {
@@ -53,6 +60,7 @@ export interface NotebookType {
   id: string;
   dateCreated: string;
   dateModified: string;
+  savedObject: boolean;
 }
 
 export class Main extends React.Component<MainProps, MainState> {
@@ -81,34 +89,61 @@ export class Main extends React.Component<MainProps, MainState> {
     }));
   };
 
+  savedObjectToNotebook = (obj): NotebookType => {
+    return {
+      id: obj.id,
+      path: obj.attributes.path,
+      dateCreated: obj.attributes.dateCreated,
+      dateModified: new Date(obj.updated_at).toString(),
+      savedObject: true,
+    };
+  };
+
+  fetchSavedObjectNotebooks$ = () =>
+    from(
+      this.props.savedObjects.client.find<NotebookType>({
+        type: 'observability-notebook',
+      })
+    ).pipe(
+      mergeMap((res) => res.savedObjects),
+      tap((res) => console.log('so notebooks', res)),
+      map(this.savedObjectToNotebook)
+    );
+
+  fetchObservabilityNotebooks$ = () =>
+    of(this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`)).pipe(
+      mergeMap((res) => res),
+      mergeMap((res) => res.data),
+      map((n) => ({ ...n, savedObject: false })),
+      tap((res) => console.log('observability notebooks', res))
+    );
+
   // Fetches path and id for all stored notebooks
-  fetchNotebooks = () => {
-    return this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/`)
-      .then((res) => this.setState(res))
-      .catch((err) => {
-        console.error('Issue in fetching the notebooks', err.body.message);
-      });
+  fetchNotebooks = async () => {
+    const notebooks$ = concat(
+      this.fetchSavedObjectNotebooks$(),
+      this.fetchObservabilityNotebooks$()
+    ).pipe(tap((res) => console.log('notebooks', res)));
+
+    const notebooks = await notebooks$.pipe(toArray()).toPromise();
+    this.setState({ data: notebooks });
   };
 
   // Creates a new notebook
   createNotebook = (newNoteName: string) => {
     if (newNoteName.length >= 50 || newNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
-      window.location.assign('#/notebooks');
       return;
     }
     const newNoteObject = {
-      name: newNoteName,
+      path: newNoteName,
     };
 
-    return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/note`, {
-        body: JSON.stringify(newNoteObject),
-      })
+    return this.props.savedObjects.client
+      .create<NotebookType>('observability-notebook', newNoteObject, {})
       .then(async (res) => {
         this.setToast(`Notebook "${newNoteName}" successfully created!`);
-        window.location.assign(`#/notebooks/${res}`);
+        window.location.assign(`#/notebooks/${res.id}`);
       })
       .catch((err) => {
         this.setToast(
@@ -118,7 +153,7 @@ export class Main extends React.Component<MainProps, MainState> {
             Documentation
           </EuiLink>
         );
-        console.error(err);
+        console.error('create error', err);
       });
   };
 
@@ -309,28 +344,25 @@ export class Main extends React.Component<MainProps, MainState> {
           />
           <Switch>
             <Route
-              exact
-              path={['/notebooks/create', '/notebooks']}
+              path="/notebooks/:id?s=1"
               render={(props) => (
-                <ObservabilitySideBar>
-                  <NoteTable
-                    loading={this.state.loading}
-                    fetchNotebooks={this.fetchNotebooks}
-                    addSampleNotebooks={this.addSampleNotebooks}
-                    notebooks={this.state.data}
-                    createNotebook={this.createNotebook}
-                    renameNotebook={this.renameNotebook}
-                    cloneNotebook={this.cloneNotebook}
-                    deleteNotebook={this.deleteNotebook}
-                    parentBreadcrumb={this.props.parentBreadcrumb}
-                    setBreadcrumbs={this.props.setBreadcrumbs}
-                    setToast={this.setToast}
-                  />
-                </ObservabilitySideBar>
+                <NotebookSO
+                  pplService={this.props.pplService}
+                  openedNoteId={props.match.params.id}
+                  DashboardContainerByValueRenderer={this.props.DashboardContainerByValueRenderer}
+                  http={this.props.http}
+                  parentBreadcrumb={this.props.parentBreadcrumb}
+                  setBreadcrumbs={this.props.setBreadcrumbs}
+                  renameNotebook={this.renameNotebook}
+                  cloneNotebook={this.cloneNotebook}
+                  deleteNotebook={this.deleteNotebook}
+                  setToast={this.setToast}
+                  location={this.props.location}
+                  history={this.props.history}
+                />
               )}
             />
             <Route
-              exact
               path="/notebooks/:id"
               render={(props) => (
                 <Notebook
@@ -347,6 +379,26 @@ export class Main extends React.Component<MainProps, MainState> {
                   location={this.props.location}
                   history={this.props.history}
                 />
+              )}
+            />
+            <Route
+              path="/notebooks"
+              render={(props) => (
+                <ObservabilitySideBar>
+                  <NoteTable
+                    loading={this.state.loading}
+                    fetchNotebooks={this.fetchNotebooks}
+                    addSampleNotebooks={this.addSampleNotebooks}
+                    notebooks={this.state.data}
+                    createNotebook={this.createNotebook}
+                    renameNotebook={this.renameNotebook}
+                    cloneNotebook={this.cloneNotebook}
+                    deleteNotebook={this.deleteNotebook}
+                    parentBreadcrumb={this.props.parentBreadcrumb}
+                    setBreadcrumbs={this.props.setBreadcrumbs}
+                    setToast={this.setToast}
+                  />
+                </ObservabilitySideBar>
               )}
             />
           </Switch>

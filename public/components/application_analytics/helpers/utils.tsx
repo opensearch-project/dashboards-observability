@@ -10,6 +10,8 @@ import { FilterType } from 'public/components/trace_analytics/components/common/
 import React, { Dispatch, ReactChild } from 'react';
 import { batch } from 'react-redux';
 import PPLService from 'public/services/requests/ppl';
+import { from } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { IField } from '../../../../common/types/explorer';
 import { preprocessQuery } from '../../../../common/utils/query_utils';
 import { SPAN_REGEX } from '../../../../common/constants/shared';
@@ -41,8 +43,6 @@ import {
   init as initPatterns,
   remove as removePatterns,
 } from '../../event_analytics/redux/slices/patterns_slice';
-import { from } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
 
 // Name validation
 export const isNameValid = (name: string, existingNames: string[]) => {
@@ -182,10 +182,6 @@ export const initializeTabData = async (dispatch: Dispatch<any>, tabId: string, 
     );
     dispatch(initPatterns({ tabId }));
   });
-};
-
-export const fetchAppsList = (http: HttpSetup) => {
-  return from(http.get(`${APP_ANALYTICS_API_PREFIX}/`)).pipe(mergeMap((res) => res.data));
 };
 
 export const fetchPanelsVizIdList = async (http: HttpSetup, appPanelId: string) => {
