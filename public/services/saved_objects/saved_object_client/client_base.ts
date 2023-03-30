@@ -4,13 +4,14 @@
  */
 
 import { ISavedObjectsClient } from './client_interface';
+import { SavedObjectsCreateResponse, SavedObjectsGetResponse } from './types';
 
 export abstract class SavedObjectClientBase implements ISavedObjectsClient {
-  abstract create(params: any): Promise<any>;
-  abstract get(params: any): Promise<any>;
-  abstract getBulk(params: any): Promise<Array<Promise<any>>>;
-  abstract update(params: any): Promise<any>;
-  abstract updateBulk(params: any): Promise<Array<Promise<any>>>;
-  abstract delete(params: any): Promise<any>;
-  abstract deleteBulk(params: any): Promise<Array<Promise<any>>>;
+  abstract create(params: unknown): Promise<SavedObjectsCreateResponse>;
+  abstract get(params: unknown): Promise<SavedObjectsGetResponse>;
+  abstract getBulk(params: unknown): Promise<SavedObjectsGetResponse>;
+  abstract update(params: unknown): Promise<unknown>;
+  abstract updateBulk(params: unknown): Promise<Array<Promise<unknown>>>;
+  abstract delete(params: unknown): Promise<unknown>;
+  abstract deleteBulk(params: unknown): Promise<unknown>;
 }

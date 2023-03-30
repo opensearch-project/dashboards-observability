@@ -11,6 +11,7 @@ import {
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/shared';
 import { PPLSavedObjectClient } from './ppl_client';
+import { SavedObjectsCreateResponse, SavedObjectsUpdateResponse } from '../types';
 
 interface CommonParams {
   query: string;
@@ -31,7 +32,7 @@ type CreateParams = CommonParams & { applicationId: string };
 type UpdateParams = CommonParams & { objectId: string };
 
 export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
-  async create(params: CreateParams): Promise<any> {
+  async create(params: CreateParams): Promise<SavedObjectsCreateResponse> {
     return await this.client.post(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_VISUALIZATION}`,
       {
@@ -55,7 +56,7 @@ export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
     );
   }
 
-  async update(params: UpdateParams): Promise<any> {
+  async update(params: UpdateParams): Promise<SavedObjectsUpdateResponse> {
     return await this.client.put(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_VISUALIZATION}`,
       {

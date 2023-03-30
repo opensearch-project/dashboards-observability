@@ -55,6 +55,7 @@ import {
   PPL_NEWLINE_REGEX,
   PPL_STATS_REGEX,
 } from '../../../../common/constants/shared';
+import { QueryManager } from '../../../../common/query_manager';
 import {
   IDefaultTimestampState,
   IExplorerFields,
@@ -68,7 +69,21 @@ import {
   buildQuery,
   composeFinalQuery,
   getIndexPatternFromRawQuery,
+  getOSDSavedObjectsClient,
+  uiSettingsService,
 } from '../../../../common/utils';
+import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
+import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
+import {
+  PanelSavedObjectClient,
+  PPLSavedQueryClient,
+} from '../../../services/saved_objects/saved_object_client/ppl';
+import {
+  SaveAsCurrenQuery,
+  SaveAsCurrentVisualization,
+  SaveAsNewVisualization,
+} from '../../../services/saved_objects/saved_object_savers';
+import { SaveAsNewQuery } from '../../../services/saved_objects/saved_object_savers/ppl/save_as_new_query';
 import { sleep } from '../../common/live_tail/live_tail_button';
 import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
 import { Search } from '../../common/search/search';
@@ -87,28 +102,15 @@ import {
   selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
+import { getContentTabTitle, getDateRange } from '../utils/utils';
 import { DataGrid } from './events_views/data_grid';
 import { HitsCounter } from './hits_counter/hits_counter';
+import { LogPatterns } from './log_patterns/log_patterns';
 import { NoResults } from './no_results';
 import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
-import { QueryManager } from '../../../../common/query_manager';
-import { uiSettingsService } from '../../../../common/utils';
-import { LogPatterns } from './log_patterns/log_patterns';
-import { getContentTabTitle, getDateRange } from '../utils/utils';
-import {
-  PPLSavedQueryClient,
-  PPLSavedVisualizationClient,
-  PanelSavedObjectClient,
-} from '../../../services/saved_objects/saved_object_client/ppl';
-import { SaveAsNewQuery } from '../../../services/saved_objects/saved_object_savers/ppl/save_as_new_query';
-import {
-  SaveAsCurrenQuery,
-  SaveAsCurrentVisualization,
-  SaveAsNewVisualization,
-} from '../../../services/saved_objects/saved_object_savers';
 
 export const Explorer = ({
   pplService,
@@ -251,10 +253,8 @@ export const Explorer = ({
 
   const getSavedDataById = async (objectId: string) => {
     // load saved query/visualization if object id exists
-    await savedObjects
-      .fetchSavedObjects({
-        objectId,
-      })
+    await getSavedObjectsClient({ objectId, objectType: 'savedQuery' })
+      .get({ objectId })
       .then(async (res) => {
         const savedData = res.observabilityObjectList[0];
         const isSavedQuery = has(savedData, SAVED_QUERY);
@@ -921,7 +921,10 @@ export const Explorer = ({
         soClient = new SaveAsCurrentVisualization(
           { tabId, history, notifications, showPermissionErrorToast },
           { batch, dispatch, changeQuery, updateTabName },
-          new PPLSavedVisualizationClient(http),
+          getSavedObjectsClient({
+            objectId: query[SAVED_OBJECT_ID],
+            objectType: 'savedVisualization',
+          }),
           new PanelSavedObjectClient(http),
           {
             ...commonParams,
@@ -943,7 +946,7 @@ export const Explorer = ({
             addVisualizationToPanel,
           },
           { batch, dispatch, changeQuery, updateTabName },
-          new PPLSavedVisualizationClient(http),
+          new OSDSavedVisualizationClient(getOSDSavedObjectsClient()),
           new PanelSavedObjectClient(http),
           {
             ...commonParams,
@@ -1061,6 +1064,7 @@ export const Explorer = ({
         setToast,
         pplService,
         notifications,
+        dispatch,
       }}
     >
       <div

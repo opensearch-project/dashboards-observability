@@ -8,13 +8,14 @@ import {
   SAVED_OBJECT_TYPE,
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/explorer';
+import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
 import { SavedQuerySaver } from './saved_query_saver';
 
 export class SaveAsNewVisualization extends SavedQuerySaver {
   constructor(
     private readonly saveContext,
     protected readonly dispatchers,
-    private readonly saveClient,
+    private readonly saveClient: ISavedObjectsClient,
     private readonly panelClient,
     private readonly saveParams
   ) {

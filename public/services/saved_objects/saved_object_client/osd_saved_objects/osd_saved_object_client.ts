@@ -4,47 +4,40 @@
  */
 
 import { isEmpty } from 'lodash';
-import { HttpStart } from '../../../../../../../src/core/public';
 import {
-  EVENT_ANALYTICS,
-  OBSERVABILITY_BASE,
-  SAVED_OBJECTS,
-} from '../../../../../common/constants/shared';
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '../../../../../../../src/core/public';
 import { SavedObjectClientBase } from '../client_base';
-import { ISavedObjectsClient } from '../client_interface';
+import { SavedObjectsGetResponse, SavedObjectsCreateResponse } from '../types';
 
-export class PPLSavedObjectClient extends SavedObjectClientBase implements ISavedObjectsClient {
-  constructor(protected readonly client: HttpStart) {
+export class OSDSavedObjectClient extends SavedObjectClientBase {
+  constructor(protected readonly client: SavedObjectsClientContract) {
     super();
   }
-  create(params: any): Promise<any> {
+  create(params: unknown): Promise<SavedObjectsCreateResponse> {
     throw new Error('Method not implemented.');
   }
-  get(params: any): Promise<any> {
-    return this.client.get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}`, {
-      query: {
-        ...params,
-      },
-    });
-  }
-  getBulk(params: any): Promise<any> {
-    return this.client.get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}`, {
-      query: {
-        ...params,
-      },
-    });
-  }
-  update(params: any): Promise<any> {
+  get(params: unknown): Promise<SavedObjectsGetResponse> {
     throw new Error('Method not implemented.');
   }
-  updateBulk(params: any): Promise<Array<Promise<any>>> {
+  getBulk(params: unknown): Promise<SavedObjectsGetResponse> {
     throw new Error('Method not implemented.');
   }
-  delete(params: any): Promise<any> {
+  update(params: unknown): Promise<unknown> {
     throw new Error('Method not implemented.');
   }
-  deleteBulk(params: any): Promise<Array<Promise<any>>> {
+  updateBulk(params: unknown): Promise<Array<Promise<unknown>>> {
     throw new Error('Method not implemented.');
+  }
+  delete(params: unknown): Promise<unknown> {
+    throw new Error('Method not implemented.');
+  }
+  deleteBulk(params: unknown): Promise<unknown> {
+    throw new Error('Method not implemented.');
+  }
+  convertToLastUpdatedMs(updatedAt: SimpleSavedObject['updated_at']) {
+    return (updatedAt ? new Date(updatedAt) : new Date()).getTime();
   }
   buildRequestBody({
     query,
