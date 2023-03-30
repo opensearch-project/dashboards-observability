@@ -175,7 +175,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
       fetchVisualizations();
     }
-  }, [fetchVisualizations, para.isVisualization, para.visSavedObjId, para.visSavedObjId]);
+  }, [fetchVisualizations, para.isVizualisation, para.visObjectInput, para.visSavedObjId]);
 
   const createDashboardVizObject = (objectId: string) => {
     const vizUniqueId = htmlIdGenerator()();
