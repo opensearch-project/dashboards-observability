@@ -25,8 +25,8 @@ import {
 import CSS from 'csstype';
 import moment from 'moment';
 import queryString from 'query-string';
-import React, { Component } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { RouteComponentProps, useLocation } from 'react-router-dom';
 import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
@@ -102,113 +102,118 @@ interface NotebookState {
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
 }
-export class Notebook extends Component<NotebookProps, NotebookState> {
-  constructor(props: Readonly<NotebookProps>) {
-    super(props);
-    this.state = {
-      selectedViewId: 'view_both',
-      path: '',
-      dateCreated: '',
-      dateModified: '',
-      paragraphs: [],
-      parsedPara: [],
-      vizPrefix: '',
-      isAddParaPopoverOpen: false,
-      isParaActionsPopoverOpen: false,
-      isNoteActionsPopoverOpen: false,
-      isReportingPluginInstalled: false,
-      isReportingActionsPopoverOpen: false,
-      isReportingLoadingModalOpen: false,
-      isModalVisible: false,
-      modalLayout: <EuiOverlayMask />,
-      showQueryParagraphError: false,
-      queryParagraphErrorMessage: '',
-    };
-  }
 
-  toggleReportingLoadingModal = (show: boolean) => {
-    this.setState({ isReportingLoadingModalOpen: show });
+export function Notebook(props: NotebookProps) {
+  const [selectedViewId, setselectedViewId] = useState('view_both');
+  const [path, setpath] = useState('');
+  const [dateCreated, setdateCreated] = useState('');
+  const [dateModified, setdateModified] = useState('');
+  const [paragraphs, _setparagraphs] = useState<ParaType[]>([]);
+  const setparagraphs = (value) => {
+    console.log('setparagraphs', value);
+    _setparagraphs(value);
+  };
+  const [parsedPara, _setparsedPara] = useState<ParaType[]>([]);
+  const setparsedPara = (callee, value) => {
+    console.log(`setParsedPara ${callee}`, value);
+    _setparsedPara(value);
+  };
+  const [vizPrefix, setvizPrefix] = useState('');
+  const [isAddParaPopoverOpen, setisAddParaPopoverOpen] = useState(false);
+  const [isParaActionsPopoverOpen, setisParaActionsPopoverOpen] = useState(false);
+  const [isNoteActionsPopoverOpen, setisNoteActionsPopoverOpen] = useState(false);
+  const [isReportingPluginInstalled, setisReportingPluginInstalled] = useState(false);
+  const [isReportingActionsPopoverOpen, setisReportingActionsPopoverOpen] = useState(false);
+  const [isReportingLoadingModalOpen, setisReportingLoadingModalOpen] = useState(false);
+  const [isModalVisible, setisModalVisible] = useState(false);
+  const [modalLayout, setmodalLayout] = useState(<EuiOverlayMask />);
+  const [showQueryParagraphError, setshowQueryParagraphError] = useState(false);
+  const [queryParagraphErrorMessage, setqueryParagraphErrorMessage] = useState('');
+  const [loadingStatus, setLoadingStatus] = useState('');
+
+  const toggleReportingLoadingModal = (show: boolean) => {
+    setisReportingLoadingModalOpen(show);
   };
 
-  parseAllParagraphs = () => {
-    const parsedPara = this.parseParagraphs(this.state.paragraphs);
-    this.setState({ parsedPara });
-  };
+  useEffect(() => {
+    setparsedPara('useEffect', parseParagraphs(paragraphs));
+  }, [paragraphs, _setparsedPara]);
+
+  // const parseAllParagraphs = () => {
+  //   const parsedParas = parseParagraphs(paragraphs);
+  //   setparsedPara('parseAllParagraphs', parsedParas);
+  // };
 
   // parse paragraphs based on backend
-  parseParagraphs = (paragraphs: any[]): ParaType[] => {
+  const setParagraphStatus = (para: ParaType, index: number): ParaType =>
+    loadingStatus === 'queue'
+      ? { ...para, inQueue: true, isOutputHidden: true }
+      : // parsedPara[index].inQueue = true;
+      // parsedPara[index].isOutputHidden = true;
+      loadingStatus === 'loading'
+      ? { ...para, isRunning: true, isOutputHidden: true }
+      : // parsedPara[index].isRunning = true;
+      // parsedPara[index].isOutputHidden = true;
+      loadingStatus === index
+      ? { ...para, isRunning: true, isOutputHidden: true }
+      : para;
+
+  const parseParagraphs = (paras: any[]): ParaType[] => {
     try {
-      let parsedPara;
+      let parsedParas;
       // @ts-ignore
       if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
-        parsedPara = zeppelinParagraphParser(paragraphs);
-        this.setState({ vizPrefix: '%sh #vizobject:' });
+        parsedParas = zeppelinParagraphParser(paras);
+        // setvizPrefix('%sh #vizobject:');
       } else {
-        parsedPara = defaultParagraphParser(paragraphs);
+        parsedParas = defaultParagraphParser(paras);
       }
-      parsedPara.forEach((para: ParaType) => {
-        para.isInputExpanded = this.state.selectedViewId === 'input_only';
+      parsedParas.forEach((para: ParaType) => {
+        para.isInputExpanded = selectedViewId === 'input_only';
         para.paraRef = React.createRef();
         para.paraDivRef = React.createRef<HTMLDivElement>();
       });
-      return parsedPara;
+      return parsedParas;
     } catch (err) {
-      this.props.setToast(
+      props.setToast(
         'Error parsing paragraphs, please make sure you have the correct permission.',
         'danger'
       );
-      this.setState({ parsedPara: [] });
       return [];
     }
   };
+  // parsedPara[index].isRunning = true;
+  // parsedPara[index].isOutputHidden = true;
 
   // Assigns Loading, Running & inQueue for paragraphs in current notebook
-  showParagraphRunning = (param: number | string) => {
-    const parsedPara = this.state.parsedPara;
-    this.state.parsedPara.map((_: ParaType, index: number) => {
-      if (param === 'queue') {
-        parsedPara[index].inQueue = true;
-        parsedPara[index].isOutputHidden = true;
-      } else if (param === 'loading') {
-        parsedPara[index].isRunning = true;
-        parsedPara[index].isOutputHidden = true;
-      } else if (param === index) {
-        parsedPara[index].isRunning = true;
-        parsedPara[index].isOutputHidden = true;
-      }
-    });
-    this.setState({ parsedPara });
+  const showParagraphRunning = (param: number | string) => {
+    console.log('showParagraphRunning');
+    setparsedPara('showParagraphRunning', parsedPara.map(setParagraphStatus));
   };
 
   // Sets a paragraph to selected and deselects all others
-  paragraphSelector = (index: number) => {
-    const parsedPara = this.state.parsedPara;
-    this.state.parsedPara.map((_: ParaType, idx: number) => {
-      if (index === idx) parsedPara[idx].isSelected = true;
-      else parsedPara[idx].isSelected = false;
-    });
-    this.setState({ parsedPara });
-  };
+  const paragraphSelector = (index: number) =>
+    setparsedPara(
+      'paragraphSelector',
+      parsedPara.map((para: ParaType, idx: number) => ({ ...para, isSelected: idx === index }))
+    );
 
   // Function for delete a Notebook button
-  deleteParagraphButton = (para: ParaType, index: number) => {
+  const deleteParagraphButton = (para: ParaType, index: number) => {
     if (index !== -1) {
-      return this.props.http
+      return props.http
         .delete(`${NOTEBOOKS_API_PREFIX}/paragraph`, {
           query: {
-            noteId: this.props.openedNoteId,
+            noteId: props.openedNoteId,
             paragraphId: para.uniqueId,
           },
         })
         .then((res) => {
-          const paragraphs = [...this.state.paragraphs];
-          paragraphs.splice(index, 1);
-          const parsedPara = [...this.state.parsedPara];
-          parsedPara.splice(index, 1);
-          this.setState({ paragraphs, parsedPara });
+          setparagraphs(paragraphs.splice(index, 1));
+          setparsedPara('deleteParagraphButton', parsedPara.splice(index, 1));
         })
         .catch((err) => {
-          this.props.setToast(
+          props.setToast(
             'Error deleting paragraph, please make sure you have the correct permission.',
             'danger'
           );
@@ -216,40 +221,40 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   };
 
-  showDeleteParaModal = (para: ParaType, index: number) => {
-    this.setState({
-      modalLayout: getDeleteModal(
-        () => this.setState({ isModalVisible: false }),
+  const showDeleteParaModal = (para: ParaType, index: number) => {
+    setmodalLayout(
+      getDeleteModal(
+        () => setisModalVisible(false),
         () => {
-          this.deleteParagraphButton(para, index);
-          this.setState({ isModalVisible: false });
+          deleteParagraphButton(para, index);
+          setisModalVisible(false);
         },
         'Delete paragraph',
         'Are you sure you want to delete the paragraph? The action cannot be undone.'
-      ),
-    });
-    this.setState({ isModalVisible: true });
+      )
+    );
+    setisModalVisible(true);
   };
 
-  showDeleteAllParaModal = () => {
-    this.setState({
-      modalLayout: getDeleteModal(
-        () => this.setState({ isModalVisible: false }),
+  const showDeleteAllParaModal = () => {
+    setmodalLayout(
+      getDeleteModal(
+        () => setisModalVisible(false),
         async () => {
-          this.setState({ isModalVisible: false });
-          await this.props.http
+          setisModalVisible(false);
+          await props.http
             .delete(`${NOTEBOOKS_API_PREFIX}/paragraph`, {
               query: {
-                noteId: this.props.openedNoteId,
+                noteId: props.openedNoteId,
               },
             })
             .then((res) => {
-              this.setState({ paragraphs: res.paragraphs });
-              this.parseAllParagraphs();
-              this.props.setToast('Paragraphs successfully deleted!');
+              setparagraphs(res.paragraphs);
+              // parseAllParagraphs();
+              props.setToast('Paragraphs successfully deleted!');
             })
             .catch((err) => {
-              this.props.setToast(
+              props.setToast(
                 'Error deleting paragraph, please make sure you have the correct permission.',
                 'danger'
               );
@@ -257,103 +262,100 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         },
         'Delete all paragraphs',
         'Are you sure you want to delete all paragraphs? The action cannot be undone.'
-      ),
-    });
-    this.setState({ isModalVisible: true });
+      )
+    );
+    setisModalVisible(true);
   };
 
-  showClearOutputsModal = () => {
-    this.setState({
-      modalLayout: getDeleteModal(
-        () => this.setState({ isModalVisible: false }),
+  const showClearOutputsModal = () => {
+    setmodalLayout(
+      getDeleteModal(
+        () => setisModalVisible(false),
         () => {
-          this.clearParagraphButton();
-          this.setState({ isModalVisible: false });
+          clearParagraphButton();
+          setisModalVisible(false);
         },
         'Clear all outputs',
         'Are you sure you want to clear all outputs? The action cannot be undone.',
         'Clear'
-      ),
-    });
-    this.setState({ isModalVisible: true });
+      )
+    );
+    setisModalVisible(true);
   };
 
-  showRenameModal = () => {
-    this.setState({
-      modalLayout: getCustomModal(
+  const showRenameModal = () => {
+    setmodalLayout(
+      getCustomModal(
         (newName: string) => {
-          this.props.renameNotebook(newName, this.props.openedNoteId);
-          this.setState({ isModalVisible: false });
-          this.loadNotebook();
+          props.renameNotebook(newName, props.openedNoteId);
+          setisModalVisible(false);
+          loadNotebook();
         },
-        () => this.setState({ isModalVisible: false }),
+        () => setisModalVisible(false),
         'Name',
         'Rename notebook',
         'Cancel',
         'Rename',
-        this.state.path,
+        path,
         CREATE_NOTE_MESSAGE
-      ),
-    });
-    this.setState({ isModalVisible: true });
+      )
+    );
+    setisModalVisible(true);
   };
 
-  showCloneModal = () => {
-    this.setState({
-      modalLayout: getCustomModal(
+  const showCloneModal = () => {
+    setmodalLayout(
+      getCustomModal(
         (newName: string) => {
-          this.props.cloneNotebook(newName, this.props.openedNoteId).then((id: string) => {
+          props.cloneNotebook(newName, props.openedNoteId).then((id: string) => {
             window.location.assign(`#/notebooks/${id}`);
             setTimeout(() => {
-              this.loadNotebook();
+              loadNotebook();
             }, 300);
           });
-          this.setState({ isModalVisible: false });
+          setisModalVisible(false);
         },
-        () => this.setState({ isModalVisible: false }),
+        () => setisModalVisible(false),
         'Name',
         'Duplicate notebook',
         'Cancel',
         'Duplicate',
-        this.state.path + ' (copy)',
+        path + ' (copy)',
         CREATE_NOTE_MESSAGE
-      ),
-    });
-    this.setState({ isModalVisible: true });
+      )
+    );
+    setisModalVisible(true);
   };
 
-  showDeleteNotebookModal = () => {
-    this.setState({
-      modalLayout: (
-        <DeleteNotebookModal
-          onConfirm={async () => {
-            const toastMessage = `Notebook "${this.state.path}" successfully deleted!`;
-            await this.props.deleteNotebook([this.props.openedNoteId], toastMessage);
-            this.setState({ isModalVisible: false }, () =>
-              setTimeout(() => {
-                this.props.history.push('.');
-              }, 1000)
-            );
-          }}
-          onCancel={() => this.setState({ isModalVisible: false })}
-          title={`Delete notebook "${this.state.path}"`}
-          message="Delete notebook will remove all contents in the paragraphs."
-        />
-      ),
-    });
-    this.setState({ isModalVisible: true });
+  const showDeleteNotebookModal = () => {
+    setmodalLayout(
+      <DeleteNotebookModal
+        onConfirm={async () => {
+          const toastMessage = `Notebook "${path}" successfully deleted!`;
+          await deleteNotebook([props.openedNoteId], toastMessage);
+          setisModalVisible(false);
+          setTimeout(() => {
+            props.history.push('.');
+          }, 1000);
+        }}
+        onCancel={() => setisModalVisible(false)}
+        title={`Delete notebook "${path}"`}
+        message="Delete notebook will remove all contents in the paragraphs."
+      />
+    );
+    setisModalVisible(true);
   };
 
   // Function for delete Visualization from notebook
-  deleteVizualization = (uniqueId: string) => {
-    this.props.http
-      .delete(`${NOTEBOOKS_API_PREFIX}/paragraph/` + this.props.openedNoteId + '/' + uniqueId)
+  const deleteVizualization = (uniqueId: string) => {
+    props.http
+      .delete(`${NOTEBOOKS_API_PREFIX}/paragraph/` + props.openedNoteId + '/' + uniqueId)
       .then((res) => {
-        this.setState({ paragraphs: res.paragraphs });
-        this.parseAllParagraphs();
+        setparagraphs(res.paragraphs);
+        // parseAllParagraphs();
       })
       .catch((err) => {
-        this.props.setToast(
+        props.setToast(
           'Error deleting visualization, please make sure you have the correct permission.',
           'danger'
         );
@@ -361,33 +363,28 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   // Backend call to add a paragraph, switch to "view both" if in output only view
-  addPara = (index: number, newParaContent: string, inpType: string) => {
+  const addPara = (index: number, newParaContent: string, inpType: string) => {
     const addParaObj = {
-      noteId: this.props.openedNoteId,
+      noteId: props.openedNoteId,
       paragraphIndex: index,
       paragraphInput: newParaContent,
       inputType: inpType,
     };
 
-    return this.props.http
+    return props.http
       .post(`${NOTEBOOKS_API_PREFIX}/paragraph/`, {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
-        const paragraphs = [...this.state.paragraphs];
-        paragraphs.splice(index, 0, res);
-        const newPara = this.parseParagraphs([res])[0];
+        setparagraphs(paragraphs.splice(index, 0, res));
+        const newPara = parseParagraphs([res])[0];
         newPara.isInputExpanded = true;
-        const parsedPara = [...this.state.parsedPara];
-        parsedPara.splice(index, 0, newPara);
-
-        this.setState({ paragraphs, parsedPara });
-        this.paragraphSelector(index);
-        if (this.state.selectedViewId === 'output_only')
-          this.setState({ selectedViewId: 'view_both' });
+        setparsedPara('addPara', parsedPara.splice(index, 0, newPara));
+        paragraphSelector(index);
+        if (selectedViewId === 'output_only') setselectedViewId('view_both');
       })
       .catch((err) => {
-        this.props.setToast(
+        props.setToast(
           'Error adding paragraph, please make sure you have the correct permission.',
           'danger'
         );
@@ -395,7 +392,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   // Function to clone a paragraph
-  cloneParaButton = (para: ParaType, index: number) => {
+  const cloneParaButton = (para: ParaType, index: number) => {
     let inputType = 'CODE';
     if (para.typeOut[0] === 'VISUALIZATION') {
       inputType = 'VISUALIZATION';
@@ -404,62 +401,65 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       inputType = 'OBSERVABILITY_VISUALIZATION';
     }
     if (index !== -1) {
-      return this.addPara(index, para.inp, inputType);
+      return addPara(index, para.inp, inputType);
     }
   };
 
   // Function to move a paragraph
-  movePara = (index: number, targetIndex: number) => {
-    const paragraphs = [...this.state.paragraphs];
-    paragraphs.splice(targetIndex, 0, paragraphs.splice(index, 1)[0]);
-    const parsedPara = [...this.state.parsedPara];
-    parsedPara.splice(targetIndex, 0, parsedPara.splice(index, 1)[0]);
+  const movePara = (index: number, targetIndex: number) => {
+    const paras = [...paragraphs];
+    paras.splice(targetIndex, 0, paragraphs.splice(index, 1)[0]);
+    const parsedParas = [...parsedPara];
+    parsedParas.splice(targetIndex, 0, parsedParas.splice(index, 1)[0]);
 
-    const moveParaObj = {
-      noteId: this.props.openedNoteId,
+    const moveParaObj = () => ({
+      noteId: props.openedNoteId,
       paragraphs,
-    };
+    });
 
-    return this.props.http
+    return props.http
       .post(`${NOTEBOOKS_API_PREFIX}/set_paragraphs/`, {
         body: JSON.stringify(moveParaObj),
       })
-      .then((res) => this.setState({ paragraphs, parsedPara }))
-      .then((res) => this.scrollToPara(targetIndex))
+      .then((res) => {
+        setparagraphs(paras);
+        setparsedPara('movePara', parsedParas);
+      })
+      .then((res) => scrollToPara(targetIndex))
       .catch((err) => {
-        this.props.setToast(
+        props.setToast(
           'Error moving paragraphs, please make sure you have the correct permission.',
           'danger'
         );
       });
   };
 
-  scrollToPara(index: number) {
+  const scrollToPara = (index: number) => {
     setTimeout(() => {
       window.scrollTo({
         left: 0,
-        top: this.state.parsedPara[index].paraDivRef.current?.offsetTop,
+        top: parsedPara[index].paraDivRef.current?.offsetTop,
         behavior: 'smooth',
       });
     }, 0);
-  }
+  };
 
   // Function for clearing outputs button
-  clearParagraphButton = () => {
-    this.showParagraphRunning('loading');
+  const clearParagraphButton = () => {
+    setLoadingStatus('loading');
     const clearParaObj = {
-      noteId: this.props.openedNoteId,
+      noteId: props.openedNoteId,
     };
-    this.props.http
+    props.http
       .put(`${NOTEBOOKS_API_PREFIX}/paragraph/clearall/`, {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
-        this.setState({ paragraphs: res.paragraphs });
-        this.parseAllParagraphs();
+        setparagraphs(res.paragraphs);
+        // parseAllParagraphs();
       })
       .catch((err) => {
-        this.props.setToast(
+        props.setToast(
           'Error clearing paragraphs, please make sure you have the correct permission.',
           'danger'
         );
@@ -467,137 +467,142 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   // Backend call to update and run contents of paragraph
-  updateRunParagraph = (
+  const updateRunParagraph = (
     para: ParaType,
     index: number,
     vizObjectInput?: string,
     paraType?: string
   ) => {
-    this.showParagraphRunning(index);
+    setLoadingStatus(index);
     if (vizObjectInput) {
-      para.inp = this.state.vizPrefix + vizObjectInput; // "%sh check"
+      para.inp = vizPrefix + vizObjectInput; // "%sh check"
     }
 
-    const paraUpdateObject = {
-      noteId: this.props.openedNoteId,
+    const paraUpdateObject = () => ({
+      noteId: props.openedNoteId,
       paragraphId: para.uniqueId,
       paragraphInput: para.inp,
       paragraphType: paraType || '',
-    };
+    });
 
-    return this.props.http
+    return props.http
       .post(`${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`, {
         body: JSON.stringify(paraUpdateObject),
       })
       .then(async (res) => {
         if (res.output[0]?.outputType === 'QUERY') {
-          await this.loadQueryResultsFromInput(res);
+          await loadQueryResultsFromInput(res);
           const checkErrorJSON = JSON.parse(res.output[0].result);
-          if (this.checkQueryOutputError(checkErrorJSON)) {
+          if (checkQueryOutputError(checkErrorJSON)) {
             return;
           }
         }
-        const paragraphs = this.state.paragraphs;
-        paragraphs[index] = res;
-        const parsedPara = [...this.state.parsedPara];
-        parsedPara[index] = this.parseParagraphs([res])[0];
-        this.setState({ paragraphs, parsedPara });
+        const paras: ParaType[] = [...paragraphs];
+        paras[index] = res;
+        const parsedParas: ParaType[] = [...parsedPara];
+        parsedParas[index] = parseParagraphs([res])[0];
+        setparagraphs(paras);
+        setparsedPara('paraUpdatedObject', parsedparas);
       })
       .catch((err) => {
         if (err.body.statusCode === 413)
-          this.props.setToast(`Error running paragraph: ${err.body.message}`, 'danger');
+          props.setToast(`Error running paragraph: ${err.body.message}`, 'danger');
         else
-          this.props.setToast(
+          props.setToast(
             'Error running paragraph, please make sure you have the correct permission.',
             'danger'
           );
       });
   };
 
-  checkQueryOutputError = (checkErrorJSON: JSON) => {
+  const checkQueryOutputError = (checkErrorJSON: JSON) => {
     // if query output has error output
     if (checkErrorJSON.hasOwnProperty('error')) {
-      this.setState({
-        showQueryParagraphError: true,
-        queryParagraphErrorMessage: checkErrorJSON.error.reason,
-      });
+      setshowQueryParagraphError(true);
+      setqueryParagraphErrorMessage(checkErrorJSON.error.reason);
       return true;
     }
     // query ran successfully, reset error variables if currently set to true
-    else if (this.state.showQueryParagraphError) {
-      this.setState({
-        showQueryParagraphError: false,
-        queryParagraphErrorMessage: '',
-      });
+    else if (showQueryParagraphError) {
+      setshowQueryParagraphError(false);
+      setqueryParagraphErrorMessage('');
       return false;
     }
   };
 
-  runForAllParagraphs = (reducer: (para: ParaType, index: number) => Promise<any>) => {
-    return this.state.parsedPara
+  const runForAllParagraphs = (reducer: (para: ParaType, index: number) => Promise<any>) => {
+    return parsedPara
       .map((para: ParaType, index: number) => () => reducer(para, index))
       .reduce((chain, func) => chain.then(func), Promise.resolve());
   };
 
   // Handles text editor value and syncs with paragraph input
-  textValueEditor = (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
+  const textValueEditor = (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
     if (!(evt.key === 'Enter' && evt.shiftKey)) {
-      const parsedPara = this.state.parsedPara;
+      console.log('textValueEditor', {
+        evt,
+        index,
+        para: parsedPara[index],
+        key: evt.target.value,
+      });
       parsedPara[index].inp = evt.target.value;
-      this.setState({ parsedPara });
+      setparsedPara('testValueEditor', parsedPara);
     }
   };
 
   // Handles run paragraph shortcut "Shift+Enter"
-  handleKeyPress = (evt: React.KeyboardEvent<Element>, para: ParaType, index: number) => {
+  const handleKeyPress = (evt: React.KeyboardEvent<Element>, para: ParaType, index: number) => {
     if (evt.key === 'Enter' && evt.shiftKey) {
-      this.updateRunParagraph(para, index);
+      updateRunParagraph(para, index);
     }
   };
 
   // update view mode, scrolls to paragraph and expands input if scrollToIndex is given
-  updateView = (selectedViewId: string, scrollToIndex?: number) => {
-    this.configureViewParameter(selectedViewId);
-    const parsedPara = [...this.state.parsedPara];
-    this.state.parsedPara.map((para: ParaType, index: number) => {
+  const updateView = (scrollToIndex?: number) => {
+    configureViewParameter(selectedViewId);
+    parsedPara.map((para: ParaType, index: number) => {
       parsedPara[index].isInputExpanded = selectedViewId === 'input_only';
     });
 
     if (scrollToIndex !== undefined) {
       parsedPara[scrollToIndex].isInputExpanded = true;
-      this.scrollToPara(scrollToIndex);
+      scrollToPara(scrollToIndex);
     }
-    this.setState({ parsedPara, selectedViewId });
-    this.paragraphSelector(scrollToIndex !== undefined ? scrollToIndex : -1);
+    setState({ parsedPara, selectedViewId });
+    paragraphSelector(scrollToIndex !== undefined ? scrollToIndex : -1);
   };
 
-  loadNotebook = () => {
-    this.showParagraphRunning('queue');
-    this.props.http
-      .get(`${NOTEBOOKS_API_PREFIX}/note/` + this.props.openedNoteId)
+  const loadNotebook = () => {
+    props.http
+      .get(`${NOTEBOOKS_API_PREFIX}/note/` + props.openedNoteId)
       .then(async (res) => {
-        this.setBreadcrumbs(res.path);
+        console.log('result notebook', res);
+        setBreadcrumbs(res.path);
         let index = 0;
         for (index = 0; index < res.paragraphs.length; ++index) {
           // if the paragraph is a query, load the query output
           if (res.paragraphs[index].output[0]?.outputType === 'QUERY') {
-            await this.loadQueryResultsFromInput(res.paragraphs[index]);
+            await loadQueryResultsFromInput(res.paragraphs[index]);
           }
         }
-        this.setState(res, this.parseAllParagraphs);
+        setpath(res.path);
+        setdateCreated(res.dateCreated);
+        setdateModified(res.dateModified);
+        setparagraphs(res.paragraphs);
+        // parseAllParagraphs();
       })
       .catch((err) => {
-        this.props.setToast(
+        props.setToast(
           'Error fetching notebooks, please make sure you have the correct permission.',
           'danger'
         );
       });
   };
 
-  loadQueryResultsFromInput = async (paragraph: any) => {
+  const loadQueryResultsFromInput = async (paragraph: any) => {
     const queryType =
       paragraph.input.inputText.substring(0, 4) === '%sql' ? 'sqlquery' : 'pplquery';
-    await this.props.http
+    await props.http
       .post(`/api/sql/${queryType}`, {
         body: JSON.stringify(paragraph.output[0].result),
       })
@@ -606,31 +611,32 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         return paragraph;
       })
       .catch((err) => {
-        this.props.setToast('Error getting query output', 'danger');
+        props.setToast('Error getting query output', 'danger');
       });
   };
 
-  setPara = (para: ParaType, index: number) => {
-    const parsedPara = [...this.state.parsedPara];
-    parsedPara.splice(index, 1, para);
-    this.setState({ parsedPara });
+  const setPara = (para: ParaType, index: number) => {
+    console.log('setPara', { para, index });
+    const parsedParas = [...parsedPara];
+    parsedParas.splice(index, 1, para);
+    setparsedPara('setPara', parsedParas);
   };
 
-  setBreadcrumbs(path: string) {
-    this.props.setBreadcrumbs([
-      this.props.parentBreadcrumb,
+  const setBreadcrumbs = (path: string) => {
+    props.setBreadcrumbs([
+      props.parentBreadcrumb,
       {
         text: 'Notebooks',
         href: '#/notebooks',
       },
       {
         text: path,
-        href: `#/notebooks/${this.props.openedNoteId}`,
+        href: `#/notebooks/${props.openedNoteId}`,
       },
     ]);
-  }
+  };
 
-  checkIfReportingPluginIsInstalled() {
+  const checkIfReportingPluginIsInstalled = () => {
     fetch('../api/status', {
       headers: {
         'Content-Type': 'application/json',
@@ -652,452 +658,482 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       .then((data) => {
         for (let i = 0; i < data.status.statuses.length; ++i) {
           if (data.status.statuses[i].id.includes('plugin:reportsDashboards')) {
-            this.setState({ isReportingPluginInstalled: true });
+            setisReportingPluginInstalled(true);
           }
         }
       })
       .catch((error) => {
-        this.props.setToast('Error checking Reporting Plugin Installation status.', 'danger');
+        props.setToast('Error checking Reporting Plugin Installation status.', 'danger');
       });
-  }
+  };
 
-  configureViewParameter(id: string) {
-    this.props.history.replace({
-      ...this.props.location,
+  const configureViewParameter = (id: string) => {
+    props.history.replace({
+      ...props.location,
       search: `view=${id}`,
     });
-  }
+  };
 
-  componentDidMount() {
-    this.setBreadcrumbs('');
-    this.loadNotebook();
-    this.checkIfReportingPluginIsInstalled();
-    const searchParams = queryString.parse(this.props.location.search);
+  useEffect(() => showParagraphRunning(loadingStatus), [loadingStatus]);
+
+  useEffect(() => {
+    console.log('initial useEffect');
+    setBreadcrumbs('');
+    console.log('breadcrumbs set');
+    loadNotebook();
+    setLoadingStatus('queue');
+    console.log('notebook loaded');
+    checkIfReportingPluginIsInstalled();
+    const searchParams = queryString.parse(props.location.search);
     const view = searchParams.view;
     if (!view) {
-      this.configureViewParameter('view_both');
+      configureViewParameter('view_both');
     }
     if (view === 'output_only') {
-      this.setState({ selectedViewId: 'output_only' });
+      setselectedViewId('output_only');
     } else if (view === 'input_only') {
-      this.setState({ selectedViewId: 'input_only' });
+      setselectedViewId('input_only');
     }
-  }
+  }, []);
 
-  render() {
-    const createdText = (
-      <div>
-        <p>
-          Created <br /> {moment(this.state.dateCreated).format(UI_DATE_FORMAT)}
-        </p>
-      </div>
-    );
-    const viewOptions: EuiButtonGroupOption[] = [
-      {
-        id: 'view_both',
-        label: 'View both',
-      },
-      {
-        id: 'input_only',
-        label: 'Input only',
-      },
-      {
-        id: 'output_only',
-        label: 'Output only',
-      },
-    ];
-    const addParaPanels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: 'Type',
-        items: [
-          {
-            name: 'Code block',
-            onClick: () => {
-              this.setState({ isAddParaPopoverOpen: false });
-              this.addPara(this.state.paragraphs.length, '', 'CODE');
-            },
-          },
-          {
-            name: 'Visualization',
-            onClick: () => {
-              this.setState({ isAddParaPopoverOpen: false });
-              this.addPara(this.state.paragraphs.length, '', 'VISUALIZATION');
-            },
-          },
-        ],
-      },
-    ];
-    const paraActionsPanels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: 'Actions',
-        items: [
-          {
-            name: 'Add paragraph to top',
-            panel: 1,
-          },
-          {
-            name: 'Add paragraph to bottom',
-            panel: 2,
-          },
-          {
-            name: 'Run all paragraphs',
-            disabled: this.state.parsedPara.length === 0,
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.runForAllParagraphs((para: ParaType, index: number) => {
-                return para.paraRef.current?.runParagraph();
-              });
-              if (this.state.selectedViewId === 'input_only') {
-                this.updateView('view_both');
-              }
-            },
-          },
-          {
-            name: 'Clear all outputs',
-            disabled: this.state.parsedPara.length === 0,
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.showClearOutputsModal();
-            },
-          },
-          {
-            name: 'Delete all paragraphs',
-            disabled: this.state.parsedPara.length === 0,
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.showDeleteAllParaModal();
-            },
-          },
-        ],
-      },
-      {
-        id: 1,
-        title: 'Add to top',
-        items: [
-          {
-            name: 'Code block',
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.addPara(0, '', 'CODE');
-            },
-          },
-          {
-            name: 'Visualization',
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.addPara(0, '', 'VISUALIZATION');
-            },
-          },
-        ],
-      },
-      {
-        id: 2,
-        title: 'Add to bottom',
-        items: [
-          {
-            name: 'Code block',
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.addPara(this.state.paragraphs.length, '', 'CODE');
-            },
-          },
-          {
-            name: 'Visualization',
-            onClick: () => {
-              this.setState({ isParaActionsPopoverOpen: false });
-              this.addPara(this.state.paragraphs.length, '', 'VISUALIZATION');
-            },
-          },
-        ],
-      },
-    ];
-    const noteActionsPanels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: 'Notebook actions',
-        items: [
-          {
-            name: 'Rename notebook',
-            onClick: () => {
-              this.setState({ isNoteActionsPopoverOpen: false });
-              this.showRenameModal();
-            },
-          },
-          {
-            name: 'Duplicate notebook',
-            onClick: () => {
-              this.setState({ isNoteActionsPopoverOpen: false });
-              this.showCloneModal();
-            },
-          },
-          {
-            name: 'Delete notebook',
-            onClick: () => {
-              this.setState({ isNoteActionsPopoverOpen: false });
-              this.showDeleteNotebookModal();
-            },
-          },
-        ],
-      },
-    ];
+  // render() {
+  const CreatedText = () => (
+    <div>
+      <p>
+        Created <br /> {moment(dateCreated).format(UI_DATE_FORMAT)}
+      </p>
+    </div>
+  );
+  const viewOptions = (): EuiButtonGroupOption[] => [
+    {
+      id: 'view_both',
+      label: 'View both',
+    },
+    {
+      id: 'input_only',
+      label: 'Input only',
+    },
+    {
+      id: 'output_only',
+      label: 'Output only',
+    },
+  ];
 
-    const reportingActionPanels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: 'Reporting',
-        items: [
-          {
-            name: 'Download PDF',
-            icon: <EuiIcon type="download" />,
-            onClick: () => {
-              this.setState({ isReportingActionsPopoverOpen: false });
-              generateInContextReport('pdf', this.props, this.toggleReportingLoadingModal);
-            },
+  const addParaPanels = (): EuiContextMenuPanelDescriptor[] => [
+    {
+      id: 0,
+      title: 'Type',
+      items: [
+        {
+          name: 'Code block',
+          onClick: () => {
+            setisAddParaPopoverOpen(false);
+            addPara(paragraphs.length, '', 'CODE');
           },
-          {
-            name: 'Download PNG',
-            icon: <EuiIcon type="download" />,
-            onClick: () => {
-              this.setState({ isReportingActionsPopoverOpen: false });
-              generateInContextReport('png', this.props, this.toggleReportingLoadingModal);
-            },
+        },
+        {
+          name: 'Visualization',
+          onClick: () => {
+            setisAddParaPopoverOpen(false);
+            addPara(paragraphs.length, '', 'VISUALIZATION');
           },
-          {
-            name: 'Create report definition',
-            icon: <EuiIcon type="calendar" />,
-            onClick: () => {
-              this.setState({ isReportingActionsPopoverOpen: false });
-              contextMenuCreateReportDefinition(window.location.href);
-            },
+        },
+      ],
+    },
+  ];
+  const paraActionsPanels = ({ parsedCount }): EuiContextMenuPanelDescriptor[] => [
+    {
+      id: 0,
+      title: 'Actions',
+      items: [
+        {
+          name: 'Add paragraph to top',
+          panel: 1,
+        },
+        {
+          name: 'Add paragraph to bottom',
+          panel: 2,
+        },
+        {
+          name: 'Run all paragraphs',
+          disabled: parsedCount === 0,
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            runForAllParagraphs((para: ParaType, index: number) => {
+              return para.paraRef.current?.runParagraph();
+            });
+            if (selectedViewId === 'input_only') {
+              updateView('view_both');
+            }
           },
-          {
-            name: 'View reports',
-            icon: <EuiIcon type="document" />,
-            onClick: () => {
-              this.setState({ isReportingActionsPopoverOpen: false });
-              contextMenuViewReports();
-            },
+        },
+        {
+          name: 'Clear all outputs',
+          disabled: parsedPara.length === 0,
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            showClearOutputsModal();
           },
-        ],
-      },
-    ];
+        },
+        {
+          name: 'Delete all paragraphs',
+          disabled: parsedPara.length === 0,
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            showDeleteAllParaModal();
+          },
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: 'Add to top',
+      items: [
+        {
+          name: 'Code block',
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            addPara(0, '', 'CODE');
+          },
+        },
+        {
+          name: 'Visualization',
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            addPara(0, '', 'VISUALIZATION');
+          },
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: 'Add to bottom',
+      items: [
+        {
+          name: 'Code block',
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            addPara(paragraphs.length, '', 'CODE');
+          },
+        },
+        {
+          name: 'Visualization',
+          onClick: () => {
+            setisParaActionsPopoverOpen(false);
+            addPara(paragraphs.length, '', 'VISUALIZATION');
+          },
+        },
+      ],
+    },
+  ];
 
-    const showReportingContextMenu = this.state.isReportingPluginInstalled ? (
+  const noteActionsPanels = (): EuiContextMenuPanelDescriptor[] => [
+    {
+      id: 0,
+      title: 'Notebook actions',
+      items: [
+        {
+          name: 'Rename notebook',
+          onClick: () => {
+            setisNoteActionsPopoverOpen(false);
+            showRenameModal();
+          },
+        },
+        {
+          name: 'Duplicate notebook',
+          onClick: () => {
+            setisNoteActionsPopoverOpen(false);
+            showCloneModal();
+          },
+        },
+        {
+          name: 'Delete notebook',
+          onClick: () => {
+            setisNoteActionsPopoverOpen(false);
+            showDeleteNotebookModal();
+          },
+        },
+      ],
+    },
+  ];
+
+  const reportingActionPanels = (): EuiContextMenuPanelDescriptor[] => [
+    {
+      id: 0,
+      title: 'Reporting',
+      items: [
+        {
+          name: 'Download PDF',
+          icon: <EuiIcon type="download" />,
+          onClick: () => {
+            setisReportingActionsPopoverOpen(false);
+            generateInContextReport('pdf', props.toggleReportingLoadingModal);
+          },
+        },
+        {
+          name: 'Download PNG',
+          icon: <EuiIcon type="download" />,
+          onClick: () => {
+            setisReportingActionsPopoverOpen(false);
+            generateInContextReport('png', props.toggleReportingLoadingModal);
+          },
+        },
+        {
+          name: 'Create report definition',
+          icon: <EuiIcon type="calendar" />,
+          onClick: () => {
+            setisReportingActionsPopoverOpen(false);
+            contextMenuCreateReportDefinition(window.location.href);
+          },
+        },
+        {
+          name: 'View reports',
+          icon: <EuiIcon type="document" />,
+          onClick: () => {
+            setisReportingActionsPopoverOpen(false);
+            contextMenuViewReports();
+          },
+        },
+      ],
+    },
+  ];
+
+  const ReportingContextMenu = () =>
+    isReportingPluginInstalled ? (
       <div>
         <EuiPopover
           panelPaddingSize="none"
-          withTitle
           button={
             <EuiButton
               id="reportingActionsButton"
               iconType="arrowDown"
               iconSide="right"
-              onClick={() => this.setState({ isReportingActionsPopoverOpen: true })}
+              onClick={() => setState({ isReportingActionsPopoverOpen: true })}
             >
               Reporting actions
             </EuiButton>
           }
-          isOpen={this.state.isReportingActionsPopoverOpen}
-          closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
+          isOpen={isReportingActionsPopoverOpen}
+          closePopover={() => setState({ isReportingActionsPopoverOpen: false })}
         >
-          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} />
+          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels()} />
         </EuiPopover>
       </div>
     ) : null;
 
-    const showLoadingModal = this.state.isReportingLoadingModalOpen ? (
-      <GenerateReportLoadingModal setShowLoading={this.toggleReportingLoadingModal} />
-    ) : null;
+  const LoadedParagraphs = () => {
+    if (parsedPara.length === 0) return <></>;
 
     return (
-      <div style={pageStyles}>
-        <EuiPage>
-          <EuiPageBody component="div">
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-              <EuiFlexItem />
-              {this.state.parsedPara.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonGroup
-                    buttonSize="m"
-                    options={viewOptions}
-                    idSelected={this.state.selectedViewId}
-                    onChange={(id) => {
-                      this.updateView(id);
-                    }}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false} />
-              <EuiFlexItem grow={false} />
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="none"
-                  withTitle
-                  button={
-                    <EuiButton
-                      data-test-subj="notebook-paragraph-actions-button"
-                      iconType="arrowDown"
-                      iconSide="right"
-                      onClick={() => this.setState({ isParaActionsPopoverOpen: true })}
-                    >
-                      Paragraph actions
-                    </EuiButton>
-                  }
-                  isOpen={this.state.isParaActionsPopoverOpen}
-                  closePopover={() => this.setState({ isParaActionsPopoverOpen: false })}
+      <>
+        {parsedPara.map((para: ParaType, index: number) => (
+          <div
+            ref={parsedPara[index].paraDivRef}
+            key={`para_div_${para.uniqueId}`}
+            style={panelStyles}
+          >
+            <Paragraphs
+              ref={parsedPara[index].paraRef}
+              pplService={props.pplService}
+              para={para}
+              setPara={(pr: ParaType) => setPara(pr, index)}
+              dateModified={paragraphs[index]?.dateModified}
+              index={index}
+              paraCount={parsedPara.length}
+              paragraphSelector={paragraphSelector}
+              textValueEditor={textValueEditor}
+              handleKeyPress={handleKeyPress}
+              addPara={addPara}
+              DashboardContainerByValueRenderer={props.DashboardContainerByValueRenderer}
+              deleteVizualization={deleteVizualization}
+              http={props.http}
+              selectedViewId={selectedViewId}
+              setSelectedViewId={updateView}
+              deletePara={showDeleteParaModal}
+              runPara={updateRunParagraph}
+              clonePara={cloneParaButton}
+              movePara={movePara}
+              showQueryParagraphError={showQueryParagraphError}
+              queryParagraphErrorMessage={queryParagraphErrorMessage}
+            />
+          </div>
+        ))}
+        {selectedViewId !== 'output_only' && (
+          <>
+            <EuiSpacer />
+            <EuiPopover
+              panelPaddingSize="none"
+              button={
+                <EuiButton
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={() => setState({ isAddParaPopoverOpen: true })}
                 >
-                  <EuiContextMenu initialPanelId={0} panels={paraActionsPanels} />
-                </EuiPopover>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{showReportingContextMenu}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="none"
-                  withTitle
-                  button={
-                    <EuiButton
-                      data-test-subj="notebook-notebook-actions-button"
-                      iconType="arrowDown"
-                      iconSide="right"
-                      onClick={() => this.setState({ isNoteActionsPopoverOpen: true })}
-                    >
-                      Notebook actions
-                    </EuiButton>
-                  }
-                  isOpen={this.state.isNoteActionsPopoverOpen}
-                  closePopover={() => this.setState({ isNoteActionsPopoverOpen: false })}
-                >
-                  <EuiContextMenu initialPanelId={0} panels={noteActionsPanels} />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiTitle size="l">
-              <h1>{this.state.path}</h1>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems={'flexStart'} gutterSize={'l'}>
-              <EuiFlexItem grow={false}>
-                <EuiText>{createdText}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {this.state.parsedPara.length > 0 ? (
-              <>
-                {this.state.parsedPara.map((para: ParaType, index: number) => (
-                  <div
-                    ref={this.state.parsedPara[index].paraDivRef}
-                    key={`para_div_${para.uniqueId}`}
-                    style={panelStyles}
+                  Add paragraph
+                </EuiButton>
+              }
+              isOpen={isAddParaPopoverOpen}
+              closePopover={() => setState({ isAddParaPopoverOpen: false })}
+            >
+              <EuiContextMenu initialPanelId={0} panels={addParaPanels()} />
+            </EuiPopover>
+          </>
+        )}
+      </>
+    );
+  };
+
+  const NoParagraphsNotice = () => {
+    if (parsedPara.length > 0) return <></>;
+
+    return (
+      // show default paragraph if no paragraphs in this notebook
+      <div style={panelStyles}>
+        <EuiPanel>
+          <EuiSpacer size="xxl" />
+          <EuiText textAlign="center">
+            <h2>No paragraphs</h2>
+            <EuiText>
+              Add a paragraph to compose your document or story. Notebooks now support two types of
+              input:
+            </EuiText>
+          </EuiText>
+          <EuiSpacer size="xl" />
+          <EuiFlexGroup justifyContent="spaceEvenly">
+            <EuiFlexItem grow={2} />
+            <EuiFlexItem grow={3}>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="editorCodeBlock" />}
+                title="Code block"
+                description="Write contents directly using markdown, SQL or PPL."
+                footer={
+                  <EuiButton onClick={() => addPara(0, '', 'CODE')} style={{ marginBottom: 17 }}>
+                    Add code block
+                  </EuiButton>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="visArea" />}
+                title="Visualization"
+                description="Import OpenSearch Dashboards or Observability visualizations to the notes."
+                footer={
+                  <EuiButton
+                    onClick={() => addPara(0, '', 'VISUALIZATION')}
+                    style={{ marginBottom: 17 }}
                   >
-                    <Paragraphs
-                      ref={this.state.parsedPara[index].paraRef}
-                      pplService={this.props.pplService}
-                      para={para}
-                      setPara={(pr: ParaType) => this.setPara(pr, index)}
-                      dateModified={this.state.paragraphs[index]?.dateModified}
-                      index={index}
-                      paraCount={this.state.parsedPara.length}
-                      paragraphSelector={this.paragraphSelector}
-                      textValueEditor={this.textValueEditor}
-                      handleKeyPress={this.handleKeyPress}
-                      addPara={this.addPara}
-                      DashboardContainerByValueRenderer={
-                        this.props.DashboardContainerByValueRenderer
-                      }
-                      deleteVizualization={this.deleteVizualization}
-                      http={this.props.http}
-                      selectedViewId={this.state.selectedViewId}
-                      setSelectedViewId={this.updateView}
-                      deletePara={this.showDeleteParaModal}
-                      runPara={this.updateRunParagraph}
-                      clonePara={this.cloneParaButton}
-                      movePara={this.movePara}
-                      showQueryParagraphError={this.state.showQueryParagraphError}
-                      queryParagraphErrorMessage={this.state.queryParagraphErrorMessage}
-                    />
-                  </div>
-                ))}
-                {this.state.selectedViewId !== 'output_only' && (
-                  <>
-                    <EuiSpacer />
-                    <EuiPopover
-                      panelPaddingSize="none"
-                      withTitle
-                      button={
-                        <EuiButton
-                          iconType="arrowDown"
-                          iconSide="right"
-                          onClick={() => this.setState({ isAddParaPopoverOpen: true })}
-                        >
-                          Add paragraph
-                        </EuiButton>
-                      }
-                      isOpen={this.state.isAddParaPopoverOpen}
-                      closePopover={() => this.setState({ isAddParaPopoverOpen: false })}
-                    >
-                      <EuiContextMenu initialPanelId={0} panels={addParaPanels} />
-                    </EuiPopover>
-                  </>
-                )}
-              </>
-            ) : (
-              // show default paragraph if no paragraphs in this notebook
-              <div style={panelStyles}>
-                <EuiPanel>
-                  <EuiSpacer size="xxl" />
-                  <EuiText textAlign="center">
-                    <h2>No paragraphs</h2>
-                    <EuiText>
-                      Add a paragraph to compose your document or story. Notebooks now support two
-                      types of input:
-                    </EuiText>
-                  </EuiText>
-                  <EuiSpacer size="xl" />
-                  <EuiFlexGroup justifyContent="spaceEvenly">
-                    <EuiFlexItem grow={2} />
-                    <EuiFlexItem grow={3}>
-                      <EuiCard
-                        icon={<EuiIcon size="xxl" type="editorCodeBlock" />}
-                        title="Code block"
-                        description="Write contents directly using markdown, SQL or PPL."
-                        footer={
-                          <EuiButton
-                            onClick={() => this.addPara(0, '', 'CODE')}
-                            style={{ marginBottom: 17 }}
-                          >
-                            Add code block
-                          </EuiButton>
-                        }
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={3}>
-                      <EuiCard
-                        icon={<EuiIcon size="xxl" type="visArea" />}
-                        title="Visualization"
-                        description="Import OpenSearch Dashboards or Observability visualizations to the notes."
-                        footer={
-                          <EuiButton
-                            onClick={() => this.addPara(0, '', 'VISUALIZATION')}
-                            style={{ marginBottom: 17 }}
-                          >
-                            Add visualization
-                          </EuiButton>
-                        }
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={2} />
-                  </EuiFlexGroup>
-                  <EuiSpacer size="xxl" />
-                </EuiPanel>
-              </div>
-            )}
-            {showLoadingModal}
-          </EuiPageBody>
-        </EuiPage>
-        {this.state.isModalVisible && this.state.modalLayout}
+                    Add visualization
+                  </EuiButton>
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={2} />
+          </EuiFlexGroup>
+          <EuiSpacer size="xxl" />
+        </EuiPanel>
       </div>
     );
-  }
+  };
+
+  const LoadingModal = () =>
+    isReportingLoadingModalOpen ? (
+      <GenerateReportLoadingModal setShowLoading={toggleReportingLoadingModal} />
+    ) : null;
+
+  const ViewButtonGroup = () => {
+    if (parsedPara.length === 0) return <></>;
+
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButtonGroup
+          legend=""
+          buttonSize="m"
+          options={viewOptions()}
+          idSelected={selectedViewId}
+          onChange={(id) => {
+            updateView(id);
+          }}
+        />
+      </EuiFlexItem>
+    );
+  };
+
+  return (
+    <div style={pageStyles}>
+      <EuiPage>
+        <EuiPageBody component="div">
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem />
+            <ViewButtonGroup />
+            <EuiFlexItem grow={false} />
+            <EuiFlexItem grow={false} />
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="none"
+                button={
+                  <EuiButton
+                    data-test-subj="notebook-paragraph-actions-button"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={() => setisParaActionsPopoverOpen(true)}
+                  >
+                    Paragraph actions
+                  </EuiButton>
+                }
+                isOpen={isParaActionsPopoverOpen}
+                closePopover={() => setisParaActionsPopoverOpen(false)}
+              >
+                <EuiContextMenu
+                  initialPanelId={0}
+                  panels={paraActionsPanels({ parsedCount: parsedPara?.length || 0 })}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ReportingContextMenu />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="none"
+                button={
+                  <EuiButton
+                    data-test-subj="notebook-notebook-actions-button"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={() => setisNoteActionsPopoverOpen(true)}
+                  >
+                    Notebook actions
+                  </EuiButton>
+                }
+                isOpen={isNoteActionsPopoverOpen}
+                closePopover={() => setisNoteActionsPopoverOpen(false)}
+              >
+                <EuiContextMenu initialPanelId={0} panels={noteActionsPanels()} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiTitle size="l">
+            <h1>{path}</h1>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems={'flexStart'} gutterSize={'l'}>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <CreatedText />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <LoadedParagraphs />
+
+          <NoParagraphsNotice />
+
+          <LoadingModal />
+        </EuiPageBody>
+      </EuiPage>
+      {isModalVisible && modalLayout}
+    </div>
+  );
 }

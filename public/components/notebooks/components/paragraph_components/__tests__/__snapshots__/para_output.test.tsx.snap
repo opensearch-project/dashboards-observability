@@ -68,10 +68,12 @@ exports[`<ParaOutput /> spec renders query outputs 1`] = `
 `;
 
 exports[`<ParaOutput /> spec renders visualization outputs 1`] = `
-<div
-  class="euiText euiText--small"
-  style="margin-left: 9px;"
->
-  2020-07-21T18:37:44+00:00 - 2020-08-20T18:37:44+00:00
+<div>
+  <div
+    class="euiText euiText--small"
+    style="margin-left: 9px;"
+  >
+    2020-07-21T18:37:44+00:00 - 2020-08-20T18:37:44+00:00
+  </div>
 </div>
 `;

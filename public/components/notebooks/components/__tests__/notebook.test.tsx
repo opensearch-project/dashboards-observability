@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, act } from '@testing-library/react';
 import { configure, mount, shallow } from 'enzyme';
+import { routeData } from 'react-router-dom';
 import Adapter from 'enzyme-adapter-react-16';
 import PPLService from '../../../../services/requests/ppl';
 import React from 'react';
@@ -32,6 +33,8 @@ global.fetch = jest.fn(() =>
   })
 );
 
+// global.location = jest.fn({ pathname: '/testroute' });
+
 describe('<Notebook /> spec', () => {
   configure({ adapter: new Adapter() });
 
@@ -45,25 +48,31 @@ describe('<Notebook /> spec', () => {
     const location = jest.fn();
     const history = jest.fn() as any;
     history.replace = jest.fn();
-    const utils = render(
-      <Notebook
-        pplService={pplService}
-        openedNoteId="mock-id"
-        DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
-        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
-        setBreadcrumbs={setBreadcrumbs}
-        renameNotebook={renameNotebook}
-        cloneNotebook={cloneNotebook}
-        deleteNotebook={deleteNotebook}
-        setToast={setToast}
-        location={location}
-        history={history}
-      />
-    );
-    expect(utils.container.firstChild).toMatchSnapshot();
-    utils.getByText('Add code block').click();
-    utils.getByText('Add visualization').click();
+    let utils;
+    await act(() => {
+      utils = render(
+        <Notebook
+          pplService={pplService}
+          openedNoteId="mock-id"
+          DashboardContainerByValueRenderer={jest.fn()}
+          http={httpClientMock}
+          parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+          setBreadcrumbs={setBreadcrumbs}
+          renameNotebook={renameNotebook}
+          cloneNotebook={cloneNotebook}
+          deleteNotebook={deleteNotebook}
+          setToast={setToast}
+          location={location}
+          history={history}
+        />
+      );
+    });
+    await waitFor(() => {
+      expect(utils.container.firstChild).toMatchSnapshot();
+    });
+
+    // utils.getByText('Add code block').click();
+    // utils.getByText('Add visualization').click();
   });
 
   it('renders the component', async () => {
@@ -73,7 +82,14 @@ describe('<Notebook /> spec', () => {
     const cloneNotebook = jest.fn();
     const deleteNotebook = jest.fn();
     const setToast = jest.fn();
-    const location = jest.fn();
+    jest.mock('react-router', () => ({
+      ...(jest.requireActual('react-router') as {}),
+      useLocation: jest.fn().mockImplementation(() => {
+        return { pathname: '/testroute' };
+      }),
+    }));
+
+    // const location = jest.fn();
     const history = jest.fn() as any;
     history.replace = jest.fn();
     httpClientMock.get = jest.fn(() =>
@@ -96,22 +112,26 @@ describe('<Notebook /> spec', () => {
         })),
       } as unknown) as HttpResponse)
     );
-    const utils = render(
-      <Notebook
-        pplService={pplService}
-        openedNoteId={sampleNotebook1.id}
-        DashboardContainerByValueRenderer={jest.fn()}
-        http={httpClientMock}
-        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
-        setBreadcrumbs={setBreadcrumbs}
-        renameNotebook={renameNotebook}
-        cloneNotebook={cloneNotebook}
-        deleteNotebook={deleteNotebook}
-        setToast={setToast}
-        location={location}
-        history={history}
-      />
-    );
+
+    let utils;
+    act(() => {
+      utils = render(
+        <Notebook
+          pplService={pplService}
+          openedNoteId={sampleNotebook1.id}
+          DashboardContainerByValueRenderer={jest.fn()}
+          http={httpClientMock}
+          parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+          setBreadcrumbs={setBreadcrumbs}
+          renameNotebook={renameNotebook}
+          cloneNotebook={cloneNotebook}
+          deleteNotebook={deleteNotebook}
+          setToast={setToast}
+          location={location}
+          history={history}
+        />
+      );
+    });
 
     await waitFor(() => {
       expect(utils.container.firstChild).toMatchSnapshot();

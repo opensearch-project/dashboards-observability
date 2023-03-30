@@ -7,9 +7,9 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
 import moment from 'moment';
+import React, { useState } from 'react';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
-import React, { useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
@@ -38,7 +38,7 @@ export const ParaOutput = (props: {
 }) => {
   const createQueryColumns = (jsonColumns: any[]) => {
     let index = 0;
-    let datagridColumns = [];
+    const datagridColumns = [];
     for (index = 0; index < jsonColumns.length; ++index) {
       const datagridColumnObject = {
         id: jsonColumns[index].name,
@@ -54,7 +54,7 @@ export const ParaOutput = (props: {
     let index = 0;
     let schemaIndex = 0;
     for (index = 0; index < queryObject.datarows.length; ++index) {
-      let datarowValue = {};
+      const datarowValue = {};
       for (schemaIndex = 0; schemaIndex < queryObject.schema.length; ++schemaIndex) {
         const columnName = queryObject.schema[schemaIndex].name;
         if (typeof queryObject.datarows[index][schemaIndex] === 'object') {
@@ -89,7 +89,7 @@ export const ParaOutput = (props: {
             const data = getQueryOutputData(queryObject);
             const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
             return (
-              <div>
+              <div key={key}>
                 <EuiText key={'query-input-key'}>
                   <b>{inputQuery}</b>
                 </EuiText>
@@ -117,7 +117,7 @@ export const ParaOutput = (props: {
           from = from === 'Invalid date' ? visInput.timeRange.from : from;
           to = to === 'Invalid date' ? visInput.timeRange.to : to;
           return (
-            <>
+            <div key={key}>
               <EuiText size="s" style={{ marginLeft: 9 }}>
                 {`${from} - ${to}`}
               </EuiText>
@@ -126,7 +126,7 @@ export const ParaOutput = (props: {
                 input={visInput}
                 onInputUpdated={setVisInput}
               />
-            </>
+            </div>
           );
         case 'OBSERVABILITY_VISUALIZATION':
           let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
@@ -137,7 +137,7 @@ export const ParaOutput = (props: {
             window.location.assign(`#/event_analytics/explorer/${savedVisualizationId}`);
           };
           return (
-            <>
+            <div key={key}>
               <EuiText size="s" style={{ marginLeft: 9 }}>
                 {`${fromObs} - ${toObs}`}
               </EuiText>
@@ -156,7 +156,7 @@ export const ParaOutput = (props: {
                   usedInNotebooks={true}
                 />
               </div>
-            </>
+            </div>
           );
         case 'HTML':
           return (
