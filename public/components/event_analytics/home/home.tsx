@@ -139,7 +139,12 @@ const EventAnalyticsHome = (props: IHomeProps) => {
     const objectIdsToDelete = selectedHistories.map((hstry) => hstry.data.objectId);
     await savedObjects
       .deleteSavedObjectsList({ objectIdList: objectIdsToDelete })
-      .then(async (res) => {
+      .catch(() =>
+        new OSDSavedVisualizationClient(getOSDSavedObjectsClient()).deleteBulk({
+          objectIdList: objectIdsToDelete,
+        })
+      )
+      .then(async () => {
         setSavedHistories((staleHistories) => {
           return staleHistories.filter((his) => {
             return !objectIdsToDelete.includes(his.objectId);

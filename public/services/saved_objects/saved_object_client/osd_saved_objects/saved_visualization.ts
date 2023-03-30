@@ -10,7 +10,7 @@ import {
   VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
 } from '../../../../../common/types/observability_saved_object_attributes';
-import { SavedObjectsGetResponse } from '../types';
+import { SavedObjectsDeleteResponse, SavedObjectsGetResponse } from '../types';
 import { OSDSavedObjectClient } from './osd_saved_object_client';
 import { OSDSavedObjectCreateResponse, OSDSavedObjectUpdateResponse } from './types';
 
@@ -143,11 +143,22 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
     return { observabilityObjectList };
   }
 
-  async delete(params: { objectId: string }): Promise<unknown> {
-    return this.client.delete(VISUALIZATION_SAVED_OBJECT, params.objectId);
+  async delete(params: { objectId: string }): Promise<SavedObjectsDeleteResponse> {
+    return this.client
+      .delete(VISUALIZATION_SAVED_OBJECT, params.objectId)
+      .then((res) => ({ deleteResponseList: { [params.objectId]: 'OK' } }))
+      .catch((res) => ({ deleteResponseList: { [params.objectId]: res } }));
   }
 
-  async deleteBulk(params: { objectIdList: string[] }): Promise<unknown> {
-    return params.objectIdList.map((id) => this.client.delete(VISUALIZATION_SAVED_OBJECT, id));
+  async deleteBulk(params: { objectIdList: string[] }): Promise<SavedObjectsDeleteResponse> {
+    const deleteResponseList: SavedObjectsDeleteResponse['deleteResponseList'] = {};
+    const x = await Promise.allSettled(
+      params.objectIdList.map((objectId) => this.delete({ objectId }))
+    ).then((res) => {
+      res.map((r, i) => {
+        deleteResponseList[params.objectIdList[i]] = r.status === 'fulfilled' ? r.value : r.reason;
+      });
+    });
+    return { deleteResponseList };
   }
 }

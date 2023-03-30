@@ -44,7 +44,9 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
     throw new Error('Method not implemented.');
   }
   deleteBulk(params: any): Promise<Array<Promise<any>>> {
-    throw new Error('Method not implemented.');
+    return this.client.delete(
+      `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/${params.objectIdList.join(',')}`
+    );
   }
   buildRequestBody({
     query,

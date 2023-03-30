@@ -26,3 +26,9 @@ export interface SavedObjectsGetResponse {
   totalHitRelation?: 'eq' | 'gte';
   observabilityObjectList: ObservabilitySavedObject[];
 }
+
+export interface SavedObjectsDeleteResponse {
+  deleteResponseList: {
+    [objectId: string]: string; // org.opensearch.rest.RestStatus, e.g. 'OK'
+  };
+}
