@@ -68,7 +68,6 @@ import {
   buildQuery,
   composeFinalQuery,
   getIndexPatternFromRawQuery,
-  getOSDSavedObjectsClient,
   uiSettingsService,
 } from '../../../../common/utils';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
@@ -834,7 +833,7 @@ export const Explorer = ({
         soClient = new SaveAsCurrenQuery(
           { tabId, notifications },
           { dispatch, updateTabName },
-          new PPLSavedQueryClient(http),
+          PPLSavedQueryClient.getInstance(),
           {
             ...commonParams,
             objectId: query[SAVED_OBJECT_ID],
@@ -878,7 +877,7 @@ export const Explorer = ({
             addVisualizationToPanel,
           },
           { batch, dispatch, changeQuery, updateTabName },
-          new OSDSavedVisualizationClient(getOSDSavedObjectsClient()),
+          OSDSavedVisualizationClient.getInstance(),
           new PanelSavedObjectClient(http),
           {
             ...commonParams,
