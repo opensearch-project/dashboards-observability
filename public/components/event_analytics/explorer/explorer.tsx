@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
-import { has, isEmpty, isEqual, reduce } from 'lodash';
+import { isEmpty, isEqual, reduce } from 'lodash';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
@@ -47,7 +47,6 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
-  TYPE_TAB_MAPPING,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -111,6 +110,7 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
+import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 
 export const Explorer = ({
   pplService,
@@ -251,102 +251,6 @@ export const Explorer = ({
     };
   };
 
-  const getSavedDataById = async (objectId: string) => {
-    // load saved query/visualization if object id exists
-    await getSavedObjectsClient({ objectId, objectType: 'savedQuery' })
-      .get({ objectId })
-      .then(async (res) => {
-        const savedData = res.observabilityObjectList[0];
-        const isSavedQuery = has(savedData, SAVED_QUERY);
-        const savedType = isSavedQuery ? SAVED_QUERY : SAVED_VISUALIZATION;
-        const objectData = isSavedQuery ? savedData.savedQuery : savedData.savedVisualization;
-        const isSavedVisualization = savedData.savedVisualization;
-        const currQuery = objectData?.query || '';
-
-        if (appLogEvents) {
-          if (objectData?.selected_date_range?.start && objectData?.selected_date_range?.end) {
-            setStartTime(objectData.selected_date_range.start);
-            setEndTime(objectData.selected_date_range.end);
-          }
-        }
-
-        // update redux
-        batch(async () => {
-          await dispatch(
-            changeQuery({
-              tabId,
-              query: {
-                [RAW_QUERY]: currQuery,
-                [SELECTED_TIMESTAMP]: objectData?.selected_timestamp?.name || 'timestamp',
-                [SAVED_OBJECT_ID]: objectId,
-                [SAVED_OBJECT_TYPE]: savedType,
-                [SELECTED_DATE_RANGE]:
-                  objectData?.selected_date_range?.start && objectData?.selected_date_range?.end
-                    ? [objectData.selected_date_range.start, objectData.selected_date_range.end]
-                    : ['now-15m', 'now'],
-              },
-            })
-          );
-          await dispatch(
-            updateFields({
-              tabId,
-              data: {
-                [SELECTED_FIELDS]: [...objectData?.selected_fields?.tokens],
-              },
-            })
-          );
-          await dispatch(
-            updateTabName({
-              tabId,
-              tabName: objectData.name,
-            })
-          );
-          // fill saved user configs
-          if (objectData?.type) {
-            let visConfig = {};
-            const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
-            if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
-              visConfig = { ...customConfig };
-            } else {
-              const statsTokens = queryManager.queryParser().parse(objectData.query).getStats();
-              visConfig = { dataConfig: { ...getDefaultVisConfig(statsTokens) } };
-            }
-            await dispatch(
-              updateVizConfig({
-                tabId,
-                vizId: objectData?.type,
-                data: visConfig,
-              })
-            );
-          }
-        });
-
-        // update UI state with saved data
-        setSelectedPanelName(objectData?.name || '');
-        setCurVisId(objectData?.type || 'bar');
-        setTempQuery((staleTempQuery: string) => {
-          return objectData?.query || staleTempQuery;
-        });
-        if (isSavedVisualization?.sub_type) {
-          if (isSavedVisualization?.sub_type === 'metric') {
-            setMetricChecked(true);
-            setMetricMeasure(isSavedVisualization?.units_of_measure);
-          }
-          setSubType(isSavedVisualization?.sub_type);
-        }
-        const tabToBeFocused = isSavedQuery
-          ? TYPE_TAB_MAPPING[SAVED_QUERY]
-          : TYPE_TAB_MAPPING[SAVED_VISUALIZATION];
-        setSelectedContentTab(tabToBeFocused);
-        await fetchData();
-      })
-      .catch((error) => {
-        notifications.toasts.addError(error, {
-          title: `Cannot get saved data for object id: ${objectId}`,
-        });
-      });
-  };
-
   const getDefaultTimestampByIndexPattern = async (
     indexPattern: string
   ): Promise<IDefaultTimestampState> => await timestampUtils.getTimestamp(indexPattern);
@@ -469,7 +373,35 @@ export const Explorer = ({
     !isEqual(getIndexPatternFromRawQuery(currentQuery), getIndexPatternFromRawQuery(prevTabQuery));
 
   const updateTabData = async (objectId: string) => {
-    await getSavedDataById(objectId);
+    await new PPLSavedObjectLoader(
+      await getSavedObjectsClient({ objectId, objectType: 'savedQuery' }),
+      notifications,
+      {
+        batch,
+        dispatch,
+        changeQuery,
+        updateFields,
+        updateTabName,
+        updateVizConfig,
+      },
+      { objectId },
+      {
+        tabId,
+        appLogEvents,
+        setStartTime,
+        setEndTime,
+        queryManager,
+        getDefaultVisConfig,
+        setSelectedPanelName,
+        setCurVisId,
+        setTempQuery,
+        setMetricChecked,
+        setMetricMeasure,
+        setSubType,
+        setSelectedContentTab,
+        fetchData,
+      }
+    ).load();
   };
 
   const prepareAvailability = async () => {
