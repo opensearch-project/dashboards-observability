@@ -8,37 +8,59 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '../../../../../../../src/core/public';
+import { OBSERVABILTY_SAVED_OBJECTS } from '../../../../../common/types/observability_saved_object_attributes';
 import { SavedObjectClientBase } from '../client_base';
-import { SavedObjectsGetResponse, SavedObjectsCreateResponse } from '../types';
+import { ObservabilitySavedObjectsType } from './types';
 
-export class OSDSavedObjectClient extends SavedObjectClientBase {
+export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
+  private static TYPE_ID_REGEX = new RegExp(
+    `(${OBSERVABILTY_SAVED_OBJECTS.join(
+      '|'
+    )}):([0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$)`
+  );
+
   constructor(protected readonly client: SavedObjectsClientContract) {
     super();
   }
-  create(params: unknown): Promise<SavedObjectsCreateResponse> {
-    throw new Error('Method not implemented.');
+
+  /**
+   * OSD saved object client operations requires object type. Type is part of
+   * the document id but not in operation response id (see
+   * https://github.com/opensearch-project/opensearch-dashboards/blob/11b98ec05483269917c335fcb1900bf98da8cac6/src/core/server/saved_objects/serialization/serializer.ts#L141).
+   * In Observability most components only uses id without explicit type. Prepend
+   * type to id to make it easier to call OSD saved object client.
+   *
+   * @param objectId - objectId in the format of id only
+   * @returns id in the format of 'SavedObjectType:id'
+   */
+  protected abstract prependTypeToId(objectId: string): string;
+
+  protected static extractTypeAndUUID(
+    objectId: string
+  ): {
+    type: '' | ObservabilitySavedObjectsType;
+    uuid: string;
+  } {
+    const matches = objectId.match(OSDSavedObjectClient.TYPE_ID_REGEX);
+    if (matches === null) {
+      return { type: '', uuid: objectId };
+    }
+    return { type: matches[1] as ObservabilitySavedObjectsType, uuid: matches[2] };
   }
-  get(params: unknown): Promise<SavedObjectsGetResponse> {
-    throw new Error('Method not implemented.');
+
+  /**
+   * @param objectId - objectId in the format of 'SavedObjectType:UUID'
+   * @returns ObservabilitySavedObjectsType or empty string if objectId
+   *          is not in expected format.
+   */
+  public static extractType(objectId: string) {
+    return this.extractTypeAndUUID(objectId).type;
   }
-  getBulk(params: unknown): Promise<SavedObjectsGetResponse> {
-    throw new Error('Method not implemented.');
-  }
-  update(params: unknown): Promise<unknown> {
-    throw new Error('Method not implemented.');
-  }
-  updateBulk(params: unknown): Promise<Array<Promise<unknown>>> {
-    throw new Error('Method not implemented.');
-  }
-  delete(params: unknown): Promise<unknown> {
-    throw new Error('Method not implemented.');
-  }
-  deleteBulk(params: unknown): Promise<unknown> {
-    throw new Error('Method not implemented.');
-  }
-  convertToLastUpdatedMs(updatedAt: SimpleSavedObject['updated_at']) {
+
+  protected static convertToLastUpdatedMs(updatedAt: SimpleSavedObject['updated_at']) {
     return (updatedAt ? new Date(updatedAt) : new Date()).getTime();
   }
+
   buildRequestBody({
     query,
     fields,

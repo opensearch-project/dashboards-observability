@@ -16,7 +16,7 @@ import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_pa
 
 const CONCAT_FIELDS = ['objectIdList', 'objectType'];
 
-interface ISavedObjectRequestParams {
+export interface ISavedObjectRequestParams {
   objectId?: string;
   objectIdList?: string[] | string;
   objectType?: string[] | string;

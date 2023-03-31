@@ -10,7 +10,14 @@ import {
   VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
 } from '../../../../../common/types/observability_saved_object_attributes';
-import { SavedObjectsDeleteResponse, SavedObjectsGetResponse } from '../types';
+import { getOSDSavedObjectsClient } from '../../../../../common/utils';
+import {
+  SavedObjectsDeleteBulkParams,
+  SavedObjectsDeleteParams,
+  SavedObjectsDeleteResponse,
+  SavedObjectsGetParams,
+  SavedObjectsGetResponse,
+} from '../types';
 import { OSDSavedObjectClient } from './osd_saved_object_client';
 import { OSDSavedObjectCreateResponse, OSDSavedObjectUpdateResponse } from './types';
 
@@ -32,11 +39,13 @@ interface CommonParams {
 type CreateParams = CommonParams & { applicationId: string };
 type UpdateParams = Partial<CommonParams> & { objectId: string };
 
-interface GetParams {
-  objectId: string;
-}
-
 export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
+  private static instance: OSDSavedVisualizationClient;
+
+  protected prependTypeToId(objectId: string) {
+    return `${VISUALIZATION_SAVED_OBJECT}:${objectId}`;
+  }
+
   async create(
     params: CreateParams
   ): Promise<OSDSavedObjectCreateResponse<VisualizationSavedObjectAttributes>> {
@@ -69,7 +78,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
     );
 
     return {
-      objectId: response.id,
+      objectId: this.prependTypeToId(response.id),
       object: response,
     };
   }
@@ -94,7 +103,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
 
     const response = await this.client.update<Partial<VisualizationSavedObjectAttributes>>(
       VISUALIZATION_SAVED_OBJECT,
-      params.objectId,
+      OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid,
       {
         title: params.name,
         description: params.description,
@@ -104,29 +113,33 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
     );
 
     return {
-      objectId: response.id,
+      objectId: this.prependTypeToId(response.id),
       object: response,
     };
   }
 
-  async get(params: GetParams): Promise<SavedObjectsGetResponse> {
+  updateBulk(params: unknown): Promise<Array<Promise<unknown>>> {
+    throw new Error('Method not implemented.');
+  }
+
+  async get(params: SavedObjectsGetParams): Promise<SavedObjectsGetResponse> {
     const response = await this.client.get<VisualizationSavedObjectAttributes>(
       VISUALIZATION_SAVED_OBJECT,
-      params.objectId
+      OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid
     );
     return {
       observabilityObjectList: [
         {
-          objectId: response.id,
+          objectId: this.prependTypeToId(response.id),
           createdTimeMs: response.attributes.createdTimeMs,
-          lastUpdatedTimeMs: this.convertToLastUpdatedMs(response.updated_at),
+          lastUpdatedTimeMs: OSDSavedObjectClient.convertToLastUpdatedMs(response.updated_at),
           savedVisualization: response.attributes.savedVisualization,
         },
       ],
     };
   }
 
-  async getBulk(params: Partial<SavedObjectsFindOptions>): Promise<SavedObjectsGetResponse> {
+  async getBulk(params: Partial<SavedObjectsFindOptions> = {}): Promise<SavedObjectsGetResponse> {
     const observabilityObjectList = await this.client
       .find<VisualizationSavedObjectAttributes>({
         ...params,
@@ -134,31 +147,42 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       })
       .then((findRes) =>
         findRes.savedObjects.map((o) => ({
-          objectId: o.id,
+          objectId: this.prependTypeToId(o.id),
           createdTimeMs: o.attributes.createdTimeMs,
-          lastUpdatedTimeMs: this.convertToLastUpdatedMs(o.updated_at),
+          lastUpdatedTimeMs: OSDSavedObjectClient.convertToLastUpdatedMs(o.updated_at),
           savedVisualization: o.attributes.savedVisualization,
         }))
       );
     return { observabilityObjectList };
   }
 
-  async delete(params: { objectId: string }): Promise<SavedObjectsDeleteResponse> {
+  async delete(params: SavedObjectsDeleteParams): Promise<SavedObjectsDeleteResponse> {
+    const uuid = OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid;
     return this.client
-      .delete(VISUALIZATION_SAVED_OBJECT, params.objectId)
-      .then((res) => ({ deleteResponseList: { [params.objectId]: 'OK' } }))
+      .delete(VISUALIZATION_SAVED_OBJECT, uuid)
+      .then(() => ({ deleteResponseList: { [params.objectId]: 'OK' } }))
       .catch((res) => ({ deleteResponseList: { [params.objectId]: res } }));
   }
 
-  async deleteBulk(params: { objectIdList: string[] }): Promise<SavedObjectsDeleteResponse> {
+  async deleteBulk(params: SavedObjectsDeleteBulkParams): Promise<SavedObjectsDeleteResponse> {
     const deleteResponseList: SavedObjectsDeleteResponse['deleteResponseList'] = {};
-    const x = await Promise.allSettled(
-      params.objectIdList.map((objectId) => this.delete({ objectId }))
-    ).then((res) => {
-      res.map((r, i) => {
-        deleteResponseList[params.objectIdList[i]] = r.status === 'fulfilled' ? r.value : r.reason;
-      });
-    });
+    await Promise.allSettled(params.objectIdList.map((objectId) => this.delete({ objectId }))).then(
+      (res) => {
+        res.forEach((r, i) => {
+          deleteResponseList[params.objectIdList[i]] =
+            r.status === 'fulfilled'
+              ? r.value.deleteResponseList[params.objectIdList[i]]
+              : r.reason;
+        });
+      }
+    );
     return { deleteResponseList };
+  }
+
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new this(getOSDSavedObjectsClient());
+    }
+    return this.instance;
   }
 }

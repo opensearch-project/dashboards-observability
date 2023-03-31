@@ -20,11 +20,23 @@ export interface ObservabilitySavedObject {
   savedQuery?: SavedQuery;
 }
 
+export interface SavedObjectsGetParams {
+  objectId: string;
+}
+
 export interface SavedObjectsGetResponse {
   startIndex?: number;
   totalHits?: number;
   totalHitRelation?: 'eq' | 'gte';
   observabilityObjectList: ObservabilitySavedObject[];
+}
+
+export interface SavedObjectsDeleteParams {
+  objectId: string;
+}
+
+export interface SavedObjectsDeleteBulkParams {
+  objectIdList: string[];
 }
 
 export interface SavedObjectsDeleteResponse {

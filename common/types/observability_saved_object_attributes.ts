@@ -7,6 +7,7 @@ import { SavedObjectAttributes } from '../../../../src/core/types';
 import { SavedVisualization } from './explorer';
 
 export const VISUALIZATION_SAVED_OBJECT = 'observability-visualization';
+export const OBSERVABILTY_SAVED_OBJECTS = [VISUALIZATION_SAVED_OBJECT] as const;
 export const SAVED_OBJECT_VERSION = 1;
 
 export interface VisualizationSavedObjectAttributes extends SavedObjectAttributes {

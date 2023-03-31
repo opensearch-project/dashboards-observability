@@ -3,15 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
+import { has, isArray, isEmpty } from 'lodash';
 import { HttpStart } from '../../../../../../../src/core/public';
 import {
   EVENT_ANALYTICS,
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
 } from '../../../../../common/constants/shared';
+import { ISavedObjectRequestParams } from '../../event_analytics/saved_objects';
 import { SavedObjectClientBase } from '../client_base';
 import { ISavedObjectsClient } from '../client_interface';
+import {
+  SavedObjectsDeleteBulkParams,
+  SavedObjectsDeleteParams,
+  SavedObjectsDeleteResponse,
+  SavedObjectsGetResponse,
+} from '../types';
+
+const CONCAT_FIELDS = ['objectIdList', 'objectType'];
 
 export class PPLSavedObjectClient extends SavedObjectClientBase implements ISavedObjectsClient {
   constructor(protected readonly client: HttpStart) {
@@ -20,14 +29,18 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
   create(params: any): Promise<any> {
     throw new Error('Method not implemented.');
   }
-  get(params: any): Promise<any> {
+  get(params: ISavedObjectRequestParams): Promise<SavedObjectsGetResponse> {
     return this.client.get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}`, {
       query: {
         ...params,
       },
     });
   }
-  getBulk(params: any): Promise<any> {
+  getBulk(params: ISavedObjectRequestParams): Promise<SavedObjectsGetResponse> {
+    CONCAT_FIELDS.map((arrayField) => {
+      this.stringifyList(params, arrayField, ',');
+    });
+
     return this.client.get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}`, {
       query: {
         ...params,
@@ -40,10 +53,12 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
   updateBulk(params: any): Promise<Array<Promise<any>>> {
     throw new Error('Method not implemented.');
   }
-  delete(params: any): Promise<any> {
-    throw new Error('Method not implemented.');
+  delete(params: SavedObjectsDeleteParams): Promise<SavedObjectsDeleteResponse> {
+    return this.client.delete(
+      `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/${params.objectId}`
+    );
   }
-  deleteBulk(params: any): Promise<Array<Promise<any>>> {
+  deleteBulk(params: SavedObjectsDeleteBulkParams): Promise<SavedObjectsDeleteResponse> {
     return this.client.delete(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/${params.objectIdList.join(',')}`
     );
@@ -113,5 +128,12 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
     }
 
     return objRequest;
+  }
+
+  private stringifyList(targetObj: any, key: string, joinBy: string) {
+    if (has(targetObj, key) && isArray(targetObj[key])) {
+      targetObj[key] = targetObj[key].join(joinBy);
+    }
+    return targetObj;
   }
 }

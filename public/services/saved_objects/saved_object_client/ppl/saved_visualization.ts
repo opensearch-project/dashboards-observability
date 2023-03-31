@@ -12,6 +12,7 @@ import {
 } from '../../../../../common/constants/shared';
 import { PPLSavedObjectClient } from './ppl_client';
 import { SavedObjectsCreateResponse, SavedObjectsUpdateResponse } from '../types';
+import { getOSDHttp } from '../../../../../common/utils';
 
 interface CommonParams {
   query: string;
@@ -32,6 +33,8 @@ type CreateParams = CommonParams & { applicationId: string };
 type UpdateParams = CommonParams & { objectId: string };
 
 export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
+  private static instance: PPLSavedVisualizationClient;
+
   async create(params: CreateParams): Promise<SavedObjectsCreateResponse> {
     return await this.client.post(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_VISUALIZATION}`,
@@ -78,5 +81,12 @@ export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
         ),
       }
     );
+  }
+
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new this(getOSDHttp());
+    }
+    return this.instance;
   }
 }

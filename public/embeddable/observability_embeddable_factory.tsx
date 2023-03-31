@@ -62,7 +62,7 @@ export class ObservabilityEmbeddableFactoryDefinition
     input: SavedObjectEmbeddableInput,
     parent?: IContainer
   ) {
-    const editPath = `#/event_analytics/explorer/${savedObjectId}`;
+    const editPath = `#/event_analytics/explorer/${VISUALIZATION_SAVED_OBJECT}:${savedObjectId}`;
     const editUrl = `/app/${observabilityID}${editPath}`;
     return new ObservabilityEmbeddable(
       {

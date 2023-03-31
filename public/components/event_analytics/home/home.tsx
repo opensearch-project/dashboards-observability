@@ -52,6 +52,8 @@ import {
 import { getOSDSavedObjectsClient } from '../../../../common/utils';
 import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
+import { PPLSavedQueryClient } from '../../../services/saved_objects/saved_object_client/ppl';
+import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedObject } from '../../../services/saved_objects/saved_object_client/types';
 import { getSampleDataModal } from '../../common/helpers/add_sample_modal';
 import { DeleteModal } from '../../common/helpers/delete_modal';
@@ -115,18 +117,11 @@ const EventAnalyticsHome = (props: IHomeProps) => {
   };
 
   const fetchHistories = async () => {
-    const observabilityObjects = await savedObjects.fetchSavedObjects({
+    const observabilityObjects = await SavedObjectsActions.getBulk({
       objectType: ['savedQuery', 'savedVisualization'],
       sortOrder: 'desc',
       fromIndex: 0,
     });
-    const osdObjects = await new OSDSavedVisualizationClient(getOSDSavedObjectsClient()).getBulk(
-      {}
-    );
-    observabilityObjects.observabilityObjectList = [
-      ...osdObjects.observabilityObjectList,
-      ...observabilityObjects.observabilityObjectList,
-    ];
     const nonAppObjects = observabilityObjects.observabilityObjectList.filter(
       (object: ObservabilitySavedObject) =>
         (object.savedVisualization && !object.savedVisualization.application_id) ||
@@ -137,13 +132,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
 
   const deleteHistoryList = async () => {
     const objectIdsToDelete = selectedHistories.map((hstry) => hstry.data.objectId);
-    await savedObjects
-      .deleteSavedObjectsList({ objectIdList: objectIdsToDelete })
-      .catch(() =>
-        new OSDSavedVisualizationClient(getOSDSavedObjectsClient()).deleteBulk({
-          objectIdList: objectIdsToDelete,
-        })
-      )
+    await SavedObjectsActions.deleteBulk({ objectIdList: objectIdsToDelete })
       .then(async () => {
         setSavedHistories((staleHistories) => {
           return staleHistories.filter((his) => {
@@ -285,11 +274,10 @@ const EventAnalyticsHome = (props: IHomeProps) => {
             }),
           });
 
-          // wait for flush
+          // wait for sample data to flush to index
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
-          const res = await savedObjects.fetchSavedObjects({
-            // objectIdList: [...resp?.savedVizIds, ...resp?.savedQueryIds] || [],
+          const res = await SavedObjectsActions.getBulk({
             objectType: ['savedQuery', 'savedVisualization'],
             sortOrder: 'desc',
             fromIndex: 0,

@@ -11,6 +11,7 @@ import {
   SAVED_OBJECTS,
   SAVED_QUERY,
 } from '../../../../../common/constants/shared';
+import { getOSDHttp } from '../../../../../common/utils';
 
 interface CommonParams {
   query: string;
@@ -26,6 +27,8 @@ type UpdateQueryParams = CommonParams & {
 };
 
 export class PPLSavedQueryClient extends PPLSavedObjectClient {
+  private static instance: PPLSavedQueryClient;
+
   async create(params: CreateQueryParams): Promise<any> {
     return await this.client.post(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_QUERY}`,
@@ -59,5 +62,12 @@ export class PPLSavedQueryClient extends PPLSavedObjectClient {
         ),
       }
     );
+  }
+
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new this(getOSDHttp());
+    }
+    return this.instance;
   }
 }
