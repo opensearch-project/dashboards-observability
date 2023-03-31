@@ -25,7 +25,7 @@ import {
 import CSS from 'csstype';
 import moment from 'moment';
 import queryString from 'query-string';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { RouteComponentProps, useLocation } from 'react-router-dom';
 import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
@@ -103,21 +103,25 @@ interface NotebookState {
   queryParagraphErrorMessage: string;
 }
 
+export interface LoadingStatus {
+  inQueue: boolean;
+  isRunning: boolean;
+  isOutputHidden: boolean;
+}
 export function Notebook(props: NotebookProps) {
   const [selectedViewId, setselectedViewId] = useState('view_both');
   const [path, setpath] = useState('');
   const [dateCreated, setdateCreated] = useState('');
   const [dateModified, setdateModified] = useState('');
   const [paragraphs, _setparagraphs] = useState<ParaType[]>([]);
-  const setparagraphs = (value) => {
+  const setparagraphs = (caller, value: ParaType[]) => {
     console.log('setparagraphs', value);
     _setparagraphs(value);
   };
-  const [parsedPara, _setparsedPara] = useState<ParaType[]>([]);
-  const setparsedPara = (callee, value) => {
-    console.log(`setParsedPara ${callee}`, value);
-    _setparsedPara(value);
-  };
+  const [parsedPara, setparsedPara] = useState<ParaType[]>([]);
+
+  const [paragraphsLoadingStatus, setParagraphsLoadingStatus] = useState<LoadingStatus[]>([]);
+
   const [vizPrefix, setvizPrefix] = useState('');
   const [isAddParaPopoverOpen, setisAddParaPopoverOpen] = useState(false);
   const [isParaActionsPopoverOpen, setisParaActionsPopoverOpen] = useState(false);
@@ -129,15 +133,45 @@ export function Notebook(props: NotebookProps) {
   const [modalLayout, setmodalLayout] = useState(<EuiOverlayMask />);
   const [showQueryParagraphError, setshowQueryParagraphError] = useState(false);
   const [queryParagraphErrorMessage, setqueryParagraphErrorMessage] = useState('');
-  const [loadingStatus, setLoadingStatus] = useState('');
+  const [loadingStatus, setLoadingStatus] = useState<string | number>('queue');
 
   const toggleReportingLoadingModal = (show: boolean) => {
     setisReportingLoadingModalOpen(show);
   };
 
+  const parseParagraphs = useCallback(
+    (paras: any[]): ParaType[] => {
+      try {
+        let parsedParas;
+        // @ts-ignore
+        if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
+          parsedParas = zeppelinParagraphParser(paras);
+        } else {
+          parsedParas = defaultParagraphParser(paras);
+        }
+
+        return parsedParas.map((p: ParaType) => ({
+          ...p,
+          ...paragraphStatus('queue', p),
+
+          isInputExpanded: selectedViewId === 'input_only',
+          paraRef: React.createRef(),
+          paraDivRef: React.createRef<HTMLDivElement>(),
+        }));
+      } catch (err) {
+        props.setToast(
+          'Error parsing paragraphs, please make sure you have the correct permission.',
+          'danger'
+        );
+        return [];
+      }
+    },
+    [props, selectedViewId]
+  );
+
   useEffect(() => {
-    setparsedPara('useEffect', parseParagraphs(paragraphs));
-  }, [paragraphs, _setparsedPara]);
+    setparsedPara(parseParagraphs(paragraphs));
+  }, [paragraphs]);
 
   // const parseAllParagraphs = () => {
   //   const parsedParas = parseParagraphs(paragraphs);
@@ -145,58 +179,31 @@ export function Notebook(props: NotebookProps) {
   // };
 
   // parse paragraphs based on backend
-  const setParagraphStatus = (para: ParaType, index: number): ParaType =>
-    loadingStatus === 'queue'
-      ? { ...para, inQueue: true, isOutputHidden: true }
-      : // parsedPara[index].inQueue = true;
-      // parsedPara[index].isOutputHidden = true;
-      loadingStatus === 'loading'
-      ? { ...para, isRunning: true, isOutputHidden: true }
-      : // parsedPara[index].isRunning = true;
-      // parsedPara[index].isOutputHidden = true;
-      loadingStatus === index
-      ? { ...para, isRunning: true, isOutputHidden: true }
-      : para;
-
-  const parseParagraphs = (paras: any[]): ParaType[] => {
-    try {
-      let parsedParas;
-      // @ts-ignore
-      if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
-        parsedParas = zeppelinParagraphParser(paras);
-        // setvizPrefix('%sh #vizobject:');
-      } else {
-        parsedParas = defaultParagraphParser(paras);
-      }
-      parsedParas.forEach((para: ParaType) => {
-        para.isInputExpanded = selectedViewId === 'input_only';
-        para.paraRef = React.createRef();
-        para.paraDivRef = React.createRef<HTMLDivElement>();
-      });
-      return parsedParas;
-    } catch (err) {
-      props.setToast(
-        'Error parsing paragraphs, please make sure you have the correct permission.',
-        'danger'
-      );
-      return [];
-    }
+  const paragraphStatus = (newLoadingStatus: string, para: ParaType): ParaType => {
+    if (newLoadingStatus === 'queue')
+      return { ...para, inQueue: true, isRunning: false, isOutputHidden: false };
+    else if (newLoadingStatus === 'loading')
+      return { ...para, inQueue: false, isRunning: true, isOutputHidden: false };
+    else return para;
   };
-  // parsedPara[index].isRunning = true;
-  // parsedPara[index].isOutputHidden = true;
 
   // Assigns Loading, Running & inQueue for paragraphs in current notebook
-  const showParagraphRunning = (param: number | string) => {
-    console.log('showParagraphRunning');
-    setparsedPara('showParagraphRunning', parsedPara.map(setParagraphStatus));
-  };
+  const showParagraphRunning = useCallback(
+    (param: number | string) => {
+      console.log('showParagraphRunning');
+      setParagraphsLoadingStatus(parsedPara.map(setParagraphStatus));
+    },
+    [paragraphsLoadingStatus, paragraphs]
+  );
 
   // Sets a paragraph to selected and deselects all others
-  const paragraphSelector = (index: number) =>
-    setparsedPara(
-      'paragraphSelector',
-      parsedPara.map((para: ParaType, idx: number) => ({ ...para, isSelected: idx === index }))
-    );
+  const paragraphSelector = (index: number) => {
+    if (!parsedPara[index].isSelected) {
+      setparsedPara(
+        parsedPara.map((para: ParaType, idx: number) => ({ ...para, isSelected: idx === index }))
+      );
+    }
+  };
 
   // Function for delete a Notebook button
   const deleteParagraphButton = (para: ParaType, index: number) => {
@@ -209,8 +216,8 @@ export function Notebook(props: NotebookProps) {
           },
         })
         .then((res) => {
-          setparagraphs(paragraphs.splice(index, 1));
-          setparsedPara('deleteParagraphButton', parsedPara.splice(index, 1));
+          setparagraphs('deleteParagraphButton', paragraphs.splice(index, 1));
+          setparsedPara(parsedPara.splice(index, 1));
         })
         .catch((err) => {
           props.setToast(
@@ -249,7 +256,7 @@ export function Notebook(props: NotebookProps) {
               },
             })
             .then((res) => {
-              setparagraphs(res.paragraphs);
+              setparagraphs('deleteAllParagraphs', res.paragraphs);
               // parseAllParagraphs();
               props.setToast('Paragraphs successfully deleted!');
             })
@@ -289,7 +296,6 @@ export function Notebook(props: NotebookProps) {
         (newName: string) => {
           props.renameNotebook(newName, props.openedNoteId);
           setisModalVisible(false);
-          loadNotebook();
         },
         () => setisModalVisible(false),
         'Name',
@@ -332,7 +338,7 @@ export function Notebook(props: NotebookProps) {
       <DeleteNotebookModal
         onConfirm={async () => {
           const toastMessage = `Notebook "${path}" successfully deleted!`;
-          await deleteNotebook([props.openedNoteId], toastMessage);
+          await props.deleteNotebook([props.openedNoteId], toastMessage);
           setisModalVisible(false);
           setTimeout(() => {
             props.history.push('.');
@@ -351,7 +357,7 @@ export function Notebook(props: NotebookProps) {
     props.http
       .delete(`${NOTEBOOKS_API_PREFIX}/paragraph/` + props.openedNoteId + '/' + uniqueId)
       .then((res) => {
-        setparagraphs(res.paragraphs);
+        setparagraphs('deleteVizualisation', res.paragraphs);
         // parseAllParagraphs();
       })
       .catch((err) => {
@@ -376,10 +382,10 @@ export function Notebook(props: NotebookProps) {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
-        setparagraphs(paragraphs.splice(index, 0, res));
+        setparagraphs('addParagraph', paragraphs.splice(index, 0, res));
         const newPara = parseParagraphs([res])[0];
         newPara.isInputExpanded = true;
-        setparsedPara('addPara', parsedPara.splice(index, 0, newPara));
+        setparsedPara(parsedPara.splice(index, 0, newPara));
         paragraphSelector(index);
         if (selectedViewId === 'output_only') setselectedViewId('view_both');
       })
@@ -422,8 +428,8 @@ export function Notebook(props: NotebookProps) {
         body: JSON.stringify(moveParaObj),
       })
       .then((res) => {
-        setparagraphs(paras);
-        setparsedPara('movePara', parsedParas);
+        setparagraphs('movePara', paras);
+        setparsedPara(parsedParas);
       })
       .then((res) => scrollToPara(targetIndex))
       .catch((err) => {
@@ -455,7 +461,8 @@ export function Notebook(props: NotebookProps) {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
-        setparagraphs(res.paragraphs);
+        console.log('clearAllParagraphs', { res });
+        setparagraphs('clearParagraphs', res.paragraphs);
         // parseAllParagraphs();
       })
       .catch((err) => {
@@ -470,20 +477,21 @@ export function Notebook(props: NotebookProps) {
   const updateRunParagraph = (
     para: ParaType,
     index: number,
+    textInput: string,
     vizObjectInput?: string,
     paraType?: string
   ) => {
-    setLoadingStatus(index);
-    if (vizObjectInput) {
-      para.inp = vizPrefix + vizObjectInput; // "%sh check"
-    }
+    const inp = vizObjectInput ? vizPrefix + vizObjectInput : textInput;
+    para = { ...para, inp, isRunning: true, isOutputHidden: true };
+    setPara(para, index);
+    // setLoadingStatus(index);
 
-    const paraUpdateObject = () => ({
+    const paraUpdateObject = {
       noteId: props.openedNoteId,
       paragraphId: para.uniqueId,
-      paragraphInput: para.inp,
+      paragraphInput: inp,
       paragraphType: paraType || '',
-    });
+    };
 
     return props.http
       .post(`${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`, {
@@ -501,11 +509,11 @@ export function Notebook(props: NotebookProps) {
         paras[index] = res;
         const parsedParas: ParaType[] = [...parsedPara];
         parsedParas[index] = parseParagraphs([res])[0];
-        setparagraphs(paras);
-        setparsedPara('paraUpdatedObject', parsedparas);
+        setparagraphs('updateRunParagraphs', paras);
+        setparsedPara(parsedParas);
       })
       .catch((err) => {
-        if (err.body.statusCode === 413)
+        if (err.body?.statusCode === 413)
           props.setToast(`Error running paragraph: ${err.body.message}`, 'danger');
         else
           props.setToast(
@@ -515,7 +523,7 @@ export function Notebook(props: NotebookProps) {
       });
   };
 
-  const checkQueryOutputError = (checkErrorJSON: JSON) => {
+  const checkQueryOutputError = (checkErrorJSON: { error: { reason: string } }) => {
     // if query output has error output
     if (checkErrorJSON.hasOwnProperty('error')) {
       setshowQueryParagraphError(true);
@@ -546,7 +554,7 @@ export function Notebook(props: NotebookProps) {
         key: evt.target.value,
       });
       parsedPara[index].inp = evt.target.value;
-      setparsedPara('testValueEditor', parsedPara);
+      setparsedPara(parsedPara);
     }
   };
 
@@ -558,21 +566,14 @@ export function Notebook(props: NotebookProps) {
   };
 
   // update view mode, scrolls to paragraph and expands input if scrollToIndex is given
-  const updateView = (scrollToIndex?: number) => {
-    configureViewParameter(selectedViewId);
-    parsedPara.map((para: ParaType, index: number) => {
-      parsedPara[index].isInputExpanded = selectedViewId === 'input_only';
-    });
-
-    if (scrollToIndex !== undefined) {
-      parsedPara[scrollToIndex].isInputExpanded = true;
-      scrollToPara(scrollToIndex);
+  const updateView = (newViewId: string) => {
+    configureViewParameter(newViewId);
+    if (newViewId === 'input_only') {
+      setparsedPara(parsedPara.map((p) => ({ ...p, isInputExpanded: true })));
     }
-    setState({ parsedPara, selectedViewId });
-    paragraphSelector(scrollToIndex !== undefined ? scrollToIndex : -1);
   };
 
-  const loadNotebook = () => {
+  const loadNotebook = useCallback(() => {
     props.http
       .get(`${NOTEBOOKS_API_PREFIX}/note/` + props.openedNoteId)
       .then(async (res) => {
@@ -588,8 +589,7 @@ export function Notebook(props: NotebookProps) {
         setpath(res.path);
         setdateCreated(res.dateCreated);
         setdateModified(res.dateModified);
-        setparagraphs(res.paragraphs);
-        // parseAllParagraphs();
+        setparagraphs('loadNotebook', res.paragraphs);
       })
       .catch((err) => {
         props.setToast(
@@ -597,7 +597,7 @@ export function Notebook(props: NotebookProps) {
           'danger'
         );
       });
-  };
+  }, [props.http, props.openedNoteId, props.setToast, setparagraphs]);
 
   const loadQueryResultsFromInput = async (paragraph: any) => {
     const queryType =
@@ -619,24 +619,27 @@ export function Notebook(props: NotebookProps) {
     console.log('setPara', { para, index });
     const parsedParas = [...parsedPara];
     parsedParas.splice(index, 1, para);
-    setparsedPara('setPara', parsedParas);
+    setparsedPara(parsedParas);
   };
 
-  const setBreadcrumbs = (path: string) => {
-    props.setBreadcrumbs([
-      props.parentBreadcrumb,
-      {
-        text: 'Notebooks',
-        href: '#/notebooks',
-      },
-      {
-        text: path,
-        href: `#/notebooks/${props.openedNoteId}`,
-      },
-    ]);
-  };
+  const setBreadcrumbs = useCallback(
+    (newPath: string) => {
+      props.setBreadcrumbs([
+        props.parentBreadcrumb,
+        {
+          text: 'Notebooks',
+          href: '#/notebooks',
+        },
+        {
+          text: newPath,
+          href: `#/notebooks/${props.openedNoteId}`,
+        },
+      ]);
+    },
+    [props]
+  );
 
-  const checkIfReportingPluginIsInstalled = () => {
+  const checkIfReportingPluginIsInstalled = useCallback(() => {
     fetch('../api/status', {
       headers: {
         'Content-Type': 'application/json',
@@ -665,7 +668,7 @@ export function Notebook(props: NotebookProps) {
       .catch((error) => {
         props.setToast('Error checking Reporting Plugin Installation status.', 'danger');
       });
-  };
+  }, [props, setisReportingPluginInstalled]);
 
   const configureViewParameter = (id: string) => {
     props.history.replace({
@@ -674,26 +677,22 @@ export function Notebook(props: NotebookProps) {
     });
   };
 
-  useEffect(() => showParagraphRunning(loadingStatus), [loadingStatus]);
+  useEffect(() => setBreadcrumbs(''), [setBreadcrumbs]);
+
+  useEffect(() => checkIfReportingPluginIsInstalled(), [checkIfReportingPluginIsInstalled]);
 
   useEffect(() => {
-    console.log('initial useEffect');
-    setBreadcrumbs('');
-    console.log('breadcrumbs set');
-    loadNotebook();
-    setLoadingStatus('queue');
-    console.log('notebook loaded');
-    checkIfReportingPluginIsInstalled();
     const searchParams = queryString.parse(props.location.search);
     const view = searchParams.view;
     if (!view) {
       configureViewParameter('view_both');
     }
-    if (view === 'output_only') {
-      setselectedViewId('output_only');
-    } else if (view === 'input_only') {
-      setselectedViewId('input_only');
-    }
+    setselectedViewId(view);
+  }, [props.location.search]);
+
+  useEffect(() => {
+    console.log('initial useEffect');
+    loadNotebook();
   }, []);
 
   // render() {
@@ -741,7 +740,11 @@ export function Notebook(props: NotebookProps) {
       ],
     },
   ];
-  const paraActionsPanels = ({ parsedCount }): EuiContextMenuPanelDescriptor[] => [
+  const paraActionsPanels = ({
+    parsedCount,
+  }: {
+    parsedCount: number;
+  }): EuiContextMenuPanelDescriptor[] => [
     {
       id: 0,
       title: 'Actions',
@@ -757,10 +760,10 @@ export function Notebook(props: NotebookProps) {
         {
           name: 'Run all paragraphs',
           disabled: parsedCount === 0,
-          onClick: () => {
+          onClick: (evt) => {
             setisParaActionsPopoverOpen(false);
             runForAllParagraphs((para: ParaType, index: number) => {
-              return para.paraRef.current?.runParagraph();
+              return para.paraRef.current?.runParagraph(evt);
             });
             if (selectedViewId === 'input_only') {
               updateView('view_both');
@@ -908,13 +911,13 @@ export function Notebook(props: NotebookProps) {
               id="reportingActionsButton"
               iconType="arrowDown"
               iconSide="right"
-              onClick={() => setState({ isReportingActionsPopoverOpen: true })}
+              onClick={() => setisReportingActionsPopoverOpen(true)}
             >
               Reporting actions
             </EuiButton>
           }
           isOpen={isReportingActionsPopoverOpen}
-          closePopover={() => setState({ isReportingActionsPopoverOpen: false })}
+          closePopover={() => setisReportingActionsPopoverOpen(false)}
         >
           <EuiContextMenu initialPanelId={0} panels={reportingActionPanels()} />
         </EuiPopover>
@@ -936,6 +939,7 @@ export function Notebook(props: NotebookProps) {
               ref={parsedPara[index].paraRef}
               pplService={props.pplService}
               para={para}
+              loading={paragraphsLoadingStatus[index]}
               setPara={(pr: ParaType) => setPara(pr, index)}
               dateModified={paragraphs[index]?.dateModified}
               index={index}
@@ -967,13 +971,13 @@ export function Notebook(props: NotebookProps) {
                 <EuiButton
                   iconType="arrowDown"
                   iconSide="right"
-                  onClick={() => setState({ isAddParaPopoverOpen: true })}
+                  onClick={() => setisAddParaPopoverOpen(true)}
                 >
                   Add paragraph
                 </EuiButton>
               }
               isOpen={isAddParaPopoverOpen}
-              closePopover={() => setState({ isAddParaPopoverOpen: false })}
+              closePopover={() => setisAddParaPopoverOpen(false)}
             >
               <EuiContextMenu initialPanelId={0} panels={addParaPanels()} />
             </EuiPopover>

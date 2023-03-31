@@ -22,7 +22,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import moment from 'moment';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import _ from 'lodash';
 import { CoreStart } from '../../../../../../../src/core/public';
 import {
@@ -84,7 +84,13 @@ interface ParagraphProps {
   selectedViewId: string;
   setSelectedViewId: (viewId: string, scrollToIndex?: number) => void;
   deletePara: (para: ParaType, index: number) => void;
-  runPara: (para: ParaType, index: number, vizObjectInput?: string, paraType?: string) => void;
+  runPara: (
+    para: ParaType,
+    index: number,
+    textInput: string,
+    vizObjectInput?: string,
+    paraType?: string
+  ) => void;
   clonePara: (para: ParaType, index: number) => void;
   movePara: (index: number, targetIndex: number) => void;
   showQueryParagraphError: boolean;
@@ -113,6 +119,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   const [selectedVisOption, setSelectedVisOption] = useState<EuiComboBoxOptionOption[]>([]);
   const [visInput, setVisInput] = useState(undefined);
   const [visType, setVisType] = useState('');
+  const [textInput, setTextInput] = useState(props.para.inp);
 
   // output is available if it's not cleared and vis paragraph has a selected visualization
   const isOutputAvailable =
@@ -120,12 +127,12 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     (para.isVizualisation && para.typeOut.length > 0 && visInput !== undefined);
 
   useImperativeHandle(ref, () => ({
-    runParagraph() {
-      return onRunPara();
+    runParagraph(evt) {
+      return onRunPara(evt);
     },
   }));
 
-  const fetchVisualizations = async () => {
+  const fetchVisualizations = useCallback(async () => {
     let opt1: EuiComboBoxOptionOption[] = [];
     let opt2: EuiComboBoxOptionOption[] = [];
     await http
@@ -168,14 +175,14 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       setVisType(selectedObject.className);
       setSelectedVisOption(selectedObject);
     }
-  };
+  }, [http, para.visSavedObjId, setVisType, setSelectedVisOption]);
 
   useEffect(() => {
     if (para.isVizualisation) {
       if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
       fetchVisualizations();
     }
-  }, [fetchVisualizations, para.isVizualisation, para.visObjectInput, para.visSavedObjId]);
+  }, [fetchVisualizations, para.isVizualisation, para.vizObjectInput, para.visSavedObjId]);
 
   const createDashboardVizObject = (objectId: string) => {
     const vizUniqueId = htmlIdGenerator()();
@@ -219,7 +226,9 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     return newVizObject;
   };
 
-  const onRunPara = () => {
+  const onRunPara = (evt) => {
+    evt.stopPropagation();
+    para.inp = textInput;
     if (
       (!para.isVizualisation && !para.inp) ||
       (para.isVizualisation && selectedVisOption.length === 0)
@@ -235,7 +244,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       newVisObjectInput = JSON.stringify(inputTemp);
     }
     setRunParaError(false);
-    return props.runPara(para, index, newVisObjectInput, visType);
+    return props.runPara(para, index, textInput, newVisObjectInput, visType);
   };
 
   const setStartTime = (time: string) => {
@@ -254,18 +263,18 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     props.setPara(newPara);
   };
 
-  // do not show output if it is a visualization paragraph and visInput is not loaded yet
-  const paraOutput = (!para.isVizualisation || visInput) && (
-    <ParaOutput
-      http={http}
-      pplService={pplService}
-      key={para.uniqueId}
-      para={para}
-      visInput={visInput}
-      setVisInput={setVisInput}
-      DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
-    />
-  );
+  const paraOutput =
+    props.selectedViewId !== 'input_only' ? (
+      <ParaOutput
+        http={http}
+        pplService={pplService}
+        key={para.uniqueId}
+        para={para}
+        visInput={visInput}
+        setVisInput={setVisInput}
+        DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
+      />
+    ) : null;
 
   // do not show input and EuiPanel if view mode is output_only
   if (props.selectedViewId === 'output_only') {
@@ -511,7 +520,14 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     <>
       <EuiPanel>
         {renderParaHeader(!para.isVizualisation ? 'Code block' : 'Visualization', index)}
-        <div key={index} className={paraClass} onClick={() => paragraphSelector(index)}>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+        <div
+          key={index}
+          className={paraClass}
+          onClick={() => {
+            paragraphSelector(index);
+          }}
+        >
           {para.isInputExpanded && (
             <>
               <EuiSpacer size="s" />
@@ -525,7 +541,8 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                   para={para}
                   index={index}
                   runParaError={runParaError}
-                  textValueEditor={textValueEditor}
+                  text={textInput}
+                  onTextChange={(evt) => setTextInput(evt.target.value)}
                   handleKeyPress={handleKeyPress}
                   startTime={para.visStartTime}
                   setStartTime={setStartTime}
@@ -546,7 +563,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               <EuiSpacer size="m" />
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => onRunPara()} fill>
+                  <EuiButton onClick={onRunPara} fill>
                     {isOutputAvailable ? 'Refresh' : 'Run'}
                   </EuiButton>
                 </EuiFlexItem>
@@ -555,7 +572,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
               <EuiSpacer size="m" />
             </>
           )}
-          {props.selectedViewId !== 'input_only' && isOutputAvailable && (
+          {props.selectedViewId !== 'input_only' && !para.isVizualisation && isOutputAvailable && (
             <>
               <EuiHorizontalRule margin="none" />
               <div style={{ opacity: para.isOutputStale ? 0.5 : 1, padding: '15px' }}>

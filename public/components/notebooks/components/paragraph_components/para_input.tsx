@@ -28,8 +28,8 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { Input, Prompt } from '@nteract/presentational-components';
-import { uiSettingsService } from '../../../../../common/utils';
 import React, { useState } from 'react';
+import { uiSettingsService } from '../../../../../common/utils';
 import { ParaType } from '../../../../../common/types/notebooks';
 
 /*
@@ -49,7 +49,8 @@ export const ParaInput = (props: {
   para: ParaType;
   index: number;
   runParaError: boolean;
-  textValueEditor: (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void;
+  text: string;
+  onTextChange: (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void;
   handleKeyPress: (evt: React.KeyboardEvent<Element>, para: any, index: number) => void;
   startTime: string;
   setStartTime: (startTime: string) => void;
@@ -58,13 +59,17 @@ export const ParaInput = (props: {
   setIsOutputStale: (isStale?: boolean) => void;
   visOptions: EuiComboBoxOptionOption[];
   selectedVisOption: EuiComboBoxOptionOption[];
-  setSelectedVisOption: (newOption: EuiComboBoxOptionOption[]) => void;
+  setSelectedVisOption: (newOption: EuiComboBoxOptionOption) => void;
   setVisType: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const { para, index, runParaError, textValueEditor, handleKeyPress } = props;
+  const { para, index, runParaError, text, onTextChange, textValueEditor, handleKeyPress } = props;
 
   const inputPlaceholderString =
     'Type %md, %sql or %ppl on the first line to define the input type. \nCode block starts here.';
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
+  const [selectableError, setSelectableError] = useState(false);
 
   const renderParaInput = () => {
     return (
@@ -78,11 +83,10 @@ export const ParaInput = (props: {
             fullWidth
             isInvalid={runParaError}
             onChange={(evt) => {
-              textValueEditor(evt, index);
-              props.setIsOutputStale(true);
+              onTextChange(evt, index);
             }}
             onKeyPress={(evt) => handleKeyPress(evt, para, index)}
-            value={para.inp}
+            value={text}
             autoFocus
           />
         ) : (
@@ -99,10 +103,6 @@ export const ParaInput = (props: {
   };
 
   const renderVisInput = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
-    const [selectableError, setSelectableError] = useState(false);
-
     const onSelect = () => {
       const selectedOptions = selectableOptions.filter((opt) => opt.checked === 'on');
       if (selectedOptions.length === 0) {
