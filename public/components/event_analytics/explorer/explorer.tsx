@@ -374,7 +374,7 @@ export const Explorer = ({
 
   const updateTabData = async (objectId: string) => {
     await new PPLSavedObjectLoader(
-      await getSavedObjectsClient({ objectId, objectType: 'savedQuery' }),
+      getSavedObjectsClient({ objectId, objectType: 'savedQuery' }),
       notifications,
       {
         batch,

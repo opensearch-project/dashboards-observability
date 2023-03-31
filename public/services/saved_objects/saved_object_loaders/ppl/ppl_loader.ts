@@ -31,7 +31,7 @@ import { QueryManager } from '../../../../../common/query_manager';
 import { statsChunk } from '../../../../../common/query_manager/ast/types/stats';
 import { IField } from '../../../../../common/types/explorer';
 import { AppDispatch } from '../../../../framework/redux/store';
-import { SavedObjectsGetResponse } from '../../saved_object_client/types';
+import { ObservabilitySavedObject } from '../../saved_object_client/types';
 
 interface LoadParams {
   objectId: string;
@@ -65,7 +65,7 @@ interface Dispatchers {
   updateVizConfig: typeof updateVizConfigAction;
 }
 
-type SavedObjectData = SavedObjectsGetResponse;
+type SavedObjectData = ObservabilitySavedObject;
 
 export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
   constructor(
