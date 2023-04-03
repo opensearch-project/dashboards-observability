@@ -76,11 +76,12 @@ export class ObservabilityEmbeddableFactoryDefinition
     );
   }
 
+  public canCreateNew() {
+    return false;
+  }
+
   async create(initialInput: SavedObjectEmbeddableInput, parent?: IContainer) {
-    return new ErrorEmbeddable(
-      'Saved searches can only be created from a saved object',
-      initialInput
-    );
+    return undefined;
   }
 
   async isEditable() {
