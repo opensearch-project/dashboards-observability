@@ -11,7 +11,6 @@ import {
   Embeddable,
   EmbeddableOutput,
   IContainer,
-  ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
 import {
@@ -71,17 +70,8 @@ export class ObservabilityEmbeddable extends Embeddable<
     super(initialInput, { editable: true, ...config }, parent);
 
     this.subscription = this.getInput$().subscribe(async () => {
-      const savedObjectId = this.getInput().savedObjectId;
-      const attributes = (this.getInput() as ObservabilityByValueInput).attributes;
-      if (this.attributes !== attributes || this.savedObjectId !== savedObjectId) {
-        this.savedObjectId = savedObjectId;
-        this.reload();
-      } else {
-        this.updateOutput({
-          attributes: this.attributes,
-          title: this.input.title || this.attributes.title,
-        });
-      }
+      this.savedObjectId = this.getInput().savedObjectId;
+      this.reload();
     });
   }
 
@@ -99,6 +89,7 @@ export class ObservabilityEmbeddable extends Embeddable<
     this.updateOutput({
       attributes: this.attributes,
       title: this.input.title || this.attributes.title,
+      defaultTitle: this.attributes.title,
     });
   }
 

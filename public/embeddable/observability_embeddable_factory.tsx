@@ -12,7 +12,6 @@ import { AttributeService, DashboardStart } from '../../../../src/plugins/dashbo
 import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
-  ErrorEmbeddable,
   IContainer,
   SavedObjectEmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
@@ -21,7 +20,7 @@ import {
   OnSaveProps,
   SavedObjectMetaData,
 } from '../../../../src/plugins/saved_objects/public';
-import { observabilityID } from '../../common/constants/shared';
+import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import {
   VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
@@ -48,7 +47,7 @@ export class ObservabilityEmbeddableFactoryDefinition
     > {
   public readonly type = OBSERVABILITY_EMBEDDABLE;
   public readonly savedObjectMetaData: SavedObjectMetaData<VisualizationSavedObjectAttributes> = {
-    name: 'SQL/PPL Visualizations',
+    name: observabilityTitle,
     includeFields: [],
     type: VISUALIZATION_SAVED_OBJECT, // saved object type for finding embeddables in Dashboard
     getIconForSavedObject: () => 'lensApp',
@@ -89,7 +88,7 @@ export class ObservabilityEmbeddableFactoryDefinition
   }
 
   getDisplayName() {
-    return 'Observability';
+    return observabilityTitle;
   }
 
   private async saveMethod(attributes: VisualizationSavedObjectAttributes, savedObjectId?: string) {
