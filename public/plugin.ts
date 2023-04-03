@@ -19,7 +19,12 @@ import {
 } from '../common/utils';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
-import { OBSERVABILITY_EMBEDDABLE } from './embeddable/observability_embeddable';
+import {
+  OBSERVABILITY_EMBEDDABLE,
+  OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
+  OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+  OBSERVABILITY_EMBEDDABLE_ID,
+} from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
 import './index.scss';
 import DSLService from './services/requests/dsl';
@@ -95,9 +100,9 @@ export class ObservabilityPlugin
     setupDeps.embeddable.registerEmbeddableFactory(OBSERVABILITY_EMBEDDABLE, embeddableFactory);
 
     setupDeps.visualizations.registerAlias({
-      name: observabilityID,
-      title: observabilityTitle,
-      description: 'create a visualization with Piped processigng language',
+      name: OBSERVABILITY_EMBEDDABLE_ID,
+      title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+      description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
       icon: 'pencil',
       aliasApp: observabilityID,
       aliasPath: '#/event_analytics/explorer',
@@ -113,7 +118,7 @@ export class ObservabilityPlugin
             id,
             savedObjectType: VISUALIZATION_SAVED_OBJECT,
             title: attributes?.title,
-            typeTitle: observabilityTitle,
+            typeTitle: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
             stage: 'production',
             updated_at: updatedAt,
           }),

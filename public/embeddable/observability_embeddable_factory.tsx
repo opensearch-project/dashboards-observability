@@ -20,7 +20,7 @@ import {
   OnSaveProps,
   SavedObjectMetaData,
 } from '../../../../src/plugins/saved_objects/public';
-import { observabilityID, observabilityTitle } from '../../common/constants/shared';
+import { observabilityID } from '../../common/constants/shared';
 import {
   VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
@@ -29,6 +29,7 @@ import {
   ObservabilityEmbeddable,
   ObservabilityOutput,
   OBSERVABILITY_EMBEDDABLE,
+  OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
 } from './observability_embeddable';
 
 interface StartServices {
@@ -47,7 +48,7 @@ export class ObservabilityEmbeddableFactoryDefinition
     > {
   public readonly type = OBSERVABILITY_EMBEDDABLE;
   public readonly savedObjectMetaData: SavedObjectMetaData<VisualizationSavedObjectAttributes> = {
-    name: observabilityTitle,
+    name: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
     includeFields: [],
     type: VISUALIZATION_SAVED_OBJECT, // saved object type for finding embeddables in Dashboard
     getIconForSavedObject: () => 'lensApp',
@@ -79,7 +80,7 @@ export class ObservabilityEmbeddableFactoryDefinition
     return false;
   }
 
-  async create(initialInput: SavedObjectEmbeddableInput, parent?: IContainer) {
+  async create(_initialInput: SavedObjectEmbeddableInput, _parent?: IContainer) {
     return undefined;
   }
 
@@ -88,7 +89,7 @@ export class ObservabilityEmbeddableFactoryDefinition
   }
 
   getDisplayName() {
-    return observabilityTitle;
+    return OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME;
   }
 
   private async saveMethod(attributes: VisualizationSavedObjectAttributes, savedObjectId?: string) {

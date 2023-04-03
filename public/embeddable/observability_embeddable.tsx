@@ -19,21 +19,12 @@ import {
 } from '../../common/types/observability_saved_object_attributes';
 import { ObservabilityEmbeddableComponent } from './observability_embeddable_component';
 
-// Apparently this needs to match the saved object type for the clone and replace panel actions to work
+// this needs to match the saved object type for the clone and replace panel actions to work
 export const OBSERVABILITY_EMBEDDABLE = VISUALIZATION_SAVED_OBJECT;
-
-export interface ObservabilityEmbeddableConfiguration {
-  savedVisBuilder: VisualizationSavedObjectAttributes;
-  // TODO: add indexPatterns as part of configuration
-  // indexPatterns?: IIndexPattern[];
-  editPath: string;
-  editUrl: string;
-  editable: boolean;
-}
-
-export type ObservabilityByValueInput = {
-  attributes: VisualizationSavedObjectAttributes;
-} & SavedObjectEmbeddableInput;
+export const OBSERVABILITY_EMBEDDABLE_ID = 'observability-ppl';
+export const OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME = 'PPL';
+export const OBSERVABILITY_EMBEDDABLE_DESCRIPTION =
+  'Create a visualization with Piped Processing Language (PPL). PPL can query data in your indices and also supports federated data sources like Prometheus';
 
 export interface ObservabilityOutput extends EmbeddableOutput {
   /**
