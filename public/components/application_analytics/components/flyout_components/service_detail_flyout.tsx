@@ -19,7 +19,10 @@ import {
   handleServiceMapRequest,
   handleServiceViewRequest,
 } from '../../../../../public/components/trace_analytics/requests/services_request_handler';
-import { filtersToDsl, processTimeStamp } from '../../../../../public/components/trace_analytics/components/common/helper_functions';
+import {
+  filtersToDsl,
+  processTimeStamp,
+} from '../../../../../public/components/trace_analytics/components/common/helper_functions';
 import { ServiceMap } from '../../../../../public/components/trace_analytics/components/services';
 import { ServiceObject } from '../../../../../public/components/trace_analytics/components/common/plots/service_map';
 import { SpanDetailTable } from '../../../../../public/components/trace_analytics/components/traces/span_detail_table';
@@ -64,7 +67,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       ),
       getListItem(
         'Connected services',
-        fields.connected_services
+        fields.connected_services && fields.connected_services.length
           ? fields.connected_services.reduce((prev: string, curr: string) => {
               return [prev, ', ', curr];
             })
@@ -118,7 +121,15 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
   }, [serviceName, fields, serviceMap, DSL, serviceMapIdSelected]);
 
   useEffect(() => {
-    const serviceDSL = filtersToDsl(mode, filters, query, processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), 'app', appConfigs);
+    const serviceDSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      'app',
+      appConfigs
+    );
     handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
     handleServiceMapRequest(http, serviceDSL, mode, setServiceMap, serviceName);
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
