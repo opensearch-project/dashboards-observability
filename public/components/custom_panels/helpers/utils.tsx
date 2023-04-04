@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
@@ -18,7 +17,6 @@ import {
 } from '../../../../common/constants/shared';
 import PPLService from '../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../src/core/public';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import {
   VisualizationType,
   SavedVisualizationType,
@@ -29,6 +27,7 @@ import { getVizContainerProps } from '../../../components/visualizations/charts/
 import { QueryManager } from '../../../../common/query_manager';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { removeBacktick } from '../../../../common/utils';
+import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -171,10 +170,12 @@ export const fetchVisualizationById = async (
   setIsError: (error: VizContainerError) => void
 ) => {
   let savedVisualization = {} as SavedVisualizationType;
-  await http
-    .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations/${savedVisualizationId}`)
+  await getSavedObjectsClient({ objectId: savedVisualizationId, objectType: 'savedQuery' })
+    .get({ objectId: savedVisualizationId })
     .then((res) => {
-      savedVisualization = res.visualization;
+      savedVisualization = { ...res.observabilityObjectList[0]?.savedVisualization };
+      savedVisualization.id = res.observabilityObjectList[0].objectId;
+      savedVisualization.timeField = res.observabilityObjectList[0]?.selected_timestamp?.name;
     })
     .catch((err) => {
       setIsError({
