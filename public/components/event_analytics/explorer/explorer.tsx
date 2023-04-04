@@ -275,7 +275,7 @@ export const Explorer = ({
         startingTime,
         endingTime,
         isLiveTailOn: isLiveTailOnRef.current,
-        selectedInterval: selectedIntervalRef.current,
+        selectedInterval: selectedIntervalRef,
       },
       notifications
     ).search();

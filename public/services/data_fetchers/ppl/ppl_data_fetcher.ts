@@ -97,7 +97,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     // update UI with new query state
     await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp);
     // calculate proper time interval for count distribution
-    if (!selectedInterval || selectedInterval.text === 'Auto') {
+    if (!selectedInterval.current || selectedInterval.current.text === 'Auto') {
       findAutoInterval(curStartTime, curEndTime);
     }
 
@@ -107,11 +107,11 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     } else {
       getEvents(finalQuery, getErrorHandler('Error fetching events'));
     }
-    getCountVisualizations(selectedInterval.value.replace(/^auto_/, ''));
+    getCountVisualizations(selectedInterval.current.value.replace(/^auto_/, ''));
     // patterns
     this.setLogPattern(this.query, this.queryIndex, finalQuery);
     if (!finalQuery.match(PATTERNS_REGEX)) {
-      getPatterns(selectedInterval.value.replace(/^auto_/, ''));
+      getPatterns(selectedInterval.current.value.replace(/^auto_/, ''));
     }
 
     // live tail - for comparing usage if for the same tab, user changed index from one to another
