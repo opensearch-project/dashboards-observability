@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef } from 'react';
-import { EuiLink, EuiInMemoryTable, EuiIcon } from '@elastic/eui';
-import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import { EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import React, { useRef, useState } from 'react';
+import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 
-interface savedQueryTableProps {
-  savedHistories: Array<any>;
+interface SavedQueryTableProps {
+  savedHistories: any[];
   handleHistoryClick: (objectId: string) => void;
-  handleSelectHistory: (selectedHistories: Array<any>) => void;
+  handleSelectHistory: (selectedHistories: any[]) => void;
   isTableLoading: boolean;
-  selectedHistories: Array<History>;
+  selectedHistories: History[];
 }
 
 export function SavedQueryTable({
@@ -21,7 +21,7 @@ export function SavedQueryTable({
   handleHistoryClick,
   handleSelectHistory,
   isTableLoading,
-}: savedQueryTableProps) {
+}: SavedQueryTableProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const pageIndexRef = useRef<number>();
@@ -30,10 +30,10 @@ export function SavedQueryTable({
   pageSizeRef.current = pageSize;
 
   const onTableChange = ({ page = {} }) => {
-    const { index: pageIndex, size: pageSize } = page;
+    const { index, size } = page;
 
-    setPageIndex(pageIndex);
-    setPageSize(pageSize);
+    setPageIndex(page);
+    setPageSize(size);
   };
 
   const columns = [
@@ -43,7 +43,7 @@ export function SavedQueryTable({
       sortable: true,
       width: '40px',
       render: (item: any) => {
-        if (item == 'Visualization') {
+        if (item === 'Visualization') {
           return (
             <div>
               <EuiIcon type="visBarVerticalStacked" size="m" />
@@ -87,14 +87,11 @@ export function SavedQueryTable({
     const isSavedVisualization = h.hasOwnProperty('savedVisualization');
     const savedObject = isSavedVisualization ? h.savedVisualization : h.savedQuery;
     const curType = isSavedVisualization ? 'savedVisualization' : 'savedQuery';
-    var subType = '';
-    if (isSavedVisualization) {
-      if (savedObject?.sub_type === 'metric') {
-        subType = 'Metric'
-      } else {
-        subType = savedObject?.sub_type;
-      }
-    }
+    const displayType = !isSavedVisualization
+      ? 'Query'
+      : savedObject?.sub_type === 'metric'
+      ? 'Metric'
+      : 'Visualization';
     const record = {
       objectId: h.objectId,
       objectType: curType,
@@ -109,7 +106,7 @@ export function SavedQueryTable({
       id: h.objectId,
       data: record,
       name: savedObject.name,
-      type: isSavedVisualization ? (!isEmpty(subType)) ? subType: 'Visualization' : 'Query',
+      type: displayType,
     };
   });
 
