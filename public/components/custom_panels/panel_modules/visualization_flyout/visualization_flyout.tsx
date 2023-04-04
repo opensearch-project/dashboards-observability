@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
@@ -33,12 +32,8 @@ import {
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
-import _, { isError } from 'lodash';
+import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { FlyoutContainers } from '../../../common/flyout_containers';
-import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
-import { convertDateTime } from '../../helpers/utils';
-import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
 import {
@@ -47,8 +42,18 @@ import {
   VisualizationType,
   VizContainerError,
 } from '../../../../../common/types/custom_panels';
-import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
+import PPLService from '../../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
+import { FlyoutContainers } from '../../../common/flyout_containers';
+import {
+  convertDateTime,
+  displayVisualization,
+  getQueryResponse,
+  isDateValid,
+} from '../../helpers/utils';
+import './visualization_flyout.scss';
 
 /*
  * VisaulizationFlyout - This module create a flyout to add visualization
@@ -332,10 +337,42 @@ export const VisaulizationFlyout = ({
     </EuiFlyoutFooter>
   );
 
+  const parseSavedVisualizations = (visualization: ObservabilitySavedVisualization) => {
+    return {
+      id: visualization.objectId,
+      name: visualization.savedVisualization.name,
+      query: visualization.savedVisualization.query,
+      type: visualization.savedVisualization.type,
+      timeField: visualization.savedVisualization.selected_timestamp.name,
+      selected_date_range: visualization.savedVisualization.selected_date_range,
+      selected_fields: visualization.savedVisualization.selected_fields,
+      user_configs: visualization.savedVisualization.user_configs
+        ? JSON.parse(visualization.savedVisualization.user_configs)
+        : {},
+      sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
+        ? visualization.savedVisualization.sub_type
+        : '',
+      units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
+        ? visualization.savedVisualization.units_of_measure
+        : '',
+      ...(visualization.savedVisualization.application_id
+        ? { application_id: visualization.savedVisualization.application_id }
+        : {}),
+    };
+  };
+
   // Fetch all saved visualizations
   const fetchSavedVisualizations = async () => {
-    return http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
+    return SavedObjectsActions.getBulk({
+      objectType: ['savedVisualization'],
+      sortOrder: 'desc',
+      fromIndex: 0,
+    })
+      .then((response) => ({
+        visualizations: response.observabilityObjectList.map((visualization) =>
+          parseSavedVisualizations(visualization as ObservabilitySavedVisualization)
+        ),
+      }))
       .then((res) => {
         if (res.visualizations.length > 0) {
           setSavedVisualizations(res.visualizations);

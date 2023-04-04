@@ -10,24 +10,26 @@ import _, { isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
+import { CoreStart } from '../../../../../../src/core/public';
 import {
   PPL_DATE_FORMAT,
   PPL_INDEX_REGEX,
   PPL_WHERE_CLAUSE_REGEX,
 } from '../../../../common/constants/shared';
-import PPLService from '../../../services/requests/ppl';
-import { CoreStart } from '../../../../../../src/core/public';
+import { QueryManager } from '../../../../common/query_manager';
 import {
-  VisualizationType,
   SavedVisualizationType,
+  VisualizationType,
   VizContainerError,
 } from '../../../../common/types/custom_panels';
-import { Visualization } from '../../visualizations/visualization';
-import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
-import { QueryManager } from '../../../../common/query_manager';
-import { getDefaultVisConfig } from '../../event_analytics/utils';
+import { SavedVisualization } from '../../../../common/types/explorer';
 import { removeBacktick } from '../../../../common/utils';
-import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
+import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
+import PPLService from '../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
+import { getDefaultVisConfig } from '../../event_analytics/utils';
+import { Visualization } from '../../visualizations/visualization';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -169,13 +171,17 @@ export const fetchVisualizationById = async (
   savedVisualizationId: string,
   setIsError: (error: VizContainerError) => void
 ) => {
-  let savedVisualization = {} as SavedVisualizationType;
-  await getSavedObjectsClient({ objectId: savedVisualizationId, objectType: 'savedQuery' })
-    .get({ objectId: savedVisualizationId })
+  let savedVisualization = {} as SavedVisualization;
+
+  await SavedObjectsActions.get({ objectId: savedVisualizationId })
     .then((res) => {
-      savedVisualization = { ...res.observabilityObjectList[0]?.savedVisualization };
-      savedVisualization.id = res.observabilityObjectList[0].objectId;
-      savedVisualization.timeField = res.observabilityObjectList[0]?.selected_timestamp?.name;
+      const visualization = (res.observabilityObjectList[0] as ObservabilitySavedVisualization)
+        .savedVisualization;
+      savedVisualization = {
+        ...visualization,
+        id: res.observabilityObjectList[0].objectId,
+        timeField: visualization.selected_timestamp.name,
+      };
     })
     .catch((err) => {
       setIsError({
