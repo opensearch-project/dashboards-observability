@@ -348,12 +348,7 @@ export const Explorer = ({
     } else {
       fetchData();
     }
-    if (savedObjectId) {
-      updateTabData(savedObjectId);
-    } else {
-      fetchData();
-    }
-  }, [savedObjectId]);
+  }, []);
 
   useEffect(() => {
     if (appLogEvents) {
