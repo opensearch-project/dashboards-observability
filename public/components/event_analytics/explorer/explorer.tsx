@@ -27,11 +27,9 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  FILTERED_PATTERN,
   NEW_TAB,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
-  PATTERN_REGEX,
   RAW_QUERY,
   SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPE,
@@ -56,7 +54,6 @@ import {
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
-  IDefaultTimestampState,
   IExplorerFields,
   IExplorerProps,
   IField,
@@ -66,7 +63,6 @@ import {
 } from '../../../../common/types/explorer';
 import {
   buildQuery,
-  composeFinalQuery,
   getIndexPatternFromRawQuery,
   uiSettingsService,
 } from '../../../../common/utils';
@@ -110,6 +106,7 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
+import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 
 export const Explorer = ({
   pplService,
@@ -164,7 +161,6 @@ export const Explorer = ({
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
   const [curVisId, setCurVisId] = useState('bar');
-  const [prevIndex, setPrevIndex] = useState('');
   const [isPanelTextFieldInvalid, setIsPanelTextFieldInvalid] = useState(false);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [timeIntervalOptions, setTimeIntervalOptions] = useState(TIME_INTERVAL_OPTIONS);
@@ -250,122 +246,39 @@ export const Explorer = ({
     };
   };
 
-  const getDefaultTimestampByIndexPattern = async (
-    indexPattern: string
-  ): Promise<IDefaultTimestampState> => await timestampUtils.getTimestamp(indexPattern);
-
   const fetchData = async (startingTime?: string, endingTime?: string) => {
-    const curQuery = queryRef.current;
+    const curQuery: IQuery = queryRef.current!;
     const rawQueryStr = (curQuery![RAW_QUERY] as string).includes(appBaseQuery)
       ? curQuery![RAW_QUERY]
       : buildQuery(appBasedRef.current, curQuery![RAW_QUERY]);
-    const curIndex = getIndexPatternFromRawQuery(rawQueryStr);
-
-    if (isEmpty(rawQueryStr)) return;
-
-    if (isEmpty(curIndex)) {
-      setToast('Query does not include valid index.', 'danger');
-      return;
-    }
-
-    let curTimestamp: string = curQuery![SELECTED_TIMESTAMP];
-    if (isEmpty(curTimestamp)) {
-      const defaultTimestamp = await getDefaultTimestampByIndexPattern(curIndex);
-      if (isEmpty(defaultTimestamp.default_timestamp)) {
-        setToast(defaultTimestamp.message, 'danger');
-        return;
-      }
-      curTimestamp = defaultTimestamp.default_timestamp;
-      if (defaultTimestamp.hasSchemaConflict) {
-        setToast(defaultTimestamp.message, 'danger');
-      }
-    }
-
-    let curPattern: string = curQuery![SELECTED_PATTERN_FIELD];
-
-    if (isEmpty(curPattern)) {
-      const patternErrorHandler = getErrorHandler('Error fetching default pattern field');
-      await setDefaultPatternsField(curIndex, '', patternErrorHandler);
-      const newQuery = queryRef.current;
-      curPattern = newQuery![SELECTED_PATTERN_FIELD];
-      if (isEmpty(curPattern)) {
-        setToast('Index does not contain a valid pattern field.', 'danger');
-        return;
-      }
-    }
-
-    if (isEqual(typeof startingTime, 'undefined') && isEqual(typeof endingTime, 'undefined')) {
-      startingTime = curQuery![SELECTED_DATE_RANGE][0];
-      endingTime = curQuery![SELECTED_DATE_RANGE][1];
-    }
-
-    // compose final query
-    const finalQuery = composeFinalQuery(
-      curQuery![RAW_QUERY],
-      startingTime!,
-      endingTime!,
-      curTimestamp,
-      isLiveTailOnRef.current,
-      appBasedRef.current,
-      curQuery![SELECTED_PATTERN_FIELD],
-      curQuery![PATTERN_REGEX],
-      curQuery![FILTERED_PATTERN]
-    );
-
-    batch(() => {
-      dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            finalQuery,
-            [RAW_QUERY]: rawQueryStr,
-            [SELECTED_TIMESTAMP]: curTimestamp,
-          },
-        })
-      );
-      if (selectedContentTabId === TAB_CHART_ID) {
-        // parse stats section on every search
-        const statsTokens = queryManager.queryParser().parse(rawQueryStr).getStats();
-        const updatedDataConfig = getDefaultVisConfig(statsTokens);
-        dispatch(
-          changeVizConfig({
-            tabId,
-            vizId: curVisId,
-            data: { dataConfig: { ...updatedDataConfig } },
-          })
-        );
-      }
-    });
-
-    if (!selectedIntervalRef.current || selectedIntervalRef.current.text === 'Auto') {
-      findAutoInterval(startingTime, endingTime);
-    }
-    if (isLiveTailOnRef.current) {
-      getLiveTail(undefined, getErrorHandler('Error fetching events'));
-    } else {
-      getEvents(undefined, getErrorHandler('Error fetching events'));
-    }
-    getCountVisualizations(selectedIntervalRef.current!.value.replace(/^auto_/, ''));
-
-    // to fetch patterns data on current query
-    if (!finalQuery.match(PATTERNS_REGEX)) {
-      getPatterns(selectedIntervalRef.current!.value.replace(/^auto_/, ''));
-    }
-
-    // for comparing usage if for the same tab, user changed index from one to another
-    if (!isLiveTailOnRef.current) {
-      setPrevIndex(curTimestamp);
-      if (!queryRef.current!.isLoaded) {
-        dispatch(
-          changeQuery({
-            tabId,
-            query: {
-              isLoaded: true,
-            },
-          })
-        );
-      }
-    }
+    new PPLDataFetcher(
+      { ...curQuery },
+      { batch, dispatch, changeQuery, changeVizConfig },
+      {
+        tabId,
+        findAutoInterval,
+        getCountVisualizations,
+        getLiveTail,
+        getEvents,
+        getErrorHandler,
+        getPatterns,
+        setDefaultPatternsField,
+        timestampUtils,
+        curVisId,
+        selectedContentTabId,
+        queryManager,
+        getDefaultVisConfig,
+      },
+      {
+        appBaseQuery,
+        query: rawQueryStr,
+        startingTime,
+        endingTime,
+        isLiveTailOn: isLiveTailOnRef.current,
+        selectedInterval: selectedIntervalRef.current,
+      },
+      notifications
+    ).search();
   };
 
   const isIndexPatternChanged = (currentQuery: string, prevTabQuery: string) =>
@@ -435,7 +348,12 @@ export const Explorer = ({
     } else {
       fetchData();
     }
-  }, []);
+    if (savedObjectId) {
+      updateTabData(savedObjectId);
+    } else {
+      fetchData();
+    }
+  }, [savedObjectId]);
 
   useEffect(() => {
     if (appLogEvents) {
@@ -796,7 +714,7 @@ export const Explorer = ({
         );
         await setDefaultPatternsField('', '');
       }
-      if (!availability) {
+      if (availability !== true) {
         await updateQueryInStore(tempQuery);
       }
       await fetchData();
