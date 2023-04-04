@@ -15,5 +15,5 @@ export interface VisualizationSavedObjectAttributes extends SavedObjectAttribute
   description: string;
   version: number;
   createdTimeMs: number;
-  savedVisualization?: SavedVisualization;
+  savedVisualization: SavedVisualization;
 }
