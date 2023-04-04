@@ -165,6 +165,7 @@ export interface SavedVisualization extends SavedObjectAttributes {
   type: string;
   sub_type: 'metric' | 'visualization';
   user_configs?: string;
+  units_of_measure?: string;
   application_id?: string;
 }
 

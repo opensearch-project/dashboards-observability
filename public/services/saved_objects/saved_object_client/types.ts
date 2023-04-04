@@ -4,6 +4,7 @@
  */
 
 import { SavedQuery, SavedVisualization } from '../../../../common/types/explorer';
+import { SAVED_QUERY, SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
 
 export interface SavedObjectsCreateResponse {
   objectId: string;
@@ -11,14 +12,22 @@ export interface SavedObjectsCreateResponse {
 
 export type SavedObjectsUpdateResponse = SavedObjectsCreateResponse;
 
-export interface ObservabilitySavedObject {
+interface ObservabilitySavedObjectBase {
   createdTimeMs: number;
   lastUpdatedTimeMs: number;
   objectId: string;
   tenant?: string;
-  savedVisualization?: SavedVisualization;
-  savedQuery?: SavedQuery;
 }
+
+export interface ObservabilitySavedVisualization extends ObservabilitySavedObjectBase {
+  [SAVED_VISUALIZATION]: SavedVisualization;
+}
+
+export interface ObservabilitySavedQuery extends ObservabilitySavedObjectBase {
+  [SAVED_QUERY]: SavedQuery;
+}
+
+export type ObservabilitySavedObject = ObservabilitySavedVisualization | ObservabilitySavedQuery;
 
 export interface SavedObjectsGetParams {
   objectId: string;

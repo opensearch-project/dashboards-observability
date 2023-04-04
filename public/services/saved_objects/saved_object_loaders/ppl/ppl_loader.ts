@@ -4,15 +4,15 @@
  */
 
 import { has, isEmpty } from 'lodash';
-import { batch as Batch } from 'react-redux';
-import { changeQuery as changeQueryAction } from 'public/components/event_analytics/redux/slices/query_slice';
 import { updateFields as updateFieldsAction } from 'public/components/event_analytics/redux/slices/field_slice';
+import { changeQuery as changeQueryAction } from 'public/components/event_analytics/redux/slices/query_slice';
 import { updateTabName as updateTabNameAction } from 'public/components/event_analytics/redux/slices/query_tab_slice';
 import { change as updateVizConfigAction } from 'public/components/event_analytics/redux/slices/viualization_config_slice';
-import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
-import { SavedObjectLoaderBase } from '../loader_base';
-import { ISavedObjectLoader } from '../loader_interface';
+import { batch as Batch } from 'react-redux';
+import { NotificationsStart } from '../../../../../../../src/core/public';
 import {
+  AGGREGATIONS,
+  BREAKDOWNS,
   GROUPBY,
   RAW_QUERY,
   SAVED_OBJECT_ID,
@@ -23,15 +23,15 @@ import {
   SELECTED_FIELDS,
   SELECTED_TIMESTAMP,
   TYPE_TAB_MAPPING,
-  AGGREGATIONS,
-  BREAKDOWNS,
 } from '../../../../../common/constants/explorer';
-import { NotificationsStart } from '../../../../../../../src/core/public';
 import { QueryManager } from '../../../../../common/query_manager';
 import { statsChunk } from '../../../../../common/query_manager/ast/types/stats';
-import { IField } from '../../../../../common/types/explorer';
+import { IField, SavedQuery, SavedVisualization } from '../../../../../common/types/explorer';
 import { AppDispatch } from '../../../../framework/redux/store';
-import { ObservabilitySavedObject } from '../../saved_object_client/types';
+import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
+import { ObservabilitySavedObject, ObservabilitySavedQuery } from '../../saved_object_client/types';
+import { SavedObjectLoaderBase } from '../loader_base';
+import { ISavedObjectLoader } from '../loader_interface';
 
 interface LoadParams {
   objectId: string;
@@ -45,7 +45,12 @@ interface LoadContext {
   queryManager: QueryManager;
   getDefaultVisConfig: (
     statsToken: statsChunk
-  ) => { [AGGREGATIONS]: IField[]; [GROUPBY]: IField[]; [BREAKDOWNS]?: IField[]; span?: any };
+  ) => {
+    [AGGREGATIONS]: IField[];
+    [GROUPBY]: IField[];
+    [BREAKDOWNS]?: IField[];
+    span?: any;
+  };
   setSelectedPanelName: (savedObjectName: string) => void;
   setCurVisId: (visId: string) => void;
   setTempQuery: (tmpQuery: string) => void;
@@ -66,6 +71,18 @@ interface Dispatchers {
 }
 
 type SavedObjectData = ObservabilitySavedObject;
+
+function isObjectSavedQuery(
+  savedObjectData: SavedObjectData
+): savedObjectData is ObservabilitySavedQuery {
+  return SAVED_QUERY in savedObjectData;
+}
+
+function isInnerObjectSavedVisualization(
+  objectData: SavedQuery | SavedVisualization
+): objectData is SavedVisualization {
+  return 'type' in objectData;
+}
 
 export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
   constructor(
@@ -102,30 +119,33 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
   }
 
   async processSavedData(savedObjectData: SavedObjectData) {
-    const isSavedQuery = has(savedObjectData, SAVED_QUERY);
-    const savedType = isSavedQuery ? SAVED_QUERY : SAVED_VISUALIZATION;
-    const objectData = isSavedQuery
+    const savedType = isObjectSavedQuery(savedObjectData) ? SAVED_QUERY : SAVED_VISUALIZATION;
+    const objectData = isObjectSavedQuery(savedObjectData)
       ? savedObjectData.savedQuery
       : savedObjectData.savedVisualization;
     const currQuery = objectData?.query || '';
     const { appLogEvents } = this.loadContext;
 
     // app analytics specific
-    if (appLogEvents && savedObjectData.selected_date_range) {
-      this.updateAppAnalyticSelectedDateRange(savedObjectData.selected_date_range);
+    if (appLogEvents && objectData.selected_date_range) {
+      this.updateAppAnalyticSelectedDateRange(objectData.selected_date_range);
     }
 
     // update redux store with this saved object data
     await this.updateReduxState(savedType, objectData, currQuery);
 
     // update UI state with this saved object data
-    await this.updateUIState(savedObjectData);
+    await this.updateUIState(objectData);
 
     // fetch data based on saved object data
     await this.loadDataFromSavedObject();
   }
 
-  async updateReduxState(savedType: string, objectData: SavedObjectData, currQuery: string) {
+  async updateReduxState(
+    savedType: typeof SAVED_QUERY | typeof SAVED_VISUALIZATION,
+    objectData: SavedQuery | SavedVisualization,
+    currQuery: string
+  ) {
     const { batch, dispatch, changeQuery, updateFields, updateTabName } = this.dispatchers;
     const { tabId } = this.loadContext;
     const { objectId } = this.loadParams;
@@ -159,34 +179,34 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
           tabName: objectData.name,
         })
       );
-      await this.updateVisualizationConfig(objectData);
+      if (isInnerObjectSavedVisualization(objectData)) {
+        await this.updateVisualizationConfig(objectData);
+      }
     });
   }
 
-  async updateVisualizationConfig(objectData: SavedObjectData) {
+  async updateVisualizationConfig(objectData: SavedVisualization) {
     const { dispatch, updateVizConfig } = this.dispatchers;
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
-    if (objectData.type) {
-      let visConfig = {};
-      const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
-      if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
-        visConfig = { ...customConfig };
-      } else {
-        const statsTokens = queryManager.queryParser().parse(objectData.query).getStats();
-        visConfig = { dataConfig: { ...getDefaultVisConfig(statsTokens) } };
-      }
-      await dispatch(
-        updateVizConfig({
-          tabId,
-          vizId: objectData?.type,
-          data: visConfig,
-        })
-      );
+    let visConfig = {};
+    const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
+    if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
+      visConfig = { ...customConfig };
+    } else {
+      const statsTokens = queryManager.queryParser().parse(objectData.query).getStats();
+      visConfig = { dataConfig: { ...getDefaultVisConfig(statsTokens) } };
     }
+    await dispatch(
+      updateVizConfig({
+        tabId,
+        vizId: objectData?.type,
+        data: visConfig,
+      })
+    );
   }
 
-  async updateUIState(objectData: SavedObjectData) {
+  async updateUIState(objectData: SavedQuery | SavedVisualization) {
     const {
       setSelectedPanelName,
       setCurVisId,
@@ -196,24 +216,22 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
       setSubType,
       setSelectedContentTab,
     } = this.loadContext;
-    const isSavedQuery = has(objectData, SAVED_QUERY);
-    const savedVisualization = objectData.savedVisualization;
     // update UI state with saved data
     setSelectedPanelName(objectData?.name || '');
     setCurVisId(objectData?.type || 'bar');
     setTempQuery((staleTempQuery) => {
       return objectData?.query || staleTempQuery;
     });
-    if (savedVisualization?.sub_type) {
-      if (savedVisualization?.sub_type === 'metric') {
+    if (isInnerObjectSavedVisualization(objectData)) {
+      if (objectData.sub_type === 'metric') {
         setMetricChecked(true);
-        setMetricMeasure(savedVisualization?.units_of_measure);
+        setMetricMeasure(objectData.units_of_measure || '');
       }
-      setSubType(savedVisualization?.sub_type);
+      setSubType(objectData.sub_type);
     }
-    const tabToBeFocused = isSavedQuery
-      ? TYPE_TAB_MAPPING[SAVED_QUERY]
-      : TYPE_TAB_MAPPING[SAVED_VISUALIZATION];
+    const tabToBeFocused = isInnerObjectSavedVisualization(objectData)
+      ? TYPE_TAB_MAPPING[SAVED_VISUALIZATION]
+      : TYPE_TAB_MAPPING[SAVED_QUERY];
     setSelectedContentTab(tabToBeFocused);
   }
 
