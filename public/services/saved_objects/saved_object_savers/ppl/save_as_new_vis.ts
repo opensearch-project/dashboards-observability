@@ -41,7 +41,7 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
           text: `New visualization '${name}' has been successfully saved.`,
         });
 
-        if (selectedPanels)
+        if (selectedPanels?.length)
           this.addToPanel({ selectedPanels, saveTitle: name, notifications, visId: res.objectId });
 
         if (appLogEvents) {

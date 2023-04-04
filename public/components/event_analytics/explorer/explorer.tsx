@@ -777,6 +777,7 @@ export const Explorer = ({
             userConfigs: JSON.stringify(userVizConfigs[curVisId]),
             description: userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '',
             subType,
+            selectedPanels: selectedCustomPanelOptions,
           }
         );
       } else {

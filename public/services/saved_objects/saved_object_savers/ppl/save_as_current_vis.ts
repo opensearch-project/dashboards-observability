@@ -19,7 +19,7 @@ export class SaveAsCurrentVisualization extends SavedQuerySaver {
   save(): void {
     const { dispatch, updateTabName } = this.dispatchers;
     const { tabId, notifications } = this.saveContext;
-    const { name } = this.saveParams;
+    const { name, selectedPanels } = this.saveParams;
     this.saveClient
       .update({ ...this.saveParams })
       .then((res: any) => {
@@ -27,6 +27,10 @@ export class SaveAsCurrentVisualization extends SavedQuerySaver {
           title: 'Saved successfully.',
           text: `Visualization '${name}' has been successfully updated.`,
         });
+
+        if (selectedPanels?.length)
+          this.addToPanel({ selectedPanels, saveTitle: name, notifications, visId: res.objectId });
+
         dispatch(
           updateTabName({
             tabId,
