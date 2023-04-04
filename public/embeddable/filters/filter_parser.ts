@@ -5,6 +5,10 @@
 
 import { Filter, getFilterField } from '../../../../../src/plugins/data/common';
 
+/**
+ * Parse core {@link Filter} and convert to a PPL where clause. Only supports
+ * non DSL filters.
+ */
 export const parseFilters = (filters?: Filter[]) => {
   if (!filters) return '';
   return filters

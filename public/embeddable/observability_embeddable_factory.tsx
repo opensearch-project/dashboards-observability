@@ -30,6 +30,7 @@ import {
   ObservabilityOutput,
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+  OBSERVABILITY_EMBEDDABLE_ICON,
 } from './observability_embeddable';
 
 interface StartServices {
@@ -51,7 +52,7 @@ export class ObservabilityEmbeddableFactoryDefinition
     name: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
     includeFields: [],
     type: VISUALIZATION_SAVED_OBJECT, // saved object type for finding embeddables in Dashboard
-    getIconForSavedObject: () => 'lensApp',
+    getIconForSavedObject: () => OBSERVABILITY_EMBEDDABLE_ICON,
   };
   private attributeService?: AttributeService<VisualizationSavedObjectAttributes>;
 

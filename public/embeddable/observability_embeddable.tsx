@@ -25,6 +25,7 @@ export const OBSERVABILITY_EMBEDDABLE_ID = 'observability-ppl';
 export const OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME = 'PPL';
 export const OBSERVABILITY_EMBEDDABLE_DESCRIPTION =
   'Create a visualization with Piped Processing Language (PPL). PPL can query data in your indices and also supports federated data sources like Prometheus';
+export const OBSERVABILITY_EMBEDDABLE_ICON = 'lensApp';
 
 export interface ObservabilityOutput extends EmbeddableOutput {
   /**

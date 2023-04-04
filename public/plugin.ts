@@ -23,6 +23,7 @@ import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
   OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+  OBSERVABILITY_EMBEDDABLE_ICON,
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
@@ -103,7 +104,7 @@ export class ObservabilityPlugin
       name: OBSERVABILITY_EMBEDDABLE_ID,
       title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
       description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
-      icon: 'pencil',
+      icon: OBSERVABILITY_EMBEDDABLE_ICON,
       aliasApp: observabilityID,
       aliasPath: '#/event_analytics/explorer',
       stage: 'production',
@@ -113,8 +114,8 @@ export class ObservabilityPlugin
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
             editApp: observabilityID,
-            editUrl: `#/event_analytics/explorer/${encodeURIComponent(id)}`,
-            icon: 'pencil',
+            editUrl: `#/event_analytics/explorer/${id}`,
+            icon: OBSERVABILITY_EMBEDDABLE_ICON,
             id,
             savedObjectType: VISUALIZATION_SAVED_OBJECT,
             title: attributes?.title,
