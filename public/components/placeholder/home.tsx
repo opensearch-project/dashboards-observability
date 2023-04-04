@@ -37,6 +37,7 @@ import {
 } from './components/available_integration_overview_page';
 import { Sidebar } from './components/integration_side_nav';
 import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
+import { AddedIntegration } from './components/added_integration';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -426,8 +427,31 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           exact
-          path={'/placeholder/:id+'}
+          path={'/placeholder/added/:id+'}
           render={(routerProps) => (
+            <Sidebar>
+              <AddedIntegration
+                disabled={false}
+                appId={decodeURIComponent(routerProps.match.params.id)}
+                pplService={pplService}
+                dslService={dslService}
+                savedObjects={savedObjects}
+                timestampUtils={timestampUtils}
+                notifications={notifications}
+                setToasts={setToast}
+                updateApp={updateApp}
+                callback={callback}
+                queryManager={queryManager}
+                {...commonProps}
+              />
+            </Sidebar>
+          )}
+        />
+        <Route
+          exact
+          path={'/placeholder/available/:id+'}
+          render={(routerProps) => (
+            <Sidebar>
             <Integration
               disabled={false}
               appId={decodeURIComponent(routerProps.match.params.id)}
@@ -442,6 +466,7 @@ export const Home = (props: HomeProps) => {
               queryManager={queryManager}
               {...commonProps}
             />
+            </Sidebar>
           )}
         />
       </Switch>

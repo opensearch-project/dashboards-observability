@@ -14,7 +14,7 @@ import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 
-interface AppTableProps extends AppAnalyticsComponentDeps {
+export interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
   applications: ApplicationType[];
   fetchApplications: () => void;
@@ -49,6 +49,10 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
         text: 'Placeholder',
         href: '#/placeholder',
       },
+      {
+        text: 'Added Integrations',
+        href: '#/placeholder/added',
+      }
     ]);
     handleDataRequest();
   }, []);

@@ -29,7 +29,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       render: (value, record) => (
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationLink`}
-          href={record.dashboardUrl}
+          href={`#/placeholder/added/${record.id}`}
         >
           {_.truncate(record.id, { length: 100 })}
         </EuiLink>

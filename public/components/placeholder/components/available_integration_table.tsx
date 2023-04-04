@@ -29,7 +29,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       render: (value, record) => (
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationLink`}
-          href={`#/placeholder/${record.templateName}`}
+          href={`#/placeholder/available/${record.templateName}`}
         >
           {_.truncate(record.templateName, { length: 100 })}
         </EuiLink>
