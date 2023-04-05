@@ -13,12 +13,12 @@ describe('Traces table component', () => {
 
   it('renders empty traces table message', () => {
     const BadComponent = () => {
-        throw new Error('Testing Observability Error Boundary')
-    }
+      throw new Error('Testing Observability Error Boundary');
+    };
     const errorScreen = mount(
       <ObservabilityErrorBoundary>
-        <BadComponent/></ObservabilityErrorBoundary>
-
+        <BadComponent />
+      </ObservabilityErrorBoundary>
     );
     expect(errorScreen).toMatchSnapshot();
   });
