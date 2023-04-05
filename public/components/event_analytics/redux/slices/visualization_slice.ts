@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import { REDUX_EXPL_SLICE_VISUALIZATION } from '../../../../../common/constants/explorer';
 
@@ -27,6 +27,9 @@ export const explorerVisualizationSlice = createSlice({
 
 export const { render, reset } = explorerVisualizationSlice.actions;
 
-export const selectExplorerVisualization = (state) => state.explorerVisualization;
+export const selectExplorerVisualization = createSelector(
+  (state) => state.explorerVisualization,
+  (visState) => visState
+);
 
-export default explorerVisualizationSlice.reducer;
+export const explorerVisualizationReducer = explorerVisualizationSlice.reducer;

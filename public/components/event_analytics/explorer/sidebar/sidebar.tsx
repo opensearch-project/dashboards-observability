@@ -3,12 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
+import { batch, useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
 import { EuiTitle, EuiSpacer, EuiFieldSearch, EuiAccordion } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { Field } from './field';
-import { IExplorerFields, IField } from '../../../../../common/types/explorer';
+import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
+import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constants/explorer';
+import { sortFields, updateFields } from '../../redux/slices/field_slice';
+import { TabContext } from '../../hooks/use_tab_context';
 
 interface ISidebarProps {
   query: string;
@@ -21,8 +25,6 @@ interface ISidebarProps {
   isFieldToggleButtonDisabled: boolean;
   handleOverridePattern: (pattern: IField) => void;
   handleOverrideTimestamp: (timestamp: IField) => void;
-  handleAddField: (field: IField) => void;
-  handleRemoveField: (field: IField) => void;
 }
 
 export const Sidebar = (props: ISidebarProps) => {
@@ -37,12 +39,75 @@ export const Sidebar = (props: ISidebarProps) => {
     isFieldToggleButtonDisabled,
     handleOverridePattern,
     handleOverrideTimestamp,
-    handleAddField,
-    handleRemoveField,
   } = props;
 
+  const dispatch = useDispatch();
+  const { tabId } = useContext<any>(TabContext);
   const [showFields, setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  /**
+   * Toggle fields between selected and unselected sets
+   * @param fieldState all fields in store
+   * @param field field to be toggled
+   * @param FieldSetToRemove the set where this field to be removed from
+   * @param FieldSetToAdd the set where this field to be added to
+   * returns new fields state
+   */
+  const toggleFields = (
+    fieldState: ExplorerFields,
+    field: IField,
+    fieldSetToRemove: string,
+    fieldSetToAdd: string
+  ): ExplorerFields => {
+    const nextFields = { ...fieldState };
+    nextFields[fieldSetToRemove] = nextFields[fieldSetToRemove].filter(
+      (fd: IField) => fd.name !== field.name
+    );
+    nextFields[fieldSetToAdd] = [...nextFields[fieldSetToAdd], field];
+    return nextFields;
+  };
+
+  const updateStoreFields = (fieldsData: ExplorerFields, tabID: string, modifiedField: string) => {
+    batch(() => {
+      dispatch(
+        updateFields({
+          tabId: tabID,
+          data: {
+            ...fieldsData,
+          },
+        })
+      );
+      dispatch(
+        sortFields({
+          tabId: tabID,
+          data: [modifiedField],
+        })
+      );
+    });
+  };
+
+  const handleAddField = useCallback(
+    (field: IField) => {
+      updateStoreFields(
+        toggleFields(explorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS),
+        tabId,
+        SELECTED_FIELDS
+      );
+    },
+    [explorerFields, tabId]
+  );
+
+  const handleRemoveField = useCallback(
+    (field: IField) => {
+      updateStoreFields(
+        toggleFields(explorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS),
+        tabId,
+        AVAILABLE_FIELDS
+      );
+    },
+    [explorerFields, tabId]
+  );
 
   return (
     <I18nProvider>

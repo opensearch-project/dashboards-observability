@@ -318,6 +318,7 @@ export interface ConfigList {
   [AGGREGATIONS]?: ConfigListEntry[];
   [BREAKDOWNS]?: ConfigListEntry[] | HistogramConfigList[];
   span?: DimensionSpan;
+  isVertical?: boolean;
 }
 
 export interface Breadcrumbs {
@@ -384,4 +385,9 @@ export interface VisualizationState {
   visData: any;
   visConfMetadata: ConfigList;
   visMeta: VisMeta;
+}
+
+export interface VisSpecificMetaData {
+  x_coordinate: string;
+  y_coordinate: string;
 }

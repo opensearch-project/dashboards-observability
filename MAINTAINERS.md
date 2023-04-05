@@ -16,3 +16,12 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Derek Ho          | [derek-ho](https://github.com/derek-ho)           | Amazon      |
 | Lior Perry        | [YANG-DB](https://github.com/YANG-DB)             | Amazon      |
 | Peter Fitzgibbons | [pjfitzgibbons](https://github.com/pjfitzgibbons) | Amazon      |
+| Simeon Widdis     | [swiddis] (https://github.com/swiddis)            | Amazon      |
+
+## Emeritus Maintainers
+
+| Maintainer        | GitHub ID                                               | Affiliation |
+| ----------------- | ------------------------------------------------------- | ----------- |
+| Charlotte Henkle  | [CEHENKLE](https://github.com/CEHENKLE)                 | Amazon      |
+| Anirudha Jadhav   | [anirudha](https://github.com/anirudha)                 | Amazon      |
+| Nick Knize        | [nknize](https://github.com/nknize)                     | Amazon      |
