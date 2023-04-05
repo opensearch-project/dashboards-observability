@@ -958,6 +958,7 @@ export const Explorer = ({
           selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
           onTabClick={(selectedTab: EuiTabbedContentTab) => handleContentTabClick(selectedTab)}
           tabs={contentTabs}
+          size="s"
         />
       </div>
     </TabContext.Provider>

@@ -218,6 +218,7 @@ export const LogExplorer = ({
         selectedTab={memorizedTabs.find((tab) => tab.id === curSelectedTabId)}
         onTabClick={(selectedTab: EuiTabbedContentTab) => handleTabClick(selectedTab)}
         data-test-subj="eventExplorer__topLevelTabbing"
+        size="s"
       />
     </>
   );
