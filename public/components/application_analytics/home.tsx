@@ -11,7 +11,7 @@ import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
-import { EuiGlobalToastList, EuiLink, EuiErrorBoundary } from '@elastic/eui';
+import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { isEmpty, last } from 'lodash';
 import { useDispatch } from 'react-redux';

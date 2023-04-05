@@ -6,7 +6,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { QueryManager } from 'common/query_manager';
-import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from '../types';
 import { App } from './app';

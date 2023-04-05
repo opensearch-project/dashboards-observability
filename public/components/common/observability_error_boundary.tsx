@@ -16,13 +16,13 @@ export function ObservabilityErrorBoundary(props: { children: React.ReactNode })
       <EuiErrorBoundary children={props.children} />
       <EuiSpacer size="l" />
       <EuiText size="s" color="subdued">
-        An unexpected error occured. Please refresh the page and if the issue persists report it to{' '}
+      An unexpected error occurred. Please refresh the page, and if the issue persists, report it by creating an issue on{' '}
         <EuiLink external={true} href={OBSERVABILITY_GITHUB_ISSUE_URL} target="blank">
-          github
+        GitHub
         </EuiLink>{' '}
-        or the{' '}
+        or posting on the{' '}
         <EuiLink external={true} href={OPENSEARCH_OBSERVABILITY_FORUM_URL} target="blank">
-          forum
+        community forum
         </EuiLink>
       </EuiText>
     </div>

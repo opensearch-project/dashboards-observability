@@ -10,7 +10,7 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
-import { ObservabilityErrorBoundary } from 'public/components/common/observability_error_boundary';
+import { ObservabilityErrorBoundary } from '../../../../public/components/common/observability_error_boundary';
 import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';

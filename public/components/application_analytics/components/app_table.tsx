@@ -125,10 +125,6 @@ export function AppTable(props: AppTableProps) {
     showModal();
   };
 
-  const BadComponent = () => {
-    throw new Error('test');
-  };
-
   const deleteApp = () => {
     const applicationString = `application${selectedApplications.length > 1 ? 's' : ''}`;
     setModalLayout(
@@ -255,95 +251,91 @@ export function AppTable(props: AppTableProps) {
     },
   ] as Array<EuiTableFieldDataColumnType<ApplicationType>>;
 
-  return <BadComponent />;
+  return (
+    <div style={pageStyles}>
+      <EuiPage>
+        <EuiPageBody component="div">
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle size="l">
+                <h1>Overview</h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiPageContent id="applicationArea">
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
+                  <h3>
+                    Applications<span className="panel-header-count"> ({applications.length})</span>
+                  </h3>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+              <EuiPageContentHeaderSection>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiPopover
+                      panelPaddingSize="none"
+                      button={popoverButton}
+                      isOpen={isActionsPopoverOpen}
+                      closePopover={() => setIsActionsPopoverOpen(false)}
+                    >
+                      <EuiContextMenuPanel items={popoverItems} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton fill href="#/application_analytics/create">
+                      {createButtonText}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiHorizontalRule />
+            {applications.length > 0 ? (
+              <EuiInMemoryTable
+                loading={props.loading}
+                items={applications}
+                itemId="id"
+                columns={tableColumns}
+                tableLayout="auto"
+                pagination={{
+                  initialPageSize: 10,
+                  pageSizeOptions: [8, 10, 13],
+                }}
+                sorting={{
+                  sort: {
+                    field: 'dateModified',
+                    direction: 'desc',
+                  },
+                }}
+                allowNeutralSort={false}
+                isSelectable={true}
+                selection={{
+                  onSelectionChange: (items) => setSelectedApplications(items),
+                }}
+              />
+            ) : (
+              <>
+                <EuiSpacer size="xxl" />
+                <EuiText textAlign="center">
+                  <h2>No applications</h2>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fullWidth={false} href={`#/application_analytics/create`}>
+                      {createButtonText}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xxl" />
+              </>
+            )}
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+      {isModalVisible && modalLayout}
+    </div>
+  );
 }
-//     <div style={pageStyles}>
-//       <EuiPage>
-//         <EuiPageBody component="div">
-//           <EuiPageHeader>
-//             <EuiPageHeaderSection>
-//               <EuiTitle size="l">
-//                 <h1>Overview</h1>
-//               </EuiTitle>
-//             </EuiPageHeaderSection>
-//           </EuiPageHeader>
-//           <EuiPageContent id="applicationArea">
-//             <EuiPageContentHeader>
-//               <EuiPageContentHeaderSection>
-//                 <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
-//                   <h3>
-//                     Applications<span className="panel-header-count"> ({applications.length})</span>
-//                   </h3>
-//                 </EuiTitle>
-//               </EuiPageContentHeaderSection>
-//               <EuiPageContentHeaderSection>
-//                 <EuiFlexGroup gutterSize="s">
-//                   <EuiFlexItem>
-//                     <EuiPopover
-//                       panelPaddingSize="none"
-//                       button={popoverButton}
-//                       isOpen={isActionsPopoverOpen}
-//                       closePopover={() => setIsActionsPopoverOpen(false)}
-//                     >
-//                       <EuiContextMenuPanel items={popoverItems} />
-//                     </EuiPopover>
-//                   </EuiFlexItem>
-//                   <EuiFlexItem>
-//                     <EuiButton fill href="#/application_analytics/create">
-//                       {createButtonText}
-//                     </EuiButton>
-//                   </EuiFlexItem>
-//                 </EuiFlexGroup>
-//               </EuiPageContentHeaderSection>
-//             </EuiPageContentHeader>
-//             <EuiHorizontalRule />
-//             {applications.length > 0 ? (
-//               <EuiInMemoryTable
-//                 loading={props.loading}
-//                 items={applications}
-//                 itemId="id"
-//                 columns={tableColumns}
-//                 tableLayout="auto"
-//                 pagination={{
-//                   initialPageSize: 10,
-//                   pageSizeOptions: [8, 10, 13],
-//                 }}
-//                 sorting={{
-//                   sort: {
-//                     field: 'dateModified',
-//                     direction: 'desc',
-//                   },
-//                 }}
-//                 allowNeutralSort={false}
-//                 isSelectable={true}
-//                 selection={{
-//                   onSelectionChange: (items) => setSelectedApplications(items),
-//                 }}
-//               />
-//             ) : (
-//               <>
-//                 <EuiSpacer size="xxl" />
-//                 <EuiText textAlign="center">
-//                   <h2>No applications</h2>
-//                 </EuiText>
-//                 <EuiSpacer size="m" />
-//                 <EuiFlexGroup justifyContent="center">
-//                   <EuiFlexItem grow={false}>
-//                     <EuiButton fullWidth={false} href={`#/application_analytics/create`}>
-//                       {createButtonText}
-//                     </EuiButton>
-//                   </EuiFlexItem>
-//                   {/* <EuiFlexItem grow={false}>
-//                     <EuiButton fullWidth={false}>Add sample applications</EuiButton>
-//                   </EuiFlexItem> */}
-//                 </EuiFlexGroup>
-//                 <EuiSpacer size="xxl" />
-//               </>
-//             )}
-//           </EuiPageContent>
-//         </EuiPageBody>
-//       </EuiPage>
-//       {isModalVisible && modalLayout}
-//     </div>
-//   );
-// }
