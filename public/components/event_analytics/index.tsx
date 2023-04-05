@@ -13,6 +13,7 @@ import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { Home as EventExplorerHome } from './home/home';
 import { LogExplorer } from './explorer/log_explorer';
+import { ObservabilityErrorBoundary } from '../common/observability_error_boundary';
 
 export const EventAnalytics = ({
   chrome,
@@ -74,19 +75,21 @@ export const EventAnalytics = ({
                 },
               ]);
               return (
-                <LogExplorer
-                  savedObjectId={prop.match.params.id}
-                  pplService={pplService}
-                  dslService={dslService}
-                  savedObjects={savedObjects}
-                  timestampUtils={timestampUtils}
-                  http={http}
-                  setToast={setToast}
-                  getExistingEmptyTab={getExistingEmptyTab}
-                  history={history}
-                  notifications={notifications}
-                  queryManager={queryManager}
-                />
+                <ObservabilityErrorBoundary>
+                  <LogExplorer
+                    savedObjectId={prop.match.params.id}
+                    pplService={pplService}
+                    dslService={dslService}
+                    savedObjects={savedObjects}
+                    timestampUtils={timestampUtils}
+                    http={http}
+                    setToast={setToast}
+                    getExistingEmptyTab={getExistingEmptyTab}
+                    history={history}
+                    notifications={notifications}
+                    queryManager={queryManager}
+                  />
+                </ObservabilityErrorBoundary>
               );
             }}
           />
@@ -104,14 +107,16 @@ export const EventAnalytics = ({
               ]);
               return (
                 <ObservabilitySideBar>
-                  <EventExplorerHome
-                    http={http}
-                    savedObjects={savedObjects}
-                    dslService={dslService}
-                    pplService={pplService}
-                    setToast={setToast}
-                    getExistingEmptyTab={getExistingEmptyTab}
-                  />
+                  <ObservabilityErrorBoundary>
+                    <EventExplorerHome
+                      http={http}
+                      savedObjects={savedObjects}
+                      dslService={dslService}
+                      pplService={pplService}
+                      setToast={setToast}
+                      getExistingEmptyTab={getExistingEmptyTab}
+                    />
+                  </ObservabilityErrorBoundary>
                 </ObservabilitySideBar>
               );
             }}

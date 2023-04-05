@@ -28,6 +28,7 @@ import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
+import { ObservabilityErrorBoundary } from '../common/observability_error_boundary';
 
 /*
  * "Home" module is initial page for Operantional Panels
@@ -303,18 +304,20 @@ export const Home = ({
         render={(props) => {
           return (
             <ObservabilitySideBar>
-              <CustomPanelTable
-                loading={loading}
-                fetchCustomPanels={fetchCustomPanels}
-                customPanels={customPanelData}
-                createCustomPanel={createCustomPanel}
-                setBreadcrumbs={chrome.setBreadcrumbs}
-                parentBreadcrumbs={parentBreadcrumbs}
-                renameCustomPanel={renameCustomPanel}
-                cloneCustomPanel={cloneCustomPanel}
-                deleteCustomPanelList={deleteCustomPanelList}
-                addSamplePanels={addSamplePanels}
-              />
+              <ObservabilityErrorBoundary>
+                <CustomPanelTable
+                  loading={loading}
+                  fetchCustomPanels={fetchCustomPanels}
+                  customPanels={customPanelData}
+                  createCustomPanel={createCustomPanel}
+                  setBreadcrumbs={chrome.setBreadcrumbs}
+                  parentBreadcrumbs={parentBreadcrumbs}
+                  renameCustomPanel={renameCustomPanel}
+                  cloneCustomPanel={cloneCustomPanel}
+                  deleteCustomPanelList={deleteCustomPanelList}
+                  addSamplePanels={addSamplePanels}
+                />
+              </ObservabilityErrorBoundary>
             </ObservabilitySideBar>
           );
         }}
@@ -323,24 +326,26 @@ export const Home = ({
         path={`${renderProps.match.path}/:id`}
         render={(props) => {
           return (
-            <CustomPanelView
-              panelId={props.match.params.id}
-              http={http}
-              pplService={pplService}
-              dslService={dslService}
-              chrome={chrome}
-              parentBreadcrumbs={parentBreadcrumbs}
-              renameCustomPanel={renameCustomPanel}
-              cloneCustomPanel={cloneCustomPanel}
-              deleteCustomPanel={deleteCustomPanel}
-              setToast={setToast}
-              onEditClick={onEditClick}
-              startTime={start}
-              endTime={end}
-              setStartTime={setStart}
-              setEndTime={setEnd}
-              page="operationalPanels"
-            />
+            <ObservabilityErrorBoundary>
+              <CustomPanelView
+                panelId={props.match.params.id}
+                http={http}
+                pplService={pplService}
+                dslService={dslService}
+                chrome={chrome}
+                parentBreadcrumbs={parentBreadcrumbs}
+                renameCustomPanel={renameCustomPanel}
+                cloneCustomPanel={cloneCustomPanel}
+                deleteCustomPanel={deleteCustomPanel}
+                setToast={setToast}
+                onEditClick={onEditClick}
+                startTime={start}
+                endTime={end}
+                setStartTime={setStart}
+                setEndTime={setEnd}
+                page="operationalPanels"
+              />
+            </ObservabilityErrorBoundary>
           );
         }}
       />

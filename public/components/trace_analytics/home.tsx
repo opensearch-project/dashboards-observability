@@ -7,18 +7,18 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { Route, RouteComponentProps } from 'react-router-dom';
-import {
-  ChromeBreadcrumb,
-  ChromeStart,
-  HttpStart,
-} from '../../../../../src/core/public';
+import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
+import { ObservabilityErrorBoundary } from '../common/observability_error_boundary';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { FilterType } from './components/common/filters/filters';
 import { SearchBarProps } from './components/common/search_bar';
 import { Dashboard } from './components/dashboard';
 import { Services, ServiceView } from './components/services';
 import { Traces, TraceView } from './components/traces';
-import { handleDataPrepperIndicesExistRequest, handleJaegerIndicesExistRequest } from './requests/request_handler';
+import {
+  handleDataPrepperIndicesExistRequest,
+  handleJaegerIndicesExistRequest,
+} from './requests/request_handler';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
@@ -28,14 +28,14 @@ export interface TraceAnalyticsCoreDeps {
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
 
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper'
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
-  modes: {
+  modes: Array<{
     id: string;
     title: string;
-  }[];
+  }>;
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
@@ -44,7 +44,9 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
 export const Home = (props: HomeProps) => {
   const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
-  const [mode, setMode] = useState<TraceAnalyticsMode>(sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode || 'jaeger')
+  const [mode, setMode] = useState<TraceAnalyticsMode>(
+    (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
+  );
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
   const [query, setQuery] = useState<string>(sessionStorage.getItem('TraceAnalyticsQuery') || '');
   const [filters, setFilters] = useState<FilterType[]>(
@@ -81,10 +83,9 @@ export const Home = (props: HomeProps) => {
   };
 
   useEffect(() => {
-    handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist)
+    handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist);
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
-  }, []);
-
+  }, [props.http]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
@@ -92,7 +93,7 @@ export const Home = (props: HomeProps) => {
   ];
 
   useEffect(() => {
-    if (!sessionStorage.getItem('TraceAnalyticsMode')){
+    if (!sessionStorage.getItem('TraceAnalyticsMode')) {
       if (dataPrepperIndicesExist) {
         setMode('data_prepper');
       } else if (jaegerIndicesExist) {
@@ -151,7 +152,7 @@ export const Home = (props: HomeProps) => {
     query,
     setQuery: setQueryWithStorage,
     filters,
-    appConfigs: appConfigs,
+    appConfigs,
     setFilters: setFiltersWithStorage,
     startTime,
     setStartTime: setStartTimeWithStorage,
@@ -159,7 +160,9 @@ export const Home = (props: HomeProps) => {
     setEndTime: setEndTimeWithStorage,
     mode,
     modes,
-    setMode: (mode: TraceAnalyticsMode) => {setMode(mode)},
+    setMode: (traceMode: TraceAnalyticsMode) => {
+      setMode(traceMode);
+    },
     jaegerIndicesExist,
     dataPrepperIndicesExist,
   };
@@ -167,18 +170,26 @@ export const Home = (props: HomeProps) => {
   return (
     <>
       <EuiGlobalToastList
-          toasts={toasts}
-          dismissToast={(removedToast) => {
-            setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-          }}
-          toastLifeTimeMs={6000}
+        toasts={toasts}
+        dismissToast={(removedToast) => {
+          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
+        }}
+        toastLifeTimeMs={6000}
       />
       <Route
         exact
         path={['/trace_analytics', '/trace_analytics/home']}
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} setToast={setToast} toasts={toasts} />
+            <ObservabilityErrorBoundary>
+              <Dashboard
+                page="dashboard"
+                childBreadcrumbs={dashboardBreadcrumbs}
+                {...commonProps}
+                setToast={setToast}
+                toasts={toasts}
+              />
+            </ObservabilityErrorBoundary>
           </ObservabilitySideBar>
         )}
       />
@@ -187,25 +198,29 @@ export const Home = (props: HomeProps) => {
         path="/trace_analytics/traces"
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Traces
-              page="traces"
-              childBreadcrumbs={traceBreadcrumbs}
-              traceIdColumnAction={traceIdColumnAction}
-              {...commonProps}
-            />
+            <ObservabilityErrorBoundary>
+              <Traces
+                page="traces"
+                childBreadcrumbs={traceBreadcrumbs}
+                traceIdColumnAction={traceIdColumnAction}
+                {...commonProps}
+              />
+            </ObservabilityErrorBoundary>
           </ObservabilitySideBar>
         )}
       />
       <Route
         path="/trace_analytics/traces/:id+"
         render={(routerProps) => (
-          <TraceView
-            parentBreadcrumbs={props.parentBreadcrumbs}
-            chrome={props.chrome}
-            http={props.http}
-            traceId={decodeURIComponent(routerProps.match.params.id)}
-            mode={mode}
-          />
+          <ObservabilityErrorBoundary>
+            <TraceView
+              parentBreadcrumbs={props.parentBreadcrumbs}
+              chrome={props.chrome}
+              http={props.http}
+              traceId={decodeURIComponent(routerProps.match.params.id)}
+              mode={mode}
+            />
+          </ObservabilityErrorBoundary>
         )}
       />
       <Route
@@ -213,36 +228,40 @@ export const Home = (props: HomeProps) => {
         path="/trace_analytics/services"
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Services
-              page="services"
-              childBreadcrumbs={serviceBreadcrumbs}
-              nameColumnAction={nameColumnAction}
-              traceColumnAction={traceColumnAction}
-              {...commonProps}
-            />
+            <ObservabilityErrorBoundary>
+              <Services
+                page="services"
+                childBreadcrumbs={serviceBreadcrumbs}
+                nameColumnAction={nameColumnAction}
+                traceColumnAction={traceColumnAction}
+                {...commonProps}
+              />
+            </ObservabilityErrorBoundary>
           </ObservabilitySideBar>
         )}
       />
       <Route
         path="/trace_analytics/services/:id+"
         render={(routerProps) => (
-          <ServiceView
-            serviceName={decodeURIComponent(routerProps.match.params.id)}
-            {...commonProps}
-            addFilter={(filter: FilterType) => {
-              for (const addedFilter of filters) {
-                if (
-                  addedFilter.field === filter.field &&
-                  addedFilter.operator === filter.operator &&
-                  addedFilter.value === filter.value
-                ) {
-                  return;
+          <ObservabilityErrorBoundary>
+            <ServiceView
+              serviceName={decodeURIComponent(routerProps.match.params.id)}
+              {...commonProps}
+              addFilter={(filter: FilterType) => {
+                for (const addedFilter of filters) {
+                  if (
+                    addedFilter.field === filter.field &&
+                    addedFilter.operator === filter.operator &&
+                    addedFilter.value === filter.value
+                  ) {
+                    return;
+                  }
                 }
-              }
-              const newFilters = [...filters, filter];
-              setFiltersWithStorage(newFilters);
-            }}
-          />
+                const newFilters = [...filters, filter];
+                setFiltersWithStorage(newFilters);
+              }}
+            />
+          </ObservabilityErrorBoundary>
         )}
       />
     </>

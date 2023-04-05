@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import classNames from 'classnames';
 import { StaticContext } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { ChromeBreadcrumb, CoreStart, Toast } from '../../../../../src/core/public';
 import { onTimeChange } from './helpers/utils';
 import { Sidebar } from './sidebar/sidebar';
@@ -26,10 +27,10 @@ import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
-import { useSelector } from 'react-redux';
 import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
+import { ObservabilityErrorBoundary } from '../common/observability_error_boundary';
 
 interface MetricsProps {
   http: CoreStart['http'];
@@ -81,7 +82,7 @@ export const Home = ({
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onRefreshFilters = (startTime: ShortDate, endTime: ShortDate) => {
+  const onRefreshFilters = (st: ShortDate, et: ShortDate) => {
     if (spanValue < 1) {
       setToast('Please add a valid span interval', 'danger');
       return;
@@ -116,7 +117,7 @@ export const Home = ({
 
   useEffect(() => {
     if (!editMode) {
-      selectedMetrics.length > 0 ? setIsTopPanelDisabled(false) : setIsTopPanelDisabled(true);
+      setIsTopPanelDisabled(!(selectedMetrics.length > 0));
     } else {
       setIsTopPanelDisabled(true);
     }
@@ -149,75 +150,77 @@ export const Home = ({
         exact
         path="/metrics_analytics"
         render={(props) => (
-          <div>
-            <EuiPage>
-              <EuiPageBody component="div">
-                <TopMenu
-                  http={http}
-                  IsTopPanelDisabled={IsTopPanelDisabled}
-                  startTime={startTime}
-                  endTime={endTime}
-                  onDatePickerChange={onDatePickerChange}
-                  recentlyUsedRanges={recentlyUsedRanges}
-                  editMode={editMode}
-                  setEditMode={setEditMode}
-                  setEditActionType={setEditActionType}
-                  panelVisualizations={panelVisualizations}
-                  setPanelVisualizations={setPanelVisualizations}
-                  resolutionValue={resolutionValue}
-                  setResolutionValue={setResolutionValue}
-                  spanValue={spanValue}
-                  setSpanValue={setSpanValue}
-                  resolutionSelectId={resolutionSelectId}
-                  savedObjects={savedObjects}
-                  setToast={setToast}
-                  setSearch={setSearch}
-                />
-                <div className="dscAppContainer">
-                  <div
-                    className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
-                  >
-                    <div className="">
-                      {!isSidebarClosed && (
-                        <Sidebar http={http} pplService={pplService} search={search} />
+          <ObservabilityErrorBoundary>
+            <div>
+              <EuiPage>
+                <EuiPageBody component="div">
+                  <TopMenu
+                    http={http}
+                    IsTopPanelDisabled={IsTopPanelDisabled}
+                    startTime={startTime}
+                    endTime={endTime}
+                    onDatePickerChange={onDatePickerChange}
+                    recentlyUsedRanges={recentlyUsedRanges}
+                    editMode={editMode}
+                    setEditMode={setEditMode}
+                    setEditActionType={setEditActionType}
+                    panelVisualizations={panelVisualizations}
+                    setPanelVisualizations={setPanelVisualizations}
+                    resolutionValue={resolutionValue}
+                    setResolutionValue={setResolutionValue}
+                    spanValue={spanValue}
+                    setSpanValue={setSpanValue}
+                    resolutionSelectId={resolutionSelectId}
+                    savedObjects={savedObjects}
+                    setToast={setToast}
+                    setSearch={setSearch}
+                  />
+                  <div className="dscAppContainer">
+                    <div
+                      className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
+                    >
+                      <div className="">
+                        {!isSidebarClosed && (
+                          <Sidebar http={http} pplService={pplService} search={search} />
+                        )}
+                        <EuiButtonIcon
+                          iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                          iconSize="m"
+                          size="s"
+                          onClick={() => onSideBarClick()}
+                          data-test-subj="collapseSideBarButton"
+                          aria-controls="discover-sidebar"
+                          aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                          aria-label="Toggle sidebar"
+                          className="dscCollapsibleSidebar__collapseButton"
+                        />
+                      </div>
+                    </div>
+                    <div className={`dscWrapper ${mainSectionClassName}`}>
+                      {selectedMetrics.length > 0 ? (
+                        <MetricsGrid
+                          http={http}
+                          chrome={chrome}
+                          panelVisualizations={panelVisualizations}
+                          setPanelVisualizations={setPanelVisualizations}
+                          editMode={editMode}
+                          pplService={pplService}
+                          startTime={startTime}
+                          endTime={endTime}
+                          moveToEvents={onEditClick}
+                          onRefresh={onRefresh}
+                          editActionType={editActionType}
+                          spanParam={spanValue + resolutionValue}
+                        />
+                      ) : (
+                        <EmptyMetricsView />
                       )}
-                      <EuiButtonIcon
-                        iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                        iconSize="m"
-                        size="s"
-                        onClick={() => onSideBarClick()}
-                        data-test-subj="collapseSideBarButton"
-                        aria-controls="discover-sidebar"
-                        aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                        aria-label="Toggle sidebar"
-                        className="dscCollapsibleSidebar__collapseButton"
-                      />
                     </div>
                   </div>
-                  <div className={`dscWrapper ${mainSectionClassName}`}>
-                    {selectedMetrics.length > 0 ? (
-                      <MetricsGrid
-                        http={http}
-                        chrome={chrome}
-                        panelVisualizations={panelVisualizations}
-                        setPanelVisualizations={setPanelVisualizations}
-                        editMode={editMode}
-                        pplService={pplService}
-                        startTime={startTime}
-                        endTime={endTime}
-                        moveToEvents={onEditClick}
-                        onRefresh={onRefresh}
-                        editActionType={editActionType}
-                        spanParam={spanValue + resolutionValue}
-                      />
-                    ) : (
-                      <EmptyMetricsView />
-                    )}
-                  </div>
-                </div>
-              </EuiPageBody>
-            </EuiPage>
-          </div>
+                </EuiPageBody>
+              </EuiPage>
+            </div>
+          </ObservabilityErrorBoundary>
         )}
       />
     </>

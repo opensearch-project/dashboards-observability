@@ -415,7 +415,7 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/application_analytics/create', '/application_analytics/edit/:id+']}
           render={(routerProps) => (
-            <EuiErrorBoundary>
+            <ObservabilityErrorBoundary>
               <CreateApp
                 dslService={dslService}
                 pplService={pplService}
@@ -426,14 +426,14 @@ export const Home = (props: HomeProps) => {
                 existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
                 {...commonProps}
               />
-            </EuiErrorBoundary>
+            </ObservabilityErrorBoundary>
           )}
         />
         <Route
           exact
           path={'/application_analytics/:id+'}
           render={(routerProps) => (
-            <EuiErrorBoundary>
+            <ObservabilityErrorBoundary>
               <Application
                 disabled={false}
                 appId={decodeURIComponent(routerProps.match.params.id)}
@@ -448,7 +448,7 @@ export const Home = (props: HomeProps) => {
                 queryManager={queryManager}
                 {...commonProps}
               />
-            </EuiErrorBoundary>
+            </ObservabilityErrorBoundary>
           )}
         />
       </Switch>

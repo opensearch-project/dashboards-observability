@@ -3,30 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButton,
-  EuiErrorBoundary,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSideBar,
-  EuiSideNav,
-  EuiSideNavItemType,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
-import { EVENT_ANALYTICS_DOCUMENTATION_URL } from 'common/constants/explorer';
+import { EuiErrorBoundary, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { useState } from 'react';
 import {
   OBSERVABILITY_GITHUB_ISSUE_URL,
   OPENSEARCH_OBSERVABILITY_FORUM_URL,
 } from '../../../common/constants/shared';
-import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
-import { uiSettingsService } from '../../../common/utils';
 
 export function ObservabilityErrorBoundary(props: { children: React.ReactNode }) {
   return (

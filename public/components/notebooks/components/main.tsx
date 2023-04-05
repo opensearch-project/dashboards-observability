@@ -10,6 +10,7 @@ import React, { ReactChild } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { Route, Switch } from 'react-router';
 import { HashRouter, RouteComponentProps } from 'react-router-dom';
+import { ObservabilityErrorBoundary } from 'public/components/common/observability_error_boundary';
 import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
@@ -313,19 +314,21 @@ export class Main extends React.Component<MainProps, MainState> {
               path={['/notebooks/create', '/notebooks']}
               render={(props) => (
                 <ObservabilitySideBar>
-                  <NoteTable
-                    loading={this.state.loading}
-                    fetchNotebooks={this.fetchNotebooks}
-                    addSampleNotebooks={this.addSampleNotebooks}
-                    notebooks={this.state.data}
-                    createNotebook={this.createNotebook}
-                    renameNotebook={this.renameNotebook}
-                    cloneNotebook={this.cloneNotebook}
-                    deleteNotebook={this.deleteNotebook}
-                    parentBreadcrumb={this.props.parentBreadcrumb}
-                    setBreadcrumbs={this.props.setBreadcrumbs}
-                    setToast={this.setToast}
-                  />
+                  <ObservabilityErrorBoundary>
+                    <NoteTable
+                      loading={this.state.loading}
+                      fetchNotebooks={this.fetchNotebooks}
+                      addSampleNotebooks={this.addSampleNotebooks}
+                      notebooks={this.state.data}
+                      createNotebook={this.createNotebook}
+                      renameNotebook={this.renameNotebook}
+                      cloneNotebook={this.cloneNotebook}
+                      deleteNotebook={this.deleteNotebook}
+                      parentBreadcrumb={this.props.parentBreadcrumb}
+                      setBreadcrumbs={this.props.setBreadcrumbs}
+                      setToast={this.setToast}
+                    />
+                  </ObservabilityErrorBoundary>
                 </ObservabilitySideBar>
               )}
             />
@@ -333,20 +336,22 @@ export class Main extends React.Component<MainProps, MainState> {
               exact
               path="/notebooks/:id"
               render={(props) => (
-                <Notebook
-                  pplService={this.props.pplService}
-                  openedNoteId={props.match.params.id}
-                  DashboardContainerByValueRenderer={this.props.DashboardContainerByValueRenderer}
-                  http={this.props.http}
-                  parentBreadcrumb={this.props.parentBreadcrumb}
-                  setBreadcrumbs={this.props.setBreadcrumbs}
-                  renameNotebook={this.renameNotebook}
-                  cloneNotebook={this.cloneNotebook}
-                  deleteNotebook={this.deleteNotebook}
-                  setToast={this.setToast}
-                  location={this.props.location}
-                  history={this.props.history}
-                />
+                <ObservabilityErrorBoundary>
+                  <Notebook
+                    pplService={this.props.pplService}
+                    openedNoteId={props.match.params.id}
+                    DashboardContainerByValueRenderer={this.props.DashboardContainerByValueRenderer}
+                    http={this.props.http}
+                    parentBreadcrumb={this.props.parentBreadcrumb}
+                    setBreadcrumbs={this.props.setBreadcrumbs}
+                    renameNotebook={this.renameNotebook}
+                    cloneNotebook={this.cloneNotebook}
+                    deleteNotebook={this.deleteNotebook}
+                    setToast={this.setToast}
+                    location={this.props.location}
+                    history={this.props.history}
+                  />
+                </ObservabilityErrorBoundary>
               )}
             />
           </Switch>
