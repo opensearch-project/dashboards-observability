@@ -33,6 +33,9 @@ export const PPL_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/search-plugins/sql/ppl/index';
 export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
+export const OBSERVABILITY_GITHUB_ISSUE_URL =
+  'https://github.com/opensearch-project/dashboards-observability/issues';
+export const OPENSEARCH_OBSERVABILITY_FORUM_URL = 'https://forum.opensearch.org/tag/observability';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
 export const SPAN_REGEX = /span/;

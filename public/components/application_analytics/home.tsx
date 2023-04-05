@@ -39,6 +39,7 @@ import {
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
+import { ObservabilityErrorBoundary } from '../common/observability_error_boundary';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -395,7 +396,7 @@ export const Home = (props: HomeProps) => {
           path={['/', '/application_analytics']}
           render={() => (
             <ObservabilitySideBar>
-              <EuiErrorBoundary>
+              <ObservabilityErrorBoundary>
                 <AppTable
                   loading={false}
                   applications={applicationList}
@@ -406,7 +407,7 @@ export const Home = (props: HomeProps) => {
                   moveToApp={moveToApp}
                   {...commonProps}
                 />
-              </EuiErrorBoundary>
+              </ObservabilityErrorBoundary>
             </ObservabilitySideBar>
           )}
         />
