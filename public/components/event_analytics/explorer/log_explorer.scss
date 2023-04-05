@@ -14,12 +14,12 @@
     svg {
       vertical-align: inherit;
     }
-    .linkNewTag{
+    .linkNewTag {
       display: inline-block;
       text-align: center;
       font-size: 0.875rem;
-      line-height: 3.5;
-      padding: 0.5rem;
+      line-height: $tab-new-line-height;
+      padding: $tab-new-padding; // align with content tab with small size 
       min-width: 6rem;
     }
   }
