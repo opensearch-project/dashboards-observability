@@ -389,6 +389,36 @@ export const onTimeChange = (
   setRecentlyUsedRanges(recentlyUsedRangeObject.slice(0, 9));
 };
 
+/**
+ * Convert an ObservabilitySavedVisualization into SavedVisualizationType,
+ * which is used in panels.
+ */
+export const parseSavedVisualizations = (
+  visualization: ObservabilitySavedVisualization
+): SavedVisualizationType => {
+  return {
+    id: visualization.objectId,
+    name: visualization.savedVisualization.name,
+    query: visualization.savedVisualization.query,
+    type: visualization.savedVisualization.type,
+    timeField: visualization.savedVisualization.selected_timestamp.name,
+    selected_date_range: visualization.savedVisualization.selected_date_range,
+    selected_fields: visualization.savedVisualization.selected_fields,
+    user_configs: visualization.savedVisualization.user_configs
+      ? JSON.parse(visualization.savedVisualization.user_configs)
+      : {},
+    sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
+      ? visualization.savedVisualization.sub_type
+      : '',
+    units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
+      ? visualization.savedVisualization.units_of_measure
+      : '',
+    ...(visualization.savedVisualization.application_id
+      ? { application_id: visualization.savedVisualization.application_id }
+      : {}),
+  };
+};
+
 // Function to check date validity
 export const isDateValid = (
   start: string | Moment | undefined,
