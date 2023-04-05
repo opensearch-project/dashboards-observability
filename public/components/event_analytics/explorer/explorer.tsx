@@ -910,6 +910,7 @@ export const Explorer = ({
         pplService,
         notifications,
         dispatch,
+        handleQueryChange,
       }}
     >
       <div
