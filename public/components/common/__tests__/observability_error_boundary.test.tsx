@@ -20,6 +20,8 @@ describe('Traces table component', () => {
         <BadComponent />
       </ObservabilityErrorBoundary>
     );
-    expect(errorScreen).toMatchSnapshot();
+    expect(errorScreen.text()).toContain(
+      'An unexpected error occurred. Please refresh the page, and if the issue persists, report it by creating an issue on'
+    );
   });
 });
