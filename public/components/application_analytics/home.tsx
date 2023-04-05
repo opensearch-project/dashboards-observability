@@ -11,7 +11,7 @@ import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
-import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
+import { EuiGlobalToastList, EuiLink, EuiErrorBoundary } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { isEmpty, last } from 'lodash';
 import { useDispatch } from 'react-redux';
@@ -138,7 +138,7 @@ export const Home = (props: HomeProps) => {
     endTime,
     setEndTime,
     mode: 'data_prepper',
-    dataPrepperIndicesExist:  indicesExist 
+    dataPrepperIndicesExist: indicesExist,
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
@@ -395,16 +395,18 @@ export const Home = (props: HomeProps) => {
           path={['/', '/application_analytics']}
           render={() => (
             <ObservabilitySideBar>
-              <AppTable
-                loading={false}
-                applications={applicationList}
-                fetchApplications={fetchApps}
-                renameApplication={renameApp}
-                deleteApplication={deleteApp}
-                clearStorage={clearStorage}
-                moveToApp={moveToApp}
-                {...commonProps}
-              />
+              <EuiErrorBoundary>
+                <AppTable
+                  loading={false}
+                  applications={applicationList}
+                  fetchApplications={fetchApps}
+                  renameApplication={renameApp}
+                  deleteApplication={deleteApp}
+                  clearStorage={clearStorage}
+                  moveToApp={moveToApp}
+                  {...commonProps}
+                />
+              </EuiErrorBoundary>
             </ObservabilitySideBar>
           )}
         />
@@ -412,36 +414,40 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/application_analytics/create', '/application_analytics/edit/:id+']}
           render={(routerProps) => (
-            <CreateApp
-              dslService={dslService}
-              pplService={pplService}
-              createApp={createApp}
-              updateApp={updateApp}
-              setToasts={setToast}
-              clearStorage={clearStorage}
-              existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
-              {...commonProps}
-            />
+            <EuiErrorBoundary>
+              <CreateApp
+                dslService={dslService}
+                pplService={pplService}
+                createApp={createApp}
+                updateApp={updateApp}
+                setToasts={setToast}
+                clearStorage={clearStorage}
+                existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
+                {...commonProps}
+              />
+            </EuiErrorBoundary>
           )}
         />
         <Route
           exact
           path={'/application_analytics/:id+'}
           render={(routerProps) => (
-            <Application
-              disabled={false}
-              appId={decodeURIComponent(routerProps.match.params.id)}
-              pplService={pplService}
-              dslService={dslService}
-              savedObjects={savedObjects}
-              timestampUtils={timestampUtils}
-              notifications={notifications}
-              setToasts={setToast}
-              updateApp={updateApp}
-              callback={callback}
-              queryManager={queryManager}
-              {...commonProps}
-            />
+            <EuiErrorBoundary>
+              <Application
+                disabled={false}
+                appId={decodeURIComponent(routerProps.match.params.id)}
+                pplService={pplService}
+                dslService={dslService}
+                savedObjects={savedObjects}
+                timestampUtils={timestampUtils}
+                notifications={notifications}
+                setToasts={setToast}
+                updateApp={updateApp}
+                callback={callback}
+                queryManager={queryManager}
+                {...commonProps}
+              />
+            </EuiErrorBoundary>
           )}
         />
       </Switch>
