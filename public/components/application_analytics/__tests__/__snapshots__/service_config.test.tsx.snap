@@ -1,12 +1,56 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Service Config component renders empty service config 1`] = `
-<ServiceConfig
+<Component
   appConfigs={Array []}
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   description=""
@@ -1067,16 +1111,60 @@ exports[`Service Config component renders empty service config 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</ServiceConfig>
+</Component>
 `;
 
 exports[`Service Config component renders with one service selected 1`] = `
-<ServiceConfig
+<Component
   appConfigs={Array []}
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   description=""
@@ -2165,5 +2253,5 @@ exports[`Service Config component renders with one service selected 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</ServiceConfig>
+</Component>
 `;

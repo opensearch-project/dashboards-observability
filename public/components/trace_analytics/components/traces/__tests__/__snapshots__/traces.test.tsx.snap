@@ -17,7 +17,47 @@ exports[`Traces component renders empty traces page 1`] = `
   }
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -44,6 +84,10 @@ exports[`Traces component renders empty traces page 1`] = `
           },
         ],
       },
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   dataPrepperIndicesExist={true}
@@ -241,7 +285,47 @@ exports[`Traces component renders empty traces page 1`] = `
     }
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -268,6 +352,10 @@ exports[`Traces component renders empty traces page 1`] = `
             },
           ],
         },
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     dataPrepperIndicesExist={true}
@@ -1290,7 +1378,47 @@ exports[`Traces component renders jaeger traces page 1`] = `
   }
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -1317,6 +1445,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
           },
         ],
       },
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   dataPrepperIndicesExist={false}
@@ -1520,7 +1652,47 @@ exports[`Traces component renders jaeger traces page 1`] = `
     }
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -1547,6 +1719,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
             },
           ],
         },
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     dataPrepperIndicesExist={false}
@@ -2594,7 +2770,47 @@ exports[`Traces component renders traces page 1`] = `
   }
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -2621,6 +2837,10 @@ exports[`Traces component renders traces page 1`] = `
           },
         ],
       },
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   dataPrepperIndicesExist={true}
@@ -2823,7 +3043,47 @@ exports[`Traces component renders traces page 1`] = `
     }
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -2850,6 +3110,10 @@ exports[`Traces component renders traces page 1`] = `
             },
           ],
         },
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     dataPrepperIndicesExist={true}

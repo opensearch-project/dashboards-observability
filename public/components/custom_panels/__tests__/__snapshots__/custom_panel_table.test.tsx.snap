@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Panels Table Component renders empty panel table container 1`] = `
-<CustomPanelTable
+<Component
   addSamplePanels={[MockFunction]}
   cloneCustomPanel={[MockFunction]}
   createCustomPanel={[MockFunction]}
@@ -592,11 +592,11 @@ exports[`Panels Table Component renders empty panel table container 1`] = `
       </div>
     </EuiPage>
   </div>
-</CustomPanelTable>
+</Component>
 `;
 
 exports[`Panels Table Component renders panel table container 1`] = `
-<CustomPanelTable
+<Component
   addSamplePanels={[MockFunction]}
   cloneCustomPanel={[MockFunction]}
   createCustomPanel={[MockFunction]}
@@ -2857,5 +2857,5 @@ exports[`Panels Table Component renders panel table container 1`] = `
       </div>
     </EuiPage>
   </div>
-</CustomPanelTable>
+</Component>
 `;

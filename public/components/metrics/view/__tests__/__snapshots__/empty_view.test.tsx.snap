@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Empty View Component renders empty view container without metrics 1`] = `
-<EmptyMetricsView>
+<Component>
   <div>
     <EuiPanel
       className="empty-view-metrics"
@@ -82,5 +82,5 @@ exports[`Empty View Component renders empty view container without metrics 1`] =
       </div>
     </EuiPanel>
   </div>
-</EmptyMetricsView>
+</Component>
 `;

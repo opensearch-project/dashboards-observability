@@ -12,12 +12,23 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
     }
   }
 >
-  <MetricsGrid
+  <Component
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction] {
           "calls": Array [
-            Array [],
             Array [],
             Array [],
             Array [],
@@ -25,35 +36,189 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "results": Array [
             Object {
               "type": "return",
-              "value": Observable {
+              "value": BehaviorSubject {
                 "_isScalar": false,
-                "_subscribe": [Function],
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
               },
             },
             Object {
               "type": "return",
-              "value": Observable {
+              "value": BehaviorSubject {
                 "_isScalar": false,
-                "_subscribe": [Function],
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
               },
             },
             Object {
               "type": "return",
-              "value": Observable {
+              "value": BehaviorSubject {
                 "_isScalar": false,
-                "_subscribe": [Function],
-              },
-            },
-            Object {
-              "type": "return",
-              "value": Observable {
-                "_isScalar": false,
-                "_subscribe": [Function],
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
               },
             },
           ],
         },
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction],
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     editActionType="save"
@@ -497,7 +662,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   }
                 }
               >
-                <VisualizationContainer
+                <Component
                   editMode={false}
                   fromTime="now-30m"
                   http={[MockFunction]}
@@ -686,7 +851,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
-                </VisualizationContainer>
+                </Component>
               </div>
             </GridItem>
             <GridItem
@@ -747,7 +912,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   }
                 }
               >
-                <VisualizationContainer
+                <Component
                   editMode={false}
                   fromTime="now-30m"
                   http={[MockFunction]}
@@ -936,7 +1101,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
-                </VisualizationContainer>
+                </Component>
               </div>
             </GridItem>
             <GridItem
@@ -997,7 +1162,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   }
                 }
               >
-                <VisualizationContainer
+                <Component
                   catalogVisualization={true}
                   editMode={false}
                   fromTime="now-30m"
@@ -1189,13 +1354,13 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
-                </VisualizationContainer>
+                </Component>
               </div>
             </GridItem>
           </div>
         </ReactGridLayout>
       </ResponsiveReactGridLayout>
     </WidthProvider>
-  </MetricsGrid>
+  </Component>
 </Provider>
 `;
