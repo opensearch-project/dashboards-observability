@@ -34,6 +34,7 @@ import {
 } from '@elastic/eui';
 import _, { isError } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
 import { convertDateTime } from '../../helpers/utils';
@@ -41,6 +42,7 @@ import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
 import {
+  BoxType,
   PplResponse,
   SavedVisualizationType,
   VisualizationType,
@@ -48,9 +50,10 @@ import {
 } from '../../../../../common/types/custom_panels';
 import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
+import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 
 /*
- * VisaulizationFlyout - This module create a flyout to add visualization
+ * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
  *
  * Props taken in as params are:
  * panelId: panel Id of current operational panel
@@ -58,47 +61,51 @@ import { uiSettingsService } from '../../../../../common/utils';
  * start: start time in date filter
  * end: end time in date filter
  * setToast: function to set toast in the panel
- * http: http core service
+ * savedObjects: savedObjects core service
  * pplService: ppl requestor service
  * setPanelVisualizations: function set the visualization list in panel
  * isFlyoutReplacement: boolean to see if the flyout is trigger for add or replace visualization
  * replaceVisualizationId: string id of the visualization to be replaced
  */
 
-interface VisualizationFlyoutProps {
+interface VisualizationFlyoutSOProps {
   panelId: string;
   pplFilterValue: string;
   closeFlyout: () => void;
   start: ShortDate;
   end: ShortDate;
+  http: CoreStart['http'];
   setToast: (
     title: string,
     color?: string,
     text?: React.ReactChild | undefined,
     side?: string | undefined
   ) => void;
-  http: CoreStart['http'];
+  savedObjects: CoreStart['savedObjects'];
   pplService: PPLService;
   setPanelVisualizations: React.Dispatch<React.SetStateAction<VisualizationType[]>>;
   isFlyoutReplacement?: boolean | undefined;
   replaceVisualizationId?: string | undefined;
   appId?: string;
+  addVisualizationPanel: any;
 }
 
-export const VisaulizationFlyout = ({
+export const VisaulizationFlyoutSO = ({
   panelId,
   appId = '',
   pplFilterValue,
   closeFlyout,
   start,
   end,
-  setToast,
   http,
+  setToast,
+  savedObjects,
   pplService,
   setPanelVisualizations,
   isFlyoutReplacement,
   replaceVisualizationId,
-}: VisualizationFlyoutProps) => {
+  addVisualizationPanel,
+}: VisualizationFlyoutSOProps) => {
   const [newVisualizationTitle, setNewVisualizationTitle] = useState('');
   const [newVisualizationType, setNewVisualizationType] = useState('');
   const [newVisualizationTimeField, setNewVisualizationTimeField] = useState('');
@@ -165,40 +172,44 @@ export const VisaulizationFlyout = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      http
-        .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/replace`, {
-          body: JSON.stringify({
-            panelId,
-            savedVisualizationId: selectValue,
-            oldVisualizationId: replaceVisualizationId,
-          }),
-        })
-        .then(async (res) => {
-          console.log('addVisualization Replacement', res);
-          setPanelVisualizations(res.visualizations);
-          setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-        })
-        .catch((err) => {
-          setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-          console.error(err);
-        });
+      // http
+      //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/replace`, {
+      //     body: JSON.stringify({
+      //       panelId,
+      //       savedVisualizationId: selectValue,
+      //       oldVisualizationId: replaceVisualizationId,
+      //     }),
+      //   })
+      //   .then(async (res) => {
+      //     setPanelVisualizations(res.visualizations);
+      //     setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
+      //   })
+      //   .catch((err) => {
+      //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
+      //     console.error(err);
+      //   });
     } else {
-      http
-        .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
-          body: JSON.stringify({
-            panelId,
-            savedVisualizationId: selectValue,
-          }),
-        })
-        .then(async (res) => {
-          console.log('addVisualization New', res);
-          setPanelVisualizations(res.visualizations);
-          setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-        })
-        .catch((err) => {
-          setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-          console.error(err);
-        });
+      const visualizationsWithNewPanel = addVisualizationPanel(
+        selectValue,
+        null,
+        setPanelVisualizations
+      );
+      console.log('VisualizationFLyoutSO Add Panel', visualizationsWithNewPanel);
+      // http
+      //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
+      //     body: JSON.stringify({
+      //       panelId,
+      //       savedVisualizationId: selectValue,
+      //     }),
+      //   })
+      //   .then(async (res) => {
+      //     setPanelVisualizations(res.visualizations);
+      //     setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
+      //   })
+      //   .catch((err) => {
+      //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
+      //     console.error(err);
+      //   });
     }
     closeFlyout();
   };

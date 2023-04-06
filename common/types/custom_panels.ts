@@ -11,6 +11,13 @@ export interface CustomPanelListType {
   applicationId?: string;
 }
 
+export interface BoxType {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
 export interface VisualizationType {
   id: string;
   savedVisualizationId: string;
@@ -22,10 +29,16 @@ export interface VisualizationType {
 
 export interface PanelType {
   name: string;
+  dateCreated: number;
+  dateModified: number;
   visualizations: VisualizationType[];
   timeRange: { to: string; from: string };
   queryFilter: { query: string; language: string };
   applicationId?: string;
+}
+
+export interface CustomPanelType extends PanelType {
+  id: string;
 }
 
 export interface SavedVisualizationType {
@@ -39,7 +52,7 @@ export interface SavedVisualizationType {
   user_configs: any;
 }
 
-export interface pplResponse {
+export interface PplResponse {
   data: any;
   metadata: any;
   size: number;

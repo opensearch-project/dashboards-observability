@@ -20,8 +20,13 @@ import { convertLegacyNotebooksUrl } from './components/notebooks/components/hel
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { uiSettingsService } from '../common/utils';
 import { QueryManager } from '../common/query_manager';
+import { DashboardSetup } from '../../../src/plugins/dashboard/public';
+import { SavedObject } from '../../../src/core/public';
+
 export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
-  public setup(core: CoreSetup): ObservabilitySetup {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
     uiSettingsService.init(core.uiSettings, core.notifications);
 
     // redirect legacy notebooks URL to current URL under observability
@@ -33,6 +38,19 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     if (window.location.pathname.includes('trace-analytics-dashboards')) {
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
+
+    dashboard.registerDashboardProvider({
+      appId: 'observability-panel',
+      savedObjectsType: 'observability-panel',
+      savedObjectsName: 'Observability Panel',
+      editUrlPathFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}/edit`,
+      viewUrlPathFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}`,
+      createLinkText: 'Observability Panel',
+      createSortText: 'Observability Panel',
+      createUrl: '/app/observability-dashboards#/operational_panels/create',
+    });
 
     core.application.register({
       id: observabilityID,
