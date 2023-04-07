@@ -47,6 +47,11 @@ export class ObservabilityPlugin
     setupRoutes({ router, client: openSearchObservabilityClient });
 
     core.savedObjects.registerType(visualizationSavedObject);
+    core.capabilities.registerProvider(() => ({
+      observability: {
+        show: true,
+      },
+    }));
 
     return {};
   }
