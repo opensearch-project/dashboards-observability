@@ -5,7 +5,13 @@
 
 import './index.scss';
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../src/core/public';
 import {
   observabilityID,
   observabilityPluginOrder,
@@ -22,6 +28,7 @@ import { uiSettingsService } from '../common/utils';
 import { QueryManager } from '../common/query_manager';
 import { DashboardSetup } from '../../../src/plugins/dashboard/public';
 import { SavedObject } from '../../../src/core/public';
+import { coreRefs } from './framework/core_refs';
 
 export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -86,6 +93,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilitySetup, Observabi
     return {};
   }
   public start(core: CoreStart): ObservabilityStart {
+    const pplService: PPLService = new PPLService(core.http);
+
+    coreRefs.http = core.http;
+    coreRefs.savedObjectsClient = core.savedObjects.client;
+    coreRefs.pplService = pplService;
+
     return {};
   }
   public stop() {}

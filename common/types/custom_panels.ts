@@ -28,7 +28,7 @@ export interface VisualizationType {
 }
 
 export interface PanelType {
-  name: string;
+  title: string;
   dateCreated: number;
   dateModified: number;
   visualizations: VisualizationType[];

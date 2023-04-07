@@ -9,3 +9,5 @@ export const CUSTOM_PANELS_DOCUMENTATION_URL =
 export const CREATE_PANEL_MESSAGE = 'Enter a name to describe the purpose of this custom panel.';
 
 export const CUSTOM_PANELS_SAVED_OBJECT_TYPE = 'observability-panel';
+
+export const CUSTOM_PANEL_SLICE = 'customPanel';

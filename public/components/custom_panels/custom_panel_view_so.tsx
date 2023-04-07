@@ -31,6 +31,8 @@ import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
 import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
+import { useRef } from 'react';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart, SimpleSavedObject } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
@@ -46,7 +48,8 @@ import {
   VisualizationType,
   VizContainerError,
 } from '../../../common/types/custom_panels';
-import { PanelGrid } from './panel_modules/panel_grid';
+import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
+
 import { getCustomModal } from './helpers/modal_containers';
 import PPLService from '../../services/requests/ppl';
 import {
@@ -71,6 +74,8 @@ import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
+import { fetchPanel, selectPanel, setPanel, setPanelId, updatePanel } from './redux/panel_slice';
+import { coreRefs } from '../../framework/core_refs';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -101,7 +106,6 @@ import { addVisualizationPanel } from './helpers/add_visualization_helper';
 interface CustomPanelViewProps {
   panelId: string;
   page: 'app' | 'operationalPanels';
-  http: CoreStart['http'];
   coreSavedObjects: CoreStart['savedObjects'];
   pplService: PPLService;
   dslService: DSLService;
@@ -116,10 +120,6 @@ interface CustomPanelViewProps {
     side?: string | undefined
   ) => void;
   onEditClick: (savedVisualizationId: string) => any;
-  startTime: string;
-  endTime: string;
-  setStartTime: any;
-  setEndTime: any;
   childBreadcrumbs?: EuiBreadcrumb[];
   appId?: string;
   updateAvailabilityVizId?: any;
@@ -131,17 +131,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     panelId,
     page,
     appId,
-    http,
-    coreSavedObjects,
     pplService,
     dslService,
     chrome,
     parentBreadcrumbs,
     childBreadcrumbs,
-    startTime,
-    endTime,
-    setStartTime,
-    setEndTime,
     updateAvailabilityVizId,
     deleteCustomPanel,
     cloneCustomPanel,
@@ -149,9 +143,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     onEditClick,
     onAddClick,
   } = props;
-  const [panel, setPanel] = useState<CustomPanelType | undefined>();
-  const [openPanelName, setOpenPanelName] = useState('');
-  const [panelCreatedTime, setPanelCreatedTime] = useState(0);
+
+  const dispatch = useDispatch();
+
+  const panel = useSelector(selectPanel);
+
   const [pplFilterValue, setPPLFilterValue] = useState('');
   const [baseQuery, setBaseQuery] = useState('');
   const [onRefresh, setOnRefresh] = useState(false);
@@ -160,8 +156,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const [addVizDisabled, setAddVizDisabled] = useState(false);
   const [editDisabled, setEditDisabled] = useState(false);
   const [dateDisabled, setDateDisabled] = useState(false);
-  const [panelVisualizations, setPanelVisualizations] = useState<VisualizationType[]>([]);
-  const [editMode, setEditMode] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false); // Add Visualization Flyout
@@ -183,34 +178,8 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     setHelpIsFlyoutVisible(true);
   };
 
-  // DateTimePicker States
+  // DateTimePicker States/add
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
-
-  const savedObjectToCustomPanel = (so: SimpleSavedObject<PanelType>): CustomPanelType => ({
-    id: so.id,
-    ...so.attributes,
-  });
-
-  // Fetch Panel by id
-  const fetchCustomPanel = async () => {
-    return coreSavedObjects.client
-      .get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, panelId)
-      .then((res) => {
-        console.log('fetchCustomPanel', res);
-        const loadedPanel: CustomPanelType = savedObjectToCustomPanel(res);
-        console.log('fetchCustomPanel', { panel: loadedPanel });
-        setPanel(loadedPanel);
-        setOpenPanelName(loadedPanel.name || loadedPanel.title);
-        setPanelCreatedTime(loadedPanel.dateCreated);
-        setPPLFilterValue(loadedPanel.queryFilter.query);
-        setStartTime(startTime ? startTime : loadedPanel.timeRange.from);
-        setEndTime(endTime ? endTime : loadedPanel.timeRange.to);
-        setPanelVisualizations(loadedPanel.visualizations);
-      })
-      .catch((err) => {
-        console.error('Issue in fetching the operational panels', err);
-      });
-  };
 
   const handleQueryChange = (newQuery: string) => {
     setPPLFilterValue(newQuery);
@@ -237,7 +206,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
-    deleteCustomPanel(panelId, openPanelName).then((res) => {
+    deleteCustomPanel(panelId, panel?.title).then((res) => {
       setTimeout(() => {
         window.location.assign(`${last(parentBreadcrumbs)!.href}`);
       }, 1000);
@@ -250,7 +219,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       <DeleteModal
         onConfirm={onDelete}
         onCancel={closeModal}
-        title={`Delete ${openPanelName}`}
+        title={`Delete ${panel?.title}`}
         message={`Are you sure you want to delete this Operational Panel?`}
       />
     );
@@ -265,7 +234,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
     const updatedPanel = { ...panel, name: editedCustomPanelName };
 
-    return coreSavedObjects.client
+    return coreRefs.savedObjectsClient
       .update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, panel.id, panel)
       .then((res) => {
         setOpenPanelName(editedCustomPanelName);
@@ -280,9 +249,8 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       });
   };
   const onRename = async (newCustomPanelName: string) => {
-    renameCustomPanel(newCustomPanelName, panelId).then(() => {
-      setOpenPanelName(newCustomPanelName);
-    });
+    const newPanel = { ...panel, title: newCustomPanelName };
+    dispatch(updatePanel(newPanel));
     closeModal();
   };
 
@@ -295,7 +263,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         'Rename Panel',
         'Cancel',
         'Rename',
-        openPanelName,
+        panel.title,
         CREATE_PANEL_MESSAGE
       )
     );
@@ -318,7 +286,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         'Duplicate Panel',
         'Cancel',
         'Duplicate',
-        openPanelName + ' (copy)',
+        panel.title + ' (copy)',
         CREATE_PANEL_MESSAGE
       )
     );
@@ -326,10 +294,21 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   // toggle between panel edit mode
-  const editPanel = (editType: string) => {
-    setEditMode(!editMode);
-    if (editType === 'cancel') fetchCustomPanel();
-    setEditActionType(editType);
+
+  const startEdit = () => {
+    setIsEditing(true);
+  };
+
+  const applyEdits = () => {
+    console.log('applyEdits', panel);
+    dispatch(updatePanel(panel));
+    setIsEditing(false);
+  };
+
+  const cancelEdit = () => {
+    console.log('cancelEdits');
+    dispatch(fetchPanel(panelId));
+    setIsEditing(false);
   };
 
   const closeFlyout = () => {
@@ -348,7 +327,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const checkDisabledInputs = () => {
     // When not in edit mode and panel has no visualizations
-    if (panelVisualizations.length === 0 && !editMode) {
+    if (panel.visualizations.length === 0 && !isEditing) {
       setEditDisabled(true);
       setInputDisabled(true);
       setAddVizDisabled(false);
@@ -356,7 +335,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     }
 
     // When panel has visualizations
-    if (panelVisualizations.length > 0) {
+    if (panel.visualizations.length > 0) {
       setEditDisabled(false);
       setInputDisabled(false);
       setAddVizDisabled(false);
@@ -364,7 +343,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     }
 
     // When in edit mode
-    if (editMode) {
+    if (isEditing) {
       setEditDisabled(false);
       setInputDisabled(true);
       setAddVizDisabled(true);
@@ -373,26 +352,26 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const buildBaseQuery = async () => {
-    const indices: string[] = [];
-    for (let i = 0; i < panelVisualizations.length; i++) {
-      const visualizationId = panelVisualizations[i].savedVisualizationId;
-      // TODO: create route to get list of visualizations in one call
-      const visData: SavedVisualizationType = await fetchVisualizationById(
-        http,
-        visualizationId,
-        (error: VizContainerError) => setToast(error.errorMessage, 'danger')
-      );
+    // const indices: string[] = [];
+    // for (let i = 0; i < visualizations.length; i++) {
+    //   const visualizationId = visualizations[i].savedVisualizationId;
+    //   // TODO: create route to get list of visualizations in one call
+    //   const visData: SavedVisualizationType = await fetchVisualizationById(
+    //     http,
+    //     visualizationId,
+    //     (error: VizContainerError) => setToast(error.errorMessage, 'danger')
+    //   );
 
-      if (!_.isEmpty(visData)) {
-        const moreIndices = parseForIndices(visData.query);
-        for (let j = 0; j < moreIndices.length; j++) {
-          if (!indices.includes(moreIndices[j])) {
-            indices.push(moreIndices[j]);
-          }
-        }
-      }
-    }
-    setBaseQuery('source = ' + indices.join(', '));
+    //   if (!_.isEmpty(visData)) {
+    //     const moreIndices = parseForIndices(visData.query);
+    //     for (let j = 0; j < moreIndices.length; j++) {
+    //       if (!indices.includes(moreIndices[j])) {
+    //         indices.push(moreIndices[j]);
+    //       }
+    //     }
+    //   }
+    // }
+    // setBaseQuery('source = ' + indices.join(', '));
     return;
   };
 
@@ -413,35 +392,35 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       from: start,
     };
 
-    http
-      .post(`${CUSTOM_PANELS_API_PREFIX}/panels/filter`, {
-        body: JSON.stringify(panelFilterBody),
-      })
-      .then((res) => {
-        setOnRefresh(!onRefresh);
-      })
-      .catch((err) => {
-        setToast('Error is adding filters to the operational panel', 'danger');
-        console.error(err.body.message);
-      });
+    // http
+    //   .post(`${CUSTOM_PANELS_API_PREFIX}/panels/filter`, {
+    //     body: JSON.stringify(panelFilterBody),
+    //   })
+    //   .then((res) => {
+    //     setOnRefresh(!onRefresh);
+    //   })
+    //   .catch((err) => {
+    //     setToast('Error is adding filters to the operational panel', 'danger');
+    //     console.error(err.body.message);
+    //   });
   };
 
   const cloneVisualization = (visualzationTitle: string, savedVisualizationId: string) => {
-    http
-      .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
-        body: JSON.stringify({
-          panelId,
-          savedVisualizationId,
-        }),
-      })
-      .then(async (res) => {
-        setPanelVisualizations(res.visualizations);
-        setToast(`Visualization ${visualzationTitle} successfully added!`, 'success');
-      })
-      .catch((err) => {
-        setToast(`Error in adding ${visualzationTitle} visualization to the panel`, 'danger');
-        console.error(err);
-      });
+    // http
+    //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
+    //     body: JSON.stringify({
+    //       panelId,
+    //       savedVisualizationId,
+    //     }),
+    //   })
+    //   .then(async (res) => {
+    //     setPanelVisualizations(res.visualizations);
+    //     setToast(`Visualization ${visualzationTitle} successfully added!`, 'success');
+    //   })
+    //   .catch((err) => {
+    //     setToast(`Error in adding ${visualzationTitle} visualization to the panel`, 'danger');
+    //     console.error(err);
+    //   });
   };
 
   const cancelButton = (
@@ -449,14 +428,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       data-test-subj="cancelPanelButton"
       iconType="cross"
       color="danger"
-      onClick={() => editPanel('cancel')}
+      onClick={cancelEdit}
     >
       Cancel
     </EuiButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
+    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={applyEdits}>
       Save
     </EuiButton>
   );
@@ -465,7 +444,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     <EuiButton
       data-test-subj="editPanelButton"
       iconType="pencil"
-      onClick={() => editPanel('edit')}
+      onClick={startEdit}
       disabled={editDisabled}
     >
       Edit
@@ -496,10 +475,13 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     </EuiButton>
   );
 
-  const addVisualizationToCurrentPanel = async (
-    savedVisualizationId: string,
-    oldVisualizationId?: string
-  ) => {
+  const addVisualizationToCurrentPanel = async ({
+    savedVisualizationId,
+    oldVisualizationId,
+  }: {
+    savedVisualizationId: string;
+    oldVisualizationId?: string;
+  }) => {
     const allVisualizations = panel!.visualizations;
 
     const visualizationsWithNewPanel = addVisualizationPanel(
@@ -508,24 +490,18 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       allVisualizations
     );
 
-    console.log('addVisualizationToCurrentPanel', {
-      allVisualizations,
-      visualizationsWithNewPanel,
-    });
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
     try {
-      const res = await coreSavedObjects.client.update(
-        CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-        panel.id,
-        updatedPanel
-      );
-      console.log('addToPanel savedObjects.Update', { res });
-      setPanel(updatedPanel);
-      setPanelVisualizations(updatedPanel.visualizations);
+      dispatch(updatePanel(updatedPanel));
     } catch (err) {
       setToast('Error adding visualization to this panel', 'danger');
       console.error(err?.body?.message || err);
     }
+  };
+
+  const setPanelVisualizations = (newVis) => {
+    const newPanel: CustomPanelType = { ...panel, visualizations: newVis };
+    dispatch(setPanel(newPanel));
   };
 
   let flyout;
@@ -535,10 +511,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         panelId={panelId}
         closeFlyout={closeFlyout}
         pplFilterValue={pplFilterValue}
-        start={startTime}
-        end={endTime}
+        start={panel.timeRange.from}
+        end={panel.timeRange.to}
         setToast={setToast}
-        http={http}
+        http={coreRefs.http!}
         pplService={pplService}
         setPanelVisualizations={setPanelVisualizations}
         isFlyoutReplacement={isFlyoutReplacement}
@@ -564,7 +540,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           'data-test-subj': 'reloadPanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
-            fetchCustomPanel();
+            dispatch(fetchPanel(panelId));
           },
         },
         {
@@ -594,39 +570,40 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       ],
     },
   ];
-
   // Fetch the custom panel on Initial Mount
   useEffect(() => {
-    fetchCustomPanel();
-  }, [panelId]);
+    dispatch(fetchPanel(panelId));
+  }, []);
 
   // Toggle input type (disabled or not disabled)
   // Disabled when there no visualizations in panels or when the panel is in edit mode
   useEffect(() => {
     checkDisabledInputs();
-  }, [editMode]);
+  }, [isEditing]);
 
   // Build base query with all of the indices included in the current visualizations
   useEffect(() => {
     checkDisabledInputs();
     buildBaseQuery();
-  }, [panelVisualizations]);
+  }, [panel]);
 
   // Edit the breadcrumb when panel name changes
   useEffect(() => {
+    if (!panel) return;
+
     let newBreadcrumb;
     if (childBreadcrumbs) {
       newBreadcrumb = childBreadcrumbs;
     } else {
       newBreadcrumb = [
         {
-          text: openPanelName,
+          text: panel.title,
           href: `${last(parentBreadcrumbs)!.href}${panelId}`,
         },
       ];
     }
     chrome.setBreadcrumbs([...parentBreadcrumbs, ...newBreadcrumb]);
-  }, [panelId, openPanelName]);
+  }, [panelId, panel]);
 
   return (
     <div>
@@ -637,16 +614,16 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
               <>
                 <EuiPageHeaderSection>
                   <EuiTitle size="l">
-                    <h1 data-test-subj="panelNameHeader">{openPanelName}</h1>
+                    <h1 data-test-subj="panelNameHeader">{panel?.title}</h1>
                   </EuiTitle>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />
                   </EuiFlexItem>
-                  Created on {moment(panelCreatedTime).format(UI_DATE_FORMAT)}
+                  Created on {moment(panel?.dateCreated || 0).format(UI_DATE_FORMAT)}
                 </EuiPageHeaderSection>
                 <EuiPageHeaderSection>
                   <EuiFlexGroup gutterSize="s">
-                    {editMode ? (
+                    {isEditing ? (
                       <>
                         <EuiFlexItem>{cancelButton}</EuiFlexItem>
                         <EuiFlexItem>{saveButton}</EuiFlexItem>
@@ -684,7 +661,9 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
                   tempQuery={pplFilterValue}
                   baseQuery={baseQuery}
                   handleQueryChange={handleQueryChange}
-                  handleQuerySearch={() => onRefreshFilters(startTime, endTime)}
+                  handleQuerySearch={() =>
+                    onRefreshFilters(panel.timeRange.from, panel.timeRange.to)
+                  }
                   dslService={dslService}
                   getSuggestions={parseGetSuggestions}
                   onItemSelect={onItemSelect}
@@ -708,8 +687,8 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
-                  start={startTime}
-                  end={endTime}
+                  start={panel.timeRange.from}
+                  end={panel.timeRange.to}
                   onTimeChange={onDatePickerChange}
                   recentlyUsedRanges={recentlyUsedRanges}
                   isDisabled={dateDisabled}
@@ -717,7 +696,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
               </EuiFlexItem>
               {appPanel && (
                 <>
-                  {editMode ? (
+                  {isEditing ? (
                     <>
                       <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
                       <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
@@ -730,25 +709,23 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
               )}
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-            {panelVisualizations.length === 0 && (
+            {panel.visualizations.length === 0 && (
               <EmptyPanelView
                 addVizDisabled={addVizDisabled}
                 showFlyout={showFlyout}
                 {...(appPanel ? { addButton } : {})}
               />
             )}
-            {console.log('PanelGrid called', { panelVisualizations })}
-            <PanelGrid
-              http={http}
+            <PanelGridSO
+              // http={coreRefs.http}
               panelId={panelId}
               updateAvailabilityVizId={updateAvailabilityVizId}
               chrome={chrome}
-              panelVisualizations={panelVisualizations}
+              panelVisualizations={panel?.visualizations || []}
               setPanelVisualizations={setPanelVisualizations}
-              editMode={editMode}
-              pplService={pplService}
-              startTime={startTime}
-              endTime={endTime}
+              editMode={isEditing}
+              startTime={panel.timeRange.from}
+              endTime={panel.timeRange.to}
               onRefresh={onRefresh}
               cloneVisualization={cloneVisualization}
               pplFilterValue={pplFilterValue}

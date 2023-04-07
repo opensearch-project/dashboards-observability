@@ -91,10 +91,6 @@ export const addVisualizationPanel = (
         ...newDimensions,
       },
     ];
-    // const updatePanelResponse = await this.updatePanel(client, panelId, {
-    //   visualizations: newPanelVisualizations,
-    // });
-    console.log('addVisualizationPanel', { visualizationsList, allPanelVisualizations });
     return newPanelVisualizations;
   } catch (error) {
     throw new Error('Add/Replace Visualization Error:' + error);

@@ -189,12 +189,10 @@ export const VisaulizationFlyoutSO = ({
       //     console.error(err);
       //   });
     } else {
-      const visualizationsWithNewPanel = addVisualizationPanel(
-        selectValue,
-        null,
-        setPanelVisualizations
-      );
-      console.log('VisualizationFLyoutSO Add Panel', visualizationsWithNewPanel);
+      const visualizationsWithNewPanel = addVisualizationPanel({
+        savedVisualizationId: selectValue,
+      });
+
       // http
       //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
       //     body: JSON.stringify({
