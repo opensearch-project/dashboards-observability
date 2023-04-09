@@ -18,6 +18,7 @@ import {
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
 } from '../../../../common/constants/explorer';
+import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
 
 export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
   protected queryIndex: string;
@@ -72,6 +73,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
       getEvents,
       getErrorHandler,
       getPatterns,
+      getAvailableFields,
     } = this.searchContext;
     const { dispatch, changeQuery } = this.storeContext;
 
@@ -107,6 +109,8 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     } else {
       getEvents(finalQuery, getErrorHandler('Error fetching events'));
     }
+    // still need all fields when query contains stats
+    if (finalQuery.match(PPL_STATS_REGEX)) getAvailableFields(`search source=${this.queryIndex}`);
     getCountVisualizations(selectedInterval.current.value.replace(/^auto_/, ''));
     // patterns
     this.setLogPattern(this.query, this.queryIndex, finalQuery);

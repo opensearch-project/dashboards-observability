@@ -134,7 +134,7 @@ export const Explorer = ({
 }: IExplorerProps) => {
   const dispatch = useDispatch();
   const requestParams = { tabId };
-  const { getLiveTail, getEvents } = useFetchEvents({
+  const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
     pplService,
     requestParams,
   });
@@ -268,6 +268,7 @@ export const Explorer = ({
         selectedContentTabId,
         queryManager,
         getDefaultVisConfig,
+        getAvailableFields,
       },
       {
         appBaseQuery,
