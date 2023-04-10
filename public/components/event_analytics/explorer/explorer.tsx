@@ -21,9 +21,20 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
 import { isEmpty, isEqual, reduce } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  ReactElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { LogExplorerRouterContext } from '..';
 import {
+  CREATE_TAB_PARAM,
+  CREATE_TAB_PARAM_KEY,
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
@@ -66,12 +77,14 @@ import {
   getIndexPatternFromRawQuery,
   uiSettingsService,
 } from '../../../../common/utils';
+import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import {
   PanelSavedObjectClient,
   PPLSavedQueryClient,
 } from '../../../services/saved_objects/saved_object_client/ppl';
+import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 import {
   SaveAsCurrenQuery,
   SaveAsCurrentVisualization,
@@ -105,8 +118,6 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
-import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
-import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 
 export const Explorer = ({
   pplService,
@@ -132,6 +143,7 @@ export const Explorer = ({
   callbackInApp,
   queryManager = new QueryManager(),
 }: IExplorerProps) => {
+  const routerContext = useContext(LogExplorerRouterContext)!;
   const dispatch = useDispatch();
   const requestParams = { tabId };
   const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
@@ -348,6 +360,9 @@ export const Explorer = ({
       updateTabData(objectId);
     } else {
       fetchData();
+    }
+    if (routerContext.searchParams.get(CREATE_TAB_PARAM_KEY) === CREATE_TAB_PARAM[TAB_CHART_ID]) {
+      setSelectedContentTab(TAB_CHART_ID);
     }
   }, []);
 

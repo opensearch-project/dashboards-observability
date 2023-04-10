@@ -4,6 +4,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
   observabilityID,
   observabilityPluginOrder,
@@ -106,7 +107,7 @@ export class ObservabilityPlugin
       description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
       icon: OBSERVABILITY_EMBEDDABLE_ICON,
       aliasApp: observabilityID,
-      aliasPath: '#/event_analytics/explorer',
+      aliasPath: `#/event_analytics/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
       stage: 'production',
       appExtensions: {
         visualizations: {
