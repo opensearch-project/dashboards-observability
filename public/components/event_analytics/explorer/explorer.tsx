@@ -143,7 +143,7 @@ export const Explorer = ({
   callbackInApp,
   queryManager = new QueryManager(),
 }: IExplorerProps) => {
-  const routerContext = useContext(LogExplorerRouterContext)!;
+  const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
   const requestParams = { tabId };
   const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
@@ -361,7 +361,10 @@ export const Explorer = ({
     } else {
       fetchData();
     }
-    if (routerContext.searchParams.get(CREATE_TAB_PARAM_KEY) === CREATE_TAB_PARAM[TAB_CHART_ID]) {
+    if (
+      routerContext &&
+      routerContext.searchParams.get(CREATE_TAB_PARAM_KEY) === CREATE_TAB_PARAM[TAB_CHART_ID]
+    ) {
       setSelectedContentTab(TAB_CHART_ID);
     }
   }, []);

@@ -58,7 +58,7 @@ export const LogExplorer = ({
   http,
   queryManager,
 }: ILogExplorerProps) => {
-  const routerContext = useContext(LogExplorerRouterContext)!;
+  const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
   const tabIds = useSelector(selectQueryTabs).queryTabIds.filter(
     (tabid: string) => !tabid.match(APP_ANALYTICS_TAB_ID_REGEX)
@@ -148,7 +148,7 @@ export const LogExplorer = ({
     if (!isEmpty(savedObjectId)) {
       dispatchSavedObjectId();
     }
-    if (routerContext.searchParams.has(CREATE_TAB_PARAM_KEY)) {
+    if (routerContext && routerContext.searchParams.has(CREATE_TAB_PARAM_KEY)) {
       // need to wait for current redux event loop to finish
       setImmediate(() => {
         addNewTab(NEW_TAB);
