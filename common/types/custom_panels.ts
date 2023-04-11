@@ -52,7 +52,7 @@ export interface SavedVisualizationType {
   user_configs: any;
 }
 
-export interface PplResponse {
+export interface PPLResponse {
   data: any;
   metadata: any;
   size: number;
@@ -62,4 +62,21 @@ export interface PplResponse {
 export interface VizContainerError {
   errorMessage: string;
   errorDetails?: string;
+}
+
+export interface ObservabilityPanelAttrs {
+  title: string;
+  description: string;
+  dateCreated: number;
+  dateModified: number;
+  timeRange: {
+    to: string;
+    from: string;
+  };
+  queryFilter: {
+    query: string;
+    language: string;
+  };
+  visualizations: VisualizationType[];
+  applicationId: string;
 }
