@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
@@ -312,21 +311,19 @@ export class Main extends React.Component<MainProps, MainState> {
               exact
               path={['/create', '/']}
               render={(props) => (
-                <ObservabilitySideBar>
-                  <NoteTable
-                    loading={this.state.loading}
-                    fetchNotebooks={this.fetchNotebooks}
-                    addSampleNotebooks={this.addSampleNotebooks}
-                    notebooks={this.state.data}
-                    createNotebook={this.createNotebook}
-                    renameNotebook={this.renameNotebook}
-                    cloneNotebook={this.cloneNotebook}
-                    deleteNotebook={this.deleteNotebook}
-                    parentBreadcrumb={this.props.parentBreadcrumb}
-                    setBreadcrumbs={this.props.setBreadcrumbs}
-                    setToast={this.setToast}
-                  />
-                </ObservabilitySideBar>
+                <NoteTable
+                  loading={this.state.loading}
+                  fetchNotebooks={this.fetchNotebooks}
+                  addSampleNotebooks={this.addSampleNotebooks}
+                  notebooks={this.state.data}
+                  createNotebook={this.createNotebook}
+                  renameNotebook={this.renameNotebook}
+                  cloneNotebook={this.cloneNotebook}
+                  deleteNotebook={this.deleteNotebook}
+                  parentBreadcrumb={this.props.parentBreadcrumb}
+                  setBreadcrumbs={this.props.setBreadcrumbs}
+                  setToast={this.setToast}
+                />
               )}
             />
             <Route

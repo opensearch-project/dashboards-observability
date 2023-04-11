@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import React, { ReactChild, useEffect, useState } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -138,7 +137,7 @@ export const Home = (props: HomeProps) => {
     endTime,
     setEndTime,
     mode: 'data_prepper',
-    dataPrepperIndicesExist:  indicesExist 
+    dataPrepperIndicesExist: indicesExist,
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
@@ -394,18 +393,16 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/', '/application_analytics']}
           render={() => (
-            <ObservabilitySideBar>
-              <AppTable
-                loading={false}
-                applications={applicationList}
-                fetchApplications={fetchApps}
-                renameApplication={renameApp}
-                deleteApplication={deleteApp}
-                clearStorage={clearStorage}
-                moveToApp={moveToApp}
-                {...commonProps}
-              />
-            </ObservabilitySideBar>
+            <AppTable
+              loading={false}
+              applications={applicationList}
+              fetchApplications={fetchApps}
+              renameApplication={renameApp}
+              deleteApplication={deleteApp}
+              clearStorage={clearStorage}
+              moveToApp={moveToApp}
+              {...commonProps}
+            />
           )}
         />
         <Route

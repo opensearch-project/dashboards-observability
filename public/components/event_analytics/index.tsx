@@ -117,16 +117,14 @@ export const EventAnalytics = ({
                 },
               ]);
               return (
-                <ObservabilitySideBar>
-                  <EventExplorerHome
-                    http={http}
-                    savedObjects={savedObjects}
-                    dslService={dslService}
-                    pplService={pplService}
-                    setToast={setToast}
-                    getExistingEmptyTab={getExistingEmptyTab}
-                  />
-                </ObservabilitySideBar>
+                <EventExplorerHome
+                  http={http}
+                  savedObjects={savedObjects}
+                  dslService={dslService}
+                  pplService={pplService}
+                  setToast={setToast}
+                  getExistingEmptyTab={getExistingEmptyTab}
+                />
               );
             }}
           />

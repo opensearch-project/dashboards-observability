@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import { EuiBreadcrumb, EuiGlobalToastList, EuiLink, ShortDate } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
@@ -300,12 +299,11 @@ export const Home = ({
         toastLifeTimeMs={6000}
       />
       <Switch>
-      <Route
-        exact
-        path={['/operational_panels/create', '/operational_panels']}
-        render={(props) => {
-          return (
-            <ObservabilitySideBar>
+        <Route
+          exact
+          path={['/operational_panels/create', '/operational_panels']}
+          render={(props) => {
+            return (
               <CustomPanelTable
                 loading={loading}
                 fetchCustomPanels={fetchCustomPanels}
@@ -318,35 +316,34 @@ export const Home = ({
                 deleteCustomPanelList={deleteCustomPanelList}
                 addSamplePanels={addSamplePanels}
               />
-            </ObservabilitySideBar>
-          );
-        }}
-      />
-      <Route
-        path={`${renderProps.match.path}/:id`}
-        render={(props) => {
-          return (
-            <CustomPanelView
-              panelId={props.match.params.id}
-              http={http}
-              pplService={pplService}
-              dslService={dslService}
-              chrome={chrome}
-              parentBreadcrumbs={parentBreadcrumbs}
-              renameCustomPanel={renameCustomPanel}
-              cloneCustomPanel={cloneCustomPanel}
-              deleteCustomPanel={deleteCustomPanel}
-              setToast={setToast}
-              onEditClick={onEditClick}
-              startTime={start}
-              endTime={end}
-              setStartTime={setStart}
-              setEndTime={setEnd}
-              page="operationalPanels"
-            />
-          );
-        }}
-      />
+            );
+          }}
+        />
+        <Route
+          path={`${renderProps.match.path}/:id`}
+          render={(props) => {
+            return (
+              <CustomPanelView
+                panelId={props.match.params.id}
+                http={http}
+                pplService={pplService}
+                dslService={dslService}
+                chrome={chrome}
+                parentBreadcrumbs={parentBreadcrumbs}
+                renameCustomPanel={renameCustomPanel}
+                cloneCustomPanel={cloneCustomPanel}
+                deleteCustomPanel={deleteCustomPanel}
+                setToast={setToast}
+                onEditClick={onEditClick}
+                startTime={start}
+                endTime={end}
+                setStartTime={setStart}
+                setEndTime={setEnd}
+                page="operationalPanels"
+              />
+            );
+          }}
+        />
       </Switch>
     </div>
   );
