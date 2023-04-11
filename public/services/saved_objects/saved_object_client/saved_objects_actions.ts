@@ -10,6 +10,7 @@ import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualiza
 import { ObservabilitySavedObjectsType } from './osd_saved_objects/types';
 import { PPLSavedQueryClient } from './ppl';
 import {
+  ObservabilitySavedObject,
   SavedObjectsDeleteBulkParams,
   SavedObjectsDeleteParams,
   SavedObjectsDeleteResponse,
@@ -36,7 +37,9 @@ export class SavedObjectsActions {
     }
   }
 
-  static async getBulk(params: ISavedObjectRequestParams): Promise<SavedObjectsGetResponse> {
+  static async getBulk<T extends ObservabilitySavedObject>(
+    params: ISavedObjectRequestParams
+  ): Promise<SavedObjectsGetResponse<T>> {
     const objects = await PPLSavedQueryClient.getInstance().getBulk(params);
     if (params.objectType?.includes('savedVisualization')) {
       const osdVisualizationObjects = await OSDSavedVisualizationClient.getInstance().getBulk();
@@ -54,7 +57,7 @@ export class SavedObjectsActions {
     } else {
       objects.observabilityObjectList.sort((a, b) => b.lastUpdatedTimeMs - a.lastUpdatedTimeMs);
     }
-    return objects;
+    return objects as SavedObjectsGetResponse<T>;
   }
 
   static delete(params: SavedObjectsDeleteParams): Promise<SavedObjectsDeleteResponse> {
@@ -88,7 +91,9 @@ export class SavedObjectsActions {
 
     if (idMap[VISUALIZATION_SAVED_OBJECT]?.length) {
       const visualizationDeleteResponses = await OSDSavedVisualizationClient.getInstance().deleteBulk(
-        { objectIdList: idMap[VISUALIZATION_SAVED_OBJECT] }
+        {
+          objectIdList: idMap[VISUALIZATION_SAVED_OBJECT],
+        }
       );
       responses.deleteResponseList = {
         ...responses.deleteResponseList,

@@ -138,9 +138,11 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       })
       .catch((err) => console.error('Fetching dashboard visualization issue', err.body.message));
 
-    await SavedObjectsActions.getBulk({ objectType: ['savedVisualization'] })
+    await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+      objectType: ['savedVisualization'],
+    })
       .then((res) => {
-        opt2 = (res.observabilityObjectList as ObservabilitySavedVisualization[])
+        opt2 = res.observabilityObjectList
           .filter((visualization) => !visualization.savedVisualization.application_id)
           .map((visualization) => ({
             label: visualization.savedVisualization.name,

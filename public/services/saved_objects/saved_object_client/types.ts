@@ -33,11 +33,13 @@ export interface SavedObjectsGetParams {
   objectId: string;
 }
 
-export interface SavedObjectsGetResponse {
+export interface SavedObjectsGetResponse<
+  T extends ObservabilitySavedObject = ObservabilitySavedObject
+> {
   startIndex?: number;
   totalHits?: number;
   totalHitRelation?: 'eq' | 'gte';
-  observabilityObjectList: ObservabilitySavedObject[];
+  observabilityObjectList: T[];
 }
 
 export interface SavedObjectsDeleteParams {

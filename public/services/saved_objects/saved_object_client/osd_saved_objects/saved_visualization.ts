@@ -153,7 +153,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
           savedVisualization: o.attributes.savedVisualization,
         }))
       );
-    return { observabilityObjectList };
+    return { totalHits: observabilityObjectList.length, observabilityObjectList };
   }
 
   async delete(params: SavedObjectsDeleteParams): Promise<SavedObjectsDeleteResponse> {

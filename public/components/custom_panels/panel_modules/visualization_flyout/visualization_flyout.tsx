@@ -36,6 +36,7 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
+import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 import {
   pplResponse,
   SavedVisualizationType,
@@ -340,15 +341,13 @@ export const VisaulizationFlyout = ({
 
   // Fetch all saved visualizations
   const fetchSavedVisualizations = async () => {
-    return SavedObjectsActions.getBulk({
-      objectType: ['savedVisualization'],
+    return SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+      objectType: [SAVED_VISUALIZATION],
       sortOrder: 'desc',
       fromIndex: 0,
     })
       .then((response) => ({
-        visualizations: response.observabilityObjectList.map((visualization) =>
-          parseSavedVisualizations(visualization as ObservabilitySavedVisualization)
-        ),
+        visualizations: response.observabilityObjectList.map(parseSavedVisualizations),
       }))
       .then((res) => {
         if (res.visualizations.length > 0) {
