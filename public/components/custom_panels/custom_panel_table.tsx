@@ -100,7 +100,7 @@ export const CustomPanelTable = ({
 
   useEffect(() => {
     const url = window.location.hash.split('/')
-    if (url[url.length-1] === 'create') { 
+    if (url[url.length - 1] === 'create') {
       createPanel();
     }
   }, [location]);
@@ -129,9 +129,8 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Custom Panels ${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].name
-    } successfully deleted!`;
+    const toastMessage = `Custom Panels ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].name
+      } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
     closeModal();
@@ -338,7 +337,7 @@ export const CustomPanelTable = ({
                   <EuiFlexItem>
                     <EuiButton
                       fill
-                      href="#/operational_panels/create"                      
+                      href="#/operational_panels/create"
                       data-test-subj="customPanels__createNewPanels"
                     >
                       Create panel
@@ -363,8 +362,8 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                          customPanel.name.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
+                        customPanel.name.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
                       : customPanels
                   }
                   itemId="id"
