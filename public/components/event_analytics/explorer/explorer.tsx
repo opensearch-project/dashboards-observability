@@ -828,6 +828,7 @@ export const Explorer = ({
     userVizConfigs,
     selectedContentTabId,
     explorerFields,
+    subType,
     selectedCustomPanelOptions,
   ]);
 
