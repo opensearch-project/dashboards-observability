@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import { Criteria, EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 
@@ -29,11 +28,12 @@ export function SavedQueryTable({
   const pageSizeRef = useRef<number>();
   pageSizeRef.current = pageSize;
 
-  const onTableChange = ({ page = {} }) => {
-    const { index, size } = page;
-
-    setPageIndex(page);
-    setPageSize(size);
+  const onTableChange = (criteria: Criteria<typeof histories>) => {
+    if (criteria.page) {
+      const { index, size } = criteria.page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
   };
 
   const columns = [
