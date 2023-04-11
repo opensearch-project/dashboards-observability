@@ -10,8 +10,6 @@
 .aa-Autocomplete {
   width: 100%;
   position: relative;
-  margin: 4px;
-  margin-left: 8px;
   --aa-search-input-height: 38px;
   --aa-panel-border-color-rgb: rgba(227,230,238,255);
   --aa-input-background-color-rbg: rgba(250,251,253,255);
@@ -72,8 +70,6 @@
 .base-query-popover {
   border: unset;
   font-size: 17px;
-  position: absolute;
-  top: 20px;
-  left: 8px;
+  margin-top: 14px;
   background-color: transparent;
 }
