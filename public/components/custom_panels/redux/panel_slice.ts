@@ -39,7 +39,7 @@ export const panelSlice = createSlice({
   },
 });
 
-export const { setPanel } = panelSlice.actions;
+export const { setPanel, setPanelList } = panelSlice.actions;
 
 export const panelReducer = panelSlice.reducer;
 

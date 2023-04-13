@@ -97,17 +97,17 @@ export const CustomPanelTable = ({
 
   useEffect(() => {
     setBreadcrumbs(parentBreadcrumbs);
-    // dispatch(fetchPanels)
+    dispatch(fetchPanels())
   }, []);
 
   useEffect(() => console.log({ customPanels, selectedCustomPanels }, [customPanels, selectedCustomPanels]))
 
-  // useEffect(() => {
-  //   const url = window.location.hash.split('/')
-  //   if (url[url.length - 1] === 'create') {
-  //     createPanel();
-  //   }
-  // }, [location]);
+  useEffect(() => {
+    const url = window.location.hash.split('/')
+    if (url[url.length - 1] === 'create') {
+      createPanel();
+    }
+  }, [location]);
 
   const closeModal = () => {
     setIsModalVisible(false);
@@ -276,7 +276,7 @@ export const CustomPanelTable = ({
 
   const tableColumns = [
     {
-      field: 'name',
+      field: 'type',
       name: 'Name',
       sortable: true,
       truncateText: true,

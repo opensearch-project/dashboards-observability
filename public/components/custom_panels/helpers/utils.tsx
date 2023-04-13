@@ -420,7 +420,7 @@ export const isPPLFilterValid = (
     setToast('Please remove index from PPL Filter', 'danger', undefined);
     return false;
   }
-  if (!checkWhereClauseExists(query)) {
+  if (query && !checkWhereClauseExists(query)) {
     setToast('PPL filters should start with a where clause', 'danger', undefined);
     return false;
   }
