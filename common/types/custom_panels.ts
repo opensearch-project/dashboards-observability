@@ -4,11 +4,12 @@
  */
 
 export interface CustomPanelListType {
-  name: string;
+  title: string;
   id: string;
   dateCreated: number;
   dateModified: number;
   applicationId?: string;
+  savedObject: boolean;
 }
 
 export interface BoxType {

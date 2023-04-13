@@ -32,6 +32,9 @@ import {
 import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
+import { useHistory, useLocation } from 'react-router-dom';
+import { coreRefs } from 'public/framework/core_refs';
+import { useDispatch, useSelector } from 'react-redux';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import {
   CREATE_PANEL_MESSAGE,
@@ -43,10 +46,7 @@ import { CustomPanelListType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import { useHistory, useLocation } from 'react-router-dom';
-import { coreRefs } from 'public/framework/core_refs';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchPanels, selectPanelList } from './redux/panel_slice';
+import { createPanel, fetchPanels, selectPanelList } from './redux/panel_slice';
 
 /*
  * "CustomPanelTable" module, used to view all the saved panels
@@ -84,7 +84,7 @@ export const CustomPanelTable = ({
   deleteCustomPanelList,
   addSamplePanels,
 }: Props) => {
-  const customPanels = useSelector(selectPanelList)
+  const customPanels = useSelector(selectPanelList);
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -97,15 +97,17 @@ export const CustomPanelTable = ({
 
   useEffect(() => {
     setBreadcrumbs(parentBreadcrumbs);
-    dispatch(fetchPanels())
+    dispatch(fetchPanels());
   }, []);
 
-  useEffect(() => console.log({ customPanels, selectedCustomPanels }, [customPanels, selectedCustomPanels]))
+  // useEffect(() =>
+  //   console.log({ customPanels, selectedCustomPanels }, [customPanels, selectedCustomPanels])
+  // );
 
   useEffect(() => {
-    const url = window.location.hash.split('/')
+    const url = window.location.hash.split('/');
     if (url[url.length - 1] === 'create') {
-      createPanel();
+      createPanelModal();
     }
   }, [location]);
 
@@ -128,27 +130,30 @@ export const CustomPanelTable = ({
   };
 
   const onClone = async (newName: string) => {
-    cloneCustomPanel(newName, selectedCustomPanels[0].id);
+    const sourcePanel = selectedCustomPanels[0];
+    console.log('onClone', { sourcePanel });
+    if (sourcePanel.savedObject) {
+      dispatch(createPanel({ ...sourcePanel, name: sourcePanel.name + ' (copy)', id: undefined }));
+    } else {
+      cloneCustomPanel(newName, selectedCustomPanels[0].id);
+    }
     closeModal();
   };
 
   const onDelete = async () => {
-    const toastMessage = `Custom Panels ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].name
+    const toastMessage = `Custom Panels ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
       } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
     closeModal();
   };
 
-
-
-
-  const createPanel = () => {
+  const createPanelModal = () => {
     setModalLayout(
       getCustomModal(
         onCreate,
         () => {
-          closeModal()
+          closeModal();
           history.goBack();
         },
         'Name',
@@ -276,7 +281,7 @@ export const CustomPanelTable = ({
 
   const tableColumns = [
     {
-      field: 'type',
+      field: 'title',
       name: 'Name',
       sortable: true,
       truncateText: true,
@@ -300,7 +305,7 @@ export const CustomPanelTable = ({
     },
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
-  console.log("rendering", { customPanels, selectedCustomPanels })
+  // console.log('rendering', { customPanels, selectedCustomPanels });
   return (
     <div style={pageStyles}>
       <EuiPage>
@@ -318,7 +323,7 @@ export const CustomPanelTable = ({
                 <EuiTitle size="s">
                   <h3>
                     Panels
-                    <span className="panel-header-count"> ({0 /*customPanels.length */})</span>
+                    <span className="panel-header-count"> ({0 /* customPanels.length */})</span>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
@@ -370,7 +375,7 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                        customPanel.name.toLowerCase().includes(searchQuery.toLowerCase())
+                        customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
                       )
                       : customPanels
                   }

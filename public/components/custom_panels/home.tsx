@@ -26,7 +26,11 @@ import {
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
 } from '../../../common/constants/shared';
-import { CustomPanelListType, ObservabilityPanelAttrs, PanelType } from '../../../common/types/custom_panels';
+import {
+  CustomPanelListType,
+  ObservabilityPanelAttrs,
+  PanelType,
+} from '../../../common/types/custom_panels';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
@@ -35,6 +39,8 @@ import { SavedObject } from '../../../../../src/core/types';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
 import { CustomPanelType } from '../../../common/types/custom_panels';
+import { fetchPanels } from './redux/panel_slice';
+import { useDispatch } from 'react-redux';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -74,6 +80,7 @@ export const Home = ({
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
 
+  const dispatch = useDispatch()
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -143,7 +150,10 @@ export const Home = ({
   };
 
   const saveRenamedPanelSO = async (id, name) => {
-    const panel: SavedObject<PanelType> = await coreRefs.savedObjectsClient!.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
+    const panel: SavedObject<PanelType> = await coreRefs.savedObjectsClient!.get(
+      CUSTOM_PANELS_SAVED_OBJECT_TYPE,
+      id
+    );
     panel.title = name;
     await coreRefs.savedObjectsClient!.update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id, panel);
   };
@@ -185,8 +195,7 @@ export const Home = ({
 
   // Fetch Panel by id
   const fetchLegacyPanel = async (id: string) => {
-    return http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/panels/${id}`)
+    return http.get(`${CUSTOM_PANELS_API_PREFIX}/panels/${id}`);
     // .then((res) => res.operationalPanel)
     // .catch((err) => {
     //   console.error('Issue in fetching the operational panel to duplicate', err);
@@ -203,8 +212,7 @@ export const Home = ({
       return Promise.reject();
     }
 
-    const fetchPanelFn = isUuid(clonedCustomPanelId) ?
-      fetchSavedObjectPanel : fetchLegacyPanel
+    const fetchPanelFn = isUuid(clonedCustomPanelId) ? fetchSavedObjectPanel : fetchLegacyPanel;
 
     try {
       // const panelToClone = await fetchPanelfn(clonedCustomPanelId)
@@ -239,26 +247,27 @@ export const Home = ({
     } catch (err) {
       setToast(
         'Error cloning Operational Panel, please make sure you have the correct permission.',
-        'danger')
+        'danger'
+      );
     }
 
     console.error(err.body.message);
-
   };
 
   const deletePanelSO = (customPanelIdList: string[]) => {
-    const soPanelIds = customPanelIdList.filter(id => id.match(uuidRx))
+    const soPanelIds = customPanelIdList.filter((id) => id.match(uuidRx));
     return Promise.all(
-      soPanelIds.map(id => coreRefs.savedObjectsClient?.delete(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id))
-    )
-  }
+      soPanelIds.map((id) =>
+        coreRefs.savedObjectsClient?.delete(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id)
+      )
+    );
+  };
 
   const deletePanels = (customPanelIdList: string[]) => {
-    const panelIds = customPanelIdList.filter(id => !id.match(uuidRx))
+    const panelIds = customPanelIdList.filter((id) => !id.match(uuidRx));
     const concatList = panelIds.toString();
-    return http
-      .delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList)
-  }
+    return http.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList);
+  };
 
   // Deletes multiple existing Operational Panels
   const deleteCustomPanelList = (customPanelIdList: string[], toastMessage: string) => {
@@ -304,49 +313,50 @@ export const Home = ({
 
   const addSamplePanels = async () => {
     try {
-      //   setLoading(true);
-      //   const flights = await http
-      //     .get('../api/saved_objects/_find', {
-      //       query: {
-      //         type: 'index-pattern',
-      //         search_fields: 'title',
-      //         search: 'opensearch_dashboards_sample_data_flights',
-      //       },
-      //     })
-      //     .then((resp) => resp.total === 0);
-      //   const logs = await http
-      //     .get('../api/saved_objects/_find', {
-      //       query: {
-      //         type: 'index-pattern',
-      //         search_fields: 'title',
-      //         search: 'opensearch_dashboards_sample_data_logs',
-      //       },
-      //     })
-      //     .then((resp) => resp.total === 0);
-      //   if (flights || logs) setToast('Adding sample data. This can take some time.');
-      //   await Promise.all([
-      //     flights ? http.post('../api/sample_data/flights') : Promise.resolve(),
-      //     logs ? http.post('../api/sample_data/logs') : Promise.resolve(),
-      //   ]);
+      setLoading(true);
+      const flights = await http
+        .get('../api/saved_objects/_find', {
+          query: {
+            type: 'index-pattern',
+            search_fields: 'title',
+            search: 'opensearch_dashboards_sample_data_flights',
+          },
+        })
+        .then((resp) => resp.total === 0);
+      const logs = await http
+        .get('../api/saved_objects/_find', {
+          query: {
+            type: 'index-pattern',
+            search_fields: 'title',
+            search: 'opensearch_dashboards_sample_data_logs',
+          },
+        })
+        .then((resp) => resp.total === 0);
+      if (flights || logs) setToast('Adding sample data. This can take some time.');
+      await Promise.all([
+        flights ? http.post('../api/sample_data/flights') : Promise.resolve(),
+        logs ? http.post('../api/sample_data/logs') : Promise.resolve(),
+      ]);
 
-      //   let savedVisualizationIds: string[] = [];
-      //   await http
-      //     .get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/addSampleSavedObjects/panels`)
-      //     .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
+      let savedVisualizationIds: string[] = [];
+      await http
+        .get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/addSampleSavedObjects/panels`)
+        .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
 
-      //   await http
-      //     .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
-      //       body: JSON.stringify({
-      //         savedVisualizationIds,
-      //       }),
-      //     })
-      //     .then((res) => {
-      //       setcustomPanelData([...customPanelData, ...res.demoPanelsData]);
-      //     });
-      //   setToast(`Sample panels successfully added.`);
+      await http
+        .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
+          body: JSON.stringify({
+            savedVisualizationIds,
+          }),
+        })
+        .then((res) => {
+          dispatch(fetchPanels())
+          // setcustomPanelData([...customPanelData, ...res.demoPanelsData]);
+        });
+      setToast(`Sample panels successfully added.`);
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');
-      console.error(err.body.message);
+      console.error(err.body?.message || err);
     } finally {
       setLoading(false);
     }
