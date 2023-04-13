@@ -6,14 +6,16 @@
   "ui": true,
   "requiredPlugins": [
     "charts",
+    "dashboard",
     "data",
     "embeddable",
     "inspector",
-    "urlForwarding",
     "navigation",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils",
+    "savedObjects",
     "uiActions",
-    "dashboard",
-    "visualizations",
-    "opensearchDashboardsReact"
+    "urlForwarding",
+    "visualizations"
   ]
 }

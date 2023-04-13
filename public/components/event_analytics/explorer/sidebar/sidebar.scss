@@ -3,14 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.dscSidebar__container {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  background-color: transparent;
-  border-right-color: transparent;
-  border-bottom-color: transparent;
-}
-
 .dscIndexPattern__container {
   display: flex;
   align-items: center;
@@ -95,10 +87,6 @@
 
 .override_timestamp_loading {
   vertical-align: middle;
-}
-
-.explorerFieldSelector {
-  padding: $euiSizeS;
 }
 
 #vis__mainContent {
