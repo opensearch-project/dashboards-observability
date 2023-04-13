@@ -3,19 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
+  SAVED_VISUALIZATION,
 } from '../../../../../common/constants/metrics';
-import {
-  pplServiceRequestor,
-  getVisualizations,
-  getNewVizDimensions,
-  sortMetricLayout,
-} from '../../helpers/utils';
-import PPLService from '../../../../services/requests/ppl';
 import { MetricType } from '../../../../../common/types/metrics';
+import PPLService from '../../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
+import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
 
 const initialState = {
   pplService: PPLService,
@@ -34,9 +32,11 @@ export const loadMetrics = createAsyncThunk('metrics/loadData', async (services:
 });
 
 const fetchCustomMetrics = async (http: any) => {
-  const dataSet = await getVisualizations(http);
+  const dataSet = await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+    objectType: [SAVED_VISUALIZATION],
+  });
   const savedMetrics = dataSet.observabilityObjectList.filter(
-    (obj: any) => obj.savedVisualization.sub_type === 'metric'
+    (obj) => obj.savedVisualization.sub_type === 'metric'
   );
   const normalizedData = savedMetrics.map((obj: any) => ({
     id: obj.objectId,

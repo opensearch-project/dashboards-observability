@@ -21,6 +21,7 @@ import { selectQueries } from '../redux/slices/query_slice';
 import { reset as visualizationReset } from '../redux/slices/visualization_slice';
 import { updateFields, sortFields, selectFields } from '../redux/slices/field_slice';
 import PPLService from '../../../services/requests/ppl';
+import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
 
 interface IFetchEventsParams {
   pplService: PPLService;
@@ -57,7 +58,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
       .finally(() => setIsEventsLoading(false));
   };
 
-  const dispatchOnGettingHis = (res: any) => {
+  const dispatchOnGettingHis = (res: any, query: string) => {
     const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
       (field: IField) => field.name
     );
@@ -81,8 +82,8 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
           tabId: requestParams.tabId,
           data: {
             [UNSELECTED_FIELDS]: res?.schema ? [...res.schema] : [],
-            [QUERIED_FIELDS]: [],
-            [AVAILABLE_FIELDS]: res?.schema || [],
+            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...res.schema] : [], // when query contains stats, need populate this
+            [AVAILABLE_FIELDS]: res?.schema ? [...res.schema] : [],
             [SELECTED_FIELDS]: [],
           },
         })
@@ -153,7 +154,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
             res.total = res.total + responseRef.current.total;
             res.size = res.size + responseRef.current.size;
           }
-          dispatchOnGettingHis(res);
+          dispatchOnGettingHis(res, searchQuery);
         }
         if (isEmpty(res.jsonData) && isEmpty(responseRef.current)) {
           dispatchOnNoHis(res);
@@ -171,7 +172,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
       'jdbc',
       (res: any) => {
         if (!isEmpty(res.jsonData)) {
-          return dispatchOnGettingHis(res);
+          return dispatchOnGettingHis(res, searchQuery);
         }
         // when no hits and needs to get available fields to override default timestamp
         dispatchOnNoHis(res);
@@ -183,14 +184,6 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
   const getAvailableFields = (query: string) => {
     fetchEvents({ query }, 'jdbc', (res: any) => {
       batch(() => {
-        dispatch(
-          fetchSuccess({
-            tabId: requestParams.tabId,
-            data: {
-              jsonDataAll: res.jsonData,
-            },
-          })
-        );
         dispatch(
           updateFields({
             tabId: requestParams.tabId,

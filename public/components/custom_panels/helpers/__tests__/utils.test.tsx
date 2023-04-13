@@ -104,6 +104,7 @@ describe('Utils helper functions', () => {
     const setToast = jest.fn();
     expect(isPPLFilterValid(sampleSavedVisualization.visualization.query, setToast)).toBe(false);
     expect(isPPLFilterValid("where Carrier = 'OpenSearch-Air'", setToast)).toBe(true);
+    expect(isPPLFilterValid('', setToast)).toBe(true);
   });
 
   it('renders displayVisualization function', () => {

@@ -21,6 +21,7 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
+import _ from 'lodash';
 import moment from 'moment';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -37,11 +38,11 @@ import {
 } from '../../../../../common/constants/shared';
 import { ParaType } from '../../../../../common/types/notebooks';
 import { uiSettingsService } from '../../../../../common/utils';
+import PPLService from '../../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { ParaInput } from './para_input';
 import { ParaOutput } from './para_output';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
-import PPLService from '../../../../services/requests/ppl';
-import _ from 'lodash';
 
 /*
  * "Paragraphs" component is used to render cells of the notebook open and "add para div" between paragraphs
@@ -67,7 +68,7 @@ import _ from 'lodash';
  * Cell component of nteract used as a container for paragraphs in notebook UI.
  * https://components.nteract.io/#cell
  */
-type ParagraphProps = {
+interface ParagraphProps {
   pplService: PPLService;
   para: ParaType;
   setPara: (para: ParaType) => void;
@@ -89,7 +90,7 @@ type ParagraphProps = {
   movePara: (index: number, targetIndex: number) => void;
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
-};
+}
 
 export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   const {
@@ -137,17 +138,17 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       })
       .catch((err) => console.error('Fetching dashboard visualization issue', err.body.message));
 
-    await http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
+    await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+      objectType: ['savedVisualization'],
+    })
       .then((res) => {
-        const noAppVisualizations = res.visualizations.filter((vis) => {
-          return !!!vis.application_id;
-        });
-        opt2 = noAppVisualizations.map((vizObject) => ({
-          label: vizObject.name,
-          key: vizObject.id,
-          className: 'OBSERVABILITY_VISUALIZATION',
-        }));
+        opt2 = res.observabilityObjectList
+          .filter((visualization) => !visualization.savedVisualization.application_id)
+          .map((visualization) => ({
+            label: visualization.savedVisualization.name,
+            key: visualization.objectId,
+            className: 'OBSERVABILITY_VISUALIZATION',
+          }));
       })
       .catch((err) =>
         console.error('Fetching observability visualization issue', err.body.message)
@@ -225,7 +226,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       setRunParaError(true);
       return;
     }
-    let newVisObjectInput = undefined;
+    let newVisObjectInput;
     if (para.isVizualisation) {
       const inputTemp = createDashboardVizObject(selectedVisOption[0].key);
       setVisInput(inputTemp);
@@ -270,7 +271,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     return paraOutput;
   }
 
-  const renderParaHeader = (type: string, index: number) => {
+  const renderParaHeader = (type: string, idx: number) => {
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
@@ -293,48 +294,48 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           },
           {
             name: 'Move up',
-            disabled: index === 0,
+            disabled: idx === 0,
             onClick: () => {
               setIsPopoverOpen(false);
-              props.movePara(index, index - 1);
+              props.movePara(idx, idx - 1);
             },
           },
           {
             name: 'Move to top',
-            disabled: index === 0,
+            disabled: idx === 0,
             onClick: () => {
               setIsPopoverOpen(false);
-              props.movePara(index, 0);
+              props.movePara(idx, 0);
             },
           },
           {
             name: 'Move down',
-            disabled: index === props.paraCount - 1,
+            disabled: idx === props.paraCount - 1,
             onClick: () => {
               setIsPopoverOpen(false);
-              props.movePara(index, index + 1);
+              props.movePara(idx, idx + 1);
             },
           },
           {
             name: 'Move to bottom',
-            disabled: index === props.paraCount - 1,
+            disabled: idx === props.paraCount - 1,
             onClick: () => {
               setIsPopoverOpen(false);
-              props.movePara(index, props.paraCount - 1);
+              props.movePara(idx, props.paraCount - 1);
             },
           },
           {
             name: 'Duplicate',
             onClick: () => {
               setIsPopoverOpen(false);
-              props.clonePara(para, index + 1);
+              props.clonePara(para, idx + 1);
             },
           },
           {
             name: 'Delete',
             onClick: () => {
               setIsPopoverOpen(false);
-              props.deletePara(para, index);
+              props.deletePara(para, idx);
             },
           },
         ],
@@ -347,14 +348,14 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             name: 'Code block',
             onClick: () => {
               setIsPopoverOpen(false);
-              props.addPara(index, '', 'CODE');
+              props.addPara(idx, '', 'CODE');
             },
           },
           {
             name: 'Visualization',
             onClick: () => {
               setIsPopoverOpen(false);
-              props.addPara(index, '', 'VISUALIZATION');
+              props.addPara(idx, '', 'VISUALIZATION');
             },
           },
         ],
@@ -367,14 +368,14 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             name: 'Code block',
             onClick: () => {
               setIsPopoverOpen(false);
-              props.addPara(index + 1, '', 'CODE');
+              props.addPara(idx + 1, '', 'CODE');
             },
           },
           {
             name: 'Visualization',
             onClick: () => {
               setIsPopoverOpen(false);
-              props.addPara(index + 1, '', 'VISUALIZATION');
+              props.addPara(idx + 1, '', 'VISUALIZATION');
             },
           },
         ],
@@ -386,7 +387,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText style={{ fontSize: 17 }}>
-              {`[${index + 1}] ${type} `}
+              {`[${idx + 1}] ${type} `}
               <EuiButtonIcon
                 aria-label="Toggle show input"
                 iconType={para.isInputExpanded ? 'arrowUp' : 'arrowDown'}
@@ -510,6 +511,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     <>
       <EuiPanel>
         {renderParaHeader(!para.isVizualisation ? 'Code block' : 'Visualization', index)}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div key={index} className={paraClass} onClick={() => paragraphSelector(index)}>
           {para.isInputExpanded && (
             <>
