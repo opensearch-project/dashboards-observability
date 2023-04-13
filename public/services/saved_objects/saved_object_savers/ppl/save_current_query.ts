@@ -5,7 +5,7 @@
 
 import { SavedQuerySaver } from './saved_query_saver';
 
-export class SaveAsCurrenQuery extends SavedQuerySaver {
+export class SaveAsCurrentQuery extends SavedQuerySaver {
   constructor(
     private readonly saveContext,
     protected readonly dispatchers,

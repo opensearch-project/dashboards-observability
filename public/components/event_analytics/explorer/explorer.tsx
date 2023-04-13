@@ -86,7 +86,7 @@ import {
 } from '../../../services/saved_objects/saved_object_client/ppl';
 import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 import {
-  SaveAsCurrenQuery,
+  SaveAsCurrentQuery,
   SaveAsCurrentVisualization,
   SaveAsNewVisualization,
 } from '../../../services/saved_objects/saved_object_savers';
@@ -762,7 +762,7 @@ export const Explorer = ({
     let soClient;
     if (isOnEventPage) {
       if (isTabHasObjID && isObjTypeMatchQuery) {
-        soClient = new SaveAsCurrenQuery(
+        soClient = new SaveAsCurrentQuery(
           { tabId, notifications },
           { dispatch, updateTabName },
           PPLSavedQueryClient.getInstance(),
