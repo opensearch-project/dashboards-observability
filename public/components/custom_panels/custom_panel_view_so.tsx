@@ -59,6 +59,7 @@ import {
   isPPLFilterValid,
   fetchVisualizationById,
   isNameValid,
+  prependRecentlyUsedRange,
 } from './helpers/utils';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
@@ -74,7 +75,7 @@ import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
-import { fetchPanel, selectPanel, setPanel, setPanelId, updatePanel } from './redux/panel_slice';
+import { fetchPanel, selectPanel, setPanel, setPanelEt, setPanelId, setPanelSt, updatePanel } from './redux/panel_slice';
 import { coreRefs } from '../../framework/core_refs';
 
 /*
@@ -194,14 +195,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    onTimeChange(
-      timeProps.start,
-      timeProps.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
-    );
+    const updatedRanges = prependRecentlyUsedRange(timeProps.start, timeProps.end, recentlyUsedRanges);
+    dispatch(updatePanel({...panel, timeRange: {from: timeProps.start, to: timeProps.end}}))
+
+    setRecentlyUsedRanges(updatedRanges.slice(0, 9))
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
@@ -381,6 +378,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     }
 
     if (!isPPLFilterValid(pplFilterValue, setToast)) {
+      console.log(pplFilterValue)
       return;
     }
 
