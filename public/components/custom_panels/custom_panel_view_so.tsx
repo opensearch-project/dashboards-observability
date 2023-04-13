@@ -108,8 +108,6 @@ interface CustomPanelViewProps {
   panelId: string;
   page: 'app' | 'operationalPanels';
   coreSavedObjects: CoreStart['savedObjects'];
-  pplService: PPLService;
-  dslService: DSLService;
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
   deleteCustomPanel: (customPanelId: string, customPanelName: string) => Promise<any>;
@@ -196,7 +194,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
     const updatedRanges = prependRecentlyUsedRange(timeProps.start, timeProps.end, recentlyUsedRanges);
-    dispatch(updatePanel({...panel, timeRange: {from: timeProps.start, to: timeProps.end}}))
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }))
 
     setRecentlyUsedRanges(updatedRanges.slice(0, 9))
     onRefreshFilters(timeProps.start, timeProps.end);

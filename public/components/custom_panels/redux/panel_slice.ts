@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 import { concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import {
@@ -15,7 +15,7 @@ import {
 } from '../../../../common/types/custom_panels';
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
-import { panel } from '../../../../../../src/plugins/vis_type_timeseries/common/vis_schema';
+import { isNameValid } from '../helpers/utils';
 
 interface InitialState {
   id: string;
@@ -57,9 +57,14 @@ export const panelReducer = panelSlice.reducer;
 export const selectPanel = (rootState): CustomPanelType => rootState.customPanel.panel;
 
 export const selectPanelList = (rootState): CustomPanelType[] => {
-  console.trace('selectPanelList', { rootState, panelList: rootState.customPanel.panelList });
+  // console.log('selectPanelList', { rootState, panelList: rootState.customPanel.panelList });
   return rootState.customPanel.panelList;
 };
+
+// export const selectPanelList = createSelector(
+//   rootState => { console.log("selectPanelList", { rootState }); return rootState.customPanel.panelList },
+//   panelList => panelList.map(p => p as CustomPanelListType)
+// );
 
 /*
  ** ASYNC DISPATCH FUNCTIONS
@@ -68,16 +73,16 @@ export const selectPanelList = (rootState): CustomPanelType[] => {
 const fetchSavedObjectPanels$ = () =>
   from(savedObjectPanelsClient.find()).pipe(
     mergeMap((res) => res.savedObjects),
-    map(savedObjectToCustomPanel),
-    tap((res) => console.log('panel', res))
+    map(savedObjectToCustomPanel)
+    // tap((res) => console.log('panel', res))
   );
 
 const fetchObservabilityPanels$ = () =>
   of(coreRefs.http.get(`${CUSTOM_PANELS_API_PREFIX}/panels`)).pipe(
     mergeMap((res) => res),
     mergeMap((res) => res.panels as ObservabilityPanelAttrs[]),
-    map((p: ObservabilityPanelAttrs) => ({ ...p, title: p.name, savedObject: false })),
-    tap((res) => console.log('observability panels', res))
+    map((p: ObservabilityPanelAttrs) => ({ ...p, title: p.name, savedObject: false }))
+    // tap((res) => console.log('observability panels', res))
   );
 
 // Fetches all saved Custom Panels
@@ -107,11 +112,32 @@ export const fetchPanel = (id) => async (dispatch, getState) => {
 
 export const fetchVisualization = () => (dispatch, getState) => {};
 
+const updateLegacyPanel = (panel: CustomPanelType) => coreRefs.http!
+  .post(`${CUSTOM_PANELS_API_PREFIX}/panels/update`, {
+    body: JSON.stringify({ panelId: panel.id, panel: panel as PanelType }),
+  });
+
+const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClient.update(panel);
+
+
+const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+
+const isUuid = (id) => !!id.match(uuidRx);
+
+
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
-  await savedObjectPanelsClient.update(panel);
-  dispatch(setPanel(panel));
-  const panelList = getState().panelList.map((p) => (p.id === panel.id ? panel : p));
-  dispatch(setPanelList(panelList));
+  try {
+    if (isUuid(panel.id))
+      await updateSavedObjectPanel(panel)
+    else
+      await updateLegacyPanel(panel)
+
+    dispatch(setPanel(panel));
+    const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
+    dispatch(setPanelList(panelList));
+  } catch (err) {
+    console.log("Error updating panel", { err, panel })
+  }
 };
 
 export const deletePanel = (id) => async (dispatch, getState) => {
@@ -124,6 +150,61 @@ export const createPanel = (panel) => async (dispatch, getState) => {
   const newPanel = await savedObjectPanelsClient.create(panel);
   const panelList = getState().panelList;
   dispatch(setPanelList([...panelList, newPanel]));
+};
+
+
+const saveRenamedPanel = async (id, name) => {
+  const renamePanelObject = {
+    panelId: id,
+    panelName: name,
+  };
+
+  return http.post(`${CUSTOM_PANELS_API_PREFIX}/panels/rename`, {
+    body: JSON.stringify(renamePanelObject),
+  });
+};
+
+const saveRenamedPanelSO = async (id, name) => {
+  const panel: SavedObject<PanelType> = await coreRefs.savedObjectsClient!.get(
+    CUSTOM_PANELS_SAVED_OBJECT_TYPE,
+    id
+  );
+  panel.title = name;
+  await coreRefs.savedObjectsClient!.update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id, panel);
+};
+
+// Renames an existing CustomPanel
+export const renameCustomPanel = (editedCustomPanelName: string, id: string) => async (dispatch, getState) => {
+  console.log("renameCustomPanel dispatched", { editedCustomPanelName, id })
+
+  if (!isNameValid(editedCustomPanelName)) {
+    console.log('Invalid Custom Panel name', 'danger');
+    return Promise.reject();
+  }
+
+  const panel = getState().customPanel.panelList.find(p => p.id === id)
+  const updatedPanel = { ...panel, title: editedCustomPanelName }
+  dispatch(updatePanel(updatedPanel))
+
+  // try {
+  //   // await savePanelFn(editedCustomPanelId, editedCustomPanelName);
+
+  //   // setcustomPanelData((prevCustomPanelData) => {
+  //   //   const newCustomPanelData = [...prevCustomPanelData];
+  //   //   const renamedCustomPanel = newCustomPanelData.find(
+  //   //     (customPanel) => customPanel.id === editedCustomPanelId
+  //   //   );
+  //   //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
+  //   //   return newCustomPanelData;
+  //   // });
+  //   // setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
+  // } catch (err) {
+  //   console.log(
+  //     'Error renaming Operational Panel, please make sure you have the correct permission.',
+  //     'danger'
+  //   );
+  //   console.error(err.body.message);
+  // }
 };
 
 /*

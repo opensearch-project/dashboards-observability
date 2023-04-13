@@ -46,7 +46,7 @@ import { CustomPanelListType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import { createPanel, fetchPanels, selectPanelList } from './redux/panel_slice';
+import { createPanel, fetchPanels, renameCustomPanel, selectPanelList } from './redux/panel_slice';
 
 /*
  * "CustomPanelTable" module, used to view all the saved panels
@@ -68,7 +68,6 @@ interface Props {
   createCustomPanel: (newCustomPanelName: string) => void;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   parentBreadcrumbs: EuiBreadcrumb[];
-  renameCustomPanel: (newCustomPanelName: string, customPanelId: string) => void;
   cloneCustomPanel: (newCustomPanelName: string, customPanelId: string) => void;
   deleteCustomPanelList: (customPanelIdList: string[], toastMessage: string) => any;
   addSamplePanels: () => void;
@@ -79,7 +78,6 @@ export const CustomPanelTable = ({
   createCustomPanel,
   setBreadcrumbs,
   parentBreadcrumbs,
-  renameCustomPanel,
   cloneCustomPanel,
   deleteCustomPanelList,
   addSamplePanels,
@@ -125,7 +123,7 @@ export const CustomPanelTable = ({
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id);
+    dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
     closeModal();
   };
 

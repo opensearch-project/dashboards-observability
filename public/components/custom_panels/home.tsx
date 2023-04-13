@@ -138,55 +138,6 @@ export const Home = ({
 
   const isUuid = (id) => !!id.match(uuidRx);
 
-  const saveRenamedPanel = async (id, name) => {
-    const renamePanelObject = {
-      panelId: id,
-      panelName: name,
-    };
-
-    return http.post(`${CUSTOM_PANELS_API_PREFIX}/panels/rename`, {
-      body: JSON.stringify(renamePanelObject),
-    });
-  };
-
-  const saveRenamedPanelSO = async (id, name) => {
-    const panel: SavedObject<PanelType> = await coreRefs.savedObjectsClient!.get(
-      CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-      id
-    );
-    panel.title = name;
-    await coreRefs.savedObjectsClient!.update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id, panel);
-  };
-
-  // Renames an existing CustomPanel
-  const renameCustomPanel = async (editedCustomPanelName: string, editedCustomPanelId: string) => {
-    if (!isNameValid(editedCustomPanelName)) {
-      setToast('Invalid Custom Panel name', 'danger');
-      return Promise.reject();
-    }
-
-    const savePanelFn = isUuid(editedCustomPanelId) ? saveRenamedPanelSO : saveRenamedPanel;
-
-    try {
-      // await savePanelFn(editedCustomPanelId, editedCustomPanelName);
-
-      // setcustomPanelData((prevCustomPanelData) => {
-      //   const newCustomPanelData = [...prevCustomPanelData];
-      //   const renamedCustomPanel = newCustomPanelData.find(
-      //     (customPanel) => customPanel.id === editedCustomPanelId
-      //   );
-      //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
-      //   return newCustomPanelData;
-      // });
-      // setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
-    } catch (err) {
-      setToast(
-        'Error renaming Operational Panel, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body.message);
-    }
-  };
 
   const fetchSavedObjectPanel = async (id: string) => {
     const soPanel = await coreRefs.savedObjectsClient?.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
@@ -384,7 +335,6 @@ export const Home = ({
                   createCustomPanel={createCustomPanel}
                   setBreadcrumbs={chrome.setBreadcrumbs}
                   parentBreadcrumbs={parentBreadcrumbs}
-                  renameCustomPanel={renameCustomPanel}
                   cloneCustomPanel={cloneCustomPanel}
                   deleteCustomPanelList={deleteCustomPanelList}
                   addSamplePanels={addSamplePanels}
@@ -401,19 +351,12 @@ export const Home = ({
             return isSavedObject ? (
               <CustomPanelViewSO
                 panelId={props.match.params.id}
-                http={http}
-                pplService={pplService}
-                dslService={dslService}
                 chrome={chrome}
                 parentBreadcrumbs={parentBreadcrumbs}
                 cloneCustomPanel={cloneCustomPanel}
                 deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
                 onEditClick={onEditClick}
-                startTime={start}
-                endTime={end}
-                setStartTime={setStart}
-                setEndTime={setEnd}
                 page="operationalPanels"
                 coreSavedObjects={coreSavedObjects}
               />
@@ -425,7 +368,7 @@ export const Home = ({
                 dslService={dslService}
                 chrome={chrome}
                 parentBreadcrumbs={parentBreadcrumbs}
-                renameCustomPanel={renameCustomPanel}
+                // renameCustomPanel={renameCustomPanel}
                 cloneCustomPanel={cloneCustomPanel}
                 deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
