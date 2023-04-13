@@ -4,33 +4,35 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { map, isEmpty } from 'lodash';
-import $ from 'jquery';
 import {
   EuiIcon,
-  EuiText,
-  EuiTabbedContentTab,
   EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { Explorer } from './explorer';
-import { ILogExplorerProps } from '../../../../common/types/explorer';
+import $ from 'jquery';
+import { isEmpty, map } from 'lodash';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { LogExplorerRouterContext } from '..';
 import {
-  TAB_TITLE,
-  TAB_ID_TXT_PFX,
-  SAVED_OBJECT_ID,
+  APP_ANALYTICS_TAB_ID_REGEX,
+  CREATE_TAB_PARAM_KEY,
   NEW_TAB,
   REDIRECT_TAB,
-  TAB_EVENT_ID,
+  SAVED_OBJECT_ID,
   TAB_CHART_ID,
-  APP_ANALYTICS_TAB_ID_REGEX,
+  TAB_EVENT_ID,
+  TAB_ID_TXT_PFX,
+  TAB_TITLE,
 } from '../../../../common/constants/explorer';
-import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
-import { selectQueries } from '../redux/slices/query_slice';
-import { selectQueryResult } from '../redux/slices/query_result_slice';
+import { ILogExplorerProps } from '../../../../common/types/explorer';
 import { initializeTabData, removeTabData } from '../../application_analytics/helpers/utils';
+import { selectQueryResult } from '../redux/slices/query_result_slice';
+import { selectQueries } from '../redux/slices/query_slice';
+import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
+import { Explorer } from './explorer';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -56,6 +58,7 @@ export const LogExplorer = ({
   http,
   queryManager,
 }: ILogExplorerProps) => {
+  const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
   const tabIds = useSelector(selectQueryTabs).queryTabIds.filter(
     (tabid: string) => !tabid.match(APP_ANALYTICS_TAB_ID_REGEX)
@@ -145,6 +148,16 @@ export const LogExplorer = ({
     if (!isEmpty(savedObjectId)) {
       dispatchSavedObjectId();
     }
+    if (routerContext && routerContext.searchParams.has(CREATE_TAB_PARAM_KEY)) {
+      // need to wait for current redux event loop to finish
+      setImmediate(() => {
+        addNewTab(NEW_TAB);
+        routerContext.searchParams.delete(CREATE_TAB_PARAM_KEY);
+        routerContext.routerProps.history.replace({
+          search: routerContext.searchParams.toString(),
+        });
+      });
+    }
   }, []);
 
   function getQueryTab({
@@ -218,6 +231,7 @@ export const LogExplorer = ({
         selectedTab={memorizedTabs.find((tab) => tab.id === curSelectedTabId)}
         onTabClick={(selectedTab: EuiTabbedContentTab) => handleTabClick(selectedTab)}
         data-test-subj="eventExplorer__topLevelTabbing"
+        size="s"
       />
     </>
   );

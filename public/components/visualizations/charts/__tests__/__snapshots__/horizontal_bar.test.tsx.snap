@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Horizontal bar component Renders horizontal bar component 1`] = `
-<Bar
+<Component
   config={true}
   layout={
     Object {
@@ -801,5 +801,5 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Bar>
+</Component>
 `;

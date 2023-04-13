@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Heatmap component Renders heatmap component 1`] = `
-<HeatMap
+<Component
   config={Object {}}
   layout={
     Object {
@@ -805,5 +805,5 @@ exports[`Heatmap component Renders heatmap component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</HeatMap>
+</Component>
 `;
