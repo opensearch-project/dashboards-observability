@@ -39,10 +39,10 @@ if (window.Cypress) {
 }
 
 const pages = {
-  'notebooks': NotebooksHome,
-  'metrics': MetricsHome,
-  'events': EventAnalytics,
-}
+  notebooks: NotebooksHome,
+  metrics: MetricsHome,
+  events: EventAnalytics,
+};
 
 export const App = ({
   CoreStartProp,
@@ -66,22 +66,21 @@ export const App = ({
     href: '#/operational_panels/',
   };
 
-  const ModuleComponent = pages[startPage]
+  const ModuleComponent = pages[startPage];
 
   return (
     <Provider store={store}>
       <I18nProvider>
         <MetricsListener http={http}>
-
           <ModuleComponent
             http={http}
+            chrome={chrome}
             notifications={notifications}
             CoreStartProp={CoreStartProp}
             DepsStart={DepsStart}
             DashboardContainerByValueRenderer={
               DepsStart.dashboard.DashboardContainerByValueRenderer
             }
-
             pplService={pplService}
             dslService={dslService}
             savedObjects={savedObjects}
@@ -93,7 +92,7 @@ export const App = ({
         </MetricsListener>
       </I18nProvider>
     </Provider>
-  )
+  );
 };
 
 // // redirect legacy notebooks URL to current URL under observability
