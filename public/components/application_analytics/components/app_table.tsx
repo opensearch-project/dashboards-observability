@@ -37,7 +37,12 @@ import moment from 'moment';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AppAnalyticsComponentDeps } from '../home';
 import { getCustomModal } from '../../custom_panels/helpers/modal_containers';
-import { pageStyles, UI_DATE_FORMAT } from '../../../../common/constants/shared';
+import {
+  observabilityID,
+  observabilityTitle,
+  pageStyles,
+  UI_DATE_FORMAT,
+} from '../../../../common/constants/shared';
 import { ApplicationType, AvailabilityType } from '../../../../common/types/application_analytics';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
@@ -70,10 +75,13 @@ export function AppTable(props: AppTableProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
-        text: 'Application analytics',
-        href: '#/application_analytics',
+        text: observabilityTitle,
+        href: `${observabilityID}#/`,
+      },
+      {
+        text: 'Applications',
+        href: '#/',
       },
     ]);
     clear();
@@ -216,10 +224,7 @@ export function AppTable(props: AppTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}ApplicationLink`}
-          href={`#/application_analytics/${record.id}`}
-        >
+        <EuiLink data-test-subj={`${record.name}ApplicationLink`} href={`#/${record.id}`}>
           {_.truncate(record.name, { length: 100 })}
         </EuiLink>
       ),
@@ -284,7 +289,7 @@ export function AppTable(props: AppTableProps) {
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/application_analytics/create">
+                    <EuiButton fill href="#/create">
                       {createButtonText}
                     </EuiButton>
                   </EuiFlexItem>
@@ -324,7 +329,7 @@ export function AppTable(props: AppTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton fullWidth={false} href={`#/application_analytics/create`}>
+                    <EuiButton fullWidth={false} href={`#/create`}>
                       {createButtonText}
                     </EuiButton>
                   </EuiFlexItem>
