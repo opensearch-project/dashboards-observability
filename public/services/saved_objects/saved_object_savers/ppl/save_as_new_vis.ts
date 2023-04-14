@@ -76,9 +76,12 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
   }
 
   addToPanel({ selectedPanels, saveTitle, notifications, visId }) {
+    const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    const soPanels = selectedPanels.filter((id) => id.panel.id.match(uuidRx));
+    const opsPanels = selectedPanels.filter((id) => !id.panel.id.match(uuidRx));
     this.panelClient
       .updateBulk({
-        selectedCustomPanels: selectedPanels,
+        selectedCustomPanels: opsPanels,
         savedVisualizationId: visId,
       })
       .then((res: any) => {
