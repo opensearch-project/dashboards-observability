@@ -16,7 +16,7 @@ import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
-import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
+import { useEffect } from 'react';
 
 export const LogExplorerRouterContext = createContext<{
   routerProps: RouteComponentProps;
@@ -61,27 +61,15 @@ export const EventAnalytics = ({
     return emptyTabId;
   };
 
-  // useEffect(() => {
-  //   chrome.setBreadcrumbs([
-  //     ...parentBreadcrumbs,
-  //     {
-  //       text: 'Explorer',
-  //       href: `#/`,
-  //     },
-  //   ]);
-  // }, []);
   useEffect(() => {
     setBreadcrumbs([
-      {
-        text: observabilityTitle,
-        href: `${observabilityID}#/`,
-      },
+        ...parentBreadcrumbs,
       {
         text: 'Logs',
         href: `#/`,
       },
     ]);
-  }, []);
+  }, [setBreadcrumbs, parentBreadcrumbs]);
 
   return (
     <>
@@ -97,20 +85,14 @@ export const EventAnalytics = ({
           <Route
             path={[`/:id`]}
             render={(routerProps) => {
-              // setBreadcrumbs([
-              //   parentBreadcrumbs,
-              //   {
-              //     text: 'Notebooks',
-              //     href: '#/',
-              //   },
-              // ]);
-              // setBreadcrumbs([
-              //   parentBreadcrumbs,
-              //   {
-              //     text: 'Explorer',
-              //     href: '#/',
-              //   },
-              // ]);
+              chrome.setBreadcrumbs([
+                ...parentBreadcrumbs,
+                eventAnalyticsBreadcrumb,
+                {
+                  text: 'Explorer',
+                  href: `#/event_analytics/explorer`,
+                },
+              ]);
               return (
                 <LogExplorerRouterContext.Provider
                   value={{
