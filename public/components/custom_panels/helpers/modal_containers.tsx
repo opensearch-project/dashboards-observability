@@ -67,7 +67,7 @@ export const getCloneModal = (
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title="Clone operational panel"
+        title="Clone Observability Dashboard"
         onCancel={onCancel}
         onConfirm={onConfirm}
         cancelButtonText="Cancel"

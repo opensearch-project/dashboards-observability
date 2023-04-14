@@ -12,6 +12,7 @@ import { StaticContext } from 'react-router';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { concat, from, Observable, of } from 'rxjs';
+import { useDispatch } from 'react-redux';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
@@ -40,7 +41,6 @@ import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
 import { CustomPanelType } from '../../../common/types/custom_panels';
 import { fetchPanels } from './redux/panel_slice';
-import { useDispatch } from 'react-redux';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -80,7 +80,7 @@ export const Home = ({
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -95,7 +95,7 @@ export const Home = ({
   // Creates a new CustomPanel
   const createCustomPanel = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Operational Panel name', 'danger');
+      setToast('Invalid Observability Dashboard name', 'danger');
       return;
     }
 
@@ -119,12 +119,12 @@ export const Home = ({
     return coreSavedObjects.client
       .create<ObservabilityPanelAttrs>('observability-panel', newPanel, {})
       .then(async (res) => {
-        setToast(`Operational Panel "${newCustomPanelName}" successfully created!`);
+        setToast(`Observability Dashboard "${newCustomPanelName}" successfully created!`);
         window.location.assign(`${_.last(parentBreadcrumbs)!.href}${res.id}`);
       })
       .catch((err) => {
         setToast(
-          'Please ask your administrator to enable Operational Panels for you.',
+          'Please ask your administrator to enable Observability Dashboards for you.',
           'danger',
           <EuiLink href={CUSTOM_PANELS_DOCUMENTATION_URL} target="_blank">
             Documentation
@@ -138,7 +138,6 @@ export const Home = ({
 
   const isUuid = (id) => !!id.match(uuidRx);
 
-
   const fetchSavedObjectPanel = async (id: string) => {
     const soPanel = await coreRefs.savedObjectsClient?.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
     return savedObjectToCustomPanel(soPanel);
@@ -149,7 +148,7 @@ export const Home = ({
     return http.get(`${CUSTOM_PANELS_API_PREFIX}/panels/${id}`);
     // .then((res) => res.operationalPanel)
     // .catch((err) => {
-    //   console.error('Issue in fetching the operational panel to duplicate', err);
+    //   console.error('Issue in fetching the Observability Panel to duplicate', err);
     // });
   };
 
@@ -159,7 +158,7 @@ export const Home = ({
     clonedCustomPanelId: string
   ): Promise<string> => {
     if (!isNameValid(clonedCustomPanelName)) {
-      setToast('Invalid Operational Panel name', 'danger');
+      setToast('Invalid Observability Dashboard name', 'danger');
       return Promise.reject();
     }
 
@@ -167,19 +166,15 @@ export const Home = ({
 
     try {
       // const panelToClone = await fetchPanelfn(clonedCustomPanelId)
-
       // const newPanel: PanelType = {
       //   ...panelToClone,
       //   title: clonedCustomPanelName,
       //   dateCreated: new Date().getTime(),
       //   dateModified: new Date().getTime()
       // }
-
       // const clonedPanel: CustomPanelType = await coreRefs.savedObjectsClient!.create(
       //   CUSTOM_PANELS_SAVED_OBJECT_TYPE, newPanel, { id: panelToClone.id }
       // )
-
-
       // setcustomPanelData((prevCustomPanelData) => {
       //   const newPanelData = [
       //     ...prevCustomPanelData,
@@ -193,11 +188,11 @@ export const Home = ({
       //   console.log("setcustomPanelData", newPanelData)
       //   return newPanelData
       // });
-      // setToast(`Operational Panel "${clonedCustomPanelName}" successfully created!`);
+      // setToast(`Observability Dashboard "${clonedCustomPanelName}" successfully created!`);
       // return clonedPanel.id;
     } catch (err) {
       setToast(
-        'Error cloning Operational Panel, please make sure you have the correct permission.',
+        'Error cloning Observability Dashboard, please make sure you have the correct permission.',
         'danger'
       );
     }
@@ -235,7 +230,7 @@ export const Home = ({
     // })
     //   .catch((err) => {
     //     setToast(
-    //       'Error deleting Operational Panels, please make sure you have the correct permission.',
+    //       'Error deleting Obsevability Dashboards, please make sure you have the correct permission.',
     //       'danger'
     //     );
     //     console.error(err.body.message);
@@ -255,7 +250,7 @@ export const Home = ({
     //   })
     //   .catch((err) => {
     //     setToast(
-    //       'Error deleting Operational Panel, please make sure you have the correct permission.',
+    //       'Error deleting Observability Dashboard, please make sure you have the correct permission.',
     //       'danger'
     //     );
     //     console.error(err.body.message);
@@ -301,10 +296,10 @@ export const Home = ({
           }),
         })
         .then((res) => {
-          dispatch(fetchPanels())
+          dispatch(fetchPanels());
           // setcustomPanelData([...customPanelData, ...res.demoPanelsData]);
         });
-      setToast(`Sample panels successfully added.`);
+      setToast(`Sample Observability Dashboards successfully added.`);
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');
       console.error(err.body?.message || err);

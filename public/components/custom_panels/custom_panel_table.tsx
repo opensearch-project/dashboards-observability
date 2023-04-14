@@ -138,10 +138,12 @@ export const CustomPanelTable = ({
     closeModal();
   };
 
+  const multiName = (count) => {
+    return count == 1 ? 'Observability Dashboard' : 'Observability Dashboards';
+  };
+
   const onDelete = async () => {
-    const toastMessage = `Custom Panels ${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-    } successfully deleted!`;
+    const toastMessage = `${multiName(selectedCustomPanels.length)} successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
     closeModal();
@@ -156,7 +158,7 @@ export const CustomPanelTable = ({
           history.goBack();
         },
         'Name',
-        'Create operational panel',
+        'Create Observability Dashboard',
         'Cancel',
         'Create',
         undefined,
@@ -172,7 +174,7 @@ export const CustomPanelTable = ({
         onRename,
         closeModal,
         'Name',
-        'Rename Panel',
+        'Rename Dashboard',
         'Cancel',
         'Rename',
         selectedCustomPanels[0].name,
@@ -188,7 +190,7 @@ export const CustomPanelTable = ({
         onClone,
         closeModal,
         'Name',
-        'Duplicate Panel',
+        'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
         selectedCustomPanels[0].name + ' (copy)',
@@ -199,13 +201,13 @@ export const CustomPanelTable = ({
   };
 
   const deletePanel = () => {
-    const customPanelString = `operational panel${selectedCustomPanels.length > 1 ? 's' : ''}`;
+    const count = selectedCustomPanels.length;
     setModalLayout(
       <DeleteModal
         onConfirm={onDelete}
         onCancel={closeModal}
-        title={`Delete ${selectedCustomPanels.length} ${customPanelString}`}
-        message={`Are you sure you want to delete the selected ${selectedCustomPanels.length} ${customPanelString}?`}
+        title={`Delete ${count} ${multiName(count)}`}
+        message={`Are you sure you want to delete the selected ${count} ${multiName(count)}?`}
       />
     );
     showModal();
@@ -291,6 +293,17 @@ export const CustomPanelTable = ({
       ),
     },
     {
+      field: 'type',
+      name: 'Type',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiLink href={`${_.last(parentBreadcrumbs)!.href}${record.id}`}>
+          {_.truncate(value, { length: 100 })}
+        </EuiLink>
+      ),
+    },
+    {
       field: 'dateModified',
       name: 'Last updated',
       sortable: true,
@@ -312,7 +325,7 @@ export const CustomPanelTable = ({
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle size="l">
-                <h1>Operational panels</h1>
+                <h1>Observability Dashboards</h1>
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
@@ -321,14 +334,14 @@ export const CustomPanelTable = ({
               <EuiPageContentHeaderSection>
                 <EuiTitle size="s">
                   <h3>
-                    Panels
+                    Dashboards
                     <span className="panel-header-count"> ({customPanels.length})</span>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
-                  Use Operational panels to create and view different visualizations on ingested
-                  observability data, using PPL (Piped Processing Language) queries.{' '}
+                  Use Observability Dashboards to create and view different visualizations on
+                  ingested observability data, using PPL (Piped Processing Language) queries.{' '}
                   <EuiLink external={true} href={CUSTOM_PANELS_DOCUMENTATION_URL} target="blank">
                     Learn more
                   </EuiLink>
@@ -352,7 +365,7 @@ export const CustomPanelTable = ({
                       href="#/operational_panels/create"
                       data-test-subj="customPanels__createNewPanels"
                     >
-                      Create panel
+                      Create Dashboard
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -364,7 +377,7 @@ export const CustomPanelTable = ({
                 <EuiFieldSearch
                   fullWidth
                   data-test-subj="operationalPanelSearchBar"
-                  placeholder="Search operational panel name"
+                  placeholder="Search Observability Dashboard name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -402,10 +415,10 @@ export const CustomPanelTable = ({
               <>
                 <EuiSpacer size="xxl" />
                 <EuiText textAlign="center">
-                  <h2 data-test-subj="customPanels__noPanelsHome">No Operational Panels</h2>
+                  <h2 data-test-subj="customPanels__noPanelsHome">No Observability Dashboards</h2>
                   <EuiSpacer size="m" />
                   <EuiText color="subdued">
-                    Use operational panels to dive deeper into observability
+                    Use Observability Dashboards to dive deeper into observability
                     <br />
                     using PPL queries and insightful visualizations
                   </EuiText>
@@ -418,7 +431,7 @@ export const CustomPanelTable = ({
                       fullWidth={false}
                       href="#/operational_panels/create"
                     >
-                      Create panel
+                      Create Dashboard
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

@@ -219,7 +219,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         onConfirm={onDelete}
         onCancel={closeModal}
         title={`Delete ${panel?.title}`}
-        message={`Are you sure you want to delete this Operational Panel?`}
+        message={`Are you sure you want to delete this Observability Dashboard?`}
       />
     );
     showModal();
@@ -227,7 +227,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const renameCustomPanel = (editedCustomPanelName: string) => {
     if (!isNameValid(editedCustomPanelName)) {
-      setToast('Invalid Custom Panel name', 'danger');
+      setToast('Invalid Observability Dashboard name', 'danger');
       return Promise.reject();
     }
 
@@ -237,11 +237,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       .update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, panel.id, panel)
       .then((res) => {
         setOpenPanelName(editedCustomPanelName);
-        setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
+        setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`);
       })
       .catch((err) => {
         setToast(
-          'Error renaming Operational Panel, please make sure you have the correct permission.',
+          'Error renaming Observability Dashboard, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err.body.message);
@@ -259,7 +259,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         onRename,
         closeModal,
         'Name',
-        'Rename Panel',
+        'Rename Dashboard',
         'Cancel',
         'Rename',
         panel.title,
@@ -282,7 +282,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         onClone,
         closeModal,
         'Name',
-        'Duplicate Panel',
+        'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
         panel.title + ' (copy)',
@@ -452,7 +452,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     </EuiButton>
   );
 
-  // Panel Actions Button
+  // Dasbhboard Actions Button
   const panelActionsButton = (
     <EuiButton
       data-test-subj="panelActionContextMenu"
@@ -461,7 +461,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       onClick={() => setPanelsMenuPopover(true)}
       disabled={addVizDisabled}
     >
-      Panel actions
+      Dasbhboard Actions
     </EuiButton>
   );
 
@@ -484,7 +484,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     try {
       dispatch(updatePanel(updatedPanel));
     } catch (err) {
-      setToast('Error adding visualization to this panel', 'danger');
+      setToast('Error adding visualization to this Dashboard', 'danger');
       console.error(err?.body?.message || err);
     }
   };
@@ -526,7 +526,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       title: 'Panel actions',
       items: [
         {
-          name: 'Reload panel',
+          name: 'Reload Dashboard',
           'data-test-subj': 'reloadPanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -534,7 +534,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Rename panel',
+          name: 'Rename Dashboard',
           'data-test-subj': 'renamePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -542,7 +542,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Duplicate panel',
+          name: 'Duplicate Dashboard',
           'data-test-subj': 'duplicatePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -550,7 +550,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Delete panel',
+          name: 'Delete Dashboard',
           'data-test-subj': 'deletePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);

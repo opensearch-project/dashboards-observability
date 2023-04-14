@@ -82,13 +82,13 @@ export class ObservabilityPlugin
     setupDeps.dashboard.registerDashboardProvider({
       appId: 'observability-panel',
       savedObjectsType: 'observability-panel',
-      savedObjectsName: 'Observability Panel',
+      savedObjectsName: 'Observability Dashboard',
       editUrlPathFn: (obj: SavedObject) =>
         `/app/observability-dashboards#/operational_panels/${obj.id}/edit`,
       viewUrlPathFn: (obj: SavedObject) =>
         `/app/observability-dashboards#/operational_panels/${obj.id}`,
-      createLinkText: 'Observability Panel',
-      createSortText: 'Observability Panel',
+      createLinkText: 'Observability Dashboard',
+      createSortText: 'Observability Dashboard',
       createUrl: '/app/observability-dashboards#/operational_panels/create',
     });
 
