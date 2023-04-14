@@ -110,8 +110,8 @@ describe.only('Testing panels table', () => {
     expectUuid(duplicate)
   });
 
-  it.only('Duplicates a legacy panel', () => {
-    createLegacyPanel()
+  it.only('Duplicates a saved object panel', () => {
+    createSavedObjectPanel()
     selectThePanel();
     openActionsDropdown();
     cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
@@ -516,13 +516,13 @@ describe('Clean up all test data', () => {
 
 
 const moveToEventsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-events#/`);
   cy.wait(delay * 3);
 };
 
 const moveToPanelHome = () => {
   cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/operational_panels/`
+    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
     , { timeout: 3000 });
   cy.wait(delay * 3);
 };

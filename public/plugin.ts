@@ -14,6 +14,7 @@ import {
   Plugin,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
+
 import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
@@ -77,7 +78,7 @@ import {
 
 export class ObservabilityPlugin
   implements
-  Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+    Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
@@ -101,7 +102,6 @@ export class ObservabilityPlugin
     if (window.location.pathname.includes('trace-analytics-dashboards')) {
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
-
 
     // // redirect legacy notebooks URL to current URL under observability
     // if (window.location.pathname.includes('application_analytics')) {
@@ -132,7 +132,7 @@ export class ObservabilityPlugin
     });
 
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
-      console.log("start page: ", startPage);
+      console.log('start page: ', startPage);
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);

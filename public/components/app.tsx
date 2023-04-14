@@ -69,34 +69,34 @@ export const App = ({
     href: '#/operational_panels/',
   };
 
-  const ModuleComponent = pages[startPage]
+  const ModuleComponent = pages[startPage];
 
   return (
     <Provider store={store}>
       <I18nProvider>
         <MetricsListener http={http}>
-
           <ModuleComponent
             http={http}
+            chrome={chrome}
             notifications={notifications}
             CoreStartProp={CoreStartProp}
             DepsStart={DepsStart}
             DashboardContainerByValueRenderer={
               DepsStart.dashboard.DashboardContainerByValueRenderer
             }
-
             pplService={pplService}
             dslService={dslService}
             savedObjects={savedObjects}
             timestampUtils={timestampUtils}
             queryManager={queryManager}
             parentBreadcrumb={parentBreadcrumb}
+            parentBreadcrumbs={[parentBreadcrumb]}
             setBreadcrumbs={chrome.setBreadcrumbs}
           />
         </MetricsListener>
       </I18nProvider>
     </Provider>
-  )
+  );
 };
 
 // // redirect legacy notebooks URL to current URL under observability

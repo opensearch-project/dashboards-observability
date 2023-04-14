@@ -6,12 +6,13 @@
 import { EuiBreadcrumb, EuiGlobalToastList, EuiLink, ShortDate } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
-import React, { ReactChild, useState } from 'react';
+import React, { ReactChild, useEffect, useState } from 'react';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext } from 'react-router';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { concat, from, Observable, of } from 'rxjs';
+import { useDispatch } from 'react-redux';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
@@ -40,7 +41,6 @@ import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
 import { CustomPanelType } from '../../../common/types/custom_panels';
 import { fetchPanels } from './redux/panel_slice';
-import { useDispatch } from 'react-redux';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -52,13 +52,15 @@ import { useDispatch } from 'react-redux';
  * chrome: chrome core service;
  * parentBreadcrumb: parent breadcrumb name and link
  * pplService: ppl requestor service
- * renderProps: Props from router
+ * renderProps: Props from router of parent component
+ *            - Used to calculate path when this component embedded into another (WHY?!)
  */
 
 interface PanelHomeProps {
   http: CoreStart['http'];
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
+  setBreadcrumbs: (newBreadcrumbs: EuiBreadcrumb[]) => void;
   pplService: PPLService;
   dslService: DSLService;
   renderProps: RouteComponentProps<any, StaticContext, any>;
@@ -73,6 +75,7 @@ export const Home = ({
   dslService,
   renderProps,
   coreSavedObjects,
+  setBreadcrumbs,
 }: PanelHomeProps) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [loading, setLoading] = useState(false);
@@ -80,7 +83,15 @@ export const Home = ({
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+
+  const customPanelBreadCrumbs = [
+    ...parentBreadcrumbs,
+    {
+      text: 'Dashboards',
+      href: `${_.last(parentBreadcrumbs)!.href}`,
+    },
+  ];
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -138,7 +149,6 @@ export const Home = ({
 
   const isUuid = (id) => !!id.match(uuidRx);
 
-
   const fetchSavedObjectPanel = async (id: string) => {
     const soPanel = await coreRefs.savedObjectsClient?.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
     return savedObjectToCustomPanel(soPanel);
@@ -167,19 +177,15 @@ export const Home = ({
 
     try {
       // const panelToClone = await fetchPanelfn(clonedCustomPanelId)
-
       // const newPanel: PanelType = {
       //   ...panelToClone,
       //   title: clonedCustomPanelName,
       //   dateCreated: new Date().getTime(),
       //   dateModified: new Date().getTime()
       // }
-
       // const clonedPanel: CustomPanelType = await coreRefs.savedObjectsClient!.create(
       //   CUSTOM_PANELS_SAVED_OBJECT_TYPE, newPanel, { id: panelToClone.id }
       // )
-
-
       // setcustomPanelData((prevCustomPanelData) => {
       //   const newPanelData = [
       //     ...prevCustomPanelData,
@@ -301,7 +307,7 @@ export const Home = ({
           }),
         })
         .then((res) => {
-          dispatch(fetchPanels())
+          dispatch(fetchPanels());
           // setcustomPanelData([...customPanelData, ...res.demoPanelsData]);
         });
       setToast(`Sample panels successfully added.`);
@@ -313,8 +319,10 @@ export const Home = ({
     }
   };
 
+  const parentPath = renderProps ? renderProps.match.path : '';
+
   return (
-    <div>
+    <HashRouter>
       <EuiGlobalToastList
         toasts={toasts}
         dismissToast={(removedToast) => {
@@ -326,25 +334,23 @@ export const Home = ({
       <Switch>
         <Route
           exact
-          path={['/operational_panels/create', '/operational_panels']}
+          path={['/create', '/']}
           render={(props) => {
             return (
-              <ObservabilitySideBar>
-                <CustomPanelTable
-                  loading={loading}
-                  createCustomPanel={createCustomPanel}
-                  setBreadcrumbs={chrome.setBreadcrumbs}
-                  parentBreadcrumbs={parentBreadcrumbs}
-                  cloneCustomPanel={cloneCustomPanel}
-                  deleteCustomPanelList={deleteCustomPanelList}
-                  addSamplePanels={addSamplePanels}
-                />
-              </ObservabilitySideBar>
+              <CustomPanelTable
+                loading={loading}
+                createCustomPanel={createCustomPanel}
+                setBreadcrumbs={chrome.setBreadcrumbs}
+                parentBreadcrumbs={customPanelBreadCrumbs}
+                cloneCustomPanel={cloneCustomPanel}
+                deleteCustomPanelList={deleteCustomPanelList}
+                addSamplePanels={addSamplePanels}
+              />
             );
           }}
         />
         <Route
-          path={`${renderProps.match.path}/:id`}
+          path={`${parentPath}/:id`}
           render={(props) => {
             const isSavedObject = !!props.match.params.id.match(uuidRx);
 
@@ -352,7 +358,7 @@ export const Home = ({
               <CustomPanelViewSO
                 panelId={props.match.params.id}
                 chrome={chrome}
-                parentBreadcrumbs={parentBreadcrumbs}
+                parentBreadcrumbs={customPanelBreadCrumbs}
                 cloneCustomPanel={cloneCustomPanel}
                 deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
@@ -367,7 +373,7 @@ export const Home = ({
                 pplService={pplService}
                 dslService={dslService}
                 chrome={chrome}
-                parentBreadcrumbs={parentBreadcrumbs}
+                parentBreadcrumbs={customPanelBreadCrumbs}
                 // renameCustomPanel={renameCustomPanel}
                 cloneCustomPanel={cloneCustomPanel}
                 deleteCustomPanel={deleteCustomPanel}
@@ -384,6 +390,6 @@ export const Home = ({
           }}
         />
       </Switch>
-    </div>
+    </HashRouter>
   );
 };
