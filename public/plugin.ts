@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './index.scss';
+
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import {
@@ -20,6 +22,16 @@ import {
 } from '../common/utils';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
+// import { uiSettingsService } from '../common/utils';
+// import { QueryManager } from '../common/query_manager';
+import { DashboardSetup } from '../../../src/plugins/dashboard/public';
+import { SavedObject } from '../../../src/core/public';
+import { coreRefs } from './framework/core_refs';
+
+// export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
+//   constructor(private initializerContext: PluginInitializerContext) {}
+
+//   public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -47,6 +59,7 @@ export class ObservabilityPlugin
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
   ): ObservabilitySetup {
+    console.log('core: ', core, ', setupDeps: ', setupDeps);
     uiSettingsService.init(core.uiSettings, core.notifications);
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
@@ -65,6 +78,19 @@ export class ObservabilityPlugin
     if (window.location.pathname.includes('trace-analytics-dashboards')) {
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
+
+    setupDeps.dashboard.registerDashboardProvider({
+      appId: 'observability-panel',
+      savedObjectsType: 'observability-panel',
+      savedObjectsName: 'Observability Panel',
+      editUrlPathFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}/edit`,
+      viewUrlPathFn: (obj: SavedObject) =>
+        `/app/observability-dashboards#/operational_panels/${obj.id}`,
+      createLinkText: 'Observability Panel',
+      createSortText: 'Observability Panel',
+      createUrl: '/app/observability-dashboards#/operational_panels/create',
+    });
 
     core.application.register({
       id: observabilityID,
@@ -132,6 +158,12 @@ export class ObservabilityPlugin
     return {};
   }
   public start(core: CoreStart): ObservabilityStart {
+    const pplService: PPLService = new PPLService(core.http);
+
+    coreRefs.http = core.http;
+    coreRefs.savedObjectsClient = core.savedObjects.client;
+    coreRefs.pplService = pplService;
+
     return {};
   }
   public stop() {}

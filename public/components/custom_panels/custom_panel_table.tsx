@@ -32,6 +32,9 @@ import {
 import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
+import { useHistory, useLocation } from 'react-router-dom';
+import { coreRefs } from 'public/framework/core_refs';
+import { useDispatch, useSelector } from 'react-redux';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import {
   CREATE_PANEL_MESSAGE,
@@ -43,7 +46,7 @@ import { CustomPanelListType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import { useHistory, useLocation } from 'react-router-dom';
+import { createPanel, fetchPanels, renameCustomPanel, selectPanelList } from './redux/panel_slice';
 
 /*
  * "CustomPanelTable" module, used to view all the saved panels
@@ -62,12 +65,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 
 interface Props {
   loading: boolean;
-  fetchCustomPanels: () => void;
-  customPanels: CustomPanelListType[];
   createCustomPanel: (newCustomPanelName: string) => void;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   parentBreadcrumbs: EuiBreadcrumb[];
-  renameCustomPanel: (newCustomPanelName: string, customPanelId: string) => void;
   cloneCustomPanel: (newCustomPanelName: string, customPanelId: string) => void;
   deleteCustomPanelList: (customPanelIdList: string[], toastMessage: string) => any;
   addSamplePanels: () => void;
@@ -75,16 +75,14 @@ interface Props {
 
 export const CustomPanelTable = ({
   loading,
-  fetchCustomPanels,
-  customPanels,
   createCustomPanel,
   setBreadcrumbs,
   parentBreadcrumbs,
-  renameCustomPanel,
   cloneCustomPanel,
   deleteCustomPanelList,
   addSamplePanels,
 }: Props) => {
+  const customPanels = useSelector(selectPanelList);
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -93,15 +91,21 @@ export const CustomPanelTable = ({
   const location = useLocation();
   const history = useHistory();
 
-  useEffect(() => {
-    setBreadcrumbs(parentBreadcrumbs);
-    fetchCustomPanels();
-  }, []);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const url = window.location.hash.split('/')
-    if (url[url.length-1] === 'create') { 
-      createPanel();
+    setBreadcrumbs(parentBreadcrumbs);
+    dispatch(fetchPanels());
+  }, []);
+
+  // useEffect(() =>
+  //   console.log({ customPanels, selectedCustomPanels }, [customPanels, selectedCustomPanels])
+  // );
+
+  useEffect(() => {
+    const url = window.location.hash.split('/');
+    if (url[url.length - 1] === 'create') {
+      createPanelModal();
     }
   }, [location]);
 
@@ -119,30 +123,36 @@ export const CustomPanelTable = ({
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id);
+    dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
     closeModal();
   };
 
   const onClone = async (newName: string) => {
-    cloneCustomPanel(newName, selectedCustomPanels[0].id);
+    const sourcePanel = selectedCustomPanels[0];
+    console.log('onClone', { sourcePanel });
+    if (sourcePanel.savedObject) {
+      dispatch(createPanel({ ...sourcePanel, name: sourcePanel.name + ' (copy)', id: undefined }));
+    } else {
+      cloneCustomPanel(newName, selectedCustomPanels[0].id);
+    }
     closeModal();
   };
 
   const onDelete = async () => {
     const toastMessage = `Custom Panels ${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].name
+      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
     } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
     closeModal();
   };
 
-  const createPanel = () => {
+  const createPanelModal = () => {
     setModalLayout(
       getCustomModal(
         onCreate,
         () => {
-          closeModal()
+          closeModal();
           history.goBack();
         },
         'Name',
@@ -222,7 +232,7 @@ export const CustomPanelTable = ({
     </EuiButton>
   );
 
-  const popoverItems: ReactElement[] = [
+  const popoverItems = (): ReactElement[] => [
     <EuiContextMenuItem
       key="rename"
       data-test-subj="renameContextMenuItem"
@@ -270,7 +280,7 @@ export const CustomPanelTable = ({
 
   const tableColumns = [
     {
-      field: 'name',
+      field: 'title',
       name: 'Name',
       sortable: true,
       truncateText: true,
@@ -294,6 +304,7 @@ export const CustomPanelTable = ({
     },
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
+  // console.log('rendering', { customPanels, selectedCustomPanels });
   return (
     <div style={pageStyles}>
       <EuiPage>
@@ -332,13 +343,13 @@ export const CustomPanelTable = ({
                       isOpen={isActionsPopoverOpen}
                       closePopover={() => setIsActionsPopoverOpen(false)}
                     >
-                      <EuiContextMenuPanel items={popoverItems} />
+                      <EuiContextMenuPanel items={popoverItems()} />
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiButton
                       fill
-                      href="#/operational_panels/create"                      
+                      href="#/operational_panels/create"
                       data-test-subj="customPanels__createNewPanels"
                     >
                       Create panel
@@ -363,7 +374,7 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                          customPanel.name.toLowerCase().includes(searchQuery.toLowerCase())
+                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
                         )
                       : customPanels
                   }

@@ -14,6 +14,7 @@ import { explorerVisualizationReducer } from '../../../components/event_analytic
 import { explorerVisualizationConfigReducer } from '../../../components/event_analytics/redux/slices/viualization_config_slice';
 import { patternsReducer } from '../../../components/event_analytics/redux/slices/patterns_slice';
 import { metricsReducers } from '../../../components/metrics/redux/slices/metrics_slice';
+import { panelReducer } from '../../../components/custom_panels/redux/panel_slice';
 
 const combinedReducer = combineReducers({
   // explorer reducers
@@ -26,6 +27,7 @@ const combinedReducer = combineReducers({
   explorerVisualizationConfig: explorerVisualizationConfigReducer,
   patterns: patternsReducer,
   metrics: metricsReducers,
+  customPanel: panelReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
