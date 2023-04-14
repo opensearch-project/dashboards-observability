@@ -321,7 +321,7 @@ export const CustomPanelTable = ({
                 <EuiTitle size="s">
                   <h3>
                     Panels
-                    <span className="panel-header-count"> ({0 /* customPanels.length */})</span>
+                    <span className="panel-header-count"> ({customPanels.length})</span>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />

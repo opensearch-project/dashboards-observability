@@ -48,9 +48,9 @@ import PPLService from '../../services/requests/ppl';
 import {
   isDateValid,
   convertDateTime,
-  onTimeChange,
   isPPLFilterValid,
   fetchVisualizationById,
+  prependRecentlyUsedRange,
 } from './helpers/utils';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
@@ -65,6 +65,8 @@ import {
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectPanel, updatePanel } from './redux/panel_slice';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -142,6 +144,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     onEditClick,
     onAddClick,
   } = props;
+
+  const dispatch = useDispatch();
+  const panel = useSelector(selectPanel);
+  
   const [openPanelName, setOpenPanelName] = useState('');
   const [panelCreatedTime, setPanelCreatedTime] = useState('');
   const [pplFilterValue, setPPLFilterValue] = useState('');
@@ -208,14 +214,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    onTimeChange(
-      timeProps.start,
-      timeProps.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
-    );
+    const updatedRanges = prependRecentlyUsedRange(timeProps.start, timeProps.end, recentlyUsedRanges);
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }))
+
+    setRecentlyUsedRanges(updatedRanges.slice(0, 9))
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
@@ -637,8 +639,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
-                  start={startTime}
-                  end={endTime}
+                  start={panel.timeRange.from}
+                  end={panel.timeRange.to}
                   onTimeChange={onDatePickerChange}
                   recentlyUsedRanges={recentlyUsedRanges}
                   isDisabled={dateDisabled}

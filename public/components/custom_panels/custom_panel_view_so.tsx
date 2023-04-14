@@ -43,10 +43,6 @@ import {
 } from '../../../common/constants/custom_panels';
 import {
   CustomPanelType,
-  PanelType,
-  SavedVisualizationType,
-  VisualizationType,
-  VizContainerError,
 } from '../../../common/types/custom_panels';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 
@@ -55,9 +51,7 @@ import PPLService from '../../services/requests/ppl';
 import {
   isDateValid,
   convertDateTime,
-  onTimeChange,
   isPPLFilterValid,
-  fetchVisualizationById,
   isNameValid,
   prependRecentlyUsedRange,
 } from './helpers/utils';
