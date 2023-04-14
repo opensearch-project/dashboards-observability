@@ -132,6 +132,49 @@ export function PanelsRouter(router: IRouter) {
     }
   );
 
+
+  // update an existing panel
+  router.post(
+    {
+      path: `${API_PREFIX}/panels/update`,
+      validate: {
+        body: schema.object({
+          panelId: schema.string(),
+          panel: schema.any(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
+
+      try {
+        const responseBody = await customPanelBackend.updatePanel(
+          opensearchNotebooksClient,
+          request.body.panelId,
+          request.body.panel
+        );
+        return response.ok({
+          body: {
+            message: 'Panel Updated',
+          },
+        });
+      } catch (error: any) {
+        console.error('Issue in updating panel', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+
   // rename an existing panel
   router.post(
     {
