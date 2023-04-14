@@ -15,6 +15,7 @@ import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
+import { useEffect } from 'react';
 
 export const LogExplorerRouterContext = createContext<{
   routerProps: RouteComponentProps;
@@ -31,6 +32,7 @@ export const EventAnalytics = ({
   http,
   notifications,
   queryManager,
+  setBreadcrumbs,
   ...props
 }: EventAnalyticsProps) => {
   const history = useHistory();
@@ -38,7 +40,7 @@ export const EventAnalytics = ({
 
   const eventAnalyticsBreadcrumb = {
     text: 'Event analytics',
-    href: '#/event_analytics',
+    href: '#/',
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
@@ -58,6 +60,16 @@ export const EventAnalytics = ({
     return emptyTabId;
   };
 
+  // useEffect(() => {
+  //   chrome.setBreadcrumbs([
+  //     ...parentBreadcrumbs,
+  //     {
+  //       text: 'Explorer',
+  //       href: `#/`,
+  //     },
+  //   ]);
+  // }, []);
+
   return (
     <>
       <EuiGlobalToastList
@@ -70,16 +82,22 @@ export const EventAnalytics = ({
       <HashRouter>
         <Switch>
           <Route
-            path={[`/event_analytics/explorer/:id`, `/event_analytics/explorer`]}
+            path={[`/:id`]}
             render={(routerProps) => {
-              chrome.setBreadcrumbs([
-                ...parentBreadcrumbs,
-                eventAnalyticsBreadcrumb,
-                {
-                  text: 'Explorer',
-                  href: `#/event_analytics/explorer`,
-                },
-              ]);
+                // setBreadcrumbs([
+                //   parentBreadcrumbs,
+                //   {
+                //     text: 'Notebooks',
+                //     href: '#/',
+                //   },
+                // ]);
+              // setBreadcrumbs([
+              //   parentBreadcrumbs,
+              //   {
+              //     text: 'Explorer',
+              //     href: '#/',
+              //   },
+              // ]);
               return (
                 <LogExplorerRouterContext.Provider
                   value={{
@@ -106,16 +124,23 @@ export const EventAnalytics = ({
           />
           <Route
             exact
-            path={['/', '/event_analytics']}
+            path={[`/`]}
             render={() => {
-              chrome.setBreadcrumbs([
-                ...parentBreadcrumbs,
-                eventAnalyticsBreadcrumb,
-                {
-                  text: 'Home',
-                  href: '#/event_analytics',
-                },
-              ]);
+              // chrome.setBreadcrumbs([
+              //   ...parentBreadcrumbs,
+              //   eventAnalyticsBreadcrumb,
+              //   {
+              //     text: 'Home',
+              //     href: '#/',
+              //   },
+              // ]);
+              // setBreadcrumbs([
+              //   parentBreadcrumbs,
+              //   {
+              //     text: 'Home',
+              //     href: '#/',
+              //   },
+              // ]);
               return (
                 <EventExplorerHome
                   http={http}

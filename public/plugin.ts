@@ -102,6 +102,7 @@ export class ObservabilityPlugin
     });
 
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
+      console.log("start page: ", startPage);
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const pplService = new PPLService(coreStart.http);

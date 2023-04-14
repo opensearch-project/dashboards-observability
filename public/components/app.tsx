@@ -30,7 +30,7 @@ interface ObservabilityAppDeps {
   timestampUtils: any;
   queryManager: QueryManager;
   startPage: string;
-  mountParams: AppMountParameters;
+  // mountParams: AppMountParameters;
 }
 
 // for cypress to test redux store
@@ -52,7 +52,7 @@ export const App = ({
   savedObjects,
   timestampUtils,
   queryManager,
-  mountParams,
+  // mountParams,
   startPage,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications } = CoreStartProp;
