@@ -171,3 +171,5 @@ export const EventAnalytics = ({
     </>
   );
 };
+
+export default EventAnalytics;

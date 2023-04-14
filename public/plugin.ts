@@ -14,7 +14,6 @@ import {
   Plugin,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
-
 import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
@@ -78,7 +77,7 @@ import {
 
 export class ObservabilityPlugin
   implements
-    Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+  Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
@@ -102,6 +101,12 @@ export class ObservabilityPlugin
     if (window.location.pathname.includes('trace-analytics-dashboards')) {
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
+
+
+    // // redirect legacy notebooks URL to current URL under observability
+    // if (window.location.pathname.includes('application_analytics')) {
+    //   window.location.assign(convertLegacyAppAnalyticsUrl(window.location));
+    // }
 
     setupDeps.dashboard.registerDashboardProvider({
       appId: 'observability-panel',
@@ -193,34 +198,6 @@ export class ObservabilityPlugin
       order: observabilityPanelsPluginOrder,
       mount: appMountWithStartPage('dashboards'),
     });
-
-    // core.application.register({
-    //   id: observabilityID,
-    //   title: observabilityTitle,
-    //   category: {
-    //     id: 'opensearch',
-    //     label: 'OpenSearch Plugins',
-    //     order: 2000,
-    //   },
-    //   order: observabilityPluginOrder,
-    //   async mount(params: AppMountParameters) {
-    //     const { Observability } = await import('./components/index');
-    //     const [coreStart, depsStart] = await core.getStartServices();
-    //     const dslService = new DSLService(coreStart.http);
-    //     const savedObjects = new SavedObjects(coreStart.http);
-    //     const timestampUtils = new TimestampUtils(dslService, pplService);
-    //     return Observability(
-    //       coreStart,
-    //       depsStart,
-    //       params,
-    //       pplService,
-    //       dslService,
-    //       savedObjects,
-    //       timestampUtils,
-    //       qm
-    //     );
-    //   },
-    // });
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
