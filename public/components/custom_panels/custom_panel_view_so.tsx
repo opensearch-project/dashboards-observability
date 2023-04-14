@@ -5,6 +5,7 @@
 /* // eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import { useCallback } from 'react';
 import {
   EuiBreadcrumb,
   EuiButton,
@@ -298,11 +299,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     setIsEditing(true);
   };
 
-  const applyEdits = () => {
-    console.log('applyEdits', panel);
+  const applyEdits = useCallback(() => {
     dispatch(updatePanel(panel));
     setIsEditing(false);
-  };
+  }, [panel]);
 
   const cancelEdit = () => {
     console.log('cancelEdits');
