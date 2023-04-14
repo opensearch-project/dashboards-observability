@@ -212,16 +212,16 @@ export class ObservabilityPlugin
       title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
       description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
       icon: OBSERVABILITY_EMBEDDABLE_ICON,
-      aliasApp: observabilityID,
-      aliasPath: `#/event_analytics/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
+      aliasApp: observabilityLogsID,
+      aliasPath: `#/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
       stage: 'production',
       appExtensions: {
         visualizations: {
           docTypes: [VISUALIZATION_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
-            editApp: observabilityID,
-            editUrl: `#/event_analytics/explorer/${id}`,
+            editApp: observabilityLogsID,
+            editUrl: `#/explorer/${id}`,
             icon: OBSERVABILITY_EMBEDDABLE_ICON,
             id,
             savedObjectType: VISUALIZATION_SAVED_OBJECT,

@@ -16,7 +16,6 @@ import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
-import { useEffect } from 'react';
 
 export const LogExplorerRouterContext = createContext<{
   routerProps: RouteComponentProps;
@@ -63,7 +62,7 @@ export const EventAnalytics = ({
 
   useEffect(() => {
     setBreadcrumbs([
-        ...parentBreadcrumbs,
+      ...parentBreadcrumbs,
       {
         text: 'Logs',
         href: `#/`,
