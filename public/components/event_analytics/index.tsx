@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import '../../variables.scss';
+
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
@@ -133,3 +135,5 @@ export const EventAnalytics = ({
     </>
   );
 };
+
+export default EventAnalytics;
