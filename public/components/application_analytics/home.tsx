@@ -5,7 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { ReactChild, useEffect, useState } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
@@ -21,7 +21,7 @@ import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_an
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
 import { ObservabilitySideBar } from '../common/side_nav';
-import { NotificationsStart } from '../../../../../src/core/public';
+import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { APP_ANALYTICS_API_PREFIX } from '../../../common/constants/application_analytics';
 import {
   ApplicationRequestType,
@@ -153,7 +153,7 @@ export const Home = (props: HomeProps) => {
   };
 
   const moveToApp = (id: string, type: string) => {
-    window.location.assign(`${last(parentBreadcrumbs)!.href}application_analytics/${id}`);
+    window.location.assign(`${last(parentBreadcrumbs)!.href}/${id}`);
     if (type === 'createSetAvailability') {
       setTriggerSwitchToEvent(2);
     }
@@ -388,60 +388,62 @@ export const Home = (props: HomeProps) => {
         }}
         toastLifeTimeMs={6000}
       />
-      <Switch>
-        <Route
-          exact
-          path={['/', '/application_analytics']}
-          render={() => (
-            <AppTable
-              loading={false}
-              applications={applicationList}
-              fetchApplications={fetchApps}
-              renameApplication={renameApp}
-              deleteApplication={deleteApp}
-              clearStorage={clearStorage}
-              moveToApp={moveToApp}
-              {...commonProps}
-            />
-          )}
-        />
-        <Route
-          exact
-          path={['/application_analytics/create', '/application_analytics/edit/:id+']}
-          render={(routerProps) => (
-            <CreateApp
-              dslService={dslService}
-              pplService={pplService}
-              createApp={createApp}
-              updateApp={updateApp}
-              setToasts={setToast}
-              clearStorage={clearStorage}
-              existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
-              {...commonProps}
-            />
-          )}
-        />
-        <Route
-          exact
-          path={'/application_analytics/:id+'}
-          render={(routerProps) => (
-            <Application
-              disabled={false}
-              appId={decodeURIComponent(routerProps.match.params.id)}
-              pplService={pplService}
-              dslService={dslService}
-              savedObjects={savedObjects}
-              timestampUtils={timestampUtils}
-              notifications={notifications}
-              setToasts={setToast}
-              updateApp={updateApp}
-              callback={callback}
-              queryManager={queryManager}
-              {...commonProps}
-            />
-          )}
-        />
-      </Switch>
+      <HashRouter>
+        <Switch>
+          <Route
+            exact
+            path={'/'}
+            render={() => (
+              <AppTable
+                loading={false}
+                applications={applicationList}
+                fetchApplications={fetchApps}
+                renameApplication={renameApp}
+                deleteApplication={deleteApp}
+                clearStorage={clearStorage}
+                moveToApp={moveToApp}
+                {...commonProps}
+              />
+            )}
+          />
+          <Route
+            exact
+            path={['/create', '/edit/:id+']}
+            render={(routerProps) => (
+              <CreateApp
+                dslService={dslService}
+                pplService={pplService}
+                createApp={createApp}
+                updateApp={updateApp}
+                setToasts={setToast}
+                clearStorage={clearStorage}
+                existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
+                {...commonProps}
+              />
+            )}
+          />
+          <Route
+            exact
+            path={'/:id+'}
+            render={(routerProps) => (
+              <Application
+                disabled={false}
+                appId={decodeURIComponent(routerProps.match.params.id)}
+                pplService={pplService}
+                dslService={dslService}
+                savedObjects={savedObjects}
+                timestampUtils={timestampUtils}
+                notifications={notifications}
+                setToasts={setToast}
+                updateApp={updateApp}
+                callback={callback}
+                queryManager={queryManager}
+                {...commonProps}
+              />
+            )}
+          />
+        </Switch>
+      </HashRouter>
     </div>
   );
 };
