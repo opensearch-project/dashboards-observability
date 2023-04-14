@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
@@ -95,7 +94,7 @@ export class Main extends React.Component<MainProps, MainState> {
   createNotebook = (newNoteName: string) => {
     if (newNoteName.length >= 50 || newNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
-      window.location.assign('#/notebooks');
+      window.location.assign('#/');
       return;
     }
     const newNoteObject = {
@@ -108,7 +107,7 @@ export class Main extends React.Component<MainProps, MainState> {
       })
       .then(async (res) => {
         this.setToast(`Notebook "${newNoteName}" successfully created!`);
-        window.location.assign(`#/notebooks/${res}`);
+        window.location.assign(`#/${res}`);
       })
       .catch((err) => {
         this.setToast(
@@ -310,28 +309,26 @@ export class Main extends React.Component<MainProps, MainState> {
           <Switch>
             <Route
               exact
-              path={['/notebooks/create', '/notebooks']}
+              path={['/create', '/']}
               render={(props) => (
-                <ObservabilitySideBar>
-                  <NoteTable
-                    loading={this.state.loading}
-                    fetchNotebooks={this.fetchNotebooks}
-                    addSampleNotebooks={this.addSampleNotebooks}
-                    notebooks={this.state.data}
-                    createNotebook={this.createNotebook}
-                    renameNotebook={this.renameNotebook}
-                    cloneNotebook={this.cloneNotebook}
-                    deleteNotebook={this.deleteNotebook}
-                    parentBreadcrumb={this.props.parentBreadcrumb}
-                    setBreadcrumbs={this.props.setBreadcrumbs}
-                    setToast={this.setToast}
-                  />
-                </ObservabilitySideBar>
+                <NoteTable
+                  loading={this.state.loading}
+                  fetchNotebooks={this.fetchNotebooks}
+                  addSampleNotebooks={this.addSampleNotebooks}
+                  notebooks={this.state.data}
+                  createNotebook={this.createNotebook}
+                  renameNotebook={this.renameNotebook}
+                  cloneNotebook={this.cloneNotebook}
+                  deleteNotebook={this.deleteNotebook}
+                  parentBreadcrumb={this.props.parentBreadcrumb}
+                  setBreadcrumbs={this.props.setBreadcrumbs}
+                  setToast={this.setToast}
+                />
               )}
             />
             <Route
               exact
-              path="/notebooks/:id"
+              path="/:id"
               render={(props) => (
                 <Notebook
                   pplService={this.props.pplService}
@@ -344,8 +341,8 @@ export class Main extends React.Component<MainProps, MainState> {
                   cloneNotebook={this.cloneNotebook}
                   deleteNotebook={this.deleteNotebook}
                   setToast={this.setToast}
-                  location={this.props.location}
-                  history={this.props.history}
+                  location={props.location}
+                  history={props.history}
                 />
               )}
             />

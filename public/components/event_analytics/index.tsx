@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import '../../variables.scss';
+
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
 import { isEmpty } from 'lodash';
 import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch, useHistory } from 'react-router-dom';
+import { useEffect } from 'react';
 import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { LogExplorer } from './explorer/log_explorer';
@@ -29,6 +32,7 @@ export const EventAnalytics = ({
   http,
   notifications,
   queryManager,
+  setBreadcrumbs,
   ...props
 }: EventAnalyticsProps) => {
   const history = useHistory();
@@ -36,7 +40,7 @@ export const EventAnalytics = ({
 
   const eventAnalyticsBreadcrumb = {
     text: 'Event analytics',
-    href: '#/event_analytics',
+    href: '#/',
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
@@ -56,6 +60,16 @@ export const EventAnalytics = ({
     return emptyTabId;
   };
 
+  useEffect(() => {
+    setBreadcrumbs([
+      ...parentBreadcrumbs,
+      {
+        text: 'Logs',
+        href: `#/`,
+      },
+    ]);
+  }, [setBreadcrumbs, parentBreadcrumbs]);
+
   return (
     <>
       <EuiGlobalToastList
@@ -68,7 +82,7 @@ export const EventAnalytics = ({
       <HashRouter>
         <Switch>
           <Route
-            path={[`/event_analytics/explorer/:id`, `/event_analytics/explorer`]}
+            path={[`/:id`]}
             render={(routerProps) => {
               chrome.setBreadcrumbs([
                 ...parentBreadcrumbs,
@@ -104,27 +118,32 @@ export const EventAnalytics = ({
           />
           <Route
             exact
-            path={['/', '/event_analytics']}
+            path={[`/`]}
             render={() => {
-              chrome.setBreadcrumbs([
-                ...parentBreadcrumbs,
-                eventAnalyticsBreadcrumb,
-                {
-                  text: 'Home',
-                  href: '#/event_analytics',
-                },
-              ]);
+              // chrome.setBreadcrumbs([
+              //   ...parentBreadcrumbs,
+              //   eventAnalyticsBreadcrumb,
+              //   {
+              //     text: 'Home',
+              //     href: '#/',
+              //   },
+              // ]);
+              // setBreadcrumbs([
+              //   parentBreadcrumbs,
+              //   {
+              //     text: 'Home',
+              //     href: '#/',
+              //   },
+              // ]);
               return (
-                <ObservabilitySideBar>
-                  <EventExplorerHome
-                    http={http}
-                    savedObjects={savedObjects}
-                    dslService={dslService}
-                    pplService={pplService}
-                    setToast={setToast}
-                    getExistingEmptyTab={getExistingEmptyTab}
-                  />
-                </ObservabilitySideBar>
+                <EventExplorerHome
+                  http={http}
+                  savedObjects={savedObjects}
+                  dslService={dslService}
+                  pplService={pplService}
+                  setToast={setToast}
+                  getExistingEmptyTab={getExistingEmptyTab}
+                />
               );
             }}
           />
@@ -133,3 +152,5 @@ export const EventAnalytics = ({
     </>
   );
 };
+
+export default EventAnalytics;

@@ -74,7 +74,7 @@ export function NoteTable(props: NoteTableProps) {
       props.parentBreadcrumb,
       {
         text: 'Notebooks',
-        href: '#/notebooks',
+        href: '#/',
       },
     ]);
     props.fetchNotebooks();
@@ -110,9 +110,8 @@ export function NoteTable(props: NoteTableProps) {
   };
 
   const onDelete = async () => {
-    const toastMessage = `Notebook${
-      selectedNotebooks.length > 1 ? 's' : ' "' + selectedNotebooks[0].path + '"'
-    } successfully deleted!`;
+    const toastMessage = `Notebook${selectedNotebooks.length > 1 ? 's' : ' "' + selectedNotebooks[0].path + '"'
+      } successfully deleted!`;
     await deleteNotebook(
       selectedNotebooks.map((note) => note.id),
       toastMessage
@@ -253,7 +252,7 @@ export function NoteTable(props: NoteTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink href={`#/notebooks/${record.id}`}>{_.truncate(value, { length: 100 })}</EuiLink>
+        <EuiLink href={`#/${record.id}`}>{_.truncate(value, { length: 100 })}</EuiLink>
       ),
     },
     {
@@ -319,7 +318,7 @@ export function NoteTable(props: NoteTableProps) {
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/notebooks/create">
+                    <EuiButton fill href="#/create">
                       Create notebook
                     </EuiButton>
                   </EuiFlexItem>
@@ -341,8 +340,8 @@ export function NoteTable(props: NoteTableProps) {
                   items={
                     searchQuery
                       ? notebooks.filter((notebook) =>
-                          notebook.path.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
+                        notebook.path.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
                       : notebooks
                   }
                   itemId="id"

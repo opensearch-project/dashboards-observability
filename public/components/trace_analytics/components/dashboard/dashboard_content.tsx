@@ -73,13 +73,17 @@ export function DashboardContent(props: DashboardProps) {
 
   useEffect(() => {
     if (showTimeoutToast === true && toasts.length === 0) {
-      setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.')
+      setToast!(
+        'Query took too long to execute.',
+        'danger',
+        'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.'
+      );
     }
     setShowTimeoutToast(false);
-  }, [showTimeoutToast])
+  }, [showTimeoutToast]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
+    // chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, page);
     setFilters([
       ...filters.map((filter) => ({
@@ -93,7 +97,7 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     let newFilteredService = '';
     for (const filter of filters) {
-      if (mode === 'data_prepper') { 
+      if (mode === 'data_prepper') {
         if (filter.field === 'serviceName') {
           newFilteredService = filter.value;
           break;
@@ -106,8 +110,22 @@ export function DashboardContent(props: DashboardProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
-  }, [filters, startTime, endTime, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
+    if (
+      !redirect &&
+      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+        (mode === 'jaeger' && jaegerIndicesExist))
+    )
+      refresh(newFilteredService);
+  }, [
+    filters,
+    startTime,
+    endTime,
+    appConfigs,
+    redirect,
+    mode,
+    dataPrepperIndicesExist,
+    jaegerIndicesExist,
+  ]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
@@ -154,12 +172,12 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         // () => {
-        //   if (toasts.length === 0) { 
+        //   if (toasts.length === 0) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
         setPercentileMap
-      ).finally(() => setLoading(false))
+      ).finally(() => setLoading(false));
       handleJaegerErrorDashboardRequest(
         http,
         DSL,
@@ -170,7 +188,7 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         // () => {
-        //   if (toasts.length === 0) { 
+        //   if (toasts.length === 0) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
@@ -295,7 +313,8 @@ export function DashboardContent(props: DashboardProps) {
         mode={mode}
       />
       <EuiSpacer size="m" />
-      {((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
+      {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
           {mode === 'data_prepper' ? (
             <>
@@ -359,7 +378,7 @@ export function DashboardContent(props: DashboardProps) {
           )}
         </div>
       ) : (
-        <MissingConfigurationMessage mode={mode}/>
+        <MissingConfigurationMessage mode={mode} />
       )}
     </>
   );

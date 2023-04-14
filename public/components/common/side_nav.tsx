@@ -24,7 +24,7 @@ export function ObservabilitySideBar(props: { children: React.ReactNode }) {
   // tries to find an item where href is a prefix of the hash
   // if none will try to find an item where the hash is a prefix of href
   function setIsSelected(
-    items: EuiSideNavItemType<React.ReactNode>[],
+    items: Array<EuiSideNavItemType<React.ReactNode>>,
     hash: string,
     initial = true,
     reverse = false
@@ -52,46 +52,21 @@ export function ObservabilitySideBar(props: { children: React.ReactNode }) {
       id: 0,
       items: [
         {
-          name: 'Application analytics',
-          id: 1,
-          href: '#/application_analytics',
-        },
-        {
           name: 'Trace analytics',
-          id: 2,
+          id: 1,
           href: '#/trace_analytics/home',
           items: [
             {
               name: 'Traces',
-              id: 2.1,
+              id: 1.1,
               href: '#/trace_analytics/traces',
             },
             {
               name: 'Services',
-              id: 2.2,
+              id: 1.2,
               href: '#/trace_analytics/services',
             },
           ],
-        },
-        {
-          name: 'Event analytics',
-          id: 3,
-          href: '#/event_analytics',
-        },
-        {
-          name: 'Metrics analytics',
-          id: 4,
-          href: '#/metrics_analytics/',
-        },
-        {
-          name: 'Operational panels',
-          id: 5,
-          href: '#/operational_panels/',
-        },
-        {
-          name: 'Notebooks',
-          id: 6,
-          href: '#/notebooks',
         },
       ],
     },
