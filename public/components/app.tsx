@@ -44,7 +44,7 @@ export const App = ({
   timestampUtils,
   queryManager,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications } = CoreStartProp;
+  const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
@@ -127,6 +127,8 @@ export const App = ({
                       pplService={pplService}
                       dslService={dslService}
                       renderProps={props}
+                      savedObjects={savedObjects}
+                      coreSavedObjects={coreSavedObjects}
                     />
                   );
                 }}
