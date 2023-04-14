@@ -11,11 +11,12 @@ import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
 import { isEmpty } from 'lodash';
 import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch, useHistory } from 'react-router-dom';
+import { useEffect } from 'react';
 import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
-import { useEffect } from 'react';
+import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
 
 export const LogExplorerRouterContext = createContext<{
   routerProps: RouteComponentProps;
@@ -69,6 +70,18 @@ export const EventAnalytics = ({
   //     },
   //   ]);
   // }, []);
+  useEffect(() => {
+    setBreadcrumbs([
+      {
+        text: observabilityTitle,
+        href: `${observabilityID}#/`,
+      },
+      {
+        text: 'Logs',
+        href: `#/`,
+      },
+    ]);
+  }, []);
 
   return (
     <>
@@ -84,13 +97,13 @@ export const EventAnalytics = ({
           <Route
             path={[`/:id`]}
             render={(routerProps) => {
-                // setBreadcrumbs([
-                //   parentBreadcrumbs,
-                //   {
-                //     text: 'Notebooks',
-                //     href: '#/',
-                //   },
-                // ]);
+              // setBreadcrumbs([
+              //   parentBreadcrumbs,
+              //   {
+              //     text: 'Notebooks',
+              //     href: '#/',
+              //   },
+              // ]);
               // setBreadcrumbs([
               //   parentBreadcrumbs,
               //   {
@@ -158,5 +171,3 @@ export const EventAnalytics = ({
     </>
   );
 };
-
-export default EventAnalytics;

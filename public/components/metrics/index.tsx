@@ -116,6 +116,16 @@ export const Home = ({
   };
 
   useEffect(() => {
+    chrome.setBreadcrumbs([
+      parentBreadcrumb,
+      {
+        text: 'Metrics',
+        href: `#/`,
+      },
+    ]);
+  }, []);
+
+  useEffect(() => {
     if (!editMode) {
       selectedMetrics.length > 0 ? setIsTopPanelDisabled(false) : setIsTopPanelDisabled(true); // eslint-disable-line
     } else {
