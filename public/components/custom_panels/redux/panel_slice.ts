@@ -1,5 +1,5 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
-import { async, concat, from, Observable, of } from 'rxjs';
+import { concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import {
   CUSTOM_PANELS_API_PREFIX,
@@ -87,16 +87,18 @@ const fetchCustomPanels = async () => {
   const panels$: Observable<CustomPanelListType> = concat(
     fetchSavedObjectPanels$(),
     fetchObservabilityPanels$()
-  ).pipe(map((res) => {
-    console.log("fetchCustomPanels", res);
-    return res as CustomPanelListType
-  }));
+  ).pipe(
+    map((res) => {
+      console.log('fetchCustomPanels', res);
+      return res as CustomPanelListType;
+    })
+  );
 
   return panels$.pipe(toArray()).toPromise();
 };
 
 export const fetchPanels = () => async (dispatch, getState) => {
-  const panels = await fetchCustomPanels()
+  const panels = await fetchCustomPanels();
   console.log('fetchPanels', { panels });
   dispatch(setPanelList(panels));
 };
@@ -109,31 +111,27 @@ export const fetchPanel = (id) => async (dispatch, getState) => {
 
 export const fetchVisualization = () => (dispatch, getState) => {};
 
-const updateLegacyPanel = (panel: CustomPanelType) => coreRefs.http!
-  .post(`${CUSTOM_PANELS_API_PREFIX}/panels/update`, {
+const updateLegacyPanel = (panel: CustomPanelType) =>
+  coreRefs.http!.post(`${CUSTOM_PANELS_API_PREFIX}/panels/update`, {
     body: JSON.stringify({ panelId: panel.id, panel: panel as PanelType }),
   });
 
 const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClient.update(panel);
 
-
 const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
 const isUuid = (id) => !!id.match(uuidRx);
 
-
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
   try {
-    if (isUuid(panel.id))
-      await updateSavedObjectPanel(panel)
-    else
-      await updateLegacyPanel(panel)
+    if (isUuid(panel.id)) await updateSavedObjectPanel(panel);
+    else await updateLegacyPanel(panel);
 
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
   } catch (err) {
-    console.log("Error updating panel", { err, panel })
+    console.log('Error updating panel', { err, panel });
   }
 };
 
@@ -143,18 +141,11 @@ export const deletePanel = (id) => async (dispatch, getState) => {
   dispatch(setPanelList(panelList));
 };
 
-export const deletePanels = (ids) => async (dispatch, getState) => {
-  ids.array.forEach(element => {
-    dispatch(deletePanel(element))
-  });
-}
-
 export const createPanel = (panel) => async (dispatch, getState) => {
   const newPanel = await savedObjectPanelsClient.create(panel);
   const panelList = getState().panelList;
   dispatch(setPanelList([...panelList, newPanel]));
 };
-
 
 const saveRenamedPanel = async (id, name) => {
   const renamePanelObject = {
@@ -177,17 +168,20 @@ const saveRenamedPanelSO = async (id, name) => {
 };
 
 // Renames an existing CustomPanel
-export const renameCustomPanel = (editedCustomPanelName: string, id: string) => async (dispatch, getState) => {
-  console.log("renameCustomPanel dispatched", { editedCustomPanelName, id })
+export const renameCustomPanel = (editedCustomPanelName: string, id: string) => async (
+  dispatch,
+  getState
+) => {
+  console.log('renameCustomPanel dispatched', { editedCustomPanelName, id });
 
   if (!isNameValid(editedCustomPanelName)) {
     console.log('Invalid Custom Panel name', 'danger');
     return Promise.reject();
   }
 
-  const panel = getState().customPanel.panelList.find(p => p.id === id)
-  const updatedPanel = { ...panel, title: editedCustomPanelName }
-  dispatch(updatePanel(updatedPanel))
+  const panel = getState().customPanel.panelList.find((p) => p.id === id);
+  const updatedPanel = { ...panel, title: editedCustomPanelName };
+  dispatch(updatePanel(updatedPanel));
 
   // try {
   //   // await savePanelFn(editedCustomPanelId, editedCustomPanelName);
