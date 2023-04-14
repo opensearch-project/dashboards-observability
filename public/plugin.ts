@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppCategory, AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 import { i18n } from '@osd/i18n';
+import {
+  AppCategory,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../src/core/public';
+import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
 
 import {
   observabilityApplicationsID,
@@ -60,7 +66,7 @@ import {
 
 export class ObservabilityPlugin
   implements
-  Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+    Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
@@ -84,12 +90,10 @@ export class ObservabilityPlugin
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
 
-
     // // redirect legacy notebooks URL to current URL under observability
     // if (window.location.pathname.includes('application_analytics')) {
     //   window.location.assign(convertLegacyAppAnalyticsUrl(window.location));
     // }
-
 
     const OBSERVABILITY_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
       observability: {
@@ -102,14 +106,11 @@ export class ObservabilityPlugin
     });
 
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
-      console.log("start page: ", startPage);
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
-      const pplService = new PPLService(coreStart.http);
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
-      const qm = new QueryManager();
 
       return Observability(
         coreStart,
@@ -129,7 +130,7 @@ export class ObservabilityPlugin
       title: observabilityApplicationsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('/application_analytics'),
+      mount: appMountWithStartPage('applications'),
     });
 
     core.application.register({
@@ -137,7 +138,7 @@ export class ObservabilityPlugin
       title: observabilityLogsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityLogsPluginOrder,
-      mount: appMountWithStartPage('events'),
+      mount: appMountWithStartPage('logs'),
     });
 
     core.application.register({
@@ -153,7 +154,7 @@ export class ObservabilityPlugin
       title: observabilityTracesTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityTracesPluginOrder,
-      mount: appMountWithStartPage('/trace_analytics'),
+      mount: appMountWithStartPage('traces'),
     });
 
     core.application.register({
@@ -169,7 +170,7 @@ export class ObservabilityPlugin
       title: observabilityPanelsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityPanelsPluginOrder,
-      mount: appMountWithStartPage('/operational_panels'),
+      mount: appMountWithStartPage('dashboards'),
     });
 
     // core.application.register({

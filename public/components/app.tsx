@@ -39,9 +39,12 @@ if (window.Cypress) {
 }
 
 const pages = {
-  notebooks: NotebooksHome,
+  applications: ApplicationAnalyticsHome,
+  logs: EventAnalytics,
   metrics: MetricsHome,
-  events: EventAnalytics,
+  traces: TraceAnalyticsHome,
+  notebooks: NotebooksHome,
+  dashboards: CustomPanelsHome,
 };
 
 export const App = ({
@@ -52,7 +55,6 @@ export const App = ({
   savedObjects,
   timestampUtils,
   queryManager,
-  // mountParams,
   startPage,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications } = CoreStartProp;
