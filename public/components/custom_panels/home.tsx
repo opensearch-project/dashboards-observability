@@ -12,6 +12,7 @@ import { StaticContext } from 'react-router';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { concat, from, Observable, of } from 'rxjs';
+import { useDispatch } from 'react-redux';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
@@ -39,8 +40,7 @@ import { SavedObject } from '../../../../../src/core/types';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
 import { CustomPanelType } from '../../../common/types/custom_panels';
-import { fetchPanels } from './redux/panel_slice';
-import { useDispatch } from 'react-redux';
+import { deletePanel, fetchPanels } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -80,7 +80,7 @@ export const Home = ({
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -138,7 +138,6 @@ export const Home = ({
 
   const isUuid = (id) => !!id.match(uuidRx);
 
-
   const fetchSavedObjectPanel = async (id: string) => {
     const soPanel = await coreRefs.savedObjectsClient?.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
     return savedObjectToCustomPanel(soPanel);
@@ -167,19 +166,15 @@ export const Home = ({
 
     try {
       // const panelToClone = await fetchPanelfn(clonedCustomPanelId)
-
       // const newPanel: PanelType = {
       //   ...panelToClone,
       //   title: clonedCustomPanelName,
       //   dateCreated: new Date().getTime(),
       //   dateModified: new Date().getTime()
       // }
-
       // const clonedPanel: CustomPanelType = await coreRefs.savedObjectsClient!.create(
       //   CUSTOM_PANELS_SAVED_OBJECT_TYPE, newPanel, { id: panelToClone.id }
       // )
-
-
       // setcustomPanelData((prevCustomPanelData) => {
       //   const newPanelData = [
       //     ...prevCustomPanelData,
@@ -222,17 +217,15 @@ export const Home = ({
 
   // Deletes multiple existing Operational Panels
   const deleteCustomPanelList = (customPanelIdList: string[], toastMessage: string) => {
-    Promise.all([
-      deletePanelSO(customPanelIdList),
-      deletePanels(customPanelIdList)
-    ]).then((res) => {
-      // setcustomPanelData((prevCustomPanelData) => {
-      //   return prevCustomPanelData.filter(
-      //     (customPanel) => !customPanelIdList.includes(customPanel.id)
-      //   );
-      // });
-      // setToast(toastMessage);
-    })
+    Promise.all([deletePanelSO(customPanelIdList), deletePanels(customPanelIdList)])
+      .then((res) => {
+        // setcustomPanelData((prevCustomPanelData) => {
+        //   return prevCustomPanelData.filter(
+        //     (customPanel) => !customPanelIdList.includes(customPanel.id)
+        //   );
+        // });
+        // setToast(toastMessage);
+      })
       .catch((err) => {
         setToast(
           'Error deleting Operational Panels, please make sure you have the correct permission.',
@@ -244,22 +237,26 @@ export const Home = ({
 
   // Deletes an existing Operational Panel
   const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
-    // return http
-    //   .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
-    //   .then((res) => {
-    //     setcustomPanelData((prevCustomPanelData) => {
-    //       return prevCustomPanelData.filter((customPanel) => customPanel.id !== customPanelId);
-    //     });
-    //     setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
-    //     return res;
-    //   })
-    //   .catch((err) => {
-    //     setToast(
-    //       'Error deleting Operational Panel, please make sure you have the correct permission.',
-    //       'danger'
-    //     );
-    //     console.error(err.body.message);
-    //   });
+    return http
+      .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
+      .then((res) => {
+        dispatch(fetchPanels());
+        setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
+        return res;
+      })
+      .catch((err) => {
+        setToast(
+          'Error deleting Operational Panel, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
+  };
+
+  // Deletes an existing SO Operational Panel
+  const deleteCustomPanelSO = async (customPanelId: string, customPanelName: string) => {
+    dispatch(deletePanel(customPanelId));
+    // TODO: toast here
   };
 
   const addSamplePanels = async () => {
@@ -301,8 +298,7 @@ export const Home = ({
           }),
         })
         .then((res) => {
-          dispatch(fetchPanels())
-          // setcustomPanelData([...customPanelData, ...res.demoPanelsData]);
+          dispatch(fetchPanels());
         });
       setToast(`Sample panels successfully added.`);
     } catch (err: any) {
@@ -354,7 +350,7 @@ export const Home = ({
                 chrome={chrome}
                 parentBreadcrumbs={parentBreadcrumbs}
                 cloneCustomPanel={cloneCustomPanel}
-                deleteCustomPanel={deleteCustomPanel}
+                deleteCustomPanel={deleteCustomPanelSO}
                 setToast={setToast}
                 onEditClick={onEditClick}
                 page="operationalPanels"
