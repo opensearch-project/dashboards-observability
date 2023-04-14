@@ -30,6 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
 import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
@@ -51,6 +52,7 @@ import {
   prependRecentlyUsedRange as onTimeChange,
   isPPLFilterValid,
   fetchVisualizationById,
+  prependRecentlyUsedRange,
 } from './helpers/utils';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
@@ -64,6 +66,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { selectPanel, updatePanel } from './redux/panel_slice';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -141,6 +144,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     onEditClick,
     onAddClick,
   } = props;
+
+  const dispatch = useDispatch();
+  const panel = useSelector(selectPanel);
+
   const [openPanelName, setOpenPanelName] = useState('');
   const [panelCreatedTime, setPanelCreatedTime] = useState('');
   const [pplFilterValue, setPPLFilterValue] = useState('');
@@ -207,14 +214,14 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    onTimeChange(
+    const updatedRanges = prependRecentlyUsedRange(
       timeProps.start,
       timeProps.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
+      recentlyUsedRanges
     );
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
+
+    setRecentlyUsedRanges(updatedRanges.slice(0, 9));
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
@@ -636,8 +643,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
-                  start={startTime}
-                  end={endTime}
+                  start={panel.timeRange.from}
+                  end={panel.timeRange.to}
                   onTimeChange={onDatePickerChange}
                   recentlyUsedRanges={recentlyUsedRanges}
                   isDisabled={dateDisabled}

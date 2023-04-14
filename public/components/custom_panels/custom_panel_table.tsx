@@ -139,8 +139,9 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Custom Panels ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-      } successfully deleted!`;
+    const toastMessage = `Custom Panels ${
+      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
+    } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
     closeModal();
@@ -321,7 +322,7 @@ export const CustomPanelTable = ({
                 <EuiTitle size="s">
                   <h3>
                     Panels
-                    <span className="panel-header-count"> ({0 /* customPanels.length */})</span>
+                    <span className="panel-header-count"> ({customPanels.length})</span>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
@@ -373,8 +374,8 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                        customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
+                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
                       : customPanels
                   }
                   itemId="id"

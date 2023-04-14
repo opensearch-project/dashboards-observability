@@ -41,13 +41,7 @@ import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
-import {
-  CustomPanelType,
-  PanelType,
-  SavedVisualizationType,
-  VisualizationType,
-  VizContainerError,
-} from '../../../common/types/custom_panels';
+import { CustomPanelType } from '../../../common/types/custom_panels';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 
 import { getCustomModal } from './helpers/modal_containers';
@@ -55,9 +49,7 @@ import PPLService from '../../services/requests/ppl';
 import {
   isDateValid,
   convertDateTime,
-  onTimeChange,
   isPPLFilterValid,
-  fetchVisualizationById,
   isNameValid,
   prependRecentlyUsedRange,
 } from './helpers/utils';
