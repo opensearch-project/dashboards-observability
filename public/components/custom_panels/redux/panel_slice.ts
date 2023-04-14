@@ -1,5 +1,5 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
-import { concat, from, Observable, of } from 'rxjs';
+import { async, concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import {
   CUSTOM_PANELS_API_PREFIX,
@@ -56,10 +56,7 @@ export const panelReducer = panelSlice.reducer;
 
 export const selectPanel = (rootState): CustomPanelType => rootState.customPanel.panel;
 
-export const selectPanelList = (rootState): CustomPanelType[] => {
-  // console.log('selectPanelList', { rootState, panelList: rootState.customPanel.panelList });
-  return rootState.customPanel.panelList;
-};
+export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
 
 // export const selectPanelList = createSelector(
 //   rootState => { console.log("selectPanelList", { rootState }); return rootState.customPanel.panelList },
@@ -145,6 +142,12 @@ export const deletePanel = (id) => async (dispatch, getState) => {
   const panelList: CustomPanelType[] = getState().panelList.filter((p) => p.id !== id);
   dispatch(setPanelList(panelList));
 };
+
+export const deletePanels = (ids) => async (dispatch, getState) => {
+  ids.array.forEach(element => {
+    dispatch(deletePanel(element))
+  });
+}
 
 export const createPanel = (panel) => async (dispatch, getState) => {
   const newPanel = await savedObjectPanelsClient.create(panel);

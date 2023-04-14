@@ -46,7 +46,7 @@ import { CustomPanelListType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import { createPanel, fetchPanels, renameCustomPanel, selectPanelList } from './redux/panel_slice';
+import { createPanel, deletePanels, fetchPanels, renameCustomPanel, selectPanelList } from './redux/panel_slice';
 
 /*
  * "CustomPanelTable" module, used to view all the saved panels

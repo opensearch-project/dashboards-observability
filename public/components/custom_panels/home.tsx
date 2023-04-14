@@ -222,24 +222,24 @@ export const Home = ({
 
   // Deletes multiple existing Operational Panels
   const deleteCustomPanelList = (customPanelIdList: string[], toastMessage: string) => {
-    // Promise.all([
-    //   deletePanelSO(customPanelIdList),
-    //   deletePanels(customPanelIdList)
-    // ]).then((res) => {
-    //   setcustomPanelData((prevCustomPanelData) => {
-    //     return prevCustomPanelData.filter(
-    //       (customPanel) => !customPanelIdList.includes(customPanel.id)
-    //     );
-    //   });
-    //   setToast(toastMessage);
-    // })
-    //   .catch((err) => {
-    //     setToast(
-    //       'Error deleting Operational Panels, please make sure you have the correct permission.',
-    //       'danger'
-    //     );
-    //     console.error(err.body.message);
-    //   });
+    Promise.all([
+      deletePanelSO(customPanelIdList),
+      deletePanels(customPanelIdList)
+    ]).then((res) => {
+      // setcustomPanelData((prevCustomPanelData) => {
+      //   return prevCustomPanelData.filter(
+      //     (customPanel) => !customPanelIdList.includes(customPanel.id)
+      //   );
+      // });
+      // setToast(toastMessage);
+    })
+      .catch((err) => {
+        setToast(
+          'Error deleting Operational Panels, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
   };
 
   // Deletes an existing Operational Panel
