@@ -12,7 +12,7 @@ exports[`Siderbar component Renders empty sidebar component 1`] = `
     }
   }
 >
-  <Sidebar
+  <Component
     explorerData={Object {}}
     explorerFields={
       Object {
@@ -217,7 +217,7 @@ exports[`Siderbar component Renders empty sidebar component 1`] = `
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Sidebar>
+  </Component>
 </Provider>
 `;
 
@@ -233,7 +233,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
     }
   }
 >
-  <Sidebar
+  <Component
     explorerData={
       Object {
         "jsonData": Array [
@@ -780,7 +780,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               data-attr-field="double_per_ip_bytes"
                               key="fielddouble_per_ip_bytes"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "double_per_ip_bytes",
@@ -1092,14 +1092,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="host"
                               key="fieldhost"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "host",
@@ -1411,14 +1411,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="ip_count"
                               key="fieldip_count"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "ip_count",
@@ -1730,14 +1730,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="per_ip_bytes"
                               key="fieldper_ip_bytes"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "per_ip_bytes",
@@ -2049,14 +2049,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="resp_code"
                               key="fieldresp_code"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "resp_code",
@@ -2368,14 +2368,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="sum_bytes"
                               key="fieldsum_bytes"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "sum_bytes",
@@ -2687,7 +2687,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                           </ul>
                         </div>
@@ -2909,7 +2909,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               data-attr-field="agent"
                               key="fieldagent"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "agent",
@@ -3290,14 +3290,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="bytes"
                               key="fieldbytes"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "bytes",
@@ -3607,14 +3607,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="clientip"
                               key="fieldclientip"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "clientip",
@@ -3924,14 +3924,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="event"
                               key="fieldevent"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "event",
@@ -4241,14 +4241,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="extension"
                               key="fieldextension"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "extension",
@@ -4629,14 +4629,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="geo"
                               key="fieldgeo"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "geo",
@@ -4946,14 +4946,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="host"
                               key="fieldhost"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "host",
@@ -5334,14 +5334,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="index"
                               key="fieldindex"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "index",
@@ -5722,14 +5722,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="ip"
                               key="fieldip"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "ip",
@@ -6039,14 +6039,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="machine"
                               key="fieldmachine"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "machine",
@@ -6356,14 +6356,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="memory"
                               key="fieldmemory"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "memory",
@@ -6673,14 +6673,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="message"
                               key="fieldmessage"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "message",
@@ -7061,14 +7061,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="phpmemory"
                               key="fieldphpmemory"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "phpmemory",
@@ -7378,14 +7378,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="referer"
                               key="fieldreferer"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "referer",
@@ -7766,14 +7766,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="request"
                               key="fieldrequest"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "request",
@@ -8154,14 +8154,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="response"
                               key="fieldresponse"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "response",
@@ -8542,14 +8542,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="tags"
                               key="fieldtags"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "tags",
@@ -8930,14 +8930,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="timestamp"
                               key="fieldtimestamp"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "timestamp",
@@ -9270,14 +9270,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="url"
                               key="fieldurl"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "url",
@@ -9658,14 +9658,14 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                             <li
                               className="dscSidebar__item"
                               data-attr-field="utc_time"
                               key="fieldutc_time"
                             >
-                              <Field
+                              <Component
                                 field={
                                   Object {
                                     "name": "utc_time",
@@ -10046,7 +10046,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Field>
+                              </Component>
                             </li>
                           </ul>
                         </div>
@@ -10060,6 +10060,6 @@ exports[`Siderbar component Renders sidebar component 1`] = `
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Sidebar>
+  </Component>
 </Provider>
 `;

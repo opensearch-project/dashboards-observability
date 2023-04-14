@@ -25,7 +25,6 @@ export const registerEventAnalyticsRouter = ({
   router: IRouter;
   savedObjectFacet: SavedObjectFacet;
 }) => {
-  
   router.get(
     {
       path: `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}`,
@@ -46,7 +45,7 @@ export const registerEventAnalyticsRouter = ({
       return res.custom(result);
     }
   );
-  
+
   router.get(
     {
       path: `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/{objectId}`,
@@ -138,12 +137,14 @@ export const registerEventAnalyticsRouter = ({
             name: schema.string(),
             description: schema.string(),
             application_id: schema.maybe(schema.string()),
-            user_configs: schema.string(),
-            sub_type: schema.string(),
+            user_configs: schema.maybe(schema.string()),
+            sub_type: schema.maybe(schema.string()),
             units_of_measure: schema.maybe(schema.string()),
-            selected_labels: schema.maybe(schema.object({
-              label: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-            })),
+            selected_labels: schema.maybe(
+              schema.object({
+                label: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+              })
+            ),
           }),
         }),
       },
@@ -230,12 +231,14 @@ export const registerEventAnalyticsRouter = ({
             name: schema.string(),
             description: schema.string(),
             application_id: schema.maybe(schema.string()),
-            user_configs: schema.string(),
-            sub_type: schema.string(),
+            user_configs: schema.maybe(schema.string()),
+            sub_type: schema.maybe(schema.string()),
             units_of_measure: schema.maybe(schema.string()),
-            selected_labels: schema.maybe(schema.object({
-              labels: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-            })),
+            selected_labels: schema.maybe(
+              schema.object({
+                labels: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+              })
+            ),
           }),
         }),
       },

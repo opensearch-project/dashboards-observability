@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
@@ -30,6 +29,7 @@ import { last } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
+import _ from 'lodash';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
@@ -48,7 +48,7 @@ import PPLService from '../../services/requests/ppl';
 import {
   isDateValid,
   convertDateTime,
-  onTimeChange,
+  prependRecentlyUsedRange as onTimeChange,
   isPPLFilterValid,
   fetchVisualizationById,
 } from './helpers/utils';
@@ -64,7 +64,6 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import _ from 'lodash';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel

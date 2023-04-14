@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Shared components Renders empty placeholder component 1`] = `
-<EmptyPlaceholder
+<Component
   icon={[Function]}
 >
   <EuiText
@@ -33,7 +33,7 @@ exports[`Shared components Renders empty placeholder component 1`] = `
                 size="xxl"
                 type={[Function]}
               >
-                <LensIconChartBar
+                <Component
                   aria-hidden={true}
                   className="euiIcon euiIcon--xxLarge euiIcon--subdued"
                   focusable="false"
@@ -61,7 +61,7 @@ exports[`Shared components Renders empty placeholder component 1`] = `
                       d="M13 11a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1v-9a1 1 0 011-1h4zm16-7a1 1 0 011 1v16a1 1 0 01-1 1h-4a1 1 0 01-1-1V5a1 1 0 011-1h4z"
                     />
                   </svg>
-                </LensIconChartBar>
+                </Component>
               </EuiIcon>
               <EuiSpacer
                 size="l"
@@ -87,11 +87,11 @@ exports[`Shared components Renders empty placeholder component 1`] = `
       </EuiTextAlign>
     </div>
   </EuiText>
-</EmptyPlaceholder>
+</Component>
 `;
 
 exports[`Shared components Renders tool bar button component 1`] = `
-<ToolbarButton
+<Component
   fontWeight="bold"
   onClick={[MockFunction]}
 >
@@ -203,5 +203,5 @@ exports[`Shared components Renders tool bar button component 1`] = `
       </button>
     </EuiButtonDisplay>
   </EuiButton>
-</ToolbarButton>
+</Component>
 `;

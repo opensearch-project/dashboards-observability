@@ -12,7 +12,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
     }
   }
 >
-  <SearchBar
+  <Component
     setSearch={[MockFunction]}
   >
     <div>
@@ -145,7 +145,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
         </EuiFlexGroup>
       </EuiSearchBar>
     </div>
-  </SearchBar>
+  </Component>
 </Provider>
 `;
 
@@ -161,7 +161,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
     }
   }
 >
-  <SearchBar
+  <Component
     setSearch={[MockFunction]}
   >
     <div>
@@ -290,6 +290,6 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
         </EuiFlexGroup>
       </EuiSearchBar>
     </div>
-  </SearchBar>
+  </Component>
 </Provider>
 `;

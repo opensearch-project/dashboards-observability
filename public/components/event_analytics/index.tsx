@@ -7,12 +7,17 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
 import { isEmpty } from 'lodash';
-import React, { ReactChild, useState } from 'react';
-import { HashRouter, Route, Switch, useHistory } from 'react-router-dom';
+import React, { createContext, ReactChild, useState } from 'react';
+import { HashRouter, Route, RouteComponentProps, Switch, useHistory } from 'react-router-dom';
 import { RAW_QUERY } from '../../../common/constants/explorer';
 import { ObservabilitySideBar } from '../common/side_nav';
-import { Home as EventExplorerHome } from './home/home';
 import { LogExplorer } from './explorer/log_explorer';
+import { Home as EventExplorerHome } from './home/home';
+
+export const LogExplorerRouterContext = createContext<{
+  routerProps: RouteComponentProps;
+  searchParams: URLSearchParams;
+} | null>(null);
 
 export const EventAnalytics = ({
   chrome,
@@ -64,7 +69,7 @@ export const EventAnalytics = ({
         <Switch>
           <Route
             path={[`/event_analytics/explorer/:id`, `/event_analytics/explorer`]}
-            render={(prop) => {
+            render={(routerProps) => {
               chrome.setBreadcrumbs([
                 ...parentBreadcrumbs,
                 eventAnalyticsBreadcrumb,
@@ -74,19 +79,26 @@ export const EventAnalytics = ({
                 },
               ]);
               return (
-                <LogExplorer
-                  savedObjectId={prop.match.params.id}
-                  pplService={pplService}
-                  dslService={dslService}
-                  savedObjects={savedObjects}
-                  timestampUtils={timestampUtils}
-                  http={http}
-                  setToast={setToast}
-                  getExistingEmptyTab={getExistingEmptyTab}
-                  history={history}
-                  notifications={notifications}
-                  queryManager={queryManager}
-                />
+                <LogExplorerRouterContext.Provider
+                  value={{
+                    routerProps,
+                    searchParams: new URLSearchParams(routerProps.location.search),
+                  }}
+                >
+                  <LogExplorer
+                    savedObjectId={routerProps.match.params.id}
+                    pplService={pplService}
+                    dslService={dslService}
+                    savedObjects={savedObjects}
+                    timestampUtils={timestampUtils}
+                    http={http}
+                    setToast={setToast}
+                    getExistingEmptyTab={getExistingEmptyTab}
+                    history={history}
+                    notifications={notifications}
+                    queryManager={queryManager}
+                  />
+                </LogExplorerRouterContext.Provider>
               );
             }}
           />

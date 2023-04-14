@@ -75,7 +75,15 @@ import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
-import { fetchPanel, selectPanel, setPanel, setPanelEt, setPanelId, setPanelSt, updatePanel } from './redux/panel_slice';
+import {
+  fetchPanel,
+  selectPanel,
+  setPanel,
+  setPanelEt,
+  setPanelId,
+  setPanelSt,
+  updatePanel,
+} from './redux/panel_slice';
 import { coreRefs } from '../../framework/core_refs';
 
 /*
@@ -193,10 +201,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    const updatedRanges = prependRecentlyUsedRange(timeProps.start, timeProps.end, recentlyUsedRanges);
-    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }))
+    const updatedRanges = prependRecentlyUsedRange(
+      timeProps.start,
+      timeProps.end,
+      recentlyUsedRanges
+    );
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
 
-    setRecentlyUsedRanges(updatedRanges.slice(0, 9))
+    setRecentlyUsedRanges(updatedRanges.slice(0, 9));
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
@@ -376,7 +388,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     }
 
     if (!isPPLFilterValid(pplFilterValue, setToast)) {
-      console.log(pplFilterValue)
+      console.log(pplFilterValue);
       return;
     }
 
@@ -388,17 +400,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       from: start,
     };
 
-    // http
-    //   .post(`${CUSTOM_PANELS_API_PREFIX}/panels/filter`, {
-    //     body: JSON.stringify(panelFilterBody),
-    //   })
-    //   .then((res) => {
-    //     setOnRefresh(!onRefresh);
-    //   })
-    //   .catch((err) => {
-    //     setToast('Error is adding filters to the operational panel', 'danger');
-    //     console.error(err.body.message);
-    //   });
+    setOnRefresh(!onRefresh);
   };
 
   const cloneVisualization = (visualzationTitle: string, savedVisualizationId: string) => {
