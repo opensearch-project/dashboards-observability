@@ -36,10 +36,8 @@ import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
-import { SavedObject } from '../../../../../src/core/types';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
-import { CustomPanelType } from '../../../common/types/custom_panels';
 import { fetchPanels } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';

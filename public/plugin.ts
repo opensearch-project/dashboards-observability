@@ -112,13 +112,11 @@ export class ObservabilityPlugin
       appId: 'observability-panel',
       savedObjectsType: 'observability-panel',
       savedObjectsName: 'Observability Panel',
-      editUrlPathFn: (obj: SavedObject) =>
-        `/app/observability-dashboards#/operational_panels/${obj.id}/edit`,
-      viewUrlPathFn: (obj: SavedObject) =>
-        `/app/observability-dashboards#/operational_panels/${obj.id}`,
+      editUrlPathFn: (obj: SavedObject) => `/app/observability-dashboards#/${obj.id}/edit`,
+      viewUrlPathFn: (obj: SavedObject) => `/app/observability-dashboards#/${obj.id}`,
       createLinkText: 'Observability Panel',
       createSortText: 'Observability Panel',
-      createUrl: '/app/observability-dashboards#/operational_panels/create',
+      createUrl: '/app/observability-dashboards#/create',
     });
 
     const OBSERVABILITY_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
