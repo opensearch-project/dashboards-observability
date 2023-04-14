@@ -57,7 +57,7 @@ export const App = ({
   queryManager,
   startPage,
 }: ObservabilityAppDeps) => {
-  const { chrome, http, notifications } = CoreStartProp;
+  const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
     text: observabilityTitle,
     href: `${observabilityID}#/`,
