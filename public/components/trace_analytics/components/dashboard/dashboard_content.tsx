@@ -44,7 +44,7 @@ export function DashboardContent(props: DashboardProps) {
     startTime,
     endTime,
     childBreadcrumbs,
-    parentBreadcrumbs,
+    parentBreadcrumb,
     filters,
     setStartTime,
     setEndTime,
@@ -83,7 +83,7 @@ export function DashboardContent(props: DashboardProps) {
   }, [showTimeoutToast]);
 
   useEffect(() => {
-    // chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
+    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, page);
     setFilters([
       ...filters.map((filter) => ({
