@@ -541,13 +541,13 @@ const moveToEventsHome = () => {
 };
 
 const moveToPanelHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`, {
-    timeout: 3000,
-  });
+  cy.visit(
+    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
+    , {timeout: 3000});
   cy.wait(delay * 3);
 };
 
-const testPanelTableCell = (name = TEST_PANEL) => cy.get('.euiTableCellContent').contains(name);
+const testPanelTableCell = (name = TEST_PANEL) => cy.get('.euiTableCellContent').contains(name)
 
 const moveToTestPanel = () => {
   moveToPanelHome();
@@ -568,22 +568,25 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    response.body.panels.map((panel) => {
-      cy.request({
-        method: 'DELETE',
-        failOnStatusCode: false,
-        url: `api/observability/operational_panels/panels/${panel.id}`,
-        headers: {
-          'content-type': 'application/json;charset=UTF-8',
-          'osd-xsrf': true,
-        },
-      }).then((response) => {
-        const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1);
-        console.log('erased panel', deletedId);
-      });
-    });
-  });
-};
+      response.body.panels
+        .map(panel => {
+            cy.request({
+              method: 'DELETE',
+              failOnStatusCode: false,
+              url: `api/observability/operational_panels/panels/${panel.id}`,
+              headers: {
+                'content-type': 'application/json;charset=UTF-8',
+                'osd-xsrf': true,
+              }
+            }).then(response => {
+              const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1)
+              console.log("erased panel", deletedId)
+            })
+          }
+        )
+    }
+  )
+}
 
 const eraseSavedObjectPaenls = () => {
   return cy
@@ -612,9 +615,10 @@ const eraseSavedObjectPaenls = () => {
 };
 
 const eraseTestPanels = () => {
-  eraseLegacyPanels();
-  eraseSavedObjectPaenls();
-};
+  eraseLegacyPanels()
+  eraseSavedObjectPaenls()
+}
+
 const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () =>
