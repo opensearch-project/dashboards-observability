@@ -78,7 +78,7 @@ describe('Creating visualizations', () => {
   });
 });
 
-describe.only('Testing panels table', () => {
+describe('Testing panels table', () => {
   beforeEach(() => {
     eraseTestPanels();
     moveToPanelHome();
@@ -110,7 +110,7 @@ describe.only('Testing panels table', () => {
     expectUuid(duplicate)
   });
 
-  it.only('Duplicates a saved object panel', () => {
+  it('Duplicates a saved object panel', () => {
     createSavedObjectPanel()
     cy.reload();
     cy.wait(250)
