@@ -80,8 +80,8 @@ describe('Creating visualizations', () => {
 
 describe.only('Testing panels table', () => {
   beforeEach(() => {
-    moveToPanelHome();
     eraseTestPanels();
+    moveToPanelHome();
   });
 
   it('Displays error toast for invalid panel name', () => {
@@ -112,12 +112,16 @@ describe.only('Testing panels table', () => {
 
   it.only('Duplicates a saved object panel', () => {
     createSavedObjectPanel()
+    cy.reload();
+    cy.wait(250)
     selectThePanel();
+    cy.wait(250)
     openActionsDropdown();
     cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
     cy.get('button[data-test-subj="runModalButton"]').click();
-    cy.contains(TEST_PANEL + " (copy)").should('exist');
-    const duplicate = testPanelTableCell()
+    const duplicateName = TEST_PANEL + " (copy)"
+    cy.contains(duplicateName).should('exist');
+    const duplicate = cy.get('.euiLink').contains(duplicateName).parent()
     expectUuid(duplicate)
   });
 
@@ -253,7 +257,7 @@ describe('Testing a panel', () => {
 
     cy.get(`input.euiFieldText[value="${TEST_PANEL} (copy)"]`)
       .focus()
-      .clear({ force: true })
+      .clear({force: true})
       .focus()
       .type('Renamed Panel', {
         delay: 200,
@@ -326,9 +330,9 @@ describe('Testing a panel', () => {
 
     cy.get('h5[data-test-subj="visualizationHeader"]')
       .contains(PPL_VISUALIZATIONS_NAMES[1])
-      .trigger('mousedown', { which: 1 })
-      .trigger('mousemove', { clientX: 1100, clientY: 0 })
-      .trigger('mouseup', { force: true });
+      .trigger('mousedown', {which: 1})
+      .trigger('mousemove', {clientX: 1100, clientY: 0})
+      .trigger('mouseup', {force: true});
 
     cy.get('button[data-test-subj="savePanelButton"]').click();
     cy.wait(delay * 3);
@@ -343,9 +347,9 @@ describe('Testing a panel', () => {
 
     cy.get('.react-resizable-handle')
       .eq(1)
-      .trigger('mousedown', { which: 1 })
-      .trigger('mousemove', { clientX: 2000, clientY: 800 })
-      .trigger('mouseup', { force: true });
+      .trigger('mousedown', {which: 1})
+      .trigger('mousemove', {clientX: 2000, clientY: 800})
+      .trigger('mouseup', {force: true});
 
     cy.get('button[data-test-subj="savePanelButton"]').click();
     cy.wait(delay * 3);
@@ -460,7 +464,7 @@ describe('Testing a panel', () => {
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
     cy.wait(1000);
     cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-      .clear({ force: true })
+      .clear({force: true})
       .type(NEW_VISUALIZATION_NAME, {
         delay: 200,
       });
@@ -523,11 +527,11 @@ const moveToEventsHome = () => {
 const moveToPanelHome = () => {
   cy.visit(
     `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
-    , { timeout: 3000 });
+    , {timeout: 3000});
   cy.wait(delay * 3);
 };
 
-const testPanelTableCell = () => cy.get('.euiTableCellContent').contains(TEST_PANEL)
+const testPanelTableCell = (name = TEST_PANEL) => cy.get('.euiTableCellContent').contains(name)
 
 const moveToTestPanel = () => {
   moveToPanelHome();
@@ -549,23 +553,23 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    response.body.panels
-      .map(panel => {
-        cy.request({
-          method: 'DELETE',
-          failOnStatusCode: false,
-          url: `api/observability/operational_panels/panels/${panel.id}`,
-          headers: {
-            'content-type': 'application/json;charset=UTF-8',
-            'osd-xsrf': true,
+      response.body.panels
+        .map(panel => {
+            cy.request({
+              method: 'DELETE',
+              failOnStatusCode: false,
+              url: `api/observability/operational_panels/panels/${panel.id}`,
+              headers: {
+                'content-type': 'application/json;charset=UTF-8',
+                'osd-xsrf': true,
+              }
+            }).then(response => {
+              const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1)
+              console.log("erased panel", deletedId)
+            })
           }
-        }).then(response => {
-          const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1)
-          console.log("erased panel", deletedId)
-        })
-      }
-      )
-  }
+        )
+    }
   )
 }
 
@@ -599,7 +603,7 @@ const eraseTestPanels = () => {
   eraseSavedObjectPaenls()
 
 }
-const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () => cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
 
@@ -630,7 +634,10 @@ const createSavedObjectPanel = () => {
         "applicationId": ""
       }
     }
-  }).then(response => console.log(response))
+  }).then(response => {
+    console.log("savedObject panel created", response)
+    moveToPanelHome();
+  })
 
 }
 
@@ -643,18 +650,19 @@ const createLegacyPanel = () => {
       'content-type': 'application/json;charset=UTF-8',
       'osd-xsrf': true,
     },
-    body: { panelName: TEST_PANEL }
+    body: {panelName: TEST_PANEL}
   })
 }
 
 const expectUuid = (cell) => {
-  cell.find('a').its('href').should('match', uuidRx)
+  cell.find('a').invoke('attr', 'href').should('match', uuidRx)
   // const id = url.split('/').slice(-1)
   // expect(id).not.to.match(uuidRx)
 }
 
 const expectLegacyId = (cell) => {
-  cell.find('a').its('href').should('not.match', uuidRx)
+  cell.then(content => console.log("expecteLegacyId", {cell: content}))
+  cell.find('a').then(console.log).invoke("attr", 'href').should('not.match', uuidRx)
   // const id = url.split('/').slice(-1)
   // expect(id).not.to.match(uuidRx)
 }
@@ -668,7 +676,10 @@ const openActionsDropdown = () => {
 }
 
 const selectThePanel = () => {
-  cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).trigger('mouseover').click();
+  cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
+    cy.get('.euiCheckbox__input[title="Select this row"]').check({force: true});
+  });
+  // cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).trigger('mouseover').click();
 }
 
 const expectToastWith = (title) => {
