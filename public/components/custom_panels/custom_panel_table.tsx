@@ -131,7 +131,10 @@ export const CustomPanelTable = ({
     const sourcePanel = selectedCustomPanels[0];
     console.log('onClone', { sourcePanel });
     if (sourcePanel.savedObject) {
-      dispatch(createPanel({ ...sourcePanel, name: sourcePanel.name + ' (copy)', id: undefined }));
+      const { id, ...newPanel } = { ...sourcePanel, title: sourcePanel.title + ' (copy)' };
+      console.log('onClone', { newPanel });
+
+      dispatch(createPanel(newPanel));
     } else {
       cloneCustomPanel(newName, selectedCustomPanels[0].id);
     }
