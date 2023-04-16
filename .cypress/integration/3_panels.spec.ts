@@ -110,7 +110,7 @@ describe('Testing panels table', () => {
       moveToPanelHome();
     });
 
-    it('Duplicates the legacy panel', () => {
+    it('Duplicates a legacy panel', () => {
       cy.get('.euiTableRow').should('have.length', 1);
       selectThePanel();
       openActionsDropdown();
@@ -123,7 +123,7 @@ describe('Testing panels table', () => {
       expectUuid(duplicate);
     });
 
-    it('Renames the legacy panel', () => {
+    it('Renames the panel', () => {
       createLegacyPanel();
       cy.reload();
       const cell = cy.get('.euiTableCellContent');
@@ -137,7 +137,7 @@ describe('Testing panels table', () => {
       expectUuid(renamed);
     });
 
-    it('Deletes the legacy panel', () => {
+    it('Deletes the panel', () => {
       cy.get('input[data-test-subj="checkboxSelectAll"]').click();
       openActionsDropdown();
       cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
@@ -159,7 +159,7 @@ describe('Testing panels table', () => {
       cy.get('.euiTableRow').should('have.length', 1);
     });
 
-    it('Duplicates a saved object panel', () => {
+    it('Duplicates the panel', () => {
       selectThePanel();
       openActionsDropdown();
       cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
@@ -181,7 +181,7 @@ describe('Testing panels table', () => {
       cy.get('button[data-test-subj="runModalButton"]').click();
     });
 
-    it('Deletes saved object panels', () => {
+    it('Deletes the panel', () => {
       createSavedObjectPanel();
       cy.get('input[data-test-subj="checkboxSelectAll"]').click();
       openActionsDropdown();
@@ -541,13 +541,13 @@ const moveToEventsHome = () => {
 };
 
 const moveToPanelHome = () => {
-  cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
-    , {timeout: 3000});
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`, {
+    timeout: 3000,
+  });
   cy.wait(delay * 3);
 };
 
-const testPanelTableCell = (name = TEST_PANEL) => cy.get('.euiTableCellContent').contains(name)
+const testPanelTableCell = (name = TEST_PANEL) => cy.get('.euiTableCellContent').contains(name);
 
 const moveToTestPanel = () => {
   moveToPanelHome();
@@ -568,25 +568,22 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-      response.body.panels
-        .map(panel => {
-            cy.request({
-              method: 'DELETE',
-              failOnStatusCode: false,
-              url: `api/observability/operational_panels/panels/${panel.id}`,
-              headers: {
-                'content-type': 'application/json;charset=UTF-8',
-                'osd-xsrf': true,
-              }
-            }).then(response => {
-              const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1)
-              console.log("erased panel", deletedId)
-            })
-          }
-        )
-    }
-  )
-}
+    response.body.panels.map((panel) => {
+      cy.request({
+        method: 'DELETE',
+        failOnStatusCode: false,
+        url: `api/observability/operational_panels/panels/${panel.id}`,
+        headers: {
+          'content-type': 'application/json;charset=UTF-8',
+          'osd-xsrf': true,
+        },
+      }).then((response) => {
+        const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1);
+        console.log('erased panel', deletedId);
+      });
+    });
+  });
+};
 
 const eraseSavedObjectPaenls = () => {
   return cy
@@ -615,10 +612,9 @@ const eraseSavedObjectPaenls = () => {
 };
 
 const eraseTestPanels = () => {
-  eraseLegacyPanels()
-  eraseSavedObjectPaenls()
-}
-
+  eraseLegacyPanels();
+  eraseSavedObjectPaenls();
+};
 const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () =>
