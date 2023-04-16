@@ -110,7 +110,7 @@ describe('Testing panels table', () => {
       moveToPanelHome();
     });
 
-    it('Duplicates a legacy panel', () => {
+    it('Duplicates the legacy panel', () => {
       cy.get('.euiTableRow').should('have.length', 1);
       selectThePanel();
       openActionsDropdown();
@@ -123,7 +123,7 @@ describe('Testing panels table', () => {
       expectUuid(duplicate);
     });
 
-    it('Renames the panel', () => {
+    it('Renames the legacy panel', () => {
       createLegacyPanel();
       cy.reload();
       const cell = cy.get('.euiTableCellContent');
@@ -137,7 +137,7 @@ describe('Testing panels table', () => {
       expectUuid(renamed);
     });
 
-    it('Deletes the panel', () => {
+    it('Deletes the legacy panel', () => {
       cy.get('input[data-test-subj="checkboxSelectAll"]').click();
       openActionsDropdown();
       cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
@@ -159,13 +159,11 @@ describe('Testing panels table', () => {
       cy.get('.euiTableRow').should('have.length', 1);
     });
 
-    it('Duplicates the panel', () => {
+    it('Duplicates a saved object panel', () => {
       selectThePanel();
       openActionsDropdown();
-      console.log('about to click duplicate');
       cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
       cy.get('button[data-test-subj="runModalButton"]').click();
-      console.log('confirmed modal');
       const duplicateName = TEST_PANEL + ' (copy)';
       cy.get('.euiTableRow').should('have.length', 2);
       cy.contains(duplicateName).should('exist');
@@ -173,7 +171,7 @@ describe('Testing panels table', () => {
       expectUuid(duplicate);
     });
 
-    it('Renames the panel', () => {
+    it('Renames a saved-objects panel', () => {
       selectThePanel();
       openActionsDropdown();
       cy.get('button[data-test-subj="renameContextMenuItem"]').click();
@@ -183,7 +181,7 @@ describe('Testing panels table', () => {
       cy.get('button[data-test-subj="runModalButton"]').click();
     });
 
-    it('Deletes the panel', () => {
+    it('Deletes saved object panels', () => {
       createSavedObjectPanel();
       cy.get('input[data-test-subj="checkboxSelectAll"]').click();
       openActionsDropdown();
