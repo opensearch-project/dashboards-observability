@@ -82,14 +82,14 @@ export const EventAnalytics = ({
       <HashRouter>
         <Switch>
           <Route
-            path={[`/:id`]}
+            path={[`/explorer/:id`, '/explorer']}
             render={(routerProps) => {
               chrome.setBreadcrumbs([
                 ...parentBreadcrumbs,
                 eventAnalyticsBreadcrumb,
                 {
                   text: 'Explorer',
-                  href: `#/event_analytics/explorer`,
+                  href: `#/`,
                 },
               ]);
               return (
