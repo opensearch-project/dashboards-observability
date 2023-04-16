@@ -197,7 +197,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
     await dispatchInitialData(newTabId);
 
     // redirect to explorer
-    history.push('/');
+    history.push('/explorer');
   };
 
   const handleQueryChange = async (query: string) => setSearchQuery(query);
