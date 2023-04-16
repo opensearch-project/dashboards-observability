@@ -276,7 +276,7 @@ describe('Testing a panel', () => {
 
     cy.get(`input.euiFieldText[value="${TEST_PANEL} (copy)"]`)
       .focus()
-      .clear({force: true})
+      .clear({ force: true })
       .focus()
       .type('Renamed Panel', {
         delay: 200,
@@ -349,9 +349,9 @@ describe('Testing a panel', () => {
 
     cy.get('h5[data-test-subj="visualizationHeader"]')
       .contains(PPL_VISUALIZATIONS_NAMES[1])
-      .trigger('mousedown', {which: 1})
-      .trigger('mousemove', {clientX: 1100, clientY: 0})
-      .trigger('mouseup', {force: true});
+      .trigger('mousedown', { which: 1 })
+      .trigger('mousemove', { clientX: 1100, clientY: 0 })
+      .trigger('mouseup', { force: true });
 
     cy.get('button[data-test-subj="savePanelButton"]').click();
     cy.wait(delay * 3);
@@ -366,9 +366,9 @@ describe('Testing a panel', () => {
 
     cy.get('.react-resizable-handle')
       .eq(1)
-      .trigger('mousedown', {which: 1})
-      .trigger('mousemove', {clientX: 2000, clientY: 800})
-      .trigger('mouseup', {force: true});
+      .trigger('mousedown', { which: 1 })
+      .trigger('mousemove', { clientX: 2000, clientY: 800 })
+      .trigger('mouseup', { force: true });
 
     cy.get('button[data-test-subj="savePanelButton"]').click();
     cy.wait(delay * 3);
@@ -483,7 +483,7 @@ describe('Testing a panel', () => {
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
     cy.wait(1000);
     cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-      .clear({force: true})
+      .clear({ force: true })
       .type(NEW_VISUALIZATION_NAME, {
         delay: 200,
       });
