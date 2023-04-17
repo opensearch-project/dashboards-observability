@@ -49,10 +49,7 @@ import {
   ExplorerData as IExplorerData,
   IQuery,
 } from '../../../../common/types/explorer';
-import { getOSDSavedObjectsClient } from '../../../../common/utils';
 import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
-import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
-import { PPLSavedQueryClient } from '../../../services/saved_objects/saved_object_client/ppl';
 import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedObject } from '../../../services/saved_objects/saved_object_client/types';
 import { getSampleDataModal } from '../../common/helpers/add_sample_modal';
@@ -223,7 +220,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       dispatch(setSelectedQueryTab({ tabId: newTabId }));
     });
     // redirect to explorer
-    history.push(`/${objectId}`);
+    history.push(`/explorer/${objectId}`);
   };
 
   const addSampledata = async () => {
@@ -334,7 +331,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       key="redirect"
       onClick={() => {
         setIsActionsPopoverOpen(false);
-        history.push(`/`);
+        history.push(`/explorer`);
       }}
       data-test-subj="eventHomeAction__explorer"
     >
@@ -456,7 +453,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           fullWidth={false}
-                          onClick={() => history.push(`/`)}
+                          onClick={() => history.push(`/explorer`)}
                           data-test-subj="actionEventExplorer"
                         >
                           Event Explorer

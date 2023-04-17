@@ -3,17 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import '../../variables.scss';
-
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
 import { isEmpty } from 'lodash';
 import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch, useHistory } from 'react-router-dom';
-import { useEffect } from 'react';
 import { RAW_QUERY } from '../../../common/constants/explorer';
-import { ObservabilitySideBar } from '../common/side_nav';
+import '../../variables.scss';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
 
@@ -39,7 +36,7 @@ export const EventAnalytics = ({
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const eventAnalyticsBreadcrumb = {
-    text: 'Event analytics',
+    text: 'Logs',
     href: '#/',
   };
 
@@ -60,16 +57,6 @@ export const EventAnalytics = ({
     return emptyTabId;
   };
 
-  useEffect(() => {
-    setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Logs',
-        href: `#/`,
-      },
-    ]);
-  }, [setBreadcrumbs, parentBreadcrumbs]);
-
   return (
     <>
       <EuiGlobalToastList
@@ -82,14 +69,14 @@ export const EventAnalytics = ({
       <HashRouter>
         <Switch>
           <Route
-            path={[`/explorer/:id`, '/explorer']}
+            path={['/explorer/:id', '/explorer']}
             render={(routerProps) => {
-              chrome.setBreadcrumbs([
+              setBreadcrumbs([
                 ...parentBreadcrumbs,
                 eventAnalyticsBreadcrumb,
                 {
                   text: 'Explorer',
-                  href: `#/`,
+                  href: `#/explorer`,
                 },
               ]);
               return (
@@ -120,21 +107,14 @@ export const EventAnalytics = ({
             exact
             path={[`/`]}
             render={() => {
-              // chrome.setBreadcrumbs([
-              //   ...parentBreadcrumbs,
-              //   eventAnalyticsBreadcrumb,
-              //   {
-              //     text: 'Home',
-              //     href: '#/',
-              //   },
-              // ]);
-              // setBreadcrumbs([
-              //   parentBreadcrumbs,
-              //   {
-              //     text: 'Home',
-              //     href: '#/',
-              //   },
-              // ]);
+              setBreadcrumbs([
+                ...parentBreadcrumbs,
+                eventAnalyticsBreadcrumb,
+                {
+                  text: 'Home',
+                  href: '#/',
+                },
+              ]);
               return (
                 <EventExplorerHome
                   http={http}
@@ -152,5 +132,3 @@ export const EventAnalytics = ({
     </>
   );
 };
-
-export default EventAnalytics;

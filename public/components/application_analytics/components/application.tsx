@@ -54,7 +54,7 @@ import {
 } from '../../../../common/constants/application_analytics';
 import { TAB_EVENT_ID, TAB_CHART_ID, NEW_TAB } from '../../../../common/constants/explorer';
 import { IQueryTab } from '../../../../common/types/explorer';
-import { NotificationsStart } from '../../../../../../src/core/public';
+import { NotificationsStart, Toast } from '../../../../../../src/core/public';
 import { AppAnalyticsComponentDeps } from '../home';
 import { CustomPanelView } from '../../../../public/components/custom_panels/custom_panel_view';
 import {
@@ -67,6 +67,7 @@ import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { fetchAppById, initializeTabData } from '../helpers/utils';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
+import { observabilityApplicationsID } from '../../../../common/constants/shared';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -91,6 +92,7 @@ interface AppDetailProps extends AppAnalyticsComponentDeps {
   updateApp: (appId: string, updateAppData: Partial<ApplicationRequestType>, type: string) => void;
   setToasts: (title: string, color?: string, text?: ReactChild) => void;
   callback: (childfunction: () => void) => void;
+  toasts: Toast[];
 }
 
 export function Application(props: AppDetailProps) {
@@ -110,6 +112,7 @@ export function Application(props: AppDetailProps) {
     updateApp,
     setAppConfigs,
     setToasts,
+    toasts,
     setFilters,
     callback,
     queryManager,
@@ -218,12 +221,12 @@ export function Application(props: AppDetailProps) {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Application analytics',
-        href: '#/application_analytics',
+        text: 'Applications',
+        href: '#/',
       },
       {
         text: application.name,
-        href: `${last(parentBreadcrumbs)!.href}application_analytics/${appId}`,
+        href: `${observabilityApplicationsID}/${appId}`,
       },
     ]);
     setStartTimeForApp(sessionStorage.getItem(`${application.name}StartTime`) || 'now-24h');
@@ -294,6 +297,7 @@ export function Application(props: AppDetailProps) {
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
           childBreadcrumbs={childBreadcrumbs}
+          toasts={toasts}
         />
       </>
     );
