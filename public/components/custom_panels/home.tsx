@@ -158,54 +158,6 @@ export const Home = ({
     // });
   };
 
-  // Clones an existing Custom Panel, return new Custom Panel id
-  const cloneCustomPanel = async (
-    clonedCustomPanelName: string,
-    clonedCustomPanelId: string
-  ): Promise<string> => {
-    if (!isNameValid(clonedCustomPanelName)) {
-      setToast('Invalid Operational Panel name', 'danger');
-      return Promise.reject();
-    }
-
-    const fetchPanelFn = isUuid(clonedCustomPanelId) ? fetchSavedObjectPanel : fetchLegacyPanel;
-
-    try {
-      // const panelToClone = await fetchPanelfn(clonedCustomPanelId)
-      // const newPanel: PanelType = {
-      //   ...panelToClone,
-      //   title: clonedCustomPanelName,
-      //   dateCreated: new Date().getTime(),
-      //   dateModified: new Date().getTime()
-      // }
-      // const clonedPanel: CustomPanelType = await coreRefs.savedObjectsClient!.create(
-      //   CUSTOM_PANELS_SAVED_OBJECT_TYPE, newPanel, { id: panelToClone.id }
-      // )
-      // setcustomPanelData((prevCustomPanelData) => {
-      //   const newPanelData = [
-      //     ...prevCustomPanelData,
-      //     {
-      //       id: clonedPanel.id,
-      //       title: clonedCustomPanelName,
-      //       dateCreated: clonedPanel.dateCreated,
-      //       dateModified: clonedPanel.dateModified,
-      //     },
-      //   ];
-      //   console.log("setcustomPanelData", newPanelData)
-      //   return newPanelData
-      // });
-      // setToast(`Operational Panel "${clonedCustomPanelName}" successfully created!`);
-      // return clonedPanel.id;
-    } catch (err) {
-      setToast(
-        'Error cloning Operational Panel, please make sure you have the correct permission.',
-        'danger'
-      );
-    }
-
-    console.error(err.body.message);
-  };
-
   const deletePanelSO = (customPanelIdList: string[]) => {
     const soPanelIds = customPanelIdList.filter((id) => id.match(uuidRx));
     return Promise.all(
@@ -338,7 +290,6 @@ export const Home = ({
                 createCustomPanel={createCustomPanel}
                 setBreadcrumbs={chrome.setBreadcrumbs}
                 parentBreadcrumbs={customPanelBreadCrumbs}
-                cloneCustomPanel={cloneCustomPanel}
                 deleteCustomPanelList={deleteCustomPanelList}
                 addSamplePanels={addSamplePanels}
               />
@@ -355,8 +306,7 @@ export const Home = ({
                 panelId={props.match.params.id}
                 chrome={chrome}
                 parentBreadcrumbs={customPanelBreadCrumbs}
-                cloneCustomPanel={cloneCustomPanel}
-                deleteCustomPanel={deleteCustomPanelSO}
+                deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
                 onEditClick={onEditClick}
                 page="operationalPanels"
@@ -371,7 +321,6 @@ export const Home = ({
                 chrome={chrome}
                 parentBreadcrumbs={customPanelBreadCrumbs}
                 // renameCustomPanel={renameCustomPanel}
-                cloneCustomPanel={cloneCustomPanel}
                 deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
                 onEditClick={onEditClick}

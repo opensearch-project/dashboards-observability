@@ -22,14 +22,17 @@ import { addVisualizationPanel } from '../helpers/add_visualization_helper';
 interface InitialState {
   id: string;
   panel: CustomPanelType;
-  visualizations: VisualizationType[];
   panelList: CustomPanelType[];
 }
 
 const initialState: InitialState = {
   id: '',
   panel: {
+    id: '',
+    title: '',
     visualizations: [],
+    dateCreated: 0,
+    dateModified: 0,
     queryFilter: { language: '', query: '' },
     timeRange: { from: 'now', to: 'now-1d' },
   },
@@ -108,6 +111,7 @@ export const fetchPanels = () => async (dispatch, getState) => {
 export const fetchPanel = (id) => async (dispatch, getState) => {
   const soPanel = await savedObjectPanelsClient.get(id);
   const panel = savedObjectToCustomPanel(soPanel);
+  console.log('fetchPanel', panel);
   dispatch(setPanel(panel));
 };
 
@@ -119,8 +123,6 @@ const updateLegacyPanel = (panel: CustomPanelType) =>
   });
 
 const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClient.update(panel);
-
-export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
 const isUuid = (id) => !!id.match(uuidRx);
 
@@ -161,8 +163,9 @@ export const deletePanel = (id) => async (dispatch, getState) => {
 };
 
 export const createPanel = (panel) => async (dispatch, getState) => {
-  const newPanel = await savedObjectPanelsClient.create(panel);
-  const panelList = getState().panelList;
+  const newSOPanel = await savedObjectPanelsClient.create(panel);
+  const newPanel = savedObjectToCustomPanel(newSOPanel);
+  const panelList = getState().customPanel.panelList;
   dispatch(setPanelList([...panelList, newPanel]));
 };
 
@@ -191,8 +194,6 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   dispatch,
   getState
 ) => {
-  console.log('renameCustomPanel dispatched', { editedCustomPanelName, id });
-
   if (!isNameValid(editedCustomPanelName)) {
     console.log('Invalid Custom Panel name', 'danger');
     return Promise.reject();
