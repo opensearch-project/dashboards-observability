@@ -124,6 +124,8 @@ const updateLegacyPanel = (panel: CustomPanelType) =>
 
 const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClient.update(panel);
 
+export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+
 const isUuid = (id) => !!id.match(uuidRx);
 
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
@@ -154,6 +156,21 @@ export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
       console.error(err?.body?.message || err);
     }
   });
+};
+
+export const replaceVizInPanel = (oldPanel, oldVizId, vizId) => async (dispatch, getState) => {
+  const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.id);
+
+  const allVisualizations = panel!.visualizations;
+
+  const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
+
+  const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+  try {
+    dispatch(updatePanel(updatedPanel));
+  } catch (err) {
+    console.error(err?.body?.message || err);
+  }
 };
 
 export const deletePanel = (id) => async (dispatch, getState) => {
