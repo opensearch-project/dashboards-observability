@@ -163,6 +163,21 @@ export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
   });
 };
 
+export const replaceVizInPanel = (oldPanel, oldVizId, vizId) => async (dispatch, getState) => {
+  const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.id);
+
+  const allVisualizations = panel!.visualizations;
+
+  const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
+
+  const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+  try {
+    dispatch(updatePanel(updatedPanel));
+  } catch (err) {
+    console.error(err?.body?.message || err);
+  }
+};
+
 export const deletePanel = (id) => async (dispatch, getState) => {
   await savedObjectPanelsClient.delete(id);
   const panelList: CustomPanelType[] = getState().panelList.filter((p) => p.id !== id);

@@ -51,6 +51,8 @@ import {
 import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
+import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -106,6 +108,11 @@ export const VisaulizationFlyoutSO = ({
   replaceVisualizationId,
   addVisualizationPanel,
 }: VisualizationFlyoutSOProps) => {
+
+  const dispatch = useDispatch();
+
+  const panel = useSelector(selectPanel);
+
   const [newVisualizationTitle, setNewVisualizationTitle] = useState('');
   const [newVisualizationType, setNewVisualizationType] = useState('');
   const [newVisualizationTimeField, setNewVisualizationTimeField] = useState('');
@@ -188,6 +195,7 @@ export const VisaulizationFlyoutSO = ({
       //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
       //     console.error(err);
       //   });
+      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue));
     } else {
       const visualizationsWithNewPanel = addVisualizationPanel({
         savedVisualizationId: selectValue,
