@@ -6,17 +6,12 @@
 import { EuiBreadcrumb, EuiGlobalToastList, EuiLink, ShortDate } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
-import React, { ReactChild, useEffect, useState } from 'react';
+import React, { ReactChild, useState } from 'react';
+import { useDispatch } from 'react-redux';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext } from 'react-router';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { concat, from, Observable, of } from 'rxjs';
-import { useDispatch } from 'react-redux';
-import PPLService from '../../services/requests/ppl';
-import DSLService from '../../services/requests/dsl';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
-
 import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_DOCUMENTATION_URL,
@@ -24,21 +19,19 @@ import {
 } from '../../../common/constants/custom_panels';
 import {
   EVENT_ANALYTICS,
+  observabilityLogsID,
+  observabilityPanelsID,
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
-  observabilityID,
-  observabilityPanelsID,
 } from '../../../common/constants/shared';
-import {
-  CustomPanelListType,
-  ObservabilityPanelAttrs,
-  PanelType,
-} from '../../../common/types/custom_panels';
+import { ObservabilityPanelAttrs } from '../../../common/types/custom_panels';
+import { coreRefs } from '../../framework/core_refs';
+import DSLService from '../../services/requests/dsl';
+import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
-import { isNameValid } from './helpers/utils';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { coreRefs } from '../../framework/core_refs';
+import { isNameValid } from './helpers/utils';
 import { fetchPanels } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
@@ -99,7 +92,7 @@ export const Home = ({
   };
 
   const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`observability-logs#/event_analytics/explorer/${savedVisualizationId}`);
+    window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
   };
 
   // Creates a new CustomPanel

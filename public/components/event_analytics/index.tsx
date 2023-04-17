@@ -3,16 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import '../../variables.scss';
-
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
 import { isEmpty } from 'lodash';
 import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch, useHistory } from 'react-router-dom';
-import { useEffect } from 'react';
 import { RAW_QUERY } from '../../../common/constants/explorer';
+import '../../variables.scss';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
 
@@ -71,7 +69,7 @@ export const EventAnalytics = ({
       <HashRouter>
         <Switch>
           <Route
-            path={[`/:id`]}
+            path={['/explorer/:id', '/explorer']}
             render={(routerProps) => {
               setBreadcrumbs([
                 ...parentBreadcrumbs,
@@ -107,7 +105,7 @@ export const EventAnalytics = ({
           />
           <Route
             exact
-            path={[`/`, '/event_analytics']}
+            path={[`/`]}
             render={() => {
               setBreadcrumbs([
                 ...parentBreadcrumbs,
@@ -134,5 +132,3 @@ export const EventAnalytics = ({
     </>
   );
 };
-
-export default EventAnalytics;
