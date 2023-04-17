@@ -50,7 +50,6 @@ export const SavePanel = ({
   setSubType,
   isSaveAsMetricEnabled,
 }: ISavedPanelProps) => {
-  const [options, setOptions] = useState([]);
   const [checked, setChecked] = useState(false);
   const [svpnlError, setSvpnlError] = useState(null);
 
