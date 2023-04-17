@@ -72,7 +72,7 @@ export const Configuration = (props: ConfigProps) => {
                       fill
                       data-test-subj="editApplicationButton"
                       onClick={() => {
-                        window.location.assign(`${last(parentBreadcrumbs)!.href}/edit/${appId}`);
+                        window.location.assign(`#/edit/${appId}`);
                       }}
                     >
                       Edit

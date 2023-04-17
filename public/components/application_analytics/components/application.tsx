@@ -275,7 +275,7 @@ export function Application(props: AppDetailProps) {
 
   const childBreadcrumbs = [
     {
-      text: 'Application analytics',
+      text: 'Applications',
       href: '#/',
     },
     {
@@ -295,6 +295,7 @@ export function Application(props: AppDetailProps) {
           endTime={appEndTime}
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           toasts={toasts}
         />
@@ -314,6 +315,7 @@ export function Application(props: AppDetailProps) {
           page="app"
           nameColumnAction={nameColumnAction}
           traceColumnAction={traceColumnAction}
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           startTime={appStartTime}
           endTime={appEndTime}
@@ -337,6 +339,7 @@ export function Application(props: AppDetailProps) {
         <TracesContent
           {...props}
           page="app"
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           traceIdColumnAction={traceIdColumnAction}
           startTime={appStartTime}
