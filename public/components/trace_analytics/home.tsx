@@ -134,13 +134,12 @@ export const Home = (props: HomeProps) => {
     },
   ];
 
-  const nameColumnAction = (item: any) =>
-    location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
+  const nameColumnAction = (item: any) => location.assign(`#/services/${encodeURIComponent(item)}`);
 
-  const traceColumnAction = () => location.assign('#/trace_analytics/traces');
+  const traceColumnAction = () => location.assign('#/traces');
 
   const traceIdColumnAction = (item: any) =>
-    location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    location.assign(`#/traces/${encodeURIComponent(item)}`);
 
   const [appConfigs, _] = useState([]);
 
