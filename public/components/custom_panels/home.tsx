@@ -32,7 +32,9 @@ import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { isNameValid } from './helpers/utils';
-import { fetchPanels, uuidRx } from './redux/panel_slice';
+import { CustomPanelViewSO } from './custom_panel_view_so';
+import { coreRefs } from '../../framework/core_refs';
+import { deletePanel, fetchPanels, uuidRx } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
