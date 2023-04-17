@@ -50,7 +50,6 @@ export const SavePanel = ({
   setSubType,
   isSaveAsMetricEnabled,
 }: ISavedPanelProps) => {
-  const [options, setOptions] = useState([]);
   const [checked, setChecked] = useState(false);
   const [svpnlError, setSvpnlError] = useState(null);
 
@@ -61,20 +60,6 @@ export const SavePanel = ({
   useEffect(() => {
     dispatch(fetchPanels());
   }, []);
-
-  const getCustomPabnelList = async (svobj: SavedObjects) => {
-    const optionRes = await svobj
-      .fetchCustomPanels()
-      .then((res: any) => {
-        return res;
-      })
-      .catch((error: any) => setSvpnlError(error));
-    setOptions(optionRes?.panels || []);
-  };
-
-  useEffect(() => {
-    getCustomPabnelList(savedObjects);
-  });
 
   const onToggleChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setChecked(e.target.checked);
