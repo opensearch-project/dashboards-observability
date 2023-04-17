@@ -1,7 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import { async, concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { forEach } from 'lodash';
+import { forEach, last } from 'lodash';
 import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
@@ -25,18 +25,20 @@ interface InitialState {
   panelList: CustomPanelType[];
 }
 
+export const newPanelTemplate = (newName) => ({
+  title: newName,
+  dateCreated: new Date().getTime(),
+  dateModified: new Date().getTime(),
+  visualizations: [],
+  queryFilter: { language: '', query: '' },
+  timeRange: { from: 'now', to: 'now-1d' },
+});
+
 const initialState: InitialState = {
   id: '',
-  panel: {
-    id: '',
-    title: '',
-    visualizations: [],
-    dateCreated: 0,
-    dateModified: 0,
-    queryFilter: { language: '', query: '' },
-    timeRange: { from: 'now', to: 'now-1d' },
-  },
+  panel: newPanelTemplate(''),
   panelList: [],
+  loadingFlag: false,
 };
 
 export const panelSlice = createSlice({
@@ -59,7 +61,15 @@ export const { setPanel, setPanelList } = panelSlice.actions;
 
 export const panelReducer = panelSlice.reducer;
 
-export const selectPanel = (rootState): CustomPanelType => rootState.customPanel.panel;
+export const selectPanel = createSelector(
+  (rootState) => rootState.customPanel.panel,
+  (panel) => normalizedPanel(panel)
+);
+
+const normalizedPanel = (panel): PanelType => ({
+  ...newPanelTemplate(''),
+  ...panel,
+});
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
 
@@ -76,7 +86,6 @@ const fetchSavedObjectPanels$ = () =>
   from(savedObjectPanelsClient.find()).pipe(
     mergeMap((res) => res.savedObjects),
     map(savedObjectToCustomPanel)
-    // tap((res) => console.log('panel', res))
   );
 
 const fetchObservabilityPanels$ = () =>
@@ -84,7 +93,6 @@ const fetchObservabilityPanels$ = () =>
     mergeMap((res) => res),
     mergeMap((res) => res.panels as ObservabilityPanelAttrs[]),
     map((p: ObservabilityPanelAttrs) => ({ ...p, title: p.name, savedObject: false }))
-    // tap((res) => console.log('observability panels', res))
   );
 
 // Fetches all saved Custom Panels
@@ -94,7 +102,6 @@ const fetchCustomPanels = async () => {
     fetchObservabilityPanels$()
   ).pipe(
     map((res) => {
-      console.log('fetchCustomPanels', res);
       return res as CustomPanelListType;
     })
   );
@@ -104,14 +111,12 @@ const fetchCustomPanels = async () => {
 
 export const fetchPanels = () => async (dispatch, getState) => {
   const panels = await fetchCustomPanels();
-  console.log('fetchPanels', { panels });
   dispatch(setPanelList(panels));
 };
 
 export const fetchPanel = (id) => async (dispatch, getState) => {
   const soPanel = await savedObjectPanelsClient.get(id);
   const panel = savedObjectToCustomPanel(soPanel);
-  console.log('fetchPanel', panel);
   dispatch(setPanel(panel));
 };
 
@@ -184,6 +189,26 @@ export const createPanel = (panel) => async (dispatch, getState) => {
   const newPanel = savedObjectToCustomPanel(newSOPanel);
   const panelList = getState().customPanel.panelList;
   dispatch(setPanelList([...panelList, newPanel]));
+
+  window.location.replace(`#/${newPanel.id}`);
+};
+
+export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
+  const { id, ...panelCopy } = {
+    ...panel,
+    title: newPanelName,
+    dateCreated: new Date().getTime(),
+    dateModified: new Date().getTime(),
+  } as PanelType;
+
+  const newSOPanel = await savedObjectPanelsClient.create(panelCopy);
+
+  const newPanel = savedObjectToCustomPanel(newSOPanel);
+  const panelList = getState().customPanel.panelList;
+  dispatch(setPanelList([...panelList, newPanel]));
+  dispatch(setPanel(newPanel));
+
+  window.location.replace(`#/${newPanel.id}`);
 };
 
 const saveRenamedPanel = async (id, name) => {

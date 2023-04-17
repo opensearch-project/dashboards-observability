@@ -213,19 +213,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    onTimeChange(
-      timeProps.start,
-      timeProps.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
-    );
+    const { updatedRanges } = onTimeChange(timeProps.start, timeProps.end, recentlyUsedRanges);
     setStartTime(timeProps.start);
     setEndTime(timeProps.end);
-    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
-
-    setRecentlyUsedRanges(updatedRanges.slice(0, 9));
+    setRecentlyUsedRanges(updatedRanges);
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 

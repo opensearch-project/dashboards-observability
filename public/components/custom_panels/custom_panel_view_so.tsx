@@ -42,7 +42,7 @@ import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
-import { CustomPanelType } from '../../../common/types/custom_panels';
+import { CustomPanelType, PanelType } from '../../../common/types/custom_panels';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 
 import { getCustomModal } from './helpers/modal_containers';
@@ -69,7 +69,10 @@ import { DeleteModal } from '../common/helpers/delete_modal';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import {
+  clonePanel,
+  createPanel,
   fetchPanel,
+  newPanelTemplate,
   selectPanel,
   setPanel,
   setPanelEt,
@@ -147,6 +150,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const dispatch = useDispatch();
 
   const panel = useSelector(selectPanel);
+  const [loading, setLoading] = useState(true);
 
   const [pplFilterValue, setPPLFilterValue] = useState('');
   const [baseQuery, setBaseQuery] = useState('');
@@ -226,34 +230,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     showModal();
   };
 
-  const renameCustomPanel = (editedCustomPanelName: string) => {
-    if (!isNameValid(editedCustomPanelName)) {
-      setToast('Invalid Observability Dashboard name', 'danger');
-      return Promise.reject();
-    }
-
-    const updatedPanel = { ...panel, name: editedCustomPanelName };
-
-    return coreRefs.savedObjectsClient
-      .update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, panel.id, panel)
-      .then((res) => {
-        setOpenPanelName(editedCustomPanelName);
-        setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`);
-      })
-      .catch((err) => {
-        setToast(
-          'Error renaming Observability Dashboard, please make sure you have the correct permission.',
-          'danger'
-        );
-        console.error(err.body.message);
-      });
-  };
-  const onRename = async (newCustomPanelName: string) => {
-    const newPanel = { ...panel, title: newCustomPanelName };
-    dispatch(updatePanel(newPanel));
-    closeModal();
-  };
-
   const renamePanel = () => {
     setModalLayout(
       getCustomModal(
@@ -271,13 +247,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    cloneCustomPanel(newCustomPanelName, panelId).then((id: string) => {
-      window.location.assign(`${last(parentBreadcrumbs)!.href}${id}`);
-    });
+    dispatch(clonePanel(panel, newCustomPanelName));
     closeModal();
   };
 
-  const clonePanel = () => {
+  const clonePanelModal = () => {
     setModalLayout(
       getCustomModal(
         onClone,
@@ -551,7 +525,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           'data-test-subj': 'duplicatePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
-            clonePanel();
+            clonePanelModal();
           },
         },
         {
@@ -567,20 +541,27 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   ];
   // Fetch the Observability Dashboard on Initial Mount
   useEffect(() => {
+    setLoading(true);
     dispatch(fetchPanel(panelId));
   }, []);
 
   // Toggle input type (disabled or not disabled)
   // Disabled when there no visualizations in panels or when the panel is in edit mode
   useEffect(() => {
-    checkDisabledInputs();
-  }, [isEditing]);
+    !loading && checkDisabledInputs();
+  }, [isEditing, loading]);
 
   // Build base query with all of the indices included in the current visualizations
   useEffect(() => {
+    if (loading) {
+      if (panel.id === props.panelId) setLoading(false);
+      else return;
+    }
+
     checkDisabledInputs();
     buildBaseQuery();
-  }, [panel]);
+    setLoading(false);
+  }, [panel, loading]);
 
   // Edit the breadcrumb when panel name changes
   useEffect(() => {
@@ -600,7 +581,9 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     chrome.setBreadcrumbs([...parentBreadcrumbs, ...newBreadcrumb]);
   }, [panelId, panel]);
 
-  return (
+  return loading ? (
+    <></>
+  ) : (
     <div>
       <EuiPage id={`panelView${appPanel ? 'InApp' : ''}`}>
         <EuiPageBody component="div">
