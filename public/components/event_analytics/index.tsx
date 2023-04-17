@@ -32,7 +32,6 @@ export const EventAnalytics = ({
   setBreadcrumbs,
   ...props
 }: EventAnalyticsProps) => {
-  const history = useHistory();
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const eventAnalyticsBreadcrumb = {
@@ -95,7 +94,6 @@ export const EventAnalytics = ({
                     http={http}
                     setToast={setToast}
                     getExistingEmptyTab={getExistingEmptyTab}
-                    history={history}
                     notifications={notifications}
                     queryManager={queryManager}
                   />
