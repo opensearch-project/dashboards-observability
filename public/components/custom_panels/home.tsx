@@ -32,7 +32,7 @@ import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { isNameValid } from './helpers/utils';
-import { fetchPanels } from './redux/panel_slice';
+import { fetchPanels, uuidRx } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -136,8 +136,6 @@ export const Home = ({
         console.error('create error', err);
       });
   };
-
-  const isUuid = (id) => !!id.match(uuidRx);
 
   const fetchSavedObjectPanel = async (id: string) => {
     const soPanel = await coreRefs.savedObjectsClient?.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
