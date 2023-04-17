@@ -51,8 +51,8 @@ export class SaveAsCurrentVisualization extends SavedQuerySaver {
 
   addToPanel({ selectedPanels, saveTitle, notifications, visId }) {
     const { dispatch } = this.dispatchers;
-    const soPanels = selectedPanels.filter((panel) => panel.panel.id.test(uuidRx));
-    const opsPanels = selectedPanels.filter((panel) => !panel.panel.id.test(uuidRx));
+    const soPanels = selectedPanels.filter((panel) => uuidRx.test(panel.panel.id));
+    const opsPanels = selectedPanels.filter((panel) => !uuidRx.test(panel.panel.id));
     dispatch(addVizToPanels(soPanels, visId));
 
     this.panelClient

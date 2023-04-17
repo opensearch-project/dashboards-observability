@@ -139,8 +139,6 @@ export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState
 
 export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
   forEach(panels, (oldPanel) => {
-    console.log(oldPanel);
-    console.log(getState().customPanel.panelList);
     const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.panel.id);
 
     const allVisualizations = panel!.visualizations;
