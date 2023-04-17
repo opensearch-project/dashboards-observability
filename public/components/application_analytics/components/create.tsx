@@ -89,10 +89,7 @@ export const CreateApp = (props: CreateAppProps) => {
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      {
-        text: observabilityTitle,
-        href: `${observabilityID}#/`,
-      },
+      ...parentBreadcrumbs,
       {
         text: 'Applications',
         href: '#/',

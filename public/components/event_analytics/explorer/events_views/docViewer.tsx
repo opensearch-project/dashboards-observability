@@ -20,6 +20,7 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceBlock } from './trace_block/trace_block';
 import { OTEL_TRACE_ID } from '../../../../../common/constants/explorer';
 import { isValidTraceId } from '../../utils';
+import { observabilityTracesID } from '../../../../../common/constants/shared';
 
 interface IDocViewerProps {
   http: HttpSetup;
@@ -102,7 +103,7 @@ export function DocViewer(props: IDocViewerProps) {
       setTracesLink(
         <EuiLink
           className="trace-link"
-          href={`#/trace_analytics/traces/${traceId}`}
+          href={`${observabilityTracesID}#/${traceId}`}
           target="_blank"
           external
         />

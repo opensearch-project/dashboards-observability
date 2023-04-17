@@ -31,8 +31,7 @@ export const Observability = (
       timestampUtils={timestampUtils}
       queryManager={queryManager}
       startPage={startPage}
-      // mountParams={undefined}
-      />,
+    />,
     AppMountParametersProp.element
   );
 

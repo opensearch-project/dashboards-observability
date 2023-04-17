@@ -162,6 +162,7 @@ export function LatencyTable(props: {
           </>
         ),
         align: 'center',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         sortable: ({ dashboard_latency_variance }) =>
           dashboard_latency_variance?.length > 0
             ? dashboard_latency_variance[2] - dashboard_latency_variance[0]
@@ -320,7 +321,7 @@ export function LatencyTable(props: {
               ]);
               if (props.page !== 'app') {
                 props.setRedirect(true);
-                location.assign('#/trace_analytics/traces');
+                location.assign('#/traces');
               }
             }}
           >
