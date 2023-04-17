@@ -621,11 +621,11 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       this.props.parentBreadcrumb,
       {
         text: 'Notebooks',
-        href: '#/notebooks',
+        href: '#/',
       },
       {
         text: path,
-        href: `#/notebooks/${this.props.openedNoteId}`,
+        href: `#/${this.props.openedNoteId}`,
       },
     ]);
   }

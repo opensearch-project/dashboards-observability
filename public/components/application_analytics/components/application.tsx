@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import {
   EuiHorizontalRule,
@@ -214,7 +213,7 @@ export function Application(props: AppDetailProps) {
     callback(switchToEvent);
   }, [appId]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
@@ -228,7 +227,7 @@ export function Application(props: AppDetailProps) {
     ]);
     setStartTimeForApp(sessionStorage.getItem(`${application.name}StartTime`) || 'now-24h');
     setEndTimeForApp(sessionStorage.getItem(`${application.name}EndTime`) || 'now');
-  }, [appId, application.name]);
+  }, [appId, application.name]); */
 
   useEffect(() => {
     const DSL = filtersToDsl(mode, filters, query, appStartTime, appEndTime, 'app', appConfigs);
@@ -274,11 +273,11 @@ export function Application(props: AppDetailProps) {
   const childBreadcrumbs = [
     {
       text: 'Application analytics',
-      href: '#/application_analytics',
+      href: '#/',
     },
     {
       text: `${application.name}`,
-      href: `#/application_analytics/${appId}`,
+      href: `#/${appId}`,
     },
   ];
 
@@ -351,7 +350,7 @@ export function Application(props: AppDetailProps) {
             openFlyout={setSpanFlyoutId}
             DSL={spanDSL}
             setTotal={setTotalSpans}
-            mode='data_prepper'
+            mode="data_prepper"
           />
         </EuiPanel>
       </>
