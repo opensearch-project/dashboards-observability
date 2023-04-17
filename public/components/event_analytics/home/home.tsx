@@ -197,7 +197,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
     await dispatchInitialData(newTabId);
 
     // redirect to explorer
-    history.push('/');
+    history.push('/explorer');
   };
 
   const handleQueryChange = async (query: string) => setSearchQuery(query);
@@ -334,7 +334,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       key="redirect"
       onClick={() => {
         setIsActionsPopoverOpen(false);
-        history.push(`/`);
+        history.push(`/explorer`);
       }}
       data-test-subj="eventHomeAction__explorer"
     >
@@ -451,7 +451,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           fullWidth={false}
-                          onClick={() => history.push(`/`)}
+                          onClick={() => history.push(`/explorer`)}
                           data-test-subj="actionEventExplorer"
                         >
                           Event Explorer

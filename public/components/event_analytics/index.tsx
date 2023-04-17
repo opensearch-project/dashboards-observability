@@ -13,7 +13,6 @@ import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch, useHistory } from 'react-router-dom';
 import { useEffect } from 'react';
 import { RAW_QUERY } from '../../../common/constants/explorer';
-import { ObservabilitySideBar } from '../common/side_nav';
 import { LogExplorer } from './explorer/log_explorer';
 import { Home as EventExplorerHome } from './home/home';
 
@@ -39,7 +38,7 @@ export const EventAnalytics = ({
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const eventAnalyticsBreadcrumb = {
-    text: 'Event analytics',
+    text: 'Logs',
     href: '#/',
   };
 
@@ -60,16 +59,6 @@ export const EventAnalytics = ({
     return emptyTabId;
   };
 
-  useEffect(() => {
-    setBreadcrumbs([
-      ...parentBreadcrumbs,
-      {
-        text: 'Logs',
-        href: `#/`,
-      },
-    ]);
-  }, [setBreadcrumbs, parentBreadcrumbs]);
-
   return (
     <>
       <EuiGlobalToastList
@@ -84,12 +73,12 @@ export const EventAnalytics = ({
           <Route
             path={[`/:id`]}
             render={(routerProps) => {
-              chrome.setBreadcrumbs([
+              setBreadcrumbs([
                 ...parentBreadcrumbs,
                 eventAnalyticsBreadcrumb,
                 {
                   text: 'Explorer',
-                  href: `#/event_analytics/explorer`,
+                  href: `#/explorer`,
                 },
               ]);
               return (
@@ -118,23 +107,16 @@ export const EventAnalytics = ({
           />
           <Route
             exact
-            path={[`/`]}
+            path={[`/`, '/event_analytics']}
             render={() => {
-              // chrome.setBreadcrumbs([
-              //   ...parentBreadcrumbs,
-              //   eventAnalyticsBreadcrumb,
-              //   {
-              //     text: 'Home',
-              //     href: '#/',
-              //   },
-              // ]);
-              // setBreadcrumbs([
-              //   parentBreadcrumbs,
-              //   {
-              //     text: 'Home',
-              //     href: '#/',
-              //   },
-              // ]);
+              setBreadcrumbs([
+                ...parentBreadcrumbs,
+                eventAnalyticsBreadcrumb,
+                {
+                  text: 'Home',
+                  href: '#/',
+                },
+              ]);
               return (
                 <EventExplorerHome
                   http={http}

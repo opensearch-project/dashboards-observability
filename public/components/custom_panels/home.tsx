@@ -34,7 +34,6 @@ import {
   ObservabilityPanelAttrs,
   PanelType,
 } from '../../../common/types/custom_panels';
-import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
@@ -100,7 +99,7 @@ export const Home = ({
   };
 
   const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`observability-logs#/${savedVisualizationId}`);
+    window.location.assign(`observability-logs#/event_analytics/explorer/${savedVisualizationId}`);
   };
 
   // Creates a new CustomPanel

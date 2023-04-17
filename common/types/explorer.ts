@@ -319,7 +319,7 @@ export interface Breadcrumbs {
 
 export interface EventAnalyticsProps {
   chrome: CoreSetup;
-  parentBreadcrumbs: ChromeBreadcrumb;
+  parentBreadcrumbs: ChromeBreadcrumb[];
   pplService: any;
   dslService: any;
   savedObjects: SavedObjectsStart;
@@ -327,7 +327,7 @@ export interface EventAnalyticsProps {
   http: HttpStart;
   notifications: NotificationsStart;
   queryManager: QueryManager;
-  setBreadcrumbs:(newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
 export interface DataConfigPanelProps {
