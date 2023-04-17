@@ -344,11 +344,7 @@ export const CustomPanelTable = ({
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton
-                      fill
-                      href="#/operational_panels/create"
-                      data-test-subj="customPanels__createNewPanels"
-                    >
+                    <EuiButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
                       Create panel
                     </EuiButton>
                   </EuiFlexItem>
@@ -413,7 +409,7 @@ export const CustomPanelTable = ({
                     <EuiButton
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
-                      href="#/operational_panels/create"
+                      href="#/create"
                     >
                       Create panel
                     </EuiButton>
