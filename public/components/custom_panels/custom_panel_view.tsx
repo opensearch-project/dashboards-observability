@@ -219,6 +219,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       timeProps.end,
       recentlyUsedRanges
     );
+    setStartTime(timeProps.start);
+    setEndTime(timeProps.end);
     dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
 
     setRecentlyUsedRanges(updatedRanges.slice(0, 9));

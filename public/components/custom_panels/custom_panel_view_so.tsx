@@ -5,6 +5,7 @@
 /* // eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import { useCallback } from 'react';
 import {
   EuiBreadcrumb,
   EuiButton,
@@ -298,11 +299,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     setIsEditing(true);
   };
 
-  const applyEdits = () => {
-    console.log('applyEdits', panel);
+  const applyEdits = useCallback(() => {
     dispatch(updatePanel(panel));
     setIsEditing(false);
-  };
+    setEditActionType('save');
+  }, [panel]);
 
   const cancelEdit = () => {
     console.log('cancelEdits');
@@ -374,7 +375,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     return;
   };
 
-  const onRefreshFilters = (start: ShortDate, end: ShortDate) => {
+  const onRefreshFilters = async (start: ShortDate, end: ShortDate) => {
     if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast)) {
       return;
     }
@@ -384,13 +385,17 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       return;
     }
 
-    const panelFilterBody = {
-      panelId,
-      query: pplFilterValue,
-      language: 'ppl',
-      to: end,
-      from: start,
-    };
+    await coreRefs.savedObjectsClient?.update('observability-panel', panelId, {
+      ...panel,
+      timeRange: {
+        to: end,
+        from: start,
+      },
+      queryFilter: {
+        query: pplFilterValue,
+        language: 'ppl',
+      },
+    });
 
     setOnRefresh(!onRefresh);
   };
