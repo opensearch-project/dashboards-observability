@@ -16,7 +16,7 @@ import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_pa
 
 const CONCAT_FIELDS = ['objectIdList', 'objectType'];
 
-interface ISavedObjectRequestParams {
+export interface ISavedObjectRequestParams {
   objectId?: string;
   objectIdList?: string[] | string;
   objectType?: string[] | string;
@@ -150,28 +150,6 @@ export default class SavedObjects {
     );
   }
 
-  async bulkUpdateSavedVisualization(params: IBulkUpdateSavedVisualizationRquest) {
-    const finalParams = this.buildRequestBody({
-      query: params.query,
-      fields: params.fields,
-      dateRange: params.dateRange,
-      chartType: params.type,
-      name: params.name,
-    });
-
-    return await Promise.all(
-      params.savedObjectList.map((objectToUpdate) => {
-        finalParams.object_id = objectToUpdate.saved_object.objectId;
-        return this.http.put(
-          `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_VISUALIZATION}`,
-          {
-            body: JSON.stringify(finalParams),
-          }
-        );
-      })
-    );
-  }
-
   async updateSavedVisualizationById(params: any) {
     const finalParams = this.buildRequestBody({
       query: params.query,
@@ -184,7 +162,7 @@ export default class SavedObjects {
       description: params.description,
       subType: params.subType,
       unitsOfMeasure: params.unitsOfMeasure,
-      selectedLabels: params.selectedLabels
+      selectedLabels: params.selectedLabels,
     });
 
     finalParams.object_id = params.objectId;
@@ -247,45 +225,11 @@ export default class SavedObjects {
       description: params.description,
       subType: params.subType,
       unitsOfMeasure: params.unitsOfMeasure,
-      selectedLabels: params.selectedLabels
+      selectedLabels: params.selectedLabels,
     });
 
     return await this.http.post(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_VISUALIZATION}`,
-      {
-        body: JSON.stringify(finalParams),
-      }
-    );
-  }
-
-  async createSavedTimestamp(params: any) {
-    const finalParams = {
-      index: params.index,
-      name: params.name,
-      type: params.type,
-      dsl_type: params.dsl_type,
-    };
-
-    return await this.http.post(
-      `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/timestamp`,
-      {
-        body: JSON.stringify(finalParams),
-      }
-    );
-  }
-
-  async updateTimestamp(params: any) {
-    const finalParams = {
-      objectId: params.index,
-      timestamp: {
-        name: params.name,
-        index: params.index,
-        type: params.type,
-        dsl_type: params.dsl_type,
-      },
-    };
-    return await this.http.put(
-      `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/timestamp`,
       {
         body: JSON.stringify(finalParams),
       }
@@ -299,6 +243,4 @@ export default class SavedObjects {
       )}`
     );
   }
-
-  deleteSavedObjectsByIdList(deleteObjectRequesList: any) {}
 }

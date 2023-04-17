@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Metrics component Renders Metrics component 1`] = `
-<Metrics
+<Component
   config={true}
   layout={
     Object {
@@ -660,7 +660,7 @@ exports[`Metrics component Renders Metrics component 1`] = `
     }
   }
 >
-  <EmptyPlaceholder
+  <Component
     icon="stats"
   >
     <EuiText
@@ -736,6 +736,6 @@ exports[`Metrics component Renders Metrics component 1`] = `
         </EuiTextAlign>
       </div>
     </EuiText>
-  </EmptyPlaceholder>
-</Metrics>
+  </Component>
+</Component>
 `;

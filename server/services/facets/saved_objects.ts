@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ILegacyClusterClient, ScopeableRequest } from '../../../../../src/core/server';
 import {
   sampleQueries,
   sampleVisualizations,
@@ -10,11 +11,11 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default class SavedObjectFacet {
-  constructor(private client: any) {
+  constructor(private client: ILegacyClusterClient) {
     this.client = client;
   }
 
-  fetch = async (request: any, params: any, format: string) => {
+  fetch = async (request: ScopeableRequest, params: Record<string, any>, format: string) => {
     const res = {
       success: false,
       data: {},
@@ -152,7 +153,7 @@ export default class SavedObjectFacet {
       const savedQueryIds: any[] = [];
 
       if (['panels', 'event_analytics'].includes(request.params.sampleRequestor)) {
-        for (var i = 0; i < sampleVisualizations.length; i++) {
+        for (let i = 0; i < sampleVisualizations.length; i++) {
           const params = {
             body: {
               savedVisualization: {
@@ -164,7 +165,7 @@ export default class SavedObjectFacet {
           savedVizIds.push(savedVizRes.objectId);
         }
 
-        for (var i = 0; i < sampleQueries.length; i++) {
+        for (let i = 0; i < sampleQueries.length; i++) {
           const params = {
             body: {
               savedQuery: {
@@ -196,7 +197,7 @@ export default class SavedObjectFacet {
     return this.fetch(
       request,
       {
-        ...params
+        ...params,
       },
       'observability.getObject'
     );

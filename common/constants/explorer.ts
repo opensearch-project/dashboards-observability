@@ -4,8 +4,8 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { VIS_CHART_TYPES } from './shared';
 import { ThresholdUnitType } from '../../public/components/event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
+import { VIS_CHART_TYPES } from './shared';
 
 export const EVENT_ANALYTICS_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/observability-plugin/event-analytics/';
@@ -31,6 +31,11 @@ export const TAB_EVENT_ID_TXT_PFX = 'main-content-events-';
 export const TAB_CHART_ID_TXT_PFX = 'main-content-vis-';
 export const TAB_EVENT_ID = 'main-content-events';
 export const TAB_CHART_ID = 'main-content-vis';
+export const CREATE_TAB_PARAM_KEY = 'create';
+export const CREATE_TAB_PARAM = {
+  [TAB_EVENT_ID]: 'events',
+  [TAB_CHART_ID]: 'visualizations',
+} as const;
 export const HAS_SAVED_TIMESTAMP = 'hasSavedTimestamp';
 export const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
 export const SAVED_QUERY = 'savedQuery';
@@ -308,4 +313,9 @@ export const sampleLogPatternData = {
     '218.148.135.12 - - [2018-07-22T04:18:12.345Z] "GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz_1 HTTP/1.1" 200 4531 "-" \
            "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
   anomalyCount: 0,
+};
+
+export const TYPE_TAB_MAPPING = {
+  [SAVED_QUERY]: TAB_EVENT_ID,
+  [SAVED_VISUALIZATION]: TAB_CHART_ID,
 };

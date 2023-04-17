@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Count distribution component Renders count distribution component with data 1`] = `
-<CountDistribution
+<Component
   countDistribution={
     Object {
       "data": Object {
@@ -168,7 +168,7 @@ exports[`Count distribution component Renders count distribution component with 
       />
     </PlotlyComponent>
   </Plt>
-</CountDistribution>
+</Component>
 `;
 
-exports[`Count distribution component Renders empty count distribution component 1`] = `<CountDistribution />`;
+exports[`Count distribution component Renders empty count distribution component 1`] = `<Component />`;

@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
@@ -33,22 +32,30 @@ import {
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
-import _, { isError } from 'lodash';
+import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { FlyoutContainers } from '../../../common/flyout_containers';
-import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
-import { convertDateTime } from '../../helpers/utils';
-import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
+import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 import {
   pplResponse,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
 } from '../../../../../common/types/custom_panels';
-import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
+import PPLService from '../../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
+import { FlyoutContainers } from '../../../common/flyout_containers';
+import {
+  convertDateTime,
+  displayVisualization,
+  getQueryResponse,
+  isDateValid,
+  parseSavedVisualizations,
+} from '../../helpers/utils';
+import './visualization_flyout.scss';
 
 /*
  * VisaulizationFlyout - This module create a flyout to add visualization
@@ -334,8 +341,14 @@ export const VisaulizationFlyout = ({
 
   // Fetch all saved visualizations
   const fetchSavedVisualizations = async () => {
-    return http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
+    return SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+      objectType: [SAVED_VISUALIZATION],
+      sortOrder: 'desc',
+      fromIndex: 0,
+    })
+      .then((response) => ({
+        visualizations: response.observabilityObjectList.map(parseSavedVisualizations),
+      }))
       .then((res) => {
         if (res.visualizations.length > 0) {
           setSavedVisualizations(res.visualizations);

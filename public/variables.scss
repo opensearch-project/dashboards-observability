@@ -3,5 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/** Shard **/
+$content-tab-padding: 8px;
+
 // dark mode border color
 $border-color-on-dark: #343741;
+
+/** Event Analytics **/
+
+// add-new tab
+$tab-new-line-height: 2.7;
+$tab-new-padding: $content-tab-padding;
