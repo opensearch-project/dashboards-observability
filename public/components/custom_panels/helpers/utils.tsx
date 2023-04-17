@@ -515,3 +515,16 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     />
   );
 };
+
+export const onTimeChange = (
+  start: ShortDate,
+  end: ShortDate,
+  recentlyUsedRanges: DurationRange[]
+) => {
+  const updatedRanges = recentlyUsedRanges.filter((recentlyUsedRange) => {
+    const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
+    return !isDuplicate;
+  });
+  updatedRanges.unshift({ start, end });
+  return { start, end, updatedRanges };
+};

@@ -36,8 +36,10 @@ import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
   CUSTOM_PANELS_API_PREFIX,
+  CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
 import {
+  PanelType,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
@@ -64,6 +66,7 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { coreRefs } from '../../framework/core_refs';
 
 /*
  * "CustomPanelsView" module used to render an Operational Panel
@@ -142,6 +145,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     onAddClick,
   } = props;
 
+  const [panel, setPanel] = useState();
   const [openPanelName, setOpenPanelName] = useState('');
   const [panelCreatedTime, setPanelCreatedTime] = useState('');
   const [pplFilterValue, setPPLFilterValue] = useState('');
@@ -183,6 +187,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     return http
       .get(`${CUSTOM_PANELS_API_PREFIX}/panels/${panelId}`)
       .then((res) => {
+        setPanel(res.operationalPanel);
         setOpenPanelName(res.operationalPanel.name);
         setPanelCreatedTime(res.createdTimeMs);
         setPPLFilterValue(res.operationalPanel.queryFilter.query);
@@ -208,19 +213,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    onTimeChange(
-      timeProps.start,
-      timeProps.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
-    );
+    const { updatedRanges } = onTimeChange(timeProps.start, timeProps.end, recentlyUsedRanges);
     setStartTime(timeProps.start);
     setEndTime(timeProps.end);
-    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
-
-    setRecentlyUsedRanges(updatedRanges.slice(0, 9));
+    setRecentlyUsedRanges(updatedRanges);
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
@@ -269,9 +265,18 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    cloneCustomPanel(newCustomPanelName, panelId).then((id: string) => {
-      window.location.assign(`${last(parentBreadcrumbs)!.href}${id}`);
-    });
+    const newPanel = {
+      ...panel,
+      title: newCustomPanelName,
+      dateCreated: new Date().getTime(),
+      dateModified: new Date().getTime(),
+    } as PanelType;
+    const newSOPanel = await coreRefs.savedObjectsClient!.create(
+      CUSTOM_PANELS_SAVED_OBJECT_TYPE,
+      newPanel
+    );
+
+    window.location.assign(`${last(parentBreadcrumbs)!.href}${newSOPanel.id}`);
     closeModal();
   };
 
