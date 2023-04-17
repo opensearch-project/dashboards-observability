@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBreadcrumb, EuiGlobalToastList, EuiLink, ShortDate } from '@elastic/eui';
+import { EuiBreadcrumb, EuiGlobalToastList, ShortDate } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import _ from 'lodash';
 import React, { ReactChild, useState } from 'react';
 import { useDispatch } from 'react-redux';
 // eslint-disable-next-line @osd/eslint/module_migration
@@ -14,7 +13,6 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
 import {
   CUSTOM_PANELS_API_PREFIX,
-  CUSTOM_PANELS_DOCUMENTATION_URL,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
 import {
@@ -24,15 +22,12 @@ import {
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
 } from '../../../common/constants/shared';
-import { ObservabilityPanelAttrs } from '../../../common/types/custom_panels';
 import { coreRefs } from '../../framework/core_refs';
 import DSLService from '../../services/requests/dsl';
 import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
-import { isNameValid } from './helpers/utils';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { coreRefs } from '../../framework/core_refs';
 import { deletePanel, fetchPanels, uuidRx } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
