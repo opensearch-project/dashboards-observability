@@ -20,14 +20,17 @@ import { isNameValid } from '../helpers/utils';
 interface InitialState {
   id: string;
   panel: CustomPanelType;
-  visualizations: VisualizationType[];
   panelList: CustomPanelType[];
 }
 
 const initialState: InitialState = {
   id: '',
   panel: {
+    id: '',
+    title: '',
     visualizations: [],
+    dateCreated: 0,
+    dateModified: 0,
     queryFilter: { language: '', query: '' },
     timeRange: { from: 'now', to: 'now-1d' },
   },
@@ -109,6 +112,7 @@ export const fetchPanels = () => async (dispatch, getState) => {
 export const fetchPanel = (id) => async (dispatch, getState) => {
   const soPanel = await savedObjectPanelsClient.get(id);
   const panel = savedObjectToCustomPanel(soPanel);
+  console.log('fetchPanel', panel);
   dispatch(setPanel(panel));
 };
 
