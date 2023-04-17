@@ -38,7 +38,11 @@ import {
   OptionType,
 } from '../../../../common/types/application_analytics';
 import { fetchAppById } from '../helpers/utils';
-import { observabilityID, observabilityTitle } from '../../../../common/constants/shared';
+import {
+  observabilityApplicationsID,
+  observabilityID,
+  observabilityTitle,
+} from '../../../../common/constants/shared';
 
 interface CreateAppProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -176,7 +180,7 @@ export const CreateApp = (props: CreateAppProps) => {
 
   const onCancel = () => {
     clearStorage();
-    window.location.assign(`${last(parentBreadcrumbs)!.href}application_analytics`);
+    window.location.assign(`${observabilityApplicationsID}#/`);
   };
 
   return (
