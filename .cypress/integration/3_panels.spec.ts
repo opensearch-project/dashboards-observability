@@ -18,7 +18,6 @@ import {
 
 import { suppressResizeObserverIssue } from '../utils/constants';
 
-
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for visualization paragraph', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
@@ -78,78 +77,113 @@ describe('Creating visualizations', () => {
   });
 });
 
-describe.only('Testing panels table', () => {
+describe('Testing panels table', () => {
   beforeEach(() => {
     moveToPanelHome();
     eraseTestPanels();
   });
 
-  it('Displays error toast for invalid panel name', () => {
-    clickCreatePanelButton();
-    confirmModal();
-    expectToastWith('Invalid Operational Panel name');
-  });
-
-  it('Creates a panel and redirects to the panel', () => {
-    clickCreatePanelButton();
-    cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
-      delay: 50,
+  describe('Without Any Panels', () => {
+    it('Displays error toast for invalid panel name', () => {
+      clickCreatePanelButton();
+      confirmModal();
+      expectToastWith('Invalid Operational Panel name');
     });
-    cy.get('button[data-test-subj="runModalButton"]').click();
-    cy.contains(TEST_PANEL).should('exist');
-  });
 
-  it('Duplicates a legacy panel', () => {
-    createLegacyPanel()
-    selectThePanel();
-    openActionsDropdown();
-    cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
-    cy.get('button[data-test-subj="runModalButton"]').click();
-    cy.contains(TEST_PANEL + " (copy)").should('exist');
-    const duplicate = testPanelTableCell()
-    expectUuid(duplicate)
-  });
-
-  it.only('Duplicates a saved object panel', () => {
-    createSavedObjectPanel()
-    selectThePanel();
-    openActionsDropdown();
-    cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
-    cy.get('button[data-test-subj="runModalButton"]').click();
-    cy.contains(TEST_PANEL + " (copy)").should('exist');
-    const duplicate = testPanelTableCell()
-    expectUuid(duplicate)
-  });
-
-  it('Renames a saved-objects panel', () => {
-    createSavedObjectPanel()
-    cy.reload()
-
-    selectThePanel()
-    openActionsDropdown();
-    cy.get('button[data-test-subj="renameContextMenuItem"]').click();
-    cy.get('input.euiFieldText').focus().type(' (rename)', {
-      delay: 50,
+    it('Creates a panel and redirects to the panel', () => {
+      clickCreatePanelButton();
+      cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      cy.contains(TEST_PANEL).should('exist');
     });
-    cy.get('button[data-test-subj="runModalButton"]').click();
   });
 
-  it('Renames a panel', () => {
-    createLegacyPanel();
-    cy.reload();
-    const cell = cy.get('.euiTableCellContent')
-    expectLegacyId(cell);
-    selectThePanel()
-    openActionsDropdown();
-    cy.get('button[data-test-subj="renameContextMenuItem"]').click();
-    cy.get('input.euiFieldText').focus().type(' (rename)');
-    cy.get('button[data-test-subj="runModalButton"]').click();
-    const renamed = testPanelTableCell()
-    expectUuid(renamed)
+  describe('with a Legacy Panel', () => {
+    it('Duplicates the legacy panel', () => {
+      createLegacyPanel();
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      cy.contains(TEST_PANEL + ' (copy)').should('exist');
+      const duplicate = testPanelTableCell();
+      expectUuid(duplicate);
+    });
+
+    it('Renames the legacy panel', () => {
+      createLegacyPanel();
+      cy.reload();
+      const cell = cy.get('.euiTableCellContent');
+      expectLegacyId(cell);
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="renameContextMenuItem"]').click();
+      cy.get('input.euiFieldText').focus().type(' (rename)');
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      const renamed = testPanelTableCell();
+      expectUuid(renamed);
+    });
+
+    it('Deletes the legacy panel', () => {
+      cy.get('input[data-test-subj="checkboxSelectAll"]').click();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
+
+      cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
+      cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+    });
+  });
+
+  describe('with a SavedObjects Panel', () => {
+    it.only('Duplicates a saved object panel', () => {
+      createSavedObjectPanel();
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      cy.contains(TEST_PANEL + ' (copy)').should('exist');
+      const duplicate = testPanelTableCell();
+      expectUuid(duplicate);
+    });
+
+    it('Renames a saved-objects panel', () => {
+      createSavedObjectPanel();
+      cy.reload();
+
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="renameContextMenuItem"]').click();
+      cy.get('input.euiFieldText').focus().type(' (rename)', {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="runModalButton"]').click();
+    });
+
+    it('Deletes saved object panels', () => {
+      createSavedObjectPanel();
+      cy.get('input[data-test-subj="checkboxSelectAll"]').click();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
+
+      cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
+      cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+    });
   });
 
   it('Searches existing panel', () => {
-    createLegacyPanel()
+    createLegacyPanel();
     cy.get('input[data-test-subj="operationalPanelSearchBar"]')
       .focus()
       .type('this panel should not exist', {
@@ -168,35 +202,6 @@ describe.only('Testing panels table', () => {
     cy.get('a.euiLink')
       .contains(TEST_PANEL + ' (copy) (rename)')
       .should('exist');
-  });
-
-  it('Deletes saved object panels', () => {
-    createSavedObjectPanel()
-    cy.get('input[data-test-subj="checkboxSelectAll"]').click();
-    openActionsDropdown();
-    cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
-
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
-      delay: 50,
-    });
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
-    cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
-  });
-
-  it('Deletes panels', () => {
-    cy.get('input[data-test-subj="checkboxSelectAll"]').click();
-    openActionsDropdown();
-    cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
-
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
-      delay: 50,
-    });
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
-    cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
   });
 
   it('Create a panel for testing', () => {
@@ -514,20 +519,19 @@ describe('Clean up all test data', () => {
   });
 });
 
-
 const moveToEventsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-events#/`);
   cy.wait(delay * 3);
 };
 
 const moveToPanelHome = () => {
-  cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
-    , { timeout: 3000 });
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`, {
+    timeout: 3000,
+  });
   cy.wait(delay * 3);
 };
 
-const testPanelTableCell = () => cy.get('.euiTableCellContent').contains(TEST_PANEL)
+const testPanelTableCell = () => cy.get('.euiTableCellContent').contains(TEST_PANEL);
 
 const moveToTestPanel = () => {
   moveToPanelHome();
@@ -536,10 +540,9 @@ const moveToTestPanel = () => {
   cy.get('h1').contains(TEST_PANEL).should('exist');
 };
 
-const TEST_PANEL_RX = new RegExp(TEST_PANEL + '.*')
+const TEST_PANEL_RX = new RegExp(TEST_PANEL + '.*');
 
 const eraseLegacyPanels = () => {
-
   cy.request({
     method: 'GET',
     failOnStatusCode: false,
@@ -549,38 +552,36 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    response.body.panels
-      .map(panel => {
-        cy.request({
-          method: 'DELETE',
-          failOnStatusCode: false,
-          url: `api/observability/operational_panels/panels/${panel.id}`,
-          headers: {
-            'content-type': 'application/json;charset=UTF-8',
-            'osd-xsrf': true,
-          }
-        }).then(response => {
-          const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1)
-          console.log("erased panel", deletedId)
-        })
-      }
-      )
-  }
-  )
-}
+    response.body.panels.map((panel) => {
+      cy.request({
+        method: 'DELETE',
+        failOnStatusCode: false,
+        url: `api/observability/operational_panels/panels/${panel.id}`,
+        headers: {
+          'content-type': 'application/json;charset=UTF-8',
+          'osd-xsrf': true,
+        },
+      }).then((response) => {
+        const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1);
+        console.log('erased panel', deletedId);
+      });
+    });
+  });
+};
 
 const eraseSavedObjectPaenls = () => {
-  return cy.request({
-    method: 'get',
-    failOnStatusCode: false,
-    url: 'api/saved_objects/_find?type=observability-panel',
-    headers: {
-      'content-type': 'application/json;charset=UTF-8',
-      'osd-xsrf': true,
-    }
-  }).then(response => {
-    response.body.saved_objects
-      .map(soPanel => {
+  return cy
+    .request({
+      method: 'get',
+      failOnStatusCode: false,
+      url: 'api/saved_objects/_find?type=observability-panel',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+    })
+    .then((response) => {
+      response.body.saved_objects.map((soPanel) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
@@ -588,51 +589,52 @@ const eraseSavedObjectPaenls = () => {
           headers: {
             'content-type': 'application/json;charset=UTF-8',
             'osd-xsrf': true,
-          }
-        })
-      })
-  })
-}
+          },
+        });
+      });
+    });
+};
 
 const eraseTestPanels = () => {
-  eraseLegacyPanels()
-  eraseSavedObjectPaenls()
-
-}
+  eraseLegacyPanels();
+  eraseSavedObjectPaenls();
+};
 const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
-const clickCreatePanelButton = () => cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
+const clickCreatePanelButton = () =>
+  cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
 
 const createSavedObjectPanel = () => {
-  const result = cy.request({
-    method: 'POST',
-    failOnStatusCode: false,
-    url: 'api/saved_objects/observability-panel',
-    headers: {
-      'content-type': 'application/json;charset=UTF-8',
-      'osd-xsrf': true,
-    },
-    body: {
-      "attributes": {
-        "title": TEST_PANEL,
-        "description": "",
-        "dateCreated": 1681127334085,
-        "dateModified": 1681127334085,
-        "timeRange": {
-          "to": "now",
-          "from": "now-1d"
+  const result = cy
+    .request({
+      method: 'POST',
+      failOnStatusCode: false,
+      url: 'api/saved_objects/observability-panel',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      body: {
+        attributes: {
+          title: TEST_PANEL,
+          description: '',
+          dateCreated: 1681127334085,
+          dateModified: 1681127334085,
+          timeRange: {
+            to: 'now',
+            from: 'now-1d',
+          },
+          queryFilter: {
+            query: '',
+            language: 'ppl',
+          },
+          visualizations: [],
+          applicationId: '',
         },
-        "queryFilter": {
-          "query": "",
-          "language": "ppl"
-        },
-        "visualizations": [],
-        "applicationId": ""
-      }
-    }
-  }).then(response => console.log(response))
-
-}
+      },
+    })
+    .then((response) => console.log(response));
+};
 
 const createLegacyPanel = () => {
   const result = cy.request({
@@ -643,39 +645,38 @@ const createLegacyPanel = () => {
       'content-type': 'application/json;charset=UTF-8',
       'osd-xsrf': true,
     },
-    body: { panelName: TEST_PANEL }
-  })
-}
+    body: { panelName: TEST_PANEL },
+  });
+};
 
 const expectUuid = (cell) => {
-  cell.find('a').its('href').should('match', uuidRx)
+  cell.find('a').its('href').should('match', uuidRx);
   // const id = url.split('/').slice(-1)
   // expect(id).not.to.match(uuidRx)
-}
+};
 
 const expectLegacyId = (cell) => {
-  cell.find('a').its('href').should('not.match', uuidRx)
+  cell.find('a').its('href').should('not.match', uuidRx);
   // const id = url.split('/').slice(-1)
   // expect(id).not.to.match(uuidRx)
-}
+};
 
 const clickDeleteAction = () => {
   cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
-}
+};
 
 const openActionsDropdown = () => {
   cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
-}
+};
 
 const selectThePanel = () => {
   cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).trigger('mouseover').click();
-}
+};
 
 const expectToastWith = (title) => {
   cy.get('.euiToastHeader__title').contains(title).should('exist');
-}
+};
 
 const confirmModal = () => {
   cy.get('button[data-test-subj="runModalButton"]').click();
-}
-
+};
