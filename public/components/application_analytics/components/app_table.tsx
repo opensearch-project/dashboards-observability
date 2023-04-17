@@ -75,10 +75,7 @@ export function AppTable(props: AppTableProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      {
-        text: observabilityTitle,
-        href: `${observabilityID}#/`,
-      },
+      ...parentBreadcrumbs,
       {
         text: 'Applications',
         href: '#/',

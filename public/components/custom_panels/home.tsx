@@ -26,6 +26,8 @@ import {
   EVENT_ANALYTICS,
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
+  observabilityID,
+  observabilityPanelsID,
 } from '../../../common/constants/shared';
 import {
   CustomPanelListType,
@@ -87,7 +89,7 @@ export const Home = ({
     ...parentBreadcrumbs,
     {
       text: 'Dashboards',
-      href: `${_.last(parentBreadcrumbs)!.href}`,
+      href: `${observabilityPanelsID}#/`,
     },
   ];
 
@@ -98,7 +100,7 @@ export const Home = ({
   };
 
   const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`#/event_analytics/explorer/${savedVisualizationId}`);
+    window.location.assign(`observability-logs#/${savedVisualizationId}`);
   };
 
   // Creates a new CustomPanel

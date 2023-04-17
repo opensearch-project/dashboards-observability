@@ -38,6 +38,7 @@ import {
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
+import { observabilityApplicationsID } from '../../../common/constants/shared';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -48,6 +49,7 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   timestampUtils: TimestampUtils;
   notifications: NotificationsStart;
   queryManager: QueryManager;
+  parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
 export interface AppAnalyticsComponentDeps extends TraceAnalyticsComponentDeps {
@@ -58,6 +60,7 @@ export interface AppAnalyticsComponentDeps extends TraceAnalyticsComponentDeps {
   setQueryWithStorage: (newQuery: string) => void;
   setFiltersWithStorage: (newFilters: FilterType[]) => void;
   setAppConfigs: (newAppConfigs: FilterType[]) => void;
+  parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
 export const Home = (props: HomeProps) => {
@@ -153,7 +156,7 @@ export const Home = (props: HomeProps) => {
   };
 
   const moveToApp = (id: string, type: string) => {
-    window.location.assign(`${last(parentBreadcrumbs)!.href}/${id}`);
+    window.location.assign(`${observabilityApplicationsID}#/${id}`);
     if (type === 'createSetAvailability') {
       setTriggerSwitchToEvent(2);
     }
@@ -434,6 +437,7 @@ export const Home = (props: HomeProps) => {
                 savedObjects={savedObjects}
                 timestampUtils={timestampUtils}
                 notifications={notifications}
+                toasts={toasts}
                 setToasts={setToast}
                 updateApp={updateApp}
                 callback={callback}
