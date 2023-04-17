@@ -30,6 +30,7 @@ import { MetricsGrid } from './view/metrics_grid';
 import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
+import { observabilityLogsID } from '../../../common/constants/shared';
 
 interface MetricsProps {
   http: CoreStart['http'];
@@ -82,7 +83,8 @@ export const Home = ({
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onRefreshFilters = (startTime: ShortDate, endTime: ShortDate) => { // eslint-disable-line
+  const onRefreshFilters = (startTime: ShortDate, endTime: ShortDate) => {
+    // eslint-disable-line
     if (spanValue < 1) {
       setToast('Please add a valid span interval', 'danger');
       return;
@@ -103,7 +105,7 @@ export const Home = ({
   };
 
   const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`#/${savedVisualizationId}`);
+    window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
   };
 
   const onSideBarClick = () => {
