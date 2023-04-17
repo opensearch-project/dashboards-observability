@@ -176,8 +176,6 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   dispatch,
   getState
 ) => {
-  console.log('renameCustomPanel dispatched', { editedCustomPanelName, id });
-
   if (!isNameValid(editedCustomPanelName)) {
     console.log('Invalid Custom Panel name', 'danger');
     return Promise.reject();
