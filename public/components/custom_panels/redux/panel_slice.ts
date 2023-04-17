@@ -1,6 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
-import { concat, from, Observable, of } from 'rxjs';
+import { async, concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { forEach } from 'lodash';
 import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
@@ -16,6 +17,7 @@ import {
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
 import { isNameValid } from '../helpers/utils';
+import { addVisualizationPanel } from '../helpers/add_visualization_helper';
 
 interface InitialState {
   id: string;
@@ -133,6 +135,25 @@ export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState
   } catch (err) {
     console.log('Error updating panel', { err, panel });
   }
+};
+
+export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
+  forEach(panels, (oldPanel) => {
+    console.log(oldPanel);
+    console.log(getState().customPanel.panelList);
+    const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.panel.id);
+
+    const allVisualizations = panel!.visualizations;
+
+    const visualizationsWithNewPanel = addVisualizationPanel(vizId, undefined, allVisualizations);
+
+    const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+    try {
+      dispatch(updatePanel(updatedPanel));
+    } catch (err) {
+      console.error(err?.body?.message || err);
+    }
+  });
 };
 
 export const deletePanel = (id) => async (dispatch, getState) => {

@@ -58,7 +58,7 @@ export const addVisualizationPanel = (
   // client: ILegacyScopedClusterClient,
   // panelId: string,
   savedVisualizationId: string,
-  oldVisualizationId?: string,
+  oldVisualizationId: string | undefined,
   allPanelVisualizations: VisualizationType[]
 ) => {
   try {
