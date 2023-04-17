@@ -15,6 +15,7 @@ import $ from 'jquery';
 import { isEmpty, map } from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { LogExplorerRouterContext } from '..';
 import {
   APP_ANALYTICS_TAB_ID_REGEX,
@@ -53,11 +54,11 @@ export const LogExplorer = ({
   setToast,
   savedObjectId,
   getExistingEmptyTab,
-  history,
   notifications,
   http,
   queryManager,
 }: ILogExplorerProps) => {
+  const history = useHistory();
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
   const tabIds = useSelector(selectQueryTabs).queryTabIds.filter(
