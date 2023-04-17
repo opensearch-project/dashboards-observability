@@ -219,7 +219,7 @@ export class ObservabilityPlugin
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
             editApp: observabilityLogsID,
-            editUrl: `#/explorer/${id}`,
+            editUrl: `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
             icon: OBSERVABILITY_EMBEDDABLE_ICON,
             id,
             savedObjectType: VISUALIZATION_SAVED_OBJECT,
