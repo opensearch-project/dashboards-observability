@@ -314,7 +314,7 @@ export const CustomPanelTable = ({
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle size="l">
-                <h1>Operational panels</h1>
+                <h1>Observability dashboards</h1>
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
@@ -414,7 +414,7 @@ export const CustomPanelTable = ({
                     <EuiButton
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
-                      href="#/operational_panels/create"
+                      href="#/create"
                     >
                       Create panel
                     </EuiButton>
