@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { uuidRx } from '../../../../../public/components/custom_panels/redux/panel_slice';
 import {
   SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPE,
@@ -76,9 +77,8 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
   }
 
   addToPanel({ selectedPanels, saveTitle, notifications, visId }) {
-    const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
-    const soPanels = selectedPanels.filter((id) => id.panel.id.match(uuidRx));
-    const opsPanels = selectedPanels.filter((id) => !id.panel.id.match(uuidRx));
+    const soPanels = selectedPanels.filter((panel) => panel.panel.id.test(uuidRx));
+    const opsPanels = selectedPanels.filter((panel) => !panel.panel.id.test(uuidRx));
     this.panelClient
       .updateBulk({
         selectedCustomPanels: opsPanels,

@@ -118,7 +118,7 @@ const updateLegacyPanel = (panel: CustomPanelType) =>
 
 const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClient.update(panel);
 
-const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
 const isUuid = (id) => !!id.match(uuidRx);
 

@@ -32,18 +32,12 @@ import {
   ObservabilityPanelAttrs,
   PanelType,
 } from '../../../common/types/custom_panels';
-import { ObservabilitySideBar } from '../common/side_nav';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
-<<<<<<< HEAD
-import { CustomPanelType } from '../../../common/types/custom_panels';
-import { deletePanel, fetchPanels } from './redux/panel_slice';
-=======
-import { fetchPanels } from './redux/panel_slice';
->>>>>>> 5f2b777a2c7963680f4bea3746e6badea65b9303
+import { deletePanel, fetchPanels, uuidRx } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -147,8 +141,6 @@ export const Home = ({
         console.error('create error', err);
       });
   };
-
-  const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
   const isUuid = (id) => !!id.match(uuidRx);
 
