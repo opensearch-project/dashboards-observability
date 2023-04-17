@@ -309,7 +309,7 @@ export const CustomPanelTable = ({
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle size="l">
-                <h1>Operational panels</h1>
+                <h1>Observability dashboards</h1>
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
