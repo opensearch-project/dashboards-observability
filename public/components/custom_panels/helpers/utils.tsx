@@ -417,7 +417,7 @@ export const parseSavedVisualizations = (
 export const isDateValid = (
   start: string | Moment | undefined,
   end: string | Moment | undefined,
-  setToast: (
+  setToast?: (
     title: string,
     color?: string,
     text?: React.ReactChild | undefined,
@@ -426,7 +426,7 @@ export const isDateValid = (
   side?: string | undefined
 ) => {
   if (end! < start!) {
-    setToast('Time range entered is invalid', 'danger', undefined, side);
+    setToast && setToast('Time range entered is invalid', 'danger', undefined, side);
     return false;
   } else return true;
 };
@@ -445,22 +445,22 @@ const checkWhereClauseExists = (query: string) => {
 // Validate if the query doesn't contain any Index
 export const isPPLFilterValid = (
   query: string,
-  setToast: (
+  setToast?: (
     title: string,
     color?: string,
     text?: React.ReactChild | undefined,
     side?: string | undefined
-  ) => void
+  ) => [ok: boolean, err: string | null]
 ) => {
   if (checkIndexExists(query)) {
-    setToast('Please remove index from PPL Filter', 'danger', undefined);
-    return false;
+    setToast && setToast('Please remove index from PPL Filter', 'danger', undefined);
+    return [false, 'Please remove index from PPL Filter'];
   }
   if (query && !checkWhereClauseExists(query)) {
-    setToast('PPL filters should start with a where clause', 'danger', undefined);
-    return false;
+    setToast && setToast('PPL filters should start with a where clause', 'danger', undefined);
+    return [false, 'PPL filters should start with a where clause'];
   }
-  return true;
+  return [true, null];
 };
 
 // Renders visualization in the vizualization container component

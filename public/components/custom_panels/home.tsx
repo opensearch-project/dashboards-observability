@@ -12,7 +12,7 @@ import { StaticContext } from 'react-router';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { concat, from, Observable, of } from 'rxjs';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
@@ -38,7 +38,14 @@ import { CustomPanelView } from './custom_panel_view';
 import { isNameValid } from './helpers/utils';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { coreRefs } from '../../framework/core_refs';
-import { fetchPanels } from './redux/panel_slice';
+import {
+  addToast,
+  dismissToast,
+  fetchPanels,
+  selectToastRightSide,
+  selectToasts,
+  setToastRightSide,
+} from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -75,9 +82,10 @@ export const Home = ({
   coreSavedObjects,
   setBreadcrumbs,
 }: PanelHomeProps) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toasts = useSelector(selectToasts);
+  const toastRightSide = useSelector(selectToastRightSide);
+
   const [loading, setLoading] = useState(false);
-  const [toastRightSide, setToastRightSide] = useState<boolean>(true);
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
 
@@ -93,8 +101,10 @@ export const Home = ({
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
-    setToastRightSide(!side ? true : false);
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+    dispatch(setToastRightSide(side !== 'left'));
+    dispatch(addToast({ id: new Date().toISOString(), title, text, color } as Toast));
+    // setToastRightSide(!side ? true : false);
+    // setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
   const onEditClick = (savedVisualizationId: string) => {
@@ -276,7 +286,7 @@ export const Home = ({
       <EuiGlobalToastList
         toasts={toasts}
         dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
+          dispatch(dismissToast(removedToast.id));
         }}
         side={toastRightSide ? 'right' : 'left'}
         toastLifeTimeMs={6000}

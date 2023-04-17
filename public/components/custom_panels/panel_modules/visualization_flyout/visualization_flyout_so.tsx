@@ -35,6 +35,7 @@ import {
 import _, { isError } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useDispatch } from 'react-redux';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
 import { convertDateTime } from '../../helpers/utils';
@@ -51,6 +52,7 @@ import {
 import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
+import { addToast } from '../../redux/panel_slice';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -98,7 +100,6 @@ export const VisaulizationFlyoutSO = ({
   start,
   end,
   http,
-  setToast,
   savedObjects,
   pplService,
   setPanelVisualizations,
@@ -125,6 +126,12 @@ export const VisaulizationFlyoutSO = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
+
+  const dispatch = useDispatch();
+
+  const setToast = (title, color, text, side) => {
+    dispatch(addToast({ title, color, text, side }));
+  };
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {

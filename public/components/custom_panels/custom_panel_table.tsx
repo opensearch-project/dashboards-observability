@@ -46,7 +46,8 @@ import { CustomPanelListType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import { createPanel, fetchPanels, renameCustomPanel, selectPanelList } from './redux/panel_slice';
+import { addToast, createPanel, fetchPanels, newPanelTemplate, renameCustomPanel, selectPanelList } from './redux/panel_slice';
+import { isNameValid } from './helpers/utils';
 
 /*
  * "CustomPanelTable" module, used to view all the saved panels
@@ -93,14 +94,15 @@ export const CustomPanelTable = ({
 
   const dispatch = useDispatch();
 
+
+  const setToast = (title, color?, text?, side?) => {
+    dispatch(addToast({ title, color, text, side }));
+  };
+
   useEffect(() => {
     setBreadcrumbs(parentBreadcrumbs);
     dispatch(fetchPanels());
   }, []);
-
-  // useEffect(() =>
-  //   console.log({ customPanels, selectedCustomPanels }, [customPanels, selectedCustomPanels])
-  // );
 
   useEffect(() => {
     const url = window.location.hash.split('/');
@@ -118,7 +120,8 @@ export const CustomPanelTable = ({
   };
 
   const onCreate = async (newCustomPanelName: string) => {
-    createCustomPanel(newCustomPanelName);
+    const newPanel = newPanelTemplate(newCustomPanelName)
+    dispatch(createPanel(newPanel))
     closeModal();
   };
 
@@ -136,9 +139,8 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Custom Panels ${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-    } successfully deleted!`;
+    const toastMessage = `Custom Panels ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
+      } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
     deleteCustomPanelList(PanelList, toastMessage);
     closeModal();
@@ -301,7 +303,6 @@ export const CustomPanelTable = ({
     },
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
-  // console.log('rendering', { customPanels, selectedCustomPanels });
   return (
     <div style={pageStyles}>
       <EuiPage>
@@ -344,11 +345,7 @@ export const CustomPanelTable = ({
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton
-                      fill
-                      href="#/operational_panels/create"
-                      data-test-subj="customPanels__createNewPanels"
-                    >
+                    <EuiButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
                       Create panel
                     </EuiButton>
                   </EuiFlexItem>
@@ -368,13 +365,7 @@ export const CustomPanelTable = ({
                 <EuiHorizontalRule margin="m" />
                 <EuiInMemoryTable
                   loading={loading}
-                  items={
-                    searchQuery
-                      ? customPanels.filter((customPanel) =>
-                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
-                      : customPanels
-                  }
+                  items={customPanels.map(p => p as CustomPanelListType)}
                   itemId="id"
                   columns={tableColumns}
                   tableLayout="auto"
@@ -391,7 +382,11 @@ export const CustomPanelTable = ({
                   allowNeutralSort={false}
                   isSelectable={true}
                   selection={{
-                    onSelectionChange: (items) => setselectedCustomPanels(items),
+
+                    onSelectionChange: (items) => {
+                      console.log("InMemoryTable selection callback", items)
+                      setselectedCustomPanels(items)
+                    },
                   }}
                 />
               </>
@@ -413,7 +408,7 @@ export const CustomPanelTable = ({
                     <EuiButton
                       data-test-subj="customPanels__emptyCreateNewPanels"
                       fullWidth={false}
-                      href="#/operational_panels/create"
+                      href="#/create"
                     >
                       Create panel
                     </EuiButton>

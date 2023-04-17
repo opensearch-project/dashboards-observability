@@ -34,14 +34,14 @@ import _ from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRef } from 'react';
 import DSLService from '../../services/requests/dsl';
-import { CoreStart, SimpleSavedObject } from '../../../../../src/core/public';
+import { CoreStart, SimpleSavedObject, Toast } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
-import { CustomPanelType } from '../../../common/types/custom_panels';
+import { CustomPanelType, VisualizationType } from '../../../common/types/custom_panels';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 
 import { getCustomModal } from './helpers/modal_containers';
@@ -68,6 +68,7 @@ import { DeleteModal } from '../common/helpers/delete_modal';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import {
+  addToast,
   fetchPanel,
   selectPanel,
   setPanel,
@@ -93,7 +94,6 @@ import { coreRefs } from '../../framework/core_refs';
  * renameCustomPanel: Rename function for the panel
  * deleteCustomPanel: Delete function for the panel
  * cloneCustomPanel: Clone function for the panel
- * setToast: create Toast function
  * onEditClick: Edit function for visualization
  * startTime: Starting time
  * endTime: Ending time
@@ -112,12 +112,6 @@ interface CustomPanelViewProps {
   parentBreadcrumbs: EuiBreadcrumb[];
   deleteCustomPanel: (customPanelId: string, customPanelName: string) => Promise<any>;
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   onEditClick: (savedVisualizationId: string) => any;
   childBreadcrumbs?: EuiBreadcrumb[];
   appId?: string;
@@ -138,7 +132,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     updateAvailabilityVizId,
     deleteCustomPanel,
     cloneCustomPanel,
-    setToast,
     onEditClick,
     onAddClick,
   } = props;
@@ -179,6 +172,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   // DateTimePicker States/add
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
+
+  const setToast = (title, color, text, side) => {
+    dispatch(addToast({ title, color, text, side }));
+  };
 
   const handleQueryChange = (newQuery: string) => {
     setPPLFilterValue(newQuery);
@@ -227,7 +224,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const renameCustomPanel = (editedCustomPanelName: string) => {
     if (!isNameValid(editedCustomPanelName)) {
-      setToast('Invalid Custom Panel name', 'danger');
+      dispatch(addToast({ title: 'Invalid Custom Panel name', color: 'danger' } as Toast));
       return Promise.reject();
     }
 
@@ -237,12 +234,19 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       .update(CUSTOM_PANELS_SAVED_OBJECT_TYPE, panel.id, panel)
       .then((res) => {
         setOpenPanelName(editedCustomPanelName);
-        setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
+        dispatch(
+          addToast({
+            title: `Operational Panel successfully renamed into "${editedCustomPanelName}"`,
+          } as Toast)
+        );
       })
       .catch((err) => {
-        setToast(
-          'Error renaming Operational Panel, please make sure you have the correct permission.',
-          'danger'
+        dispatch(
+          addToast({
+            title:
+              'Error renaming Operational Panel, please make sure you have the correct permission.',
+            color: 'danger',
+          } as Toast)
         );
         console.error(err.body.message);
       });
@@ -358,7 +362,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     //   const visData: SavedVisualizationType = await fetchVisualizationById(
     //     http,
     //     visualizationId,
-    //     (error: VizContainerError) => setToast(error.errorMessage, 'danger')
+    //     (error: VizContainerError) => dispatch(addToast({title: error.errorMessage, color: 'danger'} as Toast))
     //   );
 
     //   if (!_.isEmpty(visData)) {
@@ -474,17 +478,19 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   }) => {
     const allVisualizations = panel!.visualizations;
 
-    const visualizationsWithNewPanel = addVisualizationPanel(
+    const visualizationsWithNewPanel: VisualizationType[] = addVisualizationPanel(
       savedVisualizationId,
       oldVisualizationId,
       allVisualizations
     );
 
-    const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+    const updatedPanel: CustomPanelType = { ...panel, visualizations: visualizationsWithNewPanel };
     try {
       dispatch(updatePanel(updatedPanel));
     } catch (err) {
-      setToast('Error adding visualization to this panel', 'danger');
+      dispatch(
+        addToast({ title: 'Error adding visualization to this panel', color: 'danger' } as Toast)
+      );
       console.error(err?.body?.message || err);
     }
   };
@@ -503,7 +509,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         pplFilterValue={pplFilterValue}
         start={panel.timeRange.from}
         end={panel.timeRange.to}
-        setToast={setToast}
         http={coreRefs.http!}
         pplService={pplService}
         setPanelVisualizations={setPanelVisualizations}

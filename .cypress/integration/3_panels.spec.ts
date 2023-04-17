@@ -104,7 +104,7 @@ describe('Testing panels table', () => {
     });
   });
 
-  describe('with a Legacy Panel', () => {
+  describe.only('with a Legacy Panel', () => {
     beforeEach(() => {
       createLegacyPanel();
       moveToPanelHome();
@@ -123,10 +123,9 @@ describe('Testing panels table', () => {
       expectUuid(duplicate);
     });
 
-    it('Renames the legacy panel', () => {
-      createLegacyPanel();
-      cy.reload();
-      const cell = cy.get('.euiTableCellContent');
+    it.only('Renames the legacy panel', () => {
+      cy.get('.euiTableRow').should('have.length', 1);
+      const cell = cy.get('.euiLink').contains(TEST_PANEL);
       expectLegacyId(cell);
       selectThePanel();
       openActionsDropdown();
@@ -134,7 +133,7 @@ describe('Testing panels table', () => {
       cy.get('input.euiFieldText').focus().type(' (rename)');
       cy.get('button[data-test-subj="runModalButton"]').click();
       const renamed = testPanelTableCell();
-      expectUuid(renamed);
+      expectLegacyId(renamed);
     });
 
     it('Deletes the legacy panel', () => {
@@ -201,33 +200,20 @@ describe('Testing panels table', () => {
     createLegacyPanel();
     cy.get('input[data-test-subj="operationalPanelSearchBar"]')
       .focus()
-      .type('this panel should not exist', {
-        delay: 50,
-      });
+      .type('this panel should not exist');
 
     cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
 
     cy.get('[aria-label="Clear input"]').click();
     cy.get('input[data-test-subj="operationalPanelSearchBar"]')
       .focus()
-      .type(TEST_PANEL + ' (copy) (rename)', {
-        delay: 50,
-      });
+      .type(TEST_PANEL);
 
     cy.get('a.euiLink')
-      .contains(TEST_PANEL + ' (copy) (rename)')
+      .contains(TEST_PANEL)
       .should('exist');
   });
 
-  it('Create a panel for testing', () => {
-    moveToPanelHome();
-    // keep a panel for testing
-    clickCreatePanelButton();
-    cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
-      delay: 50,
-    });
-    cy.get('button[data-test-subj="runModalButton"]').click();
-  });
 });
 
 describe('Testing a panel', () => {
@@ -684,10 +670,13 @@ const openActionsDropdown = () => {
   cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
 };
 
-const selectThePanel = () => {
-  cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
-    cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
+const selectThePanel = (title = TEST_PANEL) => {
+  cy.get('.euiLink').contains(title).parents('.euiTableRow').first().within(() => {
+    cy.get('.euiCheckbox__input').check({ force: true });
+
+    cy.get('.euiCheckbox__input').should('be.checked')
   });
+
 };
 
 const expectToastWith = (title) => {

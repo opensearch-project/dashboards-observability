@@ -22,16 +22,25 @@ interface InitialState {
   panel: CustomPanelType;
   visualizations: VisualizationType[];
   panelList: CustomPanelType[];
+  toasts: Toast[];
+  toastRightSide: boolean;
 }
+
+export const newPanelTemplate = (newName) => ({
+  title: newName,
+  dateCreated: new Date().getTime(),
+  dateModified: new Date().getTime(),
+  visualizations: [],
+  queryFilter: { language: '', query: '' },
+  timeRange: { from: 'now', to: 'now-1d' },
+})
 
 const initialState: InitialState = {
   id: '',
-  panel: {
-    visualizations: [],
-    queryFilter: { language: '', query: '' },
-    timeRange: { from: 'now', to: 'now-1d' },
-  },
+  panel: newPanelTemplate(''),
   panelList: [],
+  toasts: [],
+  toastRightSide: false,
 };
 
 export const panelSlice = createSlice({
@@ -47,19 +56,42 @@ export const panelSlice = createSlice({
     setPanelList: (state, action) => {
       return { ...state, panelList: action.payload };
     },
+
+    addToast: (state, action) => {
+      const { title, text, color } = { title: '', text: '', color: 'success', ...action.payload };
+      const newToast = { id: new Date().toISOString(), title, text, color };
+      const toasts = [...state.toasts, newToast];
+      const toastRightSide = action.payload.side !== 'left';
+      return { ...state, toasts, toastRightSide };
+    },
+    dismissToast: (state, action) => {
+      const toasts = state.toasts.filter((t) => t.id === action.payload.id);
+      return { ...state, toasts };
+    },
+    setToastRightSide: (state, action) => ({ ...state, toastRightSide: action.payload }),
   },
 });
 
-export const { setPanel, setPanelList } = panelSlice.actions;
+export const {
+  addToast,
+  dismissToast,
+  setPanel,
+  setPanelList,
+  setToastRightSide,
+} = panelSlice.actions;
 
 export const panelReducer = panelSlice.reducer;
 
 export const selectPanel = (rootState): CustomPanelType => rootState.customPanel.panel;
 
-export const selectPanelList = (rootState): CustomPanelType[] => {
+export const selectPanelList = (rootState): CustomPaneType[] => {
   // console.log('selectPanelList', { rootState, panelList: rootState.customPanel.panelList });
   return rootState.customPanel.panelList;
 };
+
+export const selectToasts = (rootState) => rootState.customPanel.toasts;
+
+export const selectToastRightSide = (rootState) => rootState.customPanel.toastRightSide;
 
 // export const selectPanelList = createSelector(
 //   rootState => { console.log("selectPanelList", { rootState }); return rootState.customPanel.panelList },
@@ -144,7 +176,12 @@ export const deletePanel = (id) => async (dispatch, getState) => {
   dispatch(setPanelList(panelList));
 };
 
-export const createPanel = (panel) => async (dispatch, getState) => {
+export const createPanel = (panel: PanelType) => async (dispatch, getState) => {
+  if (!isNameValid(panel.title)) {
+    dispatch(addToast({ title: 'Invalid Operational Panel name', color: 'danger' }));
+    return;
+  }
+
   const newSOPanel = await savedObjectPanelsClient.create(panel);
   const newPanel = savedObjectToCustomPanel(newSOPanel);
   const panelList = getState().customPanel.panelList;
@@ -204,6 +241,32 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   //   );
   //   console.error(err.body.message);
   // }
+};
+
+export const addVisualizationToCurrentPanel = ({
+  savedVisualizationId,
+  oldVisualizationId,
+}: {
+  savedVisualizationId: string;
+  oldVisualizationId?: string;
+}) => (dispatch, getState) => {
+  const panel = getState().customPanel.panel;
+  console.log('addvis ', { panel });
+  const allVisualizations = panel!.visualizations;
+
+  const visualizationsWithNewPanel = addVisualizationPanel(
+    savedVisualizationId,
+    oldVisualizationId,
+    allVisualizations
+  );
+
+  const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+  try {
+    dispatch(updatePanel(updatedPanel));
+  } catch (err) {
+    dispatch(addToast({ msg: 'Error adding visualization to this panel', color: 'danger' }));
+    console.error(err?.body?.message || err);
+  }
 };
 
 /*
