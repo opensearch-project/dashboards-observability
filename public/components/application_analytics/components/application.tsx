@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import {
   EuiHorizontalRule,
@@ -276,12 +275,12 @@ export function Application(props: AppDetailProps) {
 
   const childBreadcrumbs = [
     {
-      text: 'Application analytics',
-      href: '#/application_analytics',
+      text: 'Applications',
+      href: '#/',
     },
     {
       text: `${application.name}`,
-      href: `#/application_analytics/${appId}`,
+      href: `#/${appId}`,
     },
   ];
 
@@ -296,6 +295,7 @@ export function Application(props: AppDetailProps) {
           endTime={appEndTime}
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           toasts={toasts}
         />
@@ -315,6 +315,7 @@ export function Application(props: AppDetailProps) {
           page="app"
           nameColumnAction={nameColumnAction}
           traceColumnAction={traceColumnAction}
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           startTime={appStartTime}
           endTime={appEndTime}
@@ -338,6 +339,7 @@ export function Application(props: AppDetailProps) {
         <TracesContent
           {...props}
           page="app"
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           traceIdColumnAction={traceIdColumnAction}
           startTime={appStartTime}
@@ -355,7 +357,7 @@ export function Application(props: AppDetailProps) {
             openFlyout={setSpanFlyoutId}
             DSL={spanDSL}
             setTotal={setTotalSpans}
-            mode='data_prepper'
+            mode="data_prepper"
           />
         </EuiPanel>
       </>

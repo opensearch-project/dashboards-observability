@@ -58,7 +58,29 @@ exports[`Dashboard component renders dashboard 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBrand": [MockFunction],
-      "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbs": [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              undefined,
+              Object {
+                "href": "#/trace_analytics/home",
+                "text": "Trace analytics",
+              },
+              Object {
+                "href": "#/trace_analytics/home",
+                "text": "Dashboard",
+              },
+            ],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
       "setCustomNavLink": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
@@ -305,7 +327,29 @@ exports[`Dashboard component renders dashboard 1`] = `
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
         "setBrand": [MockFunction],
-        "setBreadcrumbs": [MockFunction],
+        "setBreadcrumbs": [MockFunction] {
+          "calls": Array [
+            Array [
+              Array [
+                undefined,
+                Object {
+                  "href": "#/trace_analytics/home",
+                  "text": "Trace analytics",
+                },
+                Object {
+                  "href": "#/trace_analytics/home",
+                  "text": "Dashboard",
+                },
+              ],
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "setCustomNavLink": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
@@ -2372,7 +2416,29 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBrand": [MockFunction],
-      "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbs": [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              undefined,
+              Object {
+                "href": "#/trace_analytics/home",
+                "text": "Trace analytics",
+              },
+              Object {
+                "href": "#/trace_analytics/home",
+                "text": "Dashboard",
+              },
+            ],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
       "setCustomNavLink": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
@@ -2614,7 +2680,29 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
         "setBrand": [MockFunction],
-        "setBreadcrumbs": [MockFunction],
+        "setBreadcrumbs": [MockFunction] {
+          "calls": Array [
+            Array [
+              Array [
+                undefined,
+                Object {
+                  "href": "#/trace_analytics/home",
+                  "text": "Trace analytics",
+                },
+                Object {
+                  "href": "#/trace_analytics/home",
+                  "text": "Dashboard",
+                },
+              ],
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "setCustomNavLink": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
@@ -4654,7 +4742,29 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBrand": [MockFunction],
-      "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbs": [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              undefined,
+              Object {
+                "href": "#/trace_analytics/home",
+                "text": "Trace analytics",
+              },
+              Object {
+                "href": "#/trace_analytics/home",
+                "text": "Dashboard",
+              },
+            ],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
       "setCustomNavLink": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
@@ -4902,7 +5012,29 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
         "setBrand": [MockFunction],
-        "setBreadcrumbs": [MockFunction],
+        "setBreadcrumbs": [MockFunction] {
+          "calls": Array [
+            Array [
+              Array [
+                undefined,
+                Object {
+                  "href": "#/trace_analytics/home",
+                  "text": "Trace analytics",
+                },
+                Object {
+                  "href": "#/trace_analytics/home",
+                  "text": "Dashboard",
+                },
+              ],
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
         "setCustomNavLink": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
