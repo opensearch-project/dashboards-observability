@@ -1,12 +1,56 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Log Config component renders empty log config 1`] = `
-<LogConfig
+<Component
   appConfigs={Array []}
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   description=""
@@ -339,7 +383,7 @@ exports[`Log Config component renders empty log config 1`] = `
                                   onBlur={[Function]}
                                   onFocus={[Function]}
                                 >
-                                  <Autocomplete
+                                  <Component
                                     baseQuery=""
                                     dslService={
                                       Object {
@@ -442,7 +486,7 @@ exports[`Log Config component renders empty log config 1`] = `
                                         </EuiValidatableControl>
                                       </EuiTextArea>
                                     </div>
-                                  </Autocomplete>
+                                  </Component>
                                   <EuiBadge
                                     className="ppl-link ppl-link-light"
                                     color="hollow"
@@ -497,16 +541,60 @@ exports[`Log Config component renders empty log config 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</LogConfig>
+</Component>
 `;
 
 exports[`Log Config component renders with query 1`] = `
-<LogConfig
+<Component
   appConfigs={Array []}
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   description=""
@@ -844,7 +932,7 @@ exports[`Log Config component renders with query 1`] = `
                                   onBlur={[Function]}
                                   onFocus={[Function]}
                                 >
-                                  <Autocomplete
+                                  <Component
                                     baseQuery=""
                                     dslService={
                                       Object {
@@ -947,7 +1035,7 @@ exports[`Log Config component renders with query 1`] = `
                                         </EuiValidatableControl>
                                       </EuiTextArea>
                                     </div>
-                                  </Autocomplete>
+                                  </Component>
                                   <EuiBadge
                                     className="ppl-link ppl-link-light"
                                     color="hollow"
@@ -1002,5 +1090,5 @@ exports[`Log Config component renders with query 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</LogConfig>
+</Component>
 `;

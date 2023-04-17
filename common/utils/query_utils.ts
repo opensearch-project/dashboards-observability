@@ -13,7 +13,6 @@ import {
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
-  PPL_STATS_REGEX,
 } from '../../common/constants/shared';
 
 /**
@@ -42,6 +41,7 @@ export const preprocessQuery = ({
   selectedPatternField,
   patternRegex,
   filteredPattern,
+  whereClause,
 }: {
   rawQuery: string;
   startTime: string;
@@ -51,6 +51,7 @@ export const preprocessQuery = ({
   selectedPatternField?: string;
   patternRegex?: string;
   filteredPattern?: string;
+  whereClause?: string;
 }) => {
   let finalQuery = '';
 
@@ -65,7 +66,13 @@ export const preprocessQuery = ({
 
   finalQuery = `${tokens![1]}=${
     tokens![2]
-  } | where ${timeField} >= '${start}' and ${timeField} <= '${end}'${tokens![3]}`;
+  } | where ${timeField} >= '${start}' and ${timeField} <= '${end}'`;
+
+  if (whereClause) {
+    finalQuery += ` AND ${whereClause}`;
+  }
+
+  finalQuery += tokens![3];
 
   if (isLiveQuery) {
     finalQuery = finalQuery + ` | sort - ${timeField}`;

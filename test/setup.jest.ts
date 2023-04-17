@@ -5,11 +5,13 @@
 
 // import '@testing-library/jest-dom/extend-expect';
 import { configure } from '@testing-library/react';
+import { setOSDHttp, setOSDSavedObjectsClient } from '../common/utils';
+import { coreStartMock } from './__mocks__/coreMocks';
 
 configure({ testIdAttribute: 'data-test-subj' });
 
 window.URL.createObjectURL = () => '';
-HTMLCanvasElement.prototype.getContext = () => '';
+HTMLCanvasElement.prototype.getContext = () => '' as any;
 window.IntersectionObserver = class IntersectionObserver {
   constructor() {}
 
@@ -28,7 +30,7 @@ window.IntersectionObserver = class IntersectionObserver {
   unobserve() {
     return null;
   }
-};
+} as any;
 
 jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'random-id');
 
@@ -38,4 +40,20 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   },
 }));
 
+jest.mock('../public/services/saved_objects/saved_object_client/saved_objects_actions', () => {
+  return {
+    SavedObjectsActions: {
+      get: jest.fn().mockResolvedValue({
+        observabilityObjectList: [],
+      }),
+      getBulk: jest.fn().mockResolvedValue({
+        observabilityObjectList: [],
+      }),
+    },
+  };
+});
+
 jest.setTimeout(30000);
+
+setOSDHttp(coreStartMock.http);
+setOSDSavedObjectsClient(coreStartMock.savedObjects.client);

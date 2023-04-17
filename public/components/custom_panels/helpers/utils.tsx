@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
@@ -11,24 +10,26 @@ import _ from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
+import { CoreStart } from '../../../../../../src/core/public';
 import {
   PPL_DATE_FORMAT,
   PPL_INDEX_REGEX,
   PPL_WHERE_CLAUSE_REGEX,
 } from '../../../../common/constants/shared';
-import PPLService from '../../../services/requests/ppl';
-import { CoreStart } from '../../../../../../src/core/public';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
+import { QueryManager } from '../../../../common/query_manager';
 import {
-  VisualizationType,
   SavedVisualizationType,
+  VisualizationType,
   VizContainerError,
 } from '../../../../common/types/custom_panels';
-import { Visualization } from '../../visualizations/visualization';
-import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
-import { QueryManager } from '../../../../common/query_manager';
-import { getDefaultVisConfig } from '../../event_analytics/utils';
+import { SavedVisualization } from '../../../../common/types/explorer';
 import { removeBacktick } from '../../../../common/utils';
+import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
+import PPLService from '../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
+import { getDefaultVisConfig } from '../../event_analytics/utils';
+import { Visualization } from '../../visualizations/visualization';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -170,11 +171,17 @@ export const fetchVisualizationById = async (
   savedVisualizationId: string,
   setIsError: (error: VizContainerError) => void
 ) => {
-  let savedVisualization = {} as SavedVisualizationType;
-  await http
-    .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations/${savedVisualizationId}`)
+  let savedVisualization = {} as SavedVisualization;
+
+  await SavedObjectsActions.get({ objectId: savedVisualizationId })
     .then((res) => {
-      savedVisualization = res.visualization;
+      const visualization = (res.observabilityObjectList[0] as ObservabilitySavedVisualization)
+        .savedVisualization;
+      savedVisualization = {
+        ...visualization,
+        id: res.observabilityObjectList[0].objectId,
+        timeField: visualization.selected_timestamp.name,
+      };
     })
     .catch((err) => {
       setIsError({
@@ -382,6 +389,36 @@ export const onTimeChange = (
   setRecentlyUsedRanges(recentlyUsedRangeObject.slice(0, 9));
 };
 
+/**
+ * Convert an ObservabilitySavedVisualization into SavedVisualizationType,
+ * which is used in panels.
+ */
+export const parseSavedVisualizations = (
+  visualization: ObservabilitySavedVisualization
+): SavedVisualizationType => {
+  return {
+    id: visualization.objectId,
+    name: visualization.savedVisualization.name,
+    query: visualization.savedVisualization.query,
+    type: visualization.savedVisualization.type,
+    timeField: visualization.savedVisualization.selected_timestamp.name,
+    selected_date_range: visualization.savedVisualization.selected_date_range,
+    selected_fields: visualization.savedVisualization.selected_fields,
+    user_configs: visualization.savedVisualization.user_configs
+      ? JSON.parse(visualization.savedVisualization.user_configs)
+      : {},
+    sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
+      ? visualization.savedVisualization.sub_type
+      : '',
+    units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
+      ? visualization.savedVisualization.units_of_measure
+      : '',
+    ...(visualization.savedVisualization.application_id
+      ? { application_id: visualization.savedVisualization.application_id }
+      : {}),
+  };
+};
+
 // Function to check date validity
 export const isDateValid = (
   start: string | Moment | undefined,
@@ -425,7 +462,7 @@ export const isPPLFilterValid = (
     setToast('Please remove index from PPL Filter', 'danger', undefined);
     return false;
   }
-  if (!checkWhereClauseExists(query)) {
+  if (query && !checkWhereClauseExists(query)) {
     setToast('PPL filters should start with a where clause', 'danger', undefined);
     return false;
   }

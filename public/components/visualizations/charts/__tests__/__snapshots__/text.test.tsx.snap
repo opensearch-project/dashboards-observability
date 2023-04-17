@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Text component Renders text component 1`] = `
-<Text
+<Component
   visualizations={
     Object {
       "data": Object {
@@ -688,5 +688,5 @@ exports[`Text component Renders text component 1`] = `
       </div>
     </EuiMarkdownFormat>
   </div>
-</Text>
+</Component>
 `;

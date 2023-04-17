@@ -12,7 +12,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
     }
   }
 >
-  <TopMenu
+  <Component
     IsTopPanelDisabled={true}
     editMode={true}
     endTime="now"
@@ -84,7 +84,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                   <div
                     className="euiFlexItem"
                   >
-                    <SearchBar>
+                    <Component>
                       <div>
                         <EuiSearchBar
                           box={
@@ -215,7 +215,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                           </EuiFlexGroup>
                         </EuiSearchBar>
                       </div>
-                    </SearchBar>
+                    </Component>
                   </div>
                 </EuiFlexItem>
               </div>
@@ -1338,7 +1338,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </TopMenu>
+  </Component>
 </Provider>
 `;
 
@@ -1354,7 +1354,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
     }
   }
 >
-  <TopMenu
+  <Component
     IsTopPanelDisabled={true}
     editMode={false}
     endTime="now"
@@ -1396,7 +1396,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                   <div
                     className="euiFlexItem"
                   >
-                    <SearchBar>
+                    <Component>
                       <div>
                         <EuiSearchBar
                           box={
@@ -1527,7 +1527,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                           </EuiFlexGroup>
                         </EuiSearchBar>
                       </div>
-                    </SearchBar>
+                    </Component>
                   </div>
                 </EuiFlexItem>
               </div>
@@ -2570,7 +2570,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </TopMenu>
+  </Component>
 </Provider>
 `;
 
@@ -2586,7 +2586,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
     }
   }
 >
-  <TopMenu
+  <Component
     IsTopPanelDisabled={false}
     editMode={false}
     endTime="now"
@@ -2658,7 +2658,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                   <div
                     className="euiFlexItem"
                   >
-                    <SearchBar>
+                    <Component>
                       <div>
                         <EuiSearchBar
                           box={
@@ -2785,7 +2785,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                           </EuiFlexGroup>
                         </EuiSearchBar>
                       </div>
-                    </SearchBar>
+                    </Component>
                   </div>
                 </EuiFlexItem>
               </div>
@@ -3794,6 +3794,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </TopMenu>
+  </Component>
 </Provider>
 `;

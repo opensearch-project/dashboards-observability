@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Live tail button change live tail to 10s interval 1`] = `
-<LiveTailButton
+<Component
   dataTestSubj=""
   isLiveTailOn={true}
   isLiveTailPopoverOpen={false}
@@ -91,11 +91,11 @@ exports[`Live tail button change live tail to 10s interval 1`] = `
       </button>
     </EuiButtonDisplay>
   </EuiButton>
-</LiveTailButton>
+</Component>
 `;
 
 exports[`Live tail button starts live tail with 5s interval 1`] = `
-<LiveTailButton
+<Component
   dataTestSubj=""
   isLiveTailOn={true}
   isLiveTailPopoverOpen={false}
@@ -180,11 +180,11 @@ exports[`Live tail button starts live tail with 5s interval 1`] = `
       </button>
     </EuiButtonDisplay>
   </EuiButton>
-</LiveTailButton>
+</Component>
 `;
 
 exports[`Live tail off button stop live tail 1`] = `
-<StopLiveButton
+<Component
   StopLive={[MockFunction]}
   dataTestSubj=""
 >
@@ -271,5 +271,5 @@ exports[`Live tail off button stop live tail 1`] = `
       </button>
     </EuiButtonDisplay>
   </EuiButton>
-</StopLiveButton>
+</Component>
 `;
