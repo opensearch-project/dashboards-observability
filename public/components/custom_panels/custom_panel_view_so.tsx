@@ -302,6 +302,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const applyEdits = useCallback(() => {
     dispatch(updatePanel(panel));
     setIsEditing(false);
+    setEditActionType('save');
   }, [panel]);
 
   const cancelEdit = () => {
