@@ -51,7 +51,6 @@ import {
 import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
-import { dispatch } from 'd3';
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -196,7 +195,6 @@ export const VisaulizationFlyoutSO = ({
       //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
       //     console.error(err);
       //   });
-      console.log(panel, replaceVisualizationId, selectValue)
       dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue));
     } else {
       const visualizationsWithNewPanel = addVisualizationPanel({
