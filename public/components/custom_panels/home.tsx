@@ -137,8 +137,6 @@ export const Home = ({
       });
   };
 
-  const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
-
   const isUuid = (id) => !!id.match(uuidRx);
 
   const fetchSavedObjectPanel = async (id: string) => {
@@ -172,44 +170,46 @@ export const Home = ({
 
   // Deletes multiple existing Operational Panels
   const deleteCustomPanelList = (customPanelIdList: string[], toastMessage: string) => {
-    // Promise.all([
-    //   deletePanelSO(customPanelIdList),
-    //   deletePanels(customPanelIdList)
-    // ]).then((res) => {
-    //   setcustomPanelData((prevCustomPanelData) => {
-    //     return prevCustomPanelData.filter(
-    //       (customPanel) => !customPanelIdList.includes(customPanel.id)
-    //     );
-    //   });
-    //   setToast(toastMessage);
-    // })
-    //   .catch((err) => {
-    //     setToast(
-    //       'Error deleting Operational Panels, please make sure you have the correct permission.',
-    //       'danger'
-    //     );
-    //     console.error(err.body.message);
-    //   });
+    Promise.all([deletePanelSO(customPanelIdList), deletePanels(customPanelIdList)])
+      .then((res) => {
+        // setcustomPanelData((prevCustomPanelData) => {
+        //   return prevCustomPanelData.filter(
+        //     (customPanel) => !customPanelIdList.includes(customPanel.id)
+        //   );
+        // });
+        // setToast(toastMessage);
+      })
+      .catch((err) => {
+        setToast(
+          'Error deleting Operational Panels, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
   };
 
   // Deletes an existing Operational Panel
   const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
-    // return http
-    //   .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
-    //   .then((res) => {
-    //     setcustomPanelData((prevCustomPanelData) => {
-    //       return prevCustomPanelData.filter((customPanel) => customPanel.id !== customPanelId);
-    //     });
-    //     setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
-    //     return res;
-    //   })
-    //   .catch((err) => {
-    //     setToast(
-    //       'Error deleting Operational Panel, please make sure you have the correct permission.',
-    //       'danger'
-    //     );
-    //     console.error(err.body.message);
-    //   });
+    return http
+      .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
+      .then((res) => {
+        dispatch(fetchPanels());
+        setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
+        return res;
+      })
+      .catch((err) => {
+        setToast(
+          'Error deleting Operational Panel, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
+  };
+
+  // Deletes an existing SO Operational Panel
+  const deleteCustomPanelSO = async (customPanelId: string, customPanelName: string) => {
+    dispatch(deletePanel(customPanelId));
+    // TODO: toast here
   };
 
   const addSamplePanels = async () => {
@@ -252,7 +252,6 @@ export const Home = ({
         })
         .then((res) => {
           dispatch(fetchPanels());
-          // setcustomPanelData([...customPanelData, ...res.demoPanelsData]);
         });
       setToast(`Sample panels successfully added.`);
     } catch (err: any) {
