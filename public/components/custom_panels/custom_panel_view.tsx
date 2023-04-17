@@ -216,6 +216,11 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       setStartTime,
       setEndTime
     );
+    setStartTime(timeProps.start);
+    setEndTime(timeProps.end);
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
+
+    setRecentlyUsedRanges(updatedRanges.slice(0, 9));
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 

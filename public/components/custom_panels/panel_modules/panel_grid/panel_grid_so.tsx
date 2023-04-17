@@ -4,17 +4,18 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import _, { forEach } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { VisualizationContainer } from '../visualization_container';
 import { VisualizationType } from '../../../../../common/types/custom_panels';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
 import './panel_grid.scss';
 import { mergeLayoutAndVisualizations } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
+import { selectPanel } from '../../redux/panel_slice';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -73,6 +74,8 @@ export const PanelGridSO = (props: PanelGridProps) => {
     showFlyout,
     editActionType,
   } = props;
+
+  const panel = useSelector(selectPanel);
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
   const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
   const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
@@ -128,26 +131,39 @@ export const PanelGridSO = (props: PanelGridProps) => {
     const newVisualizationList = _.reject(panelVisualizations, {
       id: visualizationId,
     });
-    console.log('removeVisualization', newVisualizationList);
     mergeLayoutAndVisualizations(postEditLayout, newVisualizationList, setPanelVisualizations);
   };
 
-  // Save Visualization Layouts when not in edit mode anymore (after users saves the panel)
-  const saveVisualizationLayouts = async (panelID: string, visualizationParams: any) => {
-    return http
-      .put(`${CUSTOM_PANELS_API_PREFIX}/visualizations/edit`, {
-        body: JSON.stringify({
-          panelId: panelID,
-          visualizationParams,
-        }),
-      })
-      .then(async (res) => {
-        setPanelVisualizations(res.visualizations);
-      })
-      .catch((err) => {
-        console.error(err);
+  const updateLayout = (visualizations, newLayouts) => {
+    const newVisualizations = [];
+    forEach(visualizations, (viz) => {
+      let newviz = { ...viz };
+      forEach(newLayouts, (nwlyt) => {
+        if (viz.id === nwlyt.i) {
+          newviz = {
+            ...newviz,
+            ...nwlyt,
+          };
+          return;
+        }
       });
+      newVisualizations.push({ ...newviz });
+    });
+    return newVisualizations;
   };
+
+  // Save Visualization Layouts when not in edit mode anymore (after users saves the panel)
+  const saveVisualizationLayouts = useCallback(
+    async (panelID: string, visualizationParams: any) => {
+      const newVisualizations = updateLayout(panel.visualizations, visualizationParams);
+      const updateRes = await coreRefs.savedObjectsClient?.update('observability-panel', panelID, {
+        ...panel,
+        visualizations: newVisualizations,
+      });
+      setPanelVisualizations(updateRes?.attributes?.visualizations || []);
+    },
+    [panel]
+  );
 
   // Update layout whenever user edit gets completed
   useEffect(() => {
