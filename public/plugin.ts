@@ -140,8 +140,8 @@ export class ObservabilityPlugin
           docTypes: [VISUALIZATION_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
-            editApp: observabilityID,
-            editUrl: `#/event_analytics/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
+            editApp: observabilityLogsID,
+            editUrl: `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
             icon: OBSERVABILITY_EMBEDDABLE_ICON,
             id,
             savedObjectType: VISUALIZATION_SAVED_OBJECT,
