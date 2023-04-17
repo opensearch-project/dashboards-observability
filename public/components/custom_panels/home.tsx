@@ -30,9 +30,10 @@ import DSLService from '../../services/requests/dsl';
 import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
-import { CustomPanelViewSO } from './custom_panel_view_so';
 import { isNameValid } from './helpers/utils';
-import { fetchPanels, uuidRx } from './redux/panel_slice';
+import { CustomPanelViewSO } from './custom_panel_view_so';
+import { coreRefs } from '../../framework/core_refs';
+import { deletePanel, fetchPanels, uuidRx } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -93,62 +94,6 @@ export const Home = ({
 
   const onEditClick = (savedVisualizationId: string) => {
     window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
-  };
-
-  // Creates a new CustomPanel
-  const createCustomPanel = async (newCustomPanelName: string) => {
-    if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Operational Panel name', 'danger');
-      return;
-    }
-
-    const newPanel: ObservabilityPanelAttrs = {
-      title: newCustomPanelName,
-      description: '',
-      dateCreated: new Date().getTime(),
-      dateModified: new Date().getTime(),
-      timeRange: {
-        to: 'now',
-        from: 'now-1d',
-      },
-      queryFilter: {
-        query: '',
-        language: 'ppl',
-      },
-      visualizations: [],
-      applicationId: '',
-    };
-
-    return coreSavedObjects.client
-      .create<ObservabilityPanelAttrs>('observability-panel', newPanel, {})
-      .then(async (res) => {
-        setToast(`Operational Panel "${newCustomPanelName}" successfully created!`);
-        window.location.assign(`${_.last(parentBreadcrumbs)!.href}${res.id}`);
-      })
-      .catch((err) => {
-        setToast(
-          'Please ask your administrator to enable Operational Panels for you.',
-          'danger',
-          <EuiLink href={CUSTOM_PANELS_DOCUMENTATION_URL} target="_blank">
-            Documentation
-          </EuiLink>
-        );
-        console.error('create error', err);
-      });
-  };
-
-  const fetchSavedObjectPanel = async (id: string) => {
-    const soPanel = await coreRefs.savedObjectsClient?.get(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id);
-    return savedObjectToCustomPanel(soPanel);
-  };
-
-  // Fetch Panel by id
-  const fetchLegacyPanel = async (id: string) => {
-    return http.get(`${CUSTOM_PANELS_API_PREFIX}/panels/${id}`);
-    // .then((res) => res.operationalPanel)
-    // .catch((err) => {
-    //   console.error('Issue in fetching the operational panel to duplicate', err);
-    // });
   };
 
   const deletePanelSO = (customPanelIdList: string[]) => {
@@ -280,7 +225,6 @@ export const Home = ({
             return (
               <CustomPanelTable
                 loading={loading}
-                createCustomPanel={createCustomPanel}
                 setBreadcrumbs={chrome.setBreadcrumbs}
                 parentBreadcrumbs={customPanelBreadCrumbs}
                 deleteCustomPanelList={deleteCustomPanelList}
