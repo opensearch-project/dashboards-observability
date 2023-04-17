@@ -649,10 +649,7 @@ const createSavedObjectPanel = () => {
         },
       },
     })
-    .then((response) => {
-      console.log('savedObject panel created', response);
-      moveToPanelHome();
-    });
+    .then((response) => console.log(response));
 };
 
 const createLegacyPanel = () => {
