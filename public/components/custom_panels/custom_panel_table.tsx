@@ -172,7 +172,7 @@ export const CustomPanelTable = ({
         'Rename Panel',
         'Cancel',
         'Rename',
-        selectedCustomPanels[0].name,
+        selectedCustomPanels[0].title,
         CREATE_PANEL_MESSAGE
       )
     );
@@ -188,7 +188,7 @@ export const CustomPanelTable = ({
         'Duplicate Panel',
         'Cancel',
         'Duplicate',
-        selectedCustomPanels[0].name + ' (copy)',
+        selectedCustomPanels[0].title + ' (copy)',
         CREATE_PANEL_MESSAGE
       )
     );
