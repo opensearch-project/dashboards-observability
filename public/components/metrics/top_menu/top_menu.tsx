@@ -37,6 +37,7 @@ import SavedObjects from '../../../services/saved_objects/event_analytics/saved_
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import { MetricsExportPanel } from './metrics_export_panel';
+import { addVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 
 interface TopMenuProps {
   http: CoreStart['http'];
@@ -191,8 +192,11 @@ export const TopMenu = ({
     if (selectedPanelOptions.length > 0) {
       try {
         const allMetricIds = savedMetricIds.map((metric) => metric.objectId);
-        savedMetricsInPanels = await Promise.all(
-          selectedPanelOptions.map((panel) => {
+        const soPanels = selectedPanelOptions.filter((panel) => uuidRx.test(panel.panel.id));
+        const opsPanels = selectedPanelOptions.filter((panel) => !uuidRx.test(panel.panel.id));
+
+        const savedMetricsInOpsPanels = await Promise.all(
+          opsPanels.map((panel) => {
             return http.post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/multiple`, {
               body: JSON.stringify({
                 panelId: panel.panel.id,
@@ -201,6 +205,10 @@ export const TopMenu = ({
             });
           })
         );
+
+        allMetricIds.forEach((metricId) => {
+          dispatch(addVizToPanels(soPanels, metricId));
+        });
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);
