@@ -61,7 +61,7 @@ import './visualization_flyout.scss';
  * VisaulizationFlyout - This module create a flyout to add visualization
  *
  * Props taken in as params are:
- * panelId: panel Id of current operational panel
+ * panelId: panel Id of current Observability Dashboard
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter

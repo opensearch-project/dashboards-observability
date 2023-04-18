@@ -212,7 +212,7 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   getState
 ) => {
   if (!isNameValid(editedCustomPanelName)) {
-    console.log('Invalid Custom Panel name', 'danger');
+    console.log('Invalid Observability Dashboard name', 'danger');
     return Promise.reject();
   }
 
@@ -231,10 +231,10 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   //   //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
   //   //   return newCustomPanelData;
   //   // });
-  //   // setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
+  //   // setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`);
   // } catch (err) {
   //   console.log(
-  //     'Error renaming Operational Panel, please make sure you have the correct permission.',
+  //     'Error renaming Observability Dashboard, please make sure you have the correct permission.',
   //     'danger'
   //   );
   //   console.error(err.body.message);

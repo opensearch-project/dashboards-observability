@@ -98,7 +98,7 @@ export const Home = ({
   // Creates a new CustomPanel
   const createCustomPanel = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Operational Panel name', 'danger');
+      setToast('Invalid Observability Dashboard name', 'danger');
       return;
     }
 
@@ -122,7 +122,7 @@ export const Home = ({
     return coreSavedObjects.client
       .create<ObservabilityPanelAttrs>('observability-panel', newPanel, {})
       .then(async (res) => {
-        setToast(`Operational Panel "${newCustomPanelName}" successfully created!`);
+        setToast(`Observability Dashboard "${newCustomPanelName}" successfully created!`);
         window.location.assign(`${_.last(parentBreadcrumbs)!.href}${res.id}`);
       })
       .catch((err) => {
@@ -147,7 +147,7 @@ export const Home = ({
     return http.get(`${CUSTOM_PANELS_API_PREFIX}/panels/${id}`);
     // .then((res) => res.operationalPanel)
     // .catch((err) => {
-    //   console.error('Issue in fetching the operational panel to duplicate', err);
+    //   console.error('Issue in fetching the Observability Dashboard to duplicate', err);
     // });
   };
 
@@ -186,25 +186,25 @@ export const Home = ({
       });
   };
 
-  // Deletes an existing Operational Panel
+  // Deletes an existing Observability Dashboard
   const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
     return http
       .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
       .then((res) => {
         dispatch(fetchPanels());
-        setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
+        setToast(`Observability Dashboard "${customPanelName}" successfully deleted!`);
         return res;
       })
       .catch((err) => {
         setToast(
-          'Error deleting Operational Panel, please make sure you have the correct permission.',
+          'Error deleting Observability Dashboard, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err.body.message);
       });
   };
 
-  // Deletes an existing SO Operational Panel
+  // Deletes an existing SO Observability Dashboard
   const deleteCustomPanelSO = async (customPanelId: string, customPanelName: string) => {
     dispatch(deletePanel(customPanelId));
     // TODO: toast here

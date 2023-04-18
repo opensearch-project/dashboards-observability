@@ -136,7 +136,7 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Custom Panels ${
+    const toastMessage = `Observability Dashboards ${
       selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
     } successfully deleted!`;
     const PanelList = selectedCustomPanels.map((panel) => panel.id);
@@ -153,7 +153,7 @@ export const CustomPanelTable = ({
           history.goBack();
         },
         'Name',
-        'Create operational panel',
+        'Create Observability Dashboard',
         'Cancel',
         'Create',
         undefined,
@@ -169,7 +169,7 @@ export const CustomPanelTable = ({
         onRename,
         closeModal,
         'Name',
-        'Rename Panel',
+        'Rename Dashboard',
         'Cancel',
         'Rename',
         selectedCustomPanels[0].title,
@@ -185,7 +185,7 @@ export const CustomPanelTable = ({
         onClone,
         closeModal,
         'Name',
-        'Duplicate Panel',
+        'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
         selectedCustomPanels[0].title + ' (copy)',
@@ -196,7 +196,9 @@ export const CustomPanelTable = ({
   };
 
   const deletePanel = () => {
-    const customPanelString = `operational panel${selectedCustomPanels.length > 1 ? 's' : ''}`;
+    const customPanelString = `Observability Dashboard${
+      selectedCustomPanels.length > 1 ? 's' : ''
+    }`;
     setModalLayout(
       <DeleteModal
         onConfirm={onDelete}
@@ -318,14 +320,14 @@ export const CustomPanelTable = ({
               <EuiPageContentHeaderSection>
                 <EuiTitle size="s">
                   <h3>
-                    Panels
+                    Dashboard
                     <span className="panel-header-count"> ({customPanels.length})</span>
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
-                  Use Operational panels to create and view different visualizations on ingested
-                  observability data, using PPL (Piped Processing Language) queries.{' '}
+                  Use Observability Dashboard to create and view different visualizations on
+                  ingested observability data, using PPL (Piped Processing Language) queries.{' '}
                   <EuiLink external={true} href={CUSTOM_PANELS_DOCUMENTATION_URL} target="blank">
                     Learn more
                   </EuiLink>
@@ -345,7 +347,7 @@ export const CustomPanelTable = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiButton fill href="#/create" data-test-subj="customPanels__createNewPanels">
-                      Create panel
+                      Create Dashboard
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -357,7 +359,7 @@ export const CustomPanelTable = ({
                 <EuiFieldSearch
                   fullWidth
                   data-test-subj="operationalPanelSearchBar"
-                  placeholder="Search operational panel name"
+                  placeholder="Search Observability Dashboard name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -395,10 +397,10 @@ export const CustomPanelTable = ({
               <>
                 <EuiSpacer size="xxl" />
                 <EuiText textAlign="center">
-                  <h2 data-test-subj="customPanels__noPanelsHome">No Operational Panels</h2>
+                  <h2 data-test-subj="customPanels__noPanelsHome">No Observability Dashboards</h2>
                   <EuiSpacer size="m" />
                   <EuiText color="subdued">
-                    Use operational panels to dive deeper into observability
+                    Use Observability Dashboards to dive deeper into observability
                     <br />
                     using PPL queries and insightful visualizations
                   </EuiText>
@@ -411,7 +413,7 @@ export const CustomPanelTable = ({
                       fullWidth={false}
                       href="#/create"
                     >
-                      Create panel
+                      Create Dashboard
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
