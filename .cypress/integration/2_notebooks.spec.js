@@ -497,7 +497,7 @@ describe('Testing paragraphs', () => {
 
     cy.get('.euiButton__text').contains('Create notebook').should('exist');
   });
-  
+
   it('Cleans up test notebooks', () => {
     cy.get('[data-test-subj="notebook-notebook-actions-button"]').click();
     cy.wait(delay);
