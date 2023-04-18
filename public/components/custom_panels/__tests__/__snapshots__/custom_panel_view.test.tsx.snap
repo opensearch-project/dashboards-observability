@@ -545,7 +545,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                   iconType="arrowDown"
                                   onClick={[Function]}
                                 >
-                                  Panel actions
+                                  Dashboard Actions
                                 </EuiButton>
                               }
                               closePopover={[Function]}
@@ -640,7 +640,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                             <span
                                               className="euiButton__text"
                                             >
-                                              Panel actions
+                                              Dashboard Actions
                                             </span>
                                           </span>
                                         </EuiButtonContent>
@@ -2624,7 +2624,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                   iconType="arrowDown"
                                   onClick={[Function]}
                                 >
-                                  Panel actions
+                                  Dashboard Actions
                                 </EuiButton>
                               }
                               closePopover={[Function]}
@@ -2714,7 +2714,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                             <span
                                               className="euiButton__text"
                                             >
-                                              Panel actions
+                                              Dashboard Actions
                                             </span>
                                           </span>
                                         </EuiButtonContent>
