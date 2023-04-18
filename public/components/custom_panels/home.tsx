@@ -126,25 +126,25 @@ export const Home = ({
       });
   };
 
-  // Deletes an existing Operational Panel
+  // Deletes an existing Observability Dashboard
   const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
     return http
       .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
       .then((res) => {
         dispatch(fetchPanels());
-        setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
+        setToast(`Observability Dashboard "${customPanelName}" successfully deleted!`);
         return res;
       })
       .catch((err) => {
         setToast(
-          'Error deleting Operational Panel, please make sure you have the correct permission.',
+          'Error deleting Observability Dashboard, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err.body.message);
       });
   };
 
-  // Deletes an existing SO Operational Panel
+  // Deletes an existing SO Observability Dashboard
   const deleteCustomPanelSO = async (customPanelId: string, customPanelName: string) => {
     dispatch(deletePanel(customPanelId));
     // TODO: toast here
