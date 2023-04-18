@@ -28,7 +28,7 @@ export class SaveAsNewQuery extends SavedQuerySaver {
     this.saveClient
       .create({ ...this.saveParams })
       .then((res: any) => {
-        history.replace(`/event_analytics/explorer/${res.objectId}`);
+        history.replace(`/explorer/${res.objectId}`);
         notifications.toasts.addSuccess({
           title: 'Saved successfully.',
           text: `New query '${name}' has been successfully saved.`,
@@ -50,7 +50,7 @@ export class SaveAsNewQuery extends SavedQuerySaver {
             })
           );
         });
-        history.replace(`/event_analytics/explorer/${res.objectId}`);
+        history.replace(`/explorer/${res.objectId}`);
         return res;
       })
       .catch((error: any) => {
