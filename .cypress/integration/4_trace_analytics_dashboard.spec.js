@@ -27,7 +27,7 @@ describe('Dump test data', () => {
       cy.request(mapping_url).then((response) => {
         cy.request({
           method: 'POST',
-          form: true,
+          //form: true,
           url: 'api/console/proxy',
           headers: {
             'content-type': 'application/json;charset=UTF-8',
@@ -44,7 +44,7 @@ describe('Dump test data', () => {
       cy.request(data_url).then((response) => {
         cy.request({
           method: 'POST',
-          form: true,
+          //form: true,
           url: 'api/console/proxy',
           headers: {
             'content-type': 'application/json;charset=UTF-8',
@@ -67,7 +67,7 @@ describe('Dump test data', () => {
 
 describe('Testing dashboard table empty state', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
+    cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -83,7 +83,7 @@ describe('Testing dashboard table empty state', () => {
 
 describe('Testing dashboard table', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
+    cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -151,7 +151,7 @@ describe('Testing dashboard table', () => {
 
 describe('Testing plots', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
+    cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -186,7 +186,7 @@ describe('Testing plots', () => {
 
 describe('Latency by trace group table', () =>{
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
+    cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -255,7 +255,7 @@ describe('Latency by trace group table', () =>{
 
 describe('Testing filters on trace analytics page', { scrollBehavior: false }, () =>{
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
+    cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -348,7 +348,7 @@ describe('Dump jaeger test data', () => {
 
 describe('Testing switch mode to jaeger', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/home', {
+    cy.visit('app/observability-traces#/', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
