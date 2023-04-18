@@ -125,7 +125,7 @@ export class ObservabilityPlugin
         label: i18n.translate('core.ui.observabilityNavList.label', {
           defaultMessage: 'Observability',
         }),
-        order: 3000,
+        order: 1500,
       },
     });
 
