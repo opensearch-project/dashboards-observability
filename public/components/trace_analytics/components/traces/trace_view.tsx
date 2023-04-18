@@ -206,18 +206,18 @@ export function TraceView(props: TraceViewProps) {
 
   useEffect(() => {
     props.chrome.setBreadcrumbs([
-      props.parentBreadcrumb,
+      ...props.parentBreadcrumbs,
       {
         text: 'Trace analytics',
-        href: '#/home',
+        href: '#/trace_analytics/home',
       },
       {
         text: 'Traces',
-        href: '#/traces',
+        href: '#/trace_analytics/traces',
       },
       {
         text: props.traceId,
-        href: `#/traces/${encodeURIComponent(props.traceId)}`,
+        href: `#/trace_analytics/traces/${encodeURIComponent(props.traceId)}`,
       },
     ]);
     refresh();

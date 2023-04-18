@@ -14,12 +14,7 @@ import {
 } from '@elastic/eui';
 import { useEffect } from 'react';
 import { isEmpty } from 'lodash';
-import { useDispatch, useSelector } from 'react-redux';
 import SavedObjects from '../../../../services/saved_objects/event_analytics/saved_objects';
-import {
-  fetchPanels,
-  selectPanelList,
-} from '../../../../../public/components/custom_panels/redux/panel_slice';
 
 interface ISavedPanelProps {
   selectedOptions: any;
@@ -50,16 +45,23 @@ export const SavePanel = ({
   setSubType,
   isSaveAsMetricEnabled,
 }: ISavedPanelProps) => {
+  const [options, setOptions] = useState([]);
   const [checked, setChecked] = useState(false);
   const [svpnlError, setSvpnlError] = useState(null);
 
-  const customPanels = useSelector(selectPanelList);
-
-  const dispatch = useDispatch();
+  const getCustomPabnelList = async (svobj: SavedObjects) => {
+    const optionRes = await svobj
+      .fetchCustomPanels()
+      .then((res: any) => {
+        return res;
+      })
+      .catch((error: any) => setSvpnlError(error));
+    setOptions(optionRes?.panels || []);
+  };
 
   useEffect(() => {
-    dispatch(fetchPanels());
-  }, []);
+    getCustomPabnelList(savedObjects);
+  });
 
   const onToggleChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setChecked(e.target.checked);
@@ -84,10 +86,10 @@ export const SavePanel = ({
                 handleOptionChange(daOptions);
               }}
               selectedOptions={selectedOptions}
-              options={customPanels.map((option: any) => {
+              options={options.map((option: CustomPanelOptions) => {
                 return {
                   panel: option,
-                  label: option.title,
+                  label: option.name,
                 };
               })}
               isClearable={true}

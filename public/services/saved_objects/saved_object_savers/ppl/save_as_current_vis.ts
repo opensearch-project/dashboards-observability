@@ -3,10 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  addVizToPanels,
-  uuidRx,
-} from '../../../../../public/components/custom_panels/redux/panel_slice';
 import { SavedQuerySaver } from './saved_query_saver';
 
 export class SaveAsCurrentVisualization extends SavedQuerySaver {
@@ -50,14 +46,9 @@ export class SaveAsCurrentVisualization extends SavedQuerySaver {
   }
 
   addToPanel({ selectedPanels, saveTitle, notifications, visId }) {
-    const { dispatch } = this.dispatchers;
-    const soPanels = selectedPanels.filter((panel) => uuidRx.test(panel.panel.id));
-    const opsPanels = selectedPanels.filter((panel) => !uuidRx.test(panel.panel.id));
-    dispatch(addVizToPanels(soPanels, visId));
-
     this.panelClient
       .updateBulk({
-        selectedCustomPanels: opsPanels,
+        selectedCustomPanels: selectedPanels,
         savedVisualizationId: visId,
       })
       .then((res: any) => {

@@ -38,11 +38,6 @@ import {
   OptionType,
 } from '../../../../common/types/application_analytics';
 import { fetchAppById } from '../helpers/utils';
-import {
-  observabilityApplicationsID,
-  observabilityID,
-  observabilityTitle,
-} from '../../../../common/constants/shared';
 
 interface CreateAppProps extends AppAnalyticsComponentDeps {
   dslService: DSLService;
@@ -95,12 +90,12 @@ export const CreateApp = (props: CreateAppProps) => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Applications',
-        href: '#/',
+        text: 'Application analytics',
+        href: '#/application_analytics',
       },
       {
         text: editMode ? 'Edit' : 'Create',
-        href: `#/${editMode ? 'edit' : 'create'}`,
+        href: `#/application_analytics/${editMode ? 'edit' : 'create'}`,
       },
     ]);
   }, []);
@@ -177,7 +172,7 @@ export const CreateApp = (props: CreateAppProps) => {
 
   const onCancel = () => {
     clearStorage();
-    window.location.assign(`${observabilityApplicationsID}#/`);
+    window.location.assign(`${last(parentBreadcrumbs)!.href}application_analytics`);
   };
 
   return (

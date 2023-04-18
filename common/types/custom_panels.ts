@@ -4,19 +4,11 @@
  */
 
 export interface CustomPanelListType {
-  title: string;
+  name: string;
   id: string;
   dateCreated: number;
   dateModified: number;
   applicationId?: string;
-  savedObject: boolean;
-}
-
-export interface BoxType {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
 }
 
 export interface VisualizationType {
@@ -29,17 +21,11 @@ export interface VisualizationType {
 }
 
 export interface PanelType {
-  title: string;
-  dateCreated: number;
-  dateModified: number;
+  name: string;
   visualizations: VisualizationType[];
   timeRange: { to: string; from: string };
   queryFilter: { query: string; language: string };
   applicationId?: string;
-}
-
-export interface CustomPanelType extends PanelType {
-  id: string;
 }
 
 export interface SavedVisualizationType {
@@ -53,7 +39,7 @@ export interface SavedVisualizationType {
   user_configs: any;
 }
 
-export interface PPLResponse {
+export interface pplResponse {
   data: any;
   metadata: any;
   size: number;
@@ -63,21 +49,4 @@ export interface PPLResponse {
 export interface VizContainerError {
   errorMessage: string;
   errorDetails?: string;
-}
-
-export interface ObservabilityPanelAttrs {
-  title: string;
-  description: string;
-  dateCreated: number;
-  dateModified: number;
-  timeRange: {
-    to: string;
-    from: string;
-  };
-  queryFilter: {
-    query: string;
-    language: string;
-  };
-  visualizations: VisualizationType[];
-  applicationId: string;
 }

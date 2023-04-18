@@ -306,7 +306,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       modalLayout: getCustomModal(
         (newName: string) => {
           this.props.cloneNotebook(newName, this.props.openedNoteId).then((id: string) => {
-            window.location.assign(`#/${id}`);
+            window.location.assign(`#/notebooks/${id}`);
             setTimeout(() => {
               this.loadNotebook();
             }, 300);

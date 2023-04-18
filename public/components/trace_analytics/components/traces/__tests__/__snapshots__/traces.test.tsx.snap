@@ -108,11 +108,13 @@ exports[`Traces component renders empty traces page 1`] = `
     ]
   }
   page="traces"
-  parentBreadcrumb={
-    Object {
-      "href": "test#/",
-      "text": "test",
-    }
+  parentBreadcrumbs={
+    Array [
+      Object {
+        "href": "test#/",
+        "text": "test",
+      },
+    ]
   }
   query=""
   setEndTime={[MockFunction]}
@@ -374,11 +376,13 @@ exports[`Traces component renders empty traces page 1`] = `
       ]
     }
     page="traces"
-    parentBreadcrumb={
-      Object {
-        "href": "test#/",
-        "text": "test",
-      }
+    parentBreadcrumbs={
+      Array [
+        Object {
+          "href": "test#/",
+          "text": "test",
+        },
+      ]
     }
     query=""
     setEndTime={[MockFunction]}
@@ -1419,7 +1423,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
         "calls": Array [
           Array [
             Array [
-              undefined,
+              Object {
+                "href": "test#/",
+                "text": "test",
+              },
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -1690,7 +1697,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
           "calls": Array [
             Array [
               Array [
-                undefined,
+                Object {
+                  "href": "test#/",
+                  "text": "test",
+                },
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
@@ -2805,7 +2815,10 @@ exports[`Traces component renders traces page 1`] = `
         "calls": Array [
           Array [
             Array [
-              undefined,
+              Object {
+                "href": "test#/",
+                "text": "test",
+              },
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -3075,7 +3088,10 @@ exports[`Traces component renders traces page 1`] = `
           "calls": Array [
             Array [
               Array [
-                undefined,
+                Object {
+                  "href": "test#/",
+                  "text": "test",
+                },
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",

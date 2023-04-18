@@ -134,7 +134,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
               >
                 <a
                   class="euiButton euiButton--primary euiButton--fill"
-                  href="#/create"
+                  href="#/notebooks/create"
                   rel="noreferrer"
                 >
                   <span
@@ -429,7 +429,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     >
                       <a
                         class="euiLink euiLink--primary"
-                        href="#/id-0"
+                        href="#/notebooks/id-0"
                         rel="noreferrer"
                       >
                         path-0
@@ -504,7 +504,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     >
                       <a
                         class="euiLink euiLink--primary"
-                        href="#/id-1"
+                        href="#/notebooks/id-1"
                         rel="noreferrer"
                       >
                         path-1
@@ -579,7 +579,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     >
                       <a
                         class="euiLink euiLink--primary"
-                        href="#/id-2"
+                        href="#/notebooks/id-2"
                         rel="noreferrer"
                       >
                         path-2
@@ -654,7 +654,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     >
                       <a
                         class="euiLink euiLink--primary"
-                        href="#/id-3"
+                        href="#/notebooks/id-3"
                         rel="noreferrer"
                       >
                         path-3
@@ -729,7 +729,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     >
                       <a
                         class="euiLink euiLink--primary"
-                        href="#/id-4"
+                        href="#/notebooks/id-4"
                         rel="noreferrer"
                       >
                         path-4
@@ -1025,7 +1025,7 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
               >
                 <a
                   class="euiButton euiButton--primary euiButton--fill"
-                  href="#/create"
+                  href="#/notebooks/create"
                   rel="noreferrer"
                 >
                   <span

@@ -62,18 +62,18 @@ export function ServiceView(props: ServiceViewProps) {
 
   useEffect(() => {
     props.chrome.setBreadcrumbs([
-      props.parentBreadcrumb,
+      ...props.parentBreadcrumbs,
       {
         text: 'Trace analytics',
-        href: '#/home',
+        href: '#/trace_analytics/home',
       },
       {
         text: 'Services',
-        href: '#/services',
+        href: '#/trace_analytics/services',
       },
       {
         text: props.serviceName,
-        href: `#/services/${encodeURIComponent(props.serviceName)}`,
+        href: `#/trace_analytics/services/${encodeURIComponent(props.serviceName)}`,
       },
     ]);
   }, [props.serviceName]);
@@ -138,7 +138,7 @@ export function ServiceView(props: ServiceViewProps) {
                     {fields.connected_services && fields.connected_services.length
                       ? fields.connected_services
                           .map((service: string) => (
-                            <EuiLink href={`#/services/${service}`} key={service}>
+                            <EuiLink href={`#/trace_analytics/services/${service}`} key={service}>
                               {service}
                             </EuiLink>
                           ))
@@ -193,7 +193,7 @@ export function ServiceView(props: ServiceViewProps) {
                           inverted: false,
                           disabled: false,
                         });
-                        location.assign('#/traces');
+                        location.assign('#/trace_analytics/traces');
                       }}
                     >
                       <EuiI18nNumber value={fields.traces} />

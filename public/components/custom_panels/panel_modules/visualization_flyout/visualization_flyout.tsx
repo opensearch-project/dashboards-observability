@@ -38,7 +38,7 @@ import { CoreStart } from '../../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
 import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 import {
-  PplResponse,
+  pplResponse,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
@@ -61,7 +61,7 @@ import './visualization_flyout.scss';
  * VisaulizationFlyout - This module create a flyout to add visualization
  *
  * Props taken in as params are:
- * panelId: panel Id of current Observability Dashboard
+ * panelId: panel Id of current operational panel
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter
@@ -112,7 +112,7 @@ export const VisaulizationFlyout = ({
   const [newVisualizationTimeField, setNewVisualizationTimeField] = useState('');
   const [previewMetaData, setPreviewMetaData] = useState<SavedVisualizationType>();
   const [pplQuery, setPPLQuery] = useState('');
-  const [previewData, setPreviewData] = useState<PplResponse>({} as PplResponse);
+  const [previewData, setPreviewData] = useState<pplResponse>({} as pplResponse);
   const [previewArea, setPreviewArea] = useState(<></>);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [isPreviewError, setIsPreviewError] = useState({} as VizContainerError);
@@ -182,15 +182,11 @@ export const VisaulizationFlyout = ({
           }),
         })
         .then(async (res) => {
-          console.log('addVisualization Replacement', res);
           setPanelVisualizations(res.visualizations);
           setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
         })
         .catch((err) => {
-          setToast(
-            `Error in adding ${newVisualizationTitle} visualization to the Dashboard`,
-            'danger'
-          );
+          setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
           console.error(err);
         });
     } else {
@@ -202,7 +198,6 @@ export const VisaulizationFlyout = ({
           }),
         })
         .then(async (res) => {
-          console.log('addVisualization New', res);
           setPanelVisualizations(res.visualizations);
           setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
         })

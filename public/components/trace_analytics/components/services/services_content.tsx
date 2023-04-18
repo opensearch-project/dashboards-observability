@@ -30,7 +30,7 @@ export function ServicesContent(props: ServicesProps) {
     endTime,
     appConfigs = [],
     childBreadcrumbs,
-    parentBreadcrumb,
+    parentBreadcrumbs,
     nameColumnAction,
     traceColumnAction,
     setFilters,
@@ -51,7 +51,7 @@ export function ServicesContent(props: ServicesProps) {
   const [filteredService, setFilteredService] = useState('');
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
+    chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'services');
     setFilters([
       ...filters.map((filter) => ({
@@ -71,25 +71,12 @@ export function ServicesContent(props: ServicesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (
-      !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
-    )
-      refresh(newFilteredService);
+    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh(newFilteredService);
   }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
-    const DSL = filtersToDsl(
-      mode,
-      filters,
-      query,
-      processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
-      page,
-      appConfigs
-    );
+    const DSL = filtersToDsl(mode, filters, query,processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page, appConfigs);
     // service map should not be filtered by service name
     const serviceMapDSL = _.cloneDeep(DSL);
     serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
@@ -97,13 +84,7 @@ export function ServicesContent(props: ServicesProps) {
     );
     await Promise.all([
       handleServicesRequest(http, DSL, setTableItems, mode),
-      handleServiceMapRequest(
-        http,
-        serviceMapDSL,
-        mode,
-        setServiceMap,
-        currService || filteredService
-      ),
+      handleServiceMapRequest(http, serviceMapDSL, mode, setServiceMap, currService || filteredService),
     ]);
     setLoading(false);
   };
@@ -152,7 +133,7 @@ export function ServicesContent(props: ServicesProps) {
         dataPrepperIndicesExist={dataPrepperIndicesExist}
       />
       <EuiSpacer size="m" />
-      {mode === 'data_prepper' && dataPrepperIndicesExist ? (
+      { (mode === 'data_prepper' && dataPrepperIndicesExist) ? 
         <ServiceMap
           addFilter={addFilter}
           serviceMap={serviceMap}
@@ -160,10 +141,8 @@ export function ServicesContent(props: ServicesProps) {
           setIdSelected={setServiceMapIdSelected}
           currService={filteredService}
           page={page}
-        />
-      ) : (
-        <div />
-      )}
+        /> : (<div/>)
+      }
     </>
   );
 }

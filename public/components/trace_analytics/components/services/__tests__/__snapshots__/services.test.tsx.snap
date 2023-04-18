@@ -109,11 +109,13 @@ exports[`Services component renders empty services page 1`] = `
   }
   nameColumnAction={[Function]}
   page="services"
-  parentBreadcrumb={
-    Object {
-      "href": "test#/",
-      "text": "test",
-    }
+  parentBreadcrumbs={
+    Array [
+      Object {
+        "href": "test#/",
+        "text": "test",
+      },
+    ]
   }
   query=""
   setEndTime={[MockFunction]}
@@ -376,11 +378,13 @@ exports[`Services component renders empty services page 1`] = `
     }
     nameColumnAction={[Function]}
     page="services"
-    parentBreadcrumb={
-      Object {
-        "href": "test#/",
-        "text": "test",
-      }
+    parentBreadcrumbs={
+      Array [
+        Object {
+          "href": "test#/",
+          "text": "test",
+        },
+      ]
     }
     query=""
     setEndTime={[MockFunction]}
@@ -1953,7 +1957,10 @@ exports[`Services component renders jaeger services page 1`] = `
         "calls": Array [
           Array [
             Array [
-              undefined,
+              Object {
+                "href": "test#/",
+                "text": "test",
+              },
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -2225,7 +2232,10 @@ exports[`Services component renders jaeger services page 1`] = `
           "calls": Array [
             Array [
               Array [
-                undefined,
+                Object {
+                  "href": "test#/",
+                  "text": "test",
+                },
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
@@ -3351,7 +3361,10 @@ exports[`Services component renders services page 1`] = `
         "calls": Array [
           Array [
             Array [
-              undefined,
+              Object {
+                "href": "test#/",
+                "text": "test",
+              },
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -3622,7 +3635,10 @@ exports[`Services component renders services page 1`] = `
           "calls": Array [
             Array [
               Array [
-                undefined,
+                Object {
+                  "href": "test#/",
+                  "text": "test",
+                },
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",

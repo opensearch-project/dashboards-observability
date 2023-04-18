@@ -142,7 +142,6 @@ export class CustomPanelsAdaptor {
     }
   };
 
-
   // Rename an existing panel
   renamePanel = async (client: ILegacyScopedClusterClient, panelId: string, panelName: string) => {
     const updatePanelBody = {

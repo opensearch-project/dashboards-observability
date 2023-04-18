@@ -37,7 +37,6 @@ import {
   SavedObjectAttributes,
   SavedObjectsStart,
 } from '../../../../src/core/public/saved_objects';
-import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
 
 export interface IQueryTab {
   id: string;
@@ -319,7 +318,7 @@ export interface Breadcrumbs {
 
 export interface EventAnalyticsProps {
   chrome: CoreSetup;
-  parentBreadcrumbs: ChromeBreadcrumb[];
+  parentBreadcrumbs: Breadcrumbs[];
   pplService: any;
   dslService: any;
   savedObjects: SavedObjectsStart;
@@ -327,7 +326,6 @@ export interface EventAnalyticsProps {
   http: HttpStart;
   notifications: NotificationsStart;
   queryManager: QueryManager;
-  setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
 export interface DataConfigPanelProps {
