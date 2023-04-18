@@ -245,7 +245,6 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 });
 
-
 describe('Testing traces Spans table and verify columns functionality', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
