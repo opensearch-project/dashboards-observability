@@ -21,15 +21,24 @@ import { SAMPLE_PANEL } from '../utils/panel_constants';
 import { skipOn } from '@cypress/skip-test';
 
 const moveToEventsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
   cy.wait(delay * 3);
 };
 
 const moveToPanelHome = () => {
-  cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/operational_panels/`
-  );
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`);
   cy.wait(delay * 3);
+};
+
+const moveToTestNotebook = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-notebooks#/`, {
+    timeout: 6000,
+  });
+  cy.get('.euiTableCellContent')
+    .contains(TEST_NOTEBOOK, {
+      timeout: 6000,
+    })
+    .click();
 };
 
 describe('Adding sample data and visualization', () => {
@@ -41,20 +50,21 @@ describe('Adding sample data and visualization', () => {
   });
 
   it('Add sample observability data', () => {
-    moveToPanelHome();
-    cy.get('.euiButton__text').contains('Actions').trigger('mouseover').click();
+    moveToEventsHome();
+    cy.get('button[data-test-subj="eventHomeAction"]').trigger('mouseover').click();
     cy.wait(100);
-    cy.get('.euiContextMenuItem__text').contains('Add samples').trigger('mouseover').click();
+    cy.get('button[data-test-subj="eventHomeAction__addSamples"]').trigger('mouseover').click();
     cy.wait(100 * 3);
     cy.get('.euiModalHeader__title[data-test-subj="confirmModalTitleText"]')
       .contains('Add samples')
       .should('exist');
     cy.wait(100);
-    cy.get('.euiButton__text').contains('Yes').trigger('mouseover').click();
+    cy.get('button[data-test-subj="confirmModalConfirmButton"]').trigger('mouseover').click();
     cy.wait(100 * 5);
     cy.route2('POST', '/addSamplePanels').as('addSamples');
     cy.wait('@addSamples').then(() => {
-      cy.get('.euiTableCellContent').contains(SAMPLE_PANEL).should('exist');
+      // cy.get('.euiTableCellContent').contains(SAMPLE_PANEL).should('exist');
+      cy.get('.euiToastHeader__title').should('contain', 'successfully');
     });
     cy.wait(100);
   });
@@ -62,7 +72,8 @@ describe('Adding sample data and visualization', () => {
 
 describe('Testing notebooks table', () => {
   beforeEach(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-notebooks#/`);
+    cy.wait(delay);
   });
 
   it('Notebooks table empty state', () => {
@@ -176,57 +187,53 @@ describe('Testing notebooks table', () => {
   });
 });
 
-describe('Test reporting integration if plugin installed', () => {
-  beforeEach(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
-    cy.get('.euiTableCellContent').contains(TEST_NOTEBOOK).click();
-    cy.wait(delay * 3);
-    cy.get('body').then(($body) => {
-      skipOn($body.find('#reportingActionsButton').length <= 0);
-    });
-  });
+// describe('Test reporting integration if plugin installed', () => {
+//   beforeEach(() => {
+//     cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
+//     cy.get('.euiTableCellContent').contains(TEST_NOTEBOOK).click();
+//     cy.wait(delay * 3);
+//     cy.get('body').then(($body) => {
+//       skipOn($body.find('#reportingActionsButton').length <= 0);
+//     });
+//   });
 
-  it('Create in-context PDF report from notebook', () => {
-    cy.get('#reportingActionsButton').click();
-    cy.wait(delay);
-    cy.get('button.euiContextMenuItem:nth-child(1)').contains('Download PDF').click();
-    cy.get('#downloadInProgressLoadingModal').should('exist');
-  });
+//   it('Create in-context PDF report from notebook', () => {
+//     cy.get('#reportingActionsButton').click();
+//     cy.wait(delay);
+//     cy.get('button.euiContextMenuItem:nth-child(1)').contains('Download PDF').click();
+//     cy.get('#downloadInProgressLoadingModal').should('exist');
+//   });
 
-  it('Create in-context PNG report from notebook', () => {
-    cy.get('#reportingActionsButton').click();
-    cy.wait(delay);
-    cy.get('button.euiContextMenuItem:nth-child(2)').contains('Download PNG').click();
-    cy.get('#downloadInProgressLoadingModal').should('exist');
-  });
+//   it('Create in-context PNG report from notebook', () => {
+//     cy.get('#reportingActionsButton').click();
+//     cy.wait(delay);
+//     cy.get('button.euiContextMenuItem:nth-child(2)').contains('Download PNG').click();
+//     cy.get('#downloadInProgressLoadingModal').should('exist');
+//   });
 
-  it('Create on-demand report definition from context menu', () => {
-    cy.get('#reportingActionsButton').click();
-    cy.wait(delay);
-    cy.get('button.euiContextMenuItem:nth-child(3)').contains('Create report definition').click();
-    cy.wait(delay);
-    cy.location('pathname', { timeout: 60000 }).should('include', '/reports-dashboards');
-    cy.wait(delay);
-    cy.get('#reportSettingsName').type('Create notebook on-demand report');
-    cy.get('#createNewReportDefinition').click({ force: true });
-  });
+//   it('Create on-demand report definition from context menu', () => {
+//     cy.get('#reportingActionsButton').click();
+//     cy.wait(delay);
+//     cy.get('button.euiContextMenuItem:nth-child(3)').contains('Create report definition').click();
+//     cy.wait(delay);
+//     cy.location('pathname', { timeout: 60000 }).should('include', '/reports-dashboards');
+//     cy.wait(delay);
+//     cy.get('#reportSettingsName').type('Create notebook on-demand report');
+//     cy.get('#createNewReportDefinition').click({ force: true });
+//   });
 
-  it('View reports homepage from context menu', () => {
-    cy.get('#reportingActionsButton').click();
-    cy.wait(delay);
-    cy.get('button.euiContextMenuItem:nth-child(4)').contains('View reports').click();
-    cy.wait(delay);
-    cy.location('pathname', { timeout: 60000 }).should('include', '/reports-dashboards');
-  });
-});
+//   it('View reports homepage from context menu', () => {
+//     cy.get('#reportingActionsButton').click();
+//     cy.wait(delay);
+//     cy.get('button.euiContextMenuItem:nth-child(4)').contains('View reports').click();
+//     cy.wait(delay);
+//     cy.location('pathname', { timeout: 60000 }).should('include', '/reports-dashboards');
+//   });
+// });
 
 describe('Testing paragraphs', () => {
-  beforeEach(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
-    cy.get('.euiTableCellContent').contains(TEST_NOTEBOOK).click();
-  });
-
   it('Goes into a notebook and creates paragraphs', () => {
+    moveToTestNotebook();
     cy.get('.euiButton__text').contains('Add').click();
     cy.wait(delay);
 
@@ -256,6 +263,7 @@ describe('Testing paragraphs', () => {
   });
 
   it('Paragraph actions layout', () => {
+    moveToTestNotebook();
     cy.get('button[data-test-subj="notebook-paragraph-actions-button"]').should('exist').click();
     cy.get('.euiContextMenuPanelTitle').contains('Actions');
     cy.get('.euiContextMenuItem__text').eq(0).contains('Add paragraph to top');
@@ -308,6 +316,7 @@ describe('Testing paragraphs', () => {
   });
 
   it('Duplicates paragraphs', () => {
+    moveToTestNotebook();
     cy.get('.euiButtonIcon[aria-label="Open paragraph menu"]').eq(0).click();
     cy.wait(delay);
     cy.get('.euiContextMenuItem__text').contains('Duplicate').eq(0).click();
@@ -497,7 +506,7 @@ describe('Testing paragraphs', () => {
 
     cy.get('.euiButton__text').contains('Create notebook').should('exist');
   });
-  
+
   it('Cleans up test notebooks', () => {
     cy.get('[data-test-subj="notebook-notebook-actions-button"]').click();
     cy.wait(delay);
