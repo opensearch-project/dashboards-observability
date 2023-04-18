@@ -17,7 +17,6 @@ import {
   NOTEBOOKS_API_PREFIX,
   NOTEBOOKS_DOCUMENTATION_URL,
 } from '../../../../common/constants/notebooks';
-import { ObservabilitySideBar } from '../../common/side_nav';
 import { Notebook } from './notebook';
 import { NoteTable } from './note_table';
 

@@ -370,25 +370,19 @@ export const renderCatalogVisualization = async (
 };
 
 // Function to store recently used time filters and set start and end time.
-export const onTimeChange = (
+export const prependRecentlyUsedRange = (
   start: ShortDate,
   end: ShortDate,
-  recentlyUsedRanges: DurationRange[],
-  setRecentlyUsedRanges: React.Dispatch<React.SetStateAction<DurationRange[]>>,
-  setStart: React.Dispatch<React.SetStateAction<string>>,
-  setEnd: React.Dispatch<React.SetStateAction<string>>
+  recentlyUsedRanges: DurationRange[]
 ) => {
-  const recentlyUsedRangeObject = recentlyUsedRanges.filter((recentlyUsedRange) => {
-    const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
-    return !isDuplicate;
-  });
+  const deduplicatedRanges = rejectRecentRange(recentlyUsedRanges, { start, end });
 
-  recentlyUsedRangeObject.unshift({ start, end });
-  setStart(start);
-  setEnd(end);
-  setRecentlyUsedRanges(recentlyUsedRangeObject.slice(0, 9));
+  return [{ start, end }, ...deduplicatedRanges];
 };
 
+const rejectRecentRange = (rangeList, toReject) => {
+  return rangeList.filter((r) => !(r.start === toReject.start && r.end === toReject.end));
+};
 /**
  * Convert an ObservabilitySavedVisualization into SavedVisualizationType,
  * which is used in panels.
@@ -520,4 +514,17 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       })}
     />
   );
+};
+
+export const onTimeChange = (
+  start: ShortDate,
+  end: ShortDate,
+  recentlyUsedRanges: DurationRange[]
+) => {
+  const updatedRanges = recentlyUsedRanges.filter((recentlyUsedRange) => {
+    const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
+    return !isDuplicate;
+  });
+  updatedRanges.unshift({ start, end });
+  return { start, end, updatedRanges };
 };

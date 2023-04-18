@@ -31,6 +31,7 @@ import { Input, Prompt } from '@nteract/presentational-components';
 import { uiSettingsService } from '../../../../../common/utils';
 import React, { useState } from 'react';
 import { ParaType } from '../../../../../common/types/notebooks';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
 
 /*
  * "ParaInput" component is used by notebook to populate paragraph inputs for an open notebook.
@@ -118,7 +119,7 @@ export const ParaInput = (props: {
     const renderOption = (option: EuiComboBoxOptionOption, searchValue: string) => {
       let visURL = `visualize#/edit/${option.key}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${props.startTime}',to:'${props.endTime}'))`;
       if (option.className === 'OBSERVABILITY_VISUALIZATION') {
-        visURL = `#/event_analytics/explorer/${option.key}`;
+        visURL = `${observabilityLogsID}#/explorer/${option.key}`;
       }
       return (
         <EuiLink href={visURL} target="_blank">

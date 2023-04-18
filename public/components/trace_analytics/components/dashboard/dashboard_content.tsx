@@ -44,7 +44,7 @@ export function DashboardContent(props: DashboardProps) {
     startTime,
     endTime,
     childBreadcrumbs,
-    parentBreadcrumbs,
+    parentBreadcrumb,
     filters,
     setStartTime,
     setEndTime,
@@ -93,7 +93,7 @@ export function DashboardContent(props: DashboardProps) {
   useEffect(() => {
     let newFilteredService = '';
     for (const filter of filters) {
-      if (mode === 'data_prepper') { 
+      if (mode === 'data_prepper') {
         if (filter.field === 'serviceName') {
           newFilteredService = filter.value;
           break;
@@ -154,7 +154,7 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         // () => {
-        //   if (toasts.length === 0) { 
+        //   if (toasts.length === 0) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
@@ -170,7 +170,7 @@ export function DashboardContent(props: DashboardProps) {
         mode,
         () => setShowTimeoutToast(true),
         // () => {
-        //   if (toasts.length === 0) { 
+        //   if (toasts.length === 0) {
         //     setToast!('Query took too long to execute.', 'danger', 'Reduce time range or filter your data. If issue persists, consider increasing your cluster size.');
         //   }
         // },
