@@ -13,16 +13,24 @@ import {
   sampleSortedMetricsLayout,
   sampleVisualizationById,
 } from '../../../../../test/metrics_contants';
-import { createStore } from '@reduxjs/toolkit';
+import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 import { HttpResponse } from '../../../../../../../src/core/public';
 import { MetricsExportPanel } from '../metrics_export_panel';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import thunk from 'redux-thunk';
+import { coreRefs } from '../../../../framework/core_refs';
 
 describe('Export Metrics Panel Component', () => {
   configure({ adapter: new Adapter() });
-  const store = createStore(rootReducer);
+  const store = createStore(rootReducer, applyMiddleware(thunk));
+  coreRefs.savedObjectsClient.find = jest.fn(() =>
+    Promise.resolve({
+      savedObjects: [],
+      then: () => Promise.resolve(),
+    })
+  );
 
   it('renders Export Metrics Panel Component', async () => {
     let httpFlag = 1;
