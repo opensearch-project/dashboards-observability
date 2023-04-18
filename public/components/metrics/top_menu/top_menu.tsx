@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import { useDispatch, useSelector } from 'react-redux';
-import { uiSettingsService } from '../../../../common/utils';
 import React, { useEffect, useState } from 'react';
+import { uiSettingsService } from '../../../../common/utils';
 import { MetricType } from '../../../../common/types/metrics';
 import { resolutionOptions } from '../../../../common/constants/metrics';
 import './top_menu.scss';
@@ -93,7 +93,7 @@ export const TopMenu = ({
   const [originalPanelVisualizations, setOriginalPanelVisualizations] = useState<MetricType[]>([]);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [selectedPanelOptions, setSelectedPanelOptions] = useState<
-    EuiComboBoxOptionOption<unknown>[] | undefined
+    Array<EuiComboBoxOptionOption<unknown>> | undefined
   >([]);
 
   // toggle between panel edit mode
@@ -214,7 +214,7 @@ export const TopMenu = ({
         console.error(message, e);
         setToast('Issue in saving metrics', 'danger');
       }
-      setToast('Saved metrics to panels successfully!');
+      setToast('Saved metrics to Dashboards successfully!');
     }
   };
 

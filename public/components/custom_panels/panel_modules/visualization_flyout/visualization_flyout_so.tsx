@@ -35,6 +35,7 @@ import {
 import _, { isError } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useDispatch, useSelector } from 'react-redux';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
 import { convertDateTime } from '../../helpers/utils';
@@ -52,13 +53,12 @@ import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
-import { useDispatch, useSelector } from 'react-redux';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
  *
  * Props taken in as params are:
- * panelId: panel Id of current operational panel
+ * panelId: panel Id of current Observability Dashboard
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter
@@ -108,7 +108,6 @@ export const VisaulizationFlyoutSO = ({
   replaceVisualizationId,
   addVisualizationPanel,
 }: VisualizationFlyoutSOProps) => {
-
   const dispatch = useDispatch();
 
   const panel = useSelector(selectPanel);

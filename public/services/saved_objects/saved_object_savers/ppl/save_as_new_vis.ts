@@ -54,7 +54,7 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
         if (appLogEvents) {
           addVisualizationToPanel(res.objectId, name);
         } else {
-          history.replace(`/event_analytics/explorer/${res.objectId}`);
+          history.replace(`/explorer/${res.objectId}`);
         }
 
         batch(() => {
@@ -96,13 +96,13 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
       .then((res: any) => {
         notifications.toasts.addSuccess({
           title: 'Saved successfully.',
-          text: `Visualization '${saveTitle}' has been successfully saved to operation panels.`,
+          text: `Visualization '${saveTitle}' has been successfully saved to Observability Dashboards.`,
         });
       })
       .catch((error: any) => {
         notifications.toasts.addError(error, {
           title: 'Failed to save',
-          text: `Cannot add Visualization '${saveTitle}' to operation panels`,
+          text: `Cannot add Visualization '${saveTitle}' to Observability Dashboards`,
         });
       });
   }

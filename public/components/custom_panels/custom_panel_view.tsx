@@ -69,7 +69,7 @@ import { DeleteModal } from '../common/helpers/delete_modal';
 import { coreRefs } from '../../framework/core_refs';
 
 /*
- * "CustomPanelsView" module used to render an Operational Panel
+ * "CustomPanelsView" module used to render an Observability Dashboard
  *
  * Props taken in as params are:
  * panelId: Name of the panel opened
@@ -196,7 +196,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         setPanelVisualizations(res.operationalPanel.visualizations);
       })
       .catch((err) => {
-        console.error('Issue in fetching the operational panels', err);
+        console.error('Issue in fetching the Observability Dashboards', err);
       });
   };
 
@@ -235,7 +235,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         onConfirm={onDelete}
         onCancel={closeModal}
         title={`Delete ${openPanelName}`}
-        message={`Are you sure you want to delete this Operational Panel?`}
+        message={`Are you sure you want to delete this Observability Dashboard?`}
       />
     );
     showModal();
@@ -254,7 +254,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         onRename,
         closeModal,
         'Name',
-        'Rename Panel',
+        'Rename Dashboard',
         'Cancel',
         'Rename',
         openPanelName,
@@ -286,7 +286,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         onClone,
         closeModal,
         'Name',
-        'Duplicate Panel',
+        'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
         openPanelName + ' (copy)',
@@ -392,7 +392,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         setOnRefresh(!onRefresh);
       })
       .catch((err) => {
-        setToast('Error is adding filters to the operational panel', 'danger');
+        setToast('Error is adding filters to the Observability Dashboard', 'danger');
         console.error(err.body.message);
       });
   };
@@ -410,7 +410,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         setToast(`Visualization ${visualzationTitle} successfully added!`, 'success');
       })
       .catch((err) => {
-        setToast(`Error in adding ${visualzationTitle} visualization to the panel`, 'danger');
+        setToast(`Error in adding ${visualzationTitle} visualization to the Dashboard`, 'danger');
         console.error(err);
       });
   };
@@ -463,7 +463,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       onClick={() => setPanelsMenuPopover(true)}
       disabled={addVizDisabled}
     >
-      Panel actions
+      Dashboard Actions
     </EuiButton>
   );
 
@@ -498,7 +498,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       title: 'Panel actions',
       items: [
         {
-          name: 'Reload panel',
+          name: 'Reload Dashboard',
           'data-test-subj': 'reloadPanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -506,7 +506,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Rename panel',
+          name: 'Rename Dashboard',
           'data-test-subj': 'renamePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -514,7 +514,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Duplicate panel',
+          name: 'Duplicate Dashboard',
           'data-test-subj': 'duplicatePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -522,7 +522,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Delete panel',
+          name: 'Delete Dashboard',
           'data-test-subj': 'deletePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -533,7 +533,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     },
   ];
 
-  // Fetch the custom panel on Initial Mount
+  // Fetch the Observability Dashboard on Initial Mount
   useEffect(() => {
     fetchCustomPanel();
   }, [panelId]);
