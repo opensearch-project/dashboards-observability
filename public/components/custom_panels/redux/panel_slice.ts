@@ -137,7 +137,7 @@ export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
   } catch (err) {
-    console.log('Error updating panel', { err, panel });
+    console.log('Error updating Dashboard', { err, panel });
   }
 };
 

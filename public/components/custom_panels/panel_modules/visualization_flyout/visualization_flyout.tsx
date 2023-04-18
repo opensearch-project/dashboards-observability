@@ -187,7 +187,10 @@ export const VisaulizationFlyout = ({
           setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
         })
         .catch((err) => {
-          setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
+          setToast(
+            `Error in adding ${newVisualizationTitle} visualization to the Dashboard`,
+            'danger'
+          );
           console.error(err);
         });
     } else {
