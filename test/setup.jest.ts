@@ -6,6 +6,7 @@
 // import '@testing-library/jest-dom/extend-expect';
 import { configure } from '@testing-library/react';
 import { setOSDHttp, setOSDSavedObjectsClient } from '../common/utils';
+import { coreRefs } from '../public/framework/core_refs';
 import { coreStartMock } from './__mocks__/coreMocks';
 
 configure({ testIdAttribute: 'data-test-subj' });
@@ -57,3 +58,5 @@ jest.setTimeout(30000);
 
 setOSDHttp(coreStartMock.http);
 setOSDSavedObjectsClient(coreStartMock.savedObjects.client);
+coreRefs.http = coreStartMock.http;
+coreRefs.savedObjectsClient = coreStartMock.savedObjects.client;
