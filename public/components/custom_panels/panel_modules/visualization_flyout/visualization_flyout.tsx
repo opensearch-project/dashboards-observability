@@ -61,7 +61,7 @@ import './visualization_flyout.scss';
  * VisaulizationFlyout - This module create a flyout to add visualization
  *
  * Props taken in as params are:
- * panelId: panel Id of current operational panel
+ * panelId: panel Id of current Observability Dashboard
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter
@@ -187,7 +187,10 @@ export const VisaulizationFlyout = ({
           setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
         })
         .catch((err) => {
-          setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
+          setToast(
+            `Error in adding ${newVisualizationTitle} visualization to the Dashboard`,
+            'danger'
+          );
           console.error(err);
         });
     } else {

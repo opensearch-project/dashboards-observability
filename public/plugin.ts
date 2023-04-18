@@ -111,11 +111,11 @@ export class ObservabilityPlugin
     setupDeps.dashboard.registerDashboardProvider({
       appId: 'observability-panel',
       savedObjectsType: 'observability-panel',
-      savedObjectsName: 'Observability Panel',
+      savedObjectsName: 'Observability',
       editUrlPathFn: (obj: SavedObject) => `/app/observability-dashboards#/${obj.id}/edit`,
       viewUrlPathFn: (obj: SavedObject) => `/app/observability-dashboards#/${obj.id}`,
-      createLinkText: 'Observability Panel',
-      createSortText: 'Observability Panel',
+      createLinkText: 'Observability Dashboard',
+      createSortText: 'Observability Dashboard',
       createUrl: '/app/observability-dashboards#/create',
     });
 
@@ -235,6 +235,7 @@ export class ObservabilityPlugin
     // Return methods that should be available to other plugins
     return {};
   }
+
   public start(core: CoreStart): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
 
@@ -244,5 +245,6 @@ export class ObservabilityPlugin
 
     return {};
   }
+
   public stop() {}
 }
