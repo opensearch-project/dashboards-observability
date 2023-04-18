@@ -48,7 +48,7 @@ describe('Testing traces table', () => {
   it('Sorts the traces table', () => {
     cy.get('.euiTableRow').first().contains('-').should('exist');
     cy.get('.euiTableCellContent').contains('Trace group').click();
-    cy.get('.euiTableRow').first().contains('/%2A%2A').should('exist');
+    cy.get('.euiTableRow').first().contains('/**').should('exist');
   });
 
   it('Searches correctly', () => {
@@ -94,7 +94,7 @@ describe('Testing trace view', () => {
     cy.get('.euiBreadcrumb[href="#/"]').click();
     cy.wait(delay);
     cy.get('.euiTitle').contains('Dashboard').should('exist');
-    cy.get('.euiBreadcrumb[href="observability-traces#/"]').click();
+    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
     cy.wait(delay);
     cy.get('.euiTitle').contains('Event analytics').should('exist');
   });
