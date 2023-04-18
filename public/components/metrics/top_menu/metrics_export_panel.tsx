@@ -62,10 +62,6 @@ export const MetricsExportPanel = ({
     dispatch(fetchPanels());
   }, []);
 
-  // useEffect(() => {
-  //   setOptions(customPanels || []);
-  // }, [customPanels]);
-
   const fetchAllvisualizationsById = async () => {
     let tempVisualizationsMetaData = await Promise.all(
       sortedMetricsLayout.map(async (metricLayout) => {
