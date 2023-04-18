@@ -134,7 +134,7 @@ export const ParaOutput = (props: {
           fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
           toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
           const onEditClick = (savedVisualizationId: string) => {
-            window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
+            window.location.assign(`#/event_analytics/explorer/${savedVisualizationId}`);
           };
           return (
             <>
@@ -161,7 +161,6 @@ export const ParaOutput = (props: {
         case 'HTML':
           return (
             <EuiText key={key}>
-              {/* eslint-disable-next-line react/jsx-pascal-case */}
               <Media.HTML data={val} />
             </EuiText>
           );

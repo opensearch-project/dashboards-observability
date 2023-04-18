@@ -54,7 +54,7 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
         if (appLogEvents) {
           addVisualizationToPanel(res.objectId, name);
         } else {
-          history.replace(`/explorer/${res.objectId}`);
+          history.replace(`/event_analytics/explorer/${res.objectId}`);
         }
 
         batch(() => {
