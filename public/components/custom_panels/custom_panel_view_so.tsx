@@ -33,20 +33,15 @@ import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
 import _ from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRef } from 'react';
-import DSLService from '../../services/requests/dsl';
 import { CoreStart, SimpleSavedObject } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
-  CUSTOM_PANELS_API_PREFIX,
-  CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
 import { CustomPanelType, PanelType } from '../../../common/types/custom_panels';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 
 import { getCustomModal } from './helpers/modal_containers';
-import PPLService from '../../services/requests/ppl';
 import {
   isDateValid,
   convertDateTime,
@@ -70,15 +65,11 @@ import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visu
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import {
   clonePanel,
-  createPanel,
+  deletePanel,
   fetchPanel,
-  newPanelTemplate,
   renameCustomPanel,
   selectPanel,
   setPanel,
-  setPanelEt,
-  setPanelId,
-  setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
 import { coreRefs } from '../../framework/core_refs';
@@ -219,10 +210,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     closeModal();
   };
 
-  const deletePanel = () => {
+  const deletePanelInteraction = () => {
     setModalLayout(
       <DeleteModal
-        onConfirm={onDelete}
+        onConfirm={() => {
+          dispatch(deletePanel(panelId));
+          closeModal();
+          // TODO : navigate back if successful
+        }}
         onCancel={closeModal}
         title={`Delete ${panel?.title}`}
         message={`Are you sure you want to delete this Observability Dashboard?`}
@@ -542,7 +537,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
           'data-test-subj': 'deletePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
-            deletePanel();
+            deletePanelInteraction();
           },
         },
       ],

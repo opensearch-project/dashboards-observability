@@ -224,6 +224,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
+    // TODO: replace this with redux implementation, same as for SO
     deleteCustomPanel(panelId, panel?.title).then((res) => {
       setTimeout(() => {
         window.location.assign(`${last(parentBreadcrumbs)!.href}`);
