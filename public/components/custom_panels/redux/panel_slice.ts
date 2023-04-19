@@ -131,7 +131,7 @@ const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClie
 
 export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
-const isUuid = (id) => id.match(uuidRx);
+const isUuid = (id) => uuidRx.test(id);
 
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
   try {
