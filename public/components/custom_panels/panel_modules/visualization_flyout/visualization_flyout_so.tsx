@@ -37,7 +37,12 @@ import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlyoutContainers } from '../../../common/flyout_containers';
-import { displayVisualization, getQueryResponse, isDateValid } from '../../helpers/utils';
+import {
+  displayVisualization,
+  getQueryResponse,
+  isDateValid,
+  parseSavedVisualizations,
+} from '../../helpers/utils';
 import { convertDateTime } from '../../helpers/utils';
 import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -53,6 +58,12 @@ import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import {
+  ObservabilitySavedObject,
+  ObservabilitySavedVisualization,
+} from '../../../../services/saved_objects/saved_object_client/types';
+import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -351,8 +362,14 @@ export const VisaulizationFlyoutSO = ({
 
   // Fetch all saved visualizations
   const fetchSavedVisualizations = async () => {
-    return http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations`)
+    return SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+      objectType: [SAVED_VISUALIZATION],
+      sortOrder: 'desc',
+      fromIndex: 0,
+    })
+      .then((response) => ({
+        visualizations: response.observabilityObjectList.map(parseSavedVisualizations),
+      }))
       .then((res) => {
         if (res.visualizations.length > 0) {
           setSavedVisualizations(res.visualizations);
