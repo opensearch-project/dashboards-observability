@@ -222,7 +222,7 @@ export const CustomPanelTable = ({
         'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
-        selectedCustomPanels[0].title + ' (copy)',
+        selectedCustomPanels[0].title + ' (copy)x',
         CREATE_PANEL_MESSAGE
       )
     );
