@@ -1085,7 +1085,7 @@ exports[`<NoteTable /> spec renders the empty component 1`] = `
             <a
               class="euiButton euiButton--primary"
               data-test-subj="note-table-empty-state-create-notebook-button"
-              href="#/notebooks/create"
+              href="#/create"
               rel="noreferrer"
             >
               <span
