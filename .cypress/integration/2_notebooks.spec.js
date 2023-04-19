@@ -63,7 +63,6 @@ describe('Adding sample data and visualization', () => {
     cy.wait(100 * 5);
     cy.route2('POST', '/addSamplePanels').as('addSamples');
     cy.wait('@addSamples').then(() => {
-      // cy.get('.euiTableCellContent').contains(SAMPLE_PANEL).should('exist');
       cy.get('.euiToastHeader__title').should('contain', 'successfully');
     });
     cy.wait(100);
