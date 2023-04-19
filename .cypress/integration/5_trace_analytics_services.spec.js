@@ -9,7 +9,7 @@ import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_span
 
 describe('Testing services table empty state', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/services', {
+    cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -25,7 +25,7 @@ describe('Testing services table empty state', () => {
 
 describe('Testing services table', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/services', {
+    cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -77,7 +77,7 @@ describe('Testing service view empty state', () => {
       if (err.message.includes('ResizeObserver loop'))
         return false;
     });
-    cy.visit(`app/observability-dashboards#/trace_analytics/services/${SERVICE_NAME}`, {
+    cy.visit(`app/observability-traces#/services/${SERVICE_NAME}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -98,7 +98,7 @@ describe('Testing service view', () => {
       if (err.message.includes('ResizeObserver loop'))
         return false;
     });
-    cy.visit(`app/observability-dashboards#/trace_analytics/services`, {
+    cy.visit(`app/observability-traces#/services`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -149,7 +149,7 @@ describe('Testing service view', () => {
 
 describe('Testing Service map', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/services', {
+    cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -176,7 +176,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
       if (err.message.includes('ResizeObserver loop'))
         return false;
     });
-    cy.visit('app/observability-dashboards#/trace_analytics/services', {
+    cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -245,10 +245,9 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 });
 
-
 describe('Testing traces Spans table and verify columns functionality', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/services', {
+    cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
@@ -291,7 +290,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
 
 describe('Testing switch mode to jaeger', () => {
   beforeEach(() => {
-    cy.visit('app/observability-dashboards#/trace_analytics/services', {
+    cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
