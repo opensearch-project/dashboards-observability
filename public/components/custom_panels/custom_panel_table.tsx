@@ -42,12 +42,13 @@ import {
 } from '../../../common/constants/custom_panels';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { getCustomModal } from './helpers/modal_containers';
-import { CustomPanelListType } from '../../../common/types/custom_panels';
+import { CustomPanelListType, CustomPanelType } from '../../../common/types/custom_panels';
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import {
   createPanel,
+  deletePanels,
   fetchPanels,
   newPanelTemplate,
   renameCustomPanel,
@@ -86,11 +87,11 @@ export const CustomPanelTable = ({
   deleteCustomPanelList,
   addSamplePanels,
 }: Props) => {
-  const customPanels = useSelector(selectPanelList);
+  const customPanels = useSelector<CustomPanelType[]>(selectPanelList);
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelListType[]>([]);
+  const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
@@ -144,8 +145,17 @@ export const CustomPanelTable = ({
     const toastMessage = `Observability Dashboards ${
       selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
     } successfully deleted!`;
-    const PanelList = selectedCustomPanels.map((panel) => panel.id);
-    deleteCustomPanelList(PanelList, toastMessage);
+
+    try {
+      dispatch(deletePanels(selectedCustomPanels));
+    } catch (err) {
+      // setToast(
+      //   'Error deleting Operational Panels, please make sure you have the correct permission.',
+      //   'danger'
+      // );
+      console.error(err.body?.message || err);
+    }
+
     closeModal();
   };
 
