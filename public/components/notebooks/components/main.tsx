@@ -121,7 +121,7 @@ export class Main extends React.Component<MainProps, MainState> {
   };
 
   // Renames an existing notebook
-  renameNotebook = (editedNoteName: string, editedNoteID: string) => {
+  renameNotebook = (editedNoteName: string, editedNoteID: string): Promise<any> => {
     if (editedNoteName.length >= 50 || editedNoteName.length === 0) {
       this.setToast('Invalid notebook name', 'danger');
       return;
@@ -143,6 +143,7 @@ export class Main extends React.Component<MainProps, MainState> {
           return { data: newData };
         });
         this.setToast(`Notebook successfully renamed into "${editedNoteName}"`);
+        return res;
       })
       .catch((err) => {
         this.setToast(
