@@ -127,6 +127,8 @@ interface CustomPanelViewProps {
   appId?: string;
   updateAvailabilityVizId?: any;
   onAddClick?: any;
+  pplService: PPLService;
+  dslService: DSLService;
 }
 
 export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
