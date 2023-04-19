@@ -33,11 +33,12 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
-import { coreRefs } from 'public/framework/core_refs';
 import { useDispatch, useSelector } from 'react-redux';
+import { coreRefs } from '../../framework/core_refs';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import {
   CREATE_PANEL_MESSAGE,
+  CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
@@ -47,9 +48,11 @@ import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { pageStyles } from '../../../common/constants/shared';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import {
+  clonePanel,
   createPanel,
   deletePanels,
   fetchPanels,
+  isUuid,
   newPanelTemplate,
   renameCustomPanel,
   selectPanelList,
@@ -134,10 +137,26 @@ export const CustomPanelTable = ({
   };
 
   const onClone = async (newName: string) => {
-    const sourcePanel = selectedCustomPanels[0];
-    const { id, ...newPanel } = { ...sourcePanel, title: sourcePanel.title + ' (copy)' };
+    let sourcePanel = selectedCustomPanels[0];
+    try {
+      if (!isUuid(sourcePanel.id)) {
+        // Observability Panel API returns partial record, so for duplication
+        // we will retrieve the entire record and allow new process to continue.
+        const legacyFetchResult = await coreRefs.http!.get(
+          `${CUSTOM_PANELS_API_PREFIX}/panels/${sourcePanel.id}`
+        );
+        sourcePanel = legacyFetchResult.operationalPanel;
+      }
 
-    dispatch(createPanel(newPanel));
+      const { id, ...newPanel } = {
+        ...sourcePanel,
+        title: newName,
+      };
+
+      dispatch(createPanel(newPanel));
+    } catch (err) {
+      console.log(err);
+    }
     closeModal();
   };
 
@@ -194,7 +213,7 @@ export const CustomPanelTable = ({
     showModal();
   };
 
-  const clonePanel = () => {
+  const clonePanelModal = () => {
     setModalLayout(
       getCustomModal(
         onClone,
@@ -203,7 +222,7 @@ export const CustomPanelTable = ({
         'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
-        selectedCustomPanels[0].title + ' (copy)',
+        selectedCustomPanels[0].title + ' (copy)x',
         CREATE_PANEL_MESSAGE
       )
     );
@@ -264,7 +283,7 @@ export const CustomPanelTable = ({
       disabled={customPanels.length === 0 || selectedCustomPanels.length !== 1}
       onClick={() => {
         setIsActionsPopoverOpen(false);
-        clonePanel();
+        clonePanelModal();
       }}
     >
       Duplicate

@@ -71,6 +71,7 @@ import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import {
   clonePanel,
   createPanel,
+  deletePanels,
   fetchPanel,
   newPanelTemplate,
   selectPanel,
@@ -114,7 +115,6 @@ interface CustomPanelViewProps {
   coreSavedObjects: CoreStart['savedObjects'];
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
-  deleteCustomPanel: (customPanelId: string, customPanelName: string) => Promise<any>;
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
   setToast: (
     title: string,
@@ -140,7 +140,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     parentBreadcrumbs,
     childBreadcrumbs,
     updateAvailabilityVizId,
-    deleteCustomPanel,
     cloneCustomPanel,
     setToast,
     onEditClick,
@@ -210,11 +209,20 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
-    deleteCustomPanel(panelId, panel?.title).then((res) => {
+    const toastMessage = `Observability Dashboard ${panel.title} successfully deleted!"`;
+    try {
+      await dispatch(deletePanels([panel]));
+
       setTimeout(() => {
         window.location.assign(`${last(parentBreadcrumbs)!.href}`);
       }, 1000);
-    });
+    } catch (err) {
+      setToast(
+        'Error deleting Operational Panels, please make sure you have the correct permission.',
+        'danger'
+      );
+      console.error(err.body?.message || err);
+    }
     closeModal();
   };
 
@@ -228,6 +236,21 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       />
     );
     showModal();
+  };
+
+  const onRename = async (newCustomPanelName: string) => {
+    const newPanel = { ...panel, title: newCustomPanelName };
+    try {
+      dispatch(updatePanel(newPanel));
+      setToast(`Operational Panel successfully renamed into "${newCustomPanelName}"`);
+    } catch (err) {
+      setToast(
+        'Error renaming Operational Panel, please make sure you have the correct permission.',
+        'danger'
+      );
+      console.error(err.body.message);
+    }
+    closeModal();
   };
 
   const renamePanel = () => {

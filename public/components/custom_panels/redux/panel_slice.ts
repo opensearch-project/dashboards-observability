@@ -126,7 +126,7 @@ const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClie
 
 export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
-const isUuid = (id) => !!id.match(uuidRx);
+export const isUuid = (id) => !!id.match(uuidRx);
 
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
   try {
@@ -174,13 +174,14 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId) => async (dispatch,
 };
 
 const deletePanelSO = (customPanelIdList: string[]) => {
-  const soPanelIds = customPanelIdList.filter((id) => id.match(uuidRx));
-  console.log('deletePanelSO', soPanelIds);
+  const soPanelIds = customPanelIdList.filter((id) => isUuid(id));
   return Promise.all(soPanelIds.map((id) => savedObjectPanelsClient.delete(id)));
 };
 
 const deleteLegacyPanels = (customPanelIdList: string[]) => {
-  const panelIds = customPanelIdList.filter((id) => !id.match(uuidRx));
+  const panelIds = customPanelIdList.filter((id) => !isUuid(id));
+  if (panelIds.length === 0) return;
+
   const concatList = panelIds.toString();
   return coreRefs.http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList);
 };
