@@ -131,7 +131,7 @@ const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClie
 
 export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
-const isUuid = (id) => !!id.match(uuidRx);
+const isUuid = (id) => id.match(uuidRx);
 
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
   try {
@@ -242,7 +242,7 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   }
 
   const panel = getState().customPanel.panelList.find((p) => p.id === id);
-  const updatedPanel = { ...panel, title: editedCustomPanelName };
+  const updatedPanel = { ...panel, title: editedCustomPanelName, name: editedCustomPanelName };
   dispatch(updatePanel(updatedPanel));
 
   // try {
