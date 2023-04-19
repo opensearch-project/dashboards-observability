@@ -73,6 +73,7 @@ import {
   createPanel,
   fetchPanel,
   newPanelTemplate,
+  renameCustomPanel,
   selectPanel,
   setPanel,
   setPanelEt,
@@ -228,6 +229,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       />
     );
     showModal();
+  };
+
+  const onRename = async (newCustomPanelName: string) => {
+    dispatch(renameCustomPanel(newCustomPanelName, panelId))
+    // .then(() => {
+    //   setOpenPanelName(newCustomPanelName);
+    // });
+    closeModal();
   };
 
   const renamePanel = () => {

@@ -67,6 +67,8 @@ import {
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { coreRefs } from '../../framework/core_refs';
+import { useDispatch } from 'react-redux';
+import { renameCustomPanel } from './redux/panel_slice';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -137,13 +139,14 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     setStartTime,
     setEndTime,
     updateAvailabilityVizId,
-    renameCustomPanel,
     deleteCustomPanel,
     cloneCustomPanel,
     setToast,
     onEditClick,
     onAddClick,
   } = props;
+
+  const dispatch = useDispatch();
 
   const [panel, setPanel] = useState();
   const [openPanelName, setOpenPanelName] = useState('');
@@ -242,9 +245,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    renameCustomPanel(newCustomPanelName, panelId).then(() => {
-      setOpenPanelName(newCustomPanelName);
-    });
+    dispatch(renameCustomPanel(newCustomPanelName, panelId))
+    // .then(() => {
+    //   setOpenPanelName(newCustomPanelName);
+    // });
     closeModal();
   };
 
