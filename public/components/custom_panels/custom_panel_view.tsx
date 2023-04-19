@@ -30,6 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
 import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
@@ -67,8 +68,7 @@ import {
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { coreRefs } from '../../framework/core_refs';
-import { useDispatch } from 'react-redux';
-import { renameCustomPanel } from './redux/panel_slice';
+import { renameCustomPanel, selectPanel } from './redux/panel_slice';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -148,8 +148,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
 
   const dispatch = useDispatch();
 
-  const [panel, setPanel] = useState();
-  const [openPanelName, setOpenPanelName] = useState('');
+  const panel = useSelector(selectPanel);
+
   const [panelCreatedTime, setPanelCreatedTime] = useState('');
   const [pplFilterValue, setPPLFilterValue] = useState('');
   const [baseQuery, setBaseQuery] = useState('');
@@ -190,8 +190,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     return http
       .get(`${CUSTOM_PANELS_API_PREFIX}/panels/${panelId}`)
       .then((res) => {
-        setPanel(res.operationalPanel);
-        setOpenPanelName(res.operationalPanel.name);
+        // setPanel(res.operationalPanel);
+        // setpanel.title(res.operationalPanel.name);
         setPanelCreatedTime(res.createdTimeMs);
         setPPLFilterValue(res.operationalPanel.queryFilter.query);
         setStartTime(startTime ? startTime : res.operationalPanel.timeRange.from);
@@ -224,7 +224,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
-    deleteCustomPanel(panelId, openPanelName).then((res) => {
+    deleteCustomPanel(panelId, panel?.title).then((res) => {
       setTimeout(() => {
         window.location.assign(`${last(parentBreadcrumbs)!.href}`);
       }, 1000);
@@ -237,7 +237,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       <DeleteModal
         onConfirm={onDelete}
         onCancel={closeModal}
-        title={`Delete ${openPanelName}`}
+        title={`Delete ${panel?.title}`}
         message={`Are you sure you want to delete this Observability Dashboard?`}
       />
     );
@@ -245,9 +245,9 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    dispatch(renameCustomPanel(newCustomPanelName, panelId))
+    dispatch(renameCustomPanel(newCustomPanelName, panelId));
     // .then(() => {
-    //   setOpenPanelName(newCustomPanelName);
+    //   setpanel?.title(newCustomPanelName);
     // });
     closeModal();
   };
@@ -261,7 +261,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         'Rename Dashboard',
         'Cancel',
         'Rename',
-        openPanelName,
+        panel?.title,
         CREATE_PANEL_MESSAGE
       )
     );
@@ -293,7 +293,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
-        openPanelName + ' (copy)',
+        panel?.title + ' (copy)',
         CREATE_PANEL_MESSAGE
       )
     );
@@ -562,13 +562,13 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     } else {
       newBreadcrumb = [
         {
-          text: openPanelName,
+          text: panel.title,
           href: `${last(parentBreadcrumbs)!.href}${panelId}`,
         },
       ];
     }
     chrome.setBreadcrumbs([...parentBreadcrumbs, ...newBreadcrumb]);
-  }, [panelId, openPanelName]);
+  }, [panelId, panel.title]);
 
   return (
     <div>
@@ -579,7 +579,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
               <>
                 <EuiPageHeaderSection>
                   <EuiTitle size="l">
-                    <h1 data-test-subj="panelNameHeader">{openPanelName}</h1>
+                    <h1 data-test-subj="panelNameHeader">{panel?.title}</h1>
                   </EuiTitle>
                   <EuiFlexItem>
                     <EuiSpacer size="s" />
