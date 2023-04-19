@@ -120,8 +120,9 @@ export function NoteTable({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Notebook${selectedNotebooks.length > 1 ? 's' : ' "' + selectedNotebooks[0].path + '"'
-      } successfully deleted!`;
+    const toastMessage = `Notebook${
+      selectedNotebooks.length > 1 ? 's' : ' "' + selectedNotebooks[0].path + '"'
+    } successfully deleted!`;
     await deleteNotebook(
       selectedNotebooks.map((note) => note.id),
       toastMessage
@@ -350,8 +351,8 @@ export function NoteTable({
                   items={
                     searchQuery
                       ? notebooks.filter((notebook) =>
-                        notebook.path.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
+                          notebook.path.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
                       : notebooks
                   }
                   itemId="id"
@@ -390,7 +391,7 @@ export function NoteTable({
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      href="#/notebooks/create"
+                      href="#/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
                     >
