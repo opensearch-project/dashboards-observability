@@ -277,14 +277,14 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
     cy.get('[data-test-subj="addfilter"]').contains('+ Add filter').click();
     cy.get('.euiPopoverTitle').contains('Add filter').should('exist');
     cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(0).trigger('mouseover').click();
-    //cy.get('.euiComboBoxOption__content').eq(1).click();
+    cy.get('.euiComboBoxOption__content').eq(1).click();
     cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(1).trigger('mouseover').click();
-    //cy.get('.euiComboBoxOption__content').eq(2).click();
+    cy.get('.euiComboBoxOption__content').eq(2).click();
     cy.get('.euiButton.euiButton--primary.euiButton--fill').contains('Save').click();
-    //cy.get('.euiBadge__content').should('exist').click();
-    //cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
+    cy.get('.euiBadge__content').should('exist').click();
+    cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
     cy.get('[data-test-subj="filter-popover-cancel-button"]').contains('Cancel').click();
-    //cy.get('.euiIcon.euiIcon--small.euiIcon--inherit.euiBadge__icon').click();
+    cy.get('.euiIcon.euiIcon--small.euiIcon--inherit.euiBadge__icon').click();
   })
 });
 
