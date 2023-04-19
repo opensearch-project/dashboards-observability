@@ -4,40 +4,39 @@
  */
 
 import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiComboBoxOptionOption,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiSelect,
-  EuiSuperDatePicker,
-  ShortDate,
-  OnTimeChangeProps,
-  EuiButton,
-  EuiComboBoxOptionOption,
-  EuiButtonEmpty,
   EuiPopover,
   EuiPopoverFooter,
+  EuiSelect,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  OnTimeChangeProps,
+  ShortDate,
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect, useState } from 'react';
-import { uiSettingsService } from '../../../../common/utils';
-import { MetricType } from '../../../../common/types/metrics';
+import { CoreStart } from '../../../../../../src/core/public';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import { resolutionOptions } from '../../../../common/constants/metrics';
-import './top_menu.scss';
+import { MetricType } from '../../../../common/types/metrics';
+import { uiSettingsService } from '../../../../common/utils';
+import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
+import { addVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
+import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
 import {
   allAvailableMetricsSelector,
   metricsLayoutSelector,
   selectMetric,
 } from '../redux/slices/metrics_slice';
 import { SearchBar } from '../sidebar/search_bar';
-import { CoreStart } from '../../../../../../src/core/public';
-import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
-import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import { MetricsExportPanel } from './metrics_export_panel';
-import { addVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
+import './top_menu.scss';
 
 interface TopMenuProps {
   http: CoreStart['http'];
@@ -159,7 +158,7 @@ export const TopMenu = ({
 
   const handleSavingObjects = async () => {
     let savedMetricIds = [];
-    let savedMetricsInPanels = [];
+    const savedMetricsInPanels = [];
 
     try {
       savedMetricIds = await Promise.all(
@@ -220,92 +219,86 @@ export const TopMenu = ({
 
   return (
     <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiFlexGroup className="search-bar-top-menu">
-            <EuiFlexItem>
-              <SearchBar setSearch={setSearch} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <div className="resolutionSelect">
-                <EuiFieldText
-                  className="resolutionSelectText"
-                  prepend="Span Interval"
-                  value={spanValue}
-                  isInvalid={spanValue < 1}
-                  onChange={(e) => setSpanValue(e.target.value)}
-                  append={
-                    <EuiSelect
-                      id={resolutionSelectId}
-                      options={resolutionOptions}
-                      value={resolutionValue}
-                      onChange={(e) => onResolutionChange(e)}
-                      aria-label="resolutionSelect"
-                    />
-                  }
-                  disabled={IsTopPanelDisabled}
-                  aria-label="resolutionField"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={10}>
+          <SearchBar setSearch={setSearch} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div className="resolutionSelect">
+            <EuiFieldText
+              className="resolutionSelectText"
+              prepend="Span Interval"
+              value={spanValue}
+              isInvalid={spanValue < 1}
+              onChange={(e) => setSpanValue(e.target.value)}
+              append={
+                <EuiSelect
+                  className="resolutionSelectOption"
+                  id={resolutionSelectId}
+                  options={resolutionOptions}
+                  value={resolutionValue}
+                  onChange={(e) => onResolutionChange(e)}
+                  aria-label="resolutionSelect"
                 />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSuperDatePicker
-                dateFormat={uiSettingsService.get('dateFormat')}
-                start={startTime}
-                end={endTime}
-                onTimeChange={onDatePickerChange}
-                recentlyUsedRanges={recentlyUsedRanges}
-                isDisabled={IsTopPanelDisabled}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={Savebutton}
-                isOpen={isSavePanelOpen}
-                closePopover={() => setIsSavePanelOpen(false)}
-              >
-                <MetricsExportPanel
-                  http={http}
-                  visualizationsMetaData={visualizationsMetaData}
-                  setVisualizationsMetaData={setVisualizationsMetaData}
-                  sortedMetricsLayout={sortedMetricsLayout}
-                  selectedPanelOptions={selectedPanelOptions}
-                  setSelectedPanelOptions={setSelectedPanelOptions}
-                />
-                <EuiPopoverFooter>
-                  <EuiFlexGroup justifyContent="flexEnd">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="s"
-                        onClick={() => setIsSavePanelOpen(false)}
-                        data-test-subj="metrics__SaveCancel"
-                      >
-                        Cancel
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        fill
-                        onClick={() => {
-                          handleSavingObjects().then(() => setIsSavePanelOpen(false));
-                        }}
-                        data-test-subj="metrics__SaveConfirm"
-                      >
-                        Save
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPopoverFooter>
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+              }
+              disabled={IsTopPanelDisabled}
+              aria-label="resolutionField"
+            />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem className="metrics-search-bar-datepicker">
+          <EuiSuperDatePicker
+            dateFormat={uiSettingsService.get('dateFormat')}
+            start={startTime}
+            end={endTime}
+            onTimeChange={onDatePickerChange}
+            recentlyUsedRanges={recentlyUsedRanges}
+            isDisabled={IsTopPanelDisabled}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={Savebutton}
+            isOpen={isSavePanelOpen}
+            closePopover={() => setIsSavePanelOpen(false)}
+          >
+            <MetricsExportPanel
+              http={http}
+              visualizationsMetaData={visualizationsMetaData}
+              setVisualizationsMetaData={setVisualizationsMetaData}
+              sortedMetricsLayout={sortedMetricsLayout}
+              selectedPanelOptions={selectedPanelOptions}
+              setSelectedPanelOptions={setSelectedPanelOptions}
+            />
+            <EuiPopoverFooter>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    onClick={() => setIsSavePanelOpen(false)}
+                    data-test-subj="metrics__SaveCancel"
+                  >
+                    Cancel
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={() => {
+                      handleSavingObjects().then(() => setIsSavePanelOpen(false));
+                    }}
+                    data-test-subj="metrics__SaveConfirm"
+                  >
+                    Save
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
         {editMode ? (
           <>
