@@ -21,15 +21,24 @@ import { SAMPLE_PANEL } from '../utils/panel_constants';
 import { skipOn } from '@cypress/skip-test';
 
 const moveToEventsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
   cy.wait(delay * 3);
 };
 
 const moveToPanelHome = () => {
-  cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/operational_panels/`
-  );
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`);
   cy.wait(delay * 3);
+};
+
+const moveToTestNotebook = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-notebooks#/`, {
+    timeout: 6000,
+  });
+  cy.get('.euiTableCellContent')
+    .contains(TEST_NOTEBOOK, {
+      timeout: 6000,
+    })
+    .click();
 };
 
 describe('Adding sample data and visualization', () => {
@@ -41,20 +50,20 @@ describe('Adding sample data and visualization', () => {
   });
 
   it('Add sample observability data', () => {
-    moveToPanelHome();
-    cy.get('.euiButton__text').contains('Actions').trigger('mouseover').click();
+    moveToEventsHome();
+    cy.get('button[data-test-subj="eventHomeAction"]').trigger('mouseover').click();
     cy.wait(100);
-    cy.get('.euiContextMenuItem__text').contains('Add samples').trigger('mouseover').click();
+    cy.get('button[data-test-subj="eventHomeAction__addSamples"]').trigger('mouseover').click();
     cy.wait(100 * 3);
     cy.get('.euiModalHeader__title[data-test-subj="confirmModalTitleText"]')
       .contains('Add samples')
       .should('exist');
     cy.wait(100);
-    cy.get('.euiButton__text').contains('Yes').trigger('mouseover').click();
+    cy.get('button[data-test-subj="confirmModalConfirmButton"]').trigger('mouseover').click();
     cy.wait(100 * 5);
     cy.route2('POST', '/addSamplePanels').as('addSamples');
     cy.wait('@addSamples').then(() => {
-      cy.get('.euiTableCellContent').contains(SAMPLE_PANEL).should('exist');
+      cy.get('.euiToastHeader__title').should('contain', 'successfully');
     });
     cy.wait(100);
   });
@@ -62,7 +71,8 @@ describe('Adding sample data and visualization', () => {
 
 describe('Testing notebooks table', () => {
   beforeEach(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-notebooks#/`);
+    cy.wait(delay);
   });
 
   it('Notebooks table empty state', () => {
@@ -178,7 +188,7 @@ describe('Testing notebooks table', () => {
 
 describe('Test reporting integration if plugin installed', () => {
   beforeEach(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-notebooks#/`);
     cy.get('.euiTableCellContent').contains(TEST_NOTEBOOK).click();
     cy.wait(delay * 3);
     cy.get('body').then(($body) => {
@@ -222,8 +232,7 @@ describe('Test reporting integration if plugin installed', () => {
 
 describe('Testing paragraphs', () => {
   beforeEach(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/notebooks`);
-    cy.get('.euiTableCellContent').contains(TEST_NOTEBOOK).click();
+    moveToTestNotebook();
   });
 
   it('Goes into a notebook and creates paragraphs', () => {
@@ -550,7 +559,5 @@ describe('clean up all test data', () => {
     });
     cy.get('button.euiButton--danger').should('not.be.disabled');
     cy.get('.euiButton__text').contains('Delete').trigger('mouseover').click();
-
-    cy.get('.euiTextAlign').contains('No Operational Panels').should('exist');
   });
 });

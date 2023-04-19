@@ -81,8 +81,8 @@ export function NoteTable(props: NoteTableProps) {
   }, []);
 
   useEffect(() => {
-    const url = window.location.hash.split('/')
-    if (url[url.length-1] === 'create') { 
+    const url = window.location.hash.split('/');
+    if (url[url.length - 1] === 'create') {
       createNote();
     }
   }, [location]);
@@ -110,8 +110,9 @@ export function NoteTable(props: NoteTableProps) {
   };
 
   const onDelete = async () => {
-    const toastMessage = `Notebook${selectedNotebooks.length > 1 ? 's' : ' "' + selectedNotebooks[0].path + '"'
-      } successfully deleted!`;
+    const toastMessage = `Notebook${
+      selectedNotebooks.length > 1 ? 's' : ' "' + selectedNotebooks[0].path + '"'
+    } successfully deleted!`;
     await deleteNotebook(
       selectedNotebooks.map((note) => note.id),
       toastMessage
@@ -124,7 +125,7 @@ export function NoteTable(props: NoteTableProps) {
       getCustomModal(
         onCreate,
         () => {
-          closeModal()
+          closeModal();
           history.goBack();
         },
         'Name',
@@ -340,8 +341,8 @@ export function NoteTable(props: NoteTableProps) {
                   items={
                     searchQuery
                       ? notebooks.filter((notebook) =>
-                        notebook.path.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
+                          notebook.path.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
                       : notebooks
                   }
                   itemId="id"
@@ -379,7 +380,8 @@ export function NoteTable(props: NoteTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton href="#/notebooks/create"
+                    <EuiButton
+                      href="#/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
                     >

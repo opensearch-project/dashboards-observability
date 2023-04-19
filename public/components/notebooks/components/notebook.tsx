@@ -75,7 +75,7 @@ type NotebookProps = {
   http: CoreStart['http'];
   parentBreadcrumb: ChromeBreadcrumb;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
-  renameNotebook: (newNoteName: string, noteId: string) => void;
+  renameNotebook: (newNoteName: string, noteId: string) => Promise<any>;
   cloneNotebook: (newNoteName: string, noteId: string) => Promise<string>;
   deleteNotebook: (noteList: string[], toastMessage?: string) => void;
   setToast: (title: string, color?: string, text?: string) => void;
@@ -285,9 +285,13 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setState({
       modalLayout: getCustomModal(
         (newName: string) => {
-          this.props.renameNotebook(newName, this.props.openedNoteId);
-          this.setState({ isModalVisible: false });
-          this.loadNotebook();
+          this.props.renameNotebook(newName, this.props.openedNoteId).then((res) => {
+            this.setState({ isModalVisible: false });
+            window.location.assign(`#/${res.message.objectId}`);
+            setTimeout(() => {
+              this.loadNotebook();
+            }, 300);
+          });
         },
         () => this.setState({ isModalVisible: false }),
         'Name',
