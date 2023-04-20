@@ -28,7 +28,7 @@ import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { deletePanel, fetchPanels, uuidRx } from './redux/panel_slice';
+import { fetchPanels, uuidRx } from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -89,65 +89,6 @@ export const Home = ({
 
   const onEditClick = (savedVisualizationId: string) => {
     window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
-  };
-
-  const deletePanelSO = (customPanelIdList: string[]) => {
-    const soPanelIds = customPanelIdList.filter((id) => id.match(uuidRx));
-    return Promise.all(
-      soPanelIds.map((id) =>
-        coreRefs.savedObjectsClient?.delete(CUSTOM_PANELS_SAVED_OBJECT_TYPE, id)
-      )
-    );
-  };
-
-  const deletePanels = (customPanelIdList: string[]) => {
-    const panelIds = customPanelIdList.filter((id) => !id.match(uuidRx));
-    const concatList = panelIds.toString();
-    return http.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList);
-  };
-
-  // Deletes multiple existing Operational Panels
-  const deleteCustomPanelList = (customPanelIdList: string[], toastMessage: string) => {
-    Promise.all([deletePanelSO(customPanelIdList), deletePanels(customPanelIdList)])
-      .then((res) => {
-        // setcustomPanelData((prevCustomPanelData) => {
-        //   return prevCustomPanelData.filter(
-        //     (customPanel) => !customPanelIdList.includes(customPanel.id)
-        //   );
-        // });
-        // setToast(toastMessage);
-      })
-      .catch((err) => {
-        setToast(
-          'Error deleting Operational Panels, please make sure you have the correct permission.',
-          'danger'
-        );
-        console.error(err.body.message);
-      });
-  };
-
-  // Deletes an existing Observability Dashboard
-  const deleteCustomPanel = async (customPanelId: string, customPanelName: string) => {
-    return http
-      .delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
-      .then((res) => {
-        dispatch(fetchPanels());
-        setToast(`Observability Dashboard "${customPanelName}" successfully deleted!`);
-        return res;
-      })
-      .catch((err) => {
-        setToast(
-          'Error deleting Observability Dashboard, please make sure you have the correct permission.',
-          'danger'
-        );
-        console.error(err.body.message);
-      });
-  };
-
-  // Deletes an existing SO Observability Dashboard
-  const deleteCustomPanelSO = async (customPanelId: string, customPanelName: string) => {
-    dispatch(deletePanel(customPanelId));
-    // TODO: toast here
   };
 
   const addSamplePanels = async () => {
@@ -222,7 +163,6 @@ export const Home = ({
                 loading={loading}
                 setBreadcrumbs={chrome.setBreadcrumbs}
                 parentBreadcrumbs={customPanelBreadCrumbs}
-                deleteCustomPanelList={deleteCustomPanelList}
                 addSamplePanels={addSamplePanels}
               />
             );
@@ -240,7 +180,6 @@ export const Home = ({
                 pplService={pplService}
                 dslService={dslService}
                 parentBreadcrumbs={customPanelBreadCrumbs}
-                deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
                 onEditClick={onEditClick}
                 page="operationalPanels"
@@ -255,7 +194,6 @@ export const Home = ({
                 chrome={chrome}
                 parentBreadcrumbs={customPanelBreadCrumbs}
                 // renameCustomPanel={renameCustomPanel}
-                deleteCustomPanel={deleteCustomPanel}
                 setToast={setToast}
                 onEditClick={onEditClick}
                 startTime={start}
