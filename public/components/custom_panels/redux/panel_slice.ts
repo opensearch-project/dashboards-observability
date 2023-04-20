@@ -17,7 +17,10 @@ import {
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
 import { isNameValid } from '../helpers/utils';
-import { addVisualizationPanel } from '../helpers/add_visualization_helper';
+import {
+  addMultipleVisualizations,
+  addVisualizationPanel,
+} from '../helpers/add_visualization_helper';
 
 interface InitialState {
   id: string;
@@ -148,6 +151,23 @@ export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
     const allVisualizations = panel!.visualizations;
 
     const visualizationsWithNewPanel = addVisualizationPanel(vizId, undefined, allVisualizations);
+
+    const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+    try {
+      dispatch(updatePanel(updatedPanel));
+    } catch (err) {
+      console.error(err?.body?.message || err);
+    }
+  });
+};
+
+export const addMultipleVizToPanels = (panels, vizIds) => async (dispatch, getState) => {
+  forEach(panels, (oldPanel) => {
+    const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.panel.id);
+
+    const allVisualizations = panel!.visualizations;
+
+    const visualizationsWithNewPanel = addMultipleVisualizations(vizIds, allVisualizations);
 
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
     try {
