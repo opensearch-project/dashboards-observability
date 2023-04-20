@@ -18,6 +18,8 @@ import { EventAnalytics } from './event_analytics';
 import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
+import { ObservabilityAppServices } from '../../common/types/shared';
+import { OpenSearchDashboardsContextProvider } from '../../../../src/plugins/opensearch_dashboards_react/public';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -28,6 +30,7 @@ interface ObservabilityAppDeps {
   timestampUtils: any;
   queryManager: QueryManager;
   startPage: string;
+  services: ObservabilityAppServices;
 }
 
 // for cypress to test redux store
@@ -53,6 +56,7 @@ export const App = ({
   timestampUtils,
   queryManager,
   startPage,
+  services,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
@@ -65,26 +69,28 @@ export const App = ({
   return (
     <Provider store={store}>
       <I18nProvider>
-        <MetricsListener http={http}>
-          <ModuleComponent
-            http={http}
-            chrome={chrome}
-            notifications={notifications}
-            CoreStartProp={CoreStartProp}
-            DepsStart={DepsStart}
-            DashboardContainerByValueRenderer={
-              DepsStart.dashboard.DashboardContainerByValueRenderer
-            }
-            pplService={pplService}
-            dslService={dslService}
-            savedObjects={savedObjects}
-            timestampUtils={timestampUtils}
-            queryManager={queryManager}
-            parentBreadcrumb={parentBreadcrumb}
-            parentBreadcrumbs={[parentBreadcrumb]}
-            setBreadcrumbs={chrome.setBreadcrumbs}
-          />
-        </MetricsListener>
+        <OpenSearchDashboardsContextProvider services={services}>
+          <MetricsListener http={http}>
+            <ModuleComponent
+              http={http}
+              chrome={chrome}
+              notifications={notifications}
+              CoreStartProp={CoreStartProp}
+              DepsStart={DepsStart}
+              DashboardContainerByValueRenderer={
+                DepsStart.dashboard.DashboardContainerByValueRenderer
+              }
+              pplService={pplService}
+              dslService={dslService}
+              savedObjects={savedObjects}
+              timestampUtils={timestampUtils}
+              queryManager={queryManager}
+              parentBreadcrumb={parentBreadcrumb}
+              parentBreadcrumbs={[parentBreadcrumb]}
+              setBreadcrumbs={chrome.setBreadcrumbs}
+            />
+          </MetricsListener>
+        </OpenSearchDashboardsContextProvider>
       </I18nProvider>
     </Provider>
   );

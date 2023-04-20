@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBreadcrumb, EuiGlobalToastList, ShortDate } from '@elastic/eui';
-import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import React, { ReactChild, useState } from 'react';
+import { EuiBreadcrumb, ShortDate } from '@elastic/eui';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext } from 'react-router';
@@ -29,6 +28,7 @@ import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import { fetchPanels, uuidRx } from './redux/panel_slice';
+import { useToast } from '../common/toast';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -65,13 +65,13 @@ export const Home = ({
   coreSavedObjects,
   setBreadcrumbs,
 }: PanelHomeProps) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
   const [loading, setLoading] = useState(false);
-  const [toastRightSide, setToastRightSide] = useState<boolean>(true);
   const [start, setStart] = useState<ShortDate>('');
   const [end, setEnd] = useState<ShortDate>('');
 
   const dispatch = useDispatch();
+
+  const { setToast } = useToast();
 
   const customPanelBreadCrumbs = [
     ...parentBreadcrumbs,
@@ -80,12 +80,6 @@ export const Home = ({
       href: `${observabilityPanelsID}#/`,
     },
   ];
-
-  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
-    if (!text) text = '';
-    setToastRightSide(!side ? true : false);
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
 
   const onEditClick = (savedVisualizationId: string) => {
     window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
@@ -145,14 +139,6 @@ export const Home = ({
 
   return (
     <HashRouter>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        side={toastRightSide ? 'right' : 'left'}
-        toastLifeTimeMs={6000}
-      />
       <Switch>
         <Route
           exact
@@ -180,7 +166,6 @@ export const Home = ({
                 pplService={pplService}
                 dslService={dslService}
                 parentBreadcrumbs={customPanelBreadCrumbs}
-                setToast={setToast}
                 onEditClick={onEditClick}
                 page="operationalPanels"
                 coreSavedObjects={coreSavedObjects}
@@ -194,7 +179,6 @@ export const Home = ({
                 chrome={chrome}
                 parentBreadcrumbs={customPanelBreadCrumbs}
                 // renameCustomPanel={renameCustomPanel}
-                setToast={setToast}
                 onEditClick={onEditClick}
                 startTime={start}
                 endTime={end}

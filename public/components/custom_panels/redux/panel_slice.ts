@@ -221,8 +221,6 @@ export const createPanel = (panel) => async (dispatch, getState) => {
   const newPanel = savedObjectToCustomPanel(newSOPanel);
   const panelList = getState().customPanel.panelList;
   dispatch(setPanelList([...panelList, newPanel]));
-
-  window.location.replace(`#/${newPanel.id}`);
 };
 
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
