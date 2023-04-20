@@ -18,6 +18,11 @@ import {
 import { createPrometheusMetricById } from '../helpers/utils';
 import { MetricType } from '../../../../common/types/metrics';
 import { fetchVisualizationById } from '../../custom_panels/helpers/utils';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchPanels,
+  selectPanelList,
+} from '../../../../public/components/custom_panels/redux/panel_slice';
 
 interface MetricsExportPanelProps {
   http: CoreStart['http'];
@@ -49,14 +54,13 @@ export const MetricsExportPanel = ({
 
   const [errorResponse, setErrorResponse] = useState('');
 
-  const getCustomPanelList = async () => {
-    http
-      .get(`${CUSTOM_PANELS_API_PREFIX}/panels`)
-      .then((res: any) => {
-        setOptions(res.panels || []);
-      })
-      .catch((error: any) => console.error(error));
-  };
+  const customPanels = useSelector(selectPanelList);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchPanels());
+  }, []);
 
   const fetchAllvisualizationsById = async () => {
     let tempVisualizationsMetaData = await Promise.all(
@@ -70,7 +74,6 @@ export const MetricsExportPanel = ({
   };
 
   useEffect(() => {
-    getCustomPanelList();
     fetchAllvisualizationsById();
   }, []);
 
@@ -92,10 +95,10 @@ export const MetricsExportPanel = ({
             setSelectedPanelOptions(options);
           }}
           selectedOptions={selectedPanelOptions}
-          options={options.map((option: CustomPanelOptions) => {
+          options={customPanels.map((option: any) => {
             return {
               panel: option,
-              label: option.name,
+              label: option.title,
             };
           })}
           isClearable={true}

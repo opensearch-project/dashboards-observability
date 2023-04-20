@@ -20,7 +20,6 @@ import { CoreStart } from '../../../../../../src/core/public';
 import { MetricType } from '../../../../common/types/metrics';
 import { VisualizationType } from '../../../../common/types/custom_panels';
 import { DEFAULT_METRIC_HEIGHT, DEFAULT_METRIC_WIDTH } from '../../../../common/constants/metrics';
-import { UNITS_OF_MEASURE } from '../../../../common/constants/explorer';
 import { updateQuerySpanInterval } from '../../custom_panels/helpers/utils';
 
 export const onTimeChange = (
