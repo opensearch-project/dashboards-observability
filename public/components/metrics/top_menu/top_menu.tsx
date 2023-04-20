@@ -27,7 +27,6 @@ import { resolutionOptions } from '../../../../common/constants/metrics';
 import { MetricType } from '../../../../common/types/metrics';
 import { uiSettingsService } from '../../../../common/utils';
 import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
-import { addVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
 import {
   allAvailableMetricsSelector,
@@ -37,6 +36,7 @@ import {
 import { SearchBar } from '../sidebar/search_bar';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
+import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 
 interface TopMenuProps {
   http: CoreStart['http'];
@@ -194,6 +194,7 @@ export const TopMenu = ({
         const soPanels = selectedPanelOptions.filter((panel) => uuidRx.test(panel.panel.id));
         const opsPanels = selectedPanelOptions.filter((panel) => !uuidRx.test(panel.panel.id));
 
+        dispatch(addMultipleVizToPanels(soPanels, allMetricIds));
         const savedMetricsInOpsPanels = await Promise.all(
           opsPanels.map((panel) => {
             return http.post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/multiple`, {
@@ -204,10 +205,6 @@ export const TopMenu = ({
             });
           })
         );
-
-        allMetricIds.forEach((metricId) => {
-          dispatch(addVizToPanels(soPanels, metricId));
-        });
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);

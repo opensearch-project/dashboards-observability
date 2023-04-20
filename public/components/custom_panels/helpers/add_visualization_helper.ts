@@ -96,3 +96,30 @@ export const addVisualizationPanel = (
     throw new Error('Add/Replace Visualization Error:' + error);
   }
 };
+
+// Add Multiple visualizations in a Panel
+export const addMultipleVisualizations = (
+  savedVisualizationIds: string[],
+  allPanelVisualizations: VisualizationType[]
+) => {
+  try {
+    let newDimensions;
+    let visualizationsList = [...allPanelVisualizations];
+
+    savedVisualizationIds.map((savedVisualizationId) => {
+      newDimensions = getNewVizDimensions(visualizationsList);
+      visualizationsList = [
+        ...visualizationsList,
+        {
+          id: 'panel_viz_' + uuidv4(),
+          savedVisualizationId,
+          ...newDimensions,
+        },
+      ];
+    });
+
+    return visualizationsList;
+  } catch (error) {
+    throw new Error('Add Multiple Visualization Error:' + error);
+  }
+};
