@@ -30,6 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
 import _ from 'lodash';
+import { useDispatch } from 'react-redux';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
@@ -53,6 +54,7 @@ import {
   onTimeChange,
   isPPLFilterValid,
   fetchVisualizationById,
+  isNameValid,
 } from './helpers/utils';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
@@ -67,6 +69,7 @@ import {
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { coreRefs } from '../../framework/core_refs';
+import { clonePanel } from './redux/panel_slice';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -79,7 +82,6 @@ import { coreRefs } from '../../framework/core_refs';
  * dslService: dsl requestor service
  * chrome: chrome core service
  * parentBreadcrumb: parent breadcrumb
- * renameCustomPanel: Rename function for the panel
  * deleteCustomPanel: Delete function for the panel
  * cloneCustomPanel: Clone function for the panel
  * setToast: create Toast function
@@ -101,8 +103,6 @@ interface CustomPanelViewProps {
   dslService: DSLService;
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
-  renameCustomPanel: (editedCustomPanelName: string, editedCustomPanelId: string) => Promise<void>;
-  deleteCustomPanel: (customPanelId: string, customPanelName: string) => Promise<any>;
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
   setToast: (
     title: string,
@@ -137,8 +137,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     setStartTime,
     setEndTime,
     updateAvailabilityVizId,
-    renameCustomPanel,
-    deleteCustomPanel,
     cloneCustomPanel,
     setToast,
     onEditClick,
@@ -169,6 +167,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
 
   const appPanel = page === 'app';
 
+  const dispatch = useDispatch();
+
   const closeHelpFlyout = () => {
     setAddVizDisabled(false);
     setHelpIsFlyoutVisible(false);
@@ -197,6 +197,59 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       })
       .catch((err) => {
         console.error('Issue in fetching the Observability Dashboards', err);
+      });
+  };
+
+  // Renames an existing CustomPanel
+  const renameCustomPanel = (editedCustomPanelName: string, editedCustomPanelId: string) => {
+    if (!isNameValid(editedCustomPanelName)) {
+      setToast('Invalid Custom Panel name', 'danger');
+      return Promise.reject();
+    }
+    const renamePanelObject = {
+      panelId: editedCustomPanelId,
+      panelName: editedCustomPanelName,
+    };
+
+    return http
+      .post(`${CUSTOM_PANELS_API_PREFIX}/panels/rename`, {
+        body: JSON.stringify(renamePanelObject),
+      })
+      .then((res) => {
+        setOpenPanelName(editedCustomPanelName);
+        // setOpenPanelName((prevCustomPanelData) => {
+        //   const newCustomPanelData = [...prevCustomPanelData];
+        //   const renamedCustomPanel = newCustomPanelData.find(
+        //     (customPanel) => customPanel.id === editedCustomPanelId
+        //   );
+        //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
+        //   return newCustomPanelData;
+        // });
+        setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
+      })
+      .catch((err) => {
+        setToast(
+          'Error renaming Operational Panel, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
+  };
+
+  // Deletes an existing Operational Panel
+  const deleteCustomPanel = (customPanelId: string, customPanelName: string) => {
+    return coreRefs
+      .http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
+      .then((res) => {
+        setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
+        return res;
+      })
+      .catch((err) => {
+        setToast(
+          'Error deleting Operational Panel, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
       });
   };
 
@@ -265,22 +318,28 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    const newPanel = {
-      ...panel,
-      title: newCustomPanelName,
-      dateCreated: new Date().getTime(),
-      dateModified: new Date().getTime(),
-    } as PanelType;
-    const newSOPanel = await coreRefs.savedObjectsClient!.create(
-      CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-      newPanel
-    );
+    try {
+      await dispatch(clonePanel(panel, newCustomPanelName));
+    } catch (err) {
+      setToast('Error while attempting to Duplicate this Dashboard.', 'danger');
+    }
 
-    window.location.assign(`${last(parentBreadcrumbs)!.href}${newSOPanel.id}`);
+    // const newPanel = {
+    //   ...panel,
+    //   title: newCustomPanelName,
+    //   dateCreated: new Date().getTime(),
+    //   dateModified: new Date().getTime(),
+    // } as PanelType;
+    // const newSOPanel = await coreRefs.savedObjectsClient!.create(
+    //   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
+    //   newPanel
+    // );
+    //
+    // window.location.assign(`${last(parentBreadcrumbs)!.href}${newSOPanel.id}`);
     closeModal();
   };
 
-  const clonePanel = () => {
+  const clonePanelModal = () => {
     setModalLayout(
       getCustomModal(
         onClone,
@@ -518,7 +577,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
           'data-test-subj': 'duplicatePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
-            clonePanel();
+            clonePanelModal();
           },
         },
         {

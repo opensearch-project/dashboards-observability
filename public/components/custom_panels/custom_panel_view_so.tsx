@@ -53,7 +53,19 @@ import {
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
-import { clonePanel, fetchPanel, selectPanel, setPanel, updatePanel } from './redux/panel_slice';
+import {
+  clonePanel,
+  createPanel,
+  deletePanels,
+  fetchPanel,
+  newPanelTemplate,
+  selectPanel,
+  setPanel,
+  setPanelEt,
+  setPanelId,
+  setPanelSt,
+  updatePanel,
+} from './redux/panel_slice';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -87,7 +99,6 @@ interface CustomPanelViewProps {
   coreSavedObjects: CoreStart['savedObjects'];
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
-  deleteCustomPanel: (customPanelId: string, customPanelName: string) => Promise<any>;
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
   setToast: (
     title: string,
@@ -115,7 +126,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     parentBreadcrumbs,
     childBreadcrumbs,
     updateAvailabilityVizId,
-    deleteCustomPanel,
     cloneCustomPanel,
     setToast,
     onEditClick,
@@ -185,11 +195,20 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
-    deleteCustomPanel(panelId, panel?.title).then((res) => {
+    const toastMessage = `Observability Dashboard ${panel.title} successfully deleted!"`;
+    try {
+      await dispatch(deletePanels([panel]));
+
       setTimeout(() => {
         window.location.assign(`${last(parentBreadcrumbs)!.href}`);
       }, 1000);
-    });
+    } catch (err) {
+      setToast(
+        'Error deleting Operational Panels, please make sure you have the correct permission.',
+        'danger'
+      );
+      console.error(err.body?.message || err);
+    }
     closeModal();
   };
 
@@ -203,6 +222,21 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       />
     );
     showModal();
+  };
+
+  const onRename = async (newCustomPanelName: string) => {
+    const newPanel = { ...panel, title: newCustomPanelName };
+    try {
+      dispatch(updatePanel(newPanel));
+      setToast(`Operational Panel successfully renamed into "${newCustomPanelName}"`);
+    } catch (err) {
+      setToast(
+        'Error renaming Operational Panel, please make sure you have the correct permission.',
+        'danger'
+      );
+      console.error(err.body.message);
+    }
+    closeModal();
   };
 
   const renamePanel = () => {
