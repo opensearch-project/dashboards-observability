@@ -177,6 +177,8 @@ export const Home = ({
               <CustomPanelViewSO
                 panelId={props.match.params.id}
                 chrome={chrome}
+                pplService={pplService}
+                dslService={dslService}
                 parentBreadcrumbs={customPanelBreadCrumbs}
                 setToast={setToast}
                 onEditClick={onEditClick}
