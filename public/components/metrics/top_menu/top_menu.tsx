@@ -158,7 +158,6 @@ export const TopMenu = ({
 
   const handleSavingObjects = async () => {
     let savedMetricIds = [];
-    const savedMetricsInPanels = [];
 
     try {
       savedMetricIds = await Promise.all(
