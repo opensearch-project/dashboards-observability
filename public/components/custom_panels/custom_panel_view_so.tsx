@@ -53,7 +53,6 @@ import {
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
-import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import {
   clonePanel,
   createPanel,
@@ -67,9 +66,6 @@ import {
   setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
-import { coreRefs } from '../../framework/core_refs';
-
-
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
