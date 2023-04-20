@@ -5,7 +5,6 @@
 /* // eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useCallback } from 'react';
 import {
   EuiBreadcrumb,
   EuiButton,
@@ -27,45 +26,32 @@ import {
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
-import { last } from 'lodash';
-import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
+import { last } from 'lodash';
 import moment from 'moment';
-import _ from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRef } from 'react';
-import DSLService from '../../services/requests/dsl';
-import { CoreStart, SimpleSavedObject } from '../../../../../src/core/public';
-import { EmptyPanelView } from './panel_modules/empty_panel';
-import {
-  CREATE_PANEL_MESSAGE,
-  CUSTOM_PANELS_API_PREFIX,
-  CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-} from '../../../common/constants/custom_panels';
-import { CustomPanelType, PanelType } from '../../../common/types/custom_panels';
-import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
-
+import { CoreStart } from '../../../../../src/core/public';
+import { CREATE_PANEL_MESSAGE } from '../../../common/constants/custom_panels';
+import { UI_DATE_FORMAT } from '../../../common/constants/shared';
+import { CustomPanelType } from '../../../common/types/custom_panels';
+import { uiSettingsService } from '../../../common/utils';
+import { coreRefs } from '../../framework/core_refs';
+import { PPLReferenceFlyout } from '../common/helpers';
+import { DeleteModal } from '../common/helpers/delete_modal';
+import { Autocomplete } from '../common/search/autocomplete';
+import { onItemSelect, parseGetSuggestions } from '../common/search/autocomplete_logic';
+import { addVisualizationPanel } from './helpers/add_visualization_helper';
+import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { getCustomModal } from './helpers/modal_containers';
-import PPLService from '../../services/requests/ppl';
 import {
-  isDateValid,
   convertDateTime,
+  isDateValid,
   isPPLFilterValid,
-  isNameValid,
   prependRecentlyUsedRange,
 } from './helpers/utils';
-import { UI_DATE_FORMAT } from '../../../common/constants/shared';
-import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
-import { uiSettingsService } from '../../../common/utils';
-import { PPLReferenceFlyout } from '../common/helpers';
-import { Autocomplete } from '../common/search/autocomplete';
-import {
-  parseGetSuggestions,
-  onItemSelect,
-  parseForIndices,
-} from '../common/search/autocomplete_logic';
-import { AddVisualizationPopover } from './helpers/add_visualization_popover';
-import { DeleteModal } from '../common/helpers/delete_modal';
+import { EmptyPanelView } from './panel_modules/empty_panel';
+import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import { addVisualizationPanel } from './helpers/add_visualization_helper';
 import {
@@ -398,6 +384,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const cloneVisualization = (visualzationTitle: string, savedVisualizationId: string) => {
+    addVisualizationToCurrentPanel({ savedVisualizationId });
     // http
     //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
     //     body: JSON.stringify({
@@ -571,7 +558,9 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   // Toggle input type (disabled or not disabled)
   // Disabled when there no visualizations in panels or when the panel is in edit mode
   useEffect(() => {
-    !loading && checkDisabledInputs();
+    if (!loading) {
+      checkDisabledInputs();
+    }
   }, [isEditing, loading]);
 
   // Build base query with all of the indices included in the current visualizations
