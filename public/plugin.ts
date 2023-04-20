@@ -75,6 +75,7 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { ObservabilityAppServices } from '../common/types/shared';
 
 export class ObservabilityPlugin
   implements
@@ -135,6 +136,10 @@ export class ObservabilityPlugin
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
 
+      const services: ObservabilityAppServices = {
+        toasts: coreStart.notifications.toasts,
+      };
+
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -144,6 +149,7 @@ export class ObservabilityPlugin
         savedObjects,
         timestampUtils,
         qm,
+        services,
         startPage
       );
     };
