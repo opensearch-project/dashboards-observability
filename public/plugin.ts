@@ -79,7 +79,7 @@ import { ObservabilityAppServices } from '../common/types/shared';
 
 export class ObservabilityPlugin
   implements
-    Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+  Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies

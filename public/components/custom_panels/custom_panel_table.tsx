@@ -91,7 +91,7 @@ export const CustomPanelTable = ({
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelType[]>([]);
+  const [selectedCustomPanels, setselectedCustomPanels$] = useState<CustomPanelType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
@@ -169,9 +169,8 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboards ${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-    } successfully deleted!`;
+    const toastMessage = `Observability Dashboards ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
+      } successfully deleted!`;
 
     try {
       await dispatch(deletePanels(selectedCustomPanels));
@@ -239,9 +238,8 @@ export const CustomPanelTable = ({
   };
 
   const deletePanel = () => {
-    const customPanelString = `Observability Dashboard${
-      selectedCustomPanels.length > 1 ? 's' : ''
-    }`;
+    const customPanelString = `Observability Dashboard${selectedCustomPanels.length > 1 ? 's' : ''
+      }`;
     setModalLayout(
       <DeleteModal
         onConfirm={onDelete}
@@ -412,8 +410,8 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
+                        customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
                       : customPanels
                   }
                   itemId="id"
