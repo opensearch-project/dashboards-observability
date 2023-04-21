@@ -74,7 +74,7 @@ describe('Creating visualizations', () => {
   });
 });
 
-describe('Testing panels table', () => {
+describe.only('Testing panels table', () => {
   beforeEach(() => {
     eraseTestPanels();
     moveToPanelHome();
@@ -597,6 +597,7 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
+    console.log("legacy panels to erase", response.body)
     response.body.panels.map((panel) => {
       cy.request({
         method: 'DELETE',
@@ -626,6 +627,7 @@ const eraseSavedObjectPaenls = () => {
       },
     })
     .then((response) => {
+      console.log("saved objects to erase", response.body)
       response.body.saved_objects.map((soPanel) => {
         cy.request({
           method: 'DELETE',
@@ -635,6 +637,9 @@ const eraseSavedObjectPaenls = () => {
             'content-type': 'application/json;charset=UTF-8',
             'osd-xsrf': true,
           },
+        }).then((response) => {
+          const deletedId = response;
+          console.log('erased SO Panel', response)
         });
       });
     });
@@ -712,9 +717,10 @@ const openActionsDropdown = () => {
 };
 
 const selectThePanel = () => {
-  cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
-    cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
-  });
+  // cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
+  cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
+  cy.get('.euiTableRow-isSelected').should('exist')
+  // });
 };
 
 const expectToastWith = (title) => {
