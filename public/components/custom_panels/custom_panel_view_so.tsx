@@ -255,7 +255,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   }, [panel]);
 
   const cancelEdit = () => {
-    console.log('cancelEdits');
     dispatch(fetchPanel(panelId));
     setIsEditing(false);
   };
