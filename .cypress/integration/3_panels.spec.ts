@@ -211,6 +211,15 @@ describe('Testing panels table', () => {
       cy.location('pathname').should('eq', '/app/observability-dashboards');
       cy.location('hash').should('include', '/edit');
     });
+
+    it('Redirects to observability dashboard from OSD dashboards with create', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('div#createMenuPopover').click();
+      cy.get('[data-test-subj="contextMenuItem-observability-panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/create');
+    });
   });
 
   it('Searches existing panel', () => {
