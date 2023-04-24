@@ -131,6 +131,13 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
+export const doesNameExist = (newCustomPanelName) => async() => {
+  const panels = await fetchCustomPanels();
+  if((panels.some((i: { title: string; }) => i.title === newCustomPanelName))){
+    return Promise.reject();
+  }
+}
+
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
   try {
     if (isUuid(panel.id)) await updateSavedObjectPanel(panel);

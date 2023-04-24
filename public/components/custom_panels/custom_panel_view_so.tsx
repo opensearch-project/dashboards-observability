@@ -57,6 +57,7 @@ import {
   clonePanel,
   createPanel,
   deletePanels,
+  doesNameExist,
   fetchPanel,
   newPanelTemplate,
   selectPanel,
@@ -225,6 +226,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
+    const check = await doesNameExist(newCustomPanelName);
+    if (await check()) {
+      console.log('Observability Dashboard name already exists');
+      return;
+    } else {
     const newPanel = { ...panel, title: newCustomPanelName };
     try {
       dispatch(updatePanel(newPanel));
@@ -237,6 +243,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       console.error(err.body.message);
     }
     closeModal();
+    }
   };
 
   const renamePanel = () => {
