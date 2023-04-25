@@ -24,7 +24,6 @@ export class SaveAsNewQuery extends SavedQuerySaver {
     const { batch, dispatch, changeQuery, updateTabName } = this.dispatchers;
     const { tabId, history, notifications, showPermissionErrorToast } = this.saveContext;
     const { name } = this.saveParams;
-    console.log('this.saveParams: ', this.saveParams);
     this.saveClient
       .create({ ...this.saveParams })
       .then((res: any) => {
