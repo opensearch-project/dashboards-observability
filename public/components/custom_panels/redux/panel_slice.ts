@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import { async, concat, from, Observable, of } from 'rxjs';
 import { map, mergeMap, tap, toArray } from 'rxjs/operators';
@@ -34,7 +39,7 @@ export const newPanelTemplate = (newName) => ({
   dateModified: new Date().getTime(),
   visualizations: [],
   queryFilter: { language: '', query: '' },
-  timeRange: { from: 'now', to: 'now-1d' },
+  timeRange: { from: 'now-1d', to: 'now' },
 });
 
 const initialState: InitialState = {
