@@ -407,7 +407,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const editButton = (
     <EuiButton
-      data-test-subj="lButton"
+      data-test-subj="editPanelButton"
       iconType="pencil"
       onClick={() => editPanel('edit')}
       disabled={editDisabled}
