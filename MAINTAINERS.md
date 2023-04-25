@@ -32,4 +32,3 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Eugene Lee        | [eugenesk24](https://github.com/eugenesk24)             | Amazon      |
 | Zhongnan Su       | [zhongnansu](https://github.com/zhongnansu)             | Amazon      |
 | Sean Li           | [sejli](https://github.com/sejli)                       | Amazon      |
-| Kyle A            | [kavck](https://github.com/kavck)                       | Amazon      |
