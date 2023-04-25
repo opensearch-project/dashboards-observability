@@ -35,28 +35,29 @@ import {
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FlyoutContainers } from '../../../common/flyout_containers';
-import {
-  displayVisualization,
-  getQueryResponse,
-  isDateValid,
-  parseSavedVisualizations,
-} from '../../helpers/utils';
-import { convertDateTime } from '../../helpers/utils';
-import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
+import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 import {
   PPLResponse,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
 } from '../../../../../common/types/custom_panels';
-import './visualization_flyout.scss';
 import { uiSettingsService } from '../../../../../common/utils';
-import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
+
+import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
-import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
+import { FlyoutContainers } from '../../../common/flyout_containers';
+import {
+  convertDateTime,
+  displayVisualization,
+  getQueryResponse,
+  isDateValid,
+  parseSavedVisualizations,
+} from '../../helpers/utils';
+import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
+import './visualization_flyout.scss';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -214,7 +215,14 @@ export const VisaulizationFlyoutSO = ({
       content="Picker is disabled. Please edit date/time from panel"
       display="block"
     >
-      <EuiFormRow label="Panel Time Range" fullWidth>
+      <EuiFormRow
+        label="Panel Time Range"
+        fullWidth
+        isInvalid={startDate > endDate}
+        // date-picker-preview style reduces height, need to add an empty line
+        // above error message so it does not overlap with DatePicker.
+        error={['', 'Time range is invalid.']}
+      >
         <EuiDatePickerRange
           className="date-picker-preview"
           fullWidth
