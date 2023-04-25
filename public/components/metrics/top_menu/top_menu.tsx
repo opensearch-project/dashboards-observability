@@ -27,6 +27,9 @@ import { resolutionOptions } from '../../../../common/constants/metrics';
 import { MetricType } from '../../../../common/types/metrics';
 import { uiSettingsService } from '../../../../common/utils';
 import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
+import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
+import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
+import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
 import {
   allAvailableMetricsSelector,
@@ -36,7 +39,6 @@ import {
 import { SearchBar } from '../sidebar/search_bar';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
-import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 
 interface TopMenuProps {
   http: CoreStart['http'];
@@ -170,9 +172,12 @@ export const TopMenu = ({
           );
 
           if (metricLayout.metricType === 'prometheusMetric') {
-            return await savedObjects.createSavedVisualization(updatedMetric);
+            return OSDSavedVisualizationClient.getInstance().create(updatedMetric);
           } else {
-            return await savedObjects.updateSavedVisualizationById({
+            return getSavedObjectsClient({
+              objectId: metricLayout.id,
+              objectType: 'savedVisualization',
+            }).update({
               ...updatedMetric,
               objectId: metricLayout.id,
             });
