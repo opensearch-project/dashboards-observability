@@ -187,7 +187,8 @@ export const TopMenu = ({
     } catch (e) {
       const message = 'Issue in saving metrics';
       console.error(message, e);
-      setToast('Issue in saving metrics', 'danger');
+      setToast(message, 'danger');
+      return;
     }
 
     setToast('Saved metrics successfully!');
