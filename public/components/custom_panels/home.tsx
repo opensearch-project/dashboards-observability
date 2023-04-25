@@ -28,7 +28,14 @@ import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { deletePanel, fetchPanels, uuidRx } from './redux/panel_slice';
+import {
+  createPanel,
+  createPanelWithVizs,
+  deletePanel,
+  fetchPanels,
+  newPanelTemplate,
+  uuidRx,
+} from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -182,16 +189,19 @@ export const Home = ({
         .get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/addSampleSavedObjects/panels`)
         .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
 
-      await http
-        .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
-          body: JSON.stringify({
-            savedVisualizationIds,
-          }),
-        })
-        .then((res) => {
-          dispatch(fetchPanels());
-        });
-      setToast(`Sample panels successfully added.`);
+      const savedObjectSamplePanel = newPanelTemplate('[Logs] Web traffic Panel');
+      dispatch(createPanelWithVizs(savedObjectSamplePanel, savedVisualizationIds));
+
+      // await http
+      //   .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
+      //     body: JSON.stringify({
+      //       savedVisualizationIds,
+      //     }),
+      //   })
+      //   .then((res) => {
+      //     dispatch(fetchPanels());
+      //   });
+      // setToast(`Sample panels successfully added.`);
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');
       console.error(err.body?.message || err);

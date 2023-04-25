@@ -218,6 +218,17 @@ export const createPanel = (panel) => async (dispatch, getState) => {
   window.location.replace(`#/${newPanel.id}`);
 };
 
+export const createPanelWithVizs = (panel, vizIds) => async (dispatch, getState) => {
+  const visualizationsWithNewPanel = addMultipleVisualizations(vizIds, []);
+  const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
+  const newSOPanel = await savedObjectPanelsClient.create(updatedPanel);
+  const newPanel = savedObjectToCustomPanel(newSOPanel);
+  const panelList = getState().customPanel.panelList;
+  dispatch(setPanelList([...panelList, newPanel]));
+
+  window.location.replace(`#/${newPanel.id}`);
+};
+
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
   const { id, ...panelCopy } = {
     ...panel,
