@@ -67,6 +67,7 @@ import {
   setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
+import { useToast } from '../common/toast';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -101,12 +102,6 @@ interface CustomPanelViewProps {
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   onEditClick: (savedVisualizationId: string) => any;
   childBreadcrumbs?: EuiBreadcrumb[];
   appId?: string;
@@ -128,7 +123,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     childBreadcrumbs,
     updateAvailabilityVizId,
     cloneCustomPanel,
-    setToast,
     onEditClick,
     onAddClick,
   } = props;
@@ -156,6 +150,8 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const [editActionType, setEditActionType] = useState('');
   const [isHelpFlyoutVisible, setHelpIsFlyoutVisible] = useState(false);
 
+  const { setToast } = useToast();
+  
   const appPanel = page === 'app';
 
   const closeHelpFlyout = () => {
@@ -226,15 +222,15 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    const check = await doesNameExist(newCustomPanelName);
-    if (await check()) {
-      console.log('Observability Dashboard name already exists');
-      return;
-    } else {
     const newPanel = { ...panel, title: newCustomPanelName };
     try {
-      dispatch(updatePanel(newPanel));
-      setToast(`Operational Panel successfully renamed into "${newCustomPanelName}"`);
+      const nameFlag = await doesNameExist(newCustomPanelName);
+      if(await nameFlag()){
+        setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
+      } else {
+        dispatch(updatePanel(newPanel));
+        setToast(`Operational Panel successfully renamed into "${newCustomPanelName}"`);
+      }
     } catch (err) {
       setToast(
         'Error renaming Operational Panel, please make sure you have the correct permission.',
@@ -243,7 +239,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       console.error(err.body.message);
     }
     closeModal();
-    }
   };
 
   const renamePanel = () => {

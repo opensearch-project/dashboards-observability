@@ -92,7 +92,7 @@ export const CustomPanelTable = ({
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [selectedCustomPanels, setselectedCustomPanels$] = useState<CustomPanelType[]>([]);
+  const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
@@ -121,7 +121,10 @@ export const CustomPanelTable = ({
   };
 
   const onCreate = async (newCustomPanelName: string) => {
-    if (!isNameValid(newCustomPanelName)) {
+    const nameFlag = await doesNameExist(newCustomPanelName);
+    if (await nameFlag()) {
+      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
+    } else if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
       const newPanel = newPanelTemplate(newCustomPanelName);
@@ -131,18 +134,20 @@ export const CustomPanelTable = ({
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    const check = await doesNameExist(newCustomPanelName);
-    if (await check()) {
-      console.log('Observability Dashboard name already exists');
-      return;
+    const nameFlag = await doesNameExist(newCustomPanelName);
+    if (await nameFlag()) {
+      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
     } else {
       dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
-      closeModal();
     }
+    closeModal();
   };
 
   const onClone = async (newName: string) => {
-    if (!isNameValid(newName)) {
+    const nameFlag = await doesNameExist(newName);
+    if (await nameFlag()) {
+      setToast(`Observability Dashboard with name "${newName}" already exists`, 'danger');
+    } else if (!isNameValid(newName)) {
       setToast('Invalid Operational Panel name', 'danger');
     } else {
       let sourcePanel = selectedCustomPanels[0];
