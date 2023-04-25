@@ -5,18 +5,15 @@
 
 /// <reference types="cypress" />
 
+import { suppressResizeObserverIssue } from '../utils/constants';
 import {
   delay,
-  TEST_PANEL,
-  PPL_VISUALIZATIONS,
-  PPL_VISUALIZATIONS_NAMES,
   NEW_VISUALIZATION_NAME,
   PPL_FILTER,
-  SAMPLE_PANEL,
-  SAMPLE_VISUALIZATIONS_NAMES,
+  PPL_VISUALIZATIONS,
+  PPL_VISUALIZATIONS_NAMES,
+  TEST_PANEL,
 } from '../utils/panel_constants';
-
-import { suppressResizeObserverIssue } from '../utils/constants';
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for visualization paragraph', () => {
@@ -195,6 +192,34 @@ describe('Testing panels table', () => {
       cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
       cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
     });
+
+    it('Redirects to observability dashboard from OSD dashboards', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards with edit', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]')
+        .closest('tr')
+        .get('span.euiToolTipAnchor > button.euiButtonIcon')
+        .eq(0)
+        .click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/edit');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards with create', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('div#createMenuPopover').click();
+      cy.get('[data-test-subj="contextMenuItem-observability-panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/create');
+    });
   });
 
   it('Searches existing panel', () => {
@@ -274,7 +299,7 @@ describe('Testing a panel', () => {
 
     cy.get(`input.euiFieldText[value="${TEST_PANEL} (copy)"]`)
       .focus()
-      .clear({force: true})
+      .clear({ force: true })
       .focus()
       .type('Renamed Panel', {
         delay: 200,
@@ -347,9 +372,9 @@ describe('Testing a panel', () => {
 
     cy.get('h5[data-test-subj="visualizationHeader"]')
       .contains(PPL_VISUALIZATIONS_NAMES[1])
-      .trigger('mousedown', {which: 1})
-      .trigger('mousemove', {clientX: 1100, clientY: 0})
-      .trigger('mouseup', {force: true});
+      .trigger('mousedown', { which: 1 })
+      .trigger('mousemove', { clientX: 1100, clientY: 0 })
+      .trigger('mouseup', { force: true });
 
     cy.get('button[data-test-subj="savePanelButton"]').click();
     cy.wait(delay * 3);
@@ -364,9 +389,9 @@ describe('Testing a panel', () => {
 
     cy.get('.react-resizable-handle')
       .eq(1)
-      .trigger('mousedown', {which: 1})
-      .trigger('mousemove', {clientX: 2000, clientY: 800})
-      .trigger('mouseup', {force: true});
+      .trigger('mousedown', { which: 1 })
+      .trigger('mousemove', { clientX: 2000, clientY: 800 })
+      .trigger('mouseup', { force: true });
 
     cy.get('button[data-test-subj="savePanelButton"]').click();
     cy.wait(delay * 3);
@@ -481,7 +506,7 @@ describe('Testing a panel', () => {
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
     cy.wait(1000);
     cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-      .clear({force: true})
+      .clear({ force: true })
       .type(NEW_VISUALIZATION_NAME, {
         delay: 200,
       });
@@ -534,6 +559,11 @@ describe('Clean up all test data', () => {
     cy.get('.euiTextAlign').contains('No Operational Panels').should('exist');
   });
 });
+
+const moveToOsdDashboards = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/dashboards#/`);
+  cy.wait(delay * 3);
+};
 
 const moveToEventsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
@@ -615,7 +645,8 @@ const eraseTestPanels = () => {
   eraseLegacyPanels();
   eraseSavedObjectPaenls();
 };
-const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
+const uuidRx =
+  /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () =>
   cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();

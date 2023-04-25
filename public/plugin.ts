@@ -83,7 +83,6 @@ export class ObservabilityPlugin
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
   ): ObservabilitySetup {
-    console.log('core: ', core, ', setupDeps: ', setupDeps);
     uiSettingsService.init(core.uiSettings, core.notifications);
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
@@ -107,16 +106,16 @@ export class ObservabilityPlugin
     // if (window.location.pathname.includes('application_analytics')) {
     //   window.location.assign(convertLegacyAppAnalyticsUrl(window.location));
     // }
-
+    const BASE_URL = core.http.basePath.prepend('/app/observability-dashboards#');
     setupDeps.dashboard.registerDashboardProvider({
       appId: 'observability-panel',
       savedObjectsType: 'observability-panel',
       savedObjectsName: 'Observability',
-      editUrlPathFn: (obj: SavedObject) => `/app/observability-dashboards#/${obj.id}/edit`,
-      viewUrlPathFn: (obj: SavedObject) => `/app/observability-dashboards#/${obj.id}`,
+      editUrlPathFn: (obj: SavedObject) => `${BASE_URL}/${obj.id}/edit`,
+      viewUrlPathFn: (obj: SavedObject) => `${BASE_URL}/${obj.id}`,
       createLinkText: 'Observability Dashboard',
       createSortText: 'Observability Dashboard',
-      createUrl: '/app/observability-dashboards#/create',
+      createUrl: `${BASE_URL}/create`,
     });
 
     const OBSERVABILITY_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
@@ -130,7 +129,6 @@ export class ObservabilityPlugin
     });
 
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
-      console.log('start page: ', startPage);
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
