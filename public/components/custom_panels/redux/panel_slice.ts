@@ -11,6 +11,7 @@ import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
   CUSTOM_PANEL_SLICE,
+  createDemoPanel,
 } from '../../../../common/constants/custom_panels';
 import {
   CustomPanelListType,
@@ -21,12 +22,12 @@ import {
 } from '../../../../common/types/custom_panels';
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
-import { isNameValid, samplePanelName } from '../helpers/utils';
+import { isNameValid } from '../helpers/utils';
+import { samplePanelName } from '../../../../common/constants/custom_panels';
 import {
   addMultipleVisualizations,
   addVisualizationPanel,
 } from '../helpers/add_visualization_helper';
-import { createDemoPanel } from '../../../../server/common/helpers/custom_panels/sample_panels';
 
 interface InitialState {
   id: string;
