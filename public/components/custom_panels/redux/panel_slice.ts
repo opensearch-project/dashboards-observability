@@ -220,13 +220,16 @@ export const createPanel = (panel) => async (dispatch, getState) => {
 };
 
 export const createPanelSample = (vizIds) => async (dispatch, getState) => {
-  const samplePanel = createDemoPanel(vizIds);
+  const samplePanel = {
+    ...createDemoPanel(vizIds),
+    dateCreated: new Date().getTime(),
+    dateModified: new Date().getTime(),
+    title: '[Logs] Web traffic Panel',
+  };
   const newSOPanel = await savedObjectPanelsClient.create(samplePanel);
   const newPanel = savedObjectToCustomPanel(newSOPanel);
   const panelList = getState().customPanel.panelList;
   dispatch(setPanelList([...panelList, newPanel]));
-
-  window.location.replace(`#/${newPanel.id}`);
 };
 
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
