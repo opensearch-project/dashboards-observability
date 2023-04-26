@@ -191,6 +191,7 @@ export const Home = ({
         .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
 
       dispatch(createPanelSample(savedVisualizationIds));
+      setToast(`Sample panels successfully added.`);
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');
       console.error(err.body?.message || err);
