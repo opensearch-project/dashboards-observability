@@ -18,7 +18,7 @@ export const samplePanelName = '[Logs] Web traffic Panel';
 
 export const createDemoPanel = (savedVisualizationIds: string[]) => {
   return {
-    name: '[Logs] Web traffic Panel',
+    name: samplePanelName,
     visualizations: [
       {
         id: 'panel_viz_' + uuidv4(),
