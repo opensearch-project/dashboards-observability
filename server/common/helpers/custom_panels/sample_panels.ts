@@ -4,11 +4,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { samplePanelName } from '../../../../public/components/custom_panels/helpers/utils';
 
 export const createDemoPanel = (savedVisualizationIds: string[]) => {
   return {
-    name: samplePanelName,
+    name: '[Logs] Web traffic Panel',
     visualizations: [
       {
         id: 'panel_viz_' + uuidv4(),
