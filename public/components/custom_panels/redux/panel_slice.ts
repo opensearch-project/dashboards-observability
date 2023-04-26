@@ -33,7 +33,7 @@ interface InitialState {
   panelList: CustomPanelType[];
 }
 
-export const newPanelTemplate = (newName) => ({
+export const newPanelTemplate = (newName): PanelType => ({
   title: newName,
   dateCreated: new Date().getTime(),
   dateModified: new Date().getTime(),
@@ -74,17 +74,12 @@ export const selectPanel = createSelector(
   (panel) => normalizedPanel(panel)
 );
 
-const normalizedPanel = (panel): PanelType => ({
+const normalizedPanel = (panel: CustomPanelType): CustomPanelType => ({
   ...newPanelTemplate(''),
   ...panel,
 });
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
-
-// export const selectPanelList = createSelector(
-//   rootState => { console.log("selectPanelList", { rootState }); return rootState.customPanel.panelList },
-//   panelList => panelList.map(p => p as CustomPanelListType)
-// );
 
 /*
  ** ASYNC DISPATCH FUNCTIONS
@@ -139,7 +134,7 @@ const updateSavedObjectPanel = (panel: CustomPanelType) => savedObjectPanelsClie
 
 export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
-const isUuid = (id) => !!id.match(uuidRx);
+export const isUuid = (id) => !!id.match(uuidRx);
 
 export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
   try {
@@ -203,9 +198,26 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId) => async (dispatch,
   }
 };
 
-export const deletePanel = (id) => async (dispatch, getState) => {
-  await savedObjectPanelsClient.delete(id);
-  const panelList: CustomPanelType[] = getState().panelList.filter((p) => p.id !== id);
+const deletePanelSO = (customPanelIdList: string[]) => {
+  const soPanelIds = customPanelIdList.filter((id) => isUuid(id));
+  return Promise.all(soPanelIds.map((id) => savedObjectPanelsClient.delete(id)));
+};
+
+const deleteLegacyPanels = (customPanelIdList: string[]) => {
+  const panelIds = customPanelIdList.filter((id) => !isUuid(id));
+  if (panelIds.length === 0) return;
+
+  const concatList = panelIds.toString();
+  return coreRefs.http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList);
+};
+
+export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispatch, getState) => {
+  const ids = panelsToDelete.map((p) => p.id);
+  await Promise.all([deleteLegacyPanels(ids), deletePanelSO(ids)]);
+
+  const panelList: CustomPanelType[] = getState().customPanel.panelList.filter(
+    (p) => !ids.includes(p.id)
+  );
   dispatch(setPanelList(panelList));
 };
 

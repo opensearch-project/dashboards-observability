@@ -356,7 +356,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                <h1>Event analytics</h1>
+                <h1>Logs</h1>
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
