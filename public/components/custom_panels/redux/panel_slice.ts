@@ -21,7 +21,7 @@ import {
 } from '../../../../common/types/custom_panels';
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
-import { isNameValid } from '../helpers/utils';
+import { isNameValid, samplePanelName } from '../helpers/utils';
 import {
   addMultipleVisualizations,
   addVisualizationPanel,
@@ -224,7 +224,7 @@ export const createPanelSample = (vizIds) => async (dispatch, getState) => {
     ...createDemoPanel(vizIds),
     dateCreated: new Date().getTime(),
     dateModified: new Date().getTime(),
-    title: '[Logs] Web traffic Panel',
+    title: samplePanelName,
   };
   const newSOPanel = await savedObjectPanelsClient.create(samplePanel);
   const newPanel = savedObjectToCustomPanel(newSOPanel);

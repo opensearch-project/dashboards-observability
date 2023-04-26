@@ -50,6 +50,8 @@ export const isNameValid = (name: string) => {
   return name.length >= 50 || name.length === 0 ? false : true;
 };
 
+export const samplePanelName = '[Logs] Web traffic Panel';
+
 // DateTime convertor to required format
 export const convertDateTime = (datetime: string, isStart = true, formatted = true) => {
   let returnTime: undefined | Moment;
