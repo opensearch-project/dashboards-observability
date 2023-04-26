@@ -26,6 +26,7 @@ import {
   addMultipleVisualizations,
   addVisualizationPanel,
 } from '../helpers/add_visualization_helper';
+import { createDemoPanel } from '../../../../server/common/helpers/custom_panels/sample_panels';
 
 interface InitialState {
   id: string;
@@ -218,10 +219,9 @@ export const createPanel = (panel) => async (dispatch, getState) => {
   window.location.replace(`#/${newPanel.id}`);
 };
 
-export const createPanelWithVizs = (panel, vizIds) => async (dispatch, getState) => {
-  const visualizationsWithNewPanel = addMultipleVisualizations(vizIds, []);
-  const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-  const newSOPanel = await savedObjectPanelsClient.create(updatedPanel);
+export const createPanelSample = (vizIds) => async (dispatch, getState) => {
+  const samplePanel = createDemoPanel(vizIds);
+  const newSOPanel = await savedObjectPanelsClient.create(samplePanel);
   const newPanel = savedObjectToCustomPanel(newSOPanel);
   const panelList = getState().customPanel.panelList;
   dispatch(setPanelList([...panelList, newPanel]));

@@ -30,6 +30,7 @@ import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
 import {
   createPanel,
+  createPanelSample,
   createPanelWithVizs,
   deletePanel,
   fetchPanels,
@@ -189,19 +190,7 @@ export const Home = ({
         .get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/addSampleSavedObjects/panels`)
         .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
 
-      const savedObjectSamplePanel = newPanelTemplate('[Logs] Web traffic Panel');
-      dispatch(createPanelWithVizs(savedObjectSamplePanel, savedVisualizationIds));
-
-      // await http
-      //   .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
-      //     body: JSON.stringify({
-      //       savedVisualizationIds,
-      //     }),
-      //   })
-      //   .then((res) => {
-      //     dispatch(fetchPanels());
-      //   });
-      // setToast(`Sample panels successfully added.`);
+      dispatch(createPanelSample(savedVisualizationIds));
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');
       console.error(err.body?.message || err);
