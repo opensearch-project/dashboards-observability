@@ -363,7 +363,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     }
 
     if (!isPPLFilterValid(pplFilterValue, setToast)) {
-      console.log(pplFilterValue);
+      console.error(pplFilterValue);
       return;
     }
 

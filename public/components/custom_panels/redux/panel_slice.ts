@@ -145,7 +145,7 @@ export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
   } catch (err) {
-    console.log('Error updating Dashboard', { err, panel });
+    console.error('Error updating Dashboard', { err, panel });
   }
 };
 
@@ -226,6 +226,8 @@ export const createPanel = (panel) => async (dispatch, getState) => {
   const newPanel = savedObjectToCustomPanel(newSOPanel);
   const panelList = getState().customPanel.panelList;
   dispatch(setPanelList([...panelList, newPanel]));
+
+  window.location.replace(`#/${newPanel.id}`);
 };
 
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
@@ -272,7 +274,7 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
   getState
 ) => {
   if (!isNameValid(editedCustomPanelName)) {
-    console.log('Invalid Observability Dashboard name', 'danger');
+    console.error('Invalid Observability Dashboard name', 'danger');
     return Promise.reject();
   }
 

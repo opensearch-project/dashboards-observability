@@ -1,16 +1,17 @@
-import React from 'react';
-import { useOpenSearchDashboards } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ToastInputFields } from '../../../../../../src/core/public';
-import { ObservabilityAppServices } from '../../../../common/types/shared';
+import { coreRefs } from '../../../framework/core_refs';
 
 type Color = 'success' | 'primary' | 'warning' | 'danger' | undefined;
 
 export const useToast = () => {
-  const {
-    services: { toasts },
-  } = useOpenSearchDashboards<ObservabilityAppServices>();
+  const toasts = coreRefs.toasts!;
 
-  const setToast = (title: string, color: Color = 'success', text?, side?: string) => {
+  const setToast = (title: string, color: Color = 'success', text?: string) => {
     const newToast: ToastInputFields = {
       id: new Date().toISOString(),
       title,

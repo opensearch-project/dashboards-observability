@@ -9,7 +9,6 @@ import { QueryManager } from 'common/query_manager';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
-import { ObservabilityAppServices } from '../../common/types/shared';
 
 export const Observability = (
   CoreStartProp: CoreStart,
@@ -20,7 +19,6 @@ export const Observability = (
   savedObjects: any,
   timestampUtils: any,
   queryManager: QueryManager,
-  services: ObservabilityAppServices,
   startPage: string
 ) => {
   ReactDOM.render(
@@ -33,7 +31,6 @@ export const Observability = (
       timestampUtils={timestampUtils}
       queryManager={queryManager}
       startPage={startPage}
-      services={services}
     />,
     AppMountParametersProp.element
   );

@@ -91,7 +91,7 @@ export const CustomPanelTable = ({
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal Toggle
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />); // Modal Layout
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [selectedCustomPanels, setselectedCustomPanels$] = useState<CustomPanelType[]>([]);
+  const [selectedCustomPanels, setselectedCustomPanels] = useState<CustomPanelType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const history = useHistory();
@@ -162,15 +162,16 @@ export const CustomPanelTable = ({
           'Error cloning Operational Panel, please make sure you have the correct permission.',
           'danger'
         );
-        console.log(err);
+        console.error(err);
       }
     }
     closeModal();
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboards ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-      } successfully deleted!`;
+    const toastMessage = `Observability Dashboards ${
+      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
+    } successfully deleted!`;
 
     try {
       await dispatch(deletePanels(selectedCustomPanels));
@@ -230,7 +231,7 @@ export const CustomPanelTable = ({
         'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
-        selectedCustomPanels[0].title + ' (copy)x',
+        selectedCustomPanels[0].title + ' (copy)',
         CREATE_PANEL_MESSAGE
       )
     );
@@ -238,8 +239,9 @@ export const CustomPanelTable = ({
   };
 
   const deletePanel = () => {
-    const customPanelString = `Observability Dashboard${selectedCustomPanels.length > 1 ? 's' : ''
-      }`;
+    const customPanelString = `Observability Dashboard${
+      selectedCustomPanels.length > 1 ? 's' : ''
+    }`;
     setModalLayout(
       <DeleteModal
         onConfirm={onDelete}
@@ -344,7 +346,6 @@ export const CustomPanelTable = ({
     },
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
-  // console.log('rendering', { customPanels, selectedCustomPanels });
   return (
     <div style={pageStyles}>
       <EuiPage>
@@ -410,8 +411,8 @@ export const CustomPanelTable = ({
                   items={
                     searchQuery
                       ? customPanels.filter((customPanel) =>
-                        customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
+                          customPanel.title.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
                       : customPanels
                   }
                   itemId="id"
