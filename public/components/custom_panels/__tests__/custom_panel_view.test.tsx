@@ -24,7 +24,6 @@ import { applyMiddleware, createStore } from 'redux';
 import { rootReducer } from '../../../framework/redux/reducers';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
-import { OpenSearchDashboardsContextProvider } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 
 describe('Panels View Component', () => {
   configure({ adapter: new Adapter() });
@@ -54,26 +53,6 @@ describe('Panels View Component', () => {
     };
 
     const wrapper = mount(
-      <Provider store={store}>
-        <CustomPanelView
-          panelId={panelId}
-          http={http}
-          pplService={pplService}
-          dslService={dslService}
-          chrome={core.chrome}
-          parentBreadcrumbs={parentBreadcrumbs}
-          renameCustomPanel={renameCustomPanel}
-          cloneCustomPanel={cloneCustomPanel}
-          deleteCustomPanel={deleteCustomPanel}
-          setToast={setToast}
-          onEditClick={onEditClick}
-          startTime={start}
-          endTime={end}
-          setStartTime={setStart}
-          setEndTime={setEnd}
-          page="operationalPanels"
-        />
-      </Provider>
       <Provider store={store}>
         <CustomPanelView
           panelId={panelId}
@@ -134,31 +113,27 @@ describe('Panels View Component', () => {
       window.location.assign(`#/event_analytics/explorer/${savedVisId}`);
     };
 
-    const services = { toasts: { addDanger: (t) => {} } }
-
     const wrapper = mount(
-      <OpenSearchDashboardsContextProvider services={services} >
-        <Provider store={store}>
-          <CustomPanelView
-            panelId={panelId}
-            http={http}
-            pplService={pplService}
-            dslService={dslService}
-            chrome={core.chrome}
-            parentBreadcrumbs={parentBreadcrumbs}
-            renameCustomPanel={renameCustomPanel}
-            cloneCustomPanel={cloneCustomPanel}
-            deleteCustomPanel={deleteCustomPanel}
-            setToast={setToast}
-            onEditClick={onEditClick}
-            startTime={start}
-            endTime={end}
-            setStartTime={setStart}
-            setEndTime={setEnd}
-            page="operationalPanels"
-          />
-        </Provider>
-      </OpenSearchDashboardsContextProvider>
+      <Provider store={store}>
+        <CustomPanelView
+          panelId={panelId}
+          http={http}
+          pplService={pplService}
+          dslService={dslService}
+          chrome={core.chrome}
+          parentBreadcrumbs={parentBreadcrumbs}
+          renameCustomPanel={renameCustomPanel}
+          cloneCustomPanel={cloneCustomPanel}
+          deleteCustomPanel={deleteCustomPanel}
+          setToast={setToast}
+          onEditClick={onEditClick}
+          startTime={start}
+          endTime={end}
+          setStartTime={setStart}
+          setEndTime={setEnd}
+          page="operationalPanels"
+        />
+      </Provider>
     );
     wrapper.update();
 
