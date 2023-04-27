@@ -26,6 +26,7 @@ import {
   addMultipleVisualizations,
   addVisualizationPanel,
 } from '../helpers/add_visualization_helper';
+import { useToast } from '../../../../public/components/common/toast';
 
 interface InitialState {
   id: string;
@@ -80,6 +81,8 @@ const normalizedPanel = (panel: CustomPanelType): CustomPanelType => ({
 });
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
+
+const {setToast} = useToast();
 
 /*
  ** ASYNC DISPATCH FUNCTIONS
@@ -136,16 +139,21 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
-export const updatePanel = (panel: CustomPanelType) => async (dispatch, getState) => {
+export const updatePanel = (panel: CustomPanelType, onSuccess: string, onFailure: string) => async (dispatch, getState) => {
   try {
     if (isUuid(panel.id)) await updateSavedObjectPanel(panel);
     else await updateLegacyPanel(panel);
-
+    if (onSuccess) {
+      setToast(onSuccess)
+    }
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
-  } catch (err) {
-    console.error('Error updating Dashboard', { err, panel });
+  } catch (e) {    
+    if (onFailure) {
+      setToast(onFailure, 'danger')
+    }
+    console.error(e);
   }
 };
 
@@ -211,7 +219,7 @@ const deleteLegacyPanels = (customPanelIdList: string[]) => {
   return coreRefs.http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList);
 };
 
-export const deletePanels = (panelsToDelete: CustomPanelType[], setToast) => async (dispatch, getState) => {
+export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispatch, getState) => {
   const toastMessage = `Observability Dashboard${
     panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
   } successfully deleted!`;
@@ -233,7 +241,7 @@ export const deletePanels = (panelsToDelete: CustomPanelType[], setToast) => asy
   }
 };
 
-export const createPanel = (panel, setToast) => async (dispatch, getState) => {
+export const createPanel = (panel) => async (dispatch, getState) => {
   try {
     const newSOPanel = await savedObjectPanelsClient.create(panel);
     const newPanel = savedObjectToCustomPanel(newSOPanel);
@@ -250,7 +258,7 @@ export const createPanel = (panel, setToast) => async (dispatch, getState) => {
   }
 };
 
-export const clonePanel = (panel, newPanelName, setToast) => async (dispatch, getState) => {
+export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
   try {
     const { id, ...panelCopy } = {
       ...panel,
@@ -297,26 +305,13 @@ const saveRenamedPanelSO = async (id, name) => {
 };
 
 // Renames an existing CustomPanel
-export const renameCustomPanel = (editedCustomPanelName: string, id: string, setToast) => async (
+export const renameCustomPanel = (editedCustomPanelName: string, id: string) => async (
   dispatch,
   getState
 ) => {
-  try {
-    const panel = getState().customPanel.panelList.find((p) => p.id === id);
-    const updatedPanel = { ...panel, title: editedCustomPanelName };
-    if (isUuid(updatedPanel.id)) await updateSavedObjectPanel(updatedPanel);
-    else await updateLegacyPanel(updatedPanel);
-    dispatch(setPanel(updatedPanel));
-    const panelList = getState().customPanel.panelList.map((p) => (p.id === updatedPanel.id ? updatedPanel : p));
-    dispatch(setPanelList(panelList));
-    setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`)
-  } catch (e) {
-    setToast(
-      'Error renaming Observability Dashboard, please make sure you have the correct permission.',
-      'danger'
-    );
-    console.error(e);
-  }
+  const panel = getState().customPanel.panelList.find((p) => p.id === id);
+  const updatedPanel = { ...panel, title: editedCustomPanelName };
+  dispatch(updatePanel(updatedPanel, `Operational Panel successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Operational Panel, please make sure you have the correct permission.'))
 };
 
 /*

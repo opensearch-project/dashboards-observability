@@ -317,7 +317,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
     } else {
-      dispatch(clonePanel(panel, newCustomPanelName, setToast));
+      dispatch(clonePanel(panel, newCustomPanelName));
     }
     closeModal();
   };

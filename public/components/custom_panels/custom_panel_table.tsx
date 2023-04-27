@@ -133,7 +133,7 @@ export const CustomPanelTable = ({
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
-      dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id, setToast));
+      dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
     }
     closeModal();
   };
@@ -171,7 +171,7 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    dispatch(deletePanels(selectedCustomPanels, setToast));
+    dispatch(deletePanels(selectedCustomPanels));
     closeModal();
   };
 

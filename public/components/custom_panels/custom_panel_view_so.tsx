@@ -179,14 +179,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       timeProps.end,
       recentlyUsedRanges
     );
-    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }, '', ''));
 
     setRecentlyUsedRanges(updatedRanges.slice(0, 9));
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
   const onDelete = async () => {
-    dispatch(deletePanels([panel], setToast));
+    dispatch(deletePanels([panel]));
     setTimeout(() => {
       window.location.assign(`${last(parentBreadcrumbs)!.href}`);
     }, 1000);
@@ -209,7 +209,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
-      dispatch(renameCustomPanel(newCustomPanelName, panel.id, setToast));
+      dispatch(renameCustomPanel(newCustomPanelName, panel.id));
     }
     closeModal();
   };
@@ -234,7 +234,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Operational Panel name', 'danger');
     } else {
-      dispatch(clonePanel(panel, newCustomPanelName, setToast));
+      dispatch(clonePanel(panel, newCustomPanelName));
     }
     closeModal();
   };
@@ -448,12 +448,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     );
 
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    try {
-      dispatch(updatePanel(updatedPanel));
-    } catch (err) {
-      setToast('Error adding visualization to this Dashboard', 'danger');
-      console.error(err?.body?.message || err);
-    }
+    dispatch(updatePanel(updatedPanel, '', 'Error adding visualization to this Dashboard'));
   };
 
   const setPanelVisualizations = (newVis) => {
