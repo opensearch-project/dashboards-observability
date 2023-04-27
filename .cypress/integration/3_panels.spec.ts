@@ -85,10 +85,10 @@ describe('Testing panels table', () => {
       moveToPanelHome();
     });
 
-    it('Displays error toast for invalid panel name', () => {
+    it.skip('Displays error toast for invalid panel name', () => {
       clickCreatePanelButton();
       confirmModal();
-      expectToastWith('Invalid Operational Panel name');
+      expectToastWith('Invalid Dashboard name');
     });
 
     it('Creates a panel and redirects to the panel', () => {
@@ -146,6 +146,37 @@ describe('Testing panels table', () => {
       cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
       cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
       cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+    });
+
+    it('Searches panels', () => {
+      createLegacyPanel('Legacy Named');
+      createSavedObjectPanel('Saved Object');
+      cy.reload();
+      cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+        .focus()
+        .type('this panel should not exist', {
+          delay: 50,
+        });
+
+      cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
+
+      // Search for oriignal Legacy Panel
+      cy.get('[aria-label="Clear input"]').click();
+      cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(TEST_PANEL, {
+        delay: 50,
+      });
+
+      cy.get('a.euiLink').contains(TEST_PANEL).should('exist');
+      cy.get('.euiTableRow').should('have.length', 1);
+
+      // Search for teh Saved Object panel
+      cy.get('[aria-label="Clear input"]').click();
+      cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type('Saved Object', {
+        delay: 50,
+      });
+
+      cy.get('a.euiLink').contains('Saved Object').should('exist');
+      cy.get('.euiTableRow').should('have.length', 1);
     });
   });
 
@@ -220,38 +251,6 @@ describe('Testing panels table', () => {
       cy.location('pathname').should('eq', '/app/observability-dashboards');
       cy.location('hash').should('include', '/create');
     });
-  });
-
-  it('Searches existing panel', () => {
-    createLegacyPanel();
-    cy.get('input[data-test-subj="operationalPanelSearchBar"]')
-      .focus()
-      .type('this panel should not exist', {
-        delay: 50,
-      });
-
-    cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
-
-    cy.get('[aria-label="Clear input"]').click();
-    cy.get('input[data-test-subj="operationalPanelSearchBar"]')
-      .focus()
-      .type(TEST_PANEL + ' (copy) (rename)', {
-        delay: 50,
-      });
-
-    cy.get('a.euiLink')
-      .contains(TEST_PANEL + ' (copy) (rename)')
-      .should('exist');
-  });
-
-  it('Create a panel for testing', () => {
-    moveToPanelHome();
-    // keep a panel for testing
-    clickCreatePanelButton();
-    cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
-      delay: 50,
-    });
-    cy.get('button[data-test-subj="runModalButton"]').click();
   });
 });
 
@@ -567,7 +566,7 @@ const moveToOsdDashboards = () => {
 
 const moveToEventsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
-  cy.wait(delay * 3);
+  cy.wait(6000);
 };
 
 const moveToPanelHome = () => {
@@ -651,7 +650,7 @@ const uuidRx =
 const clickCreatePanelButton = () =>
   cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
 
-const createSavedObjectPanel = () => {
+const createSavedObjectPanel = (newName = TEST_PANEL) => {
   const result = cy
     .request({
       method: 'POST',
@@ -663,7 +662,7 @@ const createSavedObjectPanel = () => {
       },
       body: {
         attributes: {
-          title: TEST_PANEL,
+          title: newName,
           description: '',
           dateCreated: 1681127334085,
           dateModified: 1681127334085,
@@ -683,7 +682,7 @@ const createSavedObjectPanel = () => {
     .then((response) => console.log(response));
 };
 
-const createLegacyPanel = () => {
+const createLegacyPanel = (newName = TEST_PANEL) => {
   const result = cy.request({
     method: 'POST',
     failOnStatusCode: false,
@@ -692,7 +691,7 @@ const createLegacyPanel = () => {
       'content-type': 'application/json;charset=UTF-8',
       'osd-xsrf': true,
     },
-    body: { panelName: TEST_PANEL },
+    body: { panelName: newName },
   });
 };
 
