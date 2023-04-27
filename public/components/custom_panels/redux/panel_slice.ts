@@ -139,19 +139,19 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
-export const updatePanel = (panel: CustomPanelType, onSuccess: string, onFailure: string) => async (dispatch, getState) => {
+export const updatePanel = (panel: CustomPanelType, successMsg: string, failureMsg: string) => async (dispatch, getState) => {
   try {
     if (isUuid(panel.id)) await updateSavedObjectPanel(panel);
     else await updateLegacyPanel(panel);
-    if (onSuccess) {
-      setToast(onSuccess)
+    if (successMsg) {
+      setToast(successMsg)
     }
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
   } catch (e) {    
-    if (onFailure) {
-      setToast(onFailure, 'danger')
+    if (failureMsg) {
+      setToast(failureMsg, 'danger')
     }
     console.error(e);
   }
@@ -166,11 +166,7 @@ export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
     const visualizationsWithNewPanel = addVisualizationPanel(vizId, undefined, allVisualizations);
 
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    try {
-      dispatch(updatePanel(updatedPanel));
-    } catch (err) {
-      console.error(err?.body?.message || err);
-    }
+    dispatch(updatePanel(updatedPanel, '', ''));
   });
 };
 
@@ -183,11 +179,7 @@ export const addMultipleVizToPanels = (panels, vizIds) => async (dispatch, getSt
     const visualizationsWithNewPanel = addMultipleVisualizations(vizIds, allVisualizations);
 
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    try {
-      dispatch(updatePanel(updatedPanel));
-    } catch (err) {
-      console.error(err?.body?.message || err);
-    }
+    dispatch(updatePanel(updatedPanel, '', ''));
   });
 };
 

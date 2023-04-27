@@ -354,7 +354,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const cloneVisualization = (visualzationTitle: string, savedVisualizationId: string) => {
-    addVisualizationToCurrentPanel({ savedVisualizationId, onSuccess: `Visualization ${visualzationTitle} successfully added!`, onFailure: `Error in adding ${visualzationTitle} visualization to the panel` });
+    addVisualizationToCurrentPanel({ savedVisualizationId, successMsg: `Visualization ${visualzationTitle} successfully added!`, failureMsg: `Error in adding ${visualzationTitle} visualization to the panel` });
   };
 
   const cancelButton = (
@@ -412,13 +412,13 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const addVisualizationToCurrentPanel = async ({
     savedVisualizationId,
     oldVisualizationId,
-    onSuccess,
-    onFailure,
+    successMsg,
+    failureMsg,
   }: {
     savedVisualizationId: string;
     oldVisualizationId?: string;
-    onSuccess: string;
-    onFailure: string;
+    successMsg: string;
+    failureMsg: string;
   }) => {
     const allVisualizations = panel!.visualizations;
 
@@ -429,7 +429,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     );
 
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    dispatch(updatePanel(updatedPanel, onSuccess, onFailure));
+    dispatch(updatePanel(updatedPanel, successMsg, failureMsg));
   };
 
   const setPanelVisualizations = (newVis) => {
