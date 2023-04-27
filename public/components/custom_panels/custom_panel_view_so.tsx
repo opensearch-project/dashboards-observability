@@ -55,17 +55,14 @@ import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import {
   clonePanel,
-  createPanel,
   deletePanels,
   fetchPanel,
-  newPanelTemplate,
   selectPanel,
   setPanel,
-  setPanelEt,
-  setPanelId,
-  setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
+import PPLService from '../../services/requests/ppl';
+import DSLService from '../../services/requests/dsl';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -277,20 +274,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   // toggle between panel edit mode
-
-  const startEdit = () => {
-    setIsEditing(true);
-  };
-
-  const applyEdits = useCallback(() => {
-    dispatch(updatePanel(panel));
-    setIsEditing(false);
-    setEditActionType('save');
-  }, [panel]);
-
-  const cancelEdit = () => {
-    dispatch(fetchPanel(panelId));
-    setIsEditing(false);
+  const editPanel = (editType: string) => {
+    setIsEditing(!isEditing);
+    if (editType === 'cancel') dispatch(fetchPanel(panelId));
+    setEditActionType(editType);
   };
 
   const closeFlyout = () => {
@@ -406,14 +393,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       data-test-subj="cancelPanelButton"
       iconType="cross"
       color="danger"
-      onClick={cancelEdit}
+      onClick={() => editPanel('cancel')}
     >
       Cancel
     </EuiButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={applyEdits}>
+    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
       Save
     </EuiButton>
   );
@@ -422,7 +409,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     <EuiButton
       data-test-subj="editPanelButton"
       iconType="pencil"
-      onClick={startEdit}
+      onClick={() => editPanel('edit')}
       disabled={editDisabled}
     >
       Edit
