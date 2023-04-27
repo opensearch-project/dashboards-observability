@@ -38,12 +38,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 import {
-  PplResponse,
+  PPLResponse,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
 } from '../../../../../common/types/custom_panels';
 import { uiSettingsService } from '../../../../../common/utils';
+
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -115,7 +116,7 @@ export const VisaulizationFlyoutSO = ({
   const [newVisualizationTimeField, setNewVisualizationTimeField] = useState('');
   const [previewMetaData, setPreviewMetaData] = useState<SavedVisualizationType>();
   const [pplQuery, setPPLQuery] = useState('');
-  const [previewData, setPreviewData] = useState<PplResponse>({} as PplResponse);
+  const [previewData, setPreviewData] = useState<PPLResponse>({} as PPLResponse);
   const [previewArea, setPreviewArea] = useState(<></>);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [isPreviewError, setIsPreviewError] = useState({} as VizContainerError);
