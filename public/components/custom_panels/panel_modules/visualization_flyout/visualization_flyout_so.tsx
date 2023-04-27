@@ -176,23 +176,13 @@ export const VisaulizationFlyoutSO = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      try {
-        dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue));
-        setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-      } catch (err) {
-        setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-        console.error(err);
-      }
+      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle));
     } else {
-      try {
         const visualizationsWithNewPanel = addVisualizationPanel({
           savedVisualizationId: selectValue,
+          onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
+          onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`
         });
-        setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-      } catch (err) {
-        setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-        console.error(err);
-      }
     }
     closeFlyout();
   };

@@ -191,7 +191,7 @@ export const addMultipleVizToPanels = (panels, vizIds) => async (dispatch, getSt
   });
 };
 
-export const replaceVizInPanel = (oldPanel, oldVizId, vizId) => async (dispatch, getState) => {
+export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTitle) => async (dispatch, getState) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.id);
 
   const allVisualizations = panel!.visualizations;
@@ -199,11 +199,8 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId) => async (dispatch,
   const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
 
   const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-  try {
-    dispatch(updatePanel(updatedPanel));
-  } catch (err) {
-    console.error(err?.body?.message || err);
-  }
+  
+  dispatch(updatePanel(updatedPanel, `Visualization ${newVisualizationTitle} successfully added!`, `Error in adding ${newVisualizationTitle} visualization to the panel`));
 };
 
 const deletePanelSO = (customPanelIdList: string[]) => {
