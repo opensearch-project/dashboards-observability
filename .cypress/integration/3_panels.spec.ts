@@ -74,7 +74,7 @@ describe('Creating visualizations', () => {
   });
 });
 
-describe.only('Testing panels table', () => {
+describe('Testing panels table', () => {
   beforeEach(() => {
     eraseTestPanels();
     moveToPanelHome();
@@ -597,7 +597,6 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    console.log("legacy panels to erase", response.body)
     response.body.panels.map((panel) => {
       cy.request({
         method: 'DELETE',
@@ -627,7 +626,6 @@ const eraseSavedObjectPaenls = () => {
       },
     })
     .then((response) => {
-      console.log("saved objects to erase", response.body)
       response.body.saved_objects.map((soPanel) => {
         cy.request({
           method: 'DELETE',
@@ -637,9 +635,6 @@ const eraseSavedObjectPaenls = () => {
             'content-type': 'application/json;charset=UTF-8',
             'osd-xsrf': true,
           },
-        }).then((response) => {
-          const deletedId = response;
-          console.log('erased SO Panel', response)
         });
       });
     });
@@ -649,8 +644,7 @@ const eraseTestPanels = () => {
   eraseLegacyPanels();
   eraseSavedObjectPaenls();
 };
-const uuidRx =
-  /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
+const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () =>
   cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
@@ -717,10 +711,9 @@ const openActionsDropdown = () => {
 };
 
 const selectThePanel = () => {
-  // cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
-  cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
-  cy.get('.euiTableRow-isSelected').should('exist')
-  // });
+  cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
+    cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
+  });
 };
 
 const expectToastWith = (title) => {
