@@ -66,6 +66,7 @@ import {
   setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
+import { useToast } from '../common/toast';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -82,7 +83,6 @@ import {
  * renameCustomPanel: Rename function for the panel
  * deleteCustomPanel: Delete function for the panel
  * cloneCustomPanel: Clone function for the panel
- * setToast: create Toast function
  * onEditClick: Edit function for visualization
  * startTime: Starting time
  * endTime: Ending time
@@ -100,12 +100,6 @@ interface CustomPanelViewProps {
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   onEditClick: (savedVisualizationId: string) => any;
   childBreadcrumbs?: EuiBreadcrumb[];
   appId?: string;
@@ -127,12 +121,12 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     childBreadcrumbs,
     updateAvailabilityVizId,
     cloneCustomPanel,
-    setToast,
     onEditClick,
     onAddClick,
   } = props;
 
   const dispatch = useDispatch();
+  const { setToast } = useToast();
 
   const panel = useSelector(selectPanel);
   const [loading, setLoading] = useState(true);
