@@ -258,27 +258,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   // toggle between panel edit mode
-<<<<<<< HEAD
   const editPanel = (editType: string) => {
     setIsEditing(!isEditing);
     if (editType === 'cancel') dispatch(fetchPanel(panelId));
     setEditActionType(editType);
-=======
-
-  const startEdit = () => {
-    setIsEditing(true);
-  };
-
-  const applyEdits = useCallback(() => {
-    dispatch(updatePanel(panel, '', ''));
-    setIsEditing(false);
-    setEditActionType('save');
-  }, [panel]);
-
-  const cancelEdit = () => {
-    dispatch(fetchPanel(panelId));
-    setIsEditing(false);
->>>>>>> 22977feb (code cleanup)
   };
 
   const closeFlyout = () => {
