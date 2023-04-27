@@ -314,7 +314,11 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    dispatch(clonePanel(panel, newCustomPanelName, setToast));
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Operational Panel name', 'danger');
+    } else {
+      dispatch(clonePanel(panel, newCustomPanelName, setToast));
+    }
     closeModal();
   };
 

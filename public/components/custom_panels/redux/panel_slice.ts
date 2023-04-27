@@ -297,38 +297,26 @@ const saveRenamedPanelSO = async (id, name) => {
 };
 
 // Renames an existing CustomPanel
-export const renameCustomPanel = (editedCustomPanelName: string, id: string) => async (
+export const renameCustomPanel = (editedCustomPanelName: string, id: string, setToast) => async (
   dispatch,
   getState
 ) => {
-  if (!isNameValid(editedCustomPanelName)) {
-    console.error('Invalid Observability Dashboard name', 'danger');
-    return Promise.reject();
+  try {
+    const panel = getState().customPanel.panelList.find((p) => p.id === id);
+    const updatedPanel = { ...panel, title: editedCustomPanelName };
+    if (isUuid(updatedPanel.id)) await updateSavedObjectPanel(updatedPanel);
+    else await updateLegacyPanel(updatedPanel);
+    dispatch(setPanel(updatedPanel));
+    const panelList = getState().customPanel.panelList.map((p) => (p.id === updatedPanel.id ? updatedPanel : p));
+    dispatch(setPanelList(panelList));
+    setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`)
+  } catch (e) {
+    setToast(
+      'Error renaming Observability Dashboard, please make sure you have the correct permission.',
+      'danger'
+    );
+    console.error(e);
   }
-
-  const panel = getState().customPanel.panelList.find((p) => p.id === id);
-  const updatedPanel = { ...panel, title: editedCustomPanelName };
-  dispatch(updatePanel(updatedPanel));
-
-  // try {
-  //   // await savePanelFn(editedCustomPanelId, editedCustomPanelName);
-
-  //   // setcustomPanelData((prevCustomPanelData) => {
-  //   //   const newCustomPanelData = [...prevCustomPanelData];
-  //   //   const renamedCustomPanel = newCustomPanelData.find(
-  //   //     (customPanel) => customPanel.id === editedCustomPanelId
-  //   //   );
-  //   //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
-  //   //   return newCustomPanelData;
-  //   // });
-  //   // setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`);
-  // } catch (err) {
-  //   console.log(
-  //     'Error renaming Observability Dashboard, please make sure you have the correct permission.',
-  //     'danger'
-  //   );
-  //   console.error(err.body.message);
-  // }
 };
 
 /*
