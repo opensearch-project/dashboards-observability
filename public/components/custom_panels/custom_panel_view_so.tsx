@@ -55,15 +55,10 @@ import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import {
   clonePanel,
-  createPanel,
   deletePanels,
   fetchPanel,
-  newPanelTemplate,
   selectPanel,
   setPanel,
-  setPanelEt,
-  setPanelId,
-  setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
 import { useToast } from '../common/toast';
@@ -189,20 +184,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboard ${panel.title} successfully deleted!"`;
-    try {
-      await dispatch(deletePanels([panel]));
-
-      setTimeout(() => {
-        window.location.assign(`${last(parentBreadcrumbs)!.href}`);
-      }, 1000);
-    } catch (err) {
-      setToast(
-        'Error deleting Operational Panels, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body?.message || err);
-    }
+    dispatch(deletePanels([panel], setToast));
+    setTimeout(() => {
+      window.location.assign(`${last(parentBreadcrumbs)!.href}`);
+    }, 1000);
     closeModal();
   };
 
@@ -222,10 +207,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     const newPanel = { ...panel, title: newCustomPanelName };
     try {
       dispatch(updatePanel(newPanel));
-      setToast(`Operational Panel successfully renamed into "${newCustomPanelName}"`);
+      setToast(`Observability Dashboard successfully renamed into "${newCustomPanelName}"`);
     } catch (err) {
       setToast(
-        'Error renaming Operational Panel, please make sure you have the correct permission.',
+        'Error renaming Observability Dashboard, please make sure you have the correct permission.',
         'danger'
       );
       console.error(err.body.message);
@@ -250,7 +235,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    dispatch(clonePanel(panel, newCustomPanelName));
+    try {
+      await dispatch(clonePanel(panel, newCustomPanelName));
+    } catch (err) {
+      setToast('Error while attempting to Duplicate this Dashboard.', 'danger');
+    }
     closeModal();
   };
 

@@ -124,13 +124,17 @@ export const CustomPanelTable = ({
       setToast('Invalid Dashboard name', 'danger');
     } else {
       const newPanel = newPanelTemplate(newCustomPanelName);
-      dispatch(createPanel(newPanel));
+      dispatch(createPanel(newPanel, setToast));
     }
     closeModal();
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Dashboard name', 'danger');
+    } else {
+      dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
+    }
     closeModal();
   };
 
@@ -154,12 +158,10 @@ export const CustomPanelTable = ({
           title: newName,
         };
 
-        await dispatch(createPanel(newPanel));
-
-        setToast(`Observability Dashboard "${newName}" successfully created!`);
+        dispatch(createPanel(newPanel, setToast));
       } catch (err) {
         setToast(
-          'Error cloning Operational Panel, please make sure you have the correct permission.',
+          'Error cloning Observability Dashboard, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err);
@@ -169,21 +171,7 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboard${
-      selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-    } successfully deleted!`;
-
-    try {
-      await dispatch(deletePanels(selectedCustomPanels));
-      setToast(toastMessage);
-    } catch (err) {
-      setToast(
-        'Error deleting Operational Panels, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body?.message || err);
-    }
-
+    dispatch(deletePanels(selectedCustomPanels, setToast));
     closeModal();
   };
 

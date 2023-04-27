@@ -211,23 +211,43 @@ const deleteLegacyPanels = (customPanelIdList: string[]) => {
   return coreRefs.http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList);
 };
 
-export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispatch, getState) => {
-  const ids = panelsToDelete.map((p) => p.id);
-  await Promise.all([deleteLegacyPanels(ids), deletePanelSO(ids)]);
+export const deletePanels = (panelsToDelete: CustomPanelType[], setToast) => async (dispatch, getState) => {
+  const toastMessage = `Observability Dashboard${
+    panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
+  } successfully deleted!`;
+  try {
+    const ids = panelsToDelete.map((p) => p.id);
+    await Promise.all([deleteLegacyPanels(ids), deletePanelSO(ids)]);
 
-  const panelList: CustomPanelType[] = getState().customPanel.panelList.filter(
-    (p) => !ids.includes(p.id)
-  );
-  dispatch(setPanelList(panelList));
+    const panelList: CustomPanelType[] = getState().customPanel.panelList.filter(
+      (p) => !ids.includes(p.id)
+    );
+    dispatch(setPanelList(panelList));
+    setToast(toastMessage);
+  } catch (e) {
+    setToast(
+      'Error deleting Observability Dashboards, please make sure you have the correct permission.',
+      'danger'
+    );
+    console.error(e);
+  }
 };
 
-export const createPanel = (panel) => async (dispatch, getState) => {
-  const newSOPanel = await savedObjectPanelsClient.create(panel);
-  const newPanel = savedObjectToCustomPanel(newSOPanel);
-  const panelList = getState().customPanel.panelList;
-  dispatch(setPanelList([...panelList, newPanel]));
-
-  window.location.replace(`#/${newPanel.id}`);
+export const createPanel = (panel, setToast) => async (dispatch, getState) => {
+  try {
+    const newSOPanel = await savedObjectPanelsClient.create(panel);
+    const newPanel = savedObjectToCustomPanel(newSOPanel);
+    const panelList = getState().customPanel.panelList;
+    dispatch(setPanelList([...panelList, newPanel]));
+    setToast(`Observability Dashboard "${newPanel.title}" successfully created!`);
+    window.location.replace(`#/${newPanel.id}`);
+  } catch (e) {
+    setToast(
+      'Error occurred while creating Observability Dashboard, please make sure you have the correct permission.',
+      'danger'
+    );
+    console.error(e);
+  }
 };
 
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
