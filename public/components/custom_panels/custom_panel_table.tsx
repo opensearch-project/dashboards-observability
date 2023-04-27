@@ -124,7 +124,7 @@ export const CustomPanelTable = ({
       setToast('Invalid Dashboard name', 'danger');
     } else {
       const newPanel = newPanelTemplate(newCustomPanelName);
-      dispatch(createPanel(newPanel, setToast));
+      dispatch(createPanel(newPanel));
     }
     closeModal();
   };
@@ -158,7 +158,7 @@ export const CustomPanelTable = ({
           title: newName,
         };
 
-        dispatch(createPanel(newPanel, setToast));
+        dispatch(createPanel(newPanel));
       } catch (err) {
         setToast(
           'Error cloning Observability Dashboard, please make sure you have the correct permission.',

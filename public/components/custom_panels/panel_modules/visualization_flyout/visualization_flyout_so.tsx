@@ -92,16 +92,12 @@ interface VisualizationFlyoutSOProps {
 }
 
 export const VisaulizationFlyoutSO = ({
-  panelId,
   appId = '',
   pplFilterValue,
   closeFlyout,
   start,
   end,
-  http,
-  savedObjects,
   pplService,
-  setPanelVisualizations,
   isFlyoutReplacement,
   replaceVisualizationId,
   addVisualizationPanel,

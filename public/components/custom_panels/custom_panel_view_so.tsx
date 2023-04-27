@@ -66,7 +66,7 @@ import {
 import { useToast } from '../common/toast';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
-
+ 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
  *
@@ -258,10 +258,27 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   // toggle between panel edit mode
+<<<<<<< HEAD
   const editPanel = (editType: string) => {
     setIsEditing(!isEditing);
     if (editType === 'cancel') dispatch(fetchPanel(panelId));
     setEditActionType(editType);
+=======
+
+  const startEdit = () => {
+    setIsEditing(true);
+  };
+
+  const applyEdits = useCallback(() => {
+    dispatch(updatePanel(panel, '', ''));
+    setIsEditing(false);
+    setEditActionType('save');
+  }, [panel]);
+
+  const cancelEdit = () => {
+    dispatch(fetchPanel(panelId));
+    setIsEditing(false);
+>>>>>>> 22977feb (code cleanup)
   };
 
   const closeFlyout = () => {
@@ -446,7 +463,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         pplFilterValue={pplFilterValue}
         start={panel.timeRange.from}
         end={panel.timeRange.to}
-        setToast={setToast}
         http={coreRefs.http!}
         pplService={pplService}
         setPanelVisualizations={setPanelVisualizations}
