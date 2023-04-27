@@ -314,24 +314,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    try {
-      await dispatch(clonePanel(panel, newCustomPanelName));
-    } catch (err) {
-      setToast('Error while attempting to Duplicate this Dashboard.', 'danger');
-    }
-
-    // const newPanel = {
-    //   ...panel,
-    //   title: newCustomPanelName,
-    //   dateCreated: new Date().getTime(),
-    //   dateModified: new Date().getTime(),
-    // } as PanelType;
-    // const newSOPanel = await coreRefs.savedObjectsClient!.create(
-    //   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-    //   newPanel
-    // );
-    //
-    // window.location.assign(`${last(parentBreadcrumbs)!.href}${newSOPanel.id}`);
+    dispatch(clonePanel(panel, newCustomPanelName, setToast));
     closeModal();
   };
 

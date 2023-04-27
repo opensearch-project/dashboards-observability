@@ -235,11 +235,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    try {
-      await dispatch(clonePanel(panel, newCustomPanelName));
-    } catch (err) {
-      setToast('Error while attempting to Duplicate this Dashboard.', 'danger');
-    }
+    dispatch(clonePanel(panel, newCustomPanelName, setToast));
     closeModal();
   };
 

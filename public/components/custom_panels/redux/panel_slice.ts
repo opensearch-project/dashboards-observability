@@ -250,22 +250,30 @@ export const createPanel = (panel, setToast) => async (dispatch, getState) => {
   }
 };
 
-export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
-  const { id, ...panelCopy } = {
-    ...panel,
-    title: newPanelName,
-    dateCreated: new Date().getTime(),
-    dateModified: new Date().getTime(),
-  } as PanelType;
+export const clonePanel = (panel, newPanelName, setToast) => async (dispatch, getState) => {
+  try {
+    const { id, ...panelCopy } = {
+      ...panel,
+      title: newPanelName,
+      dateCreated: new Date().getTime(),
+      dateModified: new Date().getTime(),
+    } as PanelType;
 
-  const newSOPanel = await savedObjectPanelsClient.create(panelCopy);
+    const newSOPanel = await savedObjectPanelsClient.create(panelCopy);
 
-  const newPanel = savedObjectToCustomPanel(newSOPanel);
-  const panelList = getState().customPanel.panelList;
-  dispatch(setPanelList([...panelList, newPanel]));
-  dispatch(setPanel(newPanel));
-
-  window.location.replace(`#/${newPanel.id}`);
+    const newPanel = savedObjectToCustomPanel(newSOPanel);
+    const panelList = getState().customPanel.panelList;
+    dispatch(setPanelList([...panelList, newPanel]));
+    dispatch(setPanel(newPanel));
+    setToast(`Observability Dashboard "${newPanel.title}" successfully created!`);
+    window.location.replace(`#/${newPanel.id}`);
+  } catch (e) {
+    setToast(
+      'Error cloning Observability Dashboard, please make sure you have the correct permission.',
+      'danger'
+    );
+    console.error(e);
+  }
 };
 
 const saveRenamedPanel = async (id, name) => {
