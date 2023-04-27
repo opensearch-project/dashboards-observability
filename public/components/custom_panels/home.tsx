@@ -24,13 +24,21 @@ import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { fetchPanels, uuidRx } from './redux/panel_slice';
 import { REDIRECT_TAB, TAB_CREATED_TYPE, TAB_ID_TXT_PFX } from '../../../common/constants/explorer';
 import { init as initFields } from '../event_analytics/redux/slices/field_slice';
 import { init as initPatterns } from '../event_analytics/redux/slices/patterns_slice';
 import { init as initQueryResult } from '../event_analytics/redux/slices/query_result_slice';
 import { changeQuery, init as initQuery } from '../event_analytics/redux/slices/query_slice';
 import { addTab, setSelectedQueryTab } from '../event_analytics/redux/slices/query_tab_slice';
+import {
+  createPanel,
+  createPanelSample,
+  createPanelWithVizs,
+  deletePanel,
+  fetchPanels,
+  newPanelTemplate,
+  uuidRx,
+} from './redux/panel_slice';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -154,15 +162,7 @@ export const Home = ({
         .get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/addSampleSavedObjects/panels`)
         .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
 
-      await http
-        .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
-          body: JSON.stringify({
-            savedVisualizationIds,
-          }),
-        })
-        .then((res) => {
-          dispatch(fetchPanels());
-        });
+      dispatch(createPanelSample(savedVisualizationIds));
       setToast(`Sample panels successfully added.`);
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');
