@@ -169,7 +169,7 @@ export const CustomPanelTable = ({
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboards ${
+    const toastMessage = `Observability Dashboard${
       selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
     } successfully deleted!`;
 
