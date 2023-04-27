@@ -58,6 +58,7 @@ import {
   clonePanel,
   deletePanels,
   fetchPanel,
+  renameCustomPanel,
   selectPanel,
   setPanel,
   updatePanel,
@@ -205,16 +206,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    const newPanel = { ...panel, title: newCustomPanelName };
-    try {
-      dispatch(updatePanel(newPanel));
-      setToast(`Observability Dashboard successfully renamed into "${newCustomPanelName}"`);
-    } catch (err) {
-      setToast(
-        'Error renaming Observability Dashboard, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body.message);
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Dashboard name', 'danger');
+    } else {
+      dispatch(renameCustomPanel(newCustomPanelName, panel.id, setToast));
     }
     closeModal();
   };
