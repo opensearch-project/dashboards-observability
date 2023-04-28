@@ -60,3 +60,4 @@ setOSDHttp(coreStartMock.http);
 setOSDSavedObjectsClient(coreStartMock.savedObjects.client);
 coreRefs.http = coreStartMock.http;
 coreRefs.savedObjectsClient = coreStartMock.savedObjects.client;
+coreRefs.toasts = coreStartMock.notifications.toasts;
