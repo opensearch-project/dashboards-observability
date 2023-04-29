@@ -1,0 +1,19 @@
+name: Asana PR Linking
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  asana-sync:
+    runs-on: ubuntu-latest
+    name: Sync GitHub PR with Asana Task
+    steps:
+      - name: Asana
+        id: asana
+        uses: kinnersleym/github-asana-action@v1
+        with:
+          asana-token: ${{ secrets.ASANA_ACCESS_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Asana Task URL
+        run: echo ${{ steps.asana.outputs.asana-task }}}
