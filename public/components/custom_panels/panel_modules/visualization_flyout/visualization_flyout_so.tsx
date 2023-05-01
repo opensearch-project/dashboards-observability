@@ -38,12 +38,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
 import {
-  PplResponse,
+  PPLResponse,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
 } from '../../../../../common/types/custom_panels';
 import { uiSettingsService } from '../../../../../common/utils';
+
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -57,6 +58,7 @@ import {
 } from '../../helpers/utils';
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
 import './visualization_flyout.scss';
+import { useToast } from '../../../common/toast';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -66,7 +68,6 @@ import './visualization_flyout.scss';
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter
- * setToast: function to set toast in the panel
  * savedObjects: savedObjects core service
  * pplService: ppl requestor service
  * setPanelVisualizations: function set the visualization list in panel
@@ -81,12 +82,6 @@ interface VisualizationFlyoutSOProps {
   start: ShortDate;
   end: ShortDate;
   http: CoreStart['http'];
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   savedObjects: CoreStart['savedObjects'];
   pplService: PPLService;
   setPanelVisualizations: React.Dispatch<React.SetStateAction<VisualizationType[]>>;
@@ -97,22 +92,18 @@ interface VisualizationFlyoutSOProps {
 }
 
 export const VisaulizationFlyoutSO = ({
-  panelId,
   appId = '',
   pplFilterValue,
   closeFlyout,
   start,
   end,
-  http,
-  setToast,
-  savedObjects,
   pplService,
-  setPanelVisualizations,
   isFlyoutReplacement,
   replaceVisualizationId,
   addVisualizationPanel,
 }: VisualizationFlyoutSOProps) => {
   const dispatch = useDispatch();
+  const { setToast } = useToast();
 
   const panel = useSelector(selectPanel);
 
@@ -121,7 +112,7 @@ export const VisaulizationFlyoutSO = ({
   const [newVisualizationTimeField, setNewVisualizationTimeField] = useState('');
   const [previewMetaData, setPreviewMetaData] = useState<SavedVisualizationType>();
   const [pplQuery, setPPLQuery] = useState('');
-  const [previewData, setPreviewData] = useState<PplResponse>({} as PplResponse);
+  const [previewData, setPreviewData] = useState<PPLResponse>({} as PPLResponse);
   const [previewArea, setPreviewArea] = useState(<></>);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [isPreviewError, setIsPreviewError] = useState({} as VizContainerError);
@@ -166,12 +157,12 @@ export const VisaulizationFlyoutSO = ({
   };
 
   const isInputValid = () => {
-    if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast, 'left')) {
+    if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast)) {
       return false;
     }
 
     if (selectValue === '') {
-      setToast('Please make a valid selection', 'danger', undefined, 'left');
+      setToast('Please make a valid selection', 'danger', undefined);
       return false;
     }
 
@@ -182,43 +173,13 @@ export const VisaulizationFlyoutSO = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      // http
-      //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/replace`, {
-      //     body: JSON.stringify({
-      //       panelId,
-      //       savedVisualizationId: selectValue,
-      //       oldVisualizationId: replaceVisualizationId,
-      //     }),
-      //   })
-      //   .then(async (res) => {
-      //     setPanelVisualizations(res.visualizations);
-      //     setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-      //   })
-      //   .catch((err) => {
-      //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-      //     console.error(err);
-      //   });
-      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue));
+      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle));
     } else {
-      const visualizationsWithNewPanel = addVisualizationPanel({
-        savedVisualizationId: selectValue,
-      });
-
-      // http
-      //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
-      //     body: JSON.stringify({
-      //       panelId,
-      //       savedVisualizationId: selectValue,
-      //     }),
-      //   })
-      //   .then(async (res) => {
-      //     setPanelVisualizations(res.visualizations);
-      //     setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-      //   })
-      //   .catch((err) => {
-      //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-      //     console.error(err);
-      //   });
+        const visualizationsWithNewPanel = addVisualizationPanel({
+          savedVisualizationId: selectValue,
+          onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
+          onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`
+        });
     }
     closeFlyout();
   };

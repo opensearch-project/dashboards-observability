@@ -153,17 +153,14 @@ export const PanelGridSO = (props: PanelGridProps) => {
   };
 
   // Save Visualization Layouts when not in edit mode anymore (after users saves the panel)
-  const saveVisualizationLayouts = useCallback(
-    async (panelID: string, visualizationParams: any) => {
-      const newVisualizations = updateLayout(panel.visualizations, visualizationParams);
-      const updateRes = await coreRefs.savedObjectsClient?.update('observability-panel', panelID, {
-        ...panel,
-        visualizations: newVisualizations,
-      });
-      setPanelVisualizations(updateRes?.attributes?.visualizations || []);
-    },
-    [panel]
-  );
+  const saveVisualizationLayouts = async (panelID: string, visualizationParams: any) => {
+    const newVisualizations = updateLayout(panel.visualizations, visualizationParams);
+    const updateRes = await coreRefs.savedObjectsClient?.update('observability-panel', panelID, {
+      ...panel,
+      visualizations: newVisualizations,
+    });
+    setPanelVisualizations(updateRes?.attributes?.visualizations || []);
+  };
 
   // Update layout whenever user edit gets completed
   useEffect(() => {
