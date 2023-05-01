@@ -3,37 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
-
 import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
+  SavedObject,
 } from '../../../src/core/public';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
-
 import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
-  observabilityTracesTitle,
+  observabilityLogsID,
+  observabilityLogsPluginOrder,
+  observabilityLogsTitle,
   observabilityMetricsID,
   observabilityMetricsPluginOrder,
   observabilityMetricsTitle,
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityPanelsID,
+  observabilityPanelsPluginOrder,
+  observabilityPanelsTitle,
   observabilityTracesID,
   observabilityTracesPluginOrder,
-  observabilityPanelsID,
-  observabilityPanelsTitle,
-  observabilityPanelsPluginOrder,
-  observabilityLogsID,
-  observabilityLogsTitle,
-  observabilityLogsPluginOrder,
+  observabilityTracesTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -43,17 +43,11 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
+import { HeaderChatButton } from './components/llm_chat/header_chat_button';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
-// import { uiSettingsService } from '../common/utils';
-// import { QueryManager } from '../common/query_manager';
-import { DashboardSetup } from '../../../src/plugins/dashboard/public';
-import { SavedObject } from '../../../src/core/public';
-import { coreRefs } from './framework/core_refs';
-
 // export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
 //   constructor(private initializerContext: PluginInitializerContext) {}
-
 //   public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
 import {
   OBSERVABILITY_EMBEDDABLE,
@@ -63,12 +57,12 @@ import {
   OBSERVABILITY_EMBEDDABLE_ID,
 } from './embeddable/observability_embeddable';
 import { ObservabilityEmbeddableFactoryDefinition } from './embeddable/observability_embeddable_factory';
+import { coreRefs } from './framework/core_refs';
 import './index.scss';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from './services/timestamp/timestamp';
-import { observabilityID } from '../common/constants/shared';
 import {
   AppPluginStartDependencies,
   ObservabilitySetup,
@@ -83,12 +77,14 @@ export class ObservabilityPlugin
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
   ): ObservabilitySetup {
+    console.log('❗setup:');
     uiSettingsService.init(core.uiSettings, core.notifications);
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
     setPPLService(pplService);
     setOSDHttp(core.http);
     core.getStartServices().then(([coreStart]) => {
+      console.log('❗getStartServices0:');
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
 
@@ -131,6 +127,7 @@ export class ObservabilityPlugin
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
+      console.log('❗getStartServices:');
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
@@ -234,9 +231,14 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public start(core: CoreStart): ObservabilityStart {
-    const pplService: PPLService = new PPLService(core.http);
+  public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
+    core.chrome.navControls.registerRight({
+      order: 10000,
+      mount: toMountPoint(<HeaderChatButton core={core} navigation={startDeps.navigation} />),
+    });
+    // core.chrome.navControls.getRight$().forEach((x) => console.log(x));
 
+    const pplService: PPLService = new PPLService(core.http);
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;

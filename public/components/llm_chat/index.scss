@@ -1,0 +1,21 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.llm-chat-tabs {
+  background: #e6f0f8;
+  justify-content: space-around;
+
+  .euiTab-isSelected {
+    font-weight: 700;
+  }
+
+  .euiTab {
+    color: #006bb4;
+    &:hover,
+    &:focus {
+      text-decoration: none;
+    }
+  }
+}
