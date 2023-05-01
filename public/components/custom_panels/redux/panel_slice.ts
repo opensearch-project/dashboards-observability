@@ -11,6 +11,7 @@ import {
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
   CUSTOM_PANEL_SLICE,
+  createDemoPanel,
 } from '../../../../common/constants/custom_panels';
 import {
   CustomPanelListType,
@@ -22,6 +23,7 @@ import {
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
 import { isNameValid } from '../helpers/utils';
+import { samplePanelName } from '../../../../common/constants/custom_panels';
 import {
   addMultipleVisualizations,
   addVisualizationPanel,
@@ -245,6 +247,19 @@ export const createPanel = (panel) => async (dispatch, getState) => {
     );
     console.error(e);
   }
+};
+
+export const createPanelSample = (vizIds) => async (dispatch, getState) => {
+  const samplePanel = {
+    ...createDemoPanel(vizIds),
+    dateCreated: new Date().getTime(),
+    dateModified: new Date().getTime(),
+    title: samplePanelName,
+  };
+  const newSOPanel = await savedObjectPanelsClient.create(samplePanel);
+  const newPanel = savedObjectToCustomPanel(newSOPanel);
+  const panelList = getState().customPanel.panelList;
+  dispatch(setPanelList([...panelList, newPanel]));
 };
 
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
