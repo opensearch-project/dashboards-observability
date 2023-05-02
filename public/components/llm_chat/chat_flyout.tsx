@@ -10,19 +10,25 @@ import { ChatPage } from './tabs/chat/chat_page';
 
 type TabId = 'chat' | 'compose' | 'insights' | 'history';
 
-export const ChatFlyout: React.FC = () => {
+interface ChatFlyoutProps {
+  input: string;
+  setInput: (input: string) => void;
+}
+
+export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   const chatContext = useContext(ChatContext)!;
   const [selectedId, setSelectedId] = useState<TabId>('chat');
-  const [input, setInput] = useState('');
 
   const tabs = useMemo(
     () =>
-      ([
-        { id: 'chat', name: 'Chat' },
-        { id: 'compose', name: 'Compose' },
-        { id: 'insights', name: 'Insights' },
-        { id: 'history', name: 'History' },
-      ] as const).map((tab) => (
+      (
+        [
+          { id: 'chat', name: 'Chat' },
+          { id: 'compose', name: 'Compose' },
+          { id: 'insights', name: 'Insights' },
+          { id: 'history', name: 'History' },
+        ] as const
+      ).map((tab) => (
         <EuiTab
           onClick={() => setSelectedId(tab.id)}
           isSelected={tab.id === selectedId}
@@ -37,7 +43,7 @@ export const ChatFlyout: React.FC = () => {
   let content = null;
   switch (selectedId) {
     case 'chat':
-      content = <ChatPage input={input} setInput={setInput} />;
+      content = <ChatPage input={props.input} setInput={props.setInput} />;
       break;
 
     default:

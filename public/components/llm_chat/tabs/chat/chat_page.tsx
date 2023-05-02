@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ChatInputControls } from './chat_input_controls';
+import { ChatPageContent } from './chat_page_content';
 import { InputBubble } from './input_bubble';
 import { OutputBubble } from './output_bubble';
 
@@ -20,11 +21,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       <EuiFlyoutBody>
         <EuiPage>
           <EuiPageBody component="div">
-            {[...Array(5).keys()]
-              .flatMap((i) => [<OutputBubble />, <InputBubble />])
-              .reduce((accu, elem) => {
-                return accu === null ? [elem] : [...accu, <EuiSpacer />, elem];
-              }, null)}
+            <ChatPageContent />
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>

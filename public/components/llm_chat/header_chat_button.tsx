@@ -5,7 +5,7 @@
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, SavedObjectsClientContract } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import chatIcon from '../../assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
@@ -17,13 +17,17 @@ interface HeaderChatButtonProps {
 }
 
 interface IChatContext {
+  appId?: string;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [appId, setAppId] = useState<string | undefined>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
+  const [input, setInput] = useState('');
+  console.log('displayName', props.navigation.ui.TopNavMenu.displayName);
 
   const prevId = useRef<string | undefined>();
   props.core.application.currentAppId$.subscribe({
@@ -36,14 +40,16 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   });
 
   return (
-    <ChatContext.Provider value={{ setFlyoutVisible }}>
+    <ChatContext.Provider
+      value={{ appId, setFlyoutVisible, savedObjectsClient: props.core.savedObjects.client }}
+    >
       <EuiHeaderSectionItemButton
         data-test-subj="llm-chat-header-button"
         onClick={() => setFlyoutVisible(!flyoutVisible)}
       >
         <EuiIcon type={chatIcon} size="l" />
       </EuiHeaderSectionItemButton>
-      {flyoutVisible ? <ChatFlyout /> : null}
+      {flyoutVisible ? <ChatFlyout input={input} setInput={setInput} /> : null}
     </ChatContext.Provider>
   );
 };

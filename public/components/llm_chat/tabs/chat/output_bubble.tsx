@@ -11,7 +11,6 @@ interface OutputBubbleProps {
 }
 
 export const OutputBubble: React.FC<OutputBubbleProps> = React.memo((props) => {
-  console.log('❗output rerender:');
   return (
     <>
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
