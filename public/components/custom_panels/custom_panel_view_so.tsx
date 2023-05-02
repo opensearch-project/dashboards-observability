@@ -209,8 +209,8 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    const check = await doesNameExist(newCustomPanelName);
-    if (await check()) {
+    const nameFlag = await doesNameExist(newCustomPanelName);
+    if (await nameFlag()) {
       setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
     } else if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
