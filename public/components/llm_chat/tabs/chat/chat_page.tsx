@@ -3,22 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiPage,
-  EuiPageBody,
-  EuiSpacer,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { ChatBubble } from './chat_bubble';
+import { ChatInputControls } from './chat_input_controls';
+import { InputBubble } from './input_bubble';
+import { OutputBubble } from './output_bubble';
 
 interface ChatPageProps {
-  conversation: object;
+  input: string;
+  setInput: (input: string) => void;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
@@ -27,32 +20,23 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       <EuiFlyoutBody>
         <EuiPage>
           <EuiPageBody component="div">
-            {[...Array(50).keys()].map((i) => {
-              return <ChatBubble i={i} />;
-            })}
+            {[...Array(5).keys()]
+              .flatMap((i) => [<OutputBubble />, <InputBubble />])
+              .reduce((accu, elem) => {
+                return accu === null ? [elem] : [...accu, <EuiSpacer />, elem];
+              }, null)}
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiSpacer />
-        <EuiFlexGroup gutterSize="m" alignItems="flexEnd" justifyContent="spaceEvenly">
-          <EuiFlexItem grow={false} />
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon size="m" iconSize="l" iconType="pin" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTextArea
-              fullWidth
-              compressed
-              placeholder="Ask me anything.."
-              style={{ height: '41px' }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon size="m" display="fill" iconType="sortRight" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} />
-        </EuiFlexGroup>
+        <ChatInputControls
+          input={props.input}
+          setInput={props.setInput}
+          onSumbit={() => {
+            props.setInput('');
+          }}
+        />
         <EuiSpacer />
       </EuiFlyoutFooter>
     </>

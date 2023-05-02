@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.llm-chat-flyout {
+  .euiFlyoutFooter {
+    background: transparent;
+  }
+}
+
 .llm-chat-tabs {
   background: #e6f0f8;
   justify-content: space-around;
@@ -12,10 +18,15 @@
   }
 
   .euiTab {
-    color: #006bb4;
+    color: $ouiLinkColor;
     &:hover,
     &:focus {
       text-decoration: none;
     }
   }
+}
+
+.llm-chat-bubble-panel.euiPanel {
+  border-radius: 8px;
+  max-width: 291px;
 }

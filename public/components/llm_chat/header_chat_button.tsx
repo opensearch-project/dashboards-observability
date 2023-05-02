@@ -31,12 +31,9 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       if (prevId.current !== id) {
         prevId.current = id;
         setAppId(id);
-        console.log('❗id:', id);
       }
     },
   });
-
-  const onClick = () => {};
 
   return (
     <ChatContext.Provider value={{ setFlyoutVisible }}>

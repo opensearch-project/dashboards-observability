@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useContext, useMemo, useState } from 'react';
 import { ChatContext } from './header_chat_button';
 import { ChatPage } from './tabs/chat/chat_page';
@@ -13,6 +13,7 @@ type TabId = 'chat' | 'compose' | 'insights' | 'history';
 export const ChatFlyout: React.FC = () => {
   const chatContext = useContext(ChatContext)!;
   const [selectedId, setSelectedId] = useState<TabId>('chat');
+  const [input, setInput] = useState('');
 
   const tabs = useMemo(
     () =>
@@ -33,15 +34,15 @@ export const ChatFlyout: React.FC = () => {
     [selectedId]
   );
 
-  const content = useMemo(() => {
-    switch (selectedId) {
-      case 'chat':
-        return <ChatPage />;
+  let content = null;
+  switch (selectedId) {
+    case 'chat':
+      content = <ChatPage input={input} setInput={setInput} />;
+      break;
 
-      default:
-        break;
-    }
-  }, [selectedId]);
+    default:
+      break;
+  }
 
   return (
     <>
