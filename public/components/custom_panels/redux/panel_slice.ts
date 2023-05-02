@@ -84,7 +84,7 @@ const normalizedPanel = (panel: CustomPanelType): CustomPanelType => ({
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
 
-const {setToast} = useToast();
+const { setToast } = useToast();
 
 /*
  ** ASYNC DISPATCH FUNCTIONS
@@ -128,7 +128,7 @@ export const fetchPanel = (id) => async (dispatch, getState) => {
   dispatch(setPanel(panel));
 };
 
-export const fetchVisualization = () => (dispatch, getState) => {};
+export const fetchVisualization = () => (dispatch, getState) => { };
 
 const updateLegacyPanel = (panel: CustomPanelType) =>
   coreRefs.http!.post(`${CUSTOM_PANELS_API_PREFIX}/panels/update`, {
@@ -141,12 +141,10 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
-export const doesNameExist = (newCustomPanelName: string) => async() => {
+export const doesNameExist = async (newCustomPanelName: string) => {
   const panels = await fetchCustomPanels();
-  if((panels.some((i: { title: string; }) => i.title === newCustomPanelName))){
-    return true;
-  }
-  return false;
+  console.log(panels);
+  return (panels.some(({ title }: {title: string}) => title === newCustomPanelName));
 }
 export const updatePanel = (panel: CustomPanelType, successMsg: string, failureMsg: string) => async (dispatch, getState) => {
   try {
@@ -158,7 +156,7 @@ export const updatePanel = (panel: CustomPanelType, successMsg: string, failureM
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
-  } catch (e) {    
+  } catch (e) {
     if (failureMsg) {
       setToast(failureMsg, 'danger')
     }
@@ -200,7 +198,7 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTit
   const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
 
   const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-  
+
   dispatch(updatePanel(updatedPanel, `Visualization ${newVisualizationTitle} successfully added!`, `Error in adding ${newVisualizationTitle} visualization to the panel`));
 };
 
@@ -218,9 +216,8 @@ const deleteLegacyPanels = (customPanelIdList: string[]) => {
 };
 
 export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispatch, getState) => {
-  const toastMessage = `Observability Dashboard${
-    panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
-  } successfully deleted!`;
+  const toastMessage = `Observability Dashboard${panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
+    } successfully deleted!`;
   try {
     const ids = panelsToDelete.map((p) => p.id);
     await Promise.all([deleteLegacyPanels(ids), deletePanelSO(ids)]);
