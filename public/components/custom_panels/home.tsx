@@ -3,17 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBreadcrumb, ShortDate } from '@elastic/eui';
+import { EuiBreadcrumb, ShortDate, htmlIdGenerator } from '@elastic/eui';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, batch } from 'react-redux';
 // eslint-disable-next-line @osd/eslint/module_migration
 import { StaticContext } from 'react-router';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
-import {
-  CUSTOM_PANELS_API_PREFIX,
-  CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-} from '../../../common/constants/custom_panels';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../common/constants/custom_panels';
 import {
   EVENT_ANALYTICS,
   observabilityLogsID,
@@ -21,14 +18,28 @@ import {
   OBSERVABILITY_BASE,
   SAVED_OBJECTS,
 } from '../../../common/constants/shared';
-import { coreRefs } from '../../framework/core_refs';
 import DSLService from '../../services/requests/dsl';
 import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { fetchPanels, uuidRx } from './redux/panel_slice';
+import { REDIRECT_TAB, TAB_CREATED_TYPE, TAB_ID_TXT_PFX } from '../../../common/constants/explorer';
+import { init as initFields } from '../event_analytics/redux/slices/field_slice';
+import { init as initPatterns } from '../event_analytics/redux/slices/patterns_slice';
+import { init as initQueryResult } from '../event_analytics/redux/slices/query_result_slice';
+import { changeQuery, init as initQuery } from '../event_analytics/redux/slices/query_slice';
+import { addTab, setSelectedQueryTab } from '../event_analytics/redux/slices/query_tab_slice';
+import {
+  createPanel,
+  createPanelSample,
+  createPanelWithVizs,
+  deletePanel,
+  fetchPanels,
+  newPanelTemplate,
+  uuidRx,
+} from './redux/panel_slice';
 import { useToast } from '../common/toast';
+import { coreRefs } from '../../framework/core_refs';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
@@ -81,7 +92,36 @@ export const Home = ({
     },
   ];
 
-  const onEditClick = (savedVisualizationId: string) => {
+  const addNewTab = async () => {
+    // get a new tabId
+    const tabId = htmlIdGenerator(TAB_ID_TXT_PFX)();
+
+    // create a new tab
+    await batch(() => {
+      dispatch(initQuery({ tabId }));
+      dispatch(initQueryResult({ tabId }));
+      dispatch(initFields({ tabId }));
+      dispatch(addTab({ tabId }));
+      dispatch(initPatterns({ tabId }));
+    });
+
+    return tabId;
+  };
+
+  const onEditClick = async (savedVisualizationId: string) => {
+    // open a new tab in explorer for loading this perticular visualization data to edit
+    const newTabId = await addNewTab();
+    batch(() => {
+      dispatch(
+        changeQuery({
+          tabId: newTabId,
+          query: {
+            [TAB_CREATED_TYPE]: REDIRECT_TAB,
+          },
+        })
+      );
+      dispatch(setSelectedQueryTab({ tabId: newTabId }));
+    });
     window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
   };
 
@@ -117,15 +157,7 @@ export const Home = ({
         .get(`${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}/addSampleSavedObjects/panels`)
         .then((resp) => (savedVisualizationIds = [...resp.savedVizIds]));
 
-      await http
-        .post(`${CUSTOM_PANELS_API_PREFIX}/panels/addSamplePanels`, {
-          body: JSON.stringify({
-            savedVisualizationIds,
-          }),
-        })
-        .then((res) => {
-          dispatch(fetchPanels());
-        });
+      dispatch(createPanelSample(savedVisualizationIds));
       setToast(`Sample panels successfully added.`);
     } catch (err: any) {
       setToast('Error adding sample panels.', 'danger');

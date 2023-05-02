@@ -47,6 +47,7 @@ import { getCustomModal } from './helpers/modal_containers';
 import {
   convertDateTime,
   isDateValid,
+  isNameValid,
   isPPLFilterValid,
   prependRecentlyUsedRange,
 } from './helpers/utils';
@@ -55,20 +56,18 @@ import { PanelGridSO } from './panel_modules/panel_grid/panel_grid_so';
 import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visualization_flyout_so';
 import {
   clonePanel,
-  createPanel,
   deletePanels,
   doesNameExist,
   fetchPanel,
-  newPanelTemplate,
+  renameCustomPanel,
   selectPanel,
   setPanel,
-  setPanelEt,
-  setPanelId,
-  setPanelSt,
   updatePanel,
 } from './redux/panel_slice';
 import { useToast } from '../common/toast';
-
+import PPLService from '../../services/requests/ppl';
+import DSLService from '../../services/requests/dsl';
+ 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
  *
@@ -84,7 +83,6 @@ import { useToast } from '../common/toast';
  * renameCustomPanel: Rename function for the panel
  * deleteCustomPanel: Delete function for the panel
  * cloneCustomPanel: Clone function for the panel
- * setToast: create Toast function
  * onEditClick: Edit function for visualization
  * startTime: Starting time
  * endTime: Ending time
@@ -128,6 +126,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   } = props;
 
   const dispatch = useDispatch();
+  const { setToast } = useToast();
 
   const panel = useSelector(selectPanel);
   const [loading, setLoading] = useState(true);
@@ -185,27 +184,17 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       timeProps.end,
       recentlyUsedRanges
     );
-    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
+    dispatch(updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }, '', ''));
 
     setRecentlyUsedRanges(updatedRanges.slice(0, 9));
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboard ${panel.title} successfully deleted!"`;
-    try {
-      await dispatch(deletePanels([panel]));
-
-      setTimeout(() => {
-        window.location.assign(`${last(parentBreadcrumbs)!.href}`);
-      }, 1000);
-    } catch (err) {
-      setToast(
-        'Error deleting Operational Panels, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body?.message || err);
-    }
+    dispatch(deletePanels([panel]));
+    setTimeout(() => {
+      window.location.assign(`${last(parentBreadcrumbs)!.href}`);
+    }, 1000);
     closeModal();
   };
 
@@ -222,21 +211,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    const newPanel = { ...panel, title: newCustomPanelName };
-    try {
-      const nameFlag = await doesNameExist(newCustomPanelName);
-      if(await nameFlag()){
-        setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
-      } else {
-        dispatch(updatePanel(newPanel));
-        setToast(`Operational Panel successfully renamed into "${newCustomPanelName}"`);
-      }
-    } catch (err) {
-      setToast(
-        'Error renaming Operational Panel, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body.message);
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Dashboard name', 'danger');
+    } else {
+      dispatch(renameCustomPanel(newCustomPanelName, panel.id));
     }
     closeModal();
   };
@@ -258,7 +236,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    dispatch(clonePanel(panel, newCustomPanelName));
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Operational Panel name', 'danger');
+    } else {
+      dispatch(clonePanel(panel, newCustomPanelName));
+    }
     closeModal();
   };
 
@@ -279,21 +261,10 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   // toggle between panel edit mode
-
-  const startEdit = () => {
-    setIsEditing(true);
-  };
-
-  const applyEdits = useCallback(() => {
-    dispatch(updatePanel(panel));
-    setIsEditing(false);
-    setEditActionType('save');
-  }, [panel]);
-
-  const cancelEdit = () => {
-    console.log('cancelEdits');
-    dispatch(fetchPanel(panelId));
-    setIsEditing(false);
+  const editPanel = (editType: string) => {
+    setIsEditing(!isEditing);
+    if (editType === 'cancel') dispatch(fetchPanel(panelId));
+    setEditActionType(editType);
   };
 
   const closeFlyout = () => {
@@ -366,7 +337,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     }
 
     if (!isPPLFilterValid(pplFilterValue, setToast)) {
-      console.log(pplFilterValue);
+      console.error(pplFilterValue);
       return;
     }
 
@@ -386,22 +357,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const cloneVisualization = (visualzationTitle: string, savedVisualizationId: string) => {
-    addVisualizationToCurrentPanel({ savedVisualizationId });
-    // http
-    //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
-    //     body: JSON.stringify({
-    //       panelId,
-    //       savedVisualizationId,
-    //     }),
-    //   })
-    //   .then(async (res) => {
-    //     setPanelVisualizations(res.visualizations);
-    //     setToast(`Visualization ${visualzationTitle} successfully added!`, 'success');
-    //   })
-    //   .catch((err) => {
-    //     setToast(`Error in adding ${visualzationTitle} visualization to the panel`, 'danger');
-    //     console.error(err);
-    //   });
+    addVisualizationToCurrentPanel({ savedVisualizationId, successMsg: `Visualization ${visualzationTitle} successfully added!`, failureMsg: `Error in adding ${visualzationTitle} visualization to the panel` });
   };
 
   const cancelButton = (
@@ -409,14 +365,14 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       data-test-subj="cancelPanelButton"
       iconType="cross"
       color="danger"
-      onClick={cancelEdit}
+      onClick={() => editPanel('cancel')}
     >
       Cancel
     </EuiButton>
   );
 
   const saveButton = (
-    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={applyEdits}>
+    <EuiButton data-test-subj="savePanelButton" iconType="save" onClick={() => editPanel('save')}>
       Save
     </EuiButton>
   );
@@ -425,7 +381,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     <EuiButton
       data-test-subj="editPanelButton"
       iconType="pencil"
-      onClick={startEdit}
+      onClick={() => editPanel('edit')}
       disabled={editDisabled}
     >
       Edit
@@ -459,9 +415,13 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   const addVisualizationToCurrentPanel = async ({
     savedVisualizationId,
     oldVisualizationId,
+    successMsg,
+    failureMsg,
   }: {
     savedVisualizationId: string;
     oldVisualizationId?: string;
+    successMsg: string;
+    failureMsg: string;
   }) => {
     const allVisualizations = panel!.visualizations;
 
@@ -472,12 +432,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
     );
 
     const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    try {
-      dispatch(updatePanel(updatedPanel));
-    } catch (err) {
-      setToast('Error adding visualization to this Dashboard', 'danger');
-      console.error(err?.body?.message || err);
-    }
+    dispatch(updatePanel(updatedPanel, successMsg, failureMsg));
   };
 
   const setPanelVisualizations = (newVis) => {
@@ -494,7 +449,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
         pplFilterValue={pplFilterValue}
         start={panel.timeRange.from}
         end={panel.timeRange.to}
-        setToast={setToast}
         http={coreRefs.http!}
         pplService={pplService}
         setPanelVisualizations={setPanelVisualizations}

@@ -182,7 +182,6 @@ export const VisaulizationFlyout = ({
           }),
         })
         .then(async (res) => {
-          console.log('addVisualization Replacement', res);
           setPanelVisualizations(res.visualizations);
           setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
         })
@@ -202,7 +201,6 @@ export const VisaulizationFlyout = ({
           }),
         })
         .then(async (res) => {
-          console.log('addVisualization New', res);
           setPanelVisualizations(res.visualizations);
           setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
         })

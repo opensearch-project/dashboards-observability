@@ -32,38 +32,33 @@ import {
   EuiToolTip,
   ShortDate,
 } from '@elastic/eui';
-import _, { isError } from 'lodash';
+import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
+import {
+  PPLResponse,
+  SavedVisualizationType,
+  VisualizationType,
+  VizContainerError,
+} from '../../../../../common/types/custom_panels';
+import { uiSettingsService } from '../../../../../common/utils';
+
+import PPLService from '../../../../services/requests/ppl';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import {
+  convertDateTime,
   displayVisualization,
   getQueryResponse,
   isDateValid,
   parseSavedVisualizations,
 } from '../../helpers/utils';
-import { convertDateTime } from '../../helpers/utils';
-import PPLService from '../../../../services/requests/ppl';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../../common/constants/custom_panels';
-import {
-  BoxType,
-  PplResponse,
-  SavedVisualizationType,
-  VisualizationType,
-  VizContainerError,
-} from '../../../../../common/types/custom_panels';
-import './visualization_flyout.scss';
-import { uiSettingsService } from '../../../../../common/utils';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
-import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
-import {
-  ObservabilitySavedObject,
-  ObservabilitySavedVisualization,
-} from '../../../../services/saved_objects/saved_object_client/types';
-import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
+import './visualization_flyout.scss';
+import { useToast } from '../../../common/toast';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -73,7 +68,6 @@ import { SAVED_VISUALIZATION } from '../../../../../common/constants/explorer';
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter
- * setToast: function to set toast in the panel
  * savedObjects: savedObjects core service
  * pplService: ppl requestor service
  * setPanelVisualizations: function set the visualization list in panel
@@ -88,12 +82,6 @@ interface VisualizationFlyoutSOProps {
   start: ShortDate;
   end: ShortDate;
   http: CoreStart['http'];
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   savedObjects: CoreStart['savedObjects'];
   pplService: PPLService;
   setPanelVisualizations: React.Dispatch<React.SetStateAction<VisualizationType[]>>;
@@ -104,22 +92,18 @@ interface VisualizationFlyoutSOProps {
 }
 
 export const VisaulizationFlyoutSO = ({
-  panelId,
   appId = '',
   pplFilterValue,
   closeFlyout,
   start,
   end,
-  http,
-  setToast,
-  savedObjects,
   pplService,
-  setPanelVisualizations,
   isFlyoutReplacement,
   replaceVisualizationId,
   addVisualizationPanel,
 }: VisualizationFlyoutSOProps) => {
   const dispatch = useDispatch();
+  const { setToast } = useToast();
 
   const panel = useSelector(selectPanel);
 
@@ -128,7 +112,7 @@ export const VisaulizationFlyoutSO = ({
   const [newVisualizationTimeField, setNewVisualizationTimeField] = useState('');
   const [previewMetaData, setPreviewMetaData] = useState<SavedVisualizationType>();
   const [pplQuery, setPPLQuery] = useState('');
-  const [previewData, setPreviewData] = useState<PplResponse>({} as PplResponse);
+  const [previewData, setPreviewData] = useState<PPLResponse>({} as PPLResponse);
   const [previewArea, setPreviewArea] = useState(<></>);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [isPreviewError, setIsPreviewError] = useState({} as VizContainerError);
@@ -173,12 +157,12 @@ export const VisaulizationFlyoutSO = ({
   };
 
   const isInputValid = () => {
-    if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast, 'left')) {
+    if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast)) {
       return false;
     }
 
     if (selectValue === '') {
-      setToast('Please make a valid selection', 'danger', undefined, 'left');
+      setToast('Please make a valid selection', 'danger', undefined);
       return false;
     }
 
@@ -189,43 +173,13 @@ export const VisaulizationFlyoutSO = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      // http
-      //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/replace`, {
-      //     body: JSON.stringify({
-      //       panelId,
-      //       savedVisualizationId: selectValue,
-      //       oldVisualizationId: replaceVisualizationId,
-      //     }),
-      //   })
-      //   .then(async (res) => {
-      //     setPanelVisualizations(res.visualizations);
-      //     setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-      //   })
-      //   .catch((err) => {
-      //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-      //     console.error(err);
-      //   });
-      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue));
+      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle));
     } else {
-      const visualizationsWithNewPanel = addVisualizationPanel({
-        savedVisualizationId: selectValue,
-      });
-
-      // http
-      //   .post(`${CUSTOM_PANELS_API_PREFIX}/visualizations`, {
-      //     body: JSON.stringify({
-      //       panelId,
-      //       savedVisualizationId: selectValue,
-      //     }),
-      //   })
-      //   .then(async (res) => {
-      //     setPanelVisualizations(res.visualizations);
-      //     setToast(`Visualization ${newVisualizationTitle} successfully added!`, 'success');
-      //   })
-      //   .catch((err) => {
-      //     setToast(`Error in adding ${newVisualizationTitle} visualization to the panel`, 'danger');
-      //     console.error(err);
-      //   });
+        const visualizationsWithNewPanel = addVisualizationPanel({
+          savedVisualizationId: selectValue,
+          onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
+          onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`
+        });
     }
     closeFlyout();
   };
@@ -253,7 +207,14 @@ export const VisaulizationFlyoutSO = ({
       content="Picker is disabled. Please edit date/time from panel"
       display="block"
     >
-      <EuiFormRow label="Panel Time Range" fullWidth>
+      <EuiFormRow
+        label="Panel Time Range"
+        fullWidth
+        isInvalid={startDate > endDate}
+        // date-picker-preview style reduces height, need to add an empty line
+        // above error message so it does not overlap with DatePicker.
+        error={['', 'Time range is invalid.']}
+      >
         <EuiDatePickerRange
           className="date-picker-preview"
           fullWidth

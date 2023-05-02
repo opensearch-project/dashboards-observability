@@ -5,18 +5,15 @@
 
 /// <reference types="cypress" />
 
+import { suppressResizeObserverIssue } from '../utils/constants';
 import {
   delay,
-  TEST_PANEL,
-  PPL_VISUALIZATIONS,
-  PPL_VISUALIZATIONS_NAMES,
   NEW_VISUALIZATION_NAME,
   PPL_FILTER,
-  SAMPLE_PANEL,
-  SAMPLE_VISUALIZATIONS_NAMES,
+  PPL_VISUALIZATIONS,
+  PPL_VISUALIZATIONS_NAMES,
+  TEST_PANEL,
 } from '../utils/panel_constants';
-
-import { suppressResizeObserverIssue } from '../utils/constants';
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for visualization paragraph', () => {
@@ -225,6 +222,34 @@ describe.only('Testing panels table', () => {
       cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
       cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
       cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards with edit', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]')
+        .closest('tr')
+        .get('span.euiToolTipAnchor > button.euiButtonIcon')
+        .eq(0)
+        .click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/edit');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards with create', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('div#createMenuPopover').click();
+      cy.get('[data-test-subj="contextMenuItem-observability-panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/create');
     });
   });
 });
@@ -533,6 +558,11 @@ describe('Clean up all test data', () => {
     cy.get('.euiTextAlign').contains('No Operational Panels').should('exist');
   });
 });
+
+const moveToOsdDashboards = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/dashboards#/`);
+  cy.wait(delay * 3);
+};
 
 const moveToEventsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);

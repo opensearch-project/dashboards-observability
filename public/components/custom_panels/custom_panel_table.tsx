@@ -137,6 +137,8 @@ export const CustomPanelTable = ({
     const nameFlag = await doesNameExist(newCustomPanelName);
     if (await nameFlag()) {
       setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
+    } else if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Dashboard name', 'danger');
     } else {
       dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
     }
@@ -166,35 +168,20 @@ export const CustomPanelTable = ({
           title: newName,
         };
 
-        await dispatch(createPanel(newPanel));
-
-        setToast(`Observability Dashboard "${newName}" successfully created!`);
+        dispatch(createPanel(newPanel));
       } catch (err) {
         setToast(
-          'Error cloning Operational Panel, please make sure you have the correct permission.',
+          'Error cloning Observability Dashboard, please make sure you have the correct permission.',
           'danger'
         );
-        console.log(err);
+        console.error(err);
       }
     }
     closeModal();
   };
 
   const onDelete = async () => {
-    const toastMessage = `Observability Dashboards ${selectedCustomPanels.length > 1 ? 's' : ' ' + selectedCustomPanels[0].title
-      } successfully deleted!`;
-
-    try {
-      await dispatch(deletePanels(selectedCustomPanels));
-      setToast(toastMessage);
-    } catch (err) {
-      setToast(
-        'Error deleting Operational Panels, please make sure you have the correct permission.',
-        'danger'
-      );
-      console.error(err.body?.message || err);
-    }
-
+    dispatch(deletePanels(selectedCustomPanels));
     closeModal();
   };
 
@@ -356,7 +343,6 @@ export const CustomPanelTable = ({
     },
   ] as Array<EuiTableFieldDataColumnType<CustomPanelListType>>;
 
-  // console.log('rendering', { customPanels, selectedCustomPanels });
   return (
     <div style={pageStyles}>
       <EuiPage>
