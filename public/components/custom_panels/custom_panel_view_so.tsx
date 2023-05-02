@@ -126,7 +126,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   } = props;
 
   const dispatch = useDispatch();
-  const { setToast } = useToast();
 
   const panel = useSelector(selectPanel);
   const [loading, setLoading] = useState(true);

@@ -255,6 +255,7 @@ export const createPanel = (panel) => async (dispatch, getState) => {
     );
     console.error(e);
   }
+}
 
 export const createPanelSample = (vizIds) => async (dispatch, getState) => {
   const samplePanel = {
