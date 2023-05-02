@@ -50,6 +50,7 @@ import { DeleteModal } from '../common/helpers/delete_modal';
 import {
   createPanel,
   deletePanels,
+  doesNameExist,
   fetchPanels,
   isUuid,
   newPanelTemplate,
@@ -120,7 +121,10 @@ export const CustomPanelTable = ({
   };
 
   const onCreate = async (newCustomPanelName: string) => {
-    if (!isNameValid(newCustomPanelName)) {
+    const nameFlag = await doesNameExist(newCustomPanelName);
+    if (await nameFlag()) {
+      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
+    } else if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
       const newPanel = newPanelTemplate(newCustomPanelName);
@@ -130,7 +134,10 @@ export const CustomPanelTable = ({
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    if (!isNameValid(newCustomPanelName)) {
+    const nameFlag = await doesNameExist(newCustomPanelName);
+    if (await nameFlag()) {
+      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
+    } else if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
       dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
