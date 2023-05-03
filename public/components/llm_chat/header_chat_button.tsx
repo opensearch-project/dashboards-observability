@@ -17,14 +17,17 @@ interface HeaderChatButtonProps {
 }
 
 interface IChatContext {
-  appId?: string;
-  setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   savedObjectsClient: SavedObjectsClientContract;
+  setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  appId?: string;
+  chatId?: string;
+  setChatId: (chatId: string) => void;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
-  const [appId, setAppId] = useState<string | undefined>();
+  const [appId, setAppId] = useState<string>();
+  const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [input, setInput] = useState('');
   console.log('displayName', props.navigation.ui.TopNavMenu.displayName);
@@ -41,7 +44,13 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
 
   return (
     <ChatContext.Provider
-      value={{ appId, setFlyoutVisible, savedObjectsClient: props.core.savedObjects.client }}
+      value={{
+        savedObjectsClient: props.core.savedObjects.client,
+        setFlyoutVisible,
+        appId,
+        chatId,
+        setChatId,
+      }}
     >
       <EuiHeaderSectionItemButton
         data-test-subj="llm-chat-header-button"

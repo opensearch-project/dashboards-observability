@@ -4,7 +4,8 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
-import React from 'react';
+import autosize from 'autosize';
+import React, { useEffect, useRef } from 'react';
 
 interface ChatInputControlsProps {
   input: string;
@@ -13,6 +14,11 @@ interface ChatInputControlsProps {
 }
 
 export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    autosize(inputRef.current);
+  }, []);
+
   return (
     <>
       <EuiFlexGroup gutterSize="m" alignItems="flexEnd" justifyContent="spaceEvenly">
@@ -23,11 +29,18 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         <EuiFlexItem>
           <EuiTextArea
             fullWidth
+            rows={1}
             compressed
-            placeholder="Ask me anything.."
-            style={{ height: '41px' }}
+            placeholder="Ask me anything..."
             value={props.input}
             onChange={(e) => props.setInput(e.target.value)}
+            inputRef={inputRef}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                props.onSumbit();
+              }
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

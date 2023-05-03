@@ -4,23 +4,34 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { useGetConversation } from '../../hooks/use_get_conversation';
+import React, { useEffect, useRef } from 'react';
+import { IConversation } from '../../types';
 import { InputBubble } from './input_bubble';
 import { OutputBubble } from './output_bubble';
 
-interface ChatPageContentProps {}
+interface ChatPageContentProps {
+  localConversations: IConversation[];
+}
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = (props) => {
-  console.log('❗page content rerender:');
-  const { conversation, loading, error } = useGetConversation()
+  const pageEndRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    pageEndRef.current?.scrollIntoView();
+  }, []);
+
   return (
     <>
-      {[...Array(1).keys()]
-        .flatMap((i) => [<OutputBubble />, <InputBubble />])
-        .reduce((accu, elem) => {
-          return accu === null ? [elem] : [...accu, <EuiSpacer />, elem];
-        }, null)}
+      {props.localConversations
+        .map((conversation) => {
+          switch (conversation.type) {
+            case 'input':
+              return <InputBubble input={conversation.content} />;
+            case 'output':
+              return <OutputBubble output={conversation.content} />;
+          }
+        })
+        .reduce((accu: React.ReactNode[], elem) => [...accu, <EuiSpacer />, elem], [])}
+      <div ref={pageEndRef} />
     </>
   );
 };

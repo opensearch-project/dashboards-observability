@@ -7,7 +7,7 @@ import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elasti
 import React from 'react';
 
 interface OutputBubbleProps {
-  input: string;
+  output: string;
 }
 
 export const OutputBubble: React.FC<OutputBubbleProps> = React.memo((props) => {
@@ -25,9 +25,7 @@ export const OutputBubble: React.FC<OutputBubbleProps> = React.memo((props) => {
             hasBorder
             className="llm-chat-bubble-panel llm-chat-bubble-panel-output"
           >
-            <EuiText style={{ whiteSpace: 'pre-line' }}>
-              Welcome back! What would you like to chat about?
-            </EuiText>
+            <EuiText style={{ whiteSpace: 'pre-line' }}>{props.output}</EuiText>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

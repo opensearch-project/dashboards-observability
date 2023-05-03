@@ -22,7 +22,7 @@ export const InputBubble: React.FC<InputBubbleProps> = React.memo((props) => {
             hasBorder
             className="llm-chat-bubble-panel llm-chat-bubble-panel-input"
           >
-            <EuiText style={{ whiteSpace: 'pre-line' }}>Thanks! What’s new?</EuiText>
+            <EuiText style={{ whiteSpace: 'pre-line' }}>{props.input}</EuiText>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

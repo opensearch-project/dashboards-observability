@@ -5,15 +5,14 @@
 
 import { SavedObjectAttributes } from '../../../../../src/core/types';
 
-export interface ChatConversation extends SavedObjectAttributes {
+export interface IChat extends SavedObjectAttributes {
   title: string;
-  description: string;
   version: number;
   createdTimeMs: number;
-  statements: Statement[];
+  conversations: IConversation[];
 }
 
-export interface Statement extends SavedObjectAttributes {
+export interface IConversation extends SavedObjectAttributes {
   type: 'input' | 'output';
   content: string;
 }
