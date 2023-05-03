@@ -11,6 +11,7 @@ interface ChatInputControlsProps {
   input: string;
   setInput: (input: string) => void;
   onSumbit: () => void;
+  disabled: boolean;
 }
 
 export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
@@ -31,20 +32,28 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             fullWidth
             rows={1}
             compressed
+            autoFocus
             placeholder="Ask me anything..."
             value={props.input}
             onChange={(e) => props.setInput(e.target.value)}
             inputRef={inputRef}
+            style={{ minHeight: 40 }}
             onKeyPress={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                props.onSumbit();
+                if (!props.disabled) props.onSumbit();
               }
             }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon size="m" display="fill" iconType="sortRight" onClick={props.onSumbit} />
+          <EuiButtonIcon
+            size="m"
+            display="fill"
+            iconType="sortRight"
+            onClick={props.onSumbit}
+            isDisabled={props.disabled}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
       </EuiFlexGroup>

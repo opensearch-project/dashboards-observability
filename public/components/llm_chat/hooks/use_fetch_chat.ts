@@ -38,6 +38,7 @@ export const useFetchChat = () => {
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
+    console.log('❗chatId:', chatContext.chatId);
     dispatch({ type: 'request' });
     if (!chatContext.chatId) {
       dispatch({ type: 'success', payload: undefined });

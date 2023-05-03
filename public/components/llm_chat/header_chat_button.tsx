@@ -5,7 +5,7 @@
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
-import { CoreStart, SavedObjectsClientContract } from '../../../../../src/core/public';
+import { CoreStart, HttpStart, SavedObjectsClientContract } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import chatIcon from '../../assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
@@ -17,11 +17,12 @@ interface HeaderChatButtonProps {
 }
 
 interface IChatContext {
+  http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   appId?: string;
   chatId?: string;
-  setChatId: (chatId: string) => void;
+  setChatId: (chatId?: string) => void;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
@@ -30,7 +31,6 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [input, setInput] = useState('');
-  console.log('displayName', props.navigation.ui.TopNavMenu.displayName);
 
   const prevId = useRef<string | undefined>();
   props.core.application.currentAppId$.subscribe({
@@ -45,6 +45,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   return (
     <ChatContext.Provider
       value={{
+        http: props.core.http,
         savedObjectsClient: props.core.savedObjects.client,
         setFlyoutVisible,
         appId,

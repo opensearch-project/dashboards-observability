@@ -10,18 +10,13 @@
   .euiPage {
     background: transparent;
   }
-  // .euiFlyoutBody__overflow {
-  //   position: relative;
-  // }
-  // .euiFlyoutBody__overflowContent {
-  //   position: absolute;
-  //   bottom: 0px;
-  //   width: 100%;
-  // }
+}
+
+.llm-chat-flyout-header {
+  background: #e6f0f8;
 }
 
 .llm-chat-tabs {
-  background: #e6f0f8;
   justify-content: space-around;
 
   .euiTab-isSelected {
@@ -49,4 +44,25 @@
 .llm-chat-bubble-panel.llm-chat-bubble-panel-output {
   background: #e6f0f8;
   border-color: white;
+}
+
+.llm-chat-suggestion-card-panel.euiPanel {
+  width: 357px;
+  background: #f2f4f7;
+  border-color: white;
+  border-radius: 18px;
+  .llm-chat-suggestion-card-panel-title {
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 48px;
+    letter-spacing: -1px;
+    text-align: center;
+  }
+}
+
+.llm-chat-suggestion-header {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -1px;
 }

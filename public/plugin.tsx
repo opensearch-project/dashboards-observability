@@ -77,14 +77,12 @@ export class ObservabilityPlugin
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
   ): ObservabilitySetup {
-    console.log('❗setup:');
     uiSettingsService.init(core.uiSettings, core.notifications);
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
     setPPLService(pplService);
     setOSDHttp(core.http);
     core.getStartServices().then(([coreStart]) => {
-      console.log('❗getStartServices0:');
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
 
@@ -127,7 +125,6 @@ export class ObservabilityPlugin
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
-      console.log('❗getStartServices:');
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
