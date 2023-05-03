@@ -16,7 +16,7 @@ interface ChatInputControlsProps {
 export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    autosize(inputRef.current);
+    if (inputRef.current) autosize(inputRef.current);
   }, []);
 
   return (

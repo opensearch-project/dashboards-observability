@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@cypress/skip-test": "^2.6.1",
+    "@types/autosize": "^4.0.1",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/react-plotly.js": "^2.5.0",
     "@types/react-test-renderer": "^16.9.1",
