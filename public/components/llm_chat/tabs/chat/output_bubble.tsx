@@ -15,7 +15,7 @@ export const OutputBubble: React.FC<OutputBubbleProps> = React.memo((props) => {
     <>
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiAvatar name="llm" size="l" iconType="managementApp" color="plain" />
+          <EuiAvatar name="llm" size="l" iconType="managementApp" color="#e9edf3" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel

@@ -41,3 +41,12 @@
   border-radius: 8px;
   max-width: 291px;
 }
+
+.llm-chat-bubble-panel.llm-chat-bubble-panel-input {
+  background: #57c3ff;
+  border-color: white;
+}
+.llm-chat-bubble-panel.llm-chat-bubble-panel-output {
+  background: #e6f0f8;
+  border-color: white;
+}

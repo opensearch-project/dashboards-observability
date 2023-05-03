@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
+import userAvatar from '../../../../assets/user_avatar.svg';
 
 interface InputBubbleProps {
   input: string;
@@ -26,7 +27,7 @@ export const InputBubble: React.FC<InputBubbleProps> = React.memo((props) => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiAvatar name="llm" size="l" iconType="managementApp" color="plain" />
+          <EuiAvatar name="user" size="l" iconType={userAvatar} color="#e9edf3" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
