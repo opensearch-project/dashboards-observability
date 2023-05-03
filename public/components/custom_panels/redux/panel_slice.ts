@@ -143,7 +143,6 @@ export const isUuid = (id) => !!id.match(uuidRx);
 
 export const doesNameExist = async (newCustomPanelName: string) => {
   const panels = await fetchCustomPanels();
-  console.log(panels);
   return (panels.some(({ title }: {title: string}) => title === newCustomPanelName));
 }
 export const updatePanel = (panel: CustomPanelType, successMsg: string, failureMsg: string) => async (dispatch, getState) => {

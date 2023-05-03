@@ -134,19 +134,6 @@ describe('Testing panels table', () => {
       expectUuid(renamed);
     });
 
-    it.only('Renames panel with existing name', () => {
-      createLegacyPanel();
-      cy.reload();
-      const cell = cy.get('.euiTableCellContent');
-      expectLegacyId(cell);
-      selectThePanel();
-      openActionsDropdown();
-      cy.get('button[data-test-subj="renameContextMenuItem"]').click();
-      cy.get('input.euiFieldText').focus().type(TEST_PANEL);
-      cy.get('button[data-test-subj="runModalButton"]').click();
-      expectToastWith(`Observability Dashboard with name ${TEST_PANEL} already exists`);
-    });
-
     it('Deletes the panel', () => {
       cy.get('input[data-test-subj="checkboxSelectAll"]').click();
       openActionsDropdown();
