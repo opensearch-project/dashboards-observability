@@ -22,7 +22,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useContext(ChatContext)!;
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [localConversations, setLocalConversations] = useState<IConversation[]>([]);
-  const { chat, loading, error } = useGetChat();
+  const { data: chat, loading, error } = useGetChat();
   const { send, loading: llmResponding, error: llmError } = useChatActions();
 
   useEffect(() => {

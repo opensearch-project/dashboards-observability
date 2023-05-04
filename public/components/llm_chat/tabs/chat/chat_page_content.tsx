@@ -26,7 +26,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const pageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     pageEndRef.current?.scrollIntoView();
-  }, [props.localConversations]);
+  }, [props.localConversations, props.llmResponding]);
 
   if (props.loading && !props.localConversations.length) {
     return <LoadingButton />;

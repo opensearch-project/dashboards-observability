@@ -5,12 +5,10 @@
 
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
-import { SimpleSavedObject } from '../../../../../src/core/public';
-import { CHAT_SAVED_OBJECT } from '../../../common/types/observability_saved_object_attributes';
 import { ChatTabBar, TabId } from './components/chat_tab_bar';
 import { ChatContext } from './header_chat_button';
 import { ChatPage } from './tabs/chat/chat_page';
-import { IChat } from './types';
+import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
 interface ChatFlyoutProps {
   input: string;
@@ -22,13 +20,6 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   const chatContext = useContext(ChatContext)!;
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
 
-  const [chats, setChats] = useState<Array<SimpleSavedObject<IChat>>>([]);
-  useEffect(() => {
-    chatContext.savedObjectsClient
-      .find<IChat>({ type: CHAT_SAVED_OBJECT })
-      .then((response) => setChats(response.savedObjects));
-  }, []);
-
   let content = null;
   switch (selectedTabId) {
     case 'chat':
@@ -36,21 +27,16 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
       break;
 
     case 'history':
-      content = chats.map((chat) => (
-        <button
-          onClick={() => {
-            console.log(chat.id);
-            chatContext.setChatId(chat.id);
-            setSelectedTabId('chat');
-          }}
-        >
-          {chat.attributes.title}
-        </button>
-      ));
+      content = <ChatHistoryPage />;
+      break;
 
     default:
       break;
   }
+
+  useEffect(() => {
+    setSelectedTabId('chat');
+  }, [chatContext.chatId]);
 
   return (
     <>
