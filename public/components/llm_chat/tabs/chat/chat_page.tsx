@@ -5,14 +5,12 @@
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
-import { LoadingButton } from '../../components/loading_button';
 import { ChatContext } from '../../header_chat_button';
 import { useChatActions } from '../../hooks/use_chat_actions';
-import { useFetchChat } from '../../hooks/use_fetch_chat';
+import { useGetChat } from '../../hooks/use_get_chat';
 import { IConversation } from '../../types';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
-import { ChatPageSuggestions } from './chat_page_suggestions';
 
 interface ChatPageProps {
   input: string;
@@ -20,10 +18,11 @@ interface ChatPageProps {
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
+  console.count('❗chat page rerender');
   const chatContext = useContext(ChatContext)!;
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [localConversations, setLocalConversations] = useState<IConversation[]>([]);
-  const { chat, loading, error } = useFetchChat();
+  const { chat, loading, error } = useGetChat();
   const { send, loading: llmResponding, error: llmError } = useChatActions();
 
   useEffect(() => {
@@ -46,30 +45,20 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     setLocalConversations((prev) => [...prev, output]);
   };
 
-  let pageContent;
-  if (loading && !localConversations.length) {
-    pageContent = <LoadingButton />;
-  } else if (error) {
-    pageContent = <div>error: {error.message}</div>;
-  } else {
-    pageContent = (
-      <ChatPageContent
-        localConversations={localConversations}
-        llmResponding={llmResponding}
-        llmError={llmError}
-      />
-    );
-  }
-
   return (
     <>
       <EuiFlyoutBody>
         <EuiPage>
           <EuiPageBody component="div" className="llm-chat-page-body">
-            {showSuggestions && (
-              <ChatPageSuggestions closeSuggestions={() => setShowSuggestions(false)} />
-            )}
-            {pageContent}
+            <ChatPageContent
+              showSuggestions={showSuggestions}
+              setShowSuggestions={setShowSuggestions}
+              localConversations={localConversations}
+              loading={loading}
+              error={error}
+              llmResponding={llmResponding}
+              llmError={llmError}
+            />
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>

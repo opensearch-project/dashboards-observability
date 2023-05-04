@@ -20,43 +20,42 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     if (inputRef.current) autosize(inputRef.current);
   }, []);
 
+  useEffect(() => {
+    if (props.input.length === 0 && inputRef.current) inputRef.current.style.height = '40px';
+  }, [props.input]);
+
   return (
-    <>
-      <EuiFlexGroup gutterSize="m" alignItems="flexEnd" justifyContent="spaceEvenly">
-        <EuiFlexItem grow={false} />
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon size="m" iconSize="l" iconType="pin" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTextArea
-            fullWidth
-            rows={1}
-            compressed
-            autoFocus
-            placeholder="Ask me anything..."
-            value={props.input}
-            onChange={(e) => props.setInput(e.target.value)}
-            inputRef={inputRef}
-            style={{ minHeight: 40 }}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (!props.disabled) props.onSumbit();
-              }
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            size="m"
-            display="fill"
-            iconType="sortRight"
-            onClick={props.onSumbit}
-            isDisabled={props.disabled}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} />
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup gutterSize="m" alignItems="flexEnd" justifyContent="spaceEvenly">
+      <EuiFlexItem grow={false} />
+      <EuiFlexItem>
+        <EuiTextArea
+          fullWidth
+          rows={1}
+          compressed
+          autoFocus
+          placeholder="Ask me anything..."
+          value={props.input}
+          onChange={(e) => props.setInput(e.target.value)}
+          inputRef={inputRef}
+          style={{ minHeight: 40 }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              if (!props.disabled) props.onSumbit();
+            }
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          size="m"
+          display="fill"
+          iconType="sortRight"
+          onClick={props.onSumbit}
+          isDisabled={props.disabled}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} />
+    </EuiFlexGroup>
   );
 };

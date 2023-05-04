@@ -11,6 +11,7 @@ interface OutputBubbleProps {
 }
 
 export const OutputBubble: React.FC<OutputBubbleProps> = React.memo((props) => {
+  console.count('❗output bubble rerender:');
   return (
     <>
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">

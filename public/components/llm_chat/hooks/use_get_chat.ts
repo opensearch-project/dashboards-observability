@@ -9,18 +9,18 @@ import { CHAT_SAVED_OBJECT } from '../../../../common/types/observability_saved_
 import { ChatContext } from '../header_chat_button';
 import { IChat } from '../types';
 
-interface FetchChatState {
+interface State {
   chat?: SimpleSavedObject<IChat>;
   loading: boolean;
   error?: Error;
 }
 
-type FetchChatAction =
+type Action =
   | { type: 'request' }
-  | { type: 'success'; payload: FetchChatState['chat'] }
-  | { type: 'failure'; error: Required<FetchChatState['error']> };
+  | { type: 'success'; payload: State['chat'] }
+  | { type: 'failure'; error: Required<State['error']> };
 
-const reducer: Reducer<FetchChatState, FetchChatAction> = (state, action) => {
+const reducer: Reducer<State, Action> = (state, action) => {
   switch (action.type) {
     case 'request':
       return { loading: true };
@@ -33,7 +33,7 @@ const reducer: Reducer<FetchChatState, FetchChatAction> = (state, action) => {
   }
 };
 
-export const useFetchChat = () => {
+export const useGetChat = () => {
   const chatContext = useContext(ChatContext)!;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 

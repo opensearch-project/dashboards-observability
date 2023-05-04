@@ -16,18 +16,23 @@ export const useChatActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
-  const send = async (localConversations: IConversation[], input: IConversation) => {
+  const requestLLM = async (input: IConversation) => {
+    setLoading(true);
     if (input.type !== 'input') throw Error('Conversation sent must be user input.');
 
-    setLoading(true);
-    const response = await new Promise((resolve) => setTimeout(resolve, 500)).then(() =>
-      new Date().toString()
-    );
+    const response = new Date().toString();
     const output: IConversation = {
       type: 'output',
       content: response,
     };
+    setLoading(false);
+    return output;
+  };
 
+  const send = async (localConversations: IConversation[], input: IConversation) => {
+    const output = await requestLLM(input);
+
+    setLoading(true);
     try {
       if (!chatContext.chatId) {
         const createResponse = await chatContext.savedObjectsClient.create<IChat>(
@@ -58,5 +63,5 @@ export const useChatActions = () => {
     return output;
   };
 
-  return { send, loading, error };
+  return { send, requestLLM, loading, error };
 };

@@ -20,6 +20,7 @@ interface ChatPageSuggestionsProps {
 }
 
 export const ChatPageSuggestions: React.FC<ChatPageSuggestionsProps> = (props) => {
+  console.count('❗suggestions rerender');
   const suggestions = [
     {
       title: 'example',
