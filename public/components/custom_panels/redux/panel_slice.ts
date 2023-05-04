@@ -29,6 +29,7 @@ import {
   addVisualizationPanel,
 } from '../helpers/add_visualization_helper';
 import { useToast } from '../../../../public/components/common/toast';
+import { htmlIdGenerator } from '@elastic/eui';
 
 interface InitialState {
   id: string;
@@ -257,7 +258,7 @@ export const createPanelSample = (vizIds) => async (dispatch, getState) => {
     ...createDemoPanel(vizIds),
     dateCreated: new Date().getTime(),
     dateModified: new Date().getTime(),
-    title: samplePanelName,
+    title: htmlIdGenerator(samplePanelName)(),
   };
   const newSOPanel = await savedObjectPanelsClient.create(samplePanel);
   const newPanel = savedObjectToCustomPanel(newSOPanel);
