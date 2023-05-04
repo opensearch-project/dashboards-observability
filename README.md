@@ -75,7 +75,7 @@ Observability is collection of plugins and applications that let you visualize d
 
 ## Plugin Components
 
-The Dashboards Observability plugin has four components: Trace Analytics, Event Analytics, Operational Panels, and Notebooks.
+The Dashboards Observability plugin has four components: Trace Analytics, Event Analytics, Observability Dashboards, and Notebooks.
 
 ### Trace Analytics
 
@@ -93,9 +93,9 @@ Additionally the fields can be sorted and filtered.
 
 Event Analytics allows user to monitor, correlate, analyze and visualize machine generated data through [Piped Processing Language](https://opensearch.org/docs/latest/observability-plugins/ppl/index/). It also enables the user to turn data-driven events into visualizations and save frequently used ones for quick access.
 
-### Operational Panels
+### Observability Dashboards
 
-Operational panels provides the users to create and view different visualizations on ingested observability data, using Piped Processing Language queries. Use PPL 'where clauses' and datetime timespans to filter all visualizations in the panel.
+Observability Dashboards provides the users to create and view different visualizations on ingested observability data, using Piped Processing Language queries. Use PPL 'where clauses' and datetime timespans to filter all visualizations in the dashboard.
 
 ### Notebooks
 
