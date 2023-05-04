@@ -20,6 +20,7 @@ import { useBulkGetChat } from '../../hooks/use_get_chat';
 import { IChat } from '../../types';
 
 export const ChatHistoryPage: React.FC = () => {
+  console.count('❗ChatHistoryPage rerender');
   const chatContext = useContext(ChatContext)!;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

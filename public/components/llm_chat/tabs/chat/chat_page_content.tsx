@@ -7,7 +7,7 @@ import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 import { LoadingButton } from '../../components/loading_button';
 import { IConversation } from '../../types';
-import { ChatPageSuggestions } from './chat_page_suggestions';
+import { ChatPageGreetings } from './chat_page_greetings';
 import { ConversationBubble } from './conversation_bubble';
 import { ConversationContent } from './conversation_content';
 
@@ -44,7 +44,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   return (
     <>
       {props.showSuggestions && (
-        <ChatPageSuggestions closeSuggestions={() => props.setShowSuggestions(false)} />
+        <ChatPageGreetings closeSuggestions={() => props.setShowSuggestions(false)} />
       )}
       {props.localConversations
         .map((conversation) => (

@@ -34,16 +34,17 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   }, [chat]);
 
   const onSubmit = async () => {
-    if (!props.input) return;
+    const userInput = props.input.trim();
+    if (!userInput) return;
     const input: IConversation = {
       type: 'input',
-      content: props.input,
+      content: userInput,
       contentType: 'text',
     };
     setLocalConversations((prev) => [...prev, input]);
     props.setInput('');
-    const output = await send(localConversations, input);
-    setLocalConversations((prev) => [...prev, output]);
+    const outputs = await send(localConversations, input);
+    setLocalConversations((prev) => [...prev, ...outputs]);
   };
 
   return (

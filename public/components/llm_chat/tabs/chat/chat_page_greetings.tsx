@@ -15,11 +15,11 @@ import React from 'react';
 import chatIcon from '../../../../assets/chat.svg';
 import { SuggestionCard } from '../../components/suggestion_card';
 
-interface ChatPageSuggestionsProps {
+interface ChatPageGreetingsProps {
   closeSuggestions: () => void;
 }
 
-export const ChatPageSuggestions: React.FC<ChatPageSuggestionsProps> = (props) => {
+export const ChatPageGreetings: React.FC<ChatPageGreetingsProps> = (props) => {
   console.count('❗suggestions rerender');
   const suggestions = [
     {

@@ -7,7 +7,9 @@ import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
+import { SavedVisualization } from '../../../../../common/types/explorer';
 import { uiSettingsService } from '../../../../../common/utils';
+import { SavedObjectVisualization } from '../../../visualizations/saved_object_visualization';
 import { ChatContext } from '../../header_chat_button';
 import { IConversation } from '../../types';
 
@@ -47,6 +49,27 @@ export const ConversationContent: React.FC<ConversationContentProps> = React.mem
             onInputUpdated={setVisInput}
           />
         </>
+      );
+
+    case 'ppl_visualization':
+      const savedVisualization: SavedVisualization = {
+        query: props.conversation.content,
+        selected_date_range: { start: 'now-15m', end: 'now', text: '' },
+        selected_timestamp: { name: 'timestamp', type: 'timestamp' },
+        selected_fields: { tokens: [], text: '' },
+        name: 'Flight count by destination',
+        description: '',
+        type: 'bar',
+        sub_type: 'visualization',
+      };
+      return (
+        <SavedObjectVisualization
+          savedVisualization={savedVisualization}
+          timeRange={{
+            from: savedVisualization.selected_date_range.start,
+            to: savedVisualization.selected_date_range.end,
+          }}
+        />
       );
 
     default:

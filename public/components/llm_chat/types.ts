@@ -14,6 +14,9 @@ export interface IChat extends SavedObjectAttributes {
 
 export interface IConversation extends SavedObjectAttributes {
   type: 'input' | 'output';
-  contentType: 'text' | 'markdown' | 'visualization';
+  contentType: 'text' | 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
+  suggestedActions?: ISuggestedAction[];
 }
+
+type ISuggestedAction = SavedObjectAttributes;
