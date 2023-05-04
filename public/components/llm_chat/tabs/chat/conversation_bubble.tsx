@@ -37,7 +37,7 @@ export const ConversationBubble: React.FC<ConversationBubbleProps> = React.memo(
   }
 
   if (props.contentType === 'visualization') {
-    return props.children;
+    return <>{props.children}</>;
   }
 
   return (

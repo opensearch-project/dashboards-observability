@@ -63,11 +63,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
         onClose={() => chatContext.setFlyoutVisible(false)}
       >
         <EuiFlyoutHeader className="llm-chat-flyout-header">
-          <ChatTabBar
-            selectedTabId={selectedTabId}
-            setSelectedTabId={setSelectedTabId}
-            setChatId={chatContext.setChatId}
-          />
+          <ChatTabBar selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} />
         </EuiFlyoutHeader>
         {content}
       </EuiFlyout>

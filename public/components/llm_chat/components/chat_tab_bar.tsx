@@ -13,19 +13,19 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { ChatContext } from '../header_chat_button';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history';
 
 interface ChatTabBarProps {
   selectedTabId: TabId;
   setSelectedTabId: (selectedTabId: TabId) => void;
-  // chatContext causes rerender without context change, passing in setChatId directly to avoid it
-  setChatId: (chatId?: string) => void;
 }
 
 export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
   console.count('❗tab bar rerender ' + props.selectedTabId);
+  const chatContext = useContext(ChatContext)!;
   const [isOpen, setIsOpen] = useState(false);
   const tabs = ([
     { id: 'chat', name: 'Chat' },
@@ -47,7 +47,7 @@ export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
       key="new_chat"
       onClick={() => {
         setIsOpen(false);
-        props.setChatId(undefined);
+        chatContext.setChatId(undefined);
         props.setSelectedTabId('chat');
       }}
     >
