@@ -20,9 +20,13 @@ interface ChatPageProps {
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
   console.count('❗chat page rerender');
   const chatContext = useContext(ChatContext)!;
-  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [showGreetings, setShowGreetings] = useState(true);
   const [localConversations, setLocalConversations] = useState<IConversation[]>([]);
-  const { data: chat, loading, error } = useGetChat();
+  const {
+    data: chat,
+    loading: conversationLoading,
+    error: conversationLoadingError,
+  } = useGetChat();
   const { send, loading: llmResponding, error: llmError } = useChatActions();
 
   useEffect(() => {
@@ -53,11 +57,11 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         <EuiPage>
           <EuiPageBody component="div" className="llm-chat-page-body">
             <ChatPageContent
-              showSuggestions={showSuggestions}
-              setShowSuggestions={setShowSuggestions}
+              showGreetings={showGreetings}
+              setShowGreetings={setShowGreetings}
               localConversations={localConversations}
-              loading={loading}
-              error={error}
+              conversationLoading={conversationLoading}
+              conversationLoadingError={conversationLoadingError}
               llmResponding={llmResponding}
               llmError={llmError}
             />
@@ -67,7 +71,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       <EuiFlyoutFooter>
         <EuiSpacer />
         <ChatInputControls
-          disabled={loading || llmResponding}
+          disabled={conversationLoading || llmResponding}
           input={props.input}
           setInput={props.setInput}
           onSumbit={onSubmit}

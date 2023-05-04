@@ -46,12 +46,12 @@
   border-color: white;
 }
 
-.llm-chat-suggestion-card-panel.euiPanel {
+.llm-chat-greeting-card-panel.euiPanel {
   width: 357px;
   background: #f2f4f7;
   border-color: white;
   border-radius: 18px;
-  .llm-chat-suggestion-card-panel-title {
+  .llm-chat-greeting-card-panel-title {
     font-family: Inter;
     font-size: 12px;
     font-weight: 700;
@@ -61,7 +61,7 @@
   }
 }
 
-.llm-chat-suggestion-header {
+.llm-chat-greeting-header {
   font-size: 24px;
   font-weight: 500;
   letter-spacing: -1px;

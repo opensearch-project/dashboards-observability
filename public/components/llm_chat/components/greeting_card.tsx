@@ -6,18 +6,18 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 
-interface SuggestionCardProps {
+interface GreetingCardProps {
   title: string;
 }
 
-export const SuggestionCard: React.FC<SuggestionCardProps> = (props) => {
+export const GreetingCard: React.FC<GreetingCardProps> = (props) => {
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiPanel className="llm-chat-suggestion-card-panel">
+        <EuiPanel className="llm-chat-greeting-card-panel">
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText className="llm-chat-suggestion-card-panel-title">
+              <EuiText className="llm-chat-greeting-card-panel-title">
                 {props.title.toUpperCase()}
               </EuiText>
             </EuiFlexItem>

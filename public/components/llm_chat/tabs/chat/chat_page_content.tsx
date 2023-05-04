@@ -12,11 +12,11 @@ import { ConversationBubble } from './conversation_bubble';
 import { ConversationContent } from './conversation_content';
 
 interface ChatPageContentProps {
-  showSuggestions: boolean;
-  setShowSuggestions: (showSuggestions: boolean) => void;
+  showGreetings: boolean;
+  setShowGreetings: (showGreetings: boolean) => void;
   localConversations: IConversation[];
-  loading: boolean;
-  error?: Error;
+  conversationLoading: boolean;
+  conversationLoadingError?: Error;
   llmResponding: boolean;
   llmError?: Error;
 }
@@ -28,24 +28,22 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     pageEndRef.current?.scrollIntoView();
   }, [props.localConversations, props.llmResponding]);
 
-  if (props.loading && !props.localConversations.length) {
+  if (props.conversationLoading && !props.localConversations.length) {
     return <LoadingButton />;
-  } else if (props.error) {
+  } else if (props.conversationLoadingError) {
     return (
       <EuiEmptyPrompt
         iconType="alert"
         iconColor="danger"
         title={<h2>Error loading chat history</h2>}
-        body={props.error.message}
+        body={props.conversationLoadingError.message}
       />
     );
   }
 
   return (
     <>
-      {props.showSuggestions && (
-        <ChatPageGreetings closeSuggestions={() => props.setShowSuggestions(false)} />
-      )}
+      {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {props.localConversations
         .map((conversation) => (
           <ConversationBubble type={conversation.type} contentType={conversation.contentType}>

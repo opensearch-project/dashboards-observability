@@ -16,7 +16,7 @@ export const useChatActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
-  const requestLLM = async (input: IConversation): IConversation[] => {
+  const requestLLM = async (input: IConversation) => {
     if (input.type !== 'input') throw Error('Conversation sent must be user input.');
     setLoading(true);
 
