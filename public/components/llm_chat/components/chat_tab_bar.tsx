@@ -63,7 +63,12 @@ export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
-            <EuiButtonIcon size="m" iconType="boxesVertical" onClick={() => setIsOpen(!isOpen)} />
+            <EuiButtonIcon
+              aria-label="menu"
+              size="m"
+              iconType="boxesVertical"
+              onClick={() => setIsOpen(!isOpen)}
+            />
           }
           isOpen={isOpen}
           closePopover={() => setIsOpen(false)}

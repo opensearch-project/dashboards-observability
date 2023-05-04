@@ -48,6 +48,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
+          aria-label="send"
           size="m"
           display="fill"
           iconType="sortRight"

@@ -49,7 +49,12 @@ export const ChatPageSuggestions: React.FC<ChatPageSuggestionsProps> = (props) =
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon color="text" onClick={props.closeSuggestions} iconType="cross" />
+          <EuiButtonIcon
+            aria-label="close"
+            color="text"
+            onClick={props.closeSuggestions}
+            iconType="cross"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
