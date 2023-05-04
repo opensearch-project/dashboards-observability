@@ -47,6 +47,20 @@ inline \`code\` Conversation sent must be user input.');
       type: 'output',
       content: pplVisResponse,
       contentType: 'ppl_visualization',
+      suggestedActions: [
+        {
+          actionType: 'send_as_input',
+          message: 'show more',
+        },
+        {
+          actionType: 'send_as_input',
+          message: 'show more',
+        },
+        {
+          actionType: 'send_as_input',
+          message: 'show more',
+        },
+      ],
     };
     setLoading(false);
     return [output, pploutput];

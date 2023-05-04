@@ -10,6 +10,7 @@ import { IConversation } from '../../types';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { ConversationBubble } from './conversation_bubble';
 import { ConversationContent } from './conversation_content';
+import { SuggestionBubble } from './suggested_actions/suggestion_bubble';
 
 interface ChatPageContentProps {
   showGreetings: boolean;
@@ -46,9 +47,17 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {props.localConversations
         .map((conversation) => (
-          <ConversationBubble type={conversation.type} contentType={conversation.contentType}>
-            <ConversationContent conversation={conversation} />
-          </ConversationBubble>
+          <>
+            <ConversationBubble type={conversation.type} contentType={conversation.contentType}>
+              <ConversationContent conversation={conversation} />
+            </ConversationBubble>
+            {conversation.suggestedActions?.map((suggestedAction) => (
+              <>
+                <EuiSpacer size="s" />
+                <SuggestionBubble conversation={conversation} suggestedAction={suggestedAction} />
+              </>
+            ))}
+          </>
         ))
         .reduce((prev: React.ReactNode[], curr) => [...prev, <EuiSpacer />, curr], [])}
       {props.llmResponding && <LoadingButton />}

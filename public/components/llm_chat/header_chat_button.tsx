@@ -27,7 +27,6 @@ interface IChatContext {
   setChatId: (chatId?: string) => void;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
-export const DashboardContext = React.createContext<any>(null);
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   console.count('❗header chat button rerender');

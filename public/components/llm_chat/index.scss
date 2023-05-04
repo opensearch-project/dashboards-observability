@@ -32,9 +32,28 @@
   }
 }
 
-.llm-chat-bubble-panel.euiPanel {
-  border-radius: 8px;
-  max-width: 291px;
+.euiPanel {
+  &.llm-chat-bubble-panel {
+    border-radius: 8px;
+    max-width: 291px;
+  }
+  &.llm-chat-greeting-card-panel {
+    width: 357px;
+    background: #f2f4f7;
+    border-color: white;
+    border-radius: 18px;
+    .llm-chat-greeting-card-panel-title {
+      font-family: Inter;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 48px;
+      letter-spacing: -1px;
+      text-align: center;
+    }
+  }
+  &.llm-chat-suggestion-bubble-panel {
+    border-radius: 18px;
+  }
 }
 
 .llm-chat-bubble-panel.llm-chat-bubble-panel-input {
@@ -44,21 +63,6 @@
 .llm-chat-bubble-panel.llm-chat-bubble-panel-output {
   background: #e6f0f8;
   border-color: white;
-}
-
-.llm-chat-greeting-card-panel.euiPanel {
-  width: 357px;
-  background: #f2f4f7;
-  border-color: white;
-  border-radius: 18px;
-  .llm-chat-greeting-card-panel-title {
-    font-family: Inter;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 48px;
-    letter-spacing: -1px;
-    text-align: center;
-  }
 }
 
 .llm-chat-greeting-header {

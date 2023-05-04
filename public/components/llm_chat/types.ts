@@ -19,4 +19,7 @@ export interface IConversation extends SavedObjectAttributes {
   suggestedActions?: ISuggestedAction[];
 }
 
-type ISuggestedAction = SavedObjectAttributes;
+export interface ISuggestedAction extends SavedObjectAttributes {
+  actionType: 'send_as_input' | 'save_ppl_visualzation' | 'copy';
+  message: string;
+}

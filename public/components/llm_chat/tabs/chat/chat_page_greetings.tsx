@@ -19,22 +19,23 @@ interface ChatPageGreetingsProps {
   dismiss: () => void;
 }
 
+const messages = [
+  {
+    title: 'example',
+    details: "Show me the most important SLO's in my system",
+  },
+  {
+    title: 'limitations',
+    details: 'May occasionally generate incorrect information',
+  },
+  {
+    title: 'capability',
+    details: 'Allows user to provide follow-up corrections',
+  },
+];
+
 export const ChatPageGreetings: React.FC<ChatPageGreetingsProps> = (props) => {
   console.count('❗greetings rerender');
-  const messages = [
-    {
-      title: 'example',
-      details: "Show me the most important SLO's in my system",
-    },
-    {
-      title: 'limitations',
-      details: 'May occasionally generate incorrect information',
-    },
-    {
-      title: 'capability',
-      details: 'Allows user to provide follow-up corrections',
-    },
-  ];
 
   return (
     <>
@@ -54,10 +55,10 @@ export const ChatPageGreetings: React.FC<ChatPageGreetingsProps> = (props) => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {messages.map((message) => (
-        <>
+        <div key={message.title}>
           <GreetingCard title={message.title}>{message.details}</GreetingCard>
           <EuiSpacer />
-        </>
+        </div>
       ))}
     </>
   );

@@ -23,16 +23,18 @@ interface ChatTabBarProps {
   setSelectedTabId: (selectedTabId: TabId) => void;
 }
 
+const tabs = [
+  { id: 'chat', name: 'Chat' },
+  { id: 'compose', name: 'Compose' },
+  { id: 'insights', name: 'Insights' },
+  { id: 'history', name: 'History' },
+] as const;
+
 export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
   console.count('❗tab bar rerender ' + props.selectedTabId);
   const chatContext = useContext(ChatContext)!;
   const [isOpen, setIsOpen] = useState(false);
-  const tabs = ([
-    { id: 'chat', name: 'Chat' },
-    { id: 'compose', name: 'Compose' },
-    { id: 'insights', name: 'Insights' },
-    { id: 'history', name: 'History' },
-  ] as const).map((tab) => (
+  const tabsComponent = tabs.map((tab) => (
     <EuiTab
       onClick={() => props.setSelectedTabId(tab.id)}
       isSelected={tab.id === props.selectedTabId}
@@ -58,7 +60,7 @@ export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
-        <EuiTabs className="llm-chat-tabs">{tabs}</EuiTabs>
+        <EuiTabs className="llm-chat-tabs">{tabsComponent}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
