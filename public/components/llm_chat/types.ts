@@ -14,5 +14,6 @@ export interface IChat extends SavedObjectAttributes {
 
 export interface IConversation extends SavedObjectAttributes {
   type: 'input' | 'output';
+  contentType: 'text' | 'markdown' | 'visualization';
   content: string;
 }

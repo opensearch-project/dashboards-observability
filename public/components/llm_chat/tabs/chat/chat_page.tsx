@@ -38,6 +38,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     const input: IConversation = {
       type: 'input',
       content: props.input,
+      contentType: 'text',
     };
     setLocalConversations((prev) => [...prev, input]);
     props.setInput('');

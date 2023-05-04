@@ -131,7 +131,7 @@ export class ObservabilityPlugin
 
       return Observability(
         coreStart,
-        depsStart as AppPluginStartDependencies,
+        depsStart,
         params,
         pplService,
         dslService,
@@ -231,7 +231,7 @@ export class ObservabilityPlugin
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     core.chrome.navControls.registerRight({
       order: 10000,
-      mount: toMountPoint(<HeaderChatButton core={core} navigation={startDeps.navigation} />),
+      mount: toMountPoint(<HeaderChatButton core={core} startDeps={startDeps} />),
     });
     // core.chrome.navControls.getRight$().forEach((x) => console.log(x));
 

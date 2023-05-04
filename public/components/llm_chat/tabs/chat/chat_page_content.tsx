@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 import { LoadingButton } from '../../components/loading_button';
 import { IConversation } from '../../types';
 import { ChatPageSuggestions } from './chat_page_suggestions';
-import { InputBubble } from './input_bubble';
-import { OutputBubble } from './output_bubble';
+import { ConversationBubble } from './conversation_bubble';
+import { ConversationContent } from './conversation_content';
 
 interface ChatPageContentProps {
   showSuggestions: boolean;
@@ -31,7 +31,14 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   if (props.loading && !props.localConversations.length) {
     return <LoadingButton />;
   } else if (props.error) {
-    return <div>error: {props.error.message}</div>;
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        title={<h2>Error loading chat history</h2>}
+        body={props.error.message}
+      />
+    );
   }
 
   return (
@@ -40,17 +47,21 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         <ChatPageSuggestions closeSuggestions={() => props.setShowSuggestions(false)} />
       )}
       {props.localConversations
-        .map((conversation) => {
-          switch (conversation.type) {
-            case 'input':
-              return <InputBubble input={conversation.content} />;
-            case 'output':
-              return <OutputBubble output={conversation.content} />;
-          }
-        })
+        .map((conversation) => (
+          <ConversationBubble type={conversation.type} contentType={conversation.contentType}>
+            <ConversationContent conversation={conversation} />
+          </ConversationBubble>
+        ))
         .reduce((prev: React.ReactNode[], curr) => [...prev, <EuiSpacer />, curr], [])}
       {props.llmResponding && <LoadingButton />}
-      {props.llmError && <div>LLM error: {props.llmError.message}</div>}
+      {props.llmError && (
+        <EuiEmptyPrompt
+          iconType="alert"
+          iconColor="danger"
+          title={<h2>Error from response</h2>}
+          body={props.llmError.message}
+        />
+      )}
       <div ref={pageEndRef} />
     </>
   );

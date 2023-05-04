@@ -6,19 +6,21 @@
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { CoreStart, HttpStart, SavedObjectsClientContract } from '../../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import chatIcon from '../../assets/chat.svg';
+import { AppPluginStartDependencies } from '../../types';
 import { ChatFlyout } from './chat_flyout';
 import './index.scss';
 
 interface HeaderChatButtonProps {
   core: CoreStart;
-  navigation: NavigationPublicPluginStart;
+  startDeps: AppPluginStartDependencies;
 }
 
 interface IChatContext {
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   appId?: string;
   chatId?: string;
@@ -47,6 +49,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       value={{
         http: props.core.http,
         savedObjectsClient: props.core.savedObjects.client,
+        DashboardContainerByValueRenderer:
+          props.startDeps.dashboard.DashboardContainerByValueRenderer,
         setFlyoutVisible,
         appId,
         chatId,
