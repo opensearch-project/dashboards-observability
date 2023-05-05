@@ -13,6 +13,7 @@ export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
+export const INTEGRATIONS_BASE = '/api/integrations';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -69,6 +70,12 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
+const BASE_INTEGRATIONS_URI = '/_plugins/_integrations';
+export const OPENSEARCH_INTEGRATIONS_API = {
+  OBJECT: `${BASE_INTEGRATIONS_URI}/object`,
+  ALL: `${BASE_INTEGRATIONS_URI}/store/list_all`,
+  ADDED: `${BASE_INTEGRATIONS_URI}/store/list_added`,
+}
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };

@@ -12,7 +12,7 @@ import { ApplicationType } from '../../../../common/types/application_analytics'
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
-import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 
 export interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -58,7 +58,7 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${OBSERVABILITY_BASE}/store`).then((exists) => setData(exists));
+    http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) => setData(exists));
   }
 
   return (

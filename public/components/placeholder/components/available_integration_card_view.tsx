@@ -56,10 +56,11 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   // });
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
+    if (!integrations || !integrations.length) return null
     return (
       <>
         <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
-          {integrations.map((i, v) => {
+          integrations ? {integrations.map((i, v) => {
             return (
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
@@ -95,7 +96,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                 />
               </EuiFlexItem>
             );
-          })}
+          })} 
         </EuiFlexGroup>
         <EuiSpacer />
       </>

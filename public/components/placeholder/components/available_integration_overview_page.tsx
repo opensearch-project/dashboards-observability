@@ -23,7 +23,7 @@ import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
-import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { getAddIntegrationModal } from './add_integration_modal';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {
@@ -151,7 +151,8 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${OBSERVABILITY_BASE}/repository`).then((exists) => setData(exists));
+    http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => setData(exists));
+    console.log(data)
   }
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {

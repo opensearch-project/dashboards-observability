@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OPENSEARCH_PANELS_API } from "../../common/constants/shared";
+import { OPENSEARCH_INTEGRATIONS_API, OPENSEARCH_PANELS_API } from "../../common/constants/shared";
 
 export function OpenSearchObservabilityPlugin(
   Client: any,
@@ -13,7 +13,24 @@ export function OpenSearchObservabilityPlugin(
   const clientAction = components.clientAction.factory;
 
   Client.prototype.observability = components.clientAction.namespaceFactory();
+  Client.prototype.integrations = components.clientAction.namespaceFactory();
   const observability = Client.prototype.observability.prototype;
+  const integrations = Client.prototype.integrations.prototype;
+
+  // Get Object
+  integrations.getObject = clientAction({
+    url: {
+      fmt: OPENSEARCH_INTEGRATIONS_API.ALL,
+    },
+    method: "GET",
+  });
+
+  integrations.getAdded = clientAction({
+    url: {
+      fmt: OPENSEARCH_INTEGRATIONS_API.ADDED
+    },
+    method: "GET",
+  });
 
   // Get Object
   observability.getObject = clientAction({
