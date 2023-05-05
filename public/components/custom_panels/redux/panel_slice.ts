@@ -319,7 +319,7 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
 ) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === id);
   const updatedPanel = { ...panel, title: editedCustomPanelName };
-  dispatch(updatePanel(updatedPanel, `Operational Panel successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Operational Panel, please make sure you have the correct permission.'))
+  dispatch(updatePanel(updatedPanel, `Observability Dashboard successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Observability Dashboard, please make sure you have the correct permission.'))
 };
 
 /*

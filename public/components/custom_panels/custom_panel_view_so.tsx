@@ -237,7 +237,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const onClone = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Operational Panel name', 'danger');
+      setToast('Invalid Observability Dashboard name', 'danger');
     } else {
       dispatch(clonePanel(panel, newCustomPanelName));
     }

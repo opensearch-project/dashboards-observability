@@ -147,7 +147,7 @@ export const CustomPanelTable = ({
     if (await doesNameExist(newName)) {
       setToast(`Observability Dashboard with name "${newName}" already exists`, 'danger');
     } else if (!isNameValid(newName)) {
-      setToast('Invalid Operational Panel name', 'danger');
+      setToast('Invalid Observability Dashboard name', 'danger');
     } else {
       let sourcePanel = selectedCustomPanels[0];
       try {

@@ -270,9 +270,9 @@ describe('Testing a panel', () => {
     cy.get('a[data-test-subj="breadcrumb last"]').click();
 
     cy.get('h1[data-test-subj="panelNameHeader"]').contains(TEST_PANEL).should('exist');
-    cy.get('a[data-test-subj="breadcrumb"]').contains('Operational panels').click();
+    cy.get('a[data-test-subj="breadcrumb"]').contains('Observability Dashboards').click();
 
-    cy.get('a[data-test-subj="breadcrumb last"]').contains('Operational panels').should('exist');
+    cy.get('a[data-test-subj="breadcrumb last"]').contains('Observability Dashboards').should('exist');
     cy.get('a[data-test-subj="breadcrumb first"]').contains('Observability').click();
 
     cy.get('a[data-test-subj="breadcrumb"]').contains('Event analytics').should('exist');
@@ -555,7 +555,7 @@ describe('Clean up all test data', () => {
     cy.get('button.euiButton--danger').should('not.be.disabled');
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
 
-    cy.get('.euiTextAlign').contains('No Operational Panels').should('exist');
+    cy.get('.euiTextAlign').contains('No Observability Dashboards').should('exist');
   });
 });
 

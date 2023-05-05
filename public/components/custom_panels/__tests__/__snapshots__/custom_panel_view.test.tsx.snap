@@ -331,7 +331,7 @@ exports[`Panels View Component renders panel view container with visualizations 
               Array [
                 Object {
                   "href": "#/operational_panels/",
-                  "text": "Operational panels",
+                  "text": "Observability Dashboards",
                 },
                 Object {
                   "href": "observability#/",
@@ -376,7 +376,7 @@ exports[`Panels View Component renders panel view container with visualizations 
       Array [
         Object {
           "href": "#/operational_panels/",
-          "text": "Operational panels",
+          "text": "Observability Dashboards",
         },
         Object {
           "href": "observability#/",
@@ -2043,7 +2043,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                               Array [
                                 Object {
                                   "href": "#/operational_panels/",
-                                  "text": "Operational panels",
+                                  "text": "Observability Dashboards",
                                 },
                                 Object {
                                   "href": "observability#/",
@@ -2426,7 +2426,7 @@ exports[`Panels View Component renders panel view container without visualizatio
               Array [
                 Object {
                   "href": "#/operational_panels/",
-                  "text": "Operational panels",
+                  "text": "Observability Dashboards",
                 },
                 Object {
                   "href": "observability#/",
@@ -2471,7 +2471,7 @@ exports[`Panels View Component renders panel view container without visualizatio
       Array [
         Object {
           "href": "#/operational_panels/",
-          "text": "Operational panels",
+          "text": "Observability Dashboards",
         },
         Object {
           "href": "observability#/",
@@ -3994,7 +3994,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                               Array [
                                 Object {
                                   "href": "#/operational_panels/",
-                                  "text": "Operational panels",
+                                  "text": "Observability Dashboards",
                                 },
                                 Object {
                                   "href": "observability#/",

@@ -32,7 +32,7 @@ import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 
 /*
- * "Utils" This file contains different reused functions in operational panels
+ * "Utils" This file contains different reused functions in Observability Dashboards
  *
  * isNameValid - Validates string to length > 0 and < 50
  * convertDateTime - Converts input datetime string to required format
