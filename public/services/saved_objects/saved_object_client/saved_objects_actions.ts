@@ -103,7 +103,7 @@ export class SavedObjectsActions {
 
     const remainingObjectIds = [
       ...new Set(
-        idMap.non_osd.concat(
+        idMap.non_osd?.concat(
           Object.entries(responses.deleteResponseList)
             .filter(([_, status]) => status !== 'OK')
             .map(([id, _]) => id)
