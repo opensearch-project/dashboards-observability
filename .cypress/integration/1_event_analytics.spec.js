@@ -215,7 +215,8 @@ describe('Click actions test', () => {
   });
 });
 
-describe('Override timestamp for an index', () => {
+//  Waiting for PR451
+describe.skip('Override timestamp for an index', () => {
   it('Click override button to override default timestamp', () => {
     landOnEventExplorer();
     suppressResizeObserverIssue();
@@ -463,92 +464,92 @@ describe('Visualizing data', () => {
   });
 });
 
-// describe('Saves a query on explorer page', () => {
-//   it('Saves a visualization on visualization tab of explorer page', () => {
-//     landOnEventExplorer();
-//     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-//     suppressResizeObserverIssue();
-//     cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
-//     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-//     cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-//       .focus()
-//       .type(SAVE_QUERY2, { force: true });
-//     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
-//     cy.get('.euiToastHeader__title').contains('successfully').should('exist');
-//     landOnEventHome();
-//     cy.get('.euiFieldSearch').type(SAVE_QUERY2);
-//     cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY2);
-//   });
+describe('Saves a query on explorer page', () => {
+  it('Saves a visualization on visualization tab of explorer page', () => {
+    landOnEventExplorer();
+    querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
+    suppressResizeObserverIssue();
+    cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]')
+      .focus()
+      .type(SAVE_QUERY2, { force: true });
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
+    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
+    landOnEventHome();
+    cy.get('.euiFieldSearch').type(SAVE_QUERY2);
+    cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY2);
+  });
 
-//   it('Saves a visualization to an existing panel', () => {
-//     landOnPanels();
-//     cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
-//     cy.get('input.euiFieldText').type(TESTING_PANEL);
-//     cy.get('.euiButton__text')
-//       .contains(/^Create$/)
-//       .click();
-//     cy.wait(delay);
-//     landOnEventExplorer();
-//     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-//     suppressResizeObserverIssue();
-//     cy.get('button[id="main-content-vis"]', { timeout: COMMAND_TIMEOUT_LONG })
-//       .contains('Visualizations')
-//       .click();
-//     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-//     cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-//       .focus()
-//       .type(SAVE_QUERY3, { force: true });
-//     cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').type(TESTING_PANEL);
-//     cy.get(`input[value="${TESTING_PANEL}"]`).click();
-//     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
-//     cy.get('.euiToastHeader__title').contains('successfully').should('exist');
-//   });
+  it('Saves a visualization to an existing panel', () => {
+    landOnPanels();
+    cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
+    cy.get('input.euiFieldText').type(TESTING_PANEL);
+    cy.get('.euiButton__text')
+      .contains(/^Create$/)
+      .click();
+    cy.wait(delay);
+    landOnEventExplorer();
+    querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
+    suppressResizeObserverIssue();
+    cy.get('button[id="main-content-vis"]', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains('Visualizations')
+      .click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]')
+      .focus()
+      .type(SAVE_QUERY3, { force: true });
+    cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').type(TESTING_PANEL);
+    cy.get(`input[value="${TESTING_PANEL}"]`).click();
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
+    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
+  });
 
-//   it('Saves a query on event tab of explorer page', () => {
-//     landOnEventExplorer();
-//     suppressResizeObserverIssue();
-//     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
+  it('Saves a query on event tab of explorer page', () => {
+    landOnEventExplorer();
+    suppressResizeObserverIssue();
+    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
-//     cy.get('.tab-title').contains('Events').click();
-//     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-//     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
-//     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-//     cy.wait(delay * 2);
+    cy.get('.tab-title').contains('Events').click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
+    cy.wait(delay * 2);
 
-//     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
-//       .contains('successfully')
-//       .should('exist');
+    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains('successfully')
+      .should('exist');
 
-//     landOnEventHome();
+    landOnEventHome();
 
-//     cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY1);
-//   });
+    cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY1);
+  });
 
-//   it('Click on a saved query from event analytics home', () => {
-//     landOnEventExplorer();
-//     suppressResizeObserverIssue();
-//     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
+  it('Click on a saved query from event analytics home', () => {
+    landOnEventExplorer();
+    suppressResizeObserverIssue();
+    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
-//     cy.get('.tab-title').contains('Events').click();
-//     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-//     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
-//     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-//     cy.wait(delay * 2);
-//     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
-//       .contains('successfully')
-//       .should('exist');
+    cy.get('.tab-title').contains('Events').click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
+    cy.wait(delay * 2);
+    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains('successfully')
+      .should('exist');
 
-//     landOnEventHome();
+    landOnEventHome();
 
-//     cy.get('[data-test-subj="eventHome__savedQueryTableName"]')
-//       .first()
-//       .contains(SAVE_QUERY4)
-//       .click();
+    cy.get('[data-test-subj="eventHome__savedQueryTableName"]')
+      .first()
+      .contains(SAVE_QUERY4)
+      .click();
 
-//     cy.url().should('contain', '#/explorer');
-//     cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
-//       timeout: COMMAND_TIMEOUT_LONG,
-//     }).contains(TEST_QUERIES[0].query);
-//     suppressResizeObserverIssue();
-//   });
-// });
+    cy.url().should('contain', '#/explorer');
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
+      timeout: COMMAND_TIMEOUT_LONG,
+    }).contains(TEST_QUERIES[0].query);
+    suppressResizeObserverIssue();
+  });
+});
