@@ -6,13 +6,15 @@
 import { useContext, useState } from 'react';
 import {
   CHAT_SAVED_OBJECT,
+  IChat,
+  IConversation,
   SAVED_OBJECT_VERSION,
 } from '../../../../common/types/observability_saved_object_attributes';
-import { ChatContext } from '../header_chat_button';
-import { IChat, IConversation } from '../types';
+import { ChatContext, CoreServicesContext } from '../header_chat_button';
 
 export const useChatActions = () => {
   const chatContext = useContext(ChatContext)!;
+  const coreServicesContext = useContext(CoreServicesContext)!;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
@@ -72,7 +74,7 @@ inline \`code\` Conversation sent must be user input.');
     setLoading(true);
     try {
       if (!chatContext.chatId) {
-        const createResponse = await chatContext.savedObjectsClient.create<IChat>(
+        const createResponse = await coreServicesContext.savedObjectsClient.create<IChat>(
           CHAT_SAVED_OBJECT,
           {
             title: input.content.substring(0, 50),
@@ -83,7 +85,7 @@ inline \`code\` Conversation sent must be user input.');
         );
         chatContext.setChatId(createResponse.id);
       } else {
-        await chatContext.savedObjectsClient.update<Partial<IChat>>(
+        await coreServicesContext.savedObjectsClient.update<Partial<IChat>>(
           CHAT_SAVED_OBJECT,
           chatContext.chatId,
           {

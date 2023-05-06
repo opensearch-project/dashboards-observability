@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext, useEffect, useReducer } from 'react';
+import { Reducer, useContext, useEffect, useReducer } from 'react';
 import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponsePublic,
   SimpleSavedObject,
 } from '../../../../../../src/core/public';
-import { CHAT_SAVED_OBJECT } from '../../../../common/types/observability_saved_object_attributes';
-import { ChatContext } from '../header_chat_button';
-import { IChat } from '../types';
+import {
+  CHAT_SAVED_OBJECT,
+  IChat,
+} from '../../../../common/types/observability_saved_object_attributes';
+import { ChatContext, CoreServicesContext } from '../header_chat_button';
 
 interface State<T> {
   data?: T;
@@ -25,8 +27,8 @@ type Action<T> =
   | { type: 'failure'; error: Required<State<T>['error']> };
 
 // TODO use instantiation expressions when typescript is upgraded to >= 4.7
-type Reducer<T = any> = (state: State<T>, action: Action<T>) => State<T>;
-const genericReducer: Reducer = (state, action) => {
+type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;
+const genericReducer: GenericReducer = (state, action) => {
   switch (action.type) {
     case 'request':
       return { loading: true };
@@ -41,7 +43,8 @@ const genericReducer: Reducer = (state, action) => {
 
 export const useGetChat = () => {
   const chatContext = useContext(ChatContext)!;
-  const reducer: Reducer<SimpleSavedObject<IChat>> = genericReducer;
+  const coreServicesContext = useContext(CoreServicesContext)!;
+  const reducer: GenericReducer<SimpleSavedObject<IChat>> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export const useGetChat = () => {
       return;
     }
 
-    chatContext.savedObjectsClient
+    coreServicesContext.savedObjectsClient
       .get<IChat>(CHAT_SAVED_OBJECT, chatContext.chatId)
       .then((payload) => dispatch({ type: 'success', payload }))
       .catch((error) => dispatch({ type: 'failure', error }));
@@ -62,8 +65,8 @@ export const useGetChat = () => {
 };
 
 export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) => {
-  const chatContext = useContext(ChatContext)!;
-  const reducer: Reducer<SavedObjectsFindResponsePublic<IChat>> = genericReducer;
+  const chatContext = useContext(CoreServicesContext)!;
+  const reducer: GenericReducer<SavedObjectsFindResponsePublic<IChat>> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {

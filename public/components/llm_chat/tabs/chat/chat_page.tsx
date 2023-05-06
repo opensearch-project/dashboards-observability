@@ -5,10 +5,10 @@
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
-import { ChatContext } from '../../header_chat_button';
+import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
+import { ChatContext, ConversationContext } from '../../header_chat_button';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useGetChat } from '../../hooks/use_get_chat';
-import { IConversation } from '../../types';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
 
@@ -18,10 +18,10 @@ interface ChatPageProps {
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
-  console.count('❗chat page rerender');
+  console.count('chat page rerender');
   const chatContext = useContext(ChatContext)!;
+  const conversationContext = useContext(ConversationContext)!;
   const [showGreetings, setShowGreetings] = useState(true);
-  const [localConversations, setLocalConversations] = useState<IConversation[]>([]);
   const {
     data: chat,
     loading: conversationLoading,
@@ -30,10 +30,10 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const { send, loading: llmResponding, error: llmError } = useChatActions();
 
   useEffect(() => {
-    if (chat && !localConversations.length) {
-      setLocalConversations(chat.attributes.conversations);
+    if (chat) {
+      conversationContext.setLocalConversations(chat.attributes.conversations);
     } else if (!chat && !chatContext.chatId) {
-      setLocalConversations([]);
+      conversationContext.setLocalConversations([]);
     }
   }, [chat]);
 
@@ -44,11 +44,14 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       type: 'input',
       content: userInput,
       contentType: 'text',
+      context: {
+        appId: chatContext.appId,
+      },
     };
     props.setInput('');
-    setLocalConversations((prev) => [...prev, input]);
-    const outputs = await send(localConversations, input);
-    setLocalConversations((prev) => [...prev, ...outputs]);
+    conversationContext.setLocalConversations((prev) => [...prev, input]);
+    const outputs = await send(conversationContext.localConversations, input);
+    conversationContext.setLocalConversations((prev) => [...prev, ...outputs]);
   };
 
   return (
@@ -59,7 +62,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
             <ChatPageContent
               showGreetings={showGreetings}
               setShowGreetings={setShowGreetings}
-              localConversations={localConversations}
               conversationLoading={conversationLoading}
               conversationLoadingError={conversationLoadingError}
               llmResponding={llmResponding}

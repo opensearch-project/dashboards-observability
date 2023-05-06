@@ -4,9 +4,9 @@
  */
 
 import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { LoadingButton } from '../../components/loading_button';
-import { IConversation } from '../../types';
+import { ConversationContext } from '../../header_chat_button';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { ConversationBubble } from './conversation_bubble';
 import { ConversationContent } from './conversation_content';
@@ -15,7 +15,6 @@ import { SuggestionBubble } from './suggested_actions/suggestion_bubble';
 interface ChatPageContentProps {
   showGreetings: boolean;
   setShowGreetings: (showGreetings: boolean) => void;
-  localConversations: IConversation[];
   conversationLoading: boolean;
   conversationLoadingError?: Error;
   llmResponding: boolean;
@@ -23,13 +22,14 @@ interface ChatPageContentProps {
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
-  console.count('❗chat page content rerender');
+  console.count('chat page content rerender');
+  const conversationContext = useContext(ConversationContext)!;
   const pageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     pageEndRef.current?.scrollIntoView();
-  }, [props.localConversations, props.llmResponding]);
+  }, [conversationContext.localConversations, props.llmResponding]);
 
-  if (props.conversationLoading && !props.localConversations.length) {
+  if (props.conversationLoading && !conversationContext.localConversations.length) {
     return <LoadingButton />;
   } else if (props.conversationLoadingError) {
     return (
@@ -45,7 +45,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   return (
     <>
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
-      {props.localConversations
+      {conversationContext.localConversations
         .map((conversation) => (
           <>
             <ConversationBubble type={conversation.type} contentType={conversation.contentType}>

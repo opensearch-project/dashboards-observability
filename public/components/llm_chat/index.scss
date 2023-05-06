@@ -70,3 +70,10 @@
   font-weight: 500;
   letter-spacing: -1px;
 }
+
+.llm-chat-visualizations {
+  // remove some padding added by EuiPage
+  margin-left: -12px;
+  margin-right: -16px;
+  min-height: 400px;
+}

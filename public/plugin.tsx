@@ -43,7 +43,7 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
-import { HeaderChatButton } from './components/llm_chat/header_chat_button';
+import { CoreServicesContext, HeaderChatButton } from './components/llm_chat/header_chat_button';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 // export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
@@ -231,7 +231,18 @@ export class ObservabilityPlugin
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     core.chrome.navControls.registerRight({
       order: 10000,
-      mount: toMountPoint(<HeaderChatButton core={core} startDeps={startDeps} />),
+      mount: toMountPoint(
+        <CoreServicesContext.Provider
+          value={{
+            http: core.http,
+            savedObjectsClient: core.savedObjects.client,
+            DashboardContainerByValueRenderer:
+              startDeps.dashboard.DashboardContainerByValueRenderer,
+          }}
+        >
+          <HeaderChatButton application={core.application} />
+        </CoreServicesContext.Provider>
+      ),
     });
     // core.chrome.navControls.getRight$().forEach((x) => console.log(x));
 

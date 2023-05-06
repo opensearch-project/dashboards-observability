@@ -18,11 +18,6 @@ import { ChatContext } from '../header_chat_button';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history';
 
-interface ChatTabBarProps {
-  selectedTabId: TabId;
-  setSelectedTabId: (selectedTabId: TabId) => void;
-}
-
 const tabs = [
   { id: 'chat', name: 'Chat' },
   { id: 'compose', name: 'Compose' },
@@ -30,14 +25,14 @@ const tabs = [
   { id: 'history', name: 'History' },
 ] as const;
 
-export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
-  console.count('❗tab bar rerender ' + props.selectedTabId);
+export const ChatTabBar: React.FC = React.memo(() => {
+  console.count('tab bar rerender');
   const chatContext = useContext(ChatContext)!;
   const [isOpen, setIsOpen] = useState(false);
   const tabsComponent = tabs.map((tab) => (
     <EuiTab
-      onClick={() => props.setSelectedTabId(tab.id)}
-      isSelected={tab.id === props.selectedTabId}
+      onClick={() => chatContext.setSelectedTabId(tab.id)}
+      isSelected={tab.id === chatContext.selectedTabId}
       key={tab.id}
     >
       {tab.name}
@@ -50,7 +45,7 @@ export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
       onClick={() => {
         setIsOpen(false);
         chatContext.setChatId(undefined);
-        props.setSelectedTabId('chat');
+        chatContext.setSelectedTabId('chat');
       }}
     >
       New chat

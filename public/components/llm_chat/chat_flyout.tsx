@@ -4,8 +4,8 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
-import React, { useContext, useEffect, useState } from 'react';
-import { ChatTabBar, TabId } from './components/chat_tab_bar';
+import React, { useContext } from 'react';
+import { ChatTabBar } from './components/chat_tab_bar';
 import { ChatContext } from './header_chat_button';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
@@ -16,12 +16,11 @@ interface ChatFlyoutProps {
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
-  console.count('❗flyout rerender');
+  console.count('flyout rerender');
   const chatContext = useContext(ChatContext)!;
-  const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
 
   let content = null;
-  switch (selectedTabId) {
+  switch (chatContext.selectedTabId) {
     case 'chat':
       content = <ChatPage input={props.input} setInput={props.setInput} />;
       break;
@@ -34,10 +33,6 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
       break;
   }
 
-  useEffect(() => {
-    setSelectedTabId('chat');
-  }, [chatContext.chatId]);
-
   return (
     <>
       <EuiFlyout
@@ -49,7 +44,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
         onClose={() => chatContext.setFlyoutVisible(false)}
       >
         <EuiFlyoutHeader className="llm-chat-flyout-header">
-          <ChatTabBar selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} />
+          <ChatTabBar />
         </EuiFlyoutHeader>
         {content}
       </EuiFlyout>

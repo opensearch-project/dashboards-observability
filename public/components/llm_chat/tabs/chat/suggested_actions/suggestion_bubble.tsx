@@ -5,7 +5,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
-import { IConversation, ISuggestedAction } from '../../../types';
+import {
+  IConversation,
+  ISuggestedAction,
+} from '../../../../../../common/types/observability_saved_object_attributes';
 import { executeAction } from './execute_action';
 
 interface SuggestionBubbleProps {

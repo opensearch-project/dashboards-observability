@@ -35,7 +35,7 @@ const messages = [
 ];
 
 export const ChatPageGreetings: React.FC<ChatPageGreetingsProps> = (props) => {
-  console.count('❗greetings rerender');
+  console.count('greetings rerender');
 
   return (
     <>

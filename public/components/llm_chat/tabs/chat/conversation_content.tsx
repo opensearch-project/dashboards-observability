@@ -8,18 +8,18 @@ import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
 import { SavedVisualization } from '../../../../../common/types/explorer';
+import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
 import { uiSettingsService } from '../../../../../common/utils';
 import { SavedObjectVisualization } from '../../../visualizations/saved_object_visualization';
-import { ChatContext } from '../../header_chat_button';
-import { IConversation } from '../../types';
+import { CoreServicesContext } from '../../header_chat_button';
 
 interface ConversationContentProps {
   conversation: IConversation;
 }
 
 export const ConversationContent: React.FC<ConversationContentProps> = React.memo((props) => {
-  console.count('❗conversation content rerender:');
-  const chatContext = useContext(ChatContext)!;
+  console.count('conversation content rerender:');
+  const coreServicesContext = useContext(CoreServicesContext)!;
   const [visInput, setVisInput] = useState<DashboardContainerInput>();
 
   useEffect(() => {
@@ -44,10 +44,12 @@ export const ConversationContent: React.FC<ConversationContentProps> = React.mem
       return (
         <>
           <EuiText size="s">{`${from} - ${to}`}</EuiText>
-          <chatContext.DashboardContainerByValueRenderer
-            input={JSON.parse(props.conversation.content)}
-            onInputUpdated={setVisInput}
-          />
+          <div className="llm-chat-visualizations">
+            <coreServicesContext.DashboardContainerByValueRenderer
+              input={JSON.parse(props.conversation.content)}
+              onInputUpdated={setVisInput}
+            />
+          </div>
         </>
       );
 
@@ -63,13 +65,18 @@ export const ConversationContent: React.FC<ConversationContentProps> = React.mem
         sub_type: 'visualization',
       };
       return (
-        <SavedObjectVisualization
-          savedVisualization={savedVisualization}
-          timeRange={{
-            from: savedVisualization.selected_date_range.start,
-            to: savedVisualization.selected_date_range.end,
-          }}
-        />
+        <div
+          className="llm-chat-visualizations"
+          style={{ minHeight: 450, marginLeft: -16, marginRight: -16 }}
+        >
+          <SavedObjectVisualization
+            savedVisualization={savedVisualization}
+            timeRange={{
+              from: savedVisualization.selected_date_range.start,
+              to: savedVisualization.selected_date_range.end,
+            }}
+          />
+        </div>
       );
 
     default:

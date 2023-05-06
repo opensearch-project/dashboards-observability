@@ -5,39 +5,58 @@
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { CoreStart, HttpStart, SavedObjectsClientContract } from '../../../../../src/core/public';
+import {
+  ApplicationStart,
+  HttpStart,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
+import { IConversation } from '../../../common/types/observability_saved_object_attributes';
 import chatIcon from '../../assets/chat.svg';
-import { AppPluginStartDependencies } from '../../types';
 import { ChatFlyout } from './chat_flyout';
+import { TabId } from './components/chat_tab_bar';
 import './index.scss';
 
 interface HeaderChatButtonProps {
-  core: CoreStart;
-  startDeps: AppPluginStartDependencies;
+  application: ApplicationStart;
 }
 
-interface IChatContext {
+interface ICoreServicesContext {
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
-  setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
+}
+export const CoreServicesContext = React.createContext<ICoreServicesContext | null>(null);
+
+interface IChatContext {
   appId?: string;
   chatId?: string;
-  setChatId: (chatId?: string) => void;
+  setChatId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  flyoutVisible: boolean;
+  setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedTabId: TabId;
+  setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
+interface IConversationContext {
+  localConversations: IConversation[];
+  setLocalConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
+}
+export const ConversationContext = React.createContext<IConversationContext | null>(null);
+
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
-  console.count('❗header chat button rerender');
+  console.count('header chat button rerender');
   const [appId, setAppId] = useState<string>();
+  const [input, setInput] = useState('');
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const [input, setInput] = useState('');
+  const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
+  const [localConversations, setLocalConversations] = useState<IConversation[]>([]);
 
   const prevId = useRef<string | undefined>();
   useEffect(() => {
-    props.core.application.currentAppId$.subscribe({
+    props.application.currentAppId$.subscribe({
       next(id) {
         if (prevId.current !== id) {
           prevId.current = id;
@@ -45,40 +64,39 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
         }
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const chatContextValue = useMemo(
+  const chatContextValue: IChatContext = useMemo(
     () => ({
-      http: props.core.http,
-      savedObjectsClient: props.core.savedObjects.client,
-      DashboardContainerByValueRenderer:
-        props.startDeps.dashboard.DashboardContainerByValueRenderer,
-      setFlyoutVisible,
       appId,
       chatId,
       setChatId,
+      flyoutVisible,
+      setFlyoutVisible,
+      selectedTabId,
+      setSelectedTabId,
     }),
-    [
-      props.core.http,
-      props.core.savedObjects.client,
-      props.startDeps.dashboard.DashboardContainerByValueRenderer,
-      setFlyoutVisible,
-      appId,
-      chatId,
-      setChatId,
-    ]
+    [appId, chatId, flyoutVisible, selectedTabId]
+  );
+
+  const conversationContextValue: IConversationContext = useMemo(
+    () => ({
+      localConversations,
+      setLocalConversations,
+    }),
+    [localConversations]
   );
 
   return (
     <>
-      <EuiHeaderSectionItemButton
-        data-test-subj="llm-chat-header-button"
-        onClick={() => setFlyoutVisible(!flyoutVisible)}
-      >
+      <EuiHeaderSectionItemButton onClick={() => setFlyoutVisible(!flyoutVisible)}>
         <EuiIcon type={chatIcon} size="l" />
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
-        {flyoutVisible ? <ChatFlyout input={input} setInput={setInput} /> : null}
+        <ConversationContext.Provider value={conversationContextValue}>
+          {flyoutVisible ? <ChatFlyout input={input} setInput={setInput} /> : null}
+        </ConversationContext.Provider>
       </ChatContext.Provider>
     </>
   );
