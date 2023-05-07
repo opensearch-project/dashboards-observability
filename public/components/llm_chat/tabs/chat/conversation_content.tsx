@@ -65,10 +65,7 @@ export const ConversationContent: React.FC<ConversationContentProps> = React.mem
         sub_type: 'visualization',
       };
       return (
-        <div
-          className="llm-chat-visualizations"
-          style={{ minHeight: 450, marginLeft: -16, marginRight: -16 }}
-        >
+        <div className="llm-chat-visualizations" style={{ minHeight: 450 }}>
           <SavedObjectVisualization
             savedVisualization={savedVisualization}
             timeRange={{
