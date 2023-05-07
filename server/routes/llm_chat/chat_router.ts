@@ -55,7 +55,7 @@ export function registerChatRoute(router: IRouter) {
           });
           return response.ok({
             body: {
-              chatId: chatId || createResponse.id,
+              chatId: createResponse.id,
               conversations: createResponse.attributes.conversations,
             },
           });

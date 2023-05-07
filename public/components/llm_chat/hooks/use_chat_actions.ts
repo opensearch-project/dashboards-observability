@@ -9,6 +9,11 @@ import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { IConversation } from '../../../../common/types/observability_saved_object_attributes';
 import { ChatContext, ConversationContext, CoreServicesContext } from '../header_chat_button';
 
+interface SendResponse {
+  chatId: string;
+  conversations: IConversation[];
+}
+
 export const useChatActions = () => {
   const chatContext = useContext(ChatContext)!;
   const coreServicesContext = useContext(CoreServicesContext)!;
@@ -23,13 +28,16 @@ export const useChatActions = () => {
       })
     );
     try {
-      const response = await coreServicesContext.http.post(`${OBSERVABILITY_BASE}/chat/send`, {
-        body: JSON.stringify({
-          chatId: chatContext.chatId,
-          localConversations: conversationContext.localConversation.conversations,
-          input,
-        }),
-      });
+      const response = await coreServicesContext.http.post<SendResponse>(
+        `${OBSERVABILITY_BASE}/chat/send`,
+        {
+          body: JSON.stringify({
+            chatId: chatContext.chatId,
+            localConversations: conversationContext.localConversation.conversations,
+            input,
+          }),
+        }
+      );
       console.log('❗response:', response);
       chatContext.setChatId(response.chatId);
       conversationContext.setLocalConversation({
