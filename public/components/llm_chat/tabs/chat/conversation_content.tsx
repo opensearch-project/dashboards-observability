@@ -33,6 +33,7 @@ export const ConversationContent: React.FC<ConversationContentProps> = React.mem
       return <EuiText style={{ whiteSpace: 'pre-line' }}>{props.conversation.content}</EuiText>;
 
     case 'markdown':
+      // TODO maybe remove emoji from defaultParsingPlugins https://github.com/opensearch-project/oui/blob/8605d70ce89fa5633a90bdec0931c95d1683c48d/src/components/markdown_editor/plugins/markdown_default_plugins.tsx#LL66C31-L66C31
       return <EuiMarkdownFormat>{props.conversation.content}</EuiMarkdownFormat>;
 
     case 'visualization':

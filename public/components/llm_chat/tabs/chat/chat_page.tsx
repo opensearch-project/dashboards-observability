@@ -6,7 +6,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
-import { ChatContext, ConversationContext } from '../../header_chat_button';
+import { ConversationContext } from '../../header_chat_button';
 import { useGetChat } from '../../hooks/use_get_chat';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
@@ -18,7 +18,6 @@ interface ChatPageProps {
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
   console.count('chat page rerender');
-  const chatContext = useContext(ChatContext)!;
   const conversationContext = useContext(ConversationContext)!;
   const [showGreetings, setShowGreetings] = useState(true);
   const {
@@ -28,16 +27,11 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   } = useGetChat();
 
   useEffect(() => {
-    if (chat) {
+    if (chat && !conversationContext.localConversation.persisted) {
       conversationContext.setLocalConversation(
         produce((draft) => {
           draft.conversations = chat.attributes.conversations;
-        })
-      );
-    } else if (!chat && !chatContext.chatId) {
-      conversationContext.setLocalConversation(
-        produce((draft) => {
-          draft.conversations = [];
+          draft.persisted = true;
         })
       );
     }

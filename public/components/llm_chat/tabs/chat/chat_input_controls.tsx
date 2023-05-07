@@ -23,6 +23,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   const onSubmit = async () => {
     const userInput = inputRef.current?.value.trim();
     if (!userInput) return;
+
     const inputConversation: IConversation = {
       type: 'input',
       content: userInput,
@@ -33,6 +34,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     };
     props.setInput('');
     inputRef.current!.value = '';
+    inputRef.current!.style.height = '40px';
     send(inputConversation);
   };
 
@@ -43,10 +45,6 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       autosize(inputRef.current);
     }
   }, []);
-
-  useEffect(() => {
-    if (props.input.length === 0 && inputRef.current) inputRef.current.style.height = '40px';
-  }, [props.input]);
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="flexEnd" justifyContent="spaceEvenly">

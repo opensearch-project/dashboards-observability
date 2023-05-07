@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
 import { ChatContext } from '../header_chat_button';
+import { useChatActions } from '../hooks/use_chat_actions';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history';
 
@@ -28,6 +29,7 @@ const tabs = [
 export const ChatTabBar: React.FC = React.memo(() => {
   console.count('tab bar rerender');
   const chatContext = useContext(ChatContext)!;
+  const { openChat } = useChatActions();
   const [isOpen, setIsOpen] = useState(false);
   const tabsComponent = tabs.map((tab) => (
     <EuiTab
@@ -44,8 +46,7 @@ export const ChatTabBar: React.FC = React.memo(() => {
       key="new_chat"
       onClick={() => {
         setIsOpen(false);
-        chatContext.setChatId(undefined);
-        chatContext.setSelectedTabId('chat');
+        openChat(undefined);
       }}
     >
       New chat

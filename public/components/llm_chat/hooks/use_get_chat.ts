@@ -48,7 +48,8 @@ export const useGetChat = () => {
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
-    console.log('❗chatId:', chatContext.chatId);
+    // savedObjectsClient does not support abort signal
+    let abort = false;
     dispatch({ type: 'request' });
     if (!chatContext.chatId) {
       dispatch({ type: 'success', payload: undefined });
@@ -57,8 +58,16 @@ export const useGetChat = () => {
 
     coreServicesContext.savedObjectsClient
       .get<IChat>(CHAT_SAVED_OBJECT, chatContext.chatId)
-      .then((payload) => dispatch({ type: 'success', payload }))
-      .catch((error) => dispatch({ type: 'failure', error }));
+      .then((payload) => {
+        if (!abort) dispatch({ type: 'success', payload });
+      })
+      .catch((error) => {
+        if (!abort) dispatch({ type: 'failure', error });
+      });
+
+    return () => {
+      abort = true;
+    };
   }, [chatContext.chatId]);
 
   return { ...state };
@@ -70,12 +79,22 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
+    // savedObjectsClient does not support abort signal
+    let abort = false;
     dispatch({ type: 'request' });
 
     chatContext.savedObjectsClient
       .find<IChat>({ ...options, type: CHAT_SAVED_OBJECT })
-      .then((payload) => dispatch({ type: 'success', payload }))
-      .catch((error) => dispatch({ type: 'failure', error }));
+      .then((payload) => {
+        if (!abort) dispatch({ type: 'success', payload });
+      })
+      .catch((error) => {
+        if (!abort) dispatch({ type: 'failure', error });
+      });
+
+    return () => {
+      abort = true;
+    };
   }, [options]);
 
   return { ...state };

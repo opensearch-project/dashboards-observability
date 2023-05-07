@@ -14,12 +14,16 @@ interface SendResponse {
   conversations: IConversation[];
 }
 
+let abortControllerRef: AbortController;
+
 export const useChatActions = () => {
   const chatContext = useContext(ChatContext)!;
   const coreServicesContext = useContext(CoreServicesContext)!;
   const conversationContext = useContext(ConversationContext)!;
 
   const send = async (input: IConversation) => {
+    const abortController = new AbortController();
+    abortControllerRef = abortController;
     conversationContext.setLocalConversation(
       produce((draft) => {
         draft.conversations.push(input);
@@ -38,14 +42,16 @@ export const useChatActions = () => {
           }),
         }
       );
-      console.log('❗response:', response);
+      if (abortController.signal.aborted) return;
       chatContext.setChatId(response.chatId);
       conversationContext.setLocalConversation({
         llmError: undefined,
         llmResponding: false,
         conversations: response.conversations,
+        persisted: true,
       });
     } catch (error) {
+      if (abortController.signal.aborted) return;
       conversationContext.setLocalConversation(
         produce((draft) => {
           draft.llmError = error;
@@ -55,5 +61,16 @@ export const useChatActions = () => {
     }
   };
 
-  return { send };
+  const openChat = (chatId?: string) => {
+    abortControllerRef?.abort();
+    chatContext.setChatId(chatId);
+    chatContext.setSelectedTabId('chat');
+    conversationContext.setLocalConversation({
+      llmResponding: false,
+      conversations: [],
+      persisted: false,
+    });
+  };
+
+  return { send, openChat };
 };

@@ -13,17 +13,15 @@ import {
   EuiPageBody,
   EuiText,
 } from '@elastic/eui';
-import { produce } from 'immer';
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SavedObjectsFindOptions, SimpleSavedObject } from '../../../../../../../src/core/public';
 import { IChat } from '../../../../../common/types/observability_saved_object_attributes';
-import { ChatContext, ConversationContext } from '../../header_chat_button';
+import { useChatActions } from '../../hooks/use_chat_actions';
 import { useBulkGetChat } from '../../hooks/use_get_chat';
 
 export const ChatHistoryPage: React.FC = () => {
   console.count('ChatHistoryPage rerender');
-  const chatContext = useContext(ChatContext)!;
-  const conversationContext = useContext(ConversationContext)!;
+  const { openChat } = useChatActions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const bulkGetOptions: Partial<SavedObjectsFindOptions> = useMemo(
@@ -48,19 +46,7 @@ export const ChatHistoryPage: React.FC = () => {
       field: 'id',
       name: 'Chat',
       render: (id: string, item) => (
-        <EuiLink
-          onClick={() => {
-            conversationContext.setLocalConversation(
-              produce((draft) => {
-                draft.conversations = [];
-              })
-            );
-            chatContext.setChatId(id);
-            chatContext.setSelectedTabId('chat');
-          }}
-        >
-          {item.attributes.title}
-        </EuiLink>
+        <EuiLink onClick={() => openChat(id)}>{item.attributes.title}</EuiLink>
       ),
     },
     {

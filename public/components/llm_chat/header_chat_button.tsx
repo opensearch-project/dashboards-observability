@@ -4,7 +4,7 @@
  */
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ApplicationStart,
   HttpStart,
@@ -45,11 +45,17 @@ interface IConversationContext {
 }
 export const ConversationContext = React.createContext<IConversationContext | null>(null);
 
-// state for conversations cached in browser
+/**
+ * state for conversations cached in browser.
+ *
+ * @property persisted - whether conversations have been saved to index, which happens when
+ * user sends input to LLM. It is used to determine when to reset local state for conversations
+ */
 export interface LocalConversationState {
   conversations: IConversation[];
   llmResponding: boolean;
   llmError?: Error;
+  persisted: boolean;
 }
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
@@ -62,18 +68,16 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [localConversation, setLocalConversation] = useState<LocalConversationState>({
     conversations: [],
     llmResponding: false,
+    persisted: false,
   });
 
-  const prevId = useRef<string | undefined>();
   useEffect(() => {
-    props.application.currentAppId$.subscribe({
+    const subscription = props.application.currentAppId$.subscribe({
       next(id) {
-        if (prevId.current !== id) {
-          prevId.current = id;
-          setAppId(id);
-        }
+        setAppId(id);
       },
     });
+    return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
