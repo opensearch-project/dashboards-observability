@@ -6,9 +6,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
-import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
 import { ChatContext, ConversationContext } from '../../header_chat_button';
-import { useChatActions } from '../../hooks/use_chat_actions';
 import { useGetChat } from '../../hooks/use_get_chat';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
@@ -28,7 +26,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     loading: conversationLoading,
     error: conversationLoadingError,
   } = useGetChat();
-  const { send } = useChatActions();
 
   useEffect(() => {
     if (chat) {
@@ -45,21 +42,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       );
     }
   }, [chat]);
-
-  const onSubmit = async () => {
-    const userInput = props.input.trim();
-    if (!userInput) return;
-    const input: IConversation = {
-      type: 'input',
-      content: userInput,
-      contentType: 'text',
-      context: {
-        appId: chatContext.appId,
-      },
-    };
-    props.setInput('');
-    send(input);
-  };
 
   return (
     <>
@@ -81,7 +63,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           disabled={conversationLoading || conversationContext.localConversation.llmResponding}
           input={props.input}
           setInput={props.setInput}
-          onSumbit={onSubmit}
         />
         <EuiSpacer />
       </EuiFlyoutFooter>

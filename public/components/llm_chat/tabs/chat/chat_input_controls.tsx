@@ -5,20 +5,43 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import autosize from 'autosize';
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
+import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
+import { ChatContext } from '../../header_chat_button';
+import { useChatActions } from '../../hooks/use_chat_actions';
 
 interface ChatInputControlsProps {
   input: string;
   setInput: (input: string) => void;
-  onSumbit: () => void;
   disabled: boolean;
 }
 
 export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   console.count('chat input controls rerender');
+  const chatContext = useContext(ChatContext)!;
+  const { send } = useChatActions();
+  const onSubmit = async () => {
+    const userInput = inputRef.current?.value.trim();
+    if (!userInput) return;
+    const inputConversation: IConversation = {
+      type: 'input',
+      content: userInput,
+      contentType: 'text',
+      context: {
+        appId: chatContext.appId,
+      },
+    };
+    props.setInput('');
+    inputRef.current!.value = '';
+    send(inputConversation);
+  };
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    if (inputRef.current) autosize(inputRef.current);
+    if (inputRef.current) {
+      inputRef.current.value = props.input;
+      autosize(inputRef.current);
+    }
   }, []);
 
   useEffect(() => {
@@ -35,14 +58,13 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           compressed
           autoFocus
           placeholder="Ask me anything..."
-          value={props.input}
-          onChange={(e) => props.setInput(e.target.value)}
           inputRef={inputRef}
+          onBlur={(e) => props.setInput(e.target.value)}
           style={{ minHeight: 40 }}
           onKeyPress={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              if (!props.disabled) props.onSumbit();
+              if (!props.disabled) onSubmit();
             }
           }}
         />
@@ -53,7 +75,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           size="m"
           display="fill"
           iconType="sortRight"
-          onClick={props.onSumbit}
+          onClick={onSubmit}
           isDisabled={props.disabled}
         />
       </EuiFlexItem>
