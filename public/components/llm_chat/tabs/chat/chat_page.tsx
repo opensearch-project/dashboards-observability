@@ -27,13 +27,16 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     loading: conversationLoading,
     error: conversationLoadingError,
   } = useGetChat();
-  const { send, loading: llmResponding, error: llmError } = useChatActions();
+  const { send } = useChatActions();
 
   useEffect(() => {
     if (chat) {
-      conversationContext.setLocalConversations(chat.attributes.conversations);
+      conversationContext.setLocalConversation((prev) => ({
+        ...prev,
+        conversations: chat.attributes.conversations,
+      }));
     } else if (!chat && !chatContext.chatId) {
-      conversationContext.setLocalConversations([]);
+      conversationContext.setLocalConversation((prev) => ({ ...prev, conversations: [] }));
     }
   }, [chat]);
 
@@ -62,8 +65,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
               setShowGreetings={setShowGreetings}
               conversationLoading={conversationLoading}
               conversationLoadingError={conversationLoadingError}
-              llmResponding={llmResponding}
-              llmError={llmError}
             />
           </EuiPageBody>
         </EuiPage>
@@ -71,7 +72,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       <EuiFlyoutFooter>
         <EuiSpacer />
         <ChatInputControls
-          disabled={conversationLoading || llmResponding}
+          disabled={conversationLoading || conversationContext.localConversation.llmResponding}
           input={props.input}
           setInput={props.setInput}
           onSumbit={onSubmit}

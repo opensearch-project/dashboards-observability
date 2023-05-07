@@ -40,10 +40,17 @@ interface IChatContext {
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
 interface IConversationContext {
-  localConversations: IConversation[];
-  setLocalConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
+  localConversation: LocalConversationState;
+  setLocalConversation: React.Dispatch<React.SetStateAction<LocalConversationState>>;
 }
 export const ConversationContext = React.createContext<IConversationContext | null>(null);
+
+// state for conversations cached in browser
+export interface LocalConversationState {
+  conversations: IConversation[];
+  llmResponding: boolean;
+  llmError?: Error;
+}
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   console.count('header chat button rerender');
@@ -52,7 +59,10 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
-  const [localConversations, setLocalConversations] = useState<IConversation[]>([]);
+  const [localConversation, setLocalConversation] = useState<LocalConversationState>({
+    conversations: [],
+    llmResponding: false,
+  });
 
   const prevId = useRef<string | undefined>();
   useEffect(() => {
@@ -82,10 +92,10 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
 
   const conversationContextValue: IConversationContext = useMemo(
     () => ({
-      localConversations,
-      setLocalConversations,
+      localConversation,
+      setLocalConversation,
     }),
-    [localConversations]
+    [localConversation]
   );
 
   return (

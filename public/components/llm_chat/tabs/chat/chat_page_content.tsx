@@ -17,8 +17,6 @@ interface ChatPageContentProps {
   setShowGreetings: (showGreetings: boolean) => void;
   conversationLoading: boolean;
   conversationLoadingError?: Error;
-  llmResponding: boolean;
-  llmError?: Error;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -27,9 +25,12 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const pageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     pageEndRef.current?.scrollIntoView();
-  }, [conversationContext.localConversations, props.llmResponding]);
+  }, [
+    conversationContext.localConversation.conversations,
+    conversationContext.localConversation.llmResponding,
+  ]);
 
-  if (props.conversationLoading && !conversationContext.localConversations.length) {
+  if (props.conversationLoading && !conversationContext.localConversation.conversations.length) {
     return <LoadingButton />;
   } else if (props.conversationLoadingError) {
     return (
@@ -45,7 +46,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   return (
     <>
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
-      {conversationContext.localConversations
+      {conversationContext.localConversation.conversations
         .map((conversation) => (
           <>
             <ConversationBubble type={conversation.type} contentType={conversation.contentType}>
@@ -60,13 +61,13 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           </>
         ))
         .reduce((prev: React.ReactNode[], curr) => [...prev, <EuiSpacer />, curr], [])}
-      {props.llmResponding && <LoadingButton />}
-      {props.llmError && (
+      {conversationContext.localConversation.llmResponding && <LoadingButton />}
+      {conversationContext.localConversation.llmError && (
         <EuiEmptyPrompt
           iconType="alert"
           iconColor="danger"
           title={<h2>Error from response</h2>}
-          body={props.llmError.message}
+          body={conversationContext.localConversation.llmError.message}
         />
       )}
       <div ref={pageEndRef} />

@@ -49,7 +49,7 @@ export const ChatHistoryPage: React.FC = () => {
       render: (id: string, item) => (
         <EuiLink
           onClick={() => {
-            conversationContext.setLocalConversations([]);
+            conversationContext.setLocalConversation((prev) => ({ ...prev, conversations: [] }));
             chatContext.setChatId(id);
             chatContext.setSelectedTabId('chat');
           }}
