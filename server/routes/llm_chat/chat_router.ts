@@ -12,10 +12,10 @@ import {
   IChat,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
-import { mdOutput, pplOutput, visOutput } from './mock';
+import { getOutputs } from './mock';
 
 export function registerChatRoute(router: IRouter) {
-  // TODO split into three routes: request LLM, create chat, update chat
+  // TODO split into three functions: request LLM, create chat, update chat
   router.post(
     {
       path: `${OBSERVABILITY_BASE}/chat/send`,
@@ -45,7 +45,7 @@ export function registerChatRoute(router: IRouter) {
         const chatId = request.body.chatId;
         const input = request.body.input;
         const localConversations = request.body.localConversations;
-        const outputs = [mdOutput, visOutput, pplOutput];
+        const outputs = await getOutputs();
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
             title: input.content.substring(0, 50),
