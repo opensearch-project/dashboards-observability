@@ -13,6 +13,7 @@ import {
   EuiPageBody,
   EuiText,
 } from '@elastic/eui';
+import { produce } from 'immer';
 import React, { useContext, useMemo, useState } from 'react';
 import { SavedObjectsFindOptions, SimpleSavedObject } from '../../../../../../../src/core/public';
 import { IChat } from '../../../../../common/types/observability_saved_object_attributes';
@@ -49,7 +50,11 @@ export const ChatHistoryPage: React.FC = () => {
       render: (id: string, item) => (
         <EuiLink
           onClick={() => {
-            conversationContext.setLocalConversation((prev) => ({ ...prev, conversations: [] }));
+            conversationContext.setLocalConversation(
+              produce((draft) => {
+                draft.conversations = [];
+              })
+            );
             chatContext.setChatId(id);
             chatContext.setSelectedTabId('chat');
           }}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { produce } from 'immer';
 import { useContext } from 'react';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { IConversation } from '../../../../common/types/observability_saved_object_attributes';
@@ -14,11 +15,13 @@ export const useChatActions = () => {
   const conversationContext = useContext(ConversationContext)!;
 
   const send = async (input: IConversation) => {
-    conversationContext.setLocalConversation((prev) => ({
-      llmError: undefined,
-      llmResponding: true,
-      conversations: [...prev.conversations, input],
-    }));
+    conversationContext.setLocalConversation(
+      produce((draft) => {
+        draft.conversations.push(input);
+        draft.llmError = undefined;
+        draft.llmResponding = true;
+      })
+    );
     try {
       const response = await coreServicesContext.http.post(`${OBSERVABILITY_BASE}/chat/send`, {
         body: JSON.stringify({
@@ -35,11 +38,12 @@ export const useChatActions = () => {
         conversations: response.conversations,
       });
     } catch (error) {
-      conversationContext.setLocalConversation((prev) => ({
-        llmError: error,
-        llmResponding: false,
-        conversations: prev.conversations,
-      }));
+      conversationContext.setLocalConversation(
+        produce((draft) => {
+          draft.llmError = error;
+          draft.llmResponding = false;
+        })
+      );
     }
   };
 

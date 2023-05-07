@@ -4,6 +4,7 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
 import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
 import { ChatContext, ConversationContext } from '../../header_chat_button';
@@ -31,12 +32,17 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
 
   useEffect(() => {
     if (chat) {
-      conversationContext.setLocalConversation((prev) => ({
-        ...prev,
-        conversations: chat.attributes.conversations,
-      }));
+      conversationContext.setLocalConversation(
+        produce((draft) => {
+          draft.conversations = chat.attributes.conversations;
+        })
+      );
     } else if (!chat && !chatContext.chatId) {
-      conversationContext.setLocalConversation((prev) => ({ ...prev, conversations: [] }));
+      conversationContext.setLocalConversation(
+        produce((draft) => {
+          draft.conversations = [];
+        })
+      );
     }
   }, [chat]);
 
