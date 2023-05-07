@@ -49,9 +49,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       },
     };
     props.setInput('');
-    conversationContext.setLocalConversations((prev) => [...prev, input]);
-    const outputs = await send(conversationContext.localConversations, input);
-    conversationContext.setLocalConversations((prev) => [...prev, ...outputs]);
+    send(input);
   };
 
   return (
