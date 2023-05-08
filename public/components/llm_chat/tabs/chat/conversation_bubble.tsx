@@ -7,6 +7,7 @@ import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
 import userAvatar from '../../../../assets/user_avatar.svg';
+import llmAvatar from '../../../../assets/llm_avatar.svg';
 
 interface ConversationBubbleProps {
   type: IConversation['type'];
@@ -44,7 +45,7 @@ export const ConversationBubble: React.FC<ConversationBubbleProps> = React.memo(
     <>
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiAvatar name="llm" size="l" iconType="managementApp" color="#e9edf3" />
+          <EuiAvatar name="llm" size="l" iconType={llmAvatar} iconSize="xxl" color="#e9edf3" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel

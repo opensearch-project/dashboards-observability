@@ -57,12 +57,12 @@ export const ConversationContent: React.FC<ConversationContentProps> = React.mem
     case 'ppl_visualization':
       const savedVisualization: SavedVisualization = {
         query: props.conversation.content,
-        selected_date_range: { start: 'now-15m', end: 'now', text: '' },
+        selected_date_range: { start: 'now-14d', end: 'now', text: '' },
         selected_timestamp: { name: 'timestamp', type: 'timestamp' },
         selected_fields: { tokens: [], text: '' },
         name: 'Flight count by destination',
         description: '',
-        type: 'bar',
+        type: 'line',
         sub_type: 'visualization',
       };
       return (
