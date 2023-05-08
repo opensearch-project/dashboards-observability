@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import {
   IConversation,
@@ -22,15 +22,18 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = (props) => {
   return (
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow={false}>
-        <EuiButton
-          className="llm-chat-suggestion-bubble-button"
-          size="s"
-          color="text"
+        {/* EuiButton does not have good support for long text */}
+        <EuiPanel
+          className="llm-chat-suggestion-bubble-panel"
           onClick={() => executeAction(props.suggestedAction, props.conversation)}
-          isDisabled={props.inputDisabled}
+          grow={false}
+          paddingSize="s"
+          color="plain"
+          disabled={props.inputDisabled}
+          hasBorder
         >
-          <EuiText style={{ overflowWrap: 'break-word' }}>{props.suggestedAction.message}</EuiText>
-        </EuiButton>
+          <EuiText>{props.suggestedAction.message}</EuiText>
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
