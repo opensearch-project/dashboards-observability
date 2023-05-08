@@ -17,6 +17,7 @@ interface ChatPageContentProps {
   setShowGreetings: (showGreetings: boolean) => void;
   conversationLoading: boolean;
   conversationLoadingError?: Error;
+  inputDisabled: boolean;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -47,20 +48,32 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     <>
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {conversationContext.localConversation.conversations
-        .map((conversation) => (
-          <>
+        .map((conversation, i) => (
+          // TODO add id to conversation
+          <React.Fragment key={i}>
             <ConversationBubble type={conversation.type} contentType={conversation.contentType}>
               <ConversationContent conversation={conversation} />
             </ConversationBubble>
-            {conversation.suggestedActions?.map((suggestedAction) => (
-              <>
+            {conversation.suggestedActions?.map((suggestedAction, j) => (
+              <React.Fragment key={`${i}-${j}`}>
                 <EuiSpacer size="s" />
-                <SuggestionBubble conversation={conversation} suggestedAction={suggestedAction} />
-              </>
+                <SuggestionBubble
+                  inputDisabled={props.inputDisabled}
+                  conversation={conversation}
+                  suggestedAction={suggestedAction}
+                />
+              </React.Fragment>
             ))}
-          </>
+          </React.Fragment>
         ))
-        .reduce((prev: React.ReactNode[], curr) => [...prev, <EuiSpacer />, curr], [])}
+        .reduce(
+          (prev: React.ReactNode[], curr, i) => [
+            ...prev,
+            <EuiSpacer key={`space-between-conversation-${i}`} />,
+            curr,
+          ],
+          []
+        )}
       {conversationContext.localConversation.llmResponding && <LoadingButton />}
       {conversationContext.localConversation.llmError && (
         <EuiEmptyPrompt

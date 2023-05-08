@@ -37,6 +37,8 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     }
   }, [chat]);
 
+  const inputDisabled = conversationLoading || conversationContext.localConversation.llmResponding;
+
   return (
     <>
       <EuiFlyoutBody>
@@ -47,17 +49,14 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
               setShowGreetings={setShowGreetings}
               conversationLoading={conversationLoading}
               conversationLoadingError={conversationLoadingError}
+              inputDisabled={inputDisabled}
             />
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiSpacer />
-        <ChatInputControls
-          disabled={conversationLoading || conversationContext.localConversation.llmResponding}
-          input={props.input}
-          setInput={props.setInput}
-        />
+        <ChatInputControls disabled={inputDisabled} input={props.input} setInput={props.setInput} />
         <EuiSpacer />
       </EuiFlyoutFooter>
     </>

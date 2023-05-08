@@ -6,7 +6,10 @@
 import { produce } from 'immer';
 import { useContext } from 'react';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
-import { IConversation } from '../../../../common/types/observability_saved_object_attributes';
+import {
+  IConversation,
+  ISuggestedAction,
+} from '../../../../common/types/observability_saved_object_attributes';
 import { ChatContext, ConversationContext, CoreServicesContext } from '../header_chat_button';
 
 interface SendResponse {
@@ -72,5 +75,20 @@ export const useChatActions = () => {
     });
   };
 
-  return { send, openChat };
+  const executeAction = (suggestAction: ISuggestedAction, conversation: IConversation) => {
+    switch (suggestAction.actionType) {
+      case 'send_as_input':
+        send({
+          type: 'input',
+          content: suggestAction.message,
+          contentType: 'text',
+        });
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  return { send, openChat, executeAction };
 };

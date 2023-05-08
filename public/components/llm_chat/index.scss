@@ -51,9 +51,11 @@
       text-align: center;
     }
   }
-  &.llm-chat-suggestion-bubble-panel {
-    border-radius: 18px;
-  }
+}
+
+.euiButton.llm-chat-suggestion-bubble-button {
+  border-radius: 18px;
+  border-color: $ouiColorDarkShade;
 }
 
 .llm-chat-bubble-panel.llm-chat-bubble-panel-input {

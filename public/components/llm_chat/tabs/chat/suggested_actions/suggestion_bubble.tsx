@@ -3,33 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import {
   IConversation,
   ISuggestedAction,
 } from '../../../../../../common/types/observability_saved_object_attributes';
-import { executeAction } from './execute_action';
+import { useChatActions } from '../../../hooks/use_chat_actions';
 
 interface SuggestionBubbleProps {
   conversation: IConversation;
   suggestedAction: ISuggestedAction;
+  inputDisabled: boolean;
 }
 
 export const SuggestionBubble: React.FC<SuggestionBubbleProps> = (props) => {
+  const { executeAction } = useChatActions();
   return (
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow={false}>
-        <EuiPanel
-          className="llm-chat-suggestion-bubble-panel"
-          onClick={() => executeAction(props.suggestedAction.actionType, props.conversation)}
-          grow={false}
-          paddingSize="s"
-          color="plain"
-          hasBorder
+        <EuiButton
+          className="llm-chat-suggestion-bubble-button"
+          size="s"
+          color="text"
+          onClick={() => executeAction(props.suggestedAction, props.conversation)}
+          isDisabled={props.inputDisabled}
         >
-          <EuiText size="s">{props.suggestedAction.message}</EuiText>
-        </EuiPanel>
+          {props.suggestedAction.message}
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
