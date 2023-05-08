@@ -35,7 +35,6 @@ import { init as initQueryResult } from '../event_analytics/redux/slices/query_r
 import { changeQuery, init as initQuery } from '../event_analytics/redux/slices/query_slice';
 import { addTab, setSelectedQueryTab } from '../event_analytics/redux/slices/query_tab_slice';
 import { useToast } from '../common/toast';
-import { coreRefs } from '../../framework/core_refs';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 
