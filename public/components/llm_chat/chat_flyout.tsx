@@ -6,7 +6,7 @@
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ChatTabBar } from './components/chat_tab_bar';
-import { ChatContext } from './header_chat_button';
+import { ChatContext } from './chat_header_button';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 

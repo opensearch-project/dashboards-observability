@@ -6,7 +6,7 @@
 import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
 import { LoadingButton } from '../../components/loading_button';
-import { ChatStateContext } from '../../header_chat_button';
+import { ChatStateContext } from '../../chat_header_button';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './message_bubble';
 import { MessageContent } from './message_content';

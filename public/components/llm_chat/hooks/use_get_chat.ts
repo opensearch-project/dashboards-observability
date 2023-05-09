@@ -13,7 +13,7 @@ import {
   CHAT_SAVED_OBJECT,
   IChat,
 } from '../../../../common/types/observability_saved_object_attributes';
-import { ChatContext, CoreServicesContext } from '../header_chat_button';
+import { ChatContext, CoreServicesContext } from '../chat_header_button';
 
 interface State<T> {
   data?: T;

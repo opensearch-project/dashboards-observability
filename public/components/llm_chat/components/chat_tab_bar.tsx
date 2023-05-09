@@ -14,7 +14,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
-import { ChatContext } from '../header_chat_button';
+import { ChatContext } from '../chat_header_button';
 import { useChatActions } from '../hooks/use_chat_actions';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history';

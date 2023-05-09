@@ -6,7 +6,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
-import { ChatStateContext } from '../../header_chat_button';
+import { ChatStateContext } from '../../chat_header_button';
 import { useGetChat } from '../../hooks/use_get_chat';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';

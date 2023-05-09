@@ -10,7 +10,7 @@ import {
   IMessage,
   ISuggestedAction,
 } from '../../../../common/types/observability_saved_object_attributes';
-import { ChatContext, ChatStateContext, CoreServicesContext } from '../header_chat_button';
+import { ChatContext, ChatStateContext, CoreServicesContext } from '../chat_header_button';
 
 interface SendResponse {
   chatId: string;

@@ -11,7 +11,7 @@ import { SavedVisualization } from '../../../../../common/types/explorer';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { uiSettingsService } from '../../../../../common/utils';
 import { SavedObjectVisualization } from '../../../visualizations/saved_object_visualization';
-import { CoreServicesContext } from '../../header_chat_button';
+import { CoreServicesContext } from '../../chat_header_button';
 
 interface MessageContentProps {
   message: IMessage;

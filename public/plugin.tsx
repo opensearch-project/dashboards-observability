@@ -43,7 +43,7 @@ import {
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
-import { CoreServicesContext, HeaderChatButton } from './components/llm_chat/header_chat_button';
+import { CoreServicesContext, HeaderChatButton } from './components/llm_chat/chat_header_button';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 // export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
