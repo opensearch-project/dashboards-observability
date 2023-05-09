@@ -76,7 +76,7 @@ describe('Search a query on event home', () => {
 });
 
 describe('Open flyout for a data row to see details', () => {
-  before(() => {
+  beforeEach(() => {
     landOnEventExplorer();
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
@@ -215,8 +215,7 @@ describe('Click actions test', () => {
   });
 });
 
-//  Waiting for PR451
-describe.skip('Override timestamp for an index', () => {
+describe('Override timestamp for an index', () => {
   it('Click override button to override default timestamp', () => {
     landOnEventExplorer();
     suppressResizeObserverIssue();
