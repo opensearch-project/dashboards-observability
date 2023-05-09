@@ -46,9 +46,7 @@ describe('Has working breadcrumbs', () => {
   it('Redirect to correct page on breadcrumb click', () => {
     landOnEventExplorer();
     suppressResizeObserverIssue();
-    cy.wait(delay);
-    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
-    cy.wait(delay);
+    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(), { timeout: COMMAND_TIMEOUT_LONG };
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
 });
@@ -224,7 +222,6 @@ describe('Override timestamp for an index', () => {
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').click({ force: true });
-    cy.wait(delay);
 
     cy.get('[data-attr-field="utc_time"] [data-test-subj="eventFields__default-timestamp-mark"')
       .contains('Default Timestamp')
@@ -452,8 +449,7 @@ describe('Visualizing data', () => {
       .type(FIELD_AGENT);
     cy.get(`input[value="${FIELD_AGENT}"]`).click();
     cy.get('[data-test-subj="panelCloseBtn"]').click();
-    cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-    cy.wait[delay];
+    cy.get('[data-test-subj="visualizeEditorRenderButton"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
     suppressResizeObserverIssue();
 
     cy.get('.infolayer .legendtext').as('legandTxt');
@@ -484,10 +480,9 @@ describe('Saves a query on explorer page', () => {
     landOnPanels();
     cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
     cy.get('input.euiFieldText').type(TESTING_PANEL);
-    cy.get('.euiButton__text')
+    cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
       .contains(/^Create$/)
       .click();
-    cy.wait(delay);
     landOnEventExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
     suppressResizeObserverIssue();
@@ -512,8 +507,7 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-    cy.wait(delay * 2);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
 
     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('successfully')
@@ -532,8 +526,7 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-    cy.wait(delay * 2);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('successfully')
       .should('exist');
