@@ -107,22 +107,6 @@ export const Home = ({
     return tabId;
   };
 
-  const addNewTab = async () => {
-    // get a new tabId
-    const tabId = htmlIdGenerator(TAB_ID_TXT_PFX)();
-
-    // create a new tab
-    await batch(() => {
-      dispatch(initQuery({ tabId }));
-      dispatch(initQueryResult({ tabId }));
-      dispatch(initFields({ tabId }));
-      dispatch(addTab({ tabId }));
-      dispatch(initPatterns({ tabId }));
-    });
-
-    return tabId;
-  };
-
   const onEditClick = async (savedVisualizationId: string) => {
     // open a new tab in explorer for loading this perticular visualization data to edit
     const newTabId = await addNewTab();
