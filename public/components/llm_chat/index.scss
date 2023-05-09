@@ -3,6 +3,48 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.llm-chat-header-icon-wrapper {
+  &:hover::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    border-radius: 9px;
+    border: 2px solid #005eb8;
+    z-index: -1;
+  }
+  &:focus::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    border-radius: 9px;
+    border: 2px solid #00a3e0;
+    background-color: #b9d9eb;
+    z-index: -1;
+  }
+}
+.llm-chat-header-icon-wrapper-selected {
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    border-radius: 9px;
+    background-color: #005eb8;
+    z-index: -1;
+  }
+}
+
 .llm-chat-flyout {
   .euiFlyoutFooter {
     background: transparent;

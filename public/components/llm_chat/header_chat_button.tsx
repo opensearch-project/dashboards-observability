@@ -4,6 +4,7 @@
  */
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ApplicationStart,
@@ -116,7 +117,12 @@ How may I help you?`,
 
   return (
     <>
-      <EuiHeaderSectionItemButton onClick={() => setFlyoutVisible(!flyoutVisible)}>
+      <EuiHeaderSectionItemButton
+        className={classNames('llm-chat-header-icon-wrapper', {
+          'llm-chat-header-icon-wrapper-selected': flyoutVisible,
+        })}
+        onClick={() => setFlyoutVisible(!flyoutVisible)}
+      >
         <EuiIcon type={chatIcon} size="l" />
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
