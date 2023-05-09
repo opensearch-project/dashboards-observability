@@ -1,4 +1,4 @@
-const conversations = [
+const messages = [
   [
     {
       type: 'output',
@@ -138,12 +138,12 @@ export const getOutputs = (chatId?: string) => {
     'source = opensearch_dashboards_sample_data_flights | stats count() by Dest'; */
 
   i += 1;
-  /* const visOutput: IConversation = {
+  /* const visOutput: IMessage = {
     type: 'output',
     content: visResponse,
     contentType: 'visualization',
   }; */
-  /* const pplOutput: IConversation = {
+  /* const pplOutput: IMessage = {
     type: 'output',
     content: pplVisResponse,
     contentType: 'ppl_visualization',
@@ -163,5 +163,5 @@ export const getOutputs = (chatId?: string) => {
     ],
   }; */
   // return new Promise((resolve) => setTimeout(resolve, 5000)).then(() => [mdOutput]);
-  return conversations[i - 1];
+  return messages[i - 1];
 };

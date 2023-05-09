@@ -6,13 +6,13 @@
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import autosize from 'autosize';
 import React, { useContext, useEffect, useRef } from 'react';
-import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { ChatContext } from '../../header_chat_button';
 import { useChatActions } from '../../hooks/use_chat_actions';
 
 interface ChatInputControlsProps {
   input: string;
-  setInput: (input: string) => void;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
   disabled: boolean;
 }
 
@@ -26,13 +26,14 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       inputRef.current.value = props.input;
       autosize(inputRef.current);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSubmit = async () => {
     const userInput = inputRef.current?.value.trim();
     if (!userInput) return;
 
-    const inputConversation: IConversation = {
+    const inputMessage: IMessage = {
       type: 'input',
       content: userInput,
       contentType: 'text',
@@ -43,7 +44,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     props.setInput('');
     inputRef.current!.value = '';
     inputRef.current!.style.height = '40px';
-    send(inputConversation);
+    send(inputMessage);
   };
 
   return (

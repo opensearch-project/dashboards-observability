@@ -6,13 +6,13 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import {
-  IConversation,
+  IMessage,
   ISuggestedAction,
 } from '../../../../../../common/types/observability_saved_object_attributes';
 import { useChatActions } from '../../../hooks/use_chat_actions';
 
 interface SuggestionBubbleProps {
-  conversation: IConversation;
+  message: IMessage;
   suggestedAction: ISuggestedAction;
   inputDisabled: boolean;
 }
@@ -25,7 +25,7 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = (props) => {
         {/* EuiButton does not have good support for long text */}
         <EuiPanel
           className="llm-chat-suggestion-bubble-panel"
-          onClick={() => executeAction(props.suggestedAction, props.conversation)}
+          onClick={() => executeAction(props.suggestedAction, props.message)}
           grow={false}
           paddingSize="s"
           color="plain"

@@ -6,38 +6,35 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
-import { ConversationContext } from '../../header_chat_button';
+import { ChatStateContext } from '../../header_chat_button';
 import { useGetChat } from '../../hooks/use_get_chat';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
 
 interface ChatPageProps {
   input: string;
-  setInput: (input: string) => void;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
   console.count('chat page rerender');
-  const conversationContext = useContext(ConversationContext)!;
+  const chatStateContext = useContext(ChatStateContext)!;
   const [showGreetings, setShowGreetings] = useState(true);
-  const {
-    data: chat,
-    loading: conversationLoading,
-    error: conversationLoadingError,
-  } = useGetChat();
+  const { data: chat, loading: messagesLoading, error: messagesLoadingError } = useGetChat();
 
   useEffect(() => {
-    if (chat && !conversationContext.localConversation.persisted) {
-      conversationContext.setLocalConversation(
+    if (chat && !chatStateContext.chatState.persisted) {
+      chatStateContext.setChatState(
         produce((draft) => {
-          draft.conversations = chat.attributes.conversations;
+          draft.messages = chat.attributes.messages;
           draft.persisted = true;
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat]);
 
-  const inputDisabled = conversationLoading || conversationContext.localConversation.llmResponding;
+  const inputDisabled = messagesLoading || chatStateContext.chatState.llmResponding;
 
   return (
     <>
@@ -47,8 +44,8 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
             <ChatPageContent
               showGreetings={showGreetings}
               setShowGreetings={setShowGreetings}
-              conversationLoading={conversationLoading}
-              conversationLoadingError={conversationLoadingError}
+              messagesLoading={messagesLoading}
+              messagesLoadingError={messagesLoadingError}
               inputDisabled={inputDisabled}
             />
           </EuiPageBody>

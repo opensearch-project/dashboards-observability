@@ -7,14 +7,14 @@ import { produce } from 'immer';
 import { useContext } from 'react';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import {
-  IConversation,
+  IMessage,
   ISuggestedAction,
 } from '../../../../common/types/observability_saved_object_attributes';
-import { ChatContext, ConversationContext, CoreServicesContext } from '../header_chat_button';
+import { ChatContext, ChatStateContext, CoreServicesContext } from '../header_chat_button';
 
 interface SendResponse {
   chatId: string;
-  conversations: IConversation[];
+  messages: IMessage[];
 }
 
 let abortControllerRef: AbortController;
@@ -22,14 +22,14 @@ let abortControllerRef: AbortController;
 export const useChatActions = () => {
   const chatContext = useContext(ChatContext)!;
   const coreServicesContext = useContext(CoreServicesContext)!;
-  const conversationContext = useContext(ConversationContext)!;
+  const chatStateContext = useContext(ChatStateContext)!;
 
-  const send = async (input: IConversation) => {
+  const send = async (input: IMessage) => {
     const abortController = new AbortController();
     abortControllerRef = abortController;
-    conversationContext.setLocalConversation(
+    chatStateContext.setChatState(
       produce((draft) => {
-        draft.conversations.push(input);
+        draft.messages.push(input);
         draft.llmError = undefined;
         draft.llmResponding = true;
       })
@@ -40,24 +40,24 @@ export const useChatActions = () => {
         {
           body: JSON.stringify({
             chatId: chatContext.chatId,
-            localConversations: conversationContext.localConversation.conversations,
+            messages: chatStateContext.chatState.messages,
             input,
           }),
         }
       );
       if (abortController.signal.aborted) return;
       chatContext.setChatId(response.chatId);
-      conversationContext.setLocalConversation({
+      chatStateContext.setChatState({
         llmError: undefined,
         llmResponding: false,
-        conversations: response.conversations,
+        messages: response.messages,
         persisted: true,
       });
     } catch (error) {
       if (abortController.signal.aborted) return;
-      conversationContext.setLocalConversation(
+      chatStateContext.setChatState(
         produce((draft) => {
-          draft.llmError = error;
+          draft.llmError = error as Error;
           draft.llmResponding = false;
         })
       );
@@ -68,9 +68,9 @@ export const useChatActions = () => {
     abortControllerRef?.abort();
     chatContext.setChatId(chatId);
     chatContext.setSelectedTabId('chat');
-    conversationContext.setLocalConversation({
+    chatStateContext.setChatState({
       llmResponding: false,
-      conversations: [
+      messages: [
         {
           content: `Hello, I'm the Observability assistant.
 
@@ -91,7 +91,7 @@ How may I help you?`,
     });
   };
 
-  const executeAction = (suggestAction: ISuggestedAction, conversation: IConversation) => {
+  const executeAction = (suggestAction: ISuggestedAction, message: IMessage) => {
     switch (suggestAction.actionType) {
       case 'send_as_input':
         send({

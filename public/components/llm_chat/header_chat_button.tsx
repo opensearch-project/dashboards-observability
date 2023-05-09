@@ -11,7 +11,7 @@ import {
   SavedObjectsClientContract,
 } from '../../../../../src/core/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import { IConversation } from '../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../common/types/observability_saved_object_attributes';
 import chatIcon from '../../assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
 import { TabId } from './components/chat_tab_bar';
@@ -39,20 +39,20 @@ interface IChatContext {
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
-interface IConversationContext {
-  localConversation: LocalConversationState;
-  setLocalConversation: React.Dispatch<React.SetStateAction<LocalConversationState>>;
+interface IChatStateContext {
+  chatState: ChatState;
+  setChatState: React.Dispatch<React.SetStateAction<ChatState>>;
 }
-export const ConversationContext = React.createContext<IConversationContext | null>(null);
+export const ChatStateContext = React.createContext<IChatStateContext | null>(null);
 
 /**
- * state for conversations cached in browser.
+ * state for messages cached in browser.
  *
- * @property persisted - whether conversations have been saved to index, which happens when
- * user sends input to LLM. It is used to determine when to reset local state for conversations
+ * @property persisted - whether messages have been saved to index, which happens when
+ * user sends input to LLM. It is used to determine when to reset local state for messages
  */
-export interface LocalConversationState {
-  conversations: IConversation[];
+export interface ChatState {
+  messages: IMessage[];
   llmResponding: boolean;
   llmError?: Error;
   persisted: boolean;
@@ -65,8 +65,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
-  const [localConversation, setLocalConversation] = useState<LocalConversationState>({
-    conversations: [
+  const [chatState, setChatState] = useState<ChatState>({
+    messages: [
       {
         content: `Hello, I'm the Observability assistant.
 
@@ -106,12 +106,12 @@ How may I help you?`,
     [appId, chatId, flyoutVisible, selectedTabId]
   );
 
-  const conversationContextValue: IConversationContext = useMemo(
+  const chatStateContextValue: IChatStateContext = useMemo(
     () => ({
-      localConversation,
-      setLocalConversation,
+      chatState,
+      setChatState,
     }),
-    [localConversation]
+    [chatState]
   );
 
   return (
@@ -120,9 +120,9 @@ How may I help you?`,
         <EuiIcon type={chatIcon} size="l" />
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
-        <ConversationContext.Provider value={conversationContextValue}>
+        <ChatStateContext.Provider value={chatStateContextValue}>
           {flyoutVisible ? <ChatFlyout input={input} setInput={setInput} /> : null}
-        </ConversationContext.Provider>
+        </ChatStateContext.Provider>
       </ChatContext.Provider>
     </>
   );

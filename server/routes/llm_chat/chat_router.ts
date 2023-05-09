@@ -22,8 +22,8 @@ export function registerChatRoute(router: IRouter) {
       validate: {
         body: schema.object({
           chatId: schema.maybe(schema.string()),
-          // TODO finish schema
-          localConversations: schema.arrayOf(schema.any()),
+          // TODO finish schema, messages should be retrieved from index
+          messages: schema.arrayOf(schema.any()),
           input: schema.object({
             type: schema.string(),
             context: schema.object({
@@ -44,29 +44,29 @@ export function registerChatRoute(router: IRouter) {
         const client = context.core.savedObjects.client;
         const chatId = request.body.chatId;
         const input = request.body.input;
-        const localConversations = request.body.localConversations;
+        const messages = request.body.messages;
         const outputs = await getOutputs(chatId);
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
             title: input.content.substring(0, 50),
             version: SAVED_OBJECT_VERSION,
             createdTimeMs: new Date().getTime(),
-            conversations: [...localConversations, input, ...outputs],
+            messages: [...messages, input, ...outputs],
           });
           return response.ok({
             body: {
               chatId: createResponse.id,
-              conversations: createResponse.attributes.conversations,
+              messages: createResponse.attributes.messages,
             },
           });
         }
         const updateResponse = await client.update<Partial<IChat>>(CHAT_SAVED_OBJECT, chatId, {
-          conversations: [...localConversations, input, ...outputs],
+          messages: [...messages, input, ...outputs],
         });
         return response.ok({
           body: {
             chatId,
-            conversations: updateResponse.attributes.conversations,
+            messages: updateResponse.attributes.messages,
           },
         });
       } catch (error) {

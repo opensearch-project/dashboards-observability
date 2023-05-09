@@ -5,17 +5,17 @@
 
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { IConversation } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import userAvatar from '../../../../assets/user_avatar.svg';
 import llmAvatar from '../../../../assets/llm_avatar.svg';
 
-interface ConversationBubbleProps {
-  type: IConversation['type'];
-  contentType: IConversation['contentType'];
+interface MessageBubbleProps {
+  type: IMessage['type'];
+  contentType: IMessage['contentType'];
 }
 
-export const ConversationBubble: React.FC<ConversationBubbleProps> = React.memo((props) => {
-  console.count('conversation rerender:');
+export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
+  console.count('message rerender:');
   if (props.type === 'input') {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems="flexStart">

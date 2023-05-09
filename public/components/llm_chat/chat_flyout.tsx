@@ -12,7 +12,7 @@ import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
 interface ChatFlyoutProps {
   input: string;
-  setInput: (input: string) => void;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {

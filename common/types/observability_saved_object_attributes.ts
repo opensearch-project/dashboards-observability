@@ -23,11 +23,11 @@ export interface IChat extends SavedObjectAttributes {
   title: string;
   version: number;
   createdTimeMs: number;
-  conversations: IConversation[];
+  messages: IMessage[];
 }
 
 // TODO separate input and output
-export interface IConversation extends SavedObjectAttributes {
+export interface IMessage extends SavedObjectAttributes {
   type: 'input' | 'output';
   contentType: 'text' | 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
