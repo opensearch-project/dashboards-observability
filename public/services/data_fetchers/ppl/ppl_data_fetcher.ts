@@ -32,7 +32,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
   ) {
     super();
     // index/index patterns for this search
-    this.queryIndex = this.getIndex(this.searchParams.query);
+    this.queryIndex = this.getIndex(this.searchParams.query.rawQuery);
   }
 
   async setTimestamp(index: string) {
@@ -186,7 +186,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
           tabId,
           query: {
             finalQuery,
-            [RAW_QUERY]: query,
+            [RAW_QUERY]: query.rawQuery,
             [SELECTED_TIMESTAMP]: curTimestamp,
           },
         })
