@@ -148,7 +148,7 @@ import { DeleteModal } from '../../../../public/components/common/helpers/delete
         },
         {
           text: 'Added Integration',
-          href: '#/placeholder/added'
+          href: '#/added'
         },
         {
           text: appId,
@@ -236,7 +236,7 @@ import { DeleteModal } from '../../../../public/components/common/helpers/delete
                     <h4>Template</h4>
                   </EuiText>
                   <EuiSpacer size="m" />
-                  <EuiLink href={`#placeholder/available/${data.data.templateName}`}>
+                  <EuiLink href={`#/available/${data.data.templateName}`}>
                     {data.data.templateName}
                   </EuiLink>
                 </EuiFlexItem>

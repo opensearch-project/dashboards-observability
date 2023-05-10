@@ -28,12 +28,12 @@ export const Sidebar = (props: { children: React.ReactNode }) => {
         {
           name: 'Available integrations',
           id: 1,
-          href: '#/placeholder/available',
+          href: '#/available',
         },
         {
           name: 'Added integrations',
           id: 2,
-          href: '#/placeholder/added',
+          href: '#/added',
         },
       ],
     },

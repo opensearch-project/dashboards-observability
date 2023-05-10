@@ -76,7 +76,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                       <EuiButton
                         aria-label="Go to Developers Tools"
                         onClick={() => {
-                          window.location.assign(`#/placeholder/available/${i.templateName}`);
+                          window.location.assign(`#/available/${i.templateName}`);
                         }}
                       >
                         View Details

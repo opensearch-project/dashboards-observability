@@ -29,7 +29,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       render: (value, record) => (
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationLink`}
-          href={`#/placeholder/added/${record.id}`}
+          href={`#/added/${record.id}`}
         >
           {_.truncate(record.id, { length: 100 })}
         </EuiLink>
@@ -43,7 +43,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       render: (value, record) => (
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationDescription`}
-          href={`#/placeholder/available/${record.templateName}`}
+          href={`#/available/${record.templateName}`}
         >
           {_.truncate(record.templateName, { length: 100 })}
         </EuiLink>
@@ -154,7 +154,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           <EuiText textAlign="center">
             <h2>
               There are currently no added integrations. Add them{' '}
-              <EuiLink href={'#/placeholder/available'}>here</EuiLink> to start using pre-canned
+              <EuiLink href={'#/available'}>here</EuiLink> to start using pre-canned
               assets!
             </h2>
           </EuiText>
