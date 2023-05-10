@@ -72,9 +72,7 @@ export const useChatActions = () => {
       llmResponding: false,
       messages: [
         {
-          content: `Hello, I'm the Observability assistant.
-
-How may I help you?`,
+          content: `Hello, I'm the Observability assistant.\n\nHow may I help you?`,
           contentType: 'markdown',
           type: 'output',
           suggestedActions: [

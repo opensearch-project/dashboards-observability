@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import {
   IMessage,
@@ -32,7 +32,9 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = (props) => {
           disabled={props.inputDisabled}
           hasBorder
         >
-          <EuiText>{props.suggestedAction.message}</EuiText>
+          <EuiText color={props.inputDisabled ? 'subdued' : 'default'}>
+            {props.suggestedAction.message}
+          </EuiText>
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -5,7 +5,8 @@
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useEffectOnce } from 'react-use';
 import {
   ApplicationStart,
   HttpStart,
@@ -69,9 +70,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [chatState, setChatState] = useState<ChatState>({
     messages: [
       {
-        content: `Hello, I'm the Observability assistant.
-
-How may I help you?`,
+        content: `Hello, I'm the Observability assistant.\n\nHow may I help you?`,
         contentType: 'markdown',
         type: 'output',
         suggestedActions: [
@@ -84,15 +83,10 @@ How may I help you?`,
     persisted: false,
   });
 
-  useEffect(() => {
-    const subscription = props.application.currentAppId$.subscribe({
-      next(id) {
-        setAppId(id);
-      },
-    });
+  useEffectOnce(() => {
+    const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
     return () => subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const chatContextValue: IChatContext = useMemo(
     () => ({

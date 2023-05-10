@@ -5,8 +5,8 @@
 
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useContext } from 'react';
-import { ChatTabBar } from './components/chat_tab_bar';
 import { ChatContext } from './chat_header_button';
+import { ChatTabBar } from './components/chat_tab_bar';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
@@ -34,20 +34,18 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   }
 
   return (
-    <>
-      <EuiFlyout
-        className="llm-chat-flyout"
-        paddingSize="none"
-        size="460px"
-        ownFocus={false}
-        hideCloseButton
-        onClose={() => chatContext.setFlyoutVisible(false)}
-      >
-        <EuiFlyoutHeader className="llm-chat-flyout-header">
-          <ChatTabBar />
-        </EuiFlyoutHeader>
-        {content}
-      </EuiFlyout>
-    </>
+    <EuiFlyout
+      className="llm-chat-flyout"
+      paddingSize="none"
+      size="460px"
+      ownFocus={false}
+      hideCloseButton
+      onClose={() => chatContext.setFlyoutVisible(false)}
+    >
+      <EuiFlyoutHeader className="llm-chat-flyout-header">
+        <ChatTabBar />
+      </EuiFlyoutHeader>
+      {content}
+    </EuiFlyout>
   );
 };

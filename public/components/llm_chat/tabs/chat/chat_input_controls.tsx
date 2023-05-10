@@ -5,7 +5,8 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import autosize from 'autosize';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useRef } from 'react';
+import { useEffectOnce } from 'react-use';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { ChatContext } from '../../chat_header_button';
 import { useChatActions } from '../../hooks/use_chat_actions';
@@ -21,13 +22,12 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   const chatContext = useContext(ChatContext)!;
   const { send } = useChatActions();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
+  useEffectOnce(() => {
     if (inputRef.current) {
       inputRef.current.value = props.input;
       autosize(inputRef.current);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const onSubmit = async () => {
     const userInput = inputRef.current?.value.trim();

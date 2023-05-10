@@ -45,6 +45,7 @@ export function registerChatRoute(router: IRouter) {
         const chatId = request.body.chatId;
         const input = request.body.input;
         const messages = request.body.messages;
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         const outputs = await getOutputs(chatId);
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
