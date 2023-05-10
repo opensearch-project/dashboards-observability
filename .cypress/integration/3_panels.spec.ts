@@ -644,8 +644,7 @@ const eraseTestPanels = () => {
   eraseLegacyPanels();
   eraseSavedObjectPaenls();
 };
-const uuidRx =
-  /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
+const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () =>
   cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
