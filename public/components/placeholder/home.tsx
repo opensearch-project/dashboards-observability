@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import React, { ReactChild, useEffect, useState } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
@@ -20,7 +19,7 @@ import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_an
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
 import { ObservabilitySideBar } from '../common/side_nav';
-import { NotificationsStart } from '../../../../../src/core/public';
+import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { APP_ANALYTICS_API_PREFIX } from '../../../common/constants/application_analytics';
 import {
   ApplicationRequestType,
@@ -48,6 +47,7 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   timestampUtils: TimestampUtils;
   notifications: NotificationsStart;
   queryManager: QueryManager;
+  parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
 export interface AppAnalyticsComponentDeps extends TraceAnalyticsComponentDeps {
@@ -58,6 +58,7 @@ export interface AppAnalyticsComponentDeps extends TraceAnalyticsComponentDeps {
   setQueryWithStorage: (newQuery: string) => void;
   setFiltersWithStorage: (newFilters: FilterType[]) => void;
   setAppConfigs: (newAppConfigs: FilterType[]) => void;
+  parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
 export const Home = (props: HomeProps) => {
@@ -388,88 +389,90 @@ export const Home = (props: HomeProps) => {
         }}
         toastLifeTimeMs={6000}
       />
-      <Switch>
-        <Route
-          exact
-          path={['/placeholder', '/placeholder/available']}
-          render={() => (
-            <Sidebar>
-              <AvailableIntegrationOverviewPage
-                loading={false}
-                applications={applicationList}
-                fetchApplications={fetchApps}
-                renameApplication={renameApp}
-                deleteApplication={deleteApp}
-                clearStorage={clearStorage}
-                moveToApp={moveToApp}
-                {...commonProps}
-              />
-            </Sidebar>
-          )}
-        />
-        <Route
-          exact
-          path={'/placeholder/added'}
-          render={() => (
-            <Sidebar>
-              <AddedIntegrationOverviewPage
-                loading={false}
-                applications={applicationList}
-                fetchApplications={fetchApps}
-                renameApplication={renameApp}
-                deleteApplication={deleteApp}
-                clearStorage={clearStorage}
-                moveToApp={moveToApp}
-                {...commonProps}
-              />
-            </Sidebar>
-          )}
-        />
-        <Route
-          exact
-          path={'/placeholder/added/:id+'}
-          render={(routerProps) => (
-            <Sidebar>
-              <AddedIntegration
-                disabled={false}
-                appId={decodeURIComponent(routerProps.match.params.id)}
-                pplService={pplService}
-                dslService={dslService}
-                savedObjects={savedObjects}
-                timestampUtils={timestampUtils}
-                notifications={notifications}
-                setToasts={setToast}
-                updateApp={updateApp}
-                callback={callback}
-                queryManager={queryManager}
-                {...commonProps}
-              />
-            </Sidebar>
-          )}
-        />
-        <Route
-          exact
-          path={'/placeholder/available/:id+'}
-          render={(routerProps) => (
-            <Sidebar>
-            <Integration
-              disabled={false}
-              appId={decodeURIComponent(routerProps.match.params.id)}
-              pplService={pplService}
-              dslService={dslService}
-              savedObjects={savedObjects}
-              timestampUtils={timestampUtils}
-              notifications={notifications}
-              setToasts={setToast}
-              updateApp={updateApp}
-              callback={callback}
-              queryManager={queryManager}
-              {...commonProps}
-            />
-            </Sidebar>
-          )}
-        />
-      </Switch>
+      <HashRouter>
+        <Switch>
+          <Route
+            exact
+            path={['/', '/available']}
+            render={() => (
+              <Sidebar>
+                <AvailableIntegrationOverviewPage
+                  loading={false}
+                  applications={applicationList}
+                  fetchApplications={fetchApps}
+                  renameApplication={renameApp}
+                  deleteApplication={deleteApp}
+                  clearStorage={clearStorage}
+                  moveToApp={moveToApp}
+                  {...commonProps}
+                />
+              </Sidebar>
+            )}
+          />
+          <Route
+            exact
+            path={'/added'}
+            render={() => (
+              <Sidebar>
+                <AddedIntegrationOverviewPage
+                  loading={false}
+                  applications={applicationList}
+                  fetchApplications={fetchApps}
+                  renameApplication={renameApp}
+                  deleteApplication={deleteApp}
+                  clearStorage={clearStorage}
+                  moveToApp={moveToApp}
+                  {...commonProps}
+                />
+              </Sidebar>
+            )}
+          />
+          <Route
+            exact
+            path={'/added/:id+'}
+            render={(routerProps) => (
+              <Sidebar>
+                <AddedIntegration
+                  disabled={false}
+                  appId={decodeURIComponent(routerProps.match.params.id)}
+                  pplService={pplService}
+                  dslService={dslService}
+                  savedObjects={savedObjects}
+                  timestampUtils={timestampUtils}
+                  notifications={notifications}
+                  setToasts={setToast}
+                  updateApp={updateApp}
+                  callback={callback}
+                  queryManager={queryManager}
+                  {...commonProps}
+                />
+              </Sidebar>
+            )}
+          />
+          <Route
+            exact
+            path={'/available/:id+'}
+            render={(routerProps) => (
+              <Sidebar>
+                <Integration
+                  disabled={false}
+                  appId={decodeURIComponent(routerProps.match.params.id)}
+                  pplService={pplService}
+                  dslService={dslService}
+                  savedObjects={savedObjects}
+                  timestampUtils={timestampUtils}
+                  notifications={notifications}
+                  setToasts={setToast}
+                  updateApp={updateApp}
+                  callback={callback}
+                  queryManager={queryManager}
+                  {...commonProps}
+                />
+              </Sidebar>
+            )}
+          />
+        </Switch>
+      </HashRouter>
     </div>
   );
 };

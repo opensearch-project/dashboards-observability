@@ -204,7 +204,7 @@ export class ObservabilityPlugin
       title: observabilityIntegrationsTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityIntegrationsPluginOrder,
-      mount: appMountWithStartPage('placeholder'),
+      mount: appMountWithStartPage('integrations'),
     });
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
