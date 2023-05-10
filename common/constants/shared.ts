@@ -52,6 +52,10 @@ export const observabilityPanelsID = 'observability-dashboards';
 export const observabilityPanelsTitle = 'Dashboards';
 export const observabilityPanelsPluginOrder = 5095;
 
+export const observabilityIntegrationsID = 'observability-integrations';
+export const observabilityIntegrationsTitle = 'Integrations';
+export const observabilityIntegrationsPluginOrder = 5096;
+
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
@@ -75,7 +79,7 @@ export const OPENSEARCH_INTEGRATIONS_API = {
   OBJECT: `${BASE_INTEGRATIONS_URI}/object`,
   ALL: `${BASE_INTEGRATIONS_URI}/store/list_all`,
   ADDED: `${BASE_INTEGRATIONS_URI}/store/list_added`,
-}
+};
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };

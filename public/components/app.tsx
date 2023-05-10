@@ -43,6 +43,7 @@ const pages = {
   traces: TraceAnalyticsHome,
   notebooks: NotebooksHome,
   dashboards: CustomPanelsHome,
+  integrations: PlaceholderHome,
 };
 
 export const App = ({
