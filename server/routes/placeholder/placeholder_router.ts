@@ -36,6 +36,8 @@ async function readJSONFile(filePath: string): Promise<any> {
   });
 }
 
+let added = false;
+
 export function registerPlaceholderRoute(router: IRouter) {
   const appAnalyticsBackend = new PlaceholderAdaptor();
 
@@ -82,6 +84,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       try {
         const assets = await readJSONFile(__dirname + '/test.ndjson');
         const bulkCreateResponse = await context.core.savedObjects.client.bulkCreate(assets);
+        added = true;
         return response.ok({
           body: {
             data: {},
@@ -146,6 +149,35 @@ export function registerPlaceholderRoute(router: IRouter) {
       let applicationsData: ApplicationType[] = [];
       try {
         applicationsData = await appAnalyticsBackend.fetchApps(opensearchClient);
+        return response.ok({
+          body: {
+            data: applicationsData,
+          },
+        });
+      } catch (err: any) {
+        console.error('Error occurred while fetching applications', err);
+        return response.custom({
+          statusCode: err.statusCode || 500,
+          body: err.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${INTEGRATIONS_BASE}/store/list_added`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
+      let applicationsData: ApplicationType[] = [];
+      try {
+        console.log('in get added');
+        applicationsData = await appAnalyticsBackend.fetchAdded(opensearchClient, added);
+        console.log('applicationsData: ' + applicationsData);
         return response.ok({
           body: {
             data: applicationsData,
