@@ -7,6 +7,7 @@ import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
 import fetch from 'node-fetch';
 import { ApplicationType } from 'common/types/application_analytics';
+import * as fs from 'fs';
 import {
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
@@ -18,15 +19,13 @@ import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeho
 import { importFile } from '../../../../../src/plugins/saved_objects_management/public/lib';
 import { SavedObject } from '../../../../../src/plugins/data/common';
 
-import * as fs from 'fs';
-
 async function readJSONFile(filePath: string): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     let assets: any[] = [];
     const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
     stream.on('data', (data: string) => {
-      let data_array = "[" + data.replace(/\}\s+\{/gi, "},{") + "]";
-      assets = JSON.parse(data_array);
+      const dataArray = '[' + data.replace(/\}\s+\{/gi, '},{') + ']';
+      assets = JSON.parse(dataArray);
     });
     stream.on('end', () => {
       resolve(assets);
@@ -81,7 +80,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       console.log('in post');
       const applicationsData: ApplicationType[] = [];
       try {
-        const assets = await readJSONFile(__dirname + "/test.ndjson")
+        const assets = await readJSONFile(__dirname + '/test.ndjson');
         const bulkCreateResponse = await context.core.savedObjects.client.bulkCreate(assets);
         return response.ok({
           body: {
@@ -110,7 +109,9 @@ export function registerPlaceholderRoute(router: IRouter) {
             data: await random.json(),
           },
         });
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     }
   );
 
@@ -127,7 +128,9 @@ export function registerPlaceholderRoute(router: IRouter) {
             data: await random.json(),
           },
         });
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     }
   );
 
