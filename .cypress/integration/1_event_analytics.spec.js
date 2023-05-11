@@ -213,6 +213,93 @@ describe('Click actions test', () => {
   });
 });
 
+describe('Saves a query on explorer page', () => {
+  it('Saves a visualization on visualization tab of explorer page', () => {
+    landOnEventExplorer();
+    querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
+    suppressResizeObserverIssue();
+    cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]')
+      .focus()
+      .type(SAVE_QUERY2, { force: true });
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
+    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
+    landOnEventHome();
+    cy.get('.euiFieldSearch').type(SAVE_QUERY2);
+    cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY2);
+  });
+
+  it('Saves a visualization to an existing panel', () => {
+    landOnPanels();
+    cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
+    cy.get('input.euiFieldText').type(TESTING_PANEL);
+    cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains(/^Create$/)
+      .click();
+    landOnEventExplorer();
+    querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
+    suppressResizeObserverIssue();
+    cy.get('button[id="main-content-vis"]', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains('Visualizations')
+      .click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]')
+      .focus()
+      .type(SAVE_QUERY3, { force: true });
+    cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').type(TESTING_PANEL);
+    cy.get(`input[value="${TESTING_PANEL}"]`).click();
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
+    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
+  });
+
+  it('Saves a query on event tab of explorer page', () => {
+    landOnEventExplorer();
+    suppressResizeObserverIssue();
+    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
+
+    cy.get('.tab-title').contains('Events').click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+
+    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains('successfully')
+      .should('exist');
+
+    landOnEventHome();
+
+    cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY1);
+  });
+
+  it('Click on a saved query from event analytics home', () => {
+    landOnEventExplorer();
+    suppressResizeObserverIssue();
+    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
+
+    cy.get('.tab-title').contains('Events').click();
+    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
+    cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
+      .contains('successfully')
+      .should('exist');
+
+    landOnEventHome();
+
+    cy.get('[data-test-subj="eventHome__savedQueryTableName"]')
+      .first()
+      .contains(SAVE_QUERY4)
+      .click();
+
+    cy.url().should('contain', '#/explorer');
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
+      timeout: COMMAND_TIMEOUT_LONG,
+    }).contains(TEST_QUERIES[0].query);
+    suppressResizeObserverIssue();
+  });
+});
+
 describe('Override timestamp for an index', () => {
   it('Click override button to override default timestamp', () => {
     landOnEventExplorer();
@@ -456,92 +543,5 @@ describe('Visualizing data', () => {
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_1);
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_2);
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_3);
-  });
-});
-
-describe('Saves a query on explorer page', () => {
-  it('Saves a visualization on visualization tab of explorer page', () => {
-    landOnEventExplorer();
-    querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-    suppressResizeObserverIssue();
-    cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
-    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-    cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-      .focus()
-      .type(SAVE_QUERY2, { force: true });
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
-    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
-    landOnEventHome();
-    cy.get('.euiFieldSearch').type(SAVE_QUERY2);
-    cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY2);
-  });
-
-  it('Saves a visualization to an existing panel', () => {
-    landOnPanels();
-    cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
-    cy.get('input.euiFieldText').type(TESTING_PANEL);
-    cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
-      .contains(/^Create$/)
-      .click();
-    landOnEventExplorer();
-    querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-    suppressResizeObserverIssue();
-    cy.get('button[id="main-content-vis"]', { timeout: COMMAND_TIMEOUT_LONG })
-      .contains('Visualizations')
-      .click();
-    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-    cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-      .focus()
-      .type(SAVE_QUERY3, { force: true });
-    cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').type(TESTING_PANEL);
-    cy.get(`input[value="${TESTING_PANEL}"]`).click();
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
-    cy.get('.euiToastHeader__title').contains('successfully').should('exist');
-  });
-
-  it('Saves a query on event tab of explorer page', () => {
-    landOnEventExplorer();
-    suppressResizeObserverIssue();
-    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
-
-    cy.get('.tab-title').contains('Events').click();
-    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-    cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
-
-    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
-      .contains('successfully')
-      .should('exist');
-
-    landOnEventHome();
-
-    cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY1);
-  });
-
-  it('Click on a saved query from event analytics home', () => {
-    landOnEventExplorer();
-    suppressResizeObserverIssue();
-    querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
-
-    cy.get('.tab-title').contains('Events').click();
-    cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
-    cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
-    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
-      .contains('successfully')
-      .should('exist');
-
-    landOnEventHome();
-
-    cy.get('[data-test-subj="eventHome__savedQueryTableName"]')
-      .first()
-      .contains(SAVE_QUERY4)
-      .click();
-
-    cy.url().should('contain', '#/explorer');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).contains(TEST_QUERIES[0].query);
-    suppressResizeObserverIssue();
   });
 });
