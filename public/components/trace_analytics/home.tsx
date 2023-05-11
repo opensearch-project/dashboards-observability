@@ -131,7 +131,13 @@ export const Home = (props: HomeProps) => {
         path={['/trace_analytics', '/trace_analytics/home']}
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} />
+            <Services
+              page="services"
+              childBreadcrumbs={serviceBreadcrumbs}
+              nameColumnAction={nameColumnAction}
+              traceColumnAction={traceColumnAction}
+              {...commonProps}
+            />
           </ObservabilitySideBar>
         )}
       />
@@ -162,16 +168,10 @@ export const Home = (props: HomeProps) => {
       />
       <Route
         exact
-        path="/trace_analytics/services"
+        path="/trace_analytics/analytics"
         render={(routerProps) => (
           <ObservabilitySideBar>
-            <Services
-              page="services"
-              childBreadcrumbs={serviceBreadcrumbs}
-              nameColumnAction={nameColumnAction}
-              traceColumnAction={traceColumnAction}
-              {...commonProps}
-            />
+            <Dashboard page="dashboard" childBreadcrumbs={dashboardBreadcrumbs} {...commonProps} />
           </ObservabilitySideBar>
         )}
       />
