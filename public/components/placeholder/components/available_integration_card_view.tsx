@@ -33,6 +33,7 @@ import {
 } from './available_integration_overview_page';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
+  console.log(props);
   const rowNumber = _.ceil(props.records / 5);
   //   console.log(rowNumber)
 
@@ -56,11 +57,11 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   // });
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
-    if (!integrations || !integrations.length) return null
+    if (!integrations || !integrations.length) return null;
     return (
       <>
         <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
-          integrations ? {integrations.map((i, v) => {
+          {integrations.map((i, v) => {
             return (
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
@@ -96,14 +97,14 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                 />
               </EuiFlexItem>
             );
-          })} 
+          })}
         </EuiFlexGroup>
         <EuiSpacer />
       </>
     );
   };
 
-  return <>{renderRows(props.data.data)}</>;
+  return <>{renderRows(props.data.data?.integrations)}</>;
 }
 
 //   Synopsis.propTypes = {

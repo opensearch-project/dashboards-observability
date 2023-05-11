@@ -152,7 +152,6 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
 
   async function handleDataRequest() {
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => setData(exists));
-    console.log(data)
   }
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
@@ -161,8 +160,9 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
   };
 
   async function addIntegrationRequest(name: string) {
+    console.log('name', name);
     http
-      .post(`${OBSERVABILITY_BASE}/store`)
+      .post(`${INTEGRATIONS_BASE}/store`)
       .then((res) => {
         setToast(
           `${name} integration successfully added!`,
@@ -173,7 +173,7 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
       .catch((err) =>
         setToast(
           'Failed to load integration. Check Added Integrations table for more details',
-          'danger',
+          'danger'
         )
       );
   }
