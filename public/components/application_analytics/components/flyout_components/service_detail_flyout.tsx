@@ -63,7 +63,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       ),
       getListItem(
         'Connected services',
-        fields.connected_services
+        fields.connected_services && fields.connected_services.length
           ? fields.connected_services.reduce((prev: string, curr: string) => {
               return [prev, ', ', curr];
             })
