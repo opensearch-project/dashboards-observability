@@ -13,12 +13,18 @@ import {
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
   IRouter,
+  OpenSearchDashboardsRequest,
+  RequestHandlerContext,
 } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { addClickToMetric, getMetrics } from '../../common/metrics/metrics_helper';
 import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
 import { importFile } from '../../../../../src/plugins/saved_objects_management/public/lib';
 import { SavedObject } from '../../../../../src/plugins/data/common';
+import {
+  OpenSearchDashboardsResponse,
+  OpenSearchDashboardsResponseFactory,
+} from '../../../../../src/core/server/http/router';
 
 export async function readNDJson(stream: Readable): Promise<any[]> {
   return new Promise<any>((resolve, reject) => {
@@ -43,8 +49,35 @@ export async function readNDJson(stream: Readable): Promise<any[]> {
 
 let added = false;
 
+const wrappedData = async (
+  context: RequestHandlerContext,
+  request: OpenSearchDashboardsRequest,
+  response: OpenSearchDashboardsResponseFactory,
+  callback: any
+): Promise<any> => {
+  const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+    request
+  );
+  try {
+    console.log(`Calling callback for path "${request.url.pathname}"`);
+    const data = await callback(opensearchClient);
+    console.log(`Callback returned ${data.toString().length} bytes`);
+    return response.ok({
+      body: {
+        data,
+      },
+    });
+  } catch (err: any) {
+    console.error(`Callback failed with error "${err.message}"`);
+    return response.custom({
+      statusCode: err.statusCode || 500,
+      body: err.message,
+    });
+  }
+};
+
 export function registerPlaceholderRoute(router: IRouter) {
-  const appAnalyticsBackend = new PlaceholderAdaptor();
+  const integrationsAdaptor = new PlaceholderAdaptor();
 
   router.get(
     {
@@ -52,26 +85,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-      let applicationsData: ApplicationType[] = [];
-      try {
-        console.log('in get');
-        applicationsData = await appAnalyticsBackend.fetchApps(opensearchClient);
-        console.log(applicationsData);
-        return response.ok({
-          body: {
-            data: applicationsData,
-          },
-        });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
+      return wrappedData(context, request, response, integrationsAdaptor.fetchApps);
     }
   );
 
@@ -81,28 +95,12 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-      console.log('in post');
-      const applicationsData: ApplicationType[] = [];
-      try {
+      return wrappedData(context, request, response, async (client: any) => {
         const stream = fs.createReadStream(__dirname + '/test.ndjson');
         const assets = await readNDJson(stream);
-        const bulkCreateResponse = await context.core.savedObjects.client.bulkCreate(assets);
         added = true;
-        return response.ok({
-          body: {
-            data: {},
-          },
-        });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
+        return context.core.savedObjects.client.bulkCreate(assets);
+      });
     }
   );
   router.get(
@@ -111,16 +109,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      try {
-        const random = await fetch('http://127.0.0.1:4010/repository/id', {});
-        return response.ok({
-          body: {
-            data: await random.json(),
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      return wrappedData(context, request, response, async (_client: any) => {
+        return await fetch('http://127.0.0.1:4010/repository/id', {}).json();
+      });
     }
   );
 
@@ -130,16 +121,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      try {
-        const random = await fetch('http://127.0.0.1:4010/store?limit=24', {});
-        return response.ok({
-          body: {
-            data: await random.json(),
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      return wrappedData(context, request, response, async (_client: any) => {
+        return await fetch('http://127.0.0.1:4010/store?limit=24', {}).json();
+      });
     }
   );
 
@@ -149,24 +133,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-      let applicationsData: ApplicationType[] = [];
-      try {
-        applicationsData = await appAnalyticsBackend.fetchApps(opensearchClient);
-        return response.ok({
-          body: {
-            data: applicationsData,
-          },
-        });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
+      return wrappedData(context, request, response, integrationsAdaptor.fetchApps);
     }
   );
 
@@ -176,26 +143,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
+      return wrappedData(context, request, response, async (client: any) =>
+        integrationsAdaptor.fetchAdded(client, added)
       );
-      let applicationsData: ApplicationType[] = [];
-      try {
-        console.log('in get added');
-        applicationsData = await appAnalyticsBackend.fetchAdded(opensearchClient, added);
-        console.log('applicationsData: ' + applicationsData);
-        return response.ok({
-          body: {
-            data: applicationsData,
-          },
-        });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
     }
   );
 }
