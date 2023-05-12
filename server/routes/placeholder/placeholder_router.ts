@@ -3,30 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { schema } from '@osd/config-schema';
 import fetch from 'node-fetch';
-import { ApplicationType } from 'common/types/application_analytics';
 import * as fs from 'fs';
 import { Readable } from 'stream';
 import {
   ILegacyScopedClusterClient,
-  IOpenSearchDashboardsResponse,
   IRouter,
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
-import { addClickToMetric, getMetrics } from '../../common/metrics/metrics_helper';
 import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
-import { importFile } from '../../../../../src/plugins/saved_objects_management/public/lib';
-import { SavedObject } from '../../../../../src/plugins/data/common';
-import {
-  OpenSearchDashboardsResponse,
-  OpenSearchDashboardsResponseFactory,
-} from '../../../../../src/core/server/http/router';
+import { OpenSearchDashboardsResponseFactory } from '../../../../../src/core/server/http/router';
 
-export async function readNDJson(stream: Readable): Promise<any[]> {
+export const readNDJson = async (stream: Readable): Promise<any[]> => {
   return new Promise<any>((resolve, reject) => {
     let assets: any[] = [];
     let json: string = '';
@@ -45,11 +35,11 @@ export async function readNDJson(stream: Readable): Promise<any[]> {
       reject(err);
     });
   });
-}
+};
 
 let added = false;
 
-const wrappedData = async (
+export const wrappedData = async (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
@@ -59,16 +49,15 @@ const wrappedData = async (
     request
   );
   try {
-    console.log(`Calling callback for path "${request.url.pathname}"`);
     const data = await callback(opensearchClient);
-    console.log(`Callback returned ${data.toString().length} bytes`);
+    console.log(`${request.url.pathname}: callback returned ${data.toString().length} bytes`);
     return response.ok({
       body: {
         data,
       },
     });
   } catch (err: any) {
-    console.error(`Callback failed with error "${err.message}"`);
+    console.error(`${request.url.pathname}: callback failed with error "${err.message}"`);
     return response.custom({
       statusCode: err.statusCode || 500,
       body: err.message,
