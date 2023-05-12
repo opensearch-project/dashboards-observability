@@ -8,6 +8,7 @@ import { schema } from '@osd/config-schema';
 import fetch from 'node-fetch';
 import { ApplicationType } from 'common/types/application_analytics';
 import * as fs from 'fs';
+import { Readable } from 'stream';
 import {
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
@@ -19,16 +20,20 @@ import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeho
 import { importFile } from '../../../../../src/plugins/saved_objects_management/public/lib';
 import { SavedObject } from '../../../../../src/plugins/data/common';
 
-async function readJSONFile(filePath: string): Promise<any> {
+export async function readNDJson(stream: Readable): Promise<any[]> {
   return new Promise<any>((resolve, reject) => {
     let assets: any[] = [];
-    const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-    stream.on('data', (data: string) => {
-      const dataArray = '[' + data.replace(/\}\s+\{/gi, '},{') + ']';
-      assets = JSON.parse(dataArray);
+    let json: string = '';
+    stream.on('data', (chunk: string | Buffer) => {
+      json += chunk.toString();
     });
     stream.on('end', () => {
-      resolve(assets);
+      try {
+        assets = JSON.parse(`[${json.replace(/\}\s+\{/g, '},{')}]`);
+        resolve(assets);
+      } catch (err: any) {
+        reject(err);
+      }
     });
     stream.on('error', (err: Error) => {
       reject(err);
@@ -82,7 +87,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       console.log('in post');
       const applicationsData: ApplicationType[] = [];
       try {
-        const assets = await readJSONFile(__dirname + '/test.ndjson');
+        const stream = fs.createReadStream(__dirname + '/test.ndjson');
+        const assets = await readNDJson(stream);
         const bulkCreateResponse = await context.core.savedObjects.client.bulkCreate(assets);
         added = true;
         return response.ok({
