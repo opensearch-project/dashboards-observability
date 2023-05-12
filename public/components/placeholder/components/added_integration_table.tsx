@@ -29,7 +29,8 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       render: (value, record) => (
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationLink`}
-          href={`#/added/${record.id}`}
+          // href={`#/added/${record.id}`}
+          href={record.dashboardUrl}
         >
           {_.truncate(record.id, { length: 100 })}
         </EuiLink>
@@ -154,8 +155,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           <EuiText textAlign="center">
             <h2>
               There are currently no added integrations. Add them{' '}
-              <EuiLink href={'#/available'}>here</EuiLink> to start using pre-canned
-              assets!
+              <EuiLink href={'#/available'}>here</EuiLink> to start using pre-canned assets!
             </h2>
           </EuiText>
           <EuiSpacer size="m" />
