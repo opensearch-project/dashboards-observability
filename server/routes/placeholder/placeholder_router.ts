@@ -85,7 +85,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       return wrappedData(context, request, response, async (client: any) => {
-        const stream = fs.createReadStream(__dirname + '/test.ndjson');
+        const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
         const assets = await readNDJson(stream);
         added = true;
         return context.core.savedObjects.client.bulkCreate(assets);
