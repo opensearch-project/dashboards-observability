@@ -84,18 +84,18 @@ export const querySearch = (query, rangeSelected) => {
 };
 
 export const landOnEventHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs/`);
 };
 
 export const landOnEventExplorer = () => {
   cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/explorer`
+    `${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`
   );
 };
 
 export const landOnEventVisualizations = () => {
   cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/explorer`
+    `${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`
   );
   suppressResizeObserverIssue(); // have to add
   cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
@@ -103,7 +103,7 @@ export const landOnEventVisualizations = () => {
 
 export const landOnPanels = () => {
   cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/operational_panels`
+    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
   );
   cy.wait(delay);
 };
