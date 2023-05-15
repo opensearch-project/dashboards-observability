@@ -45,12 +45,9 @@ describe('Adding sample data and visualization', () => {
 describe('Has working breadcrumbs', () => {
   it('Redirect to correct page on breadcrumb click', () => {
     landOnEventExplorer();
-    cy.get('.euiBreadcrumb[href="#/event_analytics/explorer"]').contains('Explorer').click();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('exist');
-    cy.get('.euiBreadcrumb[href="#/event_analytics"]').contains('Event analytics').click();
-    cy.get('.euiTitle').contains('Event analytics').should('exist');
-    cy.get('.euiBreadcrumb[href="observability-dashboards#/"]').contains('Observability').click();
-    cy.get('.euiTitle').contains('Event analytics').should('exist');
+    suppressResizeObserverIssue();
+    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(), { timeout: COMMAND_TIMEOUT_LONG };
+    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 });
 
@@ -71,13 +68,13 @@ describe('Search a query on event home', () => {
         expect(Object.values(state.queries)[0]['selectedDateRange'][1]).equal('now');
       });
 
-    cy.url().should('contain', '#/event_analytics/explorer');
+    cy.url().should('contain', '#/explorer');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').contains(TEST_QUERIES[0].query);
   });
 });
 
 describe('Open flyout for a data row to see details', () => {
-  before(() => {
+  beforeEach(() => {
     landOnEventExplorer();
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
@@ -114,7 +111,7 @@ describe('Add/delete/switch explorer top level tabs', () => {
     landOnEventExplorer();
     suppressResizeObserverIssue();
   });
-
+  
   it('Add a new tab', () => {
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
@@ -163,6 +160,7 @@ describe('Add/delete/switch explorer top level tabs', () => {
       .find('button.euiTab')
       .then((lists) => {
         const initialLength = Cypress.$(lists).length;
+        suppressResizeObserverIssue();
         cy.get('[data-test-subj="eventExplorer__topLevelTabbing"] button.euiTab').eq(1).click();
         cy.get('button.euiTab-isSelected [data-test-subj="eventExplorer__tabClose"]').click();
         cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
@@ -186,15 +184,16 @@ describe('Add/delete/switch explorer top level tabs', () => {
   });
 });
 
-describe('Click actions', () => {
+describe('Click actions test', () => {
   beforeEach(() => {
     landOnEventHome();
+    suppressResizeObserverIssue();
   });
 
   it('Actions - click event explorer', () => {
     cy.get('[data-test-subj="eventHomeAction"]').click();
     cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-    cy.url().should('contain', '#/event_analytics/explorer');
+    cy.url().should('contain', '#/explorer');
   });
 
   it('Actions - add sample data', () => {
@@ -227,6 +226,7 @@ describe('Saves a query on explorer page', () => {
     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
     cy.get('.euiToastHeader__title').contains('successfully').should('exist');
     landOnEventHome();
+    cy.get('.euiFieldSearch').type(SAVE_QUERY2);
     cy.get('[data-test-subj="eventHome__savedQueryTableName"]').first().contains(SAVE_QUERY2);
   });
 
@@ -234,10 +234,9 @@ describe('Saves a query on explorer page', () => {
     landOnPanels();
     cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
     cy.get('input.euiFieldText').type(TESTING_PANEL);
-    cy.get('.euiButton__text')
+    cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
       .contains(/^Create$/)
       .click();
-    cy.wait(delay);
     landOnEventExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
     suppressResizeObserverIssue();
@@ -262,8 +261,7 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-    cy.wait(delay * 2);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
 
     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('successfully')
@@ -282,8 +280,7 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-    cy.wait(delay * 2);
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
     cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('successfully')
       .should('exist');
@@ -295,10 +292,11 @@ describe('Saves a query on explorer page', () => {
       .contains(SAVE_QUERY4)
       .click();
 
-    cy.url().should('contain', '#/event_analytics/explorer');
+    cy.url().should('contain', '#/explorer');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).contains(TEST_QUERIES[0].query);
+    suppressResizeObserverIssue();
   });
 });
 
@@ -310,8 +308,7 @@ describe('Override timestamp for an index', () => {
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[2].query);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
     cy.get('.tab-title').contains('Events').click();
-    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').click();
-    cy.wait(delay);
+    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').click({ force: true });
 
     cy.get('[data-attr-field="utc_time"] [data-test-subj="eventFields__default-timestamp-mark"')
       .contains('Default Timestamp')
@@ -322,7 +319,7 @@ describe('Override timestamp for an index', () => {
   });
 });
 
-describe('Toggle sidebar fields', () => {
+describe('Toggle the sidebar fields', () => {
   it('Toggle fields between available and selected section', () => {
     landOnEventExplorer();
     suppressResizeObserverIssue();
@@ -336,21 +333,22 @@ describe('Toggle sidebar fields', () => {
   });
 });
 
-describe('Search fields in sidebar', () => {
+describe('Search fields in the sidebar', () => {
   it('Search a field', () => {
     landOnEventExplorer();
     suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
-    cy.get('[data-test-subj="eventExplorer__sidebarSearch"]').type('A');
-    cy.get('[data-test-subj="field-Cancelled"]').should('not.exist');
-    cy.get('[data-test-subj="field-AvgTicketPrice"]').should('exist');
-    cy.get('[data-test-subj="field-DestAirportID"]').should('exist');
-    cy.get('[data-test-subj="field-OriginAirportID"]').should('exist');
+    cy.get('[data-test-subj="eventExplorer__sidebarSearch"]').type('C');
+    cy.get('[data-test-subj="field-Cancelled"]').should('exist');
+    cy.get('[data-test-subj="field-AvgTicketPrice"]').should('not.exist');
+    cy.get('[data-test-subj="field-DestAirportID"]').should('not.exist');
+    cy.get('[data-test-subj="field-Carrier"]').should('exist');
   });
 });
 
 describe('Delete saved objects', () => {
   it('Delete visualizations/queries from event analytics', () => {
+    suppressResizeObserverIssue();
     landOnEventHome();
     cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
     cy.get('.euiContextMenuItem__text').contains('50 rows').click();
@@ -360,7 +358,7 @@ describe('Delete saved objects', () => {
     cy.get('button.euiButton--danger').should('be.disabled');
     cy.get('input.euiFieldText[placeholder="delete"]').type('delete');
     cy.get('button.euiButton--danger').should('not.be.disabled');
-    cy.get('.euiButton__text').contains('Delete').click();
+    cy.get('.euiButton__text').contains('Delete').click({ force: true });
     cy.get('.euiTextAlign').contains('No Queries or Visualizations').should('exist');
   });
 });
@@ -457,6 +455,7 @@ describe('Live tail stop automatically', () => {
   });
 
   it('Close current selected tab', () => {
+    suppressResizeObserverIssue();
     cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).click();
@@ -484,6 +483,7 @@ describe('Live tail stop automatically', () => {
 describe('Visualizing data', () => {
   beforeEach(() => {
     landOnEventVisualizations();
+    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 
@@ -536,7 +536,7 @@ describe('Visualizing data', () => {
       .type(FIELD_AGENT);
     cy.get(`input[value="${FIELD_AGENT}"]`).click();
     cy.get('[data-test-subj="panelCloseBtn"]').click();
-    cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
+    cy.get('[data-test-subj="visualizeEditorRenderButton"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
     suppressResizeObserverIssue();
 
     cy.get('.infolayer .legendtext').as('legandTxt');
