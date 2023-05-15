@@ -1,3 +1,4 @@
+import { DeepPartial } from 'redux';
 import {
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
@@ -10,19 +11,21 @@ jest
   .mock('../../../../../../src/core/server/http/router', () => jest.fn());
 
 describe('Data wrapper', () => {
-  const contextMock: Partial<RequestHandlerContext> = {
-    observability_plugin: {
-      observabilityClient: {
-        asScoped: jest.fn(),
+  const contextMock: DeepPartial<RequestHandlerContext> = {
+    core: {
+      opensearch: {
+        legacy: {
+          client: {},
+        },
       },
     },
   };
-  const requestMock: Partial<OpenSearchDashboardsRequest> = {
+  const requestMock: DeepPartial<OpenSearchDashboardsRequest> = {
     url: {
       pathname: '/test',
     },
   };
-  const responseMock: Partial<OpenSearchDashboardsResponseFactory> = {
+  const responseMock: DeepPartial<OpenSearchDashboardsResponseFactory> = {
     custom: jest.fn((data) => data),
     ok: jest.fn((data) => data),
   };

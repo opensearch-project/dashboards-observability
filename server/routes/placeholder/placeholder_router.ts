@@ -45,9 +45,7 @@ export const wrappedData = async (
   response: OpenSearchDashboardsResponseFactory,
   callback: any
 ): Promise<any> => {
-  const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-    request
-  );
+  const opensearchClient = context.core.opensearch.legacy.client;
   try {
     const data = await callback(opensearchClient);
     console.log(`${request.url.pathname}: callback returned ${data.toString().length} bytes`);
@@ -99,7 +97,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       return wrappedData(context, request, response, async (_client: any) => {
-        return await fetch('http://127.0.0.1:4010/repository/id', {}).json();
+        return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
       });
     }
   );
@@ -111,7 +109,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       return wrappedData(context, request, response, async (_client: any) => {
-        return await fetch('http://127.0.0.1:4010/store?limit=24', {}).json();
+        return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
       });
     }
   );
