@@ -15,10 +15,23 @@ import {
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../src/core/server/http/router';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 
-export const readNDJson = async (stream: Readable): Promise<any[]> => {
+/**
+ * Parse a stream of newline-delimited JSON objects as an array.
+ * The entire stream is read; the method will hang if the stream is not closed.
+ * The data entries MUST be JSON objects,
+ * other valid JSON values will be rejected.
+ *
+ * Resolves the `Promise` if every newline-separated JSON object is valid.
+ * Rejects the `Promise` if the stream errors, or if the JSON is not parseable.
+ *
+ * @param stream A `Readable` stream of newline-delimited JSON objects.
+ * @returns A `Promise` for an array of parsed JSON objects.
+ */
+export const readNDJsonObjects = async (stream: Readable): Promise<object[]> => {
   return new Promise<any>((resolve, reject) => {
-    let assets: any[] = [];
+    let assets: object[] = [];
     let json: string = '';
     stream.on('data', (chunk: string | Buffer) => {
       json += chunk.toString();
@@ -39,6 +52,21 @@ export const readNDJson = async (stream: Readable): Promise<any[]> => {
 
 let added = false;
 
+/**
+ * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
+ * This is a convenience method that handles common error handling and response formatting.
+ * The callback must accept an `ILegacyScopedClusterClient` as its first argument.
+ *
+ * If the callback throws an error,
+ * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
+ * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
+ *
+ * @param context The `RequestHandlerContext` for the current request.
+ * @param request The request to be handled.
+ * @param response An `OpenSearchDashboardsResponseFactory` for creating responses.
+ * @param callback A callback that will be invoked on an `ILegacyScopedClusterClient`.
+ * @returns An `OpenSearchDashboardsResponse` with the return data from the callback.
+ */
 export const wrappedData = async (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
@@ -84,7 +112,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       return wrappedData(context, request, response, async (client: any) => {
         const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
-        const assets = await readNDJson(stream);
+        const assets = (await readNDJsonObjects(stream)) as SavedObjectsBulkCreateObject[];
         added = true;
         return context.core.savedObjects.client.bulkCreate(assets);
       });
