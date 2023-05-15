@@ -67,7 +67,7 @@ let added = false;
  * @param callback A callback that will be invoked on an `ILegacyScopedClusterClient`.
  * @returns An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
-export const wrappedData = async (
+export const handleWithCallback = async (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
@@ -100,7 +100,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return wrappedData(context, request, response, integrationsAdaptor.fetchApps);
+      return handleWithCallback(context, request, response, integrationsAdaptor.fetchApps);
     }
   );
 
@@ -110,7 +110,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return wrappedData(context, request, response, async (client: any) => {
+      return handleWithCallback(context, request, response, async (client: any) => {
         const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
         const assets = (await readNDJsonObjects(stream)) as SavedObjectsBulkCreateObject[];
         added = true;
@@ -124,7 +124,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return wrappedData(context, request, response, async (_client: any) => {
+      return handleWithCallback(context, request, response, async (_client: any) => {
         return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
       });
     }
@@ -136,7 +136,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return wrappedData(context, request, response, async (_client: any) => {
+      return handleWithCallback(context, request, response, async (_client: any) => {
         return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
       });
     }
@@ -148,7 +148,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return wrappedData(context, request, response, integrationsAdaptor.fetchApps);
+      return handleWithCallback(context, request, response, integrationsAdaptor.fetchApps);
     }
   );
 
@@ -158,7 +158,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return wrappedData(context, request, response, async (client: any) =>
+      return handleWithCallback(context, request, response, async (client: any) =>
         integrationsAdaptor.fetchAdded(client, added)
       );
     }

@@ -4,7 +4,7 @@ import {
   RequestHandlerContext,
 } from '../../../../../../src/core/server';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../../src/core/server/http/router';
-import { wrappedData } from '../placeholder_router';
+import { handleWithCallback } from '../placeholder_router';
 
 jest
   .mock('../../../../../../src/core/server', () => jest.fn())
@@ -34,7 +34,7 @@ describe('Data wrapper', () => {
     const callback = jest.fn((_) => {
       return { test: 'data' };
     });
-    const result = await wrappedData(
+    const result = await handleWithCallback(
       contextMock as RequestHandlerContext,
       requestMock as OpenSearchDashboardsRequest,
       responseMock as OpenSearchDashboardsResponseFactory,
@@ -50,7 +50,7 @@ describe('Data wrapper', () => {
     const callback = jest.fn((_) => {
       throw new Error('test error');
     });
-    const result = await wrappedData(
+    const result = await handleWithCallback(
       contextMock as RequestHandlerContext,
       requestMock as OpenSearchDashboardsRequest,
       responseMock as OpenSearchDashboardsResponseFactory,
