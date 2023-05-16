@@ -9,13 +9,12 @@ import { Readable } from 'stream';
 import {
   ILegacyScopedClusterClient,
   IRouter,
-  OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
 import {
-  OpenSearchDashboardsResponse,
+  OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
@@ -64,37 +63,44 @@ let added = false;
  * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
  * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
  *
- * @param {RequestHandlerContext} context The context for the current request.
- * @param {OpenSearchDashboardsRequest} request The request to be handled.
+ * @param {ILegacyScopedClusterClient} client The client to use for making requests.
  * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
  * @callback callback A callback that will invoke a request on a provided client.
  * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
 export const handleWithCallback = async (
-  context: RequestHandlerContext,
-  request: OpenSearchDashboardsRequest,
+  client: ILegacyScopedClusterClient,
   response: OpenSearchDashboardsResponseFactory,
   callback: any
 ): Promise<any> => {
-  // context.observability_plugin.observabilityClient is not in the RequestHandlerContext,
-  // but it's the correct client.
-  // Not sure why context.core.opensearch.legacy.client doesn't work, but it changes the loaded routes.
-  const opensearchClient = context.observability_plugin.observabilityClient.asScoped(request);
   try {
-    const data = await callback(opensearchClient);
-    console.log(`${request.url.pathname}: callback returned ${data.toString().length} bytes`);
+    const data = await callback(client);
+    console.log(`handleWithCallback: callback returned ${data.toString().length} bytes`);
     return response.ok({
       body: {
         data,
       },
     });
   } catch (err: any) {
-    console.error(`${request.url.pathname}: callback failed with error "${err.message}"`);
+    console.error(`handleWithCallback: callback failed with error "${err.message}"`);
     return response.custom({
       statusCode: err.statusCode || 500,
       body: err.message,
     });
   }
+};
+
+const makeClientFromContext = (
+  context: RequestHandlerContext,
+  request: OpenSearchDashboardsRequest
+): ILegacyScopedClusterClient => {
+  // context.observability_plugin.observabilityClient is not in the RequestHandlerContext type, but it's the correct client.
+  // Updating to the seemingly-correct context.core.opensearch.legacy.client is a breaking change.
+  // For now, we'll wrap access in manual type checking.
+  if (context.observability_plugin === null) {
+    throw new Error('context.observability_plugin is null');
+  }
+  return context.observability_plugin.observabilityClient.asScoped(request);
 };
 
 export function registerPlaceholderRoute(router: IRouter) {
@@ -106,7 +112,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (client: any) => {
+      const scopedClient = makeClientFromContext(context, request);
+      return handleWithCallback(scopedClient, response, async (client: any) => {
         return await integrationsAdaptor.getIntegrationTemplates(client, null);
       });
     }
@@ -118,7 +125,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (client: any) => {
+      const scopedClient = makeClientFromContext(context, request);
+      return handleWithCallback(scopedClient, response, async (client: any) => {
         const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
         const assets = (await readNDJsonObjects(stream)) as SavedObjectsBulkCreateObject[];
         added = true;
@@ -133,7 +141,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (_client: any) => {
+      const scopedClient = makeClientFromContext(context, request);
+      return handleWithCallback(scopedClient, response, async (_client: any) => {
         return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
       });
     }
@@ -145,7 +154,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (_client: any) => {
+      const scopedClient = makeClientFromContext(context, request);
+      return handleWithCallback(scopedClient, response, async (_client: any) => {
         return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
       });
     }
@@ -157,7 +167,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (client: any) => {
+      const scopedClient = makeClientFromContext(context, request);
+      return handleWithCallback(scopedClient, response, async (client: any) => {
         return await integrationsAdaptor.getIntegrationTemplates(client, null);
       });
     }
@@ -169,7 +180,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (client: any) => {
+      const scopedClient = makeClientFromContext(context, request);
+      return handleWithCallback(scopedClient, response, async (client: any) => {
         return await integrationsAdaptor.getIntegrationInstances(client, {
           added,
         });

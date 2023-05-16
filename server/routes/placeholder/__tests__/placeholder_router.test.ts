@@ -1,5 +1,6 @@
 import { DeepPartial } from 'redux';
 import {
+  ILegacyScopedClusterClient,
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from '../../../../../../src/core/server';
@@ -11,15 +12,7 @@ jest
   .mock('../../../../../../src/core/server/http/router', () => jest.fn());
 
 describe('Data wrapper', () => {
-  const contextMock: DeepPartial<RequestHandlerContext> = {
-    core: {
-      opensearch: {
-        legacy: {
-          client: {},
-        },
-      },
-    },
-  };
+  const clientMock: Partial<ILegacyScopedClusterClient> = {};
   const requestMock: DeepPartial<OpenSearchDashboardsRequest> = {
     url: {
       pathname: '/test',
@@ -35,8 +28,7 @@ describe('Data wrapper', () => {
       return { test: 'data' };
     });
     const result = await handleWithCallback(
-      contextMock as RequestHandlerContext,
-      requestMock as OpenSearchDashboardsRequest,
+      clientMock as ILegacyScopedClusterClient,
       responseMock as OpenSearchDashboardsResponseFactory,
       callback
     );
@@ -51,8 +43,7 @@ describe('Data wrapper', () => {
       throw new Error('test error');
     });
     const result = await handleWithCallback(
-      contextMock as RequestHandlerContext,
-      requestMock as OpenSearchDashboardsRequest,
+      clientMock as ILegacyScopedClusterClient,
       responseMock as OpenSearchDashboardsResponseFactory,
       callback
     );
