@@ -13,16 +13,16 @@ import {
     PPL_FILTER,
     SAMPLE_PANEL,
     SAMPLE_VISUALIZATIONS_NAMES,
-  } from '../utils/panel_constants';
-  
-  import {
+  } from '../utils/panel_constants';  
+import {
       delay,
       PPL_METRICS,
       PPL_METRICS_NAMES,
       VIS_TYPE_LINE
   } from '../utils/metrics_constants';
-  
-  import { supressResizeObserverIssue } from '../utils/constants';
+import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
+import { clearQuerySearchBoxText } from '../utils/event_analytics/helpers';
+
   
   const moveToMetricsHome = () => {
     cy.visit(
@@ -31,6 +31,11 @@ import {
     cy.wait(delay * 3);
   };
   
+  const moveToEventsExplorer = () => {
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`);
+    cy.wait(delay * 3);
+  };
+
   const moveToEventsHome = () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
     cy.wait(delay * 3);
@@ -53,7 +58,9 @@ import {
   
   describe('Creating custom metrics', () => {
     beforeEach(() => {
-      moveToEventsHome();
+      moveToEventsExplorer();
+      clearQuerySearchBoxText('searchAutocompleteTextArea');
+      suppressResizeObserverIssue();
     });
   
     it('Create custom metric in event analytics and check it in events home', () => {
@@ -62,24 +69,29 @@ import {
       });
       cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.wait(delay);
-      supressResizeObserverIssue();
+      suppressResizeObserverIssue();
       cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
       cy.wait(delay * 2);
-      // cy.get('[data-test-subj="eventExplorer__vizTypeComboBox"]').trigger('mouseover').click();
       cy.get('[data-test-subj="comboBoxInput"]').click();
-      cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_LINE).click();
-      // cy.get('[data-test-subj="comboBoxInput"]').eq(2).click();
-      // cy.get('.euiComboBoxOption__content').contains('Time series').click();
-      cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
-      cy.wait(1000);
+      cy.get('.euiComboBoxOption__content').contains('Time series').click({ force: true });
+
+      cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click({ force: true });
       cy.get('[data-test-subj="eventExplorer__querySaveName"]')
-        .focus()
-        .type(PPL_METRICS_NAMES[0], {
-          delay: 50,
-        });
+      .focus()
+      .type(PPL_METRICS_NAMES[0], { force: true });
+      // cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+
+      // cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').trigger('mouseover').click();
+      // cy.wait(1000);
+      // cy.get('[data-test-subj="eventExplorer__querySaveName"]')
+      //   // .focus()
+      //   .type(PPL_METRICS_NAMES[0], {
+      //     delay: 50,
+      //   });
       cy.get('[data-test-subj="eventExplorer__metricSaveName"]').trigger('mouseover').click();
       cy.wait(1000);
-      cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').trigger('mouseover').click();
+      cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+      // cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').trigger('mouseover').click();
       cy.wait(delay);
       cy.get('.euiToastHeader__title').contains('successfully').should('exist');
       moveToEventsHome();
@@ -92,7 +104,7 @@ import {
       });
       cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.wait(delay);
-      supressResizeObserverIssue();
+      suppressResizeObserverIssue();
       cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
       cy.wait(delay * 2);
       cy.get('[data-test-subj="eventExplorer__vizTypeComboBox"]').trigger('mouseover').click();
@@ -213,7 +225,7 @@ import {
       cy.get('[data-test-subj="metrics__spanResolutionSelect"]').eq('hours').trigger('mouseover').click();
       cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.wait(delay);
-      supressResizeObserverIssue();
+      suppressResizeObserverIssue();
       cy.get('[data-test-subj="metrics__spanValue"]').contains('3').should('exist');
       cy.get('[data-test-subj="metrics__spanResolutionSelect"]').contains('hours').should('exist');
     });
