@@ -222,6 +222,7 @@ export const Home = ({
                           moveToEvents={onEditClick}
                           onRefresh={onRefresh}
                           editActionType={editActionType}
+                          setEditActionType={setEditActionType}
                           spanParam={spanValue + resolutionValue}
                         />
                       ) : (

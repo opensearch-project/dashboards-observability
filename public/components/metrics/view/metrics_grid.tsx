@@ -33,6 +33,7 @@ interface MetricsGridProps {
   moveToEvents: (savedVisualizationId: string) => any;
   onRefresh: boolean;
   editActionType: string;
+  setEditActionType: React.Dispatch<React.SetStateAction<string>>;
   spanParam: string;
 }
 
@@ -48,6 +49,7 @@ export const MetricsGrid = ({
   moveToEvents,
   onRefresh,
   editActionType,
+  setEditActionType,
   spanParam,
 }: MetricsGridProps) => {
   // Redux tools
@@ -135,6 +137,7 @@ export const MetricsGrid = ({
     if (editActionType === 'save') {
       removeMetricsList.map((value) => handleRemoveMetric(value));
       updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
+      setEditActionType('');
     }
   }, [editActionType]);
 

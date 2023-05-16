@@ -102,7 +102,12 @@ export const TopMenu = ({
     setEditMode(!editMode);
     switch (editType) {
       case 'edit': {
-        setOriginalPanelVisualizations([...panelVisualizations]);
+        if (panelVisualizations.length > 0) {
+          setOriginalPanelVisualizations([...panelVisualizations]);
+        } else {
+          setOriginalPanelVisualizations([]);
+        }
+        // setOriginalPanelVisualizations([...panelVisualizations]);
         break;
       }
       case 'cancel': {

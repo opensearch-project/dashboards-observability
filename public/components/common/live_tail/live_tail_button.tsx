@@ -10,6 +10,7 @@ import React, { useMemo } from "react";
 import { LiveTailProps } from "common/types/explorer";
 
 //Live Tail Button
+
 export const LiveTailButton = ({
   isLiveTailOn,
   isLiveTailPopoverOpen,
