@@ -74,9 +74,12 @@ export const handleWithCallback = async (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
-  callback: (client: ILegacyScopedClusterClient) => object
-): Promise<OpenSearchDashboardsResponse> => {
-  const opensearchClient = context.core.opensearch.legacy.client;
+  callback: any
+): Promise<any> => {
+  // context.observability_plugin.observabilityClient is not in the RequestHandlerContext,
+  // but it's the correct client.
+  // Not sure why context.core.opensearch.legacy.client doesn't work, but it changes the loaded routes.
+  const opensearchClient = context.observability_plugin.observabilityClient.asScoped(request);
   try {
     const data = await callback(opensearchClient);
     console.log(`${request.url.pathname}: callback returned ${data.toString().length} bytes`);
