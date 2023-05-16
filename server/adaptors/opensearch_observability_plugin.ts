@@ -14,7 +14,7 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
   const integrations = Client.prototype.integrations.prototype;
 
   // Get Object
-  integrations.getObject = clientAction({
+  integrations.getIntegrationTemplates = clientAction({
     url: {
       fmt: OPENSEARCH_INTEGRATIONS_API.ALL,
     },

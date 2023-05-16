@@ -106,7 +106,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, integrationsAdaptor.fetchApps);
+      return handleWithCallback(context, request, response, async (client: any) => {
+        return await integrationsAdaptor.getIntegrationTemplates(client, null);
+      });
     }
   );
 
@@ -124,6 +126,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       });
     }
   );
+
   router.get(
     {
       path: `${OBSERVABILITY_BASE}/repository/id`,
@@ -154,7 +157,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, integrationsAdaptor.fetchApps);
+      return handleWithCallback(context, request, response, async (client: any) => {
+        return await integrationsAdaptor.getIntegrationTemplates(client, null);
+      });
     }
   );
 
@@ -164,9 +169,11 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      return handleWithCallback(context, request, response, async (client: any) =>
-        integrationsAdaptor.fetchAdded(client, added)
-      );
+      return handleWithCallback(context, request, response, async (client: any) => {
+        return await integrationsAdaptor.getIntegrationInstances(client, {
+          added,
+        });
+      });
     }
   );
 }

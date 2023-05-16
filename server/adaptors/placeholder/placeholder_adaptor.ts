@@ -7,25 +7,32 @@ import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
 
 export class PlaceholderAdaptor {
   // Fetch all existing integrations
-  fetchApps = async (client: ILegacyScopedClusterClient): Promise<any[]> => {
+  getIntegrationTemplates = async (
+    client: ILegacyScopedClusterClient,
+    query: IntegrationTemplateQuery | null
+  ): Promise<IntegrationTemplate[]> => {
     try {
-      console.log('poopy');
-      const response = await client.callAsCurrentUser('integrations.getObject');
-      console.log(response);
+      console.log('getIntegrationTemplates query: ' + query);
+      const response = await client.callAsCurrentUser('integrations.getIntegrationTemplates');
+      console.log('getIntegrationTemplates response: ' + response);
       return response;
     } catch (err: any) {
       throw new Error('Fetch All Applications Error: ' + err);
     }
   };
 
-  fetchAdded = async (
+  getIntegrationInstances = async (
     client: ILegacyScopedClusterClient,
-    added: boolean = false
-  ): Promise<any[]> => {
+    query: IntegrationInstanceQuery | null
+  ): Promise<IntegrationInstance[]> => {
     try {
-      const endpoint = added ? 'integrations.getAddedPop' : 'integrations.getAdded';
+      let endpoint: string = 'integrations.getAdded';
+      if (query && query.added) {
+        endpoint = 'integrations.getAddedPop';
+      }
+      console.log('getIntegrationInstances query: ' + query);
       const response = await client.callAsCurrentUser(endpoint, {});
-      console.log(response);
+      console.log('getIntegrationInstances response: ' + response);
       return response.test;
     } catch (err: any) {
       throw new Error('Fetch Added Applications Error: ' + err);
