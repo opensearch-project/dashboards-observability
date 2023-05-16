@@ -3,10 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ApplicationRequestType,
-  ApplicationType,
-} from '../../../common/types/application_analytics';
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
 
 export class PlaceholderAdaptor {
@@ -30,11 +26,7 @@ export class PlaceholderAdaptor {
       const endpoint = added ? 'integrations.getAddedPop' : 'integrations.getAdded';
       const response = await client.callAsCurrentUser(endpoint, {});
       console.log(response);
-      // return response.observabilityObjectList.map((object: any) => {
       return response.test;
-      //   return {
-      //   };
-      // });
     } catch (err: any) {
       throw new Error('Fetch Added Applications Error: ' + err);
     }
