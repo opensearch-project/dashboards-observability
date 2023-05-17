@@ -18,6 +18,7 @@ import {
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
+import { PlaceholderJavaBackend } from '../../adaptors/placeholder/placeholder_java_backend';
 
 /**
  * Parse a stream of newline-delimited JSON objects as an array.
@@ -63,18 +64,18 @@ let added = false;
  * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
  * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
  *
- * @param {ILegacyScopedClusterClient} client The client to use for making requests.
+ * @param {PlaceholderAdaptor} adaptor The adaptor instance to use for making requests.
  * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
- * @callback callback A callback that will invoke a request on a provided client.
+ * @callback callback A callback that will invoke a request on a provided adaptor.
  * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
 export const handleWithCallback = async (
-  client: ILegacyScopedClusterClient,
+  adaptor: PlaceholderAdaptor,
   response: OpenSearchDashboardsResponseFactory,
-  callback: any
+  callback: (a: PlaceholderAdaptor) => object
 ): Promise<any> => {
   try {
-    const data = await callback(client);
+    const data = await callback(adaptor);
     console.log(`handleWithCallback: callback returned ${data.toString().length} bytes`);
     return response.ok({
       body: {
@@ -90,31 +91,30 @@ export const handleWithCallback = async (
   }
 };
 
-const makeClientFromContext = (
+const getAdaptor = (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest
-): ILegacyScopedClusterClient => {
+): PlaceholderAdaptor => {
   // context.observability_plugin.observabilityClient is not in the RequestHandlerContext type, but it's the correct client.
   // Updating to the seemingly-correct context.core.opensearch.legacy.client is a breaking change.
   // For now, we'll wrap access in manual type checking.
   if (context.observability_plugin === null) {
     throw new Error('context.observability_plugin is null');
   }
-  return context.observability_plugin.observabilityClient.asScoped(request);
+  const client = context.observability_plugin.observabilityClient.asScoped(request);
+  return new PlaceholderJavaBackend(client);
 };
 
 export function registerPlaceholderRoute(router: IRouter) {
-  const integrationsAdaptor = new PlaceholderAdaptor();
-
   router.get(
     {
       path: `${INTEGRATIONS_BASE}/repository`,
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const scopedClient = makeClientFromContext(context, request);
-      return handleWithCallback(scopedClient, response, async (client: any) => {
-        return await integrationsAdaptor.getIntegrationTemplates(client, null);
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        return await a.getIntegrationTemplates(null);
       });
     }
   );
@@ -125,8 +125,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const scopedClient = makeClientFromContext(context, request);
-      return handleWithCallback(scopedClient, response, async (client: any) => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
         const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
         const assets = (await readNDJsonObjects(stream)) as SavedObjectsBulkCreateObject[];
         added = true;
@@ -141,8 +141,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const scopedClient = makeClientFromContext(context, request);
-      return handleWithCallback(scopedClient, response, async (_client: any) => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
         return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
       });
     }
@@ -154,8 +154,8 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const scopedClient = makeClientFromContext(context, request);
-      return handleWithCallback(scopedClient, response, async (_client: any) => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
         return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
       });
     }
@@ -167,9 +167,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const scopedClient = makeClientFromContext(context, request);
-      return handleWithCallback(scopedClient, response, async (client: any) => {
-        return await integrationsAdaptor.getIntegrationTemplates(client, null);
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        return await a.getIntegrationTemplates(null);
       });
     }
   );
@@ -180,9 +180,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const scopedClient = makeClientFromContext(context, request);
-      return handleWithCallback(scopedClient, response, async (client: any) => {
-        return await integrationsAdaptor.getIntegrationInstances(client, {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        return await a.getIntegrationInstances({
           added,
         });
       });
