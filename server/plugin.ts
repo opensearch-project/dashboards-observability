@@ -94,12 +94,6 @@ export class ObservabilityPlugin
           },
         },
       },
-      management: {
-        importableAndExportable: false,
-        getTitle(obj) {
-          return `Integration Template [${obj.id}]`;
-        },
-      },
     };
 
     core.savedObjects.registerType(obsPanelType);
