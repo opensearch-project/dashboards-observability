@@ -58,7 +58,7 @@ let added = false;
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
  * This is a convenience method that handles common error handling and response formatting.
- * The callback must accept an `ILegacyScopedClusterClient` as its first argument.
+ * The callback must accept a `PlaceholderAdaptor` as its first argument.
  *
  * If the callback throws an error,
  * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
