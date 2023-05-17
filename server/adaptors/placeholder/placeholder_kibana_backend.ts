@@ -45,6 +45,13 @@ export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
   getIntegrationTemplates = (
     _query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
+    this.client
+      .find({
+        type: 'integration-template',
+      })
+      .then((data) => {
+        console.warn(`Catalog queried for ${data.total} entries, ignoring for sample data.`);
+      });
     console.log(`Retrieving ${catalog.length} templates from catalog`);
     return Promise.resolve({
       integrations: catalog,
