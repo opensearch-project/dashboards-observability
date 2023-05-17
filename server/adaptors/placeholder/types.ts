@@ -4,6 +4,7 @@ interface IntegrationTemplate {
   description: string;
   catalog: string;
   assetUrl: string;
+  displayAssets: any[];
 }
 
 interface IntegrationTemplateSearchResult {

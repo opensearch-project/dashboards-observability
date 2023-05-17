@@ -1,7 +1,8 @@
-import { coreRefs } from '../../../public/framework/core_refs';
+import * as fs from 'fs';
 import { PlaceholderAdaptor } from './placeholder_adaptor';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
+import { readNDJsonObjects } from './utils';
 
 const catalog: IntegrationTemplate[] = [
   {
@@ -9,7 +10,8 @@ const catalog: IntegrationTemplate[] = [
     version: '1.0.0',
     description: 'Nginx HTTP server collector',
     catalog: 'observability',
-    assetUrl: ' https://cdn.iconscout.com/icon/free/png-256/nginx-3521604-2945048.png',
+    assetUrl: 'https://cdn.iconscout.com/icon/free/png-256/nginx-3521604-2945048.png',
+    displayAssets: [],
   },
 ];
 
@@ -47,6 +49,14 @@ export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
     return Promise.resolve({
       integrations: catalog,
     });
+  };
+
+  getAssets = (_templateName: string): Promise<SavedObjectsBulkCreateObject[]> => {
+    const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
+    const assets = readNDJsonObjects(stream).then(
+      (objects) => objects as SavedObjectsBulkCreateObject[]
+    );
+    return assets;
   };
 
   loadCatalog(): Promise<void> {

@@ -1,4 +1,4 @@
-import { readNDJsonObjects } from '../placeholder_router';
+import { readNDJsonObjects } from '../utils';
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 

@@ -1,4 +1,8 @@
-import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
+import { reject } from 'lodash';
+import {
+  ILegacyScopedClusterClient,
+  SavedObjectsBulkCreateObject,
+} from '../../../../../src/core/server';
 import { PlaceholderAdaptor } from './placeholder_adaptor';
 
 export class PlaceholderJavaBackend implements PlaceholderAdaptor {
@@ -39,5 +43,9 @@ export class PlaceholderJavaBackend implements PlaceholderAdaptor {
     } catch (err: any) {
       throw new Error('Fetch Added Applications Error: ' + err);
     }
+  };
+
+  getAssets = async (_: any): Promise<SavedObjectsBulkCreateObject[]> => {
+    return Promise.reject('not implemented');
   };
 }
