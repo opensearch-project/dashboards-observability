@@ -1,8 +1,9 @@
 import { coreRefs } from '../../../public/framework/core_refs';
 import { PlaceholderAdaptor } from './placeholder_adaptor';
-import { SavedObjectsClientContract } from '../../../../../src/core/public';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
+import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 
-const sampleTemplates: IntegrationTemplate[] = [
+const catalog: IntegrationTemplate[] = [
   {
     templateName: 'nginx',
     version: '1.0.0',
@@ -35,18 +36,33 @@ const sampleIntegrations: IntegrationInstance[] = [
 export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
   client: SavedObjectsClientContract;
 
-  constructor() {
-    this.client = coreRefs.savedObjectsClient!;
+  constructor(client: SavedObjectsClientContract) {
+    this.client = client;
   }
 
   getIntegrationTemplates = (
     _query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
-    console.log(sampleTemplates);
+    console.log(`Retrieving ${catalog.length} templates from catalog`);
     return Promise.resolve({
-      integrations: sampleTemplates,
+      integrations: catalog,
     });
   };
+
+  loadCatalog(): Promise<void> {
+    const toCreate: SavedObjectsBulkCreateObject[] = catalog.map((template) => {
+      return {
+        type: 'integration-template',
+        attributes: template,
+      };
+    });
+    try {
+      this.client.bulkCreate(toCreate);
+      return Promise.resolve();
+    } catch (err: any) {
+      return Promise.reject(err);
+    }
+  }
 
   getIntegrationInstances = (
     query?: IntegrationInstanceQuery

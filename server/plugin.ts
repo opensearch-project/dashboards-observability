@@ -78,7 +78,32 @@ export class ObservabilityPlugin
       },
     };
 
+    const integrationTemplateType: SavedObjectsType = {
+      name: 'integration-template',
+      hidden: false,
+      namespaceType: 'agnostic',
+      mappings: {
+        dynamic: false,
+        // TODO fill in the rest of the fields
+        properties: {
+          templateName: {
+            type: 'text',
+          },
+          description: {
+            type: 'text',
+          },
+        },
+      },
+      management: {
+        importableAndExportable: false,
+        getTitle(obj) {
+          return `Integration Template [${obj.id}]`;
+        },
+      },
+    };
+
     core.savedObjects.registerType(obsPanelType);
+    core.savedObjects.registerType(integrationTemplateType);
 
     // Register server side APIs
     setupRoutes({ router, client: openSearchObservabilityClient });

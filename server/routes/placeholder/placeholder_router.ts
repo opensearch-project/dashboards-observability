@@ -92,10 +92,10 @@ export const handleWithCallback = async (
 };
 
 const getAdaptor = (
-  _context: RequestHandlerContext,
+  context: RequestHandlerContext,
   _request: OpenSearchDashboardsRequest
 ): PlaceholderAdaptor => {
-  return new PlaceholderKibanaBackend();
+  return new PlaceholderKibanaBackend(context.core.savedObjects.client);
 };
 
 export function registerPlaceholderRoute(router: IRouter) {
@@ -124,6 +124,21 @@ export function registerPlaceholderRoute(router: IRouter) {
         const assets = (await readNDJsonObjects(stream)) as SavedObjectsBulkCreateObject[];
         added = true;
         return context.core.savedObjects.client.bulkCreate(assets);
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: `${INTEGRATIONS_BASE}/test_load`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request) as PlaceholderAdaptor;
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        const unwrapped = a as PlaceholderKibanaBackend;
+        await unwrapped.loadCatalog();
+        return {};
       });
     }
   );
