@@ -30,7 +30,7 @@ module.exports = defineConfig({
       return require('./.cypress/plugins/index.js')(on, config);
     },
     baseUrl: 'http://localhost:5601',
-    specPattern: '.cypress/integration/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: '.cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     supportFile: '.cypress/support/index.js',
   },
 });

@@ -45,7 +45,6 @@ describe('Adding sample data and visualization', () => {
 describe('Has working breadcrumbs', () => {
   it('Redirect to correct page on breadcrumb click', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(), { timeout: COMMAND_TIMEOUT_LONG };
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
@@ -81,8 +80,7 @@ describe('Open flyout for a data row to see details', () => {
   });
 
   it('Should be able to open flyout and see data, json and traces', () => {
-    cy.get('[data-test-subj="docTable"] tbody tr button.euiButtonIcon').first().click();
-    suppressResizeObserverIssue();
+    cy.get('[data-test-subj="eventExplorer__flyoutArrow"]').first().click();
     cy.get('.observability-flyout').should('exist');
     cy.get('.observability-flyout .osdDocViewer .euiTabs span.euiTab__content')
       .contains('Table')
@@ -96,6 +94,7 @@ describe('Open flyout for a data row to see details', () => {
   });
 
   it('Should be able to see surrounding docs', () => {
+    cy.get('[data-test-subj="eventExplorer__flyoutArrow"]').first().click();
     cy.get('.observability-flyout span.euiButton__text')
       .contains('View surrounding events')
       .should('be.visible')
@@ -107,9 +106,8 @@ describe('Open flyout for a data row to see details', () => {
 });
 
 describe('Add/delete/switch explorer top level tabs', () => {
-  before(() => {
+  beforeEach(() => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
   });
   
   it('Add a new tab', () => {
@@ -130,7 +128,6 @@ describe('Add/delete/switch explorer top level tabs', () => {
       .find('button.euiTab')
       .first()
       .click();
-    suppressResizeObserverIssue();
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
       .first()
@@ -160,7 +157,6 @@ describe('Add/delete/switch explorer top level tabs', () => {
       .find('button.euiTab')
       .then((lists) => {
         const initialLength = Cypress.$(lists).length;
-        suppressResizeObserverIssue();
         cy.get('[data-test-subj="eventExplorer__topLevelTabbing"] button.euiTab').eq(1).click();
         cy.get('button.euiTab-isSelected [data-test-subj="eventExplorer__tabClose"]').click();
         cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
@@ -187,7 +183,6 @@ describe('Add/delete/switch explorer top level tabs', () => {
 describe('Click actions test', () => {
   beforeEach(() => {
     landOnEventHome();
-    suppressResizeObserverIssue();
   });
 
   it('Actions - click event explorer', () => {
@@ -217,7 +212,6 @@ describe('Saves a query on explorer page', () => {
   it('Saves a visualization on visualization tab of explorer page', () => {
     landOnEventExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-    suppressResizeObserverIssue();
     cy.get('button[id="main-content-vis"]').contains('Visualizations').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]')
@@ -239,7 +233,6 @@ describe('Saves a query on explorer page', () => {
       .click();
     landOnEventExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-    suppressResizeObserverIssue();
     cy.get('button[id="main-content-vis"]', { timeout: COMMAND_TIMEOUT_LONG })
       .contains('Visualizations')
       .click();
@@ -255,7 +248,6 @@ describe('Saves a query on explorer page', () => {
 
   it('Saves a query on event tab of explorer page', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
     cy.get('.tab-title').contains('Events').click();
@@ -274,7 +266,6 @@ describe('Saves a query on explorer page', () => {
 
   it('Click on a saved query from event analytics home', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[0].query, TEST_QUERIES[0].dateRangeDOM);
 
     cy.get('.tab-title').contains('Events').click();
@@ -296,14 +287,12 @@ describe('Saves a query on explorer page', () => {
     cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).contains(TEST_QUERIES[0].query);
-    suppressResizeObserverIssue();
   });
 });
 
 describe('Override timestamp for an index', () => {
   it('Click override button to override default timestamp', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[2].query);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').contains('Refresh').click();
@@ -322,7 +311,6 @@ describe('Override timestamp for an index', () => {
 describe('Toggle the sidebar fields', () => {
   it('Toggle fields between available and selected section', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
     cy.get('[data-test-subj="fieldToggle-AvgTicketPrice"]').click();
     cy.get('[data-test-subj="field-AvgTicketPrice"]').should('exist');
@@ -336,7 +324,6 @@ describe('Toggle the sidebar fields', () => {
 describe('Search fields in the sidebar', () => {
   it('Search a field', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[0].query, YEAR_TO_DATE_DOM_ID);
     cy.get('[data-test-subj="eventExplorer__sidebarSearch"]').type('C');
     cy.get('[data-test-subj="field-Cancelled"]').should('exist');
@@ -348,7 +335,6 @@ describe('Search fields in the sidebar', () => {
 
 describe('Delete saved objects', () => {
   it('Delete visualizations/queries from event analytics', () => {
-    suppressResizeObserverIssue();
     landOnEventHome();
     cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
     cy.get('.euiContextMenuItem__text').contains('50 rows').click();
@@ -366,7 +352,6 @@ describe('Delete saved objects', () => {
 describe('Click to view field insights', () => {
   beforeEach(() => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 
@@ -404,7 +389,6 @@ describe('Click to view field insights', () => {
 describe('Switch on and off livetail', () => {
   it('Switch on and off in live tail', () => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[1].query);
     cy.get('[data-test-subj=eventLiveTail]').click();
     cy.get('[data-test-subj=eventLiveTail__delay10s]').click();
@@ -415,9 +399,11 @@ describe('Switch on and off livetail', () => {
 });
 
 describe('Live tail stop automatically', () => {
-  it('Moving to other tab should stop live tail automatically', () => {
+  beforeEach(() => {
     landOnEventExplorer();
-    suppressResizeObserverIssue();
+  });
+
+  it('Moving to other tab should stop live tail automatically', () => {
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[1].query);
     cy.get('[data-test-subj=eventLiveTail]').click();
@@ -426,7 +412,6 @@ describe('Live tail stop automatically', () => {
   });
 
   it('Add a new tab', () => {
-    suppressResizeObserverIssue();
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
       .then((lists) => {
@@ -446,7 +431,6 @@ describe('Live tail stop automatically', () => {
       .find('button.euiTab')
       .first()
       .click();
-    suppressResizeObserverIssue();
 
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
@@ -455,7 +439,6 @@ describe('Live tail stop automatically', () => {
   });
 
   it('Close current selected tab', () => {
-    suppressResizeObserverIssue();
     cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).click();
@@ -468,7 +451,6 @@ describe('Live tail stop automatically', () => {
         const initialLength = Cypress.$(lists).length;
         cy.get('[data-test-subj="eventExplorer__topLevelTabbing"] button.euiTab').eq(1).click();
         cy.get('button.euiTab-isSelected [data-test-subj="eventExplorer__tabClose"]').click();
-        suppressResizeObserverIssue();
         cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
           .find('button.euiTab')
           .should('have.length', initialLength - 1);
@@ -483,7 +465,6 @@ describe('Live tail stop automatically', () => {
 describe('Visualizing data', () => {
   beforeEach(() => {
     landOnEventVisualizations();
-    suppressResizeObserverIssue();
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 
@@ -537,7 +518,6 @@ describe('Visualizing data', () => {
     cy.get(`input[value="${FIELD_AGENT}"]`).click();
     cy.get('[data-test-subj="panelCloseBtn"]').click();
     cy.get('[data-test-subj="visualizeEditorRenderButton"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
-    suppressResizeObserverIssue();
 
     cy.get('.infolayer .legendtext').as('legandTxt');
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_1);
