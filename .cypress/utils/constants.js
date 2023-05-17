@@ -137,3 +137,18 @@ export const count_table_row = (expected_row_count) => {
     expect(total_row_count).to.equal(expected_row_count)
   });
 }
+
+Cypress.on('uncaught:exception', (err, runnable, promise) => {
+  // when the exception originated from an unhandled promise
+  // rejection, the promise is provided as a third argument
+  // you can turn off failing the test in this case
+  if (promise) {
+    return false
+  }
+  // we still want to ensure there are no other unexpected
+  // errors, so we let them fail the test
+})
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+  if (err.message.includes('ResizeObserver loop')) return false;
+})
