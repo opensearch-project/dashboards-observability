@@ -6,18 +6,14 @@ import {
 } from '../../../../../../src/core/server';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../../src/core/server/http/router';
 import { handleWithCallback } from '../placeholder_router';
+import { PlaceholderAdaptor } from 'server/adaptors/placeholder/placeholder_adaptor';
 
 jest
   .mock('../../../../../../src/core/server', () => jest.fn())
   .mock('../../../../../../src/core/server/http/router', () => jest.fn());
 
 describe('Data wrapper', () => {
-  const clientMock: Partial<ILegacyScopedClusterClient> = {};
-  const requestMock: DeepPartial<OpenSearchDashboardsRequest> = {
-    url: {
-      pathname: '/test',
-    },
-  };
+  const adaptorMock: Partial<PlaceholderAdaptor> = {};
   const responseMock: DeepPartial<OpenSearchDashboardsResponseFactory> = {
     custom: jest.fn((data) => data),
     ok: jest.fn((data) => data),
@@ -28,7 +24,7 @@ describe('Data wrapper', () => {
       return { test: 'data' };
     });
     const result = await handleWithCallback(
-      clientMock as ILegacyScopedClusterClient,
+      adaptorMock as PlaceholderAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
       callback
     );
@@ -43,7 +39,7 @@ describe('Data wrapper', () => {
       throw new Error('test error');
     });
     const result = await handleWithCallback(
-      clientMock as ILegacyScopedClusterClient,
+      adaptorMock as PlaceholderAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
       callback
     );
