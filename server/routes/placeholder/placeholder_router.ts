@@ -18,7 +18,7 @@ import {
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
-import { PlaceholderJavaBackend } from '../../adaptors/placeholder/placeholder_java_backend';
+import { PlaceholderKibanaBackend } from '../../../server/adaptors/placeholder/placeholder_kibana_backend';
 
 /**
  * Parse a stream of newline-delimited JSON objects as an array.
@@ -72,7 +72,7 @@ let added = false;
 export const handleWithCallback = async (
   adaptor: PlaceholderAdaptor,
   response: OpenSearchDashboardsResponseFactory,
-  callback: (a: PlaceholderAdaptor) => object
+  callback: (a: PlaceholderAdaptor) => any
 ): Promise<any> => {
   try {
     const data = await callback(adaptor);
@@ -92,17 +92,10 @@ export const handleWithCallback = async (
 };
 
 const getAdaptor = (
-  context: RequestHandlerContext,
-  request: OpenSearchDashboardsRequest
+  _context: RequestHandlerContext,
+  _request: OpenSearchDashboardsRequest
 ): PlaceholderAdaptor => {
-  // context.observability_plugin.observabilityClient is not in the RequestHandlerContext type, but it's the correct client.
-  // Updating to the seemingly-correct context.core.opensearch.legacy.client is a breaking change.
-  // For now, we'll wrap access in manual type checking.
-  if (context.observability_plugin === null) {
-    throw new Error('context.observability_plugin is null');
-  }
-  const client = context.observability_plugin.observabilityClient.asScoped(request);
-  return new PlaceholderJavaBackend(client);
+  return new PlaceholderKibanaBackend();
 };
 
 export function registerPlaceholderRoute(router: IRouter) {
@@ -114,7 +107,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
-        return await a.getIntegrationTemplates(null);
+        return await a.getIntegrationTemplates();
       });
     }
   );
@@ -169,7 +162,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
-        return await a.getIntegrationTemplates(null);
+        return await a.getIntegrationTemplates();
       });
     }
   );

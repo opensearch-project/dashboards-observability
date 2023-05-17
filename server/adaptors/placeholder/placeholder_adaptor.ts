@@ -5,10 +5,10 @@
 
 export interface PlaceholderAdaptor {
   getIntegrationTemplates: (
-    query: IntegrationTemplateQuery | null
-  ) => Promise<IntegrationTemplate[]>;
+    query?: IntegrationTemplateQuery
+  ) => Promise<IntegrationTemplateSearchResult>;
 
   getIntegrationInstances: (
-    query: IntegrationInstanceQuery | null
-  ) => Promise<IntegrationInstance[]>;
+    query?: IntegrationInstanceQuery
+  ) => Promise<IntegrationInstanceSearchResult>;
 }

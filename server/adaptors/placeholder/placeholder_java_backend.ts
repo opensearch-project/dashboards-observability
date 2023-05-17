@@ -1,6 +1,7 @@
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
+import { PlaceholderAdaptor } from './placeholder_adaptor';
 
-export class PlaceholderJavaBackend {
+export class PlaceholderJavaBackend implements PlaceholderAdaptor {
   client: ILegacyScopedClusterClient;
 
   constructor(client: ILegacyScopedClusterClient) {
@@ -9,12 +10,13 @@ export class PlaceholderJavaBackend {
 
   // Fetch all existing integrations
   getIntegrationTemplates = async (
-    query: IntegrationTemplateQuery | null
-  ): Promise<IntegrationTemplate[]> => {
+    query?: IntegrationTemplateQuery
+  ): Promise<IntegrationTemplateSearchResult> => {
     try {
-      console.log('getIntegrationTemplates query: ' + query);
+      console.log(`getIntegrationTemplates query: ${query}`);
       const response = await this.client.callAsCurrentUser('integrations.getIntegrationTemplates');
-      console.log('getIntegrationTemplates response: ' + response);
+      console.log(`getIntegrationTemplates response: ${response}`);
+      console.log(response);
       return response;
     } catch (err: any) {
       throw new Error('Fetch All Applications Error: ' + err);
@@ -22,16 +24,17 @@ export class PlaceholderJavaBackend {
   };
 
   getIntegrationInstances = async (
-    query: IntegrationInstanceQuery | null
-  ): Promise<IntegrationInstance[]> => {
+    query?: IntegrationInstanceQuery
+  ): Promise<IntegrationInstanceSearchResult> => {
     try {
       let endpoint: string = 'integrations.getAdded';
-      if (query && query.added) {
+      if (query?.added) {
         endpoint = 'integrations.getAddedPop';
       }
       console.log('getIntegrationInstances query: ' + query);
       const response = await this.client.callAsCurrentUser(endpoint, {});
-      console.log('getIntegrationInstances response: ' + response);
+      console.log('getIntegrationInstances response:');
+      console.log(response);
       return response.test;
     } catch (err: any) {
       throw new Error('Fetch Added Applications Error: ' + err);

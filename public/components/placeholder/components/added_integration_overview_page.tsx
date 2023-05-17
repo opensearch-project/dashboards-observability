@@ -52,13 +52,17 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
       {
         text: 'Added Integrations',
         href: '#/placeholder/added',
-      }
+      },
     ]);
     handleDataRequest();
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) => setData(exists));
+    http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) =>
+      setData({
+        data: exists.data.integrations,
+      })
+    );
   }
 
   return (
