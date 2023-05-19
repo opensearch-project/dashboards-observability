@@ -160,8 +160,8 @@ export function Integration(props: AppDetailProps) {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/placeholder',
+        text: 'Integration',
+        href: '#/',
       },
       {
         text: appId,

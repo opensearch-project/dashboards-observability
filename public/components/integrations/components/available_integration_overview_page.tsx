@@ -91,57 +91,12 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
     setIsModalVisible(true);
   };
 
-  // const data: AvailableIntegrationType[] = [
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  // ];
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/placeholder',
+        text: 'Integrations',
+        href: '#/',
       },
     ]);
     handleDataRequest();

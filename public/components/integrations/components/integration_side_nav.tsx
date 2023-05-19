@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -12,12 +11,8 @@ import {
   EuiPageSideBar,
   EuiSideNav,
   EuiSideNavItemType,
-  EuiSwitch,
 } from '@elastic/eui';
 import React from 'react';
-//   import { useState } from 'react';
-//   import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
-//   import { uiSettingsService } from '../../../common/utils';
 
 export const Sidebar = (props: { children: React.ReactNode }) => {
   const items = [

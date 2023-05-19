@@ -1,25 +1,9 @@
 import {
   EuiButton,
   EuiCard,
-  EuiHorizontalRule,
   EuiIcon,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPanel,
-  EuiSelectOption,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import DSLService from 'public/services/requests/dsl';
-import PPLService from 'public/services/requests/ppl';
-import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
-import TimestampUtils from 'public/services/timestamp/timestamp';
-import React, { ReactChild, useEffect, useState } from 'react';
+import React from 'react';
 
 export function Synopsis({
   id,
@@ -39,10 +23,6 @@ export function Synopsis({
     optionalImg = <EuiIcon color="text" size="l" title="" type={iconType} />;
   }
 
-  // const classes = classNames('homSynopsis__card', {
-  //   'homSynopsis__card--noPanel': !wrapInPanel,
-  // });
-
   return (
     <EuiCard
       // className={classes}
@@ -54,7 +34,6 @@ export function Synopsis({
       onClick={onClick}
       href={url}
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
-      // betaBadgeLabel={isBeta ? 'Beta' : null}
       titleElement="h3"
       footer={
         <div>
@@ -64,17 +43,3 @@ export function Synopsis({
     />
   );
 }
-
-//   Synopsis.propTypes = {
-//     description: PropTypes.string.isRequired,
-//     iconUrl: PropTypes.string,
-//     iconType: PropTypes.string,
-//     title: PropTypes.string.isRequired,
-//     url: PropTypes.string,
-//     onClick: PropTypes.func,
-//     isBeta: PropTypes.bool,
-//   };
-
-//   Synopsis.defaultProps = {
-//     isBeta: false,
-//   };

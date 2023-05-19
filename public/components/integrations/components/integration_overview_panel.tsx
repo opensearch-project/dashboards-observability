@@ -4,7 +4,6 @@ import {
   EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,

@@ -3,21 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { schema } from '@osd/config-schema';
 import fetch from 'node-fetch';
 import { ApplicationType } from 'common/types/application_analytics';
 import * as fs from 'fs';
 import {
   ILegacyScopedClusterClient,
-  IOpenSearchDashboardsResponse,
   IRouter,
 } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
-import { addClickToMetric, getMetrics } from '../../common/metrics/metrics_helper';
-import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
-import { importFile } from '../../../../../src/plugins/saved_objects_management/public/lib';
-import { SavedObject } from '../../../../../src/plugins/data/common';
+import { IntegrationAdaptor } from '../../adaptors/integrations/integration_adaptor';
 
 async function readJSONFile(filePath: string): Promise<any> {
   return new Promise<any>((resolve, reject) => {
@@ -36,8 +30,8 @@ async function readJSONFile(filePath: string): Promise<any> {
   });
 }
 
-export function registerPlaceholderRoute(router: IRouter) {
-  const appAnalyticsBackend = new PlaceholderAdaptor();
+export function registerIntegrationRoute(router: IRouter) {
+  const appAnalyticsBackend = new IntegrationAdaptor();
 
   router.get(
     {

@@ -14,11 +14,10 @@ import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { isEmpty, last } from 'lodash';
 import { useDispatch } from 'react-redux';
-import { Application, Integration } from './components/integration';
+import { Integration } from './components/integration';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
-import { ObservabilitySideBar } from '../common/side_nav';
 import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { APP_ANALYTICS_API_PREFIX } from '../../../common/constants/application_analytics';
 import {
@@ -32,7 +31,6 @@ import {
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
 import {
   AvailableIntegrationOverviewPage,
-  IntegrationOverviewPage,
 } from './components/available_integration_overview_page';
 import { Sidebar } from './components/integration_side_nav';
 import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
