@@ -58,6 +58,7 @@ import {
 } from '../../helpers/utils';
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
 import './visualization_flyout.scss';
+import { useToast } from '../../../common/toast';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
@@ -67,7 +68,6 @@ import './visualization_flyout.scss';
  * closeFlyout: function to close the flyout
  * start: start time in date filter
  * end: end time in date filter
- * setToast: function to set toast in the panel
  * savedObjects: savedObjects core service
  * pplService: ppl requestor service
  * setPanelVisualizations: function set the visualization list in panel
@@ -82,12 +82,6 @@ interface VisualizationFlyoutSOProps {
   start: ShortDate;
   end: ShortDate;
   http: CoreStart['http'];
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   savedObjects: CoreStart['savedObjects'];
   pplService: PPLService;
   setPanelVisualizations: React.Dispatch<React.SetStateAction<VisualizationType[]>>;
@@ -98,22 +92,18 @@ interface VisualizationFlyoutSOProps {
 }
 
 export const VisaulizationFlyoutSO = ({
-  panelId,
   appId = '',
   pplFilterValue,
   closeFlyout,
   start,
   end,
-  http,
-  setToast,
-  savedObjects,
   pplService,
-  setPanelVisualizations,
   isFlyoutReplacement,
   replaceVisualizationId,
   addVisualizationPanel,
 }: VisualizationFlyoutSOProps) => {
   const dispatch = useDispatch();
+  const { setToast } = useToast();
 
   const panel = useSelector(selectPanel);
 
@@ -167,12 +157,12 @@ export const VisaulizationFlyoutSO = ({
   };
 
   const isInputValid = () => {
-    if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast, 'left')) {
+    if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast)) {
       return false;
     }
 
     if (selectValue === '') {
-      setToast('Please make a valid selection', 'danger', undefined, 'left');
+      setToast('Please make a valid selection', 'danger', undefined);
       return false;
     }
 
@@ -183,11 +173,13 @@ export const VisaulizationFlyoutSO = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue));
+      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle));
     } else {
-      const visualizationsWithNewPanel = addVisualizationPanel({
-        savedVisualizationId: selectValue,
-      });
+        const visualizationsWithNewPanel = addVisualizationPanel({
+          savedVisualizationId: selectValue,
+          onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
+          onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`
+        });
     }
     closeFlyout();
   };

@@ -26,7 +26,7 @@ export const DSL_ENDPOINT = '/_plugins/_dsl';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
-export const observabilityPluginOrder = 6000;
+export const observabilityPluginOrder = 1500;
 
 export const observabilityApplicationsID = 'observability-applications';
 export const observabilityApplicationsTitle = 'Applications';
