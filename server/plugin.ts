@@ -78,10 +78,10 @@ export class ObservabilityPlugin
       },
     };
 
-    const integrationTemplateType: SavedObjectsType = {
-      name: 'integration-template',
+    const integrationInstanceType: SavedObjectsType = {
+      name: 'integration-instance',
       hidden: false,
-      namespaceType: 'agnostic',
+      namespaceType: 'single',
       mappings: {
         dynamic: false,
         // TODO fill in the rest of the fields
@@ -97,7 +97,7 @@ export class ObservabilityPlugin
     };
 
     core.savedObjects.registerType(obsPanelType);
-    core.savedObjects.registerType(integrationTemplateType);
+    core.savedObjects.registerType(integrationInstanceType);
 
     // Register server side APIs
     setupRoutes({ router, client: openSearchObservabilityClient });
