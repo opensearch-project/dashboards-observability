@@ -3,68 +3,74 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { schema } from '@osd/config-schema';
 import fetch from 'node-fetch';
-import { ApplicationType } from 'common/types/application_analytics';
 import * as fs from 'fs';
-import {
-  ILegacyScopedClusterClient,
-  IOpenSearchDashboardsResponse,
-  IRouter,
-} from '../../../../../src/core/server';
+import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
-import { addClickToMetric, getMetrics } from '../../common/metrics/metrics_helper';
 import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
-import { importFile } from '../../../../../src/plugins/saved_objects_management/public/lib';
-import { SavedObject } from '../../../../../src/plugins/data/common';
+import {
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponseFactory,
+} from '../../../../../src/core/server/http/router';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
+import { PlaceholderKibanaBackend } from '../../../server/adaptors/placeholder/placeholder_kibana_backend';
 
-async function readJSONFile(filePath: string): Promise<any> {
-  return new Promise<any>((resolve, reject) => {
-    let assets: any[] = [];
-    const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-    stream.on('data', (data: string) => {
-      const dataArray = '[' + data.replace(/\}\s+\{/gi, '},{') + ']';
-      assets = JSON.parse(dataArray);
+let added = false;
+
+/**
+ * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
+ * This is a convenience method that handles common error handling and response formatting.
+ * The callback must accept a `PlaceholderAdaptor` as its first argument.
+ *
+ * If the callback throws an error,
+ * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
+ * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
+ *
+ * @param {PlaceholderAdaptor} adaptor The adaptor instance to use for making requests.
+ * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
+ * @callback callback A callback that will invoke a request on a provided adaptor.
+ * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
+ */
+export const handleWithCallback = async (
+  adaptor: PlaceholderAdaptor,
+  response: OpenSearchDashboardsResponseFactory,
+  callback: (a: PlaceholderAdaptor) => any
+): Promise<any> => {
+  try {
+    const data = await callback(adaptor);
+    console.log(`handleWithCallback: callback returned ${data.toString().length} bytes`);
+    return response.ok({
+      body: {
+        data,
+      },
     });
-    stream.on('end', () => {
-      resolve(assets);
+  } catch (err: any) {
+    console.error(`handleWithCallback: callback failed with error "${err.message}"`);
+    return response.custom({
+      statusCode: err.statusCode || 500,
+      body: err.message,
     });
-    stream.on('error', (err: Error) => {
-      reject(err);
-    });
-  });
-}
+  }
+};
+
+const getAdaptor = (
+  context: RequestHandlerContext,
+  _request: OpenSearchDashboardsRequest
+): PlaceholderAdaptor => {
+  return new PlaceholderKibanaBackend(context.core.savedObjects.client);
+};
 
 export function registerPlaceholderRoute(router: IRouter) {
-  const appAnalyticsBackend = new PlaceholderAdaptor();
-
   router.get(
     {
       path: `${INTEGRATIONS_BASE}/repository`,
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-      let applicationsData: ApplicationType[] = [];
-      try {
-        console.log('in get');
-        applicationsData = await appAnalyticsBackend.fetchApps(opensearchClient);
-        console.log(applicationsData);
-        return response.ok({
-          body: {
-            data: applicationsData,
-          },
-        });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        return await a.getIntegrationTemplates();
+      });
     }
   );
 
@@ -74,44 +80,40 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-      console.log('in post');
-      const applicationsData: ApplicationType[] = [];
-      try {
-        const assets = await readJSONFile(__dirname + '/test.ndjson');
-        const bulkCreateResponse = await context.core.savedObjects.client.bulkCreate(assets);
-        return response.ok({
-          body: {
-            data: {},
-          },
-        });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        const assets = await a.getAssets('nginx');
+        added = true;
+        return context.core.savedObjects.client.bulkCreate(assets);
+      });
     }
   );
+
+  router.post(
+    {
+      path: `${INTEGRATIONS_BASE}/test_load`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request) as PlaceholderAdaptor;
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        const unwrapped = a as PlaceholderKibanaBackend;
+        await unwrapped.loadRepository();
+        return {};
+      });
+    }
+  );
+
   router.get(
     {
       path: `${OBSERVABILITY_BASE}/repository/id`,
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      try {
-        const random = await fetch('http://127.0.0.1:4010/repository/id', {});
-        return response.ok({
-          body: {
-            data: await random.json(),
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
+        return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
+      });
     }
   );
 
@@ -121,16 +123,10 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      try {
-        const random = await fetch('http://127.0.0.1:4010/store?limit=24', {});
-        return response.ok({
-          body: {
-            data: await random.json(),
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
+        return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
+      });
     }
   );
 
@@ -140,24 +136,25 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const opensearchClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-        request
-      );
-      let applicationsData: ApplicationType[] = [];
-      try {
-        applicationsData = await appAnalyticsBackend.fetchApps(opensearchClient);
-        return response.ok({
-          body: {
-            data: applicationsData,
-          },
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        return await a.getIntegrationTemplates();
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: `${INTEGRATIONS_BASE}/store/list_added`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+        return await a.getIntegrationInstances({
+          added,
         });
-      } catch (err: any) {
-        console.error('Error occurred while fetching applications', err);
-        return response.custom({
-          statusCode: err.statusCode || 500,
-          body: err.message,
-        });
-      }
+      });
     }
   );
 }

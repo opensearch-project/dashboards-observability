@@ -79,6 +79,7 @@ export const OPENSEARCH_INTEGRATIONS_API = {
   OBJECT: `${BASE_INTEGRATIONS_URI}/object`,
   ALL: `${BASE_INTEGRATIONS_URI}/store/list_all`,
   ADDED: `${BASE_INTEGRATIONS_URI}/store/list_added`,
+  ADDED_POP: `${BASE_INTEGRATIONS_URI}/store/list_added_pop`,
 };
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
