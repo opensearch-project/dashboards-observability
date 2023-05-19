@@ -70,6 +70,7 @@ import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import { coreRefs } from '../../framework/core_refs';
 import { clonePanel } from './redux/panel_slice';
+import { useToast } from '../common/toast';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -104,12 +105,6 @@ interface CustomPanelViewProps {
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   onEditClick: (savedVisualizationId: string) => any;
   startTime: string;
   endTime: string;
@@ -138,7 +133,6 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     setEndTime,
     updateAvailabilityVizId,
     cloneCustomPanel,
-    setToast,
     onEditClick,
     onAddClick,
   } = props;
@@ -168,6 +162,8 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   const appPanel = page === 'app';
 
   const dispatch = useDispatch();
+
+  const { setToast } = useToast();
 
   const closeHelpFlyout = () => {
     setAddVizDisabled(false);
@@ -318,24 +314,11 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    try {
-      await dispatch(clonePanel(panel, newCustomPanelName));
-    } catch (err) {
-      setToast('Error while attempting to Duplicate this Dashboard.', 'danger');
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Operational Panel name', 'danger');
+    } else {
+      dispatch(clonePanel(panel, newCustomPanelName));
     }
-
-    // const newPanel = {
-    //   ...panel,
-    //   title: newCustomPanelName,
-    //   dateCreated: new Date().getTime(),
-    //   dateModified: new Date().getTime(),
-    // } as PanelType;
-    // const newSOPanel = await coreRefs.savedObjectsClient!.create(
-    //   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-    //   newPanel
-    // );
-    //
-    // window.location.assign(`${last(parentBreadcrumbs)!.href}${newSOPanel.id}`);
     closeModal();
   };
 

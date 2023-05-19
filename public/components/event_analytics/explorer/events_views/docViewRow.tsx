@@ -11,7 +11,11 @@ import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DocFlyout } from './doc_flyout';
 import { HttpStart } from '../../../../../../../src/core/public';
-import { OTEL_TRACE_ID, DATE_PICKER_FORMAT, JAEGER_TRACE_ID } from '../../../../../common/constants/explorer';
+import {
+  OTEL_TRACE_ID,
+  DATE_PICKER_FORMAT,
+  JAEGER_TRACE_ID,
+} from '../../../../../common/constants/explorer';
 import { SurroundingFlyout } from './surrounding_flyout';
 import PPLService from '../../../../services/requests/ppl';
 import { isValidTraceId } from '../../utils';
@@ -69,20 +73,22 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
   };
 
   const getDlTmpl = (conf: { doc: IDocType }, isFlyout: boolean) => {
-    const { doc } = conf;
+    const { doc: document } = conf;
 
     return (
       <div className="truncate-by-height">
         <span>
           <dl className="source truncate-by-height">
-            {toPairs(doc).map((entry: string[]) => {
-              const isTraceField = (entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID);
+            {toPairs(document).map((entry: string[]) => {
+              const isTraceField = entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID;
               return (
                 <span key={uniqueId('grid-desc')}>
                   <dt>{entry[0]}:</dt>
                   <dd>
                     <span>
-                      {isTraceField && (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) && !isFlyout ? (
+                      {isTraceField &&
+                      (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) &&
+                      !isFlyout ? (
                         <EuiLink onClick={tracesFlyout}>{entry[1]}</EuiLink>
                       ) : (
                         entry[1]
@@ -103,8 +109,8 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
     if (!detailsOpen) toggleDetailOpen();
   };
 
-  const getDiscoverSourceLikeDOM = (doc: IDocType, isFlyout: boolean) => {
-    return getDlTmpl({ doc }, isFlyout);
+  const getDiscoverSourceLikeDOM = (document: IDocType, isFlyout: boolean) => {
+    return getDlTmpl({ doc: document }, isFlyout);
   };
 
   const toggleDetailOpen = () => {
@@ -122,6 +128,7 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
       <td className="osdDocTableCell__toggleDetails" key={uniqueId('grid-td-')}>
         <EuiButtonIcon
           className="euiButtonIcon euiButtonIcon--text"
+          data-test-subj="eventExplorer__flyoutArrow"
           onClick={() => {
             toggleDetailOpen();
           }}
@@ -131,21 +138,21 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
     );
   };
 
-  const getTds = (doc: IDocType, selectedCols: IField[], isFlyout: boolean) => {
+  const getTds = (document: IDocType, selectedColumns: IField[], isFlyout: boolean) => {
     const cols = [];
     const fieldClsName = 'osdDocTableCell__dataField eui-textBreakAll eui-textBreakWord';
     const timestampClsName = 'eui-textNoWrap';
     // No field is selected
-    if (!selectedCols || selectedCols.length === 0) {
-      if (has(doc, timeStampField)) {
+    if (!selectedColumns || selectedColumns.length === 0) {
+      if (has(document, timeStampField)) {
         cols.push(
           getTdTmpl({
             clsName: timestampClsName,
-            content: moment.utc(doc[timeStampField]).local().format(DATE_PICKER_FORMAT),
+            content: moment.utc(document[timeStampField]).local().format(DATE_PICKER_FORMAT),
           })
         );
       }
-      const _sourceLikeDOM = getDiscoverSourceLikeDOM(doc, isFlyout);
+      const _sourceLikeDOM = getDiscoverSourceLikeDOM(document, isFlyout);
       cols.push(
         getTdTmpl({
           clsName: fieldClsName,
@@ -155,9 +162,9 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
     } else {
       // Has at least one field selected
       const filteredDoc = {};
-      forEach(selectedCols, (selCol) => {
-        if (has(doc, selCol.name)) {
-          filteredDoc[selCol.name] = doc[selCol.name];
+      forEach(selectedColumns, (selCol) => {
+        if (has(document, selCol.name)) {
+          filteredDoc[selCol.name] = document[selCol.name];
         }
       });
       forEach(filteredDoc, (val, key) => {
