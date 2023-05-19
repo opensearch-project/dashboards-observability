@@ -26,7 +26,7 @@ import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { getCustomModal } from '../../../../public/components/custom_panels/helpers/modal_containers';
+import { getCustomModal } from '../../custom_panels/helpers/modal_containers';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,

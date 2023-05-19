@@ -76,7 +76,7 @@ import {
   import { getAddIntegrationModal } from './add_integration_modal';
   import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import _ from 'lodash';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import { DeleteModal } from '../../common/helpers/delete_modal';
   
   const searchBarConfigs = {
     [TAB_EVENT_ID]: {

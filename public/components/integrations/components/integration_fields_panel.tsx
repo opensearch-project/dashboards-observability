@@ -1,7 +1,7 @@
 import { EuiInMemoryTable, EuiPanel, EuiSpacer, EuiTableFieldDataColumnType, EuiText } from '@elastic/eui';
 import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import React from 'react';
-import { PanelTitle } from '../../../../public/components/trace_analytics/components/common/helper_functions';
+import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import _ from 'lodash';
 
 export function IntegrationFields(props: any) {
