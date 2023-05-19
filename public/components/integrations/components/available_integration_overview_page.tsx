@@ -7,11 +7,9 @@
 import {
   EuiFlexItem,
   EuiGlobalToastList,
-  EuiLink,
   EuiOverlayMask,
   EuiPage,
   EuiPageBody,
-  EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 import _ from 'lodash';
@@ -21,9 +19,8 @@ import { AppAnalyticsComponentDeps } from '../home';
 import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
-import { AddedIntegrationsTable } from './added_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
-import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { getAddIntegrationModal } from './add_integration_modal';
 
 interface AppTableProps extends AppAnalyticsComponentDeps {

@@ -9,22 +9,17 @@ import {
     EuiFlexGroup,
     EuiFlexItem,
     EuiGlobalToastList,
-    EuiHorizontalRule,
     EuiIcon,
     EuiInMemoryTable,
     EuiLink,
     EuiOverlayMask,
     EuiPage,
     EuiPageBody,
-    EuiPageContent,
     EuiPageContentHeaderSection,
     EuiPageHeader,
     EuiPageHeaderSection,
     EuiPanel,
-    EuiSelectOption,
     EuiSpacer,
-    EuiTabbedContent,
-    EuiTabbedContentTab,
     EuiTableFieldDataColumnType,
     EuiText,
     EuiTitle,
@@ -34,34 +29,10 @@ import {
   import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
   import TimestampUtils from 'public/services/timestamp/timestamp';
   import React, { ReactChild, useEffect, useState } from 'react';
-  import { useHistory } from 'react-router-dom';
-  import { useDispatch } from 'react-redux';
   import { last } from 'lodash';
-  import { VisualizationType } from 'common/types/custom_panels';
   import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-  import { TracesContent } from '../../trace_analytics/components/traces/traces_content';
-  import { DashboardContent } from '../../trace_analytics/components/dashboard/dashboard_content';
-  import { ServicesContent } from '../../trace_analytics/components/services/services_content';
   import { filtersToDsl, PanelTitle } from '../../trace_analytics/components/common/helper_functions';
-  import { SpanDetailTable } from '../../trace_analytics/components/traces/span_detail_table';
-  import { Explorer } from '../../event_analytics/explorer/explorer';
-  // import { Configuration } from './configuration';
-  import {
-    TAB_CONFIG_ID,
-    TAB_CONFIG_TITLE,
-    TAB_LOG_ID,
-    TAB_LOG_TITLE,
-    TAB_OVERVIEW_ID,
-    TAB_OVERVIEW_TITLE,
-    TAB_PANEL_ID,
-    TAB_PANEL_TITLE,
-    TAB_SERVICE_ID,
-    TAB_SERVICE_TITLE,
-    TAB_TRACE_ID,
-    TAB_TRACE_TITLE,
-  } from '../../../../common/constants/application_analytics';
   import { TAB_EVENT_ID, TAB_CHART_ID, NEW_TAB, FILTER_OPTIONS } from '../../../../common/constants/explorer';
-  import { IQueryTab } from '../../../../common/types/explorer';
   import { NotificationsStart } from '../../../../../../src/core/public';
   import { AppAnalyticsComponentDeps } from '../home';
   import {
