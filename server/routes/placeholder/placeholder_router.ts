@@ -98,7 +98,7 @@ export function registerPlaceholderRoute(router: IRouter) {
       const adaptor = getAdaptor(context, request) as PlaceholderAdaptor;
       return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
         const unwrapped = a as PlaceholderKibanaBackend;
-        await unwrapped.loadCatalog();
+        await unwrapped.loadRepository();
         return {};
       });
     }

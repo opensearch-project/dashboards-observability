@@ -1,0 +1,10 @@
+[
+    {
+        "templateName": "nginx",
+        "version": "1.0.0",
+        "description": "Nginx HTTP server collector",
+        "catalog": "observability",
+        "assetUrl": "https://cdn.iconscout.com/icon/free/png-256/nginx-3521604-2945048.png",
+        "displayAssets": []
+    }
+]

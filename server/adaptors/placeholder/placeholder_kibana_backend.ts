@@ -1,21 +1,12 @@
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import { PlaceholderAdaptor } from './placeholder_adaptor';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { readNDJsonObjects } from './utils';
 
-const catalog: IntegrationTemplate[] = [
-  {
-    templateName: 'nginx',
-    version: '1.0.0',
-    description: 'Nginx HTTP server collector',
-    catalog: 'observability',
-    assetUrl: 'https://cdn.iconscout.com/icon/free/png-256/nginx-3521604-2945048.png',
-    displayAssets: [],
-  },
-];
+let repository: IntegrationTemplate[] = [];
 
-const sampleIntegrations: IntegrationInstance[] = [
+const store: IntegrationInstance[] = [
   {
     templateName: 'nginx',
     type: 'dashboard',
@@ -25,15 +16,25 @@ const sampleIntegrations: IntegrationInstance[] = [
     version: '0.1.0',
     description: 'Nginx HTTP server collector for east cost prod systems',
     template:
-      'https://github.com/opensearch-project/observability/blob/2.x/integrations/nginx/config.json',
-    creationDate: '2016-08-29T09:12:33.001Z',
+      'https: //github.com/opensearch-project/observability/blob/2.x/integrations/nginx/config.json',
+    creationDate: '2016-08-29T09: 12: 33.001Z',
     author: 'Ani',
     status: 'LOADED',
     dashboardUrl:
       "http://localhost:5601/nol/app/dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'Nginx%20dashboard%20with%20basic%20Observability%20on%20access%20%2F%20error%20logs',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:'%5BNGINX%20Core%20Logs%201.0%5D%20Overview',viewMode:view)",
-    assets: {},
+    assets: [],
   },
 ];
+
+const readRepository = async (): Promise<void> => {
+  const buffer = await fs.readFile(__dirname + '/__data__/repository.json', 'utf-8');
+  try {
+    repository = JSON.parse(buffer);
+    return Promise.resolve();
+  } catch (err: any) {
+    return Promise.reject(err);
+  }
+};
 
 export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
   client: SavedObjectsClientContract;
@@ -42,19 +43,15 @@ export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
     this.client = client;
   }
 
-  getIntegrationTemplates = (
+  getIntegrationTemplates = async (
     _query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
-    this.client
-      .find({
-        type: 'integration-template',
-      })
-      .then((data) => {
-        console.warn(`Catalog queried for ${data.total} entries, ignoring for sample data.`);
-      });
-    console.log(`Retrieving ${catalog.length} templates from catalog`);
+    if (repository.length === 0) {
+      await readRepository();
+    }
+    console.log(`Retrieving ${repository.length} templates from catalog`);
     return Promise.resolve({
-      integrations: catalog,
+      integrations: repository,
     });
   };
 
@@ -66,8 +63,8 @@ export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
     return assets;
   };
 
-  loadCatalog(): Promise<void> {
-    const toCreate: SavedObjectsBulkCreateObject[] = catalog.map((template) => {
+  loadRepository(): Promise<void> {
+    const toCreate: SavedObjectsBulkCreateObject[] = repository.map((template) => {
       return {
         type: 'integration-template',
         attributes: template,
@@ -84,10 +81,10 @@ export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
   getIntegrationInstances = (
     query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceSearchResult> => {
-    console.log(sampleIntegrations);
+    console.log(store);
     if (query?.added) {
       return Promise.resolve({
-        integrations: sampleIntegrations,
+        integrations: store,
       });
     }
     return Promise.resolve({
