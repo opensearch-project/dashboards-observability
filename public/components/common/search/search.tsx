@@ -136,11 +136,10 @@ export const Search = (props: any) => {
   useEffect(() => {
     dispatch(
       liveTailFlag({
-        tabId: tabId,
-        data: {
-          [LIVE_TAIL_FLAG]: isLiveTailOn,
-        },
-      })
+        query: {
+          liveTailFlag: isLiveTailOn
+        },     
+       })
     );
   }, [isLiveTailOn]);
 

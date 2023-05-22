@@ -212,7 +212,7 @@ export const VisualizationContainer = ({
   ];
 
   if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
+    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0], showModelPanel];
   }
 
   const loadVisaulization = async () => {
@@ -329,7 +329,7 @@ export const VisualizationContainer = ({
                   closePopover={closeActionsMenu}
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel items={popoverPanel} />
+                  <EuiContextMenuPanel items={popoverPanel} data-test-subj="panelViz__popoverPanel"/>
                 </EuiPopover>
               )}
             </EuiFlexItem>

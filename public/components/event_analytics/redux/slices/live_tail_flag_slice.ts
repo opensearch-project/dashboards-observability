@@ -5,28 +5,27 @@
 
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
-import { REDUX_EXPL_SLICE_PATTERNS, LIVE_TAIL_FLAG } from '../../../../../common/constants/explorer';
+import { REDUX_EXPL_SLICE_LIVE_TAIL, LIVE_TAIL_FLAG } from '../../../../../common/constants/explorer';
 
 const initialState = {
-  [initialTabId]: {
-    [LIVE_TAIL_FLAG]: '',
-  },
+  liveTailFlag: false,
 };
 
 export const liveTailFlagSlice = createSlice({
-  name: REDUX_EXPL_SLICE_PATTERNS,
+  name: REDUX_EXPL_SLICE_LIVE_TAIL,
   initialState,
   reducers: {
-    init: (state, { payload }) => {
-      state[payload.data] = {};
-    },
+    // init: (state, { payload }) => {
+    //   state[LIVE_TAIL_FLAG] = false;
+    // },
     liveTailFlag: (state, { payload }) => {
-        state[payload.data] = payload.data;
+        state.liveTailFlag = payload.liveTailFlag;
       },
   },
+  extraReducers: (builder) => {},
 });
 
-export const { init, liveTailFlag } = liveTailFlagSlice.actions;
+export const { liveTailFlag } = liveTailFlagSlice.actions;
 
 export const selectliveTailFlag = createSelector(
   (state) => state.liveTailFlag,

@@ -52,6 +52,10 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
   const [flyoutToggleSize, setFlyoutToggleSize] = useState(true);
   const isLiveTailOn = useSelector(selectliveTailFlag);
 
+  useEffect(() => {
+    console.log("live tail selector: ", isLiveTailOn);
+  }, [isLiveTailOn]);
+
   useImperativeHandle(ref, () => ({
     closeAllFlyouts(openDocId: string) {
       console.log("appears in docViewRow");
