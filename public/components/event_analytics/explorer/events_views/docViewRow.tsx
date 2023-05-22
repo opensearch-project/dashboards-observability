@@ -52,7 +52,7 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
   const [surroundingEventsOpen, setSurroundingEventsOpen] = useState<boolean>(false);
   const [openTraces, setOpenTraces] = useState<boolean>(false);
   const [flyoutToggleSize, setFlyoutToggleSize] = useState(true);
-
+  
   useImperativeHandle(ref, () => ({
     closeAllFlyouts(openDocId: string) {
       if (openDocId !== docId && (detailsOpen || surroundingEventsOpen)) {
