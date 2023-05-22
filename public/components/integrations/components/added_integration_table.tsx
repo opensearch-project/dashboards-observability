@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {

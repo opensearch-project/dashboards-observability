@@ -4,15 +4,14 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppAnalyticsComponentDeps } from '../home';
 import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
-import { AvailableIntegrationsTable } from './available_integration_table';
 import { AddedIntegrationsTable } from './added_integration_table';
-import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
@@ -47,11 +46,11 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
       ...parentBreadcrumbs,
       {
         text: 'Placeholder',
-        href: '#/placeholder',
+        href: '#/integrations',
       },
       {
         text: 'Added Integrations',
-        href: '#/placeholder/added',
+        href: '#/integrations/added',
       },
     ]);
     handleDataRequest();

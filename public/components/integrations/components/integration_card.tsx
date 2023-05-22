@@ -1,25 +1,5 @@
-import {
-  EuiButton,
-  EuiCard,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPanel,
-  EuiSelectOption,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import DSLService from 'public/services/requests/dsl';
-import PPLService from 'public/services/requests/ppl';
-import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
-import TimestampUtils from 'public/services/timestamp/timestamp';
-import React, { ReactChild, useEffect, useState } from 'react';
+import { EuiButton, EuiCard, EuiIcon } from '@elastic/eui';
+import React from 'react';
 
 export function Synopsis({
   id,

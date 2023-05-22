@@ -1,5 +1,5 @@
-import { promises as fs } from 'fs';
-import { PlaceholderAdaptor } from './placeholder_adaptor';
+import * as fs from 'fs';
+import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { readNDJsonObjects } from './utils';
@@ -27,7 +27,7 @@ const store: IntegrationInstance[] = [
 ];
 
 const readRepository = async (): Promise<void> => {
-  const buffer = await fs.readFile(__dirname + '/__data__/repository.json', 'utf-8');
+  const buffer = await fs.promises.readFile(__dirname + '/__data__/repository.json', 'utf-8');
   try {
     repository = JSON.parse(buffer);
     return Promise.resolve();
@@ -36,7 +36,7 @@ const readRepository = async (): Promise<void> => {
   }
 };
 
-export class PlaceholderKibanaBackend implements PlaceholderAdaptor {
+export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
 
   constructor(client: SavedObjectsClientContract) {

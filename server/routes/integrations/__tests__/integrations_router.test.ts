@@ -1,19 +1,14 @@
 import { DeepPartial } from 'redux';
-import {
-  ILegacyScopedClusterClient,
-  OpenSearchDashboardsRequest,
-  RequestHandlerContext,
-} from '../../../../../../src/core/server';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../../src/core/server/http/router';
-import { handleWithCallback } from '../placeholder_router';
-import { PlaceholderAdaptor } from 'server/adaptors/placeholder/placeholder_adaptor';
+import { handleWithCallback } from '../integrations_router';
+import { IntegrationsAdaptor } from 'server/adaptors/integrations/integrations_adaptor';
 
 jest
   .mock('../../../../../../src/core/server', () => jest.fn())
   .mock('../../../../../../src/core/server/http/router', () => jest.fn());
 
 describe('Data wrapper', () => {
-  const adaptorMock: Partial<PlaceholderAdaptor> = {};
+  const adaptorMock: Partial<IntegrationsAdaptor> = {};
   const responseMock: DeepPartial<OpenSearchDashboardsResponseFactory> = {
     custom: jest.fn((data) => data),
     ok: jest.fn((data) => data),
@@ -24,7 +19,7 @@ describe('Data wrapper', () => {
       return { test: 'data' };
     });
     const result = await handleWithCallback(
-      adaptorMock as PlaceholderAdaptor,
+      adaptorMock as IntegrationsAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
       callback
     );
@@ -39,7 +34,7 @@ describe('Data wrapper', () => {
       throw new Error('test error');
     });
     const result = await handleWithCallback(
-      adaptorMock as PlaceholderAdaptor,
+      adaptorMock as IntegrationsAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
       callback
     );

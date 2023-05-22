@@ -4,7 +4,6 @@ import {
   EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
@@ -12,18 +11,17 @@ import {
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
-import logo from '../assets/nginx-svgrepo-com.svg';
 
 const pageStyles: CSS.Properties = {
   width: '80%',
 };
 
 export function IntegrationOverview(props: any) {
-  const {data} = props;
+  const { data } = props;
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }}>
       <img src={data.data.assetUrl} alt="React Logo" style={{ height: 53, width: 53 }} />
-      <EuiSpacer size='m'/>
+      <EuiSpacer size="m" />
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
           <EuiFlexGroup gutterSize="xs">

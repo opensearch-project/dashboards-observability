@@ -17,7 +17,6 @@ import {
   EuiFieldText,
   EuiButton,
 } from '@elastic/eui';
-import { string } from 'joi';
 
 /*
  * "CustomInputModalProps" component is used to create a modal with an input filed
@@ -178,5 +177,3 @@ export const getAddIntegrationModal = (
     />
   );
 };
-
-

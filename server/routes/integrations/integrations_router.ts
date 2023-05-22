@@ -7,34 +7,33 @@ import fetch from 'node-fetch';
 import * as fs from 'fs';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
-import { PlaceholderAdaptor } from '../../../server/adaptors/placeholder/placeholder_adaptor';
+import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
 import {
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
-import { PlaceholderKibanaBackend } from '../../../server/adaptors/placeholder/placeholder_kibana_backend';
+import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
 
 let added = false;
 
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
  * This is a convenience method that handles common error handling and response formatting.
- * The callback must accept a `PlaceholderAdaptor` as its first argument.
+ * The callback must accept a `IntegrationsAdaptor` as its first argument.
  *
  * If the callback throws an error,
  * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
  * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
  *
- * @param {PlaceholderAdaptor} adaptor The adaptor instance to use for making requests.
+ * @param {IntegrationsAdaptor} adaptor The adaptor instance to use for making requests.
  * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
  * @callback callback A callback that will invoke a request on a provided adaptor.
  * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
  */
 export const handleWithCallback = async (
-  adaptor: PlaceholderAdaptor,
+  adaptor: IntegrationsAdaptor,
   response: OpenSearchDashboardsResponseFactory,
-  callback: (a: PlaceholderAdaptor) => any
+  callback: (a: IntegrationsAdaptor) => any
 ): Promise<any> => {
   try {
     const data = await callback(adaptor);
@@ -56,11 +55,11 @@ export const handleWithCallback = async (
 const getAdaptor = (
   context: RequestHandlerContext,
   _request: OpenSearchDashboardsRequest
-): PlaceholderAdaptor => {
-  return new PlaceholderKibanaBackend(context.core.savedObjects.client);
+): IntegrationsAdaptor => {
+  return new IntegrationsKibanaBackend(context.core.savedObjects.client);
 };
 
-export function registerPlaceholderRoute(router: IRouter) {
+export function registerIntegrationsRoute(router: IRouter) {
   router.get(
     {
       path: `${INTEGRATIONS_BASE}/repository`,
@@ -68,7 +67,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         return await a.getIntegrationTemplates();
       });
     }
@@ -81,7 +80,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         const assets = await a.getAssets('nginx');
         added = true;
         return context.core.savedObjects.client.bulkCreate(assets);
@@ -95,9 +94,9 @@ export function registerPlaceholderRoute(router: IRouter) {
       validate: false,
     },
     async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request) as PlaceholderAdaptor;
-      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
-        const unwrapped = a as PlaceholderKibanaBackend;
+      const adaptor = getAdaptor(context, request) as IntegrationsAdaptor;
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+        const unwrapped = a as IntegrationsKibanaBackend;
         await unwrapped.loadRepository();
         return {};
       });
@@ -111,7 +110,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
+      return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
         return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
       });
     }
@@ -124,7 +123,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (_a: PlaceholderAdaptor) => {
+      return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
         return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
       });
     }
@@ -137,7 +136,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         return await a.getIntegrationTemplates();
       });
     }
@@ -150,7 +149,7 @@ export function registerPlaceholderRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: PlaceholderAdaptor) => {
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         return await a.getIntegrationInstances({
           added,
         });
