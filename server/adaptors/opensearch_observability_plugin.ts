@@ -11,29 +11,6 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
   Client.prototype.observability = components.clientAction.namespaceFactory();
   Client.prototype.integrations = components.clientAction.namespaceFactory();
   const observability = Client.prototype.observability.prototype;
-  const integrations = Client.prototype.integrations.prototype;
-
-  // Get Object
-  integrations.getIntegrationTemplates = clientAction({
-    url: {
-      fmt: OPENSEARCH_INTEGRATIONS_API.ALL,
-    },
-    method: 'GET',
-  });
-
-  integrations.getAdded = clientAction({
-    url: {
-      fmt: OPENSEARCH_INTEGRATIONS_API.ADDED,
-    },
-    method: 'GET',
-  });
-
-  integrations.getAddedPop = clientAction({
-    url: {
-      fmt: OPENSEARCH_INTEGRATIONS_API.ADDED_POP,
-    },
-    method: 'GET',
-  });
 
   // Get Object
   observability.getObject = clientAction({
