@@ -5,7 +5,7 @@
 
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/server';
 
-export interface PlaceholderAdaptor {
+export interface IntegrationsAdaptor {
   getIntegrationTemplates: (
     query?: IntegrationTemplateQuery
   ) => Promise<IntegrationTemplateSearchResult>;

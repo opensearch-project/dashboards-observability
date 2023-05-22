@@ -12,7 +12,7 @@ import { observabilityID, observabilityTitle } from '../../common/constants/shar
 import { store } from '../framework/redux/store';
 import { AppPluginStartDependencies } from '../types';
 import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
-import { Home as PlaceholderHome } from './placeholder/home';
+import { Home as PlaceholderHome } from './integrations/home';
 import { MetricsListener } from './common/metrics_listener';
 import { Home as CustomPanelsHome } from './custom_panels/home';
 import { EventAnalytics } from './event_analytics';

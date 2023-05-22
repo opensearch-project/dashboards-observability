@@ -20,7 +20,10 @@ import { registerSqlRoute } from './notebooks/sqlRouter';
 import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_router';
 import { registerAppAnalyticsRouter } from './application_analytics/app_analytics_router';
 import { registerMetricsRoute } from './metrics/metrics_rounter';
-import { registerPlaceholderRoute } from './placeholder/placeholder_router';
+import {
+  registerIntegrationsRoute,
+  registerPlaceholderRoute,
+} from './placeholder/integrations_router';
 
 export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
   PanelsRouter(router);
@@ -41,5 +44,5 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
   registerSqlRoute(router, queryService);
 
   registerMetricsRoute(router);
-  registerPlaceholderRoute(router);
+  registerIntegrationsRoute(router);
 }

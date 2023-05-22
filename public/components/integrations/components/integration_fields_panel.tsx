@@ -1,11 +1,17 @@
-import { EuiInMemoryTable, EuiPanel, EuiSpacer, EuiTableFieldDataColumnType, EuiText } from '@elastic/eui';
-import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import {
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiSpacer,
+  EuiTableFieldDataColumnType,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
-import { PanelTitle } from '../../../../public/components/trace_analytics/components/common/helper_functions';
 import _ from 'lodash';
+import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {
-  const data = props.data.data.fields || []
+  const data = props.data.data.fields || [];
 
   const search = {
     box: {
@@ -33,9 +39,7 @@ export function IntegrationFields(props: any) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText
-          data-test-subj={`${record.name}IntegrationLink`}
-        >
+        <EuiText data-test-subj={`${record.name}IntegrationLink`}>
           {_.truncate(record.name, { length: 100 })}
         </EuiText>
       ),
@@ -64,23 +68,21 @@ export function IntegrationFields(props: any) {
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
-
-
   return (
     <EuiPanel>
       <PanelTitle title={props.data.data.templateName + ' Fields'} />
-      <EuiSpacer size='l'/>
+      <EuiSpacer size="l" />
       <EuiInMemoryTable
-      itemId="id"
-      loading={false}
-      items={data}
-      columns={tableColumns}
-      pagination={{
-        initialPageSize: 10,
-        pageSizeOptions: [5, 10, 15],
-      }}
-      search={search}
-    />
+        itemId="id"
+        loading={false}
+        items={data}
+        columns={tableColumns}
+        pagination={{
+          initialPageSize: 10,
+          pageSizeOptions: [5, 10, 15],
+        }}
+        search={search}
+      />
     </EuiPanel>
   );
 }

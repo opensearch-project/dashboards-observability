@@ -3,9 +3,9 @@ import {
   ILegacyScopedClusterClient,
   SavedObjectsBulkCreateObject,
 } from '../../../../../src/core/server';
-import { PlaceholderAdaptor } from './placeholder_adaptor';
+import { IntegrationsAdaptor } from './integrations_adaptor';
 
-export class PlaceholderJavaBackend implements PlaceholderAdaptor {
+export class IntegrationsJavaBackend implements IntegrationsAdaptor {
   client: ILegacyScopedClusterClient;
 
   constructor(client: ILegacyScopedClusterClient) {

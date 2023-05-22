@@ -20,7 +20,7 @@ import React from 'react';
 //   import { uiSettingsService } from '../../../common/utils';
 
 export const Sidebar = (props: { children: React.ReactNode }) => {
-  const items = [
+  const sidebarItems = [
     {
       name: 'Integrations',
       id: 0,
@@ -61,7 +61,8 @@ export const Sidebar = (props: { children: React.ReactNode }) => {
     }
     return initial && setIsSelected(items, hash, false, !reverse);
   }
-  setIsSelected(items, location.hash);
+
+  setIsSelected(sidebarItems, location.hash);
 
   return (
     <EuiPage>
@@ -73,7 +74,7 @@ export const Sidebar = (props: { children: React.ReactNode }) => {
           gutterSize="none"
         >
           <EuiFlexItem>
-            <EuiSideNav items={items} />
+            <EuiSideNav items={sidebarItems} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageSideBar>

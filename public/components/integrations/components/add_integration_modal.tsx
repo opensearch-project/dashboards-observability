@@ -178,5 +178,3 @@ export const getAddIntegrationModal = (
     />
   );
 };
-
-

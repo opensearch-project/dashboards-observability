@@ -193,7 +193,7 @@ export function Integration(props: AppDetailProps) {
       .catch((err) =>
         setToast(
           'Failed to load integration. Check Added Integrations table for more details',
-          'danger',
+          'danger'
         )
       );
   }
@@ -209,14 +209,14 @@ export function Integration(props: AppDetailProps) {
       />
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        {IntegrationOverview({data, getModal})}
+        {IntegrationOverview({ data, getModal })}
         <EuiSpacer />
-          {IntegrationDetails({ data })}
-          <EuiSpacer />
-          {IntegrationAssets({ data })}
-          <EuiSpacer />
-          {IntegrationFields({ data })}
-          <EuiSpacer />
+        {IntegrationDetails({ data })}
+        <EuiSpacer />
+        {IntegrationAssets({ data })}
+        <EuiSpacer />
+        {IntegrationFields({ data })}
+        <EuiSpacer />
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>
