@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -12,7 +11,6 @@ import {
   EuiPageSideBar,
   EuiSideNav,
   EuiSideNavItemType,
-  EuiSwitch,
 } from '@elastic/eui';
 import React from 'react';
 //   import { useState } from 'react';

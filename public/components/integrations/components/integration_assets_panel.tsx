@@ -1,6 +1,5 @@
 import {
   EuiInMemoryTable,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTableFieldDataColumnType,

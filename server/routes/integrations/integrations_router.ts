@@ -12,7 +12,6 @@ import {
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
 
 let added = false;

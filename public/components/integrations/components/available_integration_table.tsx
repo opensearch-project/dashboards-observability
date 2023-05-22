@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React from 'react';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
@@ -95,40 +95,6 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     ],
   };
 
-  // return (
-  //   <div>
-  //     <EuiFlexGroup alignItems="center">
-  //       <EuiFlexItem grow={1}>
-  //         <EuiTitle size="s">
-  //           <h2 style={{ fontWeight: 430 }}>Integrations (2)</h2>
-  //         </EuiTitle>
-  //       </EuiFlexItem>
-  //     </EuiFlexGroup>
-
-  //     <EuiSpacer size="m" />
-
-  //     <EuiFlexGroup
-  //       direction="column"
-  //       justifyContent="spaceBetween"
-  //       style={{ height: '100%' }}
-  //       gutterSize="none"
-  //     >
-  //       {features.map((feature) => (
-  //         <EuiFlexItem key={feature} grow={false}>
-  //           <Synopsis
-  //             id={'random'}
-  //             description={'random'}
-  //             iconUrl={'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350'}
-  //             title={feature}
-  //             onClick={() => {
-  //               window.location.assign(`#/placeholder/${feature}`);
-  //             }}
-  //           />
-  //         </EuiFlexItem>
-  //       ))}
-  //     </EuiFlexGroup>
-  //   </div>
-  // );
   return (
     <EuiPageContent id="availableIntegrationsArea">
       <EuiPageContentHeaderSection>

@@ -4,7 +4,6 @@ import {
   EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
@@ -12,7 +11,6 @@ import {
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
-import logo from '../assets/nginx-svgrepo-com.svg';
 
 const pageStyles: CSS.Properties = {
   width: '80%',

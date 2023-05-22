@@ -9,22 +9,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastList,
-  EuiHorizontalRule,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
-  EuiSelectOption,
   EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiTableFieldDataColumnType,
   EuiText,
   EuiTitle,
@@ -34,40 +29,11 @@ import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { last } from 'lodash';
-import { VisualizationType } from 'common/types/custom_panels';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
-import { TracesContent } from '../../trace_analytics/components/traces/traces_content';
-import { DashboardContent } from '../../trace_analytics/components/dashboard/dashboard_content';
-import { ServicesContent } from '../../trace_analytics/components/services/services_content';
-import { filtersToDsl, PanelTitle } from '../../trace_analytics/components/common/helper_functions';
-import { SpanDetailTable } from '../../trace_analytics/components/traces/span_detail_table';
-import { Explorer } from '../../event_analytics/explorer/explorer';
-// import { Configuration } from './configuration';
-import {
-  TAB_CONFIG_ID,
-  TAB_CONFIG_TITLE,
-  TAB_LOG_ID,
-  TAB_LOG_TITLE,
-  TAB_OVERVIEW_ID,
-  TAB_OVERVIEW_TITLE,
-  TAB_PANEL_ID,
-  TAB_PANEL_TITLE,
-  TAB_SERVICE_ID,
-  TAB_SERVICE_TITLE,
-  TAB_TRACE_ID,
-  TAB_TRACE_TITLE,
-} from '../../../../common/constants/application_analytics';
-import {
-  TAB_EVENT_ID,
-  TAB_CHART_ID,
-  NEW_TAB,
-  FILTER_OPTIONS,
-} from '../../../../common/constants/explorer';
-import { IQueryTab } from '../../../../common/types/explorer';
+import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
+import { TAB_EVENT_ID, TAB_CHART_ID, FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { AppAnalyticsComponentDeps } from '../home';
 import {
@@ -75,11 +41,6 @@ import {
   ApplicationType,
 } from '../../../../common/types/application_analytics';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
-import { IntegrationOverview } from './integration_overview_panel';
-import { IntegrationDetails } from './integration_details_panel';
-import { IntegrationFields } from './integration_fields_panel';
-import { IntegrationAssets } from './integration_assets_panel';
-import { getAddIntegrationModal } from './add_integration_modal';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 
@@ -149,7 +110,7 @@ export function AddedIntegration(props: AppDetailProps) {
       ...parentBreadcrumbs,
       {
         text: 'Placeholder',
-        href: '#/placeholder',
+        href: '#/integrations',
       },
       {
         text: 'Added Integration',
@@ -157,7 +118,7 @@ export function AddedIntegration(props: AppDetailProps) {
       },
       {
         text: appId,
-        href: `${last(parentBreadcrumbs)!.href}placeholder/added/${appId}`,
+        href: `${last(parentBreadcrumbs)!.href}integrations/added/${appId}`,
       },
     ]);
     handleDataRequest();

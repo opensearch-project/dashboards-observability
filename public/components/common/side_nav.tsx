@@ -96,7 +96,7 @@ export function ObservabilitySideBar(props: { children: React.ReactNode }) {
         {
           name: 'Placeholder',
           id: 7,
-          href: '#/placeholder',
+          href: '#/integrations',
         },
       ],
     },

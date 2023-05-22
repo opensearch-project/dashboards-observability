@@ -1,12 +1,7 @@
 import { DeepPartial } from 'redux';
-import {
-  ILegacyScopedClusterClient,
-  OpenSearchDashboardsRequest,
-  RequestHandlerContext,
-} from '../../../../../../src/core/server';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../../src/core/server/http/router';
 import { handleWithCallback } from '../integrations_router';
-import { IntegrationsAdaptor } from 'server/adaptors/placeholder/integrations_adaptor';
+import { IntegrationsAdaptor } from 'server/adaptors/integrations/integrations_adaptor';
 
 jest
   .mock('../../../../../../src/core/server', () => jest.fn())
