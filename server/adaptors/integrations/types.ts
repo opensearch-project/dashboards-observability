@@ -49,11 +49,11 @@ interface IntegrationTemplateQuery {
 
 interface IntegrationInstance {
   id: string;
+  name: string;
   templateName: string;
-  integrationType: string;
-  dataset: string;
-  namespace: string;
+  dataSource: string;
   creationDate: string;
+  tags?: string[];
   status: string; // Dynamically computed status on read
   assets: AssetReference[]; // References to imported assets
 }
