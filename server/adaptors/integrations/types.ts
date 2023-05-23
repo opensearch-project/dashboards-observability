@@ -1,38 +1,68 @@
 interface IntegrationTemplate {
-  templateName: string;
+  name: string;
   version: string;
-  description: string;
-  catalog: string;
-  assetUrl: string;
-  displayAssets: any[];
+  integrationType: string;
+  author?: string;
+  description?: string;
+  tags?: string[];
+  sourceUrl?: string;
+  statics?: {
+    mapping?: {
+      logo?: string;
+      gallery?: string[];
+      darkModeLogo?: string; // Fallback to light mode if absent
+      darkModeGallery?: string[];
+    };
+    assets?: Array<{
+      path: string;
+      mimeType: string;
+      annotation?: string;
+      data: string;
+    }>;
+  };
+  components: Array<{
+    name: string;
+    version: string;
+    description?: string;
+    sourceUrl?: string;
+    schemaBody: string;
+    mappingBody: string;
+  }>;
+  displayAssets: Array<{
+    assetBody: string;
+  }>;
 }
 
 interface IntegrationTemplateSearchResult {
-  integrations: IntegrationTemplate[];
+  hits: IntegrationTemplate[];
 }
 
 interface IntegrationTemplateQuery {
-  name?: string; // Temporary value to satisfy linter, don't use
+  tags?: string[];
 }
 
 interface IntegrationInstance {
-  templateName: string;
-  type: string;
-  dataset: string;
-  namespace: string;
   id: string;
-  version: string;
-  description: string;
-  template: string;
+  name: string;
+  templateName: string;
+  dataSource: {
+    sourceType: string;
+    dataset: string;
+    namespace: string;
+  };
   creationDate: string;
-  author: string;
+  tags?: string[];
   status: string;
-  dashboardUrl: string;
-  assets: object;
+  assets: Array<{
+    assetType: string;
+    assetUrl: string;
+    status: string;
+    isDefaultAsset: boolean;
+  }>;
 }
 
 interface IntegrationInstanceSearchResult {
-  integrations: IntegrationInstance[];
+  hits: IntegrationInstance[];
 }
 
 interface IntegrationInstanceQuery {
