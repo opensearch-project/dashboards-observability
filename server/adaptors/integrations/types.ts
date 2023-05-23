@@ -13,12 +13,14 @@ interface IntegrationTemplate {
       darkModeLogo?: string; // Fallback to light mode if absent
       darkModeGallery?: string[];
     };
-    assets?: Array<{
-      path: string;
-      mimeType: string;
-      annotation?: string;
-      data: string;
-    }>;
+    assets?: Map<
+      string,
+      {
+        mimeType: string;
+        annotation?: string;
+        data: string;
+      }
+    >;
   };
   components: Array<{
     name: string;
@@ -29,7 +31,7 @@ interface IntegrationTemplate {
     mappingBody: string;
   }>;
   displayAssets: Array<{
-    assetBody: string;
+    body: string;
   }>;
 }
 
