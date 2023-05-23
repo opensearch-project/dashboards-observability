@@ -1,4 +1,3 @@
-import { string } from 'joi';
 import { Readable } from 'stream';
 
 /**
@@ -32,23 +31,4 @@ export const readNDJsonObjects = async (stream: Readable): Promise<any[]> => {
       reject(err);
     });
   });
-};
-
-export const loadIntegration = async (
-  template: IntegrationTemplate,
-  name: string,
-  dataSource: string,
-  tags?: string[]
-): Promise<IntegrationInstance> => {
-  const instance: Partial<IntegrationInstance> = {
-    name,
-    dataSource,
-    tags,
-    id: 'unknown',
-    status: 'unknown',
-    templateName: template.name,
-    creationDate: new Date().toISOString(),
-    assets: [],
-  };
-  return Promise.resolve(instance as IntegrationInstance);
 };
