@@ -32,3 +32,28 @@ export const readNDJsonObjects = async (stream: Readable): Promise<any[]> => {
     });
   });
 };
+
+export const loadTemplate = async (
+  template: IntegrationTemplate,
+  options: {
+    name: string;
+    dataset: string;
+    namespace: string;
+    tags?: string[];
+  }
+): Promise<IntegrationInstance> => {
+  const instance: IntegrationInstance = {
+    id: 'unknown',
+    name: options.name,
+    templateName: template.name,
+    dataSource: {
+      sourceType: template.integrationType,
+      dataset: options.dataset,
+      namespace: options.namespace,
+    },
+    creationDate: new Date().toISOString(),
+    status: 'unknown',
+    assets: [],
+  };
+  return Promise.reject(new Error('Not implemented'));
+};
