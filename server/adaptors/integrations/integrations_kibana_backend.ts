@@ -6,25 +6,7 @@ import { readNDJsonObjects } from './utils';
 
 let repository: IntegrationTemplate[] = [];
 
-const store: IntegrationInstance[] = [
-  {
-    templateName: 'nginx',
-    type: 'dashboard',
-    dataset: 'prod',
-    namespace: 'us_east',
-    id: 'nginx-prod-us_east',
-    version: '0.1.0',
-    description: 'Nginx HTTP server collector for east cost prod systems',
-    template:
-      'https: //github.com/opensearch-project/observability/blob/2.x/integrations/nginx/config.json',
-    creationDate: '2016-08-29T09: 12: 33.001Z',
-    author: 'Ani',
-    status: 'LOADED',
-    dashboardUrl:
-      "http://localhost:5601/nol/app/dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'Nginx%20dashboard%20with%20basic%20Observability%20on%20access%20%2F%20error%20logs',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:'%5BNGINX%20Core%20Logs%201.0%5D%20Overview',viewMode:view)",
-    assets: [],
-  },
-];
+const store: IntegrationInstance[] = [];
 
 const readRepository = async (): Promise<void> => {
   const buffer = await fs.promises.readFile(__dirname + '/__data__/repository.json', 'utf-8');
@@ -51,7 +33,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     }
     console.log(`Retrieving ${repository.length} templates from catalog`);
     return Promise.resolve({
-      integrations: repository,
+      hits: repository,
     });
   };
 
@@ -84,11 +66,11 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     console.log(store);
     if (query?.added) {
       return Promise.resolve({
-        integrations: store,
+        hits: store,
       });
     }
     return Promise.resolve({
-      integrations: [],
+      hits: [],
     });
   };
 }
