@@ -1,15 +1,51 @@
 interface IntegrationTemplate {
   name: string;
   version: string;
+  integrationType: string;
   author?: string;
   description?: string;
   tags?: string[];
   sourceUrl?: string;
   catalog?: string;
-  staticAssetMapping?: StaticAssetMapping;
-  staticAssets?: StaticAsset[]; // Blobs for static assets to display, like logos
+  statics?: IntegrationStatics;
   components: IntegrationComponent[]; // Describes expected format of the data, used for validation
   displayAssets: IntegrationAsset[]; // Asset objects that can be imported
+}
+
+class IntegrationStatics {
+  mapping?: StaticAssetMapping;
+  assets?: StaticAsset[];
+
+  getLogo(darkMode?: boolean): StaticAsset | undefined {
+    if (darkMode && this.mapping?.darkModeLogo) {
+      return this.getAsset(this.mapping?.darkModeLogo);
+    }
+    if (this.mapping?.logo) {
+      return this.getAsset(this.mapping?.logo);
+    }
+  }
+
+  getGallery(darkMode?: boolean): StaticAsset[] {
+    if (darkMode && this.mapping?.darkModeGallery) {
+      return this.mapping.darkModeGallery
+        .map((path) => this.getAsset(path))
+        .filter((x) => x) as StaticAsset[];
+    }
+    if (this.mapping?.gallery) {
+      return this.mapping.gallery
+        .map((path) => this.getAsset(path))
+        .filter((x) => x) as StaticAsset[];
+    }
+    return [];
+  }
+
+  getAsset(path: string): StaticAsset | undefined {
+    for (const asset of this.assets?.values() ?? []) {
+      if (asset.path === path) {
+        return asset;
+      }
+    }
+  }
 }
 
 interface StaticAssetMapping {
@@ -51,6 +87,7 @@ interface IntegrationInstance {
   id: string;
   name: string;
   templateName: string;
+  integrationType: string;
   dataSource: string;
   creationDate: string;
   tags?: string[];
