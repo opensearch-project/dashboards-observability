@@ -284,7 +284,7 @@ export const Explorer = ({
       },
       {
         appBaseQuery,
-        query: rawQueryStr,
+        query: curQuery,
         startingTime,
         endingTime,
         isLiveTailOn: isLiveTailOnRef.current,

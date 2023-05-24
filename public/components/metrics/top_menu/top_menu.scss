@@ -4,17 +4,13 @@
  */
 
 .resolutionSelect {
-    .euiFormControlLayout {
-        .euiFormControlLayout {
-            width: 116px;
-        }
-    }
+  max-width: 300px;
 }
 
-.resolutionSelectText {
-    width: 70px;
+.metrics-search-bar-input {
+  max-width: 500px;
 }
 
-.search-bar-top-menu{
-   width:25vw;
+.metrics-search-bar-datepicker {
+  width: 500px;
 }

@@ -123,14 +123,16 @@ export const DocFlyout = ({
 
   const flyoutBody = (
     <EuiFlyoutBody>
-      {populateDataGrid(
-        explorerFields,
-        getHeaders(explorerFields.queriedFields, DEFAULT_COLUMNS.slice(1), true),
-        <tr className="osdDocTable__row">{memorizedTds}</tr>,
-        getHeaders(explorerFields.selectedFields, DEFAULT_COLUMNS.slice(1), true),
-        <tr className="osdDocTable__row">{memorizedTds}</tr>
-      )}
-      <DocViewer http={http} hit={doc} openTraces={openTraces} />
+      <div className="obsExplorer">
+        {populateDataGrid(
+          explorerFields,
+          getHeaders(explorerFields.queriedFields, DEFAULT_COLUMNS.slice(1), true),
+          <tr className="osdDocTable__row">{memorizedTds}</tr>,
+          getHeaders(explorerFields.selectedFields, DEFAULT_COLUMNS.slice(1), true),
+          <tr className="osdDocTable__row">{memorizedTds}</tr>
+        )}
+        <DocViewer http={http} hit={doc} openTraces={openTraces} />
+      </div>
     </EuiFlyoutBody>
   );
 

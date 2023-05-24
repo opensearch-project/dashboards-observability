@@ -24,11 +24,10 @@ export class SaveAsNewQuery extends SavedQuerySaver {
     const { batch, dispatch, changeQuery, updateTabName } = this.dispatchers;
     const { tabId, history, notifications, showPermissionErrorToast } = this.saveContext;
     const { name } = this.saveParams;
-    console.log('this.saveParams: ', this.saveParams);
     this.saveClient
       .create({ ...this.saveParams })
       .then((res: any) => {
-        history.replace(`/event_analytics/explorer/${res.objectId}`);
+        history.replace(`/explorer/${res.objectId}`);
         notifications.toasts.addSuccess({
           title: 'Saved successfully.',
           text: `New query '${name}' has been successfully saved.`,
@@ -50,7 +49,7 @@ export class SaveAsNewQuery extends SavedQuerySaver {
             })
           );
         });
-        history.replace(`/event_analytics/explorer/${res.objectId}`);
+        history.replace(`/explorer/${res.objectId}`);
         return res;
       })
       .catch((error: any) => {

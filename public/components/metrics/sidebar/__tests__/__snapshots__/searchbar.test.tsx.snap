@@ -15,7 +15,9 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
   <Component
     setSearch={[MockFunction]}
   >
-    <div>
+    <div
+      className="metrics-search-bar-input"
+    >
       <EuiSearchBar
         box={
           Object {
@@ -164,7 +166,9 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
   <Component
     setSearch={[MockFunction]}
   >
-    <div>
+    <div
+      className="metrics-search-bar-input"
+    >
       <EuiSearchBar
         box={
           Object {

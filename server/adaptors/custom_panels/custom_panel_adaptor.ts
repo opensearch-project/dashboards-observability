@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { PanelType, VisualizationType } from '../../../common/types/custom_panels';
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
-import { createDemoPanel } from '../../common/helpers/custom_panels/sample_panels';
+import { createDemoPanel } from '../../../common/constants/custom_panels';
 
 interface boxType {
   x1: number;
@@ -141,6 +141,7 @@ export class CustomPanelsAdaptor {
       throw new Error('Create Panel Error:' + error);
     }
   };
+
 
   // Rename an existing panel
   renamePanel = async (client: ILegacyScopedClusterClient, panelId: string, panelName: string) => {

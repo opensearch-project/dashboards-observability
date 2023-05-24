@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import {
   EuiHorizontalRule,
@@ -54,7 +53,7 @@ import {
 } from '../../../../common/constants/application_analytics';
 import { TAB_EVENT_ID, TAB_CHART_ID, NEW_TAB } from '../../../../common/constants/explorer';
 import { IQueryTab } from '../../../../common/types/explorer';
-import { NotificationsStart } from '../../../../../../src/core/public';
+import { NotificationsStart, Toast } from '../../../../../../src/core/public';
 import { AppAnalyticsComponentDeps } from '../home';
 import { CustomPanelView } from '../../../../public/components/custom_panels/custom_panel_view';
 import {
@@ -67,6 +66,7 @@ import { SpanDetailFlyout } from '../../../../public/components/trace_analytics/
 import { TraceDetailFlyout } from './flyout_components/trace_detail_flyout';
 import { fetchAppById, initializeTabData } from '../helpers/utils';
 import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
+import { observabilityApplicationsID } from '../../../../common/constants/shared';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -91,6 +91,7 @@ interface AppDetailProps extends AppAnalyticsComponentDeps {
   updateApp: (appId: string, updateAppData: Partial<ApplicationRequestType>, type: string) => void;
   setToasts: (title: string, color?: string, text?: ReactChild) => void;
   callback: (childfunction: () => void) => void;
+  toasts: Toast[];
 }
 
 export function Application(props: AppDetailProps) {
@@ -110,6 +111,7 @@ export function Application(props: AppDetailProps) {
     updateApp,
     setAppConfigs,
     setToasts,
+    toasts,
     setFilters,
     callback,
     queryManager,
@@ -218,12 +220,12 @@ export function Application(props: AppDetailProps) {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Application analytics',
-        href: '#/application_analytics',
+        text: 'Applications',
+        href: '#/',
       },
       {
         text: application.name,
-        href: `${last(parentBreadcrumbs)!.href}application_analytics/${appId}`,
+        href: `${observabilityApplicationsID}/${appId}`,
       },
     ]);
     setStartTimeForApp(sessionStorage.getItem(`${application.name}StartTime`) || 'now-24h');
@@ -273,12 +275,12 @@ export function Application(props: AppDetailProps) {
 
   const childBreadcrumbs = [
     {
-      text: 'Application analytics',
-      href: '#/application_analytics',
+      text: 'Applications',
+      href: '#/',
     },
     {
       text: `${application.name}`,
-      href: `#/application_analytics/${appId}`,
+      href: `#/${appId}`,
     },
   ];
 
@@ -293,7 +295,9 @@ export function Application(props: AppDetailProps) {
           endTime={appEndTime}
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
+          toasts={toasts}
         />
       </>
     );
@@ -311,6 +315,7 @@ export function Application(props: AppDetailProps) {
           page="app"
           nameColumnAction={nameColumnAction}
           traceColumnAction={traceColumnAction}
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           startTime={appStartTime}
           endTime={appEndTime}
@@ -334,6 +339,7 @@ export function Application(props: AppDetailProps) {
         <TracesContent
           {...props}
           page="app"
+          parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
           traceIdColumnAction={traceIdColumnAction}
           startTime={appStartTime}
@@ -351,7 +357,7 @@ export function Application(props: AppDetailProps) {
             openFlyout={setSpanFlyoutId}
             DSL={spanDSL}
             setTotal={setTotalSpans}
-            mode='data_prepper'
+            mode="data_prepper"
           />
         </EuiPanel>
       </>

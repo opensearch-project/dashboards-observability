@@ -23,7 +23,7 @@ export function TracesContent(props: TracesProps) {
     appConfigs,
     startTime,
     endTime,
-    parentBreadcrumbs,
+    parentBreadcrumb,
     childBreadcrumbs,
     traceIdColumnAction,
     setQuery,
@@ -39,7 +39,7 @@ export function TracesContent(props: TracesProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([...parentBreadcrumbs, ...childBreadcrumbs]);
+    chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'traces');
     setFilters([
       ...filters.map((filter) => ({
@@ -51,13 +51,33 @@ export function TracesContent(props: TracesProps) {
   }, []);
 
   useEffect(() => {
-    if (!redirect && ((mode === 'data_prepper' && dataPrepperIndicesExist) || (mode === 'jaeger' && jaegerIndicesExist))) refresh();
+    if (
+      !redirect &&
+      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+        (mode === 'jaeger' && jaegerIndicesExist))
+    )
+      refresh();
   }, [filters, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
 
   const refresh = async (sort?: PropertySort) => {
     setLoading(true);
-    const DSL = filtersToDsl(mode, filters, query, processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page, appConfigs);
-    const timeFilterDSL = filtersToDsl(mode, [], '', processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), page);
+    const DSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page,
+      appConfigs
+    );
+    const timeFilterDSL = filtersToDsl(
+      mode,
+      [],
+      '',
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page
+    );
     await handleTracesRequest(http, DSL, timeFilterDSL, tableItems, setTableItems, mode, sort);
     setLoading(false);
   };

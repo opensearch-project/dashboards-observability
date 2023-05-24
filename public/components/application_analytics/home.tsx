@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import React, { ReactChild, useEffect, useState } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
@@ -21,8 +20,7 @@ import { CreateApp } from './components/create';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
-import { ObservabilitySideBar } from '../common/side_nav';
-import { NotificationsStart } from '../../../../../src/core/public';
+import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { APP_ANALYTICS_API_PREFIX } from '../../../common/constants/application_analytics';
 import {
   ApplicationRequestType,
@@ -39,6 +37,7 @@ import {
   CUSTOM_PANELS_DOCUMENTATION_URL,
 } from '../../../common/constants/custom_panels';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
+import { observabilityApplicationsID } from '../../../common/constants/shared';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -49,6 +48,7 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   timestampUtils: TimestampUtils;
   notifications: NotificationsStart;
   queryManager: QueryManager;
+  parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
 export interface AppAnalyticsComponentDeps extends TraceAnalyticsComponentDeps {
@@ -59,6 +59,7 @@ export interface AppAnalyticsComponentDeps extends TraceAnalyticsComponentDeps {
   setQueryWithStorage: (newQuery: string) => void;
   setFiltersWithStorage: (newFilters: FilterType[]) => void;
   setAppConfigs: (newAppConfigs: FilterType[]) => void;
+  parentBreadcrumbs: ChromeBreadcrumb[];
 }
 
 export const Home = (props: HomeProps) => {
@@ -138,7 +139,7 @@ export const Home = (props: HomeProps) => {
     endTime,
     setEndTime,
     mode: 'data_prepper',
-    dataPrepperIndicesExist:  indicesExist 
+    dataPrepperIndicesExist: indicesExist,
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
@@ -154,7 +155,7 @@ export const Home = (props: HomeProps) => {
   };
 
   const moveToApp = (id: string, type: string) => {
-    window.location.assign(`${last(parentBreadcrumbs)!.href}application_analytics/${id}`);
+    window.location.assign(`${observabilityApplicationsID}#/${id}`);
     if (type === 'createSetAvailability') {
       setTriggerSwitchToEvent(2);
     }
@@ -173,7 +174,7 @@ export const Home = (props: HomeProps) => {
       })
       .catch((err) => {
         setToast(
-          'Please ask your administrator to enable Operational Panels for you.',
+          'Please ask your administrator to enable Observability Dashboards for you.',
           'danger',
           <EuiLink href={CUSTOM_PANELS_DOCUMENTATION_URL} target="_blank">
             Documentation
@@ -187,7 +188,7 @@ export const Home = (props: HomeProps) => {
     const concatList = [appPanelId].toString();
     return http.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList).catch((err) => {
       setToast(
-        'Error occurred while deleting Operational Panels, please make sure you have the correct permission.',
+        'Error occurred while deleting Observability Dashboards, please make sure you have the correct permission.',
         'danger'
       );
       console.error(err.body.message);
@@ -389,12 +390,12 @@ export const Home = (props: HomeProps) => {
         }}
         toastLifeTimeMs={6000}
       />
-      <Switch>
-        <Route
-          exact
-          path={['/', '/application_analytics']}
-          render={() => (
-            <ObservabilitySideBar>
+      <HashRouter>
+        <Switch>
+          <Route
+            exact
+            path={'/'}
+            render={() => (
               <AppTable
                 loading={false}
                 applications={applicationList}
@@ -405,46 +406,47 @@ export const Home = (props: HomeProps) => {
                 moveToApp={moveToApp}
                 {...commonProps}
               />
-            </ObservabilitySideBar>
-          )}
-        />
-        <Route
-          exact
-          path={['/application_analytics/create', '/application_analytics/edit/:id+']}
-          render={(routerProps) => (
-            <CreateApp
-              dslService={dslService}
-              pplService={pplService}
-              createApp={createApp}
-              updateApp={updateApp}
-              setToasts={setToast}
-              clearStorage={clearStorage}
-              existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
-              {...commonProps}
-            />
-          )}
-        />
-        <Route
-          exact
-          path={'/application_analytics/:id+'}
-          render={(routerProps) => (
-            <Application
-              disabled={false}
-              appId={decodeURIComponent(routerProps.match.params.id)}
-              pplService={pplService}
-              dslService={dslService}
-              savedObjects={savedObjects}
-              timestampUtils={timestampUtils}
-              notifications={notifications}
-              setToasts={setToast}
-              updateApp={updateApp}
-              callback={callback}
-              queryManager={queryManager}
-              {...commonProps}
-            />
-          )}
-        />
-      </Switch>
+            )}
+          />
+          <Route
+            exact
+            path={['/create', '/edit/:id+']}
+            render={(routerProps) => (
+              <CreateApp
+                dslService={dslService}
+                pplService={pplService}
+                createApp={createApp}
+                updateApp={updateApp}
+                setToasts={setToast}
+                clearStorage={clearStorage}
+                existingAppId={decodeURIComponent(routerProps.match.params.id) || ''}
+                {...commonProps}
+              />
+            )}
+          />
+          <Route
+            exact
+            path={'/:id+'}
+            render={(routerProps) => (
+              <Application
+                disabled={false}
+                appId={decodeURIComponent(routerProps.match.params.id)}
+                pplService={pplService}
+                dslService={dslService}
+                savedObjects={savedObjects}
+                timestampUtils={timestampUtils}
+                notifications={notifications}
+                toasts={toasts}
+                setToasts={setToast}
+                updateApp={updateApp}
+                callback={callback}
+                queryManager={queryManager}
+                {...commonProps}
+              />
+            )}
+          />
+        </Switch>
+      </HashRouter>
     </div>
   );
 };

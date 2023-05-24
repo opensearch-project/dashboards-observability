@@ -20,7 +20,7 @@ import {
   OnSaveProps,
   SavedObjectMetaData,
 } from '../../../../src/plugins/saved_objects/public';
-import { observabilityID } from '../../common/constants/shared';
+import { observabilityID, observabilityLogsID } from '../../common/constants/shared';
 import {
   VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
@@ -63,8 +63,8 @@ export class ObservabilityEmbeddableFactoryDefinition
     input: SavedObjectEmbeddableInput,
     parent?: IContainer
   ) {
-    const editPath = `#/event_analytics/explorer/${VISUALIZATION_SAVED_OBJECT}:${savedObjectId}`;
-    const editUrl = `/app/${observabilityID}${editPath}`;
+    const editPath = `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${savedObjectId}`;
+    const editUrl = `/app/${observabilityLogsID}${editPath}`;
     return new ObservabilityEmbeddable(
       {
         editUrl,

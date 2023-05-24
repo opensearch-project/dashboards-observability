@@ -1,7 +1,7 @@
 {
   "baseUrl": "http://localhost:5601",
   "video": true,
-  "chromeWebSecurity": false,
+  "chromeWebSecurity": true,
   "fixturesFolder": ".cypress/fixtures",
   "integrationFolder": ".cypress/integration",
   "pluginsFile": ".cypress/plugins/index.js",
@@ -19,5 +19,8 @@
     "opensearch": "localhost:9200",
     "opensearchDashboards": "localhost:5601",
     "security_enabled": true
+  },
+  "cypress-watch-and-reload": {
+    "watch": ["common/**", "public/**", "server/**"]
   }
 }

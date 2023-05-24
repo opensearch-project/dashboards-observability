@@ -74,15 +74,15 @@ export function NoteTable(props: NoteTableProps) {
       props.parentBreadcrumb,
       {
         text: 'Notebooks',
-        href: '#/notebooks',
+        href: '#/',
       },
     ]);
     props.fetchNotebooks();
   }, []);
 
   useEffect(() => {
-    const url = window.location.hash.split('/')
-    if (url[url.length-1] === 'create') { 
+    const url = window.location.hash.split('/');
+    if (url[url.length - 1] === 'create') {
       createNote();
     }
   }, [location]);
@@ -125,7 +125,7 @@ export function NoteTable(props: NoteTableProps) {
       getCustomModal(
         onCreate,
         () => {
-          closeModal()
+          closeModal();
           history.goBack();
         },
         'Name',
@@ -253,7 +253,7 @@ export function NoteTable(props: NoteTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink href={`#/notebooks/${record.id}`}>{_.truncate(value, { length: 100 })}</EuiLink>
+        <EuiLink href={`#/${record.id}`}>{_.truncate(value, { length: 100 })}</EuiLink>
       ),
     },
     {
@@ -319,7 +319,7 @@ export function NoteTable(props: NoteTableProps) {
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill href="#/notebooks/create">
+                    <EuiButton fill href="#/create">
                       Create notebook
                     </EuiButton>
                   </EuiFlexItem>
@@ -380,7 +380,8 @@ export function NoteTable(props: NoteTableProps) {
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton href="#/notebooks/create"
+                    <EuiButton
+                      href="#/create"
                       data-test-subj="note-table-empty-state-create-notebook-button"
                       fullWidth={false}
                     >

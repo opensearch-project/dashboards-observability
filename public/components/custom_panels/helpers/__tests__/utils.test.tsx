@@ -3,20 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import moment from 'moment';
-import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-
-import {
-  isNameValid,
-  convertDateTime,
-  mergeLayoutAndVisualizations,
-  onTimeChange,
-  isDateValid,
-  isPPLFilterValid,
-  displayVisualization,
-} from '../utils';
+import React from 'react';
+import { PPL_DATE_FORMAT } from '../../../../../common/constants/shared';
 import {
   sampleLayout,
   sampleMergedVisualizations,
@@ -26,11 +18,16 @@ import {
   sampleSavedVisualization,
   sampleSavedVisualizationForHorizontalBar,
   sampleSavedVisualizationForLine,
-  sampleSavedVisualizationForPie,
-  sampleSavedVisualizationForTreeMap,
 } from '../../../../../test/panels_constants';
-import { PPL_DATE_FORMAT } from '../../../../../common/constants/shared';
-import React from 'react';
+import {
+  convertDateTime,
+  displayVisualization,
+  isDateValid,
+  isNameValid,
+  isPPLFilterValid,
+  mergeLayoutAndVisualizations,
+  onTimeChange,
+} from '../utils';
 
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
@@ -56,23 +53,22 @@ describe('Utils helper functions', () => {
   });
 
   it('validates onTimeChange function', () => {
-    const setRecentlyUsedRanges = jest.fn((x) => x);
-    const setStart = jest.fn();
-    const setEnd = jest.fn();
     const recentlyUsedRanges: DurationRange[] = [];
-    onTimeChange(
+    const result = onTimeChange(
       '2022-01-30T18:44:40.577Z',
       '2022-02-25T19:18:33.075Z',
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStart,
-      setEnd
+      recentlyUsedRanges
     );
-    expect(setRecentlyUsedRanges).toHaveBeenCalledWith([
-      { start: '2022-01-30T18:44:40.577Z', end: '2022-02-25T19:18:33.075Z' },
-    ]);
-    expect(setStart).toHaveBeenCalledWith('2022-01-30T18:44:40.577Z');
-    expect(setEnd).toHaveBeenCalledWith('2022-02-25T19:18:33.075Z');
+    expect(result).toEqual({
+      start: '2022-01-30T18:44:40.577Z',
+      end: '2022-02-25T19:18:33.075Z',
+      updatedRanges: [
+        {
+          start: '2022-01-30T18:44:40.577Z',
+          end: '2022-02-25T19:18:33.075Z',
+        },
+      ],
+    });
   });
 
   it('validates isDateValid function', () => {
