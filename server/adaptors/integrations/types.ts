@@ -22,17 +22,21 @@ interface IntegrationTemplate {
       }
     >;
   };
-  components: Array<{
-    name: string;
-    version: string;
-    description?: string;
-    sourceUrl?: string;
-    schemaBody: string;
-    mappingBody: string;
-  }>;
-  displayAssets: Array<{
-    body: string;
-  }>;
+  components: IntegrationComponent[];
+  displayAssets: DisplayAsset[];
+}
+
+interface IntegrationComponent {
+  name: string;
+  version: string;
+  description?: string;
+  sourceUrl?: string;
+  schemaBody: string;
+  mappingBody: string;
+}
+
+interface DisplayAsset {
+  body: string;
 }
 
 interface IntegrationTemplateSearchResult {
@@ -55,12 +59,14 @@ interface IntegrationInstance {
   creationDate: string;
   tags?: string[];
   status: string;
-  assets: Array<{
-    assetType: string;
-    assetUrl: string;
-    status: string;
-    isDefaultAsset: boolean;
-  }>;
+  assets: AssetReference[];
+}
+
+interface AssetReference {
+  assetType: string;
+  assetUrl: string;
+  status: string;
+  isDefaultAsset: boolean;
 }
 
 interface IntegrationInstanceSearchResult {
