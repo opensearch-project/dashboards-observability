@@ -65,6 +65,7 @@ export class IntegrationInstanceBuilder {
       creationDate: new Date().toISOString(),
       status: 'unknown',
       assets: refs,
+      addedBy: 'unknown',
     });
   }
 }

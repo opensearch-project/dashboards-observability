@@ -29,7 +29,7 @@ export interface AddedIntegrationsTableProps {
 }
 
 export interface AddedIntegrationsList {
-  data: AddedIntegrationType[];
+  hits: AddedIntegrationType[];
 }
 
 export interface AddedIntegrationType {
@@ -39,7 +39,7 @@ export interface AddedIntegrationType {
 export function AddedIntegrationOverviewPage(props: AppTableProps) {
   const { chrome, parentBreadcrumbs, http } = props;
 
-  const [data, setData] = useState<AddedIntegrationsList>({ data: [] });
+  const [data, setData] = useState<AddedIntegrationsList>({ hits: [] });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -59,7 +59,7 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
   async function handleDataRequest() {
     http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) =>
       setData({
-        data: exists.data.integrations,
+        data: exists.data,
       })
     );
   }

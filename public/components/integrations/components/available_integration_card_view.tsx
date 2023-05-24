@@ -68,7 +68,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     );
   };
 
-  console.log('MARKER');
   console.log(props);
   return <>{props.data.data === undefined ? props.data.hits : renderRows(props.data.data.hits)}</>;
 }

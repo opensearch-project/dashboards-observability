@@ -62,7 +62,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   };
 
   getIntegrationInstances = (
-    query?: IntegrationInstanceQuery
+    _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceSearchResult> => {
     return Promise.resolve({
       hits: store,

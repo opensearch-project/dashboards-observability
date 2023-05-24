@@ -59,6 +59,7 @@ interface IntegrationInstance {
   creationDate: string;
   tags?: string[];
   status: string;
+  addedBy?: string;
   assets: AssetReference[];
 }
 
