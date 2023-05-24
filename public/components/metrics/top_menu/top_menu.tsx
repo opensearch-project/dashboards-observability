@@ -210,10 +210,6 @@ export const TopMenu = ({
             });
           })
         );
-
-        allMetricIds.forEach((metricId) => {
-          dispatch(addVizToPanels(soPanels, metricId));
-        });
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);

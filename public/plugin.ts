@@ -219,40 +219,6 @@ export class ObservabilityPlugin
       },
     });
 
-    const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
-      getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
-      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-      overlays: (await core.getStartServices())[0].overlays,
-    }));
-    setupDeps.embeddable.registerEmbeddableFactory(OBSERVABILITY_EMBEDDABLE, embeddableFactory);
-
-    setupDeps.visualizations.registerAlias({
-      name: OBSERVABILITY_EMBEDDABLE_ID,
-      title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
-      description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
-      icon: OBSERVABILITY_EMBEDDABLE_ICON,
-      aliasApp: observabilityID,
-      aliasPath: `#/event_analytics/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
-      stage: 'production',
-      appExtensions: {
-        visualizations: {
-          docTypes: [VISUALIZATION_SAVED_OBJECT],
-          toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-            description: attributes?.description,
-            editApp: observabilityID,
-            editUrl: `#/event_analytics/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
-            icon: OBSERVABILITY_EMBEDDABLE_ICON,
-            id,
-            savedObjectType: VISUALIZATION_SAVED_OBJECT,
-            title: attributes?.title,
-            typeTitle: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
-            stage: 'production',
-            updated_at: updatedAt,
-          }),
-        },
-      },
-    });
-
     // Return methods that should be available to other plugins
     return {};
   }
