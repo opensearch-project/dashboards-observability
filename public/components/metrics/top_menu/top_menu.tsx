@@ -107,7 +107,6 @@ export const TopMenu = ({
         } else {
           setOriginalPanelVisualizations([]);
         }
-        // setOriginalPanelVisualizations([...panelVisualizations]);
         break;
       }
       case 'cancel': {

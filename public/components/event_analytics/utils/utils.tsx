@@ -74,10 +74,8 @@ export const getTrs = (
   for (let i = trs.length; i < upperLimit; i++) {
     const docId = uniqueId('doc_view');
     const tempRowRef = React.createRef<{
-      // console.log("appears here");
       closeAllFlyouts(openDocId: string): void;
     }>();
-    console.log("appears here"); 
     tempRefs.push(tempRowRef);
     trs.push(
       <DocViewRow

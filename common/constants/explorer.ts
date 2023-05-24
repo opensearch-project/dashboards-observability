@@ -50,7 +50,6 @@ export const DEFAULT_COLUMNS = ['', 'Time', '_source'];
 export const OTEL_TRACE_ID = 'traceId';
 export const JAEGER_TRACE_ID = 'traceID';
 export const DATE_PICKER_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-export const LIVE_TAIL_FLAG = 'liveTailFlag'
 export const TIME_INTERVAL_OPTIONS = [
   {
     text: 'Minute',

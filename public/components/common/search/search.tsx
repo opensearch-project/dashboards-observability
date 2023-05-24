@@ -25,12 +25,10 @@ import { Autocomplete } from './autocomplete';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { PPLReferenceFlyout } from '../helpers';
 import { uiSettingsService } from '../../../../common/utils';
-import { APP_ANALYTICS_TAB_ID_REGEX, LIVE_TAIL_FLAG } from '../../../../common/constants/explorer';
+import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
-import { LIVE_END_TIME, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { useDispatch } from 'react-redux';
-import { liveTailFlag } from '../../event_analytics/redux/slices/live_tail_flag_slice';
-// ../../redux/slices/live_tail_flag_slice
+import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -93,7 +91,6 @@ export const Search = (props: any) => {
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const dispatch = useDispatch();
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
@@ -132,16 +129,6 @@ export const Search = (props: any) => {
       dataTestSubj="eventLiveTail"
     />
   );
-
-  useEffect(() => {
-    dispatch(
-      liveTailFlag({
-        query: {
-          liveTailFlag: isLiveTailOn
-        },     
-       })
-    );
-  }, [isLiveTailOn]);
 
   return (
     <div className="globalQueryBar">

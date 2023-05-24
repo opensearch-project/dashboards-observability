@@ -11,12 +11,14 @@ import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DocFlyout } from './doc_flyout';
 import { HttpStart } from '../../../../../../../src/core/public';
-import { OTEL_TRACE_ID, DATE_PICKER_FORMAT, JAEGER_TRACE_ID } from '../../../../../common/constants/explorer';
+import {
+  OTEL_TRACE_ID,
+  DATE_PICKER_FORMAT,
+  JAEGER_TRACE_ID,
+} from '../../../../../common/constants/explorer';
 import { SurroundingFlyout } from './surrounding_flyout';
 import PPLService from '../../../../services/requests/ppl';
 import { isValidTraceId } from '../../utils';
-import { useSelector } from 'react-redux';
-import { selectliveTailFlag } from '../../redux/slices/live_tail_flag_slice';
 export interface IDocType {
   [key: string]: string;
 }
@@ -50,18 +52,10 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
   const [surroundingEventsOpen, setSurroundingEventsOpen] = useState<boolean>(false);
   const [openTraces, setOpenTraces] = useState<boolean>(false);
   const [flyoutToggleSize, setFlyoutToggleSize] = useState(true);
-  const isLiveTailOn = useSelector(selectliveTailFlag);
-
-  useEffect(() => {
-    console.log("live tail selector: ", isLiveTailOn);
-  }, [isLiveTailOn]);
 
   useImperativeHandle(ref, () => ({
     closeAllFlyouts(openDocId: string) {
-      console.log("appears in docViewRow");
-      console.log("openDocId: ", openDocId);
-      console.log("DocId: ", openDocId);
-      if (openDocId !== docId && (detailsOpen || surroundingEventsOpen) && !isLiveTailOn) {
+      if (openDocId !== docId && (detailsOpen || surroundingEventsOpen)) {
         setSurroundingEventsOpen(false);
         setDetailsOpen(false);
       }
@@ -85,13 +79,15 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
         <span>
           <dl className="source truncate-by-height">
             {toPairs(doc).map((entry: string[]) => {
-              const isTraceField = (entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID);
+              const isTraceField = entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID;
               return (
                 <span key={uniqueId('grid-desc')}>
                   <dt>{entry[0]}:</dt>
                   <dd>
                     <span>
-                      {isTraceField && (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) && !isFlyout ? (
+                      {isTraceField &&
+                      (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) &&
+                      !isFlyout ? (
                         <EuiLink onClick={tracesFlyout}>{entry[1]}</EuiLink>
                       ) : (
                         entry[1]

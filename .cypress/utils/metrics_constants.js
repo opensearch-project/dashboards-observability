@@ -6,9 +6,9 @@
 export const delay = 100;
 
 export const PPL_METRICS_NAMES = [
-  'Average value by metric handler request in flight',
-  'Average value by virtual memory bytes',
-  'Average value by cpu seconds total',
+  '[Metric] Average ram usage per day by windows os',
+  '[Metric] Daily count for error response codes',
+  '[Metric] Average ram usage per day by apple os',
   'Average value by memstats stat bytes',
   'Average value by memstats heap allocation bytes',
 ];
@@ -20,3 +20,4 @@ export const PPL_METRICS = [
 ];
 
 export const VIS_TYPE_LINE = 'Time Series';
+export const TESTING_PANEL = 'Mock Testing Panels for Metrics';
