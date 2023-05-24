@@ -78,7 +78,7 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
       <div className="truncate-by-height">
         <span>
           <dl className="source truncate-by-height">
-            {toPairs(document).map((entry: string[]) => {
+            {toPairs(doc).map((entry: string[]) => {
               const isTraceField = entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID;
               return (
                 <span key={uniqueId('grid-desc')}>
