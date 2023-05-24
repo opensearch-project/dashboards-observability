@@ -13,24 +13,30 @@ interface IntegrationTemplate {
       darkModeLogo?: string; // Fallback to light mode if absent
       darkModeGallery?: string[];
     };
-    assets?: Array<{
-      path: string;
-      mimeType: string;
-      annotation?: string;
-      data: string;
-    }>;
+    assets?: Map<
+      string,
+      {
+        mimeType: string;
+        annotation?: string;
+        data: string;
+      }
+    >;
   };
-  components: Array<{
-    name: string;
-    version: string;
-    description?: string;
-    sourceUrl?: string;
-    schemaBody: string;
-    mappingBody: string;
-  }>;
-  displayAssets: Array<{
-    assetBody: string;
-  }>;
+  components: IntegrationComponent[];
+  displayAssets: DisplayAsset[];
+}
+
+interface IntegrationComponent {
+  name: string;
+  version: string;
+  description?: string;
+  sourceUrl?: string;
+  schemaBody: string;
+  mappingBody: string;
+}
+
+interface DisplayAsset {
+  body: string;
 }
 
 interface IntegrationTemplateSearchResult {
@@ -53,12 +59,15 @@ interface IntegrationInstance {
   creationDate: string;
   tags?: string[];
   status: string;
-  assets: Array<{
-    assetType: string;
-    assetUrl: string;
-    status: string;
-    isDefaultAsset: boolean;
-  }>;
+  addedBy?: string;
+  assets: AssetReference[];
+}
+
+interface AssetReference {
+  assetType: string;
+  assetId: string;
+  status: string;
+  isDefaultAsset: boolean;
 }
 
 interface IntegrationInstanceSearchResult {

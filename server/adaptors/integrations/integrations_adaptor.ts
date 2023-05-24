@@ -15,4 +15,6 @@ export interface IntegrationsAdaptor {
   getIntegrationInstances: (
     query?: IntegrationInstanceQuery
   ) => Promise<IntegrationInstanceSearchResult>;
+
+  loadIntegrationInstance: (templateName: string) => Promise<IntegrationInstance>;
 }

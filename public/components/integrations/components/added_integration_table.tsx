@@ -18,7 +18,8 @@ import React from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  const integrations = props.data.data;
+  console.log(props);
+  const integrations = props.data.data ? props.data.data.hits : props.data.hits;
 
   const tableColumns = [
     {
@@ -30,9 +31,11 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationLink`}
           // href={`#/added/${record.id}`}
-          href={record.dashboardUrl}
+          href={`dashboards#/view/${
+            record.assets.filter((asset: any) => asset.isDefaultAsset)[0].assetId
+          }`}
         >
-          {_.truncate(record.id, { length: 100 })}
+          {_.truncate(record.name, { length: 100 })}
         </EuiLink>
       ),
     },
@@ -79,7 +82,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
-          {_.truncate(record.author, { length: 100 })}
+          {_.truncate(record.addedBy, { length: 100 })}
         </EuiText>
       ),
     },

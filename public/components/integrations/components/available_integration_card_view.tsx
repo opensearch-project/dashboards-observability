@@ -7,7 +7,6 @@ import {
 } from './available_integration_overview_page';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  console.log(props);
   const rowNumber = _.ceil(props.records / 5);
 
   const getImage = (url?: string) => {
@@ -21,6 +20,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   };
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
+    console.log(integrations.length);
     if (!integrations || !integrations.length) return null;
     return (
       <>
@@ -33,15 +33,15 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   layout="vertical"
                   icon={getImage(i.assetUrl)}
                   titleSize="xs"
-                  title={i.templateName}
+                  title={i.name}
                   description={i.description}
-                  data-test-subj={`homeSynopsisLink${i.templateName.toLowerCase()}`}
+                  data-test-subj={`homeSynopsisLink${i.name.toLowerCase()}`}
                   footer={
                     <div>
                       <EuiButton
                         aria-label="Go to Developers Tools"
                         onClick={() => {
-                          window.location.assign(`#/available/${i.templateName}`);
+                          window.location.assign(`#/available/${i.name}`);
                         }}
                       >
                         View Details
@@ -50,7 +50,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                       <EuiButton
                         aria-label="Go to Developers Tools"
                         onClick={() => {
-                          props.showModal(i.templateName);
+                          props.showModal(i.name);
                         }}
                         size="s"
                       >
@@ -68,5 +68,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     );
   };
 
-  return <>{renderRows(props.data.data?.integrations)}</>;
+  console.log(props);
+  return <>{props.data.data === undefined ? props.data.hits : renderRows(props.data.data.hits)}</>;
 }
