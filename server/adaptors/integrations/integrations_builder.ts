@@ -25,11 +25,26 @@ export class IntegrationInstanceBuilder {
   }
 
   async validate(_template: IntegrationTemplate): Promise<void> {
+    // Assuming everything is valid for now
     return Promise.resolve();
   }
 
-  async post_assets(_assets: DisplayAsset[]): Promise<AssetReference[]> {
-    return Promise.resolve([]);
+  async post_assets(assets: DisplayAsset[]): Promise<AssetReference[]> {
+    try {
+      const deserializedAssets = assets.map((asset) => JSON.parse(asset.body));
+      const response = await this.client.bulkCreate(deserializedAssets);
+      const refs: AssetReference[] = response.saved_objects.map((obj) => {
+        return {
+          assetType: obj.type,
+          assetId: obj.id,
+          status: 'available', // Assuming a successfully created object is available
+          isDefaultAsset: obj.type === 'dashboard', // Assuming for now that dashboards are default
+        };
+      });
+      return Promise.resolve(refs);
+    } catch (err: any) {
+      return Promise.reject(err);
+    }
   }
 
   async build_instance(

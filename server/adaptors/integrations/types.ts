@@ -64,7 +64,7 @@ interface IntegrationInstance {
 
 interface AssetReference {
   assetType: string;
-  assetUrl: string;
+  assetId: string;
   status: string;
   isDefaultAsset: boolean;
 }
