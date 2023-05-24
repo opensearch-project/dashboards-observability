@@ -19,7 +19,7 @@ import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   console.log(props);
-  const integrations = props.data.data ? props.data.data.hits : props.data.hits;
+  const integrations = props.data.hits;
 
   const tableColumns = [
     {

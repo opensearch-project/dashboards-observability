@@ -91,51 +91,6 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
     setIsModalVisible(true);
   };
 
-  // const data: AvailableIntegrationType[] = [
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  //   {
-  //     name: 'nginx',
-  //     description:
-  //       'Open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server',
-  //     status: 'Available',
-  //     assetUrl: 'https://www.shareicon.net/data/256x256/2017/06/28/888041_logo_512x512.png',
-  //   },
-  // ];
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
@@ -148,7 +103,7 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => setData(exists));
+    http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => setData(exists.data));
   }
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {

@@ -57,11 +57,7 @@ export function AddedIntegrationOverviewPage(props: AppTableProps) {
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) =>
-      setData({
-        data: exists.data,
-      })
-    );
+    http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) => setData(exists.data));
   }
 
   return (
