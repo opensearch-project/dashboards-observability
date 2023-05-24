@@ -124,9 +124,11 @@ export const SurroundingFlyout = ({
   };
 
   const loadButton = (typeOfDocs: 'new' | 'old') => {
-    typeOfDocs === 'new'
-      ? loadData(typeOfDocs, numNewEvents + 5)
-      : loadData(typeOfDocs, valueOldEvents + 5);
+    if (typeOfDocs === 'new') {
+      loadData(typeOfDocs, numNewEvents + 5);
+    } else {
+      loadData(typeOfDocs, valueOldEvents + 5);
+    }
   };
 
   const handleKeyDown = (
@@ -139,11 +141,11 @@ export const SurroundingFlyout = ({
   };
 
   const onChangeNewEvents = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNumNewEvents(parseInt(e.target.value));
+    setNumNewEvents(parseInt(e.target.value, 10));
   };
 
   const onChangeOldEvents = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNumOldEvents(parseInt(e.target.value));
+    setNumOldEvents(parseInt(e.target.value, 10));
   };
 
   const flyoutHeader = (
@@ -227,35 +229,37 @@ export const SurroundingFlyout = ({
 
   const flyoutBody = (
     <EuiFlyoutBody>
-      {getInputForm('arrowUp', onChangeNewEvents, numNewEvents, 'new')}
-      <EuiSpacer size="s" />
-      <div>
-        {newEventsError !== '' && (
-          <EuiCallOut iconType="bolt" title={newEventsError} color="warning" />
+      <div className="obsExplorer">
+        {getInputForm('arrowUp', onChangeNewEvents, numNewEvents, 'new')}
+        <EuiSpacer size="s" />
+        <div>
+          {newEventsError !== '' && (
+            <EuiCallOut iconType="bolt" title={newEventsError} color="warning" />
+          )}
+        </div>
+        {populateDataGrid(
+          explorerFields,
+          getHeaders(explorerFields.queriedFields, DEFAULT_COLUMNS.slice(1), true),
+          <>
+            {newEventsData}
+            <tr className="osdDocTable__row selected-event-row">{memorizedTds}</tr>
+            {oldEventsData}
+          </>,
+          getHeaders(explorerFields.selectedFields, DEFAULT_COLUMNS.slice(1), true),
+          <>
+            {newEventsData}
+            <tr className="osdDocTable__row selected-event-row">{memorizedTds}</tr>
+            {oldEventsData}
+          </>
         )}
+        <div>
+          {oldEventsError !== '' && (
+            <EuiCallOut iconType="bolt" title={oldEventsError} color="warning" />
+          )}
+        </div>
+        <EuiSpacer size="s" />
+        {getInputForm('arrowDown', onChangeOldEvents, valueOldEvents, 'old')}
       </div>
-      {populateDataGrid(
-        explorerFields,
-        getHeaders(explorerFields.queriedFields, DEFAULT_COLUMNS.slice(1), true),
-        <>
-          {newEventsData}
-          <tr className="osdDocTable__row selected-event-row">{memorizedTds}</tr>
-          {oldEventsData}
-        </>,
-        getHeaders(explorerFields.selectedFields, DEFAULT_COLUMNS.slice(1), true),
-        <>
-          {newEventsData}
-          <tr className="osdDocTable__row selected-event-row">{memorizedTds}</tr>
-          {oldEventsData}
-        </>
-      )}
-      <div>
-        {oldEventsError !== '' && (
-          <EuiCallOut iconType="bolt" title={oldEventsError} color="warning" />
-        )}
-      </div>
-      <EuiSpacer size="s" />
-      {getInputForm('arrowDown', onChangeOldEvents, valueOldEvents, 'old')}
     </EuiFlyoutBody>
   );
 

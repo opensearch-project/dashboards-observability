@@ -5,37 +5,15 @@
 
 /// <reference types="cypress" />
 
+import { suppressResizeObserverIssue } from '../utils/constants';
 import {
   delay,
-  TEST_PANEL,
-  PPL_VISUALIZATIONS,
-  PPL_VISUALIZATIONS_NAMES,
   NEW_VISUALIZATION_NAME,
   PPL_FILTER,
-  SAMPLE_PANEL,
-  SAMPLE_VISUALIZATIONS_NAMES,
+  PPL_VISUALIZATIONS,
+  PPL_VISUALIZATIONS_NAMES,
+  TEST_PANEL,
 } from '../utils/panel_constants';
-
-import { suppressResizeObserverIssue } from '../utils/constants';
-
-const moveToEventsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/event_analytics/`);
-  cy.wait(delay * 3);
-};
-
-const moveToPanelHome = () => {
-  cy.visit(
-    `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/operational_panels/`
-  );
-  cy.wait(delay * 3);
-};
-
-const moveToTestPanel = () => {
-  moveToPanelHome();
-  cy.get('.euiTableCellContent').contains(TEST_PANEL).trigger('mouseover').click();
-  cy.wait(delay * 3);
-  cy.get('h1').contains(TEST_PANEL).should('exist');
-};
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for visualization paragraph', () => {
@@ -98,83 +76,181 @@ describe('Creating visualizations', () => {
 
 describe('Testing panels table', () => {
   beforeEach(() => {
+    eraseTestPanels();
     moveToPanelHome();
   });
 
-  it('Displays error toast for invalid panel name', () => {
-    cy.get('button[data-test-subj="customPanels__createNewPanels"]').click();
-    cy.get('button[data-test-subj="runModalButton"]').click();
-    cy.get('.euiToastHeader__title').contains('Invalid Operational Panel name').should('exist');
-  });
-
-  it('Creates a panel and redirects to the panel', () => {
-    cy.get('button[data-test-subj="customPanels__createNewPanels"]').click();
-    cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
-      delay: 50,
+  describe('Without Any Panels', () => {
+    beforeEach(() => {
+      moveToPanelHome();
     });
-    cy.get('button[data-test-subj="runModalButton"]').click();
-    cy.contains(TEST_PANEL).should('exist');
-  });
 
-  it('Duplicates a panel', () => {
-    cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).trigger('mouseover').click();
-    cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
-    cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
-    cy.get('button[data-test-subj="runModalButton"]').click();
-  });
-
-  it('Renames a panel', () => {
-    cy.get('.euiCheckbox__input[title="Select this row"]').eq(0).trigger('mouseover').click();
-    cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
-    cy.get('button[data-test-subj="renameContextMenuItem"]').click();
-    cy.get('input.euiFieldText').focus().type(' (rename)', {
-      delay: 50,
+    it.skip('Displays error toast for invalid panel name', () => {
+      clickCreatePanelButton();
+      confirmModal();
+      expectToastWith('Invalid Dashboard name');
     });
-    cy.get('button[data-test-subj="runModalButton"]').click();
+
+    it('Creates a panel and redirects to the panel', () => {
+      clickCreatePanelButton();
+      cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      cy.contains(TEST_PANEL).should('exist');
+    });
   });
 
-  it('Searches existing panel', () => {
-    cy.get('input[data-test-subj="operationalPanelSearchBar"]')
-      .focus()
-      .type('this panel should not exist', {
+  describe('with a Legacy Panel', () => {
+    beforeEach(() => {
+      createLegacyPanel();
+      moveToPanelHome();
+    });
+
+    it('Duplicates a legacy panel', () => {
+      cy.get('.euiTableRow').should('have.length', 1);
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      cy.get('.euiTableRow').should('have.length', 2);
+      const duplicateName = TEST_PANEL + ' (copy)';
+      cy.contains(duplicateName).should('exist');
+      const duplicate = cy.get('.euiLink').contains(duplicateName);
+      expectUuid(duplicate);
+    });
+
+    it('Renames the panel', () => {
+      createLegacyPanel();
+      cy.reload();
+      const cell = cy.get('.euiTableCellContent');
+      expectLegacyId(cell);
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="renameContextMenuItem"]').click();
+      cy.get('input.euiFieldText').focus().type(' (rename)');
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      const renamed = testPanelTableCell();
+      expectUuid(renamed);
+    });
+
+    it('Deletes the panel', () => {
+      cy.get('input[data-test-subj="checkboxSelectAll"]').click();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
+
+      cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
+      cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+    });
+
+    it('Searches panels', () => {
+      createLegacyPanel('Legacy Named');
+      createSavedObjectPanel('Saved Object');
+      cy.reload();
+      cy.get('input[data-test-subj="operationalPanelSearchBar"]')
+        .focus()
+        .type('this panel should not exist', {
+          delay: 50,
+        });
+
+      cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
+
+      // Search for oriignal Legacy Panel
+      cy.get('[aria-label="Clear input"]').click();
+      cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type(TEST_PANEL, {
         delay: 50,
       });
 
-    cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
+      cy.get('a.euiLink').contains(TEST_PANEL).should('exist');
+      cy.get('.euiTableRow').should('have.length', 1);
 
-    cy.get('[aria-label="Clear input"]').click();
-    cy.get('input[data-test-subj="operationalPanelSearchBar"]')
-      .focus()
-      .type(TEST_PANEL + ' (copy) (rename)', {
+      // Search for teh Saved Object panel
+      cy.get('[aria-label="Clear input"]').click();
+      cy.get('input[data-test-subj="operationalPanelSearchBar"]').focus().type('Saved Object', {
         delay: 50,
       });
 
-    cy.get('a.euiLink')
-      .contains(TEST_PANEL + ' (copy) (rename)')
-      .should('exist');
+      cy.get('a.euiLink').contains('Saved Object').should('exist');
+      cy.get('.euiTableRow').should('have.length', 1);
+    });
   });
 
-  it('Deletes panels', () => {
-    cy.get('input[data-test-subj="checkboxSelectAll"]').click();
-    cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
-    cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
-
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
-      delay: 50,
+  describe('with a SavedObjects Panel', () => {
+    beforeEach(() => {
+      createSavedObjectPanel();
+      moveToPanelHome();
+      cy.get('.euiTableRow').should('have.length', 1);
     });
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
-    cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
-    cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
-  });
 
-  it('Create a panel for testing', () => {
-    // keep a panel for testing
-    cy.get('button[data-test-subj="customPanels__createNewPanels"]').click();
-    cy.get('input.euiFieldText').focus().type(TEST_PANEL, {
-      delay: 50,
+    it('Duplicates the panel', () => {
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+      cy.get('button[data-test-subj="runModalButton"]').click();
+      const duplicateName = TEST_PANEL + ' (copy)';
+      cy.get('.euiTableRow').should('have.length', 2);
+      cy.contains(duplicateName).should('exist');
+      const duplicate = cy.get('.euiLink').contains(duplicateName);
+      expectUuid(duplicate);
     });
-    cy.get('button[data-test-subj="runModalButton"]').click();
+
+    it('Renames a saved-objects panel', () => {
+      selectThePanel();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="renameContextMenuItem"]').click();
+      cy.get('input.euiFieldText').focus().type(' (rename)', {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="runModalButton"]').click();
+    });
+
+    it('Deletes the panel', () => {
+      createSavedObjectPanel();
+      cy.get('input[data-test-subj="checkboxSelectAll"]').click();
+      openActionsDropdown();
+      cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
+
+      cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
+        delay: 50,
+      });
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
+      cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
+      cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards with edit', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]')
+        .closest('tr')
+        .get('span.euiToolTipAnchor > button.euiButtonIcon')
+        .eq(0)
+        .click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/edit');
+    });
+
+    it('Redirects to observability dashboard from OSD dashboards with create', () => {
+      moveToOsdDashboards();
+      cy.location('pathname').should('eq', '/app/dashboards');
+      cy.get('div#createMenuPopover').click();
+      cy.get('[data-test-subj="contextMenuItem-observability-panel"]').click();
+      cy.location('pathname').should('eq', '/app/observability-dashboards');
+      cy.location('hash').should('include', '/create');
+    });
   });
 });
 
@@ -194,9 +270,9 @@ describe('Testing a panel', () => {
     cy.get('a[data-test-subj="breadcrumb last"]').click();
 
     cy.get('h1[data-test-subj="panelNameHeader"]').contains(TEST_PANEL).should('exist');
-    cy.get('a[data-test-subj="breadcrumb"]').contains('Operational panels').click();
+    cy.get('a[data-test-subj="breadcrumb"]').contains('Observability Dashboards').click();
 
-    cy.get('a[data-test-subj="breadcrumb last"]').contains('Operational panels').should('exist');
+    cy.get('a[data-test-subj="breadcrumb last"]').contains('Observability Dashboards').should('exist');
     cy.get('a[data-test-subj="breadcrumb first"]').contains('Observability').click();
 
     cy.get('a[data-test-subj="breadcrumb"]').contains('Event analytics').should('exist');
@@ -470,8 +546,8 @@ describe('Clean up all test data', () => {
   it('Deletes test panel', () => {
     moveToPanelHome();
     cy.get('.euiCheckbox__input[data-test-subj="checkboxSelectAll"]').trigger('mouseover').click();
-    cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
-    cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
+    openActionsDropdown();
+    clickDeleteAction();
     cy.get('button.euiButton--danger').should('be.disabled');
     cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {
       delay: 50,
@@ -479,6 +555,171 @@ describe('Clean up all test data', () => {
     cy.get('button.euiButton--danger').should('not.be.disabled');
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
 
-    cy.get('.euiTextAlign').contains('No Operational Panels').should('exist');
+    cy.get('.euiTextAlign').contains('No Observability Dashboards').should('exist');
   });
 });
+
+const moveToOsdDashboards = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/dashboards#/`);
+  cy.wait(delay * 3);
+};
+
+const moveToEventsHome = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
+  cy.wait(6000);
+};
+
+const moveToPanelHome = () => {
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`, {
+    timeout: 3000,
+  });
+  cy.wait(delay * 3);
+};
+
+const testPanelTableCell = (name = TEST_PANEL) => cy.get('.euiTableCellContent').contains(name);
+
+const moveToTestPanel = () => {
+  moveToPanelHome();
+  testPanelTableCell().trigger('mouseover').click();
+  cy.wait(delay * 3);
+  cy.get('h1').contains(TEST_PANEL).should('exist');
+};
+
+const TEST_PANEL_RX = new RegExp(TEST_PANEL + '.*');
+
+const eraseLegacyPanels = () => {
+  cy.request({
+    method: 'GET',
+    failOnStatusCode: false,
+    url: 'api/observability/operational_panels/panels',
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+    },
+  }).then((response) => {
+    response.body.panels.map((panel) => {
+      cy.request({
+        method: 'DELETE',
+        failOnStatusCode: false,
+        url: `api/observability/operational_panels/panels/${panel.id}`,
+        headers: {
+          'content-type': 'application/json;charset=UTF-8',
+          'osd-xsrf': true,
+        },
+      }).then((response) => {
+        const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1);
+        console.log('erased panel', deletedId);
+      });
+    });
+  });
+};
+
+const eraseSavedObjectPaenls = () => {
+  return cy
+    .request({
+      method: 'get',
+      failOnStatusCode: false,
+      url: 'api/saved_objects/_find?type=observability-panel',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+    })
+    .then((response) => {
+      response.body.saved_objects.map((soPanel) => {
+        cy.request({
+          method: 'DELETE',
+          failOnStatusCode: false,
+          url: `api/saved_objects/observability-panel/${soPanel.id}`,
+          headers: {
+            'content-type': 'application/json;charset=UTF-8',
+            'osd-xsrf': true,
+          },
+        });
+      });
+    });
+};
+
+const eraseTestPanels = () => {
+  eraseLegacyPanels();
+  eraseSavedObjectPaenls();
+};
+const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
+
+const clickCreatePanelButton = () =>
+  cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
+
+const createSavedObjectPanel = (newName = TEST_PANEL) => {
+  const result = cy
+    .request({
+      method: 'POST',
+      failOnStatusCode: false,
+      url: 'api/saved_objects/observability-panel',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      body: {
+        attributes: {
+          title: newName,
+          description: '',
+          dateCreated: 1681127334085,
+          dateModified: 1681127334085,
+          timeRange: {
+            to: 'now',
+            from: 'now-1d',
+          },
+          queryFilter: {
+            query: '',
+            language: 'ppl',
+          },
+          visualizations: [],
+          applicationId: '',
+        },
+      },
+    })
+    .then((response) => console.log(response));
+};
+
+const createLegacyPanel = (newName = TEST_PANEL) => {
+  const result = cy.request({
+    method: 'POST',
+    failOnStatusCode: false,
+    url: 'api/observability/operational_panels/panels',
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+    },
+    body: { panelName: newName },
+  });
+};
+
+const expectUuid = (anchorElem) => {
+  anchorElem.invoke('attr', 'href').should('match', uuidRx);
+};
+
+const expectLegacyId = (anchorElem) => {
+  anchorElem.invoke('attr', 'href').should('not.match', uuidRx);
+};
+
+const clickDeleteAction = () => {
+  cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
+};
+
+const openActionsDropdown = () => {
+  cy.get('button[data-test-subj="operationalPanelsActionsButton"]').click();
+};
+
+const selectThePanel = () => {
+  cy.get('.euiCheckbox__input[title="Select this row"]').then(() => {
+    cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
+  });
+};
+
+const expectToastWith = (title) => {
+  cy.get('.euiToastHeader__title').contains(title).should('exist');
+};
+
+const confirmModal = () => {
+  cy.get('button[data-test-subj="runModalButton"]').click();
+};

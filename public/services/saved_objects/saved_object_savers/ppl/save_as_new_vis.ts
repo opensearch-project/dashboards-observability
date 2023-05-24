@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { forEach } from 'lodash';
+import {
+  addVizToPanels,
+  fetchPanel,
+  uuidRx,
+} from '../../../../../public/components/custom_panels/redux/panel_slice';
 import {
   SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPE,
@@ -10,6 +16,7 @@ import {
 } from '../../../../../common/constants/explorer';
 import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
 import { SavedQuerySaver } from './saved_query_saver';
+import { addVisualizationPanel } from '../../../../../public/components/custom_panels/helpers/add_visualization_helper';
 
 export class SaveAsNewVisualization extends SavedQuerySaver {
   constructor(
@@ -47,7 +54,7 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
         if (appLogEvents) {
           addVisualizationToPanel(res.objectId, name);
         } else {
-          history.replace(`/event_analytics/explorer/${res.objectId}`);
+          history.replace(`/explorer/${res.objectId}`);
         }
 
         batch(() => {
@@ -76,21 +83,26 @@ export class SaveAsNewVisualization extends SavedQuerySaver {
   }
 
   addToPanel({ selectedPanels, saveTitle, notifications, visId }) {
+    const { dispatch } = this.dispatchers;
+    const soPanels = selectedPanels.filter((panel) => uuidRx.test(panel.panel.id));
+    const opsPanels = selectedPanels.filter((panel) => !uuidRx.test(panel.panel.id));
+
+    dispatch(addVizToPanels(soPanels, visId));
     this.panelClient
       .updateBulk({
-        selectedCustomPanels: selectedPanels,
+        selectedCustomPanels: opsPanels,
         savedVisualizationId: visId,
       })
       .then((res: any) => {
         notifications.toasts.addSuccess({
           title: 'Saved successfully.',
-          text: `Visualization '${saveTitle}' has been successfully saved to operation panels.`,
+          text: `Visualization '${saveTitle}' has been successfully saved to Observability Dashboards.`,
         });
       })
       .catch((error: any) => {
         notifications.toasts.addError(error, {
           title: 'Failed to save',
-          text: `Cannot add Visualization '${saveTitle}' to operation panels`,
+          text: `Cannot add Visualization '${saveTitle}' to Observability Dashboards`,
         });
       });
   }

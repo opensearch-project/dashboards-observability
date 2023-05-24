@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './variables.scss';
 import './components/trace_analytics/index.scss';
 import './components/notebooks/index.scss'
 

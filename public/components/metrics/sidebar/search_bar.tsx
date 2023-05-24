@@ -28,7 +28,7 @@ export const SearchBar = (props: ISearchBarProps) => {
   };
 
   return (
-    <div>
+    <div className="metrics-search-bar-input">
       <EuiSearchBar
         box={{
           placeholder: 'Search for metrics',

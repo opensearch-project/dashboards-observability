@@ -5,6 +5,12 @@
 
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import {
+  CREATE_TAB_PARAM,
+  CREATE_TAB_PARAM_KEY,
+  TAB_CHART_ID,
+} from '../../../../common/constants/explorer';
+import { observabilityLogsID } from '../../../../common/constants/shared';
 
 interface AddVisualizationPopoverProps {
   showFlyout: (isReplacement?: boolean, replaceVizId?: string) => void;
@@ -27,7 +33,9 @@ export const AddVisualizationPopover = ({
 
   const advancedVisualization = () => {
     closeVizPopover();
-    window.location.assign('#/event_analytics/explorer');
+    window.location.assign(
+      `${observabilityLogsID}#/explorer?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`
+    );
   };
 
   const getVizContextPanels = () => {

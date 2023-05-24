@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
@@ -30,14 +29,18 @@ import { last } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import moment from 'moment';
+import _ from 'lodash';
+import { useDispatch } from 'react-redux';
 import DSLService from '../../services/requests/dsl';
 import { CoreStart } from '../../../../../src/core/public';
 import { EmptyPanelView } from './panel_modules/empty_panel';
 import {
   CREATE_PANEL_MESSAGE,
   CUSTOM_PANELS_API_PREFIX,
+  CUSTOM_PANELS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants/custom_panels';
 import {
+  PanelType,
   SavedVisualizationType,
   VisualizationType,
   VizContainerError,
@@ -51,6 +54,7 @@ import {
   onTimeChange,
   isPPLFilterValid,
   fetchVisualizationById,
+  isNameValid,
 } from './helpers/utils';
 import { UI_DATE_FORMAT } from '../../../common/constants/shared';
 import { VisaulizationFlyout } from './panel_modules/visualization_flyout';
@@ -64,10 +68,12 @@ import {
 } from '../common/search/autocomplete_logic';
 import { AddVisualizationPopover } from './helpers/add_visualization_popover';
 import { DeleteModal } from '../common/helpers/delete_modal';
-import _ from 'lodash';
+import { coreRefs } from '../../framework/core_refs';
+import { clonePanel } from './redux/panel_slice';
+import { useToast } from '../common/toast';
 
 /*
- * "CustomPanelsView" module used to render an Operational Panel
+ * "CustomPanelsView" module used to render an Observability Dashboard
  *
  * Props taken in as params are:
  * panelId: Name of the panel opened
@@ -77,7 +83,6 @@ import _ from 'lodash';
  * dslService: dsl requestor service
  * chrome: chrome core service
  * parentBreadcrumb: parent breadcrumb
- * renameCustomPanel: Rename function for the panel
  * deleteCustomPanel: Delete function for the panel
  * cloneCustomPanel: Clone function for the panel
  * setToast: create Toast function
@@ -99,15 +104,7 @@ interface CustomPanelViewProps {
   dslService: DSLService;
   chrome: CoreStart['chrome'];
   parentBreadcrumbs: EuiBreadcrumb[];
-  renameCustomPanel: (editedCustomPanelName: string, editedCustomPanelId: string) => Promise<void>;
-  deleteCustomPanel: (customPanelId: string, customPanelName: string) => Promise<any>;
   cloneCustomPanel: (clonedCustomPanelName: string, clonedCustomPanelId: string) => Promise<string>;
-  setToast: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
   onEditClick: (savedVisualizationId: string) => any;
   startTime: string;
   endTime: string;
@@ -135,13 +132,12 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     setStartTime,
     setEndTime,
     updateAvailabilityVizId,
-    renameCustomPanel,
-    deleteCustomPanel,
     cloneCustomPanel,
-    setToast,
     onEditClick,
     onAddClick,
   } = props;
+
+  const [panel, setPanel] = useState();
   const [openPanelName, setOpenPanelName] = useState('');
   const [panelCreatedTime, setPanelCreatedTime] = useState('');
   const [pplFilterValue, setPPLFilterValue] = useState('');
@@ -165,6 +161,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
 
   const appPanel = page === 'app';
 
+  const dispatch = useDispatch();
+
+  const { setToast } = useToast();
+
   const closeHelpFlyout = () => {
     setAddVizDisabled(false);
     setHelpIsFlyoutVisible(false);
@@ -183,6 +183,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     return http
       .get(`${CUSTOM_PANELS_API_PREFIX}/panels/${panelId}`)
       .then((res) => {
+        setPanel(res.operationalPanel);
         setOpenPanelName(res.operationalPanel.name);
         setPanelCreatedTime(res.createdTimeMs);
         setPPLFilterValue(res.operationalPanel.queryFilter.query);
@@ -191,7 +192,60 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         setPanelVisualizations(res.operationalPanel.visualizations);
       })
       .catch((err) => {
-        console.error('Issue in fetching the operational panels', err);
+        console.error('Issue in fetching the Observability Dashboards', err);
+      });
+  };
+
+  // Renames an existing CustomPanel
+  const renameCustomPanel = (editedCustomPanelName: string, editedCustomPanelId: string) => {
+    if (!isNameValid(editedCustomPanelName)) {
+      setToast('Invalid Custom Panel name', 'danger');
+      return Promise.reject();
+    }
+    const renamePanelObject = {
+      panelId: editedCustomPanelId,
+      panelName: editedCustomPanelName,
+    };
+
+    return http
+      .post(`${CUSTOM_PANELS_API_PREFIX}/panels/rename`, {
+        body: JSON.stringify(renamePanelObject),
+      })
+      .then((res) => {
+        setOpenPanelName(editedCustomPanelName);
+        // setOpenPanelName((prevCustomPanelData) => {
+        //   const newCustomPanelData = [...prevCustomPanelData];
+        //   const renamedCustomPanel = newCustomPanelData.find(
+        //     (customPanel) => customPanel.id === editedCustomPanelId
+        //   );
+        //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
+        //   return newCustomPanelData;
+        // });
+        setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`);
+      })
+      .catch((err) => {
+        setToast(
+          'Error renaming Observability Dashboard, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
+      });
+  };
+
+  // Deletes an existing Observability Dashboard
+  const deleteCustomPanel = (customPanelId: string, customPanelName: string) => {
+    return coreRefs
+      .http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
+      .then((res) => {
+        setToast(`Observability Dashboard "${customPanelName}" successfully deleted!`);
+        return res;
+      })
+      .catch((err) => {
+        setToast(
+          'Error deleting Observability Dashboard, please make sure you have the correct permission.',
+          'danger'
+        );
+        console.error(err.body.message);
       });
   };
 
@@ -208,14 +262,10 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onDatePickerChange = (timeProps: OnTimeChangeProps) => {
-    onTimeChange(
-      timeProps.start,
-      timeProps.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
-    );
+    const { updatedRanges } = onTimeChange(timeProps.start, timeProps.end, recentlyUsedRanges);
+    setStartTime(timeProps.start);
+    setEndTime(timeProps.end);
+    setRecentlyUsedRanges(updatedRanges);
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 
@@ -234,7 +284,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         onConfirm={onDelete}
         onCancel={closeModal}
         title={`Delete ${openPanelName}`}
-        message={`Are you sure you want to delete this Operational Panel?`}
+        message={`Are you sure you want to delete this Observability Dashboard?`}
       />
     );
     showModal();
@@ -253,7 +303,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         onRename,
         closeModal,
         'Name',
-        'Rename Panel',
+        'Rename Dashboard',
         'Cancel',
         'Rename',
         openPanelName,
@@ -264,19 +314,21 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
   };
 
   const onClone = async (newCustomPanelName: string) => {
-    cloneCustomPanel(newCustomPanelName, panelId).then((id: string) => {
-      window.location.assign(`${last(parentBreadcrumbs)!.href}${id}`);
-    });
+    if (!isNameValid(newCustomPanelName)) {
+      setToast('Invalid Observability Dashboard name', 'danger');
+    } else {
+      dispatch(clonePanel(panel, newCustomPanelName));
+    }
     closeModal();
   };
 
-  const clonePanel = () => {
+  const clonePanelModal = () => {
     setModalLayout(
       getCustomModal(
         onClone,
         closeModal,
         'Name',
-        'Duplicate Panel',
+        'Duplicate Dashboard',
         'Cancel',
         'Duplicate',
         openPanelName + ' (copy)',
@@ -382,7 +434,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         setOnRefresh(!onRefresh);
       })
       .catch((err) => {
-        setToast('Error is adding filters to the operational panel', 'danger');
+        setToast('Error is adding filters to the Observability Dashboard', 'danger');
         console.error(err.body.message);
       });
   };
@@ -400,7 +452,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         setToast(`Visualization ${visualzationTitle} successfully added!`, 'success');
       })
       .catch((err) => {
-        setToast(`Error in adding ${visualzationTitle} visualization to the panel`, 'danger');
+        setToast(`Error in adding ${visualzationTitle} visualization to the Dashboard`, 'danger');
         console.error(err);
       });
   };
@@ -453,7 +505,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       onClick={() => setPanelsMenuPopover(true)}
       disabled={addVizDisabled}
     >
-      Panel actions
+      Dashboard Actions
     </EuiButton>
   );
 
@@ -488,7 +540,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
       title: 'Panel actions',
       items: [
         {
-          name: 'Reload panel',
+          name: 'Reload Dashboard',
           'data-test-subj': 'reloadPanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -496,7 +548,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Rename panel',
+          name: 'Rename Dashboard',
           'data-test-subj': 'renamePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -504,15 +556,15 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
           },
         },
         {
-          name: 'Duplicate panel',
+          name: 'Duplicate Dashboard',
           'data-test-subj': 'duplicatePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
-            clonePanel();
+            clonePanelModal();
           },
         },
         {
-          name: 'Delete panel',
+          name: 'Delete Dashboard',
           'data-test-subj': 'deletePanelContextMenuItem',
           onClick: () => {
             setPanelsMenuPopover(false);
@@ -523,7 +575,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
     },
   ];
 
-  // Fetch the custom panel on Initial Mount
+  // Fetch the Observability Dashboard on Initial Mount
   useEffect(() => {
     fetchCustomPanel();
   }, [panelId]);

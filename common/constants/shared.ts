@@ -23,9 +23,33 @@ export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
 
-export const observabilityID = 'observability-dashboards';
+export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
-export const observabilityPluginOrder = 6000;
+export const observabilityPluginOrder = 1500;
+
+export const observabilityApplicationsID = 'observability-applications';
+export const observabilityApplicationsTitle = 'Applications';
+export const observabilityApplicationsPluginOrder = 5090;
+
+export const observabilityLogsID = 'observability-logs';
+export const observabilityLogsTitle = 'Logs';
+export const observabilityLogsPluginOrder = 5091;
+
+export const observabilityMetricsID = 'observability-metrics';
+export const observabilityMetricsTitle = 'Metrics';
+export const observabilityMetricsPluginOrder = 5092;
+
+export const observabilityTracesID = 'observability-traces';
+export const observabilityTracesTitle = 'Traces';
+export const observabilityTracesPluginOrder = 5093;
+
+export const observabilityNotebookID = 'observability-notebooks';
+export const observabilityNotebookTitle = 'Notebooks';
+export const observabilityNotebookPluginOrder = 5094;
+
+export const observabilityPanelsID = 'observability-dashboards';
+export const observabilityPanelsTitle = 'Dashboards';
+export const observabilityPanelsPluginOrder = 5095;
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';

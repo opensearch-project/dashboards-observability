@@ -206,7 +206,7 @@ export function ErrorRatesTable(props: {
               ]);
               if (props.page !== 'app') {
                 props.setRedirect(true);
-                location.assign('#/trace_analytics/traces');
+                location.assign('#/traces');
               }
             }}
           >

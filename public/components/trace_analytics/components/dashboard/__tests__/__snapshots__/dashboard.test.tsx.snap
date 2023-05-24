@@ -62,10 +62,7 @@ exports[`Dashboard component renders dashboard 1`] = `
         "calls": Array [
           Array [
             Array [
-              Object {
-                "href": "test#/",
-                "text": "test",
-              },
+              undefined,
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -334,10 +331,7 @@ exports[`Dashboard component renders dashboard 1`] = `
           "calls": Array [
             Array [
               Array [
-                Object {
-                  "href": "test#/",
-                  "text": "test",
-                },
+                undefined,
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
@@ -2426,10 +2420,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "calls": Array [
           Array [
             Array [
-              Object {
-                "href": "test#/",
-                "text": "test",
-              },
+              undefined,
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -2693,10 +2684,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
           "calls": Array [
             Array [
               Array [
-                Object {
-                  "href": "test#/",
-                  "text": "test",
-                },
+                undefined,
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
@@ -4758,10 +4746,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "calls": Array [
           Array [
             Array [
-              Object {
-                "href": "test#/",
-                "text": "test",
-              },
+              undefined,
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -5031,10 +5016,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
           "calls": Array [
             Array [
               Array [
-                Object {
-                  "href": "test#/",
-                  "text": "test",
-                },
+                undefined,
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
