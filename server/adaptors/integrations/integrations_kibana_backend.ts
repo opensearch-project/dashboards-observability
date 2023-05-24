@@ -3,6 +3,7 @@ import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { readNDJsonObjects } from './utils';
+import { IntegrationInstanceBuilder } from './integrations_builder';
 
 let repository: IntegrationTemplate[] = [];
 
@@ -45,7 +46,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return assets;
   };
 
-  loadRepository(): Promise<void> {
+  loadRepository = (): Promise<void> => {
     const toCreate: SavedObjectsBulkCreateObject[] = repository.map((template) => {
       return {
         type: 'integration-template',
@@ -58,19 +59,39 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     } catch (err: any) {
       return Promise.reject(err);
     }
-  }
+  };
 
   getIntegrationInstances = (
     query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceSearchResult> => {
-    console.log(store);
-    if (query?.added) {
-      return Promise.resolve({
-        hits: store,
-      });
-    }
     return Promise.resolve({
-      hits: [],
+      hits: store,
+    });
+  };
+
+  loadIntegrationInstance = async (templateName: string): Promise<IntegrationInstance> => {
+    for (const template of repository) {
+      if (template.name !== templateName) {
+        continue;
+      }
+      try {
+        const result = await new IntegrationInstanceBuilder(this.client).build(template, {
+          name: 'Placeholder Nginx Integration',
+          dataset: 'nginx',
+          namespace: 'prod',
+        });
+        store.push(result);
+        return Promise.resolve(result);
+      } catch (err: any) {
+        return Promise.reject({
+          message: err.toString(),
+          statusCode: 500,
+        });
+      }
+    }
+    return Promise.reject({
+      message: `Template ${templateName} not found`,
+      statusCode: 404,
     });
   };
 }

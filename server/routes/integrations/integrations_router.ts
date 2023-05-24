@@ -14,7 +14,7 @@ import {
 } from '../../../../../src/core/server/http/router';
 import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
 
-let added = false;
+const added = false;
 
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
@@ -81,24 +81,7 @@ export function registerIntegrationsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        const assets = await a.getAssets('nginx');
-        added = true;
-        return context.core.savedObjects.client.bulkCreate(assets);
-      });
-    }
-  );
-
-  router.post(
-    {
-      path: `${INTEGRATIONS_BASE}/test_load`,
-      validate: false,
-    },
-    async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request) as IntegrationsAdaptor;
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        const unwrapped = a as IntegrationsKibanaBackend;
-        await unwrapped.loadRepository();
-        return {};
+        return a.loadIntegrationInstance('nginx');
       });
     }
   );

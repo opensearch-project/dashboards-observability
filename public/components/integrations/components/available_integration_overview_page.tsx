@@ -34,7 +34,7 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
 }
 
 export interface AvailableIntegrationType {
-  templateName: string;
+  name: string;
   description: string;
   status: string;
   assetUrl?: string | undefined;
@@ -48,7 +48,7 @@ export interface AvailableIntegrationsTableProps {
 }
 
 export interface AvailableIntegrationsList {
-  data: AvailableIntegrationType[];
+  hits: AvailableIntegrationType[];
 }
 
 export interface AvailableIntegrationsCardViewProps {
@@ -62,7 +62,7 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
 
   const [isCardView, setCardView] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [data, setData] = useState<AvailableIntegrationsList>({ data: [] });
+  const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
