@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
@@ -45,7 +44,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       return Promise.resolve(result);
     } catch (err: any) {
       return Promise.reject({
-        message: err.toString(),
+        message: err.message,
         statusCode: 500,
       });
     }
