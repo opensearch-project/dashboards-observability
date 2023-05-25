@@ -15,7 +15,6 @@ interface MessageBubbleProps {
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
-  console.count('message rerender:');
   if (props.type === 'input') {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems="flexStart">

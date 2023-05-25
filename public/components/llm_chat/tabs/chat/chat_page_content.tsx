@@ -21,7 +21,6 @@ interface ChatPageContentProps {
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
-  console.count('chat page content rerender');
   const chatStateContext = useContext(ChatStateContext)!;
   const pageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

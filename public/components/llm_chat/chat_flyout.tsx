@@ -16,7 +16,6 @@ interface ChatFlyoutProps {
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
-  console.count('flyout rerender');
   const chatContext = useContext(ChatContext)!;
 
   let content = null;

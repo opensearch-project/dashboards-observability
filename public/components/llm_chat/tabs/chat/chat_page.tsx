@@ -17,7 +17,6 @@ interface ChatPageProps {
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
-  console.count('chat page rerender');
   const chatStateContext = useContext(ChatStateContext)!;
   const [showGreetings, setShowGreetings] = useState(true);
   const { data: chat, loading: messagesLoading, error: messagesLoadingError } = useGetChat();

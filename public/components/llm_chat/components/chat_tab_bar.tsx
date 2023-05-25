@@ -27,7 +27,6 @@ const tabs = [
 ] as const;
 
 export const ChatTabBar: React.FC = React.memo(() => {
-  console.count('tab bar rerender');
   const chatContext = useContext(ChatContext)!;
   const { openChat } = useChatActions();
   const [isOpen, setIsOpen] = useState(false);

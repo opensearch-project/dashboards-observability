@@ -20,7 +20,6 @@ import { useChatActions } from '../../hooks/use_chat_actions';
 import { useBulkGetChat } from '../../hooks/use_get_chat';
 
 export const ChatHistoryPage: React.FC = () => {
-  console.count('ChatHistoryPage rerender');
   const { openChat } = useChatActions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

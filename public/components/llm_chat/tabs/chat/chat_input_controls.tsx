@@ -18,7 +18,6 @@ interface ChatInputControlsProps {
 }
 
 export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
-  console.count('chat input controls rerender');
   const chatContext = useContext(ChatContext)!;
   const { send } = useChatActions();
   const inputRef = useRef<HTMLTextAreaElement>(null);

@@ -61,7 +61,6 @@ export interface ChatState {
 }
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
-  console.count('header chat button rerender');
   const [appId, setAppId] = useState<string>();
   const [input, setInput] = useState('');
   const [chatId, setChatId] = useState<string>();

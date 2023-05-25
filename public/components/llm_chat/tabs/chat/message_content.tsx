@@ -18,7 +18,6 @@ interface MessageContentProps {
 }
 
 export const MessageContent: React.FC<MessageContentProps> = React.memo((props) => {
-  console.count('message content rerender:');
   const coreServicesContext = useContext(CoreServicesContext)!;
   const [visInput, setVisInput] = useState<DashboardContainerInput>();
 

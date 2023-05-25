@@ -35,8 +35,6 @@ const messages = [
 ];
 
 export const ChatPageGreetings: React.FC<ChatPageGreetingsProps> = (props) => {
-  console.count('greetings rerender');
-
   return (
     <>
       <EuiSpacer size="xxl" />
