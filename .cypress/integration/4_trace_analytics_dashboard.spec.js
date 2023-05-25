@@ -72,7 +72,6 @@ describe('Testing dashboard table empty state', () => {
         win.sessionStorage.clear();
       },
     });
-    cy.wait(delay * 3);
   });
 
   it('Renders empty state', () => {
@@ -104,23 +103,20 @@ describe('Testing dashboard table', () => {
     cy.get('.euiBreadcrumb').contains('Trace analytics').click();
     cy.get('.euiTitle').contains('Dashboard').should('exist');
     cy.get('.euiBreadcrumb').contains('Observability').click();
-    cy.get('.euiTitle').contains('Event analytics').should('exist');
+    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
   it('Adds the percentile filters', () => {
+    cy.wait(delay);//Needed after removing waits from setTimeFilter()
     cy.contains(' >= 95 percentile').click({ force: true });
-    cy.wait(delay);
     cy.contains(' >= 95 percentile').click({ force: true });
-    cy.wait(delay);
 
     cy.contains('Latency percentile within trace group: >= 95th').should('exist');
     cy.contains(' (7)').should('exist');
     cy.contains('318.69').should('exist');
 
     cy.contains(' < 95 percentile').click({ force: true });
-    cy.wait(delay);
     cy.contains(' < 95 percentile').click({ force: true });
-    cy.wait(delay);
 
     cy.contains('Latency percentile within trace group: < 95th').should('exist');
     cy.contains(' (8)').should('exist');
@@ -134,16 +130,13 @@ describe('Testing dashboard table', () => {
   });
 
   it('Redirects to traces table with filter', () => {
-    cy.wait(delay);
     cy.get('.euiLink').contains('13').click();
-    cy.wait(delay);
 
     cy.get('h2.euiTitle').contains('Traces').should('exist');
     cy.contains(' (13)').should('exist');
     cy.contains('client_create_order').should('exist');
 
     cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
-    cy.wait(delay);
 
     cy.contains('client_create_order').should('exist');
   });
@@ -211,7 +204,6 @@ describe('Latency by trace group table', () =>{
   it('Sorts the Latency by trace group table', () => {
     cy.get('span[title*="Trace group name"]').click();
     cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]').eq(0).contains('/**').should('exist');
-    cy.wait(delay);
   });
 
   it('Verify tooltips in Latency by trace group table', () => {
@@ -232,7 +224,7 @@ describe('Latency by trace group table', () =>{
   it('Verify Search engine on Trace dashboard', () => {
     cy.get('.euiFieldSearch.euiFieldSearch--fullWidth').click().type('client_pay_order');
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.wait(delay);
+    cy.wait(delay);//Fails without
     cy.get('.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent').contains('211.04').should('exist');
     cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').click();
     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
@@ -264,6 +256,7 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
   });
 
   it('Verify Change all filters', () =>{
+    cy.wait(delay);//Needed after removing waits from setTimeFilter()
     cy.get('[data-test-subj="global-filter-button"]').click();
     cy.get('.euiContextMenuPanelTitle').contains('Change all filters').should('exist');
     cy.get('.euiContextMenuItem__text').eq(0).contains('Enable all');
@@ -274,8 +267,10 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
   })
 
   it('Verify Add filter section', () => {
+    cy.wait(delay);//Needed after removing waits from setTimeFilter()
     cy.get('[data-test-subj="addfilter"]').contains('+ Add filter').click();
     cy.get('.euiPopoverTitle').contains('Add filter').should('exist');
+    cy.wait(delay);//drop down won't open without
     cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(0).trigger('mouseover').click();
     cy.get('.euiComboBoxOption__content').eq(1).click();
     cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(1).trigger('mouseover').click();
@@ -370,9 +365,7 @@ describe('Testing switch mode to jaeger', () => {
   });
 
   it('Verifies traces links to traces page', () => {
-    cy.wait(delay);
     cy.get('.euiLink').contains('7').click();
-    cy.wait(delay);
 
     cy.get('h2.euiTitle').contains('Traces').should('exist');
     cy.contains(' (7)').should('exist');
