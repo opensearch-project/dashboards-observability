@@ -9,16 +9,17 @@ jest.mock('fs', () => ({
 
 describe('IntegrationsRepository', () => {
   const mockReadFile = fs.promises.readFile as jest.MockedFunction<typeof fs.promises.readFile>;
+  const repository = new IntegrationsRepository();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    repository._clear();
   });
 
   it('should initialize the repository', async () => {
     const buffer = '[{"name": "Template 1"}, {"name": "Template 2"}]';
     mockReadFile.mockResolvedValue(buffer);
 
-    const repository = new IntegrationsRepository();
     await repository.init();
 
     expect(mockReadFile).toHaveBeenCalledWith(repository.repositoryPath, 'utf-8');
@@ -30,7 +31,6 @@ describe('IntegrationsRepository', () => {
     const buffer = '[{"name": "Template 1"}, {"name": "Template 2"}]';
     mockReadFile.mockResolvedValue(buffer);
 
-    const repository = new IntegrationsRepository();
     const result = await repository.get();
 
     expect(result).toEqual([{ name: 'Template 1' }, { name: 'Template 2' }]);
@@ -41,7 +41,6 @@ describe('IntegrationsRepository', () => {
     const buffer = '[{"name": "Template 1"}, {"name": "Template 2"}]';
     mockReadFile.mockResolvedValue(buffer);
 
-    const repository = new IntegrationsRepository();
     const result = await repository.getByName('Template 2');
 
     expect(result).toEqual({ name: 'Template 2' });
@@ -52,7 +51,6 @@ describe('IntegrationsRepository', () => {
     const buffer = '[{"name": "Template 1"}, {"name": "Template 2"}]';
     mockReadFile.mockResolvedValue(buffer);
 
-    const repository = new IntegrationsRepository();
     await expect(repository.getByName('Template 3')).rejects.toEqual({
       message: 'Integration template with name Template 3 not found',
       statusCode: 404,
