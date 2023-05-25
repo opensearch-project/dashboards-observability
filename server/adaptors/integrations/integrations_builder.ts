@@ -53,7 +53,6 @@ export class IntegrationInstanceBuilder {
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
     return Promise.resolve({
-      id: 'unknown',
       name: options.name,
       templateName: template.name,
       dataSource: {
@@ -62,7 +61,7 @@ export class IntegrationInstanceBuilder {
         namespace: options.namespace,
       },
       tags: options.tags,
-      creationDate: new Date().toISOString(),
+      creationDate: new Date(),
       status: 'unknown',
       assets: refs,
       addedBy: 'unknown',
