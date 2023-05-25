@@ -10,8 +10,6 @@ export interface IntegrationsAdaptor {
     query?: IntegrationTemplateQuery
   ) => Promise<IntegrationTemplateSearchResult>;
 
-  getAssets: (templateName: string) => Promise<SavedObjectsBulkCreateObject[]>;
-
   getIntegrationInstances: (
     query?: IntegrationInstanceQuery
   ) => Promise<IntegrationInstanceSearchResult>;

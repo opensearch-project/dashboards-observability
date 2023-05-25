@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import { IntegrationsAdaptor } from './integrations_adaptor';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
-import { readNDJsonObjects } from './utils';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 
 let repository: IntegrationTemplate[] = [];
@@ -36,14 +34,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return Promise.resolve({
       hits: repository,
     });
-  };
-
-  getAssets = (_templateName: string): Promise<SavedObjectsBulkCreateObject[]> => {
-    const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
-    const assets = readNDJsonObjects(stream).then(
-      (objects) => objects as SavedObjectsBulkCreateObject[]
-    );
-    return assets;
   };
 
   getIntegrationInstances = async (
