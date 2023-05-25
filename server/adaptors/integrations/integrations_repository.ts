@@ -27,6 +27,11 @@ export class IntegrationsRepository {
     }
   }
 
+  _clear() {
+    this.repository = [];
+    this.initialized = false;
+  }
+
   async get(): Promise<IntegrationTemplate[]> {
     if (!this.initialized) {
       await this.init();
