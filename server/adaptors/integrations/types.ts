@@ -13,17 +13,16 @@ interface IntegrationTemplate {
       darkModeLogo?: string; // Fallback to light mode if absent
       darkModeGallery?: string[];
     };
-    assets?: Map<
-      string,
-      {
-        mimeType: string;
-        annotation?: string;
-        data: string;
-      }
-    >;
+    assets?: Map<string, StaticAsset>;
   };
   components: IntegrationComponent[];
   displayAssets: DisplayAsset[];
+}
+
+interface StaticAsset {
+  mimeType: string;
+  annotation?: string;
+  data: string;
 }
 
 interface IntegrationComponent {

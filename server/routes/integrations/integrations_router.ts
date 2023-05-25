@@ -101,6 +101,30 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
+      path: `${INTEGRATIONS_BASE}/repository/nginx/static/logo`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      try {
+        const logo = await adaptor.getStatic('nginx', '/logo');
+        return response.ok({
+          headers: {
+            'Content-Type': logo.mimeType,
+          },
+          body: Buffer.from(logo.data, 'base64'),
+        });
+      } catch (err: any) {
+        return response.custom({
+          statusCode: err.statusCode ? err.statusCode : 500,
+          body: err.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
       path: `${OBSERVABILITY_BASE}/store`,
       validate: false,
     },

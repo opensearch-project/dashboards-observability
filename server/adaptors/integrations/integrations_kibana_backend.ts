@@ -94,4 +94,19 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       statusCode: 404,
     });
   };
+
+  getStatic = async (templateName: string, path: string): Promise<StaticAsset> => {
+    if (repository.length === 0) {
+      await readRepository();
+    }
+    const map = repository[0].statics?.assets!;
+    const data = map[path];
+    if (data === undefined) {
+      return Promise.reject({
+        message: `Asset ${path} not found`,
+        statusCode: 404,
+      });
+    }
+    return Promise.resolve(data);
+  };
 }
