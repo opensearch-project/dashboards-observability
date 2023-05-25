@@ -1,49 +1,25 @@
-import * as fs from 'fs';
 import { IntegrationsAdaptor } from './integrations_adaptor';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
-import { readNDJsonObjects } from './utils';
 import { IntegrationInstanceBuilder } from './integrations_builder';
-
-let repository: IntegrationTemplate[] = [];
-
-const store: IntegrationInstance[] = [];
-
-const readRepository = async (): Promise<void> => {
-  const buffer = await fs.promises.readFile(__dirname + '/__data__/repository.json', 'utf-8');
-  try {
-    repository = JSON.parse(buffer);
-    return Promise.resolve();
-  } catch (err: any) {
-    return Promise.reject(err);
-  }
-};
+import { IntegrationsRepository } from './integrations_repository';
 
 export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
+  repository: IntegrationsRepository;
 
-  constructor(client: SavedObjectsClientContract) {
+  constructor(client: SavedObjectsClientContract, repository?: IntegrationsRepository) {
     this.client = client;
+    this.repository = repository ?? new IntegrationsRepository();
   }
 
   getIntegrationTemplates = async (
     _query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
-    if (repository.length === 0) {
-      await readRepository();
-    }
-    console.log(`Retrieving ${repository.length} templates from catalog`);
+    const repo = await this.repository.get();
+    console.log(`Retrieving ${repo.length} templates from catalog`);
     return Promise.resolve({
-      hits: repository,
+      hits: repo,
     });
-  };
-
-  getAssets = (_templateName: string): Promise<SavedObjectsBulkCreateObject[]> => {
-    const stream = fs.createReadStream(__dirname + '/__tests__/test.ndjson');
-    const assets = readNDJsonObjects(stream).then(
-      (objects) => objects as SavedObjectsBulkCreateObject[]
-    );
-    return assets;
   };
 
   getIntegrationInstances = async (
@@ -57,51 +33,32 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   };
 
   loadIntegrationInstance = async (templateName: string): Promise<IntegrationInstance> => {
-    for (const template of repository) {
-      if (template.name !== templateName) {
-        continue;
-      }
-      try {
-        const result = await new IntegrationInstanceBuilder(this.client).build(template, {
-          name: 'Placeholder Nginx Integration',
-          dataset: 'nginx',
-          namespace: 'prod',
-        });
-        this.client.create('integration-instance', result);
-        return Promise.resolve(result);
-      } catch (err: any) {
-        return Promise.reject({
-          message: err.toString(),
-          statusCode: 500,
-        });
-      }
+    const template = await this.repository.getByName(templateName);
+    try {
+      const result = await new IntegrationInstanceBuilder(this.client).build(template, {
+        name: 'Placeholder Nginx Integration',
+        dataset: 'nginx',
+        namespace: 'prod',
+      });
+      await this.client.create('integration-instance', result);
+      return Promise.resolve(result);
+    } catch (err: any) {
+      return Promise.reject({
+        message: err.message,
+        statusCode: 500,
+      });
     }
-    return Promise.reject({
-      message: `Template ${templateName} not found`,
-      statusCode: 404,
-    });
   };
 
   getStatic = async (templateName: string, path: string): Promise<StaticAsset> => {
-    if (repository.length === 0) {
-      await readRepository();
+    const template = await this.repository.getByName(templateName);
+    const data = template.statics?.assets?.[path];
+    if (data === undefined) {
+      return Promise.reject({
+        message: `Asset ${path} not found`,
+        statusCode: 404,
+      });
     }
-    for (const item of repository) {
-      if (item.name !== templateName) {
-        continue;
-      }
-      const data = item.statics?.assets?.[path];
-      if (data === undefined) {
-        return Promise.reject({
-          message: `Asset ${path} not found`,
-          statusCode: 404,
-        });
-      }
-      return Promise.resolve(data);
-    }
-    return Promise.reject({
-      message: `Template ${templateName} not found`,
-      statusCode: 404,
-    });
+    return Promise.resolve(data);
   };
 }
