@@ -84,13 +84,27 @@ export class ObservabilityPlugin
       namespaceType: 'single',
       mappings: {
         dynamic: false,
-        // TODO fill in the rest of the fields
         properties: {
+          name: {
+            type: 'text',
+          },
           templateName: {
             type: 'text',
           },
-          description: {
+          dataSource: {
+            type: 'nested',
+          },
+          creationDate: {
+            type: 'date',
+          },
+          tags: {
+            type: 'nested',
+          },
+          addedBy: {
             type: 'text',
+          },
+          assets: {
+            type: 'nested',
           },
         },
       },

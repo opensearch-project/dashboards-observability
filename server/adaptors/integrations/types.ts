@@ -49,7 +49,6 @@ interface IntegrationTemplateQuery {
 }
 
 interface IntegrationInstance {
-  id: string;
   name: string;
   templateName: string;
   dataSource: {
@@ -57,7 +56,7 @@ interface IntegrationInstance {
     dataset: string;
     namespace: string;
   };
-  creationDate: string;
+  creationDate: Date;
   tags?: string[];
   status: string;
   addedBy?: string;

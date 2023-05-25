@@ -46,11 +46,13 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return assets;
   };
 
-  getIntegrationInstances = (
+  getIntegrationInstances = async (
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceSearchResult> => {
+    const result = await this.client.find({ type: 'integration-instance' });
     return Promise.resolve({
-      hits: store,
+      total: result.total,
+      hits: result.saved_objects.map((x) => x.attributes) as IntegrationInstance[],
     });
   };
 
@@ -65,7 +67,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
           dataset: 'nginx',
           namespace: 'prod',
         });
-        store.push(result);
+        this.client.create('integration-instance', result);
         return Promise.resolve(result);
       } catch (err: any) {
         return Promise.reject({
