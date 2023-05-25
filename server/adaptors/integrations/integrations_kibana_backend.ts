@@ -5,8 +5,6 @@ import { IntegrationInstanceBuilder } from './integrations_builder';
 
 let repository: IntegrationTemplate[] = [];
 
-const store: IntegrationInstance[] = [];
-
 const readRepository = async (): Promise<void> => {
   const buffer = await fs.promises.readFile(__dirname + '/__data__/repository.json', 'utf-8');
   try {
