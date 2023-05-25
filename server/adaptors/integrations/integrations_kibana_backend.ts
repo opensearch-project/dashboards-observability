@@ -46,21 +46,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return assets;
   };
 
-  loadRepository = (): Promise<void> => {
-    const toCreate: SavedObjectsBulkCreateObject[] = repository.map((template) => {
-      return {
-        type: 'integration-template',
-        attributes: template,
-      };
-    });
-    try {
-      this.client.bulkCreate(toCreate);
-      return Promise.resolve();
-    } catch (err: any) {
-      return Promise.reject(err);
-    }
-  };
-
   getIntegrationInstances = (
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceSearchResult> => {
