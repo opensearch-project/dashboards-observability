@@ -112,11 +112,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                 },
               ]
             }
-            singleSelection={
-              Object {
-                "asPlainText": true,
-              }
-            }
+            singleSelection={false}
             sortMatchesBy="none"
           >
             <div
@@ -170,11 +166,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                     },
                   ]
                 }
-                singleSelection={
-                  Object {
-                    "asPlainText": true,
-                  }
-                }
+                singleSelection={false}
                 toggleButtonRef={[Function]}
                 updatePosition={[Function]}
                 value="[Logs] Web traffic Panel, [Logs] Web traffic Panel 2"
@@ -207,15 +199,16 @@ exports[`Saved query table component Renders saved query table 1`] = `
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <div
-                        className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+                        className="euiComboBox__inputWrap euiComboBox__inputWrap-isClearable"
                         data-test-subj="comboBoxInput"
                         onClick={[Function]}
                         tabIndex={-1}
                       >
                         <EuiComboBoxPill
-                          asPlainText={true}
+                          asPlainText={false}
                           color="hollow"
                           key="[logs] web traffic panel"
+                          onClose={[Function]}
                           option={
                             Object {
                               "label": "[Logs] Web traffic Panel",
@@ -236,24 +229,107 @@ exports[`Saved query table component Renders saved query table 1`] = `
                             }
                           }
                         >
-                          <span
-                            className="euiComboBoxPill euiComboBoxPill--plainText"
-                            panel={
+                          <EuiI18n
+                            default="Remove {children} from selection in this group"
+                            token="euiComboBoxPill.removeSelection"
+                            values={
                               Object {
-                                "dateCreated": 1637781403888,
-                                "dateModified": 1637781403888,
-                                "id": "uRZgU30B661cwDZT-ILw",
-                                "name": "[Logs] Web traffic Panel",
+                                "children": "[Logs] Web traffic Panel",
                               }
                             }
                           >
-                            [Logs] Web traffic Panel
-                          </span>
+                            <EuiBadge
+                              className="euiComboBoxPill"
+                              closeButtonProps={
+                                Object {
+                                  "tabIndex": -1,
+                                }
+                              }
+                              color="hollow"
+                              iconOnClick={[Function]}
+                              iconOnClickAriaLabel="Remove [Logs] Web traffic Panel from selection in this group"
+                              iconSide="right"
+                              iconType="cross"
+                              panel={
+                                Object {
+                                  "dateCreated": 1637781403888,
+                                  "dateModified": 1637781403888,
+                                  "id": "uRZgU30B661cwDZT-ILw",
+                                  "name": "[Logs] Web traffic Panel",
+                                }
+                              }
+                              title="[Logs] Web traffic Panel"
+                            >
+                              <EuiInnerText>
+                                <span
+                                  className="euiBadge euiBadge--hollow euiBadge--iconRight euiComboBoxPill"
+                                  panel={
+                                    Object {
+                                      "dateCreated": 1637781403888,
+                                      "dateModified": 1637781403888,
+                                      "id": "uRZgU30B661cwDZT-ILw",
+                                      "name": "[Logs] Web traffic Panel",
+                                    }
+                                  }
+                                  title="[Logs] Web traffic Panel"
+                                >
+                                  <span
+                                    className="euiBadge__content"
+                                  >
+                                    <span
+                                      className="euiBadge__text"
+                                    >
+                                      [Logs] Web traffic Panel
+                                    </span>
+                                    <button
+                                      aria-label="Remove [Logs] Web traffic Panel from selection in this group"
+                                      className="euiBadge__iconButton"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      title="Remove [Logs] Web traffic Panel from selection in this group"
+                                      type="button"
+                                    >
+                                      <EuiIcon
+                                        className="euiBadge__icon"
+                                        color="inherit"
+                                        size="s"
+                                        tabIndex={-1}
+                                        type="cross"
+                                      >
+                                        <EuiIconEmpty
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiBadge__icon"
+                                          focusable="false"
+                                          role="img"
+                                          style={null}
+                                          tabIndex={-1}
+                                        >
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiBadge__icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={null}
+                                            tabIndex={-1}
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </EuiIconEmpty>
+                                      </EuiIcon>
+                                    </button>
+                                  </span>
+                                </span>
+                              </EuiInnerText>
+                            </EuiBadge>
+                          </EuiI18n>
                         </EuiComboBoxPill>
                         <EuiComboBoxPill
-                          asPlainText={true}
+                          asPlainText={false}
                           color="hollow"
                           key="[logs] web traffic panel 2"
+                          onClose={[Function]}
                           option={
                             Object {
                               "label": "[Logs] Web traffic Panel 2",
@@ -274,19 +350,101 @@ exports[`Saved query table component Renders saved query table 1`] = `
                             }
                           }
                         >
-                          <span
-                            className="euiComboBoxPill euiComboBoxPill--plainText"
-                            panel={
+                          <EuiI18n
+                            default="Remove {children} from selection in this group"
+                            token="euiComboBoxPill.removeSelection"
+                            values={
                               Object {
-                                "dateCreated": 1637781403888,
-                                "dateModified": 1637781403888,
-                                "id": "uRZgU30B661cwDZT-ILw",
-                                "name": "[Logs] Web traffic Panel",
+                                "children": "[Logs] Web traffic Panel 2",
                               }
                             }
                           >
-                            [Logs] Web traffic Panel 2
-                          </span>
+                            <EuiBadge
+                              className="euiComboBoxPill"
+                              closeButtonProps={
+                                Object {
+                                  "tabIndex": -1,
+                                }
+                              }
+                              color="hollow"
+                              iconOnClick={[Function]}
+                              iconOnClickAriaLabel="Remove [Logs] Web traffic Panel 2 from selection in this group"
+                              iconSide="right"
+                              iconType="cross"
+                              panel={
+                                Object {
+                                  "dateCreated": 1637781403888,
+                                  "dateModified": 1637781403888,
+                                  "id": "uRZgU30B661cwDZT-ILw",
+                                  "name": "[Logs] Web traffic Panel",
+                                }
+                              }
+                              title="[Logs] Web traffic Panel 2"
+                            >
+                              <EuiInnerText>
+                                <span
+                                  className="euiBadge euiBadge--hollow euiBadge--iconRight euiComboBoxPill"
+                                  panel={
+                                    Object {
+                                      "dateCreated": 1637781403888,
+                                      "dateModified": 1637781403888,
+                                      "id": "uRZgU30B661cwDZT-ILw",
+                                      "name": "[Logs] Web traffic Panel",
+                                    }
+                                  }
+                                  title="[Logs] Web traffic Panel 2"
+                                >
+                                  <span
+                                    className="euiBadge__content"
+                                  >
+                                    <span
+                                      className="euiBadge__text"
+                                    >
+                                      [Logs] Web traffic Panel 2
+                                    </span>
+                                    <button
+                                      aria-label="Remove [Logs] Web traffic Panel 2 from selection in this group"
+                                      className="euiBadge__iconButton"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      title="Remove [Logs] Web traffic Panel 2 from selection in this group"
+                                      type="button"
+                                    >
+                                      <EuiIcon
+                                        className="euiBadge__icon"
+                                        color="inherit"
+                                        size="s"
+                                        tabIndex={-1}
+                                        type="cross"
+                                      >
+                                        <EuiIconEmpty
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiBadge__icon"
+                                          focusable="false"
+                                          role="img"
+                                          style={null}
+                                          tabIndex={-1}
+                                        >
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiBadge__icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={null}
+                                            tabIndex={-1}
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </EuiIconEmpty>
+                                      </EuiIcon>
+                                    </button>
+                                  </span>
+                                </span>
+                              </EuiInnerText>
+                            </EuiBadge>
+                          </EuiI18n>
                         </EuiComboBoxPill>
                         <AutosizeInput
                           aria-controls=""
@@ -593,7 +751,6 @@ exports[`Saved query table component Renders saved query table 1`] = `
               <EuiSwitch
                 checked={false}
                 compressed={true}
-                data-test-subj="eventExplorer__metricSaveName"
                 disabled={true}
                 label="Save as Metric"
                 onBlur={[Function]}
@@ -608,7 +765,6 @@ exports[`Saved query table component Renders saved query table 1`] = `
                     aria-checked={false}
                     aria-labelledby="random_html_id"
                     className="euiSwitch__button"
-                    data-test-subj="eventExplorer__metricSaveName"
                     disabled={true}
                     id="random_html_id"
                     onBlur={[Function]}
