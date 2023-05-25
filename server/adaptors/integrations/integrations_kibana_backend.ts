@@ -99,14 +99,22 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     if (repository.length === 0) {
       await readRepository();
     }
-    const map = repository[0].statics?.assets!;
-    const data = map[path];
-    if (data === undefined) {
-      return Promise.reject({
-        message: `Asset ${path} not found`,
-        statusCode: 404,
-      });
+    for (const item of repository) {
+      if (item.name !== templateName) {
+        continue;
+      }
+      const data = item.statics?.assets?.[path];
+      if (data === undefined) {
+        return Promise.reject({
+          message: `Asset ${path} not found`,
+          statusCode: 404,
+        });
+      }
+      return Promise.resolve(data);
     }
-    return Promise.resolve(data);
+    return Promise.reject({
+      message: `Template ${templateName} not found`,
+      statusCode: 404,
+    });
   };
 }

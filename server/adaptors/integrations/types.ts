@@ -13,7 +13,9 @@ interface IntegrationTemplate {
       darkModeLogo?: string; // Fallback to light mode if absent
       darkModeGallery?: string[];
     };
-    assets?: Map<string, StaticAsset>;
+    assets?: {
+      [key: string]: StaticAsset;
+    };
   };
   components: IntegrationComponent[];
   displayAssets: DisplayAsset[];

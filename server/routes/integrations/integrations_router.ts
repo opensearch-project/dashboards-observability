@@ -5,6 +5,7 @@
 
 import fetch from 'node-fetch';
 import * as fs from 'fs';
+import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
@@ -101,13 +102,18 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${INTEGRATIONS_BASE}/repository/nginx/static/logo`,
-      validate: false,
+      path: `${INTEGRATIONS_BASE}/repository/{id}/static/{path}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+          path: schema.string(),
+        }),
+      },
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       try {
-        const logo = await adaptor.getStatic('nginx', '/logo');
+        const logo = await adaptor.getStatic(request.params.id, `/${request.params.path}`);
         return response.ok({
           headers: {
             'Content-Type': logo.mimeType,
