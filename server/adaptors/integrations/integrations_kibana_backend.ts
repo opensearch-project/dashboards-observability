@@ -46,21 +46,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return assets;
   };
 
-  loadRepository = (): Promise<void> => {
-    const toCreate: SavedObjectsBulkCreateObject[] = repository.map((template) => {
-      return {
-        type: 'integration-template',
-        attributes: template,
-      };
-    });
-    try {
-      this.client.bulkCreate(toCreate);
-      return Promise.resolve();
-    } catch (err: any) {
-      return Promise.reject(err);
-    }
-  };
-
   getIntegrationInstances = (
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceSearchResult> => {
@@ -88,6 +73,29 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
           statusCode: 500,
         });
       }
+    }
+    return Promise.reject({
+      message: `Template ${templateName} not found`,
+      statusCode: 404,
+    });
+  };
+
+  getStatic = async (templateName: string, path: string): Promise<StaticAsset> => {
+    if (repository.length === 0) {
+      await readRepository();
+    }
+    for (const item of repository) {
+      if (item.name !== templateName) {
+        continue;
+      }
+      const data = item.statics?.assets?.[path];
+      if (data === undefined) {
+        return Promise.reject({
+          message: `Asset ${path} not found`,
+          statusCode: 404,
+        });
+      }
+      return Promise.resolve(data);
     }
     return Promise.reject({
       message: `Template ${templateName} not found`,

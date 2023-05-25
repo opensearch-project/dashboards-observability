@@ -5,6 +5,7 @@
 
 import fetch from 'node-fetch';
 import * as fs from 'fs';
+import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
@@ -96,6 +97,35 @@ export function registerIntegrationsRoute(router: IRouter) {
       return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
         return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
       });
+    }
+  );
+
+  router.get(
+    {
+      path: `${INTEGRATIONS_BASE}/repository/{id}/static/{path}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+          path: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      try {
+        const logo = await adaptor.getStatic(request.params.id, `/${request.params.path}`);
+        return response.ok({
+          headers: {
+            'Content-Type': logo.mimeType,
+          },
+          body: Buffer.from(logo.data, 'base64'),
+        });
+      } catch (err: any) {
+        return response.custom({
+          statusCode: err.statusCode ? err.statusCode : 500,
+          body: err.message,
+        });
+      }
     }
   );
 

@@ -5,6 +5,7 @@ import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,
 } from './available_integration_overview_page';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
   const rowNumber = _.ceil(props.records / 5);
@@ -20,7 +21,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   };
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
-    console.log(integrations.length);
     if (!integrations || !integrations.length) return null;
     return (
       <>
@@ -31,7 +31,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                 <EuiCard
                   // className={classes}
                   layout="vertical"
-                  icon={getImage(i.assetUrl)}
+                  icon={getImage(`${INTEGRATIONS_BASE}/repository/${i.name}/static/logo`)}
                   titleSize="xs"
                   title={i.name}
                   description={i.description}
@@ -68,6 +68,5 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     );
   };
 
-  console.log(props);
-  return <>{props.data.data === undefined ? props.data.hits : renderRows(props.data.data.hits)}</>;
+  return <>{renderRows(props.data.hits)}</>;
 }
