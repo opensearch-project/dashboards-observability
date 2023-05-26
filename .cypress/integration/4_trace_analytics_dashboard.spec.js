@@ -107,7 +107,6 @@ describe('Testing dashboard table', () => {
   });
 
   it('Adds the percentile filters', () => {
-    cy.wait(delay);//Needed after removing waits from setTimeFilter()
     cy.contains(' >= 95 percentile').click({ force: true });
     cy.contains(' >= 95 percentile').click({ force: true });
 
