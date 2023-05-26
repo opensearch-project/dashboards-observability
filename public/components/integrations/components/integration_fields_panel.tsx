@@ -73,6 +73,37 @@ export function IntegrationFields(props: any) {
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
+  const traverseTypes = (
+    properties: any,
+    category?: string,
+    prefix?: string
+  ): Array<{
+    name: string;
+    type: string;
+    category: string;
+  }> => {
+    const result: any[] = [];
+    for (const p of Object.keys(properties)) {
+      if (properties[p].type) {
+        result.push({
+          name: prefix ? prefix + '.' + p : p,
+          type: properties[p].type,
+          category: category ? category : 'None',
+        });
+      } else if (properties[p].properties) {
+        result.push({
+          name: prefix ? prefix + '.' + p : p,
+          type: 'nested',
+          category: category ? category : 'None',
+        });
+        result.push(
+          ...traverseTypes(properties[p].properties, (prefix = prefix ? prefix + '.' + p : p))
+        );
+      }
+    }
+    return result;
+  };
+
   return (
     <EuiPanel>
       <PanelTitle title={props.data.data.name + ' Fields'} />
@@ -83,23 +114,7 @@ export function IntegrationFields(props: any) {
         items={data
           .map((x: any) => {
             const properties = x.mapping.template.mappings.properties;
-            const result = [];
-            for (const p of Object.keys(properties)) {
-              if (properties[p].type) {
-                result.push({
-                  name: p,
-                  type: properties[p].type,
-                  category: 'observability',
-                });
-              } else if (properties[p].properties) {
-                result.push({
-                  name: p,
-                  type: 'nested',
-                  category: 'observability',
-                });
-              }
-            }
-            return result;
+            return traverseTypes(properties, x.name);
           })
           .flat()}
         columns={tableColumns}
