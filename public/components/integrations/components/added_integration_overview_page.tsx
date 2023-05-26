@@ -16,9 +16,6 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 export interface AppTableProps extends AppAnalyticsComponentDeps {
   loading: boolean;
   applications: ApplicationType[];
-  fetchApplications: () => void;
-  renameApplication: (newAppName: string, appId: string) => void;
-  deleteApplication: (appList: string[], panelIdList: string[], toastMessage?: string) => void;
   clearStorage: () => void;
   moveToApp: (id: string, type: string) => void;
 }
