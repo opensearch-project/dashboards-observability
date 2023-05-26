@@ -20,7 +20,7 @@ export function IntegrationHeader() {
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l">
+          <EuiTitle size="l" data-test-subj="integrations-header">
             <h1>Integrations</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
