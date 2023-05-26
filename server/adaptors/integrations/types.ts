@@ -2,6 +2,7 @@ interface IntegrationTemplate {
   name: string;
   version: string;
   integrationType: string;
+  license: string;
   author?: string;
   description?: string;
   tags?: string[];
