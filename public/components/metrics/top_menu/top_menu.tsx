@@ -102,7 +102,11 @@ export const TopMenu = ({
     setEditMode(!editMode);
     switch (editType) {
       case 'edit': {
-        setOriginalPanelVisualizations([...panelVisualizations]);
+        if (panelVisualizations.length > 0) {
+          setOriginalPanelVisualizations([...panelVisualizations]);
+        } else {
+          setOriginalPanelVisualizations([]);
+        }
         break;
       }
       case 'cancel': {
@@ -128,7 +132,12 @@ export const TopMenu = ({
   );
 
   const saveButton = (
-    <EuiButton size="s" iconType="save" onClick={() => editPanel('save')}>
+    <EuiButton
+      size="s"
+      iconType="save"
+      data-test-subj="metrics__saveView"
+      onClick={() => editPanel('save')}
+    >
       Save view
     </EuiButton>
   );
@@ -136,6 +145,7 @@ export const TopMenu = ({
   const editButton = (
     <EuiButton
       size="s"
+      data-test-subj="metrics__editView"
       iconType="pencil"
       onClick={() => editPanel('edit')}
       isDisabled={IsTopPanelDisabled}
@@ -233,6 +243,7 @@ export const TopMenu = ({
               value={spanValue}
               isInvalid={spanValue < 1}
               onChange={(e) => setSpanValue(e.target.value)}
+              data-test-subj="metrics__spanValue"
               append={
                 <EuiSelect
                   className="resolutionSelectOption"
@@ -241,6 +252,7 @@ export const TopMenu = ({
                   value={resolutionValue}
                   onChange={(e) => onResolutionChange(e)}
                   aria-label="resolutionSelect"
+                  data-test-subj="metrics__spanResolutionSelect"
                 />
               }
               disabled={IsTopPanelDisabled}

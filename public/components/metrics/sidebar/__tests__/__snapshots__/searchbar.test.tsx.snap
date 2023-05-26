@@ -17,6 +17,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
   >
     <div
       className="metrics-search-bar-input"
+      data-test-subj="metricsSearch"
     >
       <EuiSearchBar
         box={
@@ -168,6 +169,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
   >
     <div
       className="metrics-search-bar-input"
+      data-test-subj="metricsSearch"
     >
       <EuiSearchBar
         box={

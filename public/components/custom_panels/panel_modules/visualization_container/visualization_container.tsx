@@ -25,6 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import _ from 'lodash';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import {
@@ -34,7 +35,6 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
-import _ from 'lodash';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -212,7 +212,7 @@ export const VisualizationContainer = ({
   ];
 
   if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
+    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0], showModelPanel];
   }
 
   const loadVisaulization = async () => {
@@ -329,7 +329,10 @@ export const VisualizationContainer = ({
                   closePopover={closeActionsMenu}
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel items={popoverPanel} />
+                  <EuiContextMenuPanel
+                    items={popoverPanel}
+                    data-test-subj="panelViz__popoverPanel"
+                  />
                 </EuiPopover>
               )}
             </EuiFlexItem>
