@@ -11,7 +11,7 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {
-  const data = props.data.data.fields || [];
+  const data = props.data.data.components || [];
 
   const search = {
     box: {
@@ -70,7 +70,7 @@ export function IntegrationFields(props: any) {
 
   return (
     <EuiPanel>
-      <PanelTitle title={props.data.data.templateName + ' Fields'} />
+      <PanelTitle title={props.data.data.name + ' Fields'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"

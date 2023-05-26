@@ -28,7 +28,7 @@ export function IntegrationOverview(props: any) {
             <EuiFlexItem>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
                 <EuiLink href={data.data.link} external={true} target="blank">
-                  {data.data.templateName}
+                  {data.data.name}
                 </EuiLink>
               </EuiTitle>
             </EuiFlexItem>
@@ -36,7 +36,7 @@ export function IntegrationOverview(props: any) {
               <EuiButton
                 size="s"
                 onClick={() => {
-                  props.getModal(data.data.templateName);
+                  props.getModal(data.data.name);
                 }}
               >
                 Add
@@ -58,22 +58,22 @@ export function IntegrationOverview(props: any) {
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{data.data.version?.resource}</EuiText>
+            <EuiText size="m">{data.data.version}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Category</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{data.data.components?.join(', ')}</EuiText>
+            <EuiText size="m">{data.data.components?.map((x: any) => x.name).join(', ')}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Contributer</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiLink href={data.data.contributer?.link} external={true} target="blank">
-              {data.data.contributer?.name}
+            <EuiLink href={data.data.sourceUrl} external={true} target="blank">
+              {data.data.author}
             </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem>

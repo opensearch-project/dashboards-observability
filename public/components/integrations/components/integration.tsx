@@ -88,7 +88,46 @@ export function Integration(props: AppDetailProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [data, setData] = useState({ data: {} });
+  const [data, setData] = useState({
+    data: {
+      name: 'nginx',
+      author: 'John Doe',
+      sourceUrl: 'https://github.com/Swiddis/dashboards-observability',
+      version: '1.0.0',
+      integrationType: 'logs',
+      description: 'Nginx HTTP server collector',
+      assetUrl: '/api/integrations/repository/nginx/static/logo',
+      status: 'available',
+      license: 'Apache-2.0',
+      components: [
+        {
+          name: 'communication',
+          type: 'schema',
+          category: 'observability',
+        },
+        {
+          name: 'http',
+          type: 'schema',
+          category: 'observability',
+        },
+        {
+          name: 'logs',
+          type: 'schema',
+          category: 'observability',
+        },
+      ],
+      displayAssets: [
+        {
+          name: 'Dashboard',
+          type: 'dashboard',
+        },
+        {
+          name: 'Panel',
+          type: 'panel',
+        },
+      ],
+    },
+  });
 
   const getModal = (name: string) => {
     setModalLayout(
@@ -156,6 +195,7 @@ export function Integration(props: AppDetailProps) {
       );
   }
 
+  console.log(data);
   return (
     <EuiPage>
       <EuiGlobalToastList

@@ -11,7 +11,7 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationAssets(props: any) {
-  const data = props.data.data.assets || [];
+  const data = props.data.data.displayAssets || [];
 
   const search = {
     box: {
@@ -59,7 +59,7 @@ export function IntegrationAssets(props: any) {
 
   return (
     <EuiPanel>
-      <PanelTitle title={props.data.data.templateName + ' Assets'} />
+      <PanelTitle title={props.data.data.name + ' Assets'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
