@@ -69,38 +69,7 @@ interface AppDetailProps extends AppAnalyticsComponentDeps {
 }
 
 export function AddedIntegration(props: AppDetailProps) {
-  const {
-    pplService,
-    dslService,
-    timestampUtils,
-    savedObjects,
-    http,
-    notifications,
-    appId,
-    chrome,
-    parentBreadcrumbs,
-    query,
-    filters,
-    appConfigs,
-    updateApp,
-    setAppConfigs,
-    setFilters,
-    callback,
-    queryManager,
-    mode,
-  } = props;
-  const [application, setApplication] = useState<ApplicationType>({
-    id: '',
-    dateCreated: '',
-    dateModified: '',
-    name: '',
-    description: '',
-    baseQuery: '',
-    servicesEntities: [],
-    traceGroups: [],
-    panelId: '',
-    availability: { name: '', color: '', availabilityVisId: '' },
-  });
+  const { http, appId, chrome, parentBreadcrumbs } = props;
 
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [stateData, setData] = useState({ data: {} });

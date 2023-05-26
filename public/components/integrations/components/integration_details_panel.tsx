@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';

@@ -21,10 +21,7 @@ import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/request
 import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { ApplicationType } from '../../../common/types/application_analytics';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
-import {
-  AvailableIntegrationOverviewPage,
-  IntegrationOverviewPage,
-} from './components/available_integration_overview_page';
+import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { Sidebar } from './components/integration_side_nav';
 import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
 import { AddedIntegration } from './components/added_integration';
