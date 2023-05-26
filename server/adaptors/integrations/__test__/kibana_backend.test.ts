@@ -21,7 +21,7 @@ describe('IntegrationsKibanaBackend', () => {
     backend = new IntegrationsKibanaBackend(mockClient, mockRepository);
   });
 
-  test('should get integration templates from the repository', async () => {
+  it('should get integration templates from the repository', async () => {
     const templates = [{ name: 'Template 1' }, { name: 'Template 2' }];
     (mockRepository.get as jest.Mock).mockResolvedValue(templates);
 
@@ -31,7 +31,7 @@ describe('IntegrationsKibanaBackend', () => {
     expect(result).toEqual({ hits: templates });
   });
 
-  test('should get integration instances from the client', async () => {
+  it('should get integration instances from the client', async () => {
     const mockResult = {
       total: 2,
       saved_objects: [
@@ -50,7 +50,7 @@ describe('IntegrationsKibanaBackend', () => {
     });
   });
 
-  test('should load an integration instance', async () => {
+  it('should load an integration instance', async () => {
     const templateName = 'Template 1';
     const template = { name: templateName };
     const instance = { name: 'Instance 1' };
@@ -76,7 +76,7 @@ describe('IntegrationsKibanaBackend', () => {
     expect(result).toEqual(instance);
   });
 
-  test('should reject when loading an integration instance fails', async () => {
+  it('should reject when loading an integration instance fails', async () => {
     const templateName = 'Template 1';
     const template = { name: templateName };
     const errorMessage = 'An error occurred during instance creation';
