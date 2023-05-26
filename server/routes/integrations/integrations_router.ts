@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fetch from 'node-fetch';
-import * as fs from 'fs';
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
@@ -95,7 +93,7 @@ export function registerIntegrationsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
-        return (await fetch('http://127.0.0.1:4010/repository/id', {})).json();
+        return {};
       });
     }
   );
@@ -137,7 +135,7 @@ export function registerIntegrationsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
-        return (await fetch('http://127.0.0.1:4010/store?limit=24', {})).json();
+        return {};
       });
     }
   );
