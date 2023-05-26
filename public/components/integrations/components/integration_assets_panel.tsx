@@ -11,7 +11,7 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationAssets(props: any) {
-  const data = props.data.data.displayAssets || [];
+  const data = props.data.data.displayAssets.map((x: any) => JSON.parse(x.body)) || [];
 
   const search = {
     box: {
@@ -39,8 +39,10 @@ export function IntegrationAssets(props: any) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationLink`}>
-          {_.truncate(record.name, { length: 100 })}
+        <EuiText data-test-subj={`${record.id}IntegrationLink`}>
+          {_.truncate(record.attributes.title ? record.attributes.title : '(Unnamed)', {
+            length: 100,
+          })}
         </EuiText>
       ),
     },
@@ -64,7 +66,7 @@ export function IntegrationAssets(props: any) {
       <EuiInMemoryTable
         itemId="id"
         loading={false}
-        items={data}
+        items={data.filter((x: any) => x.type !== undefined)}
         columns={tableColumns}
         pagination={{
           initialPageSize: 10,

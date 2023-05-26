@@ -11,7 +11,12 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {
-  const data = props.data.data.components || [];
+  const data =
+    props.data.data.components.map((x: any) => ({
+      name: x.name,
+      version: x.version,
+      mapping: JSON.parse(x.mappingBody),
+    })) || [];
 
   const search = {
     box: {
@@ -75,7 +80,28 @@ export function IntegrationFields(props: any) {
       <EuiInMemoryTable
         itemId="id"
         loading={false}
-        items={data}
+        items={data
+          .map((x: any) => {
+            const properties = x.mapping.template.mappings.properties;
+            const result = [];
+            for (const p of Object.keys(properties)) {
+              if (properties[p].type) {
+                result.push({
+                  name: p,
+                  type: properties[p].type,
+                  category: 'observability',
+                });
+              } else if (properties[p].properties) {
+                result.push({
+                  name: p,
+                  type: 'nested',
+                  category: 'observability',
+                });
+              }
+            }
+            return result;
+          })
+          .flat()}
         columns={tableColumns}
         pagination={{
           initialPageSize: 10,

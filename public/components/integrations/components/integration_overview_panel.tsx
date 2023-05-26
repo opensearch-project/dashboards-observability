@@ -11,6 +11,7 @@ import {
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 const pageStyles: CSS.Properties = {
   width: '80%',
@@ -20,7 +21,11 @@ export function IntegrationOverview(props: any) {
   const { data } = props;
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }}>
-      <img src={data.data.assetUrl} alt="React Logo" style={{ height: 53, width: 53 }} />
+      <img
+        src={`${INTEGRATIONS_BASE}/repository/nginx/static/logo`}
+        alt="React Logo"
+        style={{ height: 53, width: 53 }}
+      />
       <EuiSpacer size="m" />
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
