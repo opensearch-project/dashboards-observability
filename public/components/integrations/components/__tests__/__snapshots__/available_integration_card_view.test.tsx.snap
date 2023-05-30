@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Integration Header Test Renders integration header as expected 1`] = `
+exports[`Available Integration Card View Test Renders nginx integration card view using dummy data 1`] = `
 Array [
   <EuiFlexGroup
     gutterSize="l"
