@@ -33,14 +33,17 @@ interface AppTableProps extends AppAnalyticsComponentDeps {
 export interface AvailableIntegrationType {
   name: string;
   description: string;
-  status: string;
   assetUrl?: string | undefined;
+  version?: string | undefined;
+  integrationType: string;
+  statics: any;
+  components: any[];
+  displayAssets: any[];
 }
 
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
-  records: number;
   showModal: (input: string) => void;
 }
 
@@ -50,7 +53,6 @@ export interface AvailableIntegrationsList {
 
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
-  records: number;
   showModal: (input: string) => void;
 }
 
@@ -148,8 +150,8 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
           />
         </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ data, records: 6, showModal: getModal })
-          : AvailableIntegrationsTable({ loading: false, data, records: 6, showModal: getModal })}
+          ? AvailableIntegrationsCardView({ data, showModal: getModal })
+          : AvailableIntegrationsTable({ loading: false, data, showModal: getModal })}
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>
