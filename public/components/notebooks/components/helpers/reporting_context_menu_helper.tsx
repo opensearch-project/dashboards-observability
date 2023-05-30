@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parse } from "url";
+import { parse } from 'url';
 
 const getReportSourceURL = (baseURI: string) => {
   return baseURI.substr(baseURI.lastIndexOf('/') + 1, baseURI.length);
-}
+};
 
 export const readDataReportToFile = async (
   stream: string,
@@ -16,7 +16,7 @@ export const readDataReportToFile = async (
 ) => {
   const blob = new Blob([stream]);
   const url = URL.createObjectURL(blob);
-  let link = document.createElement('a');
+  const link = document.createElement('a');
   link.setAttribute('href', url);
   link.setAttribute('download', fileName);
   document.body.appendChild(link);
@@ -25,22 +25,18 @@ export const readDataReportToFile = async (
 };
 
 const getFileFormatPrefix = (fileFormat: string) => {
-  var fileFormatPrefix = 'data:' + fileFormat + ';base64,';
+  const fileFormatPrefix = 'data:' + fileFormat + ';base64,';
   return fileFormatPrefix;
 };
 
-const readStreamToFile = async (
-  stream: string,
-  fileFormat: string,
-  fileName: string
-) => {
-  let link = document.createElement('a');
+const readStreamToFile = async (stream: string, fileFormat: string, fileName: string) => {
+  const link = document.createElement('a');
   if (fileName.includes('csv')) {
     readDataReportToFile(stream, fileFormat, fileName);
     return;
   }
-  let fileFormatPrefix = getFileFormatPrefix(fileFormat);
-  let url = fileFormatPrefix + stream;
+  const fileFormatPrefix = getFileFormatPrefix(fileFormat);
+  const url = fileFormatPrefix + stream;
   if (typeof link.download !== 'string') {
     window.open(url, '_blank');
     return;
@@ -93,8 +89,7 @@ function addTenantToURL(url, userRequestedTenant) {
   // build fake url from relative url
   const fakeUrl = `http://opensearch.com${url}`;
   const tenantKey = 'security_tenant';
-  const tenantKeyAndValue =
-    tenantKey + '=' + encodeURIComponent(userRequestedTenant);
+  const tenantKeyAndValue = tenantKey + '=' + encodeURIComponent(userRequestedTenant);
 
   const { pathname, search } = parse(fakeUrl);
   const queryDelimiter = !search ? '?' : '&';
@@ -126,15 +121,10 @@ export const generateInContextReport = async (
   try {
     const tenant = await getTenantInfoIfExists();
     if (tenant) {
-      baseUrl = addTenantToURL(baseUrl, tenant) 
+      baseUrl = addTenantToURL(baseUrl, tenant);
     }
   } catch (error) {
-    props.setToast(
-      'Tenant error',
-      'danger',
-      'Failed to get user tenant.'
-    );
-    console.log(`failed to get user tenant: ${error}`);
+    props.setToast('Tenant error', 'danger', 'Failed to get user tenant.');
   }
 
   const reportSource = 'Notebook';
@@ -150,7 +140,7 @@ export const generateInContextReport = async (
         core_params: {
           base_url: baseUrl,
           report_format: fileFormat,
-          time_duration: 'PT30M', // time duration can be hard-coded 
+          time_duration: 'PT30M', // time duration can be hard-coded
           ...rest,
         },
       },
@@ -165,71 +155,63 @@ export const generateInContextReport = async (
       },
     },
   };
-  fetch(
-    '../api/reporting/generateReport',
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'true',
-        accept: '*/*',
-        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-        pragma: 'no-cache',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-      },
-      method: 'POST',
-      body: JSON.stringify(contextMenuOnDemandReport),
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      mode: 'cors',
-      credentials: 'include',
-    }
-  )
-  .then((response) => {
-    toggleReportingLoadingModal(false);
-    if (response.status === 200) {
-      // success toast
-      props.setToast('Successfully generated report.', 'success');
-    } else {
-      if (response.status === 403) {
-        // permissions failure toast
-        props.setToast(
-          'Error generating report,',
-          'danger',
-          'Insufficient permissions. Reach out to your OpenSearch Dashboards administrator.'
-        );
-      } else if (response.status === 503) {
-        // timeout failure
-        props.setToast(
-          'Error generating report.',
-          'danger',
-          'Timed out generating on-demand report from notebook. Try again later.'
-        );
+  await fetch('../api/reporting/generateReport', {
+    headers: {
+      'Content-Type': 'application/json',
+      'osd-xsrf': 'true',
+      accept: '*/*',
+      'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
+      pragma: 'no-cache',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+    },
+    method: 'POST',
+    body: JSON.stringify(contextMenuOnDemandReport),
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    mode: 'cors',
+    credentials: 'include',
+  })
+    .then(async (response) => [response.status, await response.json()])
+    .then(async ([status, data]) => {
+      toggleReportingLoadingModal(false);
+      if (status === 200) {
+        const a = document.createElement('a');
+        a.href = window.location.origin + `${data.queryUrl}&visualReportId=${data.reportId}`;
+        a.target = '_blank';
+        a.rel = 'noreferrer';
+        a.click();
+        // success toast
+        props.setToast('Please continue report generation in the new tab.', 'success');
       } else {
-        // generic failure
-        props.setToast(
-          'Download error',
-          'danger',
-          'There was an error generating this report.'
-        );
+        if (status === 403) {
+          // permissions failure toast
+          props.setToast(
+            'Error generating report,',
+            'danger',
+            'Insufficient permissions. Reach out to your OpenSearch Dashboards administrator.'
+          );
+        } else if (status === 503) {
+          // timeout failure
+          props.setToast(
+            'Error generating report.',
+            'danger',
+            'Timed out generating on-demand report from notebook. Try again later.'
+          );
+        } else {
+          // generic failure
+          props.setToast('Download error', 'danger', 'There was an error generating this report.');
+        }
       }
-    }
-    return response.json();
-  })
-  .then(async (data) => {
-    await readStreamToFile(data.data, fileFormat, data.filename);
-  })
-}
+    });
+};
 
 export const contextMenuCreateReportDefinition = (baseURI: string) => {
   const reportSourceId = getReportSourceURL(baseURI);
   let reportSource = 'notebook:';
 
   reportSource += reportSourceId.toString();
-  window.location.assign(
-    `reports-dashboards#/create?previous=${reportSource}?timeFrom=0?timeTo=0`
-  );
+  window.location.assign(`reports-dashboards#/create?previous=${reportSource}?timeFrom=0?timeTo=0`);
 };
 
-export const contextMenuViewReports = () =>
-  window.location.assign('reports-dashboards#/');
+export const contextMenuViewReports = () => window.location.assign('reports-dashboards#/');

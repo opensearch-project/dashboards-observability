@@ -6,7 +6,7 @@
 import {
   contextMenuCreateReportDefinition,
   contextMenuViewReports,
-  generateInContextReport
+  generateInContextReport,
 } from '../reporting_context_menu_helper';
 
 describe('reporting_context_menu_helper tests', () => {
@@ -52,7 +52,8 @@ describe('reporting_context_menu_helper tests', () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         status,
-        json: () => Promise.resolve({ filename, fileFormat, data: 'test-data' }),
+        json: () =>
+          Promise.resolve({ filename, fileFormat, data: 'test-data', reportId: 'test-id' }),
         text: () => Promise.resolve({ tenant }),
       })
     );
@@ -65,7 +66,7 @@ describe('reporting_context_menu_helper tests', () => {
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(200, 'test.csv', '__user__', setToast, toggleReportingLoadingModal);
     expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Successfully generated report.', 'success');
+    expect(setToast).toBeCalledWith('Please continue report generation in the new tab.', 'success');
   });
 
   it('generates pdf for global tenant', async () => {
@@ -73,7 +74,7 @@ describe('reporting_context_menu_helper tests', () => {
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(200, 'test.pdf', '', setToast, toggleReportingLoadingModal);
     expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Successfully generated report.', 'success');
+    expect(setToast).toBeCalledWith('Please continue report generation in the new tab.', 'success');
   });
 
   it('generates png for custom tenant', async () => {
@@ -81,15 +82,7 @@ describe('reporting_context_menu_helper tests', () => {
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(200, 'test.png', 'custom_tenant', setToast, toggleReportingLoadingModal);
     expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Successfully generated report.', 'success');
-  });
-
-  it('generates png for custom tenant', async () => {
-    const setToast = jest.fn();
-    const toggleReportingLoadingModal = jest.fn();
-    await generateReport(200, 'test.png', 'custom_tenant', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Successfully generated report.', 'success');
+    expect(setToast).toBeCalledWith('Please continue report generation in the new tab.', 'success');
   });
 
   it('handles 404 error', async () => {
@@ -132,7 +125,11 @@ describe('reporting_context_menu_helper tests', () => {
     global.fetch = jest.fn(() => Promise.reject({ status: 500 }));
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
-    await generateInContextReport('csv', { setToast }, toggleReportingLoadingModal);
+    try {
+      await generateInContextReport('csv', { setToast }, toggleReportingLoadingModal);
+    } catch (error) {
+      expect(error.status).toEqual(500);
+    }
     expect(toggleReportingLoadingModal).toBeCalledWith(true);
     expect(setToast).toBeCalledWith('Tenant error', 'danger', 'Failed to get user tenant.');
   });
