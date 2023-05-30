@@ -87,13 +87,23 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${OBSERVABILITY_BASE}/repository/id`,
-      validate: false,
+      path: `${INTEGRATIONS_BASE}/repository/{name}`,
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
-        return {};
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+        return {
+          data: (
+            await a.getIntegrationTemplates({
+              name: request.params.name,
+            })
+          ).hits[0],
+        };
       });
     }
   );
@@ -124,19 +134,6 @@ export function registerIntegrationsRoute(router: IRouter) {
           body: err.message,
         });
       }
-    }
-  );
-
-  router.get(
-    {
-      path: `${OBSERVABILITY_BASE}/store`,
-      validate: false,
-    },
-    async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (_a: IntegrationsAdaptor) => {
-        return {};
-      });
     }
   );
 

@@ -13,12 +13,16 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   }
 
   getIntegrationTemplates = async (
-    _query?: IntegrationTemplateQuery
+    query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
-    const repo = await this.repository.get();
-    console.log(`Retrieving ${repo.length} templates from catalog`);
+    if (query?.name) {
+      const result = await this.repository.getByName(query.name);
+      return Promise.resolve({ hits: [result] });
+    }
+    const result = await this.repository.get();
+    console.log(`Retrieving ${result.length} templates from catalog`);
     return Promise.resolve({
-      hits: repo,
+      hits: result,
     });
   };
 

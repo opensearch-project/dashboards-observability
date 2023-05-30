@@ -13,8 +13,8 @@ import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
 import { IntegrationAssets } from './integration_assets_panel';
 import { getAddIntegrationModal } from './add_integration_modal';
-import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationProps } from './integration_types';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function Integration(props: AvailableIntegrationProps) {
   const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
@@ -22,7 +22,9 @@ export function Integration(props: AvailableIntegrationProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [data, setData] = useState({ data: {} });
+  const [data, setData] = useState({
+    data: null,
+  });
 
   const getModal = (name: string) => {
     setModalLayout(
@@ -64,7 +66,10 @@ export function Integration(props: AvailableIntegrationProps) {
   }, [integrationTemplateId]);
 
   async function handleDataRequest() {
-    http.get(`${OBSERVABILITY_BASE}/repository/id`).then((exists) => setData(exists));
+    // TODO fill in ID request here
+    http.get(`${INTEGRATIONS_BASE}/repository/nginx`).then((exists) => {
+      setData(exists.data);
+    });
   }
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
@@ -74,7 +79,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   async function addIntegrationRequest(name: string) {
     http
-      .post(`${OBSERVABILITY_BASE}/store`)
+      .post(`${INTEGRATIONS_BASE}/store`)
       .then((res) => {
         setToast(
           `${name} integration successfully added!`,
@@ -90,6 +95,9 @@ export function Integration(props: AvailableIntegrationProps) {
       );
   }
 
+  if (!data.data) {
+    return <EuiPage>Loading...</EuiPage>;
+  }
   return (
     <EuiPage>
       <EuiGlobalToastList
