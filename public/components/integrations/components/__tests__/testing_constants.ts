@@ -1,3 +1,4 @@
+import { AddedIntegrationsTableProps } from '../added_integration_overview_page';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationsTableProps,
@@ -189,5 +190,157 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
     ],
   },
   showModal: () => {},
+  loading: false,
+};
+
+export const addedIntegrationData: AddedIntegrationsTableProps = {
+  data: {
+    hits: [
+      {
+        name: 'Placeholder Nginx Integration',
+        templateName: 'nginx',
+        dataSource: {
+          sourceType: 'logs',
+          dataset: 'nginx',
+          namespace: 'prod',
+        },
+        creationDate: '2023-05-30T14:56:30.139Z',
+        status: 'unknown',
+        assets: [
+          {
+            assetType: 'index-pattern',
+            assetId: '47892350-b495-11ed-af0a-cf5c93b5a3b6',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'search',
+            assetId: 'd80e05b2-518c-4c3d-9651-4c9d8632dce4',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '3b49a65d-54d8-483d-a8f0-3d7c855e1ecf',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'search',
+            assetId: '9f820fbe-ddde-43a2-9402-30bd295c97f6',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '865e577b-634b-4a65-b9d6-7e324c395d18',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: 'dc1803f0-b478-11ed-9063-ebe46f9ac203',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '99acc580-b47a-11ed-9063-ebe46f9ac203',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '01ea64d0-b62f-11ed-a677-43d7aa86763b',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'dashboard',
+            assetId: '96847220-5261-44d0-89b4-65f3a659f13a',
+            status: 'available',
+            isDefaultAsset: true,
+          },
+          {
+            status: 'available',
+            isDefaultAsset: false,
+          },
+        ],
+        addedBy: 'unknown',
+      },
+      {
+        name: 'Placeholder Nginx Integration',
+        templateName: 'nginx',
+        dataSource: {
+          sourceType: 'logs',
+          dataset: 'nginx',
+          namespace: 'prod',
+        },
+        creationDate: '2023-05-30T14:56:35.137Z',
+        status: 'unknown',
+        assets: [
+          {
+            assetType: 'index-pattern',
+            assetId: '47892350-b495-11ed-af0a-cf5c93b5a3b6',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'search',
+            assetId: 'd80e05b2-518c-4c3d-9651-4c9d8632dce4',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '3b49a65d-54d8-483d-a8f0-3d7c855e1ecf',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'search',
+            assetId: '9f820fbe-ddde-43a2-9402-30bd295c97f6',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '865e577b-634b-4a65-b9d6-7e324c395d18',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: 'dc1803f0-b478-11ed-9063-ebe46f9ac203',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '99acc580-b47a-11ed-9063-ebe46f9ac203',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'visualization',
+            assetId: '01ea64d0-b62f-11ed-a677-43d7aa86763b',
+            status: 'available',
+            isDefaultAsset: false,
+          },
+          {
+            assetType: 'dashboard',
+            assetId: '96847220-5261-44d0-89b4-65f3a659f13a',
+            status: 'available',
+            isDefaultAsset: true,
+          },
+          {
+            status: 'available',
+            isDefaultAsset: false,
+          },
+        ],
+        addedBy: 'unknown',
+      },
+    ],
+  },
   loading: false,
 };

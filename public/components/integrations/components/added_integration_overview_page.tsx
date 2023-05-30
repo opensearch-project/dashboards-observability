@@ -30,7 +30,13 @@ export interface AddedIntegrationsList {
 }
 
 export interface AddedIntegrationType {
-  dashboardUrl: string;
+  name: string;
+  templateName: string;
+  dataSource: any;
+  creationDate: string;
+  status: string;
+  assets: any[];
+  addedBy: string;
 }
 
 export function AddedIntegrationOverviewPage(props: AppTableProps) {
