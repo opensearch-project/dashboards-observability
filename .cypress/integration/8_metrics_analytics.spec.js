@@ -162,7 +162,7 @@ describe('Select and unselect metrics in sidebar', () => {
   });
 });
 
-describe.only('Test Metric Visualizations', () => {
+describe('Test Metric Visualizations', () => {
   beforeEach(() => {
     moveToMetricsHome();
     suppressResizeObserverIssue();
