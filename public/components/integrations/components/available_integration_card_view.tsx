@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
@@ -8,8 +13,6 @@ import {
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  const rowNumber = _.ceil(props.records / 5);
-
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {

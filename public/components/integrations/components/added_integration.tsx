@@ -24,83 +24,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import DSLService from 'public/services/requests/dsl';
-import PPLService from 'public/services/requests/ppl';
-import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
-import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { last } from 'lodash';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
-import { TAB_EVENT_ID, TAB_CHART_ID, FILTER_OPTIONS } from '../../../../common/constants/explorer';
-import { NotificationsStart } from '../../../../../../src/core/public';
-import { AppAnalyticsComponentDeps } from '../home';
-import {
-  ApplicationRequestType,
-  ApplicationType,
-} from '../../../../common/types/application_analytics';
-import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
+import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { DeleteModal } from '../../common/helpers/delete_modal';
+import { AddedIntegrationProps } from './integration_types';
 
-const searchBarConfigs = {
-  [TAB_EVENT_ID]: {
-    showSaveButton: false,
-    showSavePanelOptionsList: false,
-  },
-  [TAB_CHART_ID]: {
-    showSaveButton: true,
-    showSavePanelOptionsList: false,
-  },
-};
-
-interface AppDetailProps extends AppAnalyticsComponentDeps {
-  disabled?: boolean;
-  appId: string;
-  pplService: PPLService;
-  dslService: DSLService;
-  savedObjects: SavedObjects;
-  timestampUtils: TimestampUtils;
-  notifications: NotificationsStart;
-  queryManager: QueryManager;
-  updateApp: (appId: string, updateAppData: Partial<ApplicationRequestType>, type: string) => void;
-  callback: (childfunction: () => void) => void;
-}
-
-export function AddedIntegration(props: AppDetailProps) {
-  const {
-    pplService,
-    dslService,
-    timestampUtils,
-    savedObjects,
-    http,
-    notifications,
-    appId,
-    chrome,
-    parentBreadcrumbs,
-    query,
-    filters,
-    appConfigs,
-    updateApp,
-    setAppConfigs,
-    setFilters,
-    callback,
-    queryManager,
-    mode,
-  } = props;
-  const [application, setApplication] = useState<ApplicationType>({
-    id: '',
-    dateCreated: '',
-    dateModified: '',
-    name: '',
-    description: '',
-    baseQuery: '',
-    servicesEntities: [],
-    traceGroups: [],
-    panelId: '',
-    availability: { name: '', color: '', availabilityVisId: '' },
-  });
+export function AddedIntegration(props: AddedIntegrationProps) {
+  const { http, integrationInstanceId, chrome, parentBreadcrumbs } = props;
 
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [stateData, setData] = useState({ data: {} });
@@ -117,12 +52,12 @@ export function AddedIntegration(props: AppDetailProps) {
         href: '#/added',
       },
       {
-        text: appId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/added/${appId}`,
+        text: integrationInstanceId,
+        href: `${last(parentBreadcrumbs)!.href}integrations/added/${integrationInstanceId}`,
       },
     ]);
     handleDataRequest();
-  }, [appId]);
+  }, [integrationInstanceId]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);

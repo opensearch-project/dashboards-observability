@@ -15,35 +15,27 @@ import {
 import _ from 'lodash';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { AppAnalyticsComponentDeps } from '../home';
-import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { getAddIntegrationModal } from './add_integration_modal';
-
-interface AppTableProps extends AppAnalyticsComponentDeps {
-  loading: boolean;
-  applications: ApplicationType[];
-  fetchApplications: () => void;
-  renameApplication: (newAppName: string, appId: string) => void;
-  deleteApplication: (appList: string[], panelIdList: string[], toastMessage?: string) => void;
-  clearStorage: () => void;
-  moveToApp: (id: string, type: string) => void;
-}
+import { AvailableIntegrationOverviewPageProps } from './integration_types';
 
 export interface AvailableIntegrationType {
   name: string;
   description: string;
-  status: string;
   assetUrl?: string | undefined;
+  version?: string | undefined;
+  integrationType: string;
+  statics: any;
+  components: any[];
+  displayAssets: any[];
 }
 
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
-  records: number;
   showModal: (input: string) => void;
 }
 
@@ -53,11 +45,10 @@ export interface AvailableIntegrationsList {
 
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
-  records: number;
   showModal: (input: string) => void;
 }
 
-export function AvailableIntegrationOverviewPage(props: AppTableProps) {
+export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
   const { chrome, parentBreadcrumbs, http } = props;
 
   const [isCardView, setCardView] = useState(true);
@@ -151,8 +142,8 @@ export function AvailableIntegrationOverviewPage(props: AppTableProps) {
           />
         </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ data, records: 6, showModal: getModal })
-          : AvailableIntegrationsTable({ loading: false, data, records: 6, showModal: getModal })}
+          ? AvailableIntegrationsCardView({ data, showModal: getModal })
+          : AvailableIntegrationsTable({ loading: false, data, showModal: getModal })}
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>
