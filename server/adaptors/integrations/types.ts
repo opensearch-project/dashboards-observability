@@ -46,7 +46,7 @@ interface IntegrationTemplateSearchResult {
 }
 
 interface IntegrationTemplateQuery {
-  tags?: string[];
+  name?: string;
 }
 
 interface IntegrationInstance {

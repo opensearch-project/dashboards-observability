@@ -5,7 +5,7 @@ import { PanelTitle } from '../../trace_analytics/components/common/helper_funct
 export function IntegrationDetails(props: any) {
   let screenshots;
   if (props.data.data.statics.mapping.gallery) {
-    screenshots = props.data.data.statics.gallery;
+    screenshots = props.data.data.data.statics.gallery;
   }
 
   return (
