@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
-import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
+import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
 import {
   OpenSearchDashboardsRequest,
