@@ -4,7 +4,14 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiGlobalToastList, EuiOverlayMask, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import {
+  EuiGlobalToastList,
+  EuiLoadingSpinner,
+  EuiOverlayMask,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { last } from 'lodash';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
@@ -96,7 +103,7 @@ export function Integration(props: AvailableIntegrationProps) {
   }
 
   if (!data.data) {
-    return <EuiPage>Loading...</EuiPage>;
+    return <EuiLoadingSpinner />;
   }
   return (
     <EuiPage>
