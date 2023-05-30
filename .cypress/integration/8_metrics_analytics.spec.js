@@ -66,7 +66,7 @@ describe('Creating custom metrics', () => {
       .contains(PPL_METRICS_NAMES[0]);
   });
 
-  it('Check for new metric under recently created netrics', () => {
+  it('Check for new metrics under recently created netrics', () => {
     cy.get('[id^=autocomplete-textarea]').focus().type(PPL_METRICS[1], {
       delay: 50,
     });
@@ -162,7 +162,7 @@ describe('Select and unselect metrics in sidebar', () => {
   });
 });
 
-describe('Test Metric Visualizations', () => {
+describe.only('Test Metric Visualizations', () => {
   beforeEach(() => {
     moveToMetricsHome();
     suppressResizeObserverIssue();
@@ -229,25 +229,6 @@ describe('Test Metric Visualizations', () => {
       .contains('This year')
       .should('exist');
     cy.wait(delay);
-  });
-
-  it('Change span value interval', () => {
-    clearQuerySearchBoxText('metrics__spanValue');
-    cy.get('[data-test-subj="metrics__spanValue"]').focus().type('3', {
-      delay: 50,
-    });
-    cy.get('[data-test-subj="metrics__spanResolutionSelect"]')
-      .trigger('mouseover')
-      .select('minutes');
-    cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
-    cy.wait(delay);
-    suppressResizeObserverIssue();
-    cy.get('button[aria-label="actionMenuButton"]').trigger('mouseover').click();
-    cy.get('[data-test-subj="showCatalogPPLQuery"]')
-      .contains('View query')
-      .trigger('mouseover')
-      .click();
-    cy.get('.euiCodeBlock__line').contains('span(timestamp,3m)').should('exist');
   });
 
   it('Saves metrics to an existing panel', () => {

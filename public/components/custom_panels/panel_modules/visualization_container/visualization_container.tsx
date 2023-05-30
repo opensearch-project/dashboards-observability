@@ -212,7 +212,7 @@ export const VisualizationContainer = ({
   ];
 
   if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0], showModelPanel];
+    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
   }
 
   const loadVisaulization = async () => {
