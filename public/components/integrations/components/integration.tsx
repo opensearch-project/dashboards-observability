@@ -61,8 +61,8 @@ export function Integration(props: AvailableIntegrationProps) {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/integrations',
+        text: 'Integrations',
+        href: '#/',
       },
       {
         text: integrationTemplateId,

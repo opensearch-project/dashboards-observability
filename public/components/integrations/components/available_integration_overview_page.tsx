@@ -86,8 +86,8 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/integrations',
+        text: 'Integrations',
+        href: '#/',
       },
     ]);
     handleDataRequest();

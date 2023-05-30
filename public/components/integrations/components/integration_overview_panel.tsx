@@ -48,6 +48,7 @@ export function IntegrationOverview(props: any) {
                 onClick={() => {
                   props.getModal(data.data.name);
                 }}
+                fill
               >
                 Add
               </EuiButton>

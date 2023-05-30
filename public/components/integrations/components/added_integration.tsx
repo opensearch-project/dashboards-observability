@@ -44,16 +44,16 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/integrations',
+        text: 'Integrations',
+        href: '#/',
       },
       {
-        text: 'Added Integration',
-        href: '#/added',
+        text: 'Installed Integration',
+        href: '#/installed',
       },
       {
         text: integrationInstanceId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/added/${integrationInstanceId}`,
+        href: `${last(parentBreadcrumbs)!.href}integrations/installed/${integrationInstanceId}`,
       },
     ]);
     handleDataRequest();
