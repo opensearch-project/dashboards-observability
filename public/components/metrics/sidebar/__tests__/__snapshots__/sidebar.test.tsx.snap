@@ -112,6 +112,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
             className="sidebarHeight"
           >
             <Component
+              dataTestSubj="metricsListItems_recentlyCreated"
               handleClick={[Function]}
               headerName="Recently Created Metrics"
               metricsList={Array []}
@@ -223,6 +224,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
               />
             </EuiSpacer>
             <Component
+              dataTestSubj="metricsListItems_selectedMetrics"
               handleClick={[Function]}
               headerName="Selected Metrics"
               metricsList={Array []}
@@ -334,6 +336,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
               />
             </EuiSpacer>
             <Component
+              dataTestSubj="metricsListItems_availableMetrics"
               handleClick={[Function]}
               headerName="Available Metrics"
               metricsList={Array []}
