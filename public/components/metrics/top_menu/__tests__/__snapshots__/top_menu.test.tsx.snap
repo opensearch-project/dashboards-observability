@@ -81,6 +81,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
             <Component>
               <div
                 className="metrics-search-bar-input"
+                data-test-subj="metricsSearch"
               >
                 <EuiSearchBar
                   box={
@@ -228,6 +229,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                   <EuiSelect
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
+                    data-test-subj="metrics__spanResolutionSelect"
                     id="select_123"
                     onChange={[Function]}
                     options={
@@ -259,6 +261,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                 }
                 aria-label="resolutionField"
                 className="resolutionSelectText"
+                data-test-subj="metrics__spanValue"
                 disabled={true}
                 isInvalid={false}
                 onChange={[Function]}
@@ -270,6 +273,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                     <EuiSelect
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
+                      data-test-subj="metrics__spanResolutionSelect"
                       id="select_123"
                       onChange={[Function]}
                       options={
@@ -323,6 +327,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                         <input
                           aria-label="resolutionField"
                           className="euiFieldText resolutionSelectText euiFieldText--inGroup"
+                          data-test-subj="metrics__spanValue"
                           disabled={true}
                           onChange={[Function]}
                           type="text"
@@ -334,6 +339,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                     <EuiSelect
                       aria-label="resolutionSelect"
                       className="euiFormControlLayout__append resolutionSelectOption"
+                      data-test-subj="metrics__spanResolutionSelect"
                       id="select_123"
                       key="0/.0"
                       onChange={[Function]}
@@ -385,6 +391,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                               <select
                                 aria-label="resolutionSelect"
                                 className="euiSelect euiFormControlLayout__append resolutionSelectOption"
+                                data-test-subj="metrics__spanResolutionSelect"
                                 id="select_123"
                                 onChange={[Function]}
                                 onMouseUp={[Function]}
@@ -1247,12 +1254,14 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <EuiButton
+              data-test-subj="metrics__saveView"
               iconType="save"
               onClick={[Function]}
               size="s"
             >
               <EuiButtonDisplay
                 baseClassName="euiButton"
+                data-test-subj="metrics__saveView"
                 disabled={false}
                 element="button"
                 iconType="save"
@@ -1263,6 +1272,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
               >
                 <button
                   className="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="metrics__saveView"
                   disabled={false}
                   onClick={[Function]}
                   style={
@@ -1380,6 +1390,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
             <Component>
               <div
                 className="metrics-search-bar-input"
+                data-test-subj="metricsSearch"
               >
                 <EuiSearchBar
                   box={
@@ -1527,6 +1538,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                   <EuiSelect
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
+                    data-test-subj="metrics__spanResolutionSelect"
                     id="select_123"
                     onChange={[Function]}
                     options={
@@ -1558,6 +1570,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                 }
                 aria-label="resolutionField"
                 className="resolutionSelectText"
+                data-test-subj="metrics__spanValue"
                 disabled={true}
                 isInvalid={false}
                 onChange={[Function]}
@@ -1569,6 +1582,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                     <EuiSelect
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
+                      data-test-subj="metrics__spanResolutionSelect"
                       id="select_123"
                       onChange={[Function]}
                       options={
@@ -1622,6 +1636,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                         <input
                           aria-label="resolutionField"
                           className="euiFieldText resolutionSelectText euiFieldText--inGroup"
+                          data-test-subj="metrics__spanValue"
                           disabled={true}
                           onChange={[Function]}
                           type="text"
@@ -1633,6 +1648,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                     <EuiSelect
                       aria-label="resolutionSelect"
                       className="euiFormControlLayout__append resolutionSelectOption"
+                      data-test-subj="metrics__spanResolutionSelect"
                       id="select_123"
                       key="0/.0"
                       onChange={[Function]}
@@ -1684,6 +1700,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                               <select
                                 aria-label="resolutionSelect"
                                 className="euiSelect euiFormControlLayout__append resolutionSelectOption"
+                                data-test-subj="metrics__spanResolutionSelect"
                                 id="select_123"
                                 onChange={[Function]}
                                 onMouseUp={[Function]}
@@ -2461,6 +2478,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <EuiButton
+              data-test-subj="metrics__editView"
               iconType="pencil"
               isDisabled={true}
               onClick={[Function]}
@@ -2468,6 +2486,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
             >
               <EuiButtonDisplay
                 baseClassName="euiButton"
+                data-test-subj="metrics__editView"
                 disabled={true}
                 element="button"
                 iconType="pencil"
@@ -2478,6 +2497,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
               >
                 <button
                   className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                  data-test-subj="metrics__editView"
                   disabled={true}
                   onClick={[Function]}
                   style={
@@ -2629,6 +2649,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
             <Component>
               <div
                 className="metrics-search-bar-input"
+                data-test-subj="metricsSearch"
               >
                 <EuiSearchBar
                   box={
@@ -2772,6 +2793,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                   <EuiSelect
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
+                    data-test-subj="metrics__spanResolutionSelect"
                     id="select_123"
                     onChange={[Function]}
                     options={
@@ -2803,6 +2825,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                 }
                 aria-label="resolutionField"
                 className="resolutionSelectText"
+                data-test-subj="metrics__spanValue"
                 disabled={false}
                 isInvalid={false}
                 onChange={[Function]}
@@ -2814,6 +2837,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                     <EuiSelect
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
+                      data-test-subj="metrics__spanResolutionSelect"
                       id="select_123"
                       onChange={[Function]}
                       options={
@@ -2867,6 +2891,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                         <input
                           aria-label="resolutionField"
                           className="euiFieldText resolutionSelectText euiFieldText--inGroup"
+                          data-test-subj="metrics__spanValue"
                           disabled={false}
                           onChange={[Function]}
                           type="text"
@@ -2878,6 +2903,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                     <EuiSelect
                       aria-label="resolutionSelect"
                       className="euiFormControlLayout__append resolutionSelectOption"
+                      data-test-subj="metrics__spanResolutionSelect"
                       id="select_123"
                       key="0/.0"
                       onChange={[Function]}
@@ -2929,6 +2955,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                               <select
                                 aria-label="resolutionSelect"
                                 className="euiSelect euiFormControlLayout__append resolutionSelectOption"
+                                data-test-subj="metrics__spanResolutionSelect"
                                 id="select_123"
                                 onChange={[Function]}
                                 onMouseUp={[Function]}
@@ -3676,6 +3703,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <EuiButton
+              data-test-subj="metrics__editView"
               iconType="pencil"
               isDisabled={false}
               onClick={[Function]}
@@ -3683,6 +3711,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
             >
               <EuiButtonDisplay
                 baseClassName="euiButton"
+                data-test-subj="metrics__editView"
                 disabled={false}
                 element="button"
                 iconType="pencil"
@@ -3693,6 +3722,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
               >
                 <button
                   className="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="metrics__editView"
                   disabled={false}
                   onClick={[Function]}
                   style={
