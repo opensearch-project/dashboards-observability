@@ -13,8 +13,6 @@ import {
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  const rowNumber = _.ceil(props.records / 5);
-
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
