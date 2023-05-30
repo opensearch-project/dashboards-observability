@@ -264,6 +264,21 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         "http": [MockFunction],
       }
     }
+    setEditActionType={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
     setPanelVisualizations={[MockFunction]}
     spanParam="1h"
     startTime="now-30m"
