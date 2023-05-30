@@ -10,16 +10,13 @@ import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from 'public/services/timestamp/timestamp';
-import { EuiGlobalToastList, EuiLink } from '@elastic/eui';
+import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { last } from 'lodash';
-import { useDispatch } from 'react-redux';
 import { Integration } from './components/integration';
 import { TraceAnalyticsComponentDeps, TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { FilterType } from '../trace_analytics/components/common/filters/filters';
 import { handleDataPrepperIndicesExistRequest } from '../trace_analytics/requests/request_handler';
 import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
-import { ApplicationType } from '../../../common/types/application_analytics';
 import { QueryManager } from '../../../common/query_manager/ppl_query_manager';
 import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { Sidebar } from './components/integration_side_nav';
@@ -62,8 +59,6 @@ export const Home = (props: HomeProps) => {
     queryManager,
   } = props;
   const [triggerSwitchToEvent, setTriggerSwitchToEvent] = useState(0);
-  const dispatch = useDispatch();
-  const [applicationList, setApplicationList] = useState<ApplicationType[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [indicesExist, setIndicesExist] = useState(true);
   const [appConfigs, setAppConfigs] = useState<FilterType[]>([]);
@@ -134,20 +129,6 @@ export const Home = (props: HomeProps) => {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const clearStorage = () => {
-    setNameWithStorage('');
-    setDescriptionWithStorage('');
-    setFiltersWithStorage([]);
-    setQueryWithStorage('');
-  };
-
-  const moveToApp = (id: string, type: string) => {
-    window.location.assign(`${last(parentBreadcrumbs)!.href}application_analytics/${id}`);
-    if (type === 'createSetAvailability') {
-      setTriggerSwitchToEvent(2);
-    }
-  };
-
   const callback = (childFunc: () => void) => {
     if (childFunc && triggerSwitchToEvent > 0) {
       childFunc();
@@ -171,13 +152,7 @@ export const Home = (props: HomeProps) => {
             path={['/', '/available']}
             render={() => (
               <Sidebar>
-                <AvailableIntegrationOverviewPage
-                  loading={false}
-                  applications={applicationList}
-                  clearStorage={clearStorage}
-                  moveToApp={moveToApp}
-                  {...commonProps}
-                />
+                <AvailableIntegrationOverviewPage {...commonProps} />
               </Sidebar>
             )}
           />
@@ -186,13 +161,7 @@ export const Home = (props: HomeProps) => {
             path={'/added'}
             render={() => (
               <Sidebar>
-                <AddedIntegrationOverviewPage
-                  loading={false}
-                  applications={applicationList}
-                  clearStorage={clearStorage}
-                  moveToApp={moveToApp}
-                  {...commonProps}
-                />
+                <AddedIntegrationOverviewPage {...commonProps} />
               </Sidebar>
             )}
           />

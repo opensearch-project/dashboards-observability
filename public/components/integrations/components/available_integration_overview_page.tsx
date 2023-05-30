@@ -15,20 +15,12 @@ import {
 import _ from 'lodash';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { AppAnalyticsComponentDeps } from '../home';
-import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { getAddIntegrationModal } from './add_integration_modal';
-
-interface AppTableProps extends AppAnalyticsComponentDeps {
-  loading: boolean;
-  applications: ApplicationType[];
-  clearStorage: () => void;
-  moveToApp: (id: string, type: string) => void;
-}
+import { AvailableIntegrationOverviewPageProps } from './integration_types';
 
 export interface AvailableIntegrationType {
   name: string;
@@ -56,7 +48,7 @@ export interface AvailableIntegrationsCardViewProps {
   showModal: (input: string) => void;
 }
 
-export function AvailableIntegrationOverviewPage(props: AppTableProps) {
+export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
   const { chrome, parentBreadcrumbs, http } = props;
 
   const [isCardView, setCardView] = useState(true);

@@ -7,18 +7,10 @@
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { AppAnalyticsComponentDeps } from '../home';
-import { ApplicationType } from '../../../../common/types/application_analytics';
 import { IntegrationHeader } from './integration_header';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-
-export interface AppTableProps extends AppAnalyticsComponentDeps {
-  loading: boolean;
-  applications: ApplicationType[];
-  clearStorage: () => void;
-  moveToApp: (id: string, type: string) => void;
-}
+import { AddedIntegrationOverviewPageProps } from './integration_types';
 
 export interface AddedIntegrationsTableProps {
   loading: boolean;
@@ -39,7 +31,7 @@ export interface AddedIntegrationType {
   addedBy: string;
 }
 
-export function AddedIntegrationOverviewPage(props: AppTableProps) {
+export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
   const { chrome, parentBreadcrumbs, http } = props;
 
   const [data, setData] = useState<AddedIntegrationsList>({ hits: [] });
