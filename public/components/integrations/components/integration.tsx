@@ -5,54 +5,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiGlobalToastList, EuiOverlayMask, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import DSLService from 'public/services/requests/dsl';
-import PPLService from 'public/services/requests/ppl';
-import SavedObjects from 'public/services/saved_objects/event_analytics/saved_objects';
-import TimestampUtils from 'public/services/timestamp/timestamp';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { last } from 'lodash';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { TAB_EVENT_ID, TAB_CHART_ID, NEW_TAB } from '../../../../common/constants/explorer';
-import { NotificationsStart } from '../../../../../../src/core/public';
-import { AppAnalyticsComponentDeps } from '../home';
-import {
-  ApplicationRequestType,
-  ApplicationType,
-} from '../../../../common/types/application_analytics';
-import { QueryManager } from '../../../../common/query_manager/ppl_query_manager';
 import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
 import { IntegrationAssets } from './integration_assets_panel';
 import { getAddIntegrationModal } from './add_integration_modal';
 import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { AvailableIntegrationProps } from './integration_types';
 
-const searchBarConfigs = {
-  [TAB_EVENT_ID]: {
-    showSaveButton: false,
-    showSavePanelOptionsList: false,
-  },
-  [TAB_CHART_ID]: {
-    showSaveButton: true,
-    showSavePanelOptionsList: false,
-  },
-};
-
-interface AppDetailProps extends AppAnalyticsComponentDeps {
-  disabled?: boolean;
-  appId: string;
-  pplService: PPLService;
-  dslService: DSLService;
-  savedObjects: SavedObjects;
-  timestampUtils: TimestampUtils;
-  notifications: NotificationsStart;
-  queryManager: QueryManager;
-  updateApp: (appId: string, updateAppData: Partial<ApplicationRequestType>, type: string) => void;
-  callback: (childfunction: () => void) => void;
-}
-
-export function Integration(props: AppDetailProps) {
-  const { http, appId, chrome, parentBreadcrumbs } = props;
+export function Integration(props: AvailableIntegrationProps) {
+  const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
@@ -91,12 +56,12 @@ export function Integration(props: AppDetailProps) {
         href: '#/integrations',
       },
       {
-        text: appId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/${appId}`,
+        text: integrationTemplateId,
+        href: `${last(parentBreadcrumbs)!.href}integrations/${integrationTemplateId}`,
       },
     ]);
     handleDataRequest();
-  }, [appId]);
+  }, [integrationTemplateId]);
 
   async function handleDataRequest() {
     http.get(`${OBSERVABILITY_BASE}/repository/id`).then((exists) => setData(exists));
