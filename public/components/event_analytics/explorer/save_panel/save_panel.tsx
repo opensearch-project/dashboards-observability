@@ -91,6 +91,7 @@ export const SavePanel = ({
                 };
               })}
               isClearable={true}
+              singleSelection={{ asPlainText: true }}
               data-test-subj="eventExplorer__querySaveComboBox"
             />
           </EuiFormRow>
@@ -121,6 +122,7 @@ export const SavePanel = ({
                 onChange={onToggleChange}
                 compressed
                 disabled={!isSaveAsMetricEnabled}
+                data-test-subj="eventExplorer__metricSaveName"
               />
             </EuiToolTip>
           </EuiFormRow>
