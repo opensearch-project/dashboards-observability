@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as fs from 'fs';
 
 const DEFAULT_REPOSITORY_PATH: string = __dirname + '/__data__/repository.json';

@@ -36,7 +36,7 @@ export const handleWithCallback = async (
 ): Promise<any> => {
   try {
     const data = await callback(adaptor);
-    console.log(`handleWithCallback: callback returned ${data.toString().length} bytes`);
+    // console.log(`handleWithCallback: callback returned ${data.toString().length} bytes`);
     return response.ok({
       body: {
         data,
@@ -164,4 +164,51 @@ export function registerIntegrationsRoute(router: IRouter) {
       });
     }
   );
+
+  router.get(
+    {
+      path: `${INTEGRATIONS_BASE}/store/{id}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      console.log(request);
+      console.log(request.params.id);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+        return {
+          data: await a.getIntegrationInstance({
+            added,
+            id: request.params.id,
+          }),
+        };
+      });
+    }
+  );
+
+  // router.get(
+  //   {
+  //     path: `${INTEGRATIONS_BASE}/repository/{name}`,
+  //     validate: {
+  //       params: schema.object({
+  //         name: schema.string(),
+  //       }),
+  //     },
+  //   },
+  //   async (context, request, response): Promise<any> => {
+  //     const adaptor = getAdaptor(context, request);
+  //     return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+  //       return {
+  //         data: (
+  //           await a.getIntegrationTemplates({
+  //             name: request.params.name,
+  //           })
+  //         ).hits[0],
+  //       };
+  //     });
+  //   }
+  // );
 }

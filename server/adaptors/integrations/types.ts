@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 interface IntegrationTemplate {
   name: string;
   version: string;
@@ -64,6 +69,22 @@ interface IntegrationInstance {
   assets: AssetReference[];
 }
 
+interface IntegrationInstanceResult {
+  name: string;
+  templateName: string;
+  dataSource: {
+    sourceType: string;
+    dataset: string;
+    namespace: string;
+  };
+  creationDate: Date;
+  tags?: string[];
+  status: string;
+  addedBy?: string;
+  assets: AssetReference[];
+  id: string;
+}
+
 interface AssetReference {
   assetType: string;
   assetId: string;
@@ -71,10 +92,11 @@ interface AssetReference {
   isDefaultAsset: boolean;
 }
 
-interface IntegrationInstanceSearchResult {
-  hits: IntegrationInstance[];
+interface IntegrationInstancesSearchResult {
+  hits: IntegrationInstanceResult[];
 }
 
 interface IntegrationInstanceQuery {
   added?: boolean;
+  id?: string;
 }

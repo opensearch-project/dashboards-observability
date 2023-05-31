@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 

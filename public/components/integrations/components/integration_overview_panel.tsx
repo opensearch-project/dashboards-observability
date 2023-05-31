@@ -27,7 +27,7 @@ export function IntegrationOverview(props: any) {
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }}>
       <img
-        src={`${INTEGRATIONS_BASE}/repository/nginx/static/logo`}
+        src={`${INTEGRATIONS_BASE}/repository/${data.data.name}/static/logo`}
         alt="React Logo"
         style={{ height: 53, width: 53 }}
       />
@@ -44,7 +44,7 @@ export function IntegrationOverview(props: any) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
-                size="s"
+                size="m"
                 onClick={() => {
                   props.getModal(data.data.name);
                 }}

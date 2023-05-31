@@ -22,6 +22,7 @@ import { IntegrationAssets } from './integration_assets_panel';
 import { getAddIntegrationModal } from './add_integration_modal';
 import { AvailableIntegrationProps } from './integration_types';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { IntegrationScreenshots } from './integration_screenshots_panel';
 
 export function Integration(props: AvailableIntegrationProps) {
   const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
@@ -74,7 +75,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   async function handleDataRequest() {
     // TODO fill in ID request here
-    http.get(`${INTEGRATIONS_BASE}/repository/nginx`).then((exists) => {
+    http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`).then((exists) => {
       setData(exists.data);
     });
   }
@@ -119,6 +120,8 @@ export function Integration(props: AvailableIntegrationProps) {
         {IntegrationOverview({ data, getModal })}
         <EuiSpacer />
         {IntegrationDetails({ data })}
+        <EuiSpacer />
+        {IntegrationScreenshots({ data })}
         <EuiSpacer />
         {IntegrationAssets({ data })}
         <EuiSpacer />

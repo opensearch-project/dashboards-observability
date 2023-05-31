@@ -29,6 +29,7 @@ export interface AddedIntegrationType {
   status: string;
   assets: any[];
   addedBy: string;
+  id: string;
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
