@@ -38,7 +38,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   const { http, integrationInstanceId, chrome, parentBreadcrumbs } = props;
 
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [stateData, setData] = useState({ data: {} });
+  const [stateData, setData] = useState<any>({ data: {} });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -52,12 +52,12 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         href: '#/installed',
       },
       {
-        text: integrationInstanceId,
-        href: `#/installed/${integrationInstanceId}`,
+        text: `${stateData.data.data?.name}`,
+        href: `#/installed/${stateData.data.data?.id}`,
       },
     ]);
     handleDataRequest();
-  }, [integrationInstanceId]);
+  }, [integrationInstanceId, stateData.data.data?.name]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
@@ -100,6 +100,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
+                  fill
                   size="s"
                   onClick={() => {
                     getModal();

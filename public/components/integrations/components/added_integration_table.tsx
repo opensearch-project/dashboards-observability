@@ -97,7 +97,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
-  const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
+  const FILTER_OPTIONS = ['logs'];
 
   const search = {
     box: {
@@ -117,7 +117,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       },
     ],
   };
-  console.log(integrations);
 
   return (
     <EuiPageContent id="addedIntegrationsArea">

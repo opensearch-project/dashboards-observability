@@ -22,7 +22,7 @@ export function IntegrationScreenshots(props: any) {
           return (
             <EuiFlexItem key={v}>
               <img
-                style={{ width: 100, height: 100 }}
+                style={{ width: 300, height: 300 }}
                 alt=""
                 className="synopsisIcon"
                 src={`${INTEGRATIONS_BASE}/repository/${props.data.data.name}/static/logo`}

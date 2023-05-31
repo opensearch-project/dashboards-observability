@@ -12,8 +12,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
-import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
+
+const FILTER_OPTIONS = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
 export function IntegrationAssets(props: any) {
   const data = props.data.data.displayAssets.map((x: any) => JSON.parse(x.body)) || [];

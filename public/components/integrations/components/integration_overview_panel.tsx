@@ -42,7 +42,7 @@ export function IntegrationOverview(props: any) {
                 </EuiLink>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 size="m"
                 onClick={() => {
