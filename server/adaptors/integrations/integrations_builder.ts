@@ -24,9 +24,18 @@ export class IntegrationInstanceBuilder {
     return result;
   }
 
-  async validate(_template: IntegrationTemplate): Promise<void> {
+  async validate(template: IntegrationTemplate): Promise<void> {
     // Assuming everything is valid for now
+    if (!this.is_integration_template(template)) {
+      return Promise.reject(
+        'Provided template does not have the parameters of a valid IntegrationTemplate'
+      );
+    }
     return Promise.resolve();
+  }
+
+  is_integration_template(template: any): template is IntegrationTemplate {
+    return template && template.name && typeof template.name === 'string';
   }
 
   async post_assets(assets: DisplayAsset[]): Promise<AssetReference[]> {
