@@ -94,12 +94,17 @@ describe('IntegrationInstanceBuilder', () => {
     );
   });
 
-  it('should not reject on validation a valid template', async () => {
+  it('should not reject validating a valid template', async () => {
     // Placeholder template for now -- fill in when validation is implemented
     const template = { name: 'Template 1' } as IntegrationTemplate;
 
     const result = await builder.validate(template);
 
     expect(result).toBeUndefined();
+  });
+
+  it('should reject an empty object', async () => {
+    const template = {} as IntegrationTemplate;
+    await expect(builder.validate(template)).rejects.toBeTruthy();
   });
 });
