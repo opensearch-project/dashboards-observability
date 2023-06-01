@@ -17,6 +17,10 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     this.client = client;
     this.repository = repository ?? new IntegrationsRepository();
   }
+  deleteIntegrationInstance = async (id: string): Promise<any> => {
+    const result = await this.client.delete('integration-instance', id);
+    return Promise.resolve(result);
+  };
 
   getIntegrationTemplates = async (
     query?: IntegrationTemplateQuery

@@ -146,19 +146,6 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${INTEGRATIONS_BASE}/store`,
-      validate: false,
-    },
-    async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return await a.getIntegrationTemplates();
-      });
-    }
-  );
-
-  router.get(
-    {
       path: `${INTEGRATIONS_BASE}/store/list_added`,
       validate: false,
     },
@@ -168,6 +155,25 @@ export function registerIntegrationsRoute(router: IRouter) {
         return await a.getIntegrationInstances({
           added,
         });
+      });
+    }
+  );
+
+  router.delete(
+    {
+      path: `${INTEGRATIONS_BASE}/store/{id}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+        return {
+          data: await a.deleteIntegrationInstance(request.params.id),
+        };
       });
     }
   );

@@ -16,5 +16,7 @@ export interface IntegrationsAdaptor {
 
   loadIntegrationInstance: (templateName: string, name: string) => Promise<IntegrationInstance>;
 
+  deleteIntegrationInstance: (id: string) => Promise<any>;
+
   getStatic: (templateName: string, path: string) => Promise<StaticAsset>;
 }

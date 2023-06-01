@@ -33,11 +33,13 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AddedIntegrationProps } from './integration_types';
+import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegration(props: AddedIntegrationProps) {
   const { http, integrationInstanceId, chrome, parentBreadcrumbs } = props;
 
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const { setToast } = useToast();
+
   const [stateData, setData] = useState<any>({ data: {} });
 
   useEffect(() => {
@@ -67,6 +69,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
       <DeleteModal
         onConfirm={() => {
           setIsModalVisible(false);
+          deleteAddedIntegration(integrationInstanceId);
         }}
         onCancel={() => {
           setIsModalVisible(false);
@@ -77,6 +80,13 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     );
     setIsModalVisible(true);
   };
+
+  async function deleteAddedIntegration(integrationInstance: string) {
+    http.delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`).then(() => {
+      setToast(`${stateData.data.data?.name} integration successfully deleted!`, 'success');
+      window.location.hash = '#/installed';
+    });
+  }
 
   async function handleDataRequest() {
     http
@@ -315,13 +325,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   return (
     <EuiPage>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        toastLifeTimeMs={6000}
-      />
       <EuiPageBody>
         <EuiSpacer size="xl" />
         {AddedOverview({ stateData })}
