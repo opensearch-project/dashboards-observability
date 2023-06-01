@@ -55,11 +55,14 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return Promise.resolve(savedObjectToIntegrationInstance(result));
   };
 
-  loadIntegrationInstance = async (templateName: string): Promise<IntegrationInstance> => {
+  loadIntegrationInstance = async (
+    templateName: string,
+    name: string
+  ): Promise<IntegrationInstance> => {
     const template = await this.repository.getByName(templateName);
     try {
       const result = await new IntegrationInstanceBuilder(this.client).build(template, {
-        name: 'Placeholder Nginx Integration',
+        name,
         dataset: 'nginx',
         namespace: 'prod',
       });

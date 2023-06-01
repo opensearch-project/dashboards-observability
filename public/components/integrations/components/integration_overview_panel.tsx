@@ -46,7 +46,7 @@ export function IntegrationOverview(props: any) {
               <EuiButton
                 size="m"
                 onClick={() => {
-                  props.getModal(data.data.name);
+                  props.showFlyout(data.data.name);
                 }}
                 fill
               >

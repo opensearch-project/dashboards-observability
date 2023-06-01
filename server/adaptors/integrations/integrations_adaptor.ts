@@ -14,7 +14,7 @@ export interface IntegrationsAdaptor {
 
   getIntegrationInstance: (query?: IntegrationInstanceQuery) => Promise<IntegrationInstanceResult>;
 
-  loadIntegrationInstance: (templateName: string) => Promise<IntegrationInstance>;
+  loadIntegrationInstance: (templateName: string, name: string) => Promise<IntegrationInstance>;
 
   getStatic: (templateName: string, path: string) => Promise<StaticAsset>;
 }

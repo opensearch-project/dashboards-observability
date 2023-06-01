@@ -69,7 +69,10 @@ describe('IntegrationsKibanaBackend', () => {
       .spyOn(IntegrationInstanceBuilder.prototype, 'build')
       .mockImplementationOnce(builderMock.build);
 
-    const result = await backend.loadIntegrationInstance(templateName);
+    const result = await backend.loadIntegrationInstance(
+      templateName,
+      'Placeholder Nginx Integration'
+    );
 
     expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
     expect(builderMock.build).toHaveBeenCalledWith(template, {
@@ -93,7 +96,7 @@ describe('IntegrationsKibanaBackend', () => {
       .spyOn(IntegrationInstanceBuilder.prototype, 'build')
       .mockImplementationOnce(builderMock.build);
 
-    await expect(backend.loadIntegrationInstance(templateName)).rejects.toEqual({
+    await expect(backend.loadIntegrationInstance(templateName, 'test')).rejects.toEqual({
       message: errorMessage,
       statusCode: 500,
     });

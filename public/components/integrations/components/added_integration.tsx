@@ -106,7 +106,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                     getModal();
                   }}
                 >
-                  Delete
+                  Remove Integration
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

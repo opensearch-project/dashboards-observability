@@ -74,13 +74,20 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.post(
     {
-      path: `${INTEGRATIONS_BASE}/store`,
-      validate: false,
+      path: `${INTEGRATIONS_BASE}/store/{templateName}`,
+      validate: {
+        params: schema.object({
+          templateName: schema.string(),
+        }),
+        body: schema.object({
+          name: schema.string(),
+        }),
+      },
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return a.loadIntegrationInstance('nginx');
+        return a.loadIntegrationInstance(request.params.templateName, request.body.name);
       });
     }
   );
