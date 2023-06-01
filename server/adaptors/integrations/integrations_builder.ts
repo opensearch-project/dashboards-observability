@@ -1,4 +1,5 @@
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
+import { templateValidator } from './validators';
 
 interface BuilderOptions {
   name: string;
@@ -25,13 +26,16 @@ export class IntegrationInstanceBuilder {
   }
 
   async validate(template: IntegrationTemplate): Promise<void> {
-    // Assuming everything is valid for now
-    if (!this.is_integration_template(template)) {
-      return Promise.reject(
-        'Provided template does not have the parameters of a valid IntegrationTemplate'
-      );
+    if (templateValidator(template)) {
+      return Promise.resolve();
     }
-    return Promise.resolve();
+    return Promise.reject({
+      status: 400,
+      message: templateValidator.errors
+        ?.filter((e) => e.message)
+        .map((e) => e.message)
+        .join(', '),
+    });
   }
 
   is_integration_template(template: any): template is IntegrationTemplate {
