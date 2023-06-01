@@ -39,12 +39,14 @@ export class IntegrationInstanceBuilder {
     try {
       const deserializedAssets = assets.map((asset) => JSON.parse(asset.body));
       const response = await this.client.bulkCreate(deserializedAssets);
-      const refs: AssetReference[] = response.saved_objects.map((obj) => {
+      console.log('bAWIEHIOGHIAORHGIOAEHRG' + JSON.stringify(response));
+      const refs: AssetReference[] = response.saved_objects.map((obj: any) => {
         return {
           assetType: obj.type,
           assetId: obj.id,
           status: 'available', // Assuming a successfully created object is available
           isDefaultAsset: obj.type === 'dashboard', // Assuming for now that dashboards are default
+          description: obj.attributes.title,
         };
       });
       return Promise.resolve(refs);

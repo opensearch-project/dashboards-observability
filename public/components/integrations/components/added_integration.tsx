@@ -95,11 +95,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   }
 
   function AddedOverview(overviewProps: any) {
-    let data: any = {};
-    if (overviewProps?.data?.data) {
-      data = overviewProps.data.data;
-    }
-    console.log(data);
+    const { data } = overviewProps.data;
 
     return (
       <EuiPageHeader style={{ justifyContent: 'center' }}>
@@ -109,7 +105,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                  <EuiText>{data?.id}</EuiText>
+                  <h1>{data?.data?.name}</h1>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -156,7 +152,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 <h4>Added By</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText>{data?.data?.author}</EuiText>
+              <EuiText>{data?.data?.addedBy}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -172,7 +168,10 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   }
 
   function AddedAssets(assetProps: any) {
-    const data = assetProps.data?.data?.assets || [];
+    const { data } = assetProps.data;
+
+    const assets = data?.data?.assets || [];
+    console.log(assets);
 
     const search = {
       box: {
@@ -199,11 +198,20 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         name: 'Name',
         sortable: true,
         truncateText: true,
-        render: (value, record) => (
-          <EuiText data-test-subj={`${record.name}IntegrationLink`}>
-            {_.truncate(record.name, { length: 100 })}
-          </EuiText>
-        ),
+        render: (value, record) => {
+          return record.isDefaultAsset ? (
+            <EuiLink
+              data-test-subj={`${record.name}IntegrationLink`}
+              onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
+            >
+              {_.truncate(record.description, { length: 100 })}
+            </EuiLink>
+          ) : (
+            <EuiText data-test-subj={`${record.name}IntegrationLink`}>
+              {_.truncate(record.description, { length: 100 })}
+            </EuiText>
+          );
+        },
       },
       {
         field: 'type',
@@ -212,7 +220,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         truncateText: true,
         render: (value, record) => (
           <EuiText data-test-subj={`${record.type}IntegrationDescription`}>
-            {_.truncate(record.type, { length: 100 })}
+            {_.truncate(record.assetType, { length: 100 })}
           </EuiText>
         ),
       },
@@ -239,7 +247,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         <EuiInMemoryTable
           itemId="id"
           loading={false}
-          items={data}
+          items={assets}
           columns={tableColumns}
           pagination={{
             initialPageSize: 10,
@@ -281,7 +289,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         truncateText: true,
         render: (value, record) => (
           <EuiText data-test-subj={`${record.name}IntegrationLink`}>
-            {_.truncate(record.name, { length: 100 })}
+            {_.truncate(record.description, { length: 100 })}
           </EuiText>
         ),
       },
@@ -332,11 +340,9 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     <EuiPage>
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        {AddedOverview({ stateData })}
+        {AddedOverview({ data: stateData })}
         <EuiSpacer />
-        {AddedAssets({ stateData })}
-        <EuiSpacer />
-        {AddedIntegrationFields({ stateData })}
+        {AddedAssets({ data: stateData })}
         <EuiSpacer />
       </EuiPageBody>
       {isModalVisible && modalLayout}
