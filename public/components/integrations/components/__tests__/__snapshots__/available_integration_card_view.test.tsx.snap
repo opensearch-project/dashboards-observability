@@ -37,26 +37,8 @@ Array [
           }
         >
           <EuiCard
-            data-test-subj="homeSynopsisLinknginx"
+            data-test-subj="integration_card_nginx"
             description="Nginx HTTP server collector"
-            footer={
-              <div>
-                <EuiButton
-                  aria-label="Go to Developers Tools"
-                  onClick={[Function]}
-                >
-                  View Details
-                </EuiButton>
-                <EuiSpacer />
-                <EuiButton
-                  aria-label="Go to Developers Tools"
-                  onClick={[Function]}
-                  size="s"
-                >
-                  Add
-                </EuiButton>
-              </div>
-            }
             icon={
               <img
                 alt=""
@@ -70,19 +52,21 @@ Array [
                 }
               />
             }
-            layout="vertical"
+            onClick={[Function]}
             title="nginx"
-            titleSize="xs"
+            titleElement="span"
           >
             <EuiPanel
-              className="euiCard euiCard--centerAligned euiCard--hasIcon"
-              data-test-subj="homeSynopsisLinknginx"
+              className="euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+              data-test-subj="integration_card_nginx"
               element="div"
               hasShadow={true}
+              onClick={[Function]}
             >
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned euiCard--hasIcon"
-                data-test-subj="homeSynopsisLinknginx"
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                data-test-subj="integration_card_nginx"
+                onClick={[Function]}
               >
                 <div
                   className="euiCard__top"
@@ -105,13 +89,20 @@ Array [
                   <EuiTitle
                     className="euiCard__title"
                     id="random_html_idTitle"
-                    size="xs"
+                    size="s"
                   >
                     <span
-                      className="euiTitle euiTitle--xsmall euiCard__title"
+                      className="euiTitle euiTitle--small euiCard__title"
                       id="random_html_idTitle"
                     >
-                      nginx
+                      <button
+                        aria-describedby=" random_html_idDescription"
+                        className="euiCard__titleButton"
+                        disabled={false}
+                        onClick={[Function]}
+                      >
+                        nginx
+                      </button>
                     </span>
                   </EuiTitle>
                   <EuiText
@@ -128,113 +119,6 @@ Array [
                       </p>
                     </div>
                   </EuiText>
-                </div>
-                <div
-                  className="euiCard__footer"
-                >
-                  <div>
-                    <EuiButton
-                      aria-label="Go to Developers Tools"
-                      onClick={[Function]}
-                    >
-                      <EuiButtonDisplay
-                        aria-label="Go to Developers Tools"
-                        baseClassName="euiButton"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <button
-                          aria-label="Go to Developers Tools"
-                          className="euiButton euiButton--primary"
-                          disabled={false}
-                          onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
-                          type="button"
-                        >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            textProps={
-                              Object {
-                                "className": "euiButton__text",
-                              }
-                            }
-                          >
-                            <span
-                              className="euiButtonContent euiButton__content"
-                            >
-                              <span
-                                className="euiButton__text"
-                              >
-                                View Details
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
-                    <EuiSpacer>
-                      <div
-                        className="euiSpacer euiSpacer--l"
-                      />
-                    </EuiSpacer>
-                    <EuiButton
-                      aria-label="Go to Developers Tools"
-                      onClick={[Function]}
-                      size="s"
-                    >
-                      <EuiButtonDisplay
-                        aria-label="Go to Developers Tools"
-                        baseClassName="euiButton"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
-                        onClick={[Function]}
-                        size="s"
-                        type="button"
-                      >
-                        <button
-                          aria-label="Go to Developers Tools"
-                          className="euiButton euiButton--primary euiButton--small"
-                          disabled={false}
-                          onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
-                          type="button"
-                        >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            textProps={
-                              Object {
-                                "className": "euiButton__text",
-                              }
-                            }
-                          >
-                            <span
-                              className="euiButtonContent euiButton__content"
-                            >
-                              <span
-                                className="euiButton__text"
-                              >
-                                Add
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
-                  </div>
                 </div>
               </div>
             </EuiPanel>

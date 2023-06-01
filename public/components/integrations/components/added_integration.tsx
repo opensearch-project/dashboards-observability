@@ -95,7 +95,11 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   }
 
   function AddedOverview(overviewProps: any) {
-    const { data } = overviewProps;
+    let data: any = {};
+    if (overviewProps?.data?.data) {
+      data = overviewProps.data.data;
+    }
+    console.log(data);
 
     return (
       <EuiPageHeader style={{ justifyContent: 'center' }}>
@@ -105,13 +109,14 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                  <EuiText>{data?.data?.id}</EuiText>
+                  <EuiText>{data?.id}</EuiText>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
                   size="s"
+                  color="danger"
                   onClick={() => {
                     getModal();
                   }}

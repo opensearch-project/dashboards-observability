@@ -103,7 +103,7 @@ describe('IntegrationsKibanaBackend', () => {
 
     expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
     expect(builderMock.build).toHaveBeenCalledWith(template, {
-      name: 'Placeholder Nginx Integration',
+      name: 'test',
       dataset: 'nginx',
       namespace: 'prod',
     });

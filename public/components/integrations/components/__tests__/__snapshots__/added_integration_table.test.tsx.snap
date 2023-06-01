@@ -259,19 +259,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 "name": "Type",
                 "options": Array [
                   Object {
-                    "name": "Visualization",
-                    "value": "Visualization",
-                    "view": "Visualization",
-                  },
-                  Object {
-                    "name": "Query",
-                    "value": "Query",
-                    "view": "Query",
-                  },
-                  Object {
-                    "name": "Metric",
-                    "value": "Metric",
-                    "view": "Metric",
+                    "name": "logs",
+                    "value": "logs",
+                    "view": "logs",
                   },
                 ],
                 "type": "field_value_selection",
@@ -296,19 +286,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "name": "Type",
                   "options": Array [
                     Object {
-                      "name": "Visualization",
-                      "value": "Visualization",
-                      "view": "Visualization",
-                    },
-                    Object {
-                      "name": "Query",
-                      "value": "Query",
-                      "view": "Query",
-                    },
-                    Object {
-                      "name": "Metric",
-                      "value": "Metric",
-                      "view": "Metric",
+                      "name": "logs",
+                      "value": "logs",
+                      "view": "logs",
                     },
                   ],
                   "type": "field_value_selection",
@@ -444,19 +424,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             "name": "Type",
                             "options": Array [
                               Object {
-                                "name": "Visualization",
-                                "value": "Visualization",
-                                "view": "Visualization",
-                              },
-                              Object {
-                                "name": "Query",
-                                "value": "Query",
-                                "view": "Query",
-                              },
-                              Object {
-                                "name": "Metric",
-                                "value": "Metric",
-                                "view": "Metric",
+                                "name": "logs",
+                                "value": "logs",
+                                "view": "logs",
                               },
                             ],
                             "type": "field_value_selection",
@@ -496,19 +466,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 "name": "Type",
                                 "options": Array [
                                   Object {
-                                    "name": "Visualization",
-                                    "value": "Visualization",
-                                    "view": "Visualization",
-                                  },
-                                  Object {
-                                    "name": "Query",
-                                    "value": "Query",
-                                    "view": "Query",
-                                  },
-                                  Object {
-                                    "name": "Metric",
-                                    "value": "Metric",
-                                    "view": "Metric",
+                                    "name": "logs",
+                                    "value": "logs",
+                                    "view": "logs",
                                   },
                                 ],
                                 "type": "field_value_selection",
@@ -1260,13 +1220,13 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   <EuiLink
                                     className=""
                                     data-test-subj="nginxIntegrationLink"
-                                    href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
+                                    href="#/installed/undefined"
                                     key=".0"
                                   >
                                     <a
                                       className="euiLink euiLink--primary"
                                       data-test-subj="nginxIntegrationLink"
-                                      href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
+                                      href="#/installed/undefined"
                                       rel="noreferrer"
                                     >
                                       Placeholder Nginx Integration
@@ -1359,7 +1319,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                     <div
                                       className="euiText euiText--medium"
                                       data-test-subj="nginxIntegrationDescription"
-                                    />
+                                    >
+                                      logs
+                                    </div>
                                   </EuiText>
                                 </div>
                               </td>
@@ -1537,13 +1499,13 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   <EuiLink
                                     className=""
                                     data-test-subj="nginxIntegrationLink"
-                                    href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
+                                    href="#/installed/undefined"
                                     key=".0"
                                   >
                                     <a
                                       className="euiLink euiLink--primary"
                                       data-test-subj="nginxIntegrationLink"
-                                      href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
+                                      href="#/installed/undefined"
                                       rel="noreferrer"
                                     >
                                       Placeholder Nginx Integration
@@ -1636,7 +1598,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                     <div
                                       className="euiText euiText--medium"
                                       data-test-subj="nginxIntegrationDescription"
-                                    />
+                                    >
+                                      logs
+                                    </div>
                                   </EuiText>
                                 </div>
                               </td>
