@@ -1,4 +1,5 @@
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
+import { templateValidator } from './validators';
 
 interface BuilderOptions {
   name: string;
@@ -24,9 +25,21 @@ export class IntegrationInstanceBuilder {
     return result;
   }
 
-  async validate(_template: IntegrationTemplate): Promise<void> {
-    // Assuming everything is valid for now
-    return Promise.resolve();
+  async validate(template: IntegrationTemplate): Promise<void> {
+    if (templateValidator(template)) {
+      return Promise.resolve();
+    }
+    return Promise.reject({
+      status: 400,
+      message: templateValidator.errors
+        ?.filter((e) => e.message)
+        .map((e) => e.message)
+        .join(', '),
+    });
+  }
+
+  is_integration_template(template: any): template is IntegrationTemplate {
+    return template && template.name && typeof template.name === 'string';
   }
 
   async post_assets(assets: DisplayAsset[]): Promise<AssetReference[]> {
