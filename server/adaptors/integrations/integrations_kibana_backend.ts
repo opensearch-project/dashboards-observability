@@ -1,7 +1,13 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { IntegrationsRepository } from './integrations_repository';
+import { SimpleSavedObject } from '../../../../../src/core/public';
 
 export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
@@ -11,6 +17,10 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     this.client = client;
     this.repository = repository ?? new IntegrationsRepository();
   }
+  deleteIntegrationInstance = async (id: string): Promise<any> => {
+    const result = await this.client.delete('integration-instance', id);
+    return Promise.resolve(result);
+  };
 
   getIntegrationTemplates = async (
     query?: IntegrationTemplateQuery
@@ -28,19 +38,35 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
 
   getIntegrationInstances = async (
     _query?: IntegrationInstanceQuery
-  ): Promise<IntegrationInstanceSearchResult> => {
+  ): Promise<IntegrationInstancesSearchResult> => {
     const result = await this.client.find({ type: 'integration-instance' });
+    console.log(result);
     return Promise.resolve({
       total: result.total,
-      hits: result.saved_objects.map((x) => x.attributes) as IntegrationInstance[],
+      hits: result.saved_objects?.map((x) => ({
+        ...x.attributes!,
+        id: x.id,
+      })) as IntegrationInstanceResult[],
     });
   };
 
-  loadIntegrationInstance = async (templateName: string): Promise<IntegrationInstance> => {
+  getIntegrationInstance = async (
+    _query?: IntegrationInstanceQuery
+  ): Promise<IntegrationInstanceResult> => {
+    console.log(`id:${_query!.id}`);
+    const result = await this.client.get('integration-instance', `${_query!.id}`);
+    console.log(savedObjectToIntegrationInstance(result));
+    return Promise.resolve(savedObjectToIntegrationInstance(result));
+  };
+
+  loadIntegrationInstance = async (
+    templateName: string,
+    name: string
+  ): Promise<IntegrationInstance> => {
     const template = await this.repository.getByName(templateName);
     try {
       const result = await new IntegrationInstanceBuilder(this.client).build(template, {
-        name: 'Placeholder Nginx Integration',
+        name,
         dataset: 'nginx',
         namespace: 'prod',
       });
@@ -66,3 +92,11 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return Promise.resolve(data);
   };
 }
+
+/*
+ ** UTILITY FUNCTIONS
+ */
+const savedObjectToIntegrationInstance = (so: any): IntegrationInstanceResult => ({
+  id: so.id,
+  ...so.attributes,
+});

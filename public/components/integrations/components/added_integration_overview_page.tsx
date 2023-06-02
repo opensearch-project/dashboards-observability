@@ -29,6 +29,7 @@ export interface AddedIntegrationType {
   status: string;
   assets: any[];
   addedBy: string;
+  id: string;
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
@@ -40,12 +41,12 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/integrations',
+        text: 'Integrations',
+        href: '#/',
       },
       {
-        text: 'Added Integrations',
-        href: '#/integrations/added',
+        text: 'Installed Integrations',
+        href: '#/installed',
       },
     ]);
     handleDataRequest();

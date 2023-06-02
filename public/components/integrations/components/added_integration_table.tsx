@@ -31,9 +31,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         <EuiLink
           data-test-subj={`${record.templateName}IntegrationLink`}
           // href={`#/added/${record.id}`}
-          href={`dashboards#/view/${
-            record.assets.filter((asset: any) => asset.isDefaultAsset)[0].assetId
-          }`}
+          href={`#/installed/${record.id}`}
         >
           {_.truncate(record.name, { length: 100 })}
         </EuiLink>
@@ -60,7 +58,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
-          {_.truncate(record.type, { length: 100 })}
+          {_.truncate(record.dataSource.sourceType, { length: 100 })}
         </EuiText>
       ),
     },
@@ -99,7 +97,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
-  const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
+  const FILTER_OPTIONS = ['logs'];
 
   const search = {
     box: {

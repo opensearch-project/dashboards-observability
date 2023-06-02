@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IntegrationsKibanaBackend } from '../integrations_kibana_backend';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
@@ -13,6 +18,7 @@ describe('IntegrationsKibanaBackend', () => {
     mockClient = {
       find: jest.fn(),
       create: jest.fn(),
+      delete: jest.fn(),
     } as any;
     mockRepository = {
       get: jest.fn(),
@@ -64,7 +70,10 @@ describe('IntegrationsKibanaBackend', () => {
       .spyOn(IntegrationInstanceBuilder.prototype, 'build')
       .mockImplementationOnce(builderMock.build);
 
-    const result = await backend.loadIntegrationInstance(templateName);
+    const result = await backend.loadIntegrationInstance(
+      templateName,
+      'Placeholder Nginx Integration'
+    );
 
     expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
     expect(builderMock.build).toHaveBeenCalledWith(template, {
@@ -74,6 +83,14 @@ describe('IntegrationsKibanaBackend', () => {
     });
     expect(mockClient.create).toHaveBeenCalledWith('integration-instance', instance);
     expect(result).toEqual(instance);
+  });
+
+  it('should delete an integration instance', async () => {
+    const mockDelete = jest.fn();
+    (mockClient.create as jest.Mock).mockResolvedValue(mockDelete);
+
+    await backend.deleteIntegrationInstance('deletedId');
+    expect(mockClient.delete).toHaveBeenCalledWith('integration-instance', 'deletedId');
   });
 
   it('should reject when loading an integration instance fails', async () => {
@@ -88,14 +105,14 @@ describe('IntegrationsKibanaBackend', () => {
       .spyOn(IntegrationInstanceBuilder.prototype, 'build')
       .mockImplementationOnce(builderMock.build);
 
-    await expect(backend.loadIntegrationInstance(templateName)).rejects.toEqual({
+    await expect(backend.loadIntegrationInstance(templateName, 'test')).rejects.toEqual({
       message: errorMessage,
       statusCode: 500,
     });
 
     expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
     expect(builderMock.build).toHaveBeenCalledWith(template, {
-      name: 'Placeholder Nginx Integration',
+      name: 'test',
       dataset: 'nginx',
       namespace: 'prod',
     });

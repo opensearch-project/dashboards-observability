@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/server';
-
 export interface IntegrationsAdaptor {
   getIntegrationTemplates: (
     query?: IntegrationTemplateQuery
@@ -12,9 +10,13 @@ export interface IntegrationsAdaptor {
 
   getIntegrationInstances: (
     query?: IntegrationInstanceQuery
-  ) => Promise<IntegrationInstanceSearchResult>;
+  ) => Promise<IntegrationInstancesSearchResult>;
 
-  loadIntegrationInstance: (templateName: string) => Promise<IntegrationInstance>;
+  getIntegrationInstance: (query?: IntegrationInstanceQuery) => Promise<IntegrationInstanceResult>;
+
+  loadIntegrationInstance: (templateName: string, name: string) => Promise<IntegrationInstance>;
+
+  deleteIntegrationInstance: (id: string) => Promise<any>;
 
   getStatic: (templateName: string, path: string) => Promise<StaticAsset>;
 }

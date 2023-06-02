@@ -30,34 +30,36 @@ import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import _ from 'lodash';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
-import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AddedIntegrationProps } from './integration_types';
+import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegration(props: AddedIntegrationProps) {
   const { http, integrationInstanceId, chrome, parentBreadcrumbs } = props;
 
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [stateData, setData] = useState({ data: {} });
+  const { setToast } = useToast();
+
+  const [stateData, setData] = useState<any>({ data: {} });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/integrations',
+        text: 'Integrations',
+        href: '#/',
       },
       {
-        text: 'Added Integration',
-        href: '#/added',
+        text: 'Installed Integration',
+        href: '#/installed',
       },
       {
-        text: integrationInstanceId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/added/${integrationInstanceId}`,
+        text: `${stateData.data.data?.name}`,
+        href: `#/installed/${stateData.data.data?.id}`,
       },
     ]);
     handleDataRequest();
-  }, [integrationInstanceId]);
+  }, [integrationInstanceId, stateData.data.data?.name]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
@@ -67,6 +69,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
       <DeleteModal
         onConfirm={() => {
           setIsModalVisible(false);
+          deleteAddedIntegration(integrationInstanceId);
         }}
         onCancel={() => {
           setIsModalVisible(false);
@@ -78,35 +81,21 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     setIsModalVisible(true);
   };
 
-  async function handleDataRequest() {
-    http.get(`${OBSERVABILITY_BASE}/store/id`).then((exists) => setData(exists));
+  async function deleteAddedIntegration(integrationInstance: string) {
+    http.delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`).then(() => {
+      setToast(`${stateData.data.data?.name} integration successfully deleted!`, 'success');
+      window.location.hash = '#/installed';
+    });
   }
 
-  const setToast = (title: string, color = 'success', text?: ReactChild) => {
-    if (!text) text = '';
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
-
-  async function addIntegrationRequest(name: string) {
+  async function handleDataRequest() {
     http
-      .post(`${OBSERVABILITY_BASE}/store`)
-      .then((res) => {
-        setToast(
-          `${name} integration successfully added!`,
-          'success',
-          `View the added assets from ${name} in the Added Integrations list`
-        );
-      })
-      .catch((err) =>
-        setToast(
-          'Failed to load integration. Check Added Integrations table for more details',
-          'danger'
-        )
-      );
+      .get(`${INTEGRATIONS_BASE}/store/${integrationInstanceId}`)
+      .then((exists) => setData(exists));
   }
 
   function AddedOverview(overviewProps: any) {
-    const { data } = overviewProps;
+    const { data } = overviewProps.data;
 
     return (
       <EuiPageHeader style={{ justifyContent: 'center' }}>
@@ -116,17 +105,19 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                  <EuiText>{data.data.id}</EuiText>
+                  <h1>{data?.data?.name}</h1>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButton
+                  fill
                   size="s"
+                  color="danger"
                   onClick={() => {
                     getModal();
                   }}
                 >
-                  Delete
+                  Remove Integration
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -138,8 +129,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 <h4>Template</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiLink href={`#/available/${data.data.templateName}`}>
-                {data.data.templateName}
+              <EuiLink href={`#/available/${data?.data?.templateName}`}>
+                {data?.data?.templateName}
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -147,28 +138,28 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 <h4>Date Added</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data.data.creationDate?.split('T')[0]}</EuiText>
+              <EuiText size="m">{data?.data?.creationDate?.split('T')[0]}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <h4>Status</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data.data.status}</EuiText>
+              <EuiText size="m">{data?.data?.status}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <h4>Added By</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText>{data.data.author}</EuiText>
+              <EuiText>{data?.data?.addedBy}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <h4>Tags</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data.data.license}</EuiText>
+              <EuiText size="m">{data?.data?.license}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageHeaderSection>
@@ -177,7 +168,10 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   }
 
   function AddedAssets(assetProps: any) {
-    const data = assetProps.data.data.assets || [];
+    const { data } = assetProps.data;
+
+    const assets = data?.data?.assets || [];
+    console.log(assets);
 
     const search = {
       box: {
@@ -204,11 +198,20 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         name: 'Name',
         sortable: true,
         truncateText: true,
-        render: (value, record) => (
-          <EuiText data-test-subj={`${record.name}IntegrationLink`}>
-            {_.truncate(record.name, { length: 100 })}
-          </EuiText>
-        ),
+        render: (value, record) => {
+          return record.isDefaultAsset ? (
+            <EuiLink
+              data-test-subj={`${record.name}IntegrationLink`}
+              onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
+            >
+              {_.truncate(record.description, { length: 100 })}
+            </EuiLink>
+          ) : (
+            <EuiText data-test-subj={`${record.name}IntegrationLink`}>
+              {_.truncate(record.description, { length: 100 })}
+            </EuiText>
+          );
+        },
       },
       {
         field: 'type',
@@ -217,7 +220,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         truncateText: true,
         render: (value, record) => (
           <EuiText data-test-subj={`${record.type}IntegrationDescription`}>
-            {_.truncate(record.type, { length: 100 })}
+            {_.truncate(record.assetType, { length: 100 })}
           </EuiText>
         ),
       },
@@ -244,7 +247,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         <EuiInMemoryTable
           itemId="id"
           loading={false}
-          items={data}
+          items={assets}
           columns={tableColumns}
           pagination={{
             initialPageSize: 10,
@@ -257,7 +260,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   }
 
   function AddedIntegrationFields(fieldProps: any) {
-    const data = fieldProps.data.data.fields || [];
+    const data = fieldProps.data?.data?.fields || [];
 
     const search = {
       box: {
@@ -286,7 +289,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         truncateText: true,
         render: (value, record) => (
           <EuiText data-test-subj={`${record.name}IntegrationLink`}>
-            {_.truncate(record.name, { length: 100 })}
+            {_.truncate(record.description, { length: 100 })}
           </EuiText>
         ),
       },
@@ -335,20 +338,11 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   return (
     <EuiPage>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        toastLifeTimeMs={6000}
-      />
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        {AddedOverview({ stateData })}
+        {AddedOverview({ data: stateData })}
         <EuiSpacer />
-        {AddedAssets({ stateData })}
-        <EuiSpacer />
-        {AddedIntegrationFields({ stateData })}
+        {AddedAssets({ data: stateData })}
         <EuiSpacer />
       </EuiPageBody>
       {isModalVisible && modalLayout}

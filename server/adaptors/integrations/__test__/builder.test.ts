@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 
@@ -34,8 +39,8 @@ describe('IntegrationInstanceBuilder', () => {
     };
     const mockResponse = {
       saved_objects: [
-        { type: 'dashboard', id: 'dashboard1' },
-        { type: 'visualization', id: 'visualization1' },
+        { type: 'dashboard', id: 'dashboard1', attributes: { title: 'hi' } },
+        { type: 'visualization', id: 'visualization1', attributes: { title: 'hi' } },
       ],
     };
     const expectedInstance = {
@@ -55,12 +60,14 @@ describe('IntegrationInstanceBuilder', () => {
           assetId: 'dashboard1',
           status: 'available',
           isDefaultAsset: true,
+          description: 'hi',
         },
         {
           assetType: 'visualization',
           assetId: 'visualization1',
           status: 'available',
           isDefaultAsset: false,
+          description: 'hi',
         },
       ],
       addedBy: 'unknown',

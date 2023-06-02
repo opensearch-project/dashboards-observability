@@ -22,47 +22,48 @@ import { IntegrationAssets } from './integration_assets_panel';
 import { getAddIntegrationModal } from './add_integration_modal';
 import { AvailableIntegrationProps } from './integration_types';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { IntegrationScreenshots } from './integration_screenshots_panel';
+import { AddIntegrationFlyout } from './add_integration_flyout';
 
 export function Integration(props: AvailableIntegrationProps) {
   const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [data, setData] = useState({
     data: null,
   });
 
-  const getModal = (name: string) => {
-    setModalLayout(
-      getAddIntegrationModal(
-        () => {
-          addIntegrationRequest(name);
-          setIsModalVisible(false);
-        },
-        () => {
-          setIsModalVisible(false);
-        },
-        'Name',
-        'Namespace',
-        'Tags (optional)',
-        name,
-        'prod',
-        'Add Integration Options',
-        'Cancel',
-        'Add',
-        'test'
-      )
-    );
-    setIsModalVisible(true);
-  };
+  // const getModal = (name: string) => {
+  //   setModalLayout(
+  //     getAddIntegrationModal(
+  //       () => {
+  //         addIntegrationRequest(name);
+  //         setIsModalVisible(false);
+  //       },
+  //       () => {
+  //         setIsModalVisible(false);
+  //       },
+  //       'Name',
+  //       'Namespace',
+  //       'Tags (optional)',
+  //       name,
+  //       'prod',
+  //       'Add Integration Options',
+  //       'Cancel',
+  //       'Add',
+  //       'test'
+  //     )
+  //   );
+  //   setIsModalVisible(true);
+  // };
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...parentBreadcrumbs,
       {
-        text: 'Placeholder',
-        href: '#/integrations',
+        text: 'Integrations',
+        href: '#/',
       },
       {
         text: integrationTemplateId,
@@ -74,7 +75,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   async function handleDataRequest() {
     // TODO fill in ID request here
-    http.get(`${INTEGRATIONS_BASE}/repository/nginx`).then((exists) => {
+    http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`).then((exists) => {
       setData(exists.data);
     });
   }
@@ -84,9 +85,12 @@ export function Integration(props: AvailableIntegrationProps) {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  async function addIntegrationRequest(name: string) {
+  async function addIntegrationRequest(templateName: string, name: string) {
+    console.log(name);
     http
-      .post(`${INTEGRATIONS_BASE}/store`)
+      .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
+        body: JSON.stringify({ name }),
+      })
       .then((res) => {
         setToast(
           `${name} integration successfully added!`,
@@ -102,6 +106,10 @@ export function Integration(props: AvailableIntegrationProps) {
       );
   }
 
+  // return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
+  //   body: JSON.stringify(body),
+  // });
+
   if (!data.data) {
     return <EuiLoadingSpinner />;
   }
@@ -116,16 +124,33 @@ export function Integration(props: AvailableIntegrationProps) {
       />
       <EuiPageBody>
         <EuiSpacer size="xl" />
-        {IntegrationOverview({ data, getModal })}
+        {IntegrationOverview({
+          data,
+          showFlyout: () => {
+            setIsFlyoutVisible(true);
+          },
+        })}
         <EuiSpacer />
         {IntegrationDetails({ data })}
+        <EuiSpacer />
+        {IntegrationScreenshots({ data })}
         <EuiSpacer />
         {IntegrationAssets({ data })}
         <EuiSpacer />
         {IntegrationFields({ data })}
         <EuiSpacer />
       </EuiPageBody>
-      {isModalVisible && modalLayout}
+      {isFlyoutVisible && (
+        <AddIntegrationFlyout
+          onClose={() => {
+            setIsFlyoutVisible(false);
+          }}
+          onCreate={(name) => {
+            addIntegrationRequest(integrationTemplateId, name);
+          }}
+          integrationName={integrationTemplateId}
+        />
+      )}
     </EuiPage>
   );
 }

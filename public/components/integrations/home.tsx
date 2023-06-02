@@ -53,7 +53,7 @@ export const Home = (props: HomeProps) => {
           />
           <Route
             exact
-            path={'/added'}
+            path={'/installed'}
             render={() => (
               <Sidebar>
                 <AddedIntegrationOverviewPage {...commonProps} />
@@ -62,7 +62,7 @@ export const Home = (props: HomeProps) => {
           />
           <Route
             exact
-            path={'/added/:id+'}
+            path={'/installed/:id+'}
             render={(routerProps) => (
               <Sidebar>
                 <AddedIntegration

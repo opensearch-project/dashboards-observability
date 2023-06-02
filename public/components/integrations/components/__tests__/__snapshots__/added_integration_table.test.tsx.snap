@@ -95,141 +95,75 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 Object {
                   "assetId": "47892350-b495-11ed-af0a-cf5c93b5a3b6",
                   "assetType": "index-pattern",
+                  "description": "sso_logs-*-*",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "d80e05b2-518c-4c3d-9651-4c9d8632dce4",
                   "assetType": "search",
+                  "description": "[NGINX Core Logs 1.0] Nginx Access Logs",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "3b49a65d-54d8-483d-a8f0-3d7c855e1ecf",
                   "assetType": "visualization",
+                  "description": "[NGINX Core Logs 1.0] Response codes over time",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "9f820fbe-ddde-43a2-9402-30bd295c97f6",
                   "assetType": "search",
+                  "description": "[NGINX Core Logs 1.0] Nginx Error Logs",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "865e577b-634b-4a65-b9d6-7e324c395d18",
                   "assetType": "visualization",
+                  "description": "[NGINX Core Logs 1.0] Errors over time",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "dc1803f0-b478-11ed-9063-ebe46f9ac203",
                   "assetType": "visualization",
+                  "description": "Top Paths",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "99acc580-b47a-11ed-9063-ebe46f9ac203",
                   "assetType": "visualization",
+                  "description": "Data Volume",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "01ea64d0-b62f-11ed-a677-43d7aa86763b",
                   "assetType": "visualization",
+                  "description": "Req-per-min",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
                   "assetId": "96847220-5261-44d0-89b4-65f3a659f13a",
                   "assetType": "dashboard",
+                  "description": "[NGINX Core Logs 1.0] Overview",
                   "isDefaultAsset": true,
                   "status": "available",
                 },
-                Object {
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
               ],
-              "creationDate": "2023-05-30T14:56:30.139Z",
+              "creationDate": "2023-06-02T15:30:35.281Z",
               "dataSource": Object {
                 "dataset": "nginx",
                 "namespace": "prod",
                 "sourceType": "logs",
               },
-              "name": "Placeholder Nginx Integration",
-              "status": "unknown",
-              "templateName": "nginx",
-            },
-            Object {
-              "addedBy": "unknown",
-              "assets": Array [
-                Object {
-                  "assetId": "47892350-b495-11ed-af0a-cf5c93b5a3b6",
-                  "assetType": "index-pattern",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "d80e05b2-518c-4c3d-9651-4c9d8632dce4",
-                  "assetType": "search",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "3b49a65d-54d8-483d-a8f0-3d7c855e1ecf",
-                  "assetType": "visualization",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "9f820fbe-ddde-43a2-9402-30bd295c97f6",
-                  "assetType": "search",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "865e577b-634b-4a65-b9d6-7e324c395d18",
-                  "assetType": "visualization",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "dc1803f0-b478-11ed-9063-ebe46f9ac203",
-                  "assetType": "visualization",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "99acc580-b47a-11ed-9063-ebe46f9ac203",
-                  "assetType": "visualization",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "01ea64d0-b62f-11ed-a677-43d7aa86763b",
-                  "assetType": "visualization",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "96847220-5261-44d0-89b4-65f3a659f13a",
-                  "assetType": "dashboard",
-                  "isDefaultAsset": true,
-                  "status": "available",
-                },
-                Object {
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-              ],
-              "creationDate": "2023-05-30T14:56:35.137Z",
-              "dataSource": Object {
-                "dataset": "nginx",
-                "namespace": "prod",
-                "sourceType": "logs",
-              },
-              "name": "Placeholder Nginx Integration",
+              "id": "6b3b8010-015a-11ee-8bf8-9f447e9961b0",
+              "name": "nginx",
               "status": "unknown",
               "templateName": "nginx",
             },
@@ -259,19 +193,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 "name": "Type",
                 "options": Array [
                   Object {
-                    "name": "Visualization",
-                    "value": "Visualization",
-                    "view": "Visualization",
-                  },
-                  Object {
-                    "name": "Query",
-                    "value": "Query",
-                    "view": "Query",
-                  },
-                  Object {
-                    "name": "Metric",
-                    "value": "Metric",
-                    "view": "Metric",
+                    "name": "logs",
+                    "value": "logs",
+                    "view": "logs",
                   },
                 ],
                 "type": "field_value_selection",
@@ -296,19 +220,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "name": "Type",
                   "options": Array [
                     Object {
-                      "name": "Visualization",
-                      "value": "Visualization",
-                      "view": "Visualization",
-                    },
-                    Object {
-                      "name": "Query",
-                      "value": "Query",
-                      "view": "Query",
-                    },
-                    Object {
-                      "name": "Metric",
-                      "value": "Metric",
-                      "view": "Metric",
+                      "name": "logs",
+                      "value": "logs",
+                      "view": "logs",
                     },
                   ],
                   "type": "field_value_selection",
@@ -444,19 +358,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             "name": "Type",
                             "options": Array [
                               Object {
-                                "name": "Visualization",
-                                "value": "Visualization",
-                                "view": "Visualization",
-                              },
-                              Object {
-                                "name": "Query",
-                                "value": "Query",
-                                "view": "Query",
-                              },
-                              Object {
-                                "name": "Metric",
-                                "value": "Metric",
-                                "view": "Metric",
+                                "name": "logs",
+                                "value": "logs",
+                                "view": "logs",
                               },
                             ],
                             "type": "field_value_selection",
@@ -496,19 +400,9 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 "name": "Type",
                                 "options": Array [
                                   Object {
-                                    "name": "Visualization",
-                                    "value": "Visualization",
-                                    "view": "Visualization",
-                                  },
-                                  Object {
-                                    "name": "Query",
-                                    "value": "Query",
-                                    "view": "Query",
-                                  },
-                                  Object {
-                                    "name": "Metric",
-                                    "value": "Metric",
-                                    "view": "Metric",
+                                    "name": "logs",
+                                    "value": "logs",
+                                    "view": "logs",
                                   },
                                 ],
                                 "type": "field_value_selection",
@@ -723,141 +617,75 @@ exports[`Added Integration Table View Test Renders added integration table view 
                     Object {
                       "assetId": "47892350-b495-11ed-af0a-cf5c93b5a3b6",
                       "assetType": "index-pattern",
+                      "description": "sso_logs-*-*",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "d80e05b2-518c-4c3d-9651-4c9d8632dce4",
                       "assetType": "search",
+                      "description": "[NGINX Core Logs 1.0] Nginx Access Logs",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "3b49a65d-54d8-483d-a8f0-3d7c855e1ecf",
                       "assetType": "visualization",
+                      "description": "[NGINX Core Logs 1.0] Response codes over time",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "9f820fbe-ddde-43a2-9402-30bd295c97f6",
                       "assetType": "search",
+                      "description": "[NGINX Core Logs 1.0] Nginx Error Logs",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "865e577b-634b-4a65-b9d6-7e324c395d18",
                       "assetType": "visualization",
+                      "description": "[NGINX Core Logs 1.0] Errors over time",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "dc1803f0-b478-11ed-9063-ebe46f9ac203",
                       "assetType": "visualization",
+                      "description": "Top Paths",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "99acc580-b47a-11ed-9063-ebe46f9ac203",
                       "assetType": "visualization",
+                      "description": "Data Volume",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "01ea64d0-b62f-11ed-a677-43d7aa86763b",
                       "assetType": "visualization",
+                      "description": "Req-per-min",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
                       "assetId": "96847220-5261-44d0-89b4-65f3a659f13a",
                       "assetType": "dashboard",
+                      "description": "[NGINX Core Logs 1.0] Overview",
                       "isDefaultAsset": true,
                       "status": "available",
                     },
-                    Object {
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
                   ],
-                  "creationDate": "2023-05-30T14:56:30.139Z",
+                  "creationDate": "2023-06-02T15:30:35.281Z",
                   "dataSource": Object {
                     "dataset": "nginx",
                     "namespace": "prod",
                     "sourceType": "logs",
                   },
-                  "name": "Placeholder Nginx Integration",
-                  "status": "unknown",
-                  "templateName": "nginx",
-                },
-                Object {
-                  "addedBy": "unknown",
-                  "assets": Array [
-                    Object {
-                      "assetId": "47892350-b495-11ed-af0a-cf5c93b5a3b6",
-                      "assetType": "index-pattern",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "d80e05b2-518c-4c3d-9651-4c9d8632dce4",
-                      "assetType": "search",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "3b49a65d-54d8-483d-a8f0-3d7c855e1ecf",
-                      "assetType": "visualization",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "9f820fbe-ddde-43a2-9402-30bd295c97f6",
-                      "assetType": "search",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "865e577b-634b-4a65-b9d6-7e324c395d18",
-                      "assetType": "visualization",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "dc1803f0-b478-11ed-9063-ebe46f9ac203",
-                      "assetType": "visualization",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "99acc580-b47a-11ed-9063-ebe46f9ac203",
-                      "assetType": "visualization",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "01ea64d0-b62f-11ed-a677-43d7aa86763b",
-                      "assetType": "visualization",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "96847220-5261-44d0-89b4-65f3a659f13a",
-                      "assetType": "dashboard",
-                      "isDefaultAsset": true,
-                      "status": "available",
-                    },
-                    Object {
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                  ],
-                  "creationDate": "2023-05-30T14:56:35.137Z",
-                  "dataSource": Object {
-                    "dataset": "nginx",
-                    "namespace": "prod",
-                    "sourceType": "logs",
-                  },
-                  "name": "Placeholder Nginx Integration",
+                  "id": "6b3b8010-015a-11ee-8bf8-9f447e9961b0",
+                  "name": "nginx",
                   "status": "unknown",
                   "templateName": "nginx",
                 },
@@ -876,7 +704,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   10,
                   15,
                 ],
-                "totalItemCount": 2,
+                "totalItemCount": 1,
               }
             }
             responsive={true}
@@ -1230,7 +1058,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                           >
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_name_0_0"
+                              key="_data_column_name_6b3b8010-015a-11ee-8bf8-9f447e9961b0_0"
                               mobileOptions={
                                 Object {
                                   "header": "Asset name",
@@ -1260,16 +1088,16 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   <EuiLink
                                     className=""
                                     data-test-subj="nginxIntegrationLink"
-                                    href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
+                                    href="#/installed/6b3b8010-015a-11ee-8bf8-9f447e9961b0"
                                     key=".0"
                                   >
                                     <a
                                       className="euiLink euiLink--primary"
                                       data-test-subj="nginxIntegrationLink"
-                                      href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
+                                      href="#/installed/6b3b8010-015a-11ee-8bf8-9f447e9961b0"
                                       rel="noreferrer"
                                     >
-                                      Placeholder Nginx Integration
+                                      nginx
                                     </a>
                                   </EuiLink>
                                 </div>
@@ -1277,7 +1105,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_source_0_1"
+                              key="_data_column_source_6b3b8010-015a-11ee-8bf8-9f447e9961b0_1"
                               mobileOptions={
                                 Object {
                                   "header": "Source",
@@ -1324,7 +1152,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_type_0_2"
+                              key="_data_column_type_6b3b8010-015a-11ee-8bf8-9f447e9961b0_2"
                               mobileOptions={
                                 Object {
                                   "header": "Type",
@@ -1359,14 +1187,16 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                     <div
                                       className="euiText euiText--medium"
                                       data-test-subj="nginxIntegrationDescription"
-                                    />
+                                    >
+                                      logs
+                                    </div>
                                   </EuiText>
                                 </div>
                               </td>
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_dateAdded_0_3"
+                              key="_data_column_dateAdded_6b3b8010-015a-11ee-8bf8-9f447e9961b0_3"
                               mobileOptions={
                                 Object {
                                   "header": "Date Added",
@@ -1402,7 +1232,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                       className="euiText euiText--medium"
                                       data-test-subj="nginxIntegrationDescription"
                                     >
-                                      2023-05-30T14:56:30.139Z
+                                      2023-06-02T15:30:35.281Z
                                     </div>
                                   </EuiText>
                                 </div>
@@ -1410,7 +1240,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_author_0_4"
+                              key="_data_column_author_6b3b8010-015a-11ee-8bf8-9f447e9961b0_4"
                               mobileOptions={
                                 Object {
                                   "header": "Added By",
@@ -1454,7 +1284,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_status_0_5"
+                              key="_data_column_status_6b3b8010-015a-11ee-8bf8-9f447e9961b0_5"
                               mobileOptions={
                                 Object {
                                   "header": "Status",
@@ -1483,289 +1313,12 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 >
                                   <EuiText
                                     className=""
-                                    data-test-subj="Placeholder Nginx IntegrationIntegrationStatus"
+                                    data-test-subj="nginxIntegrationStatus"
                                     key=".0"
                                   >
                                     <div
                                       className="euiText euiText--medium"
-                                      data-test-subj="Placeholder Nginx IntegrationIntegrationStatus"
-                                    >
-                                      unknown
-                                    </div>
-                                  </EuiText>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                          </tr>
-                        </EuiTableRow>
-                        <EuiTableRow
-                          isSelectable={true}
-                          isSelected={false}
-                        >
-                          <tr
-                            className="euiTableRow euiTableRow-isSelectable"
-                          >
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_name_1_0"
-                              mobileOptions={
-                                Object {
-                                  "header": "Asset name",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Asset name
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiLink
-                                    className=""
-                                    data-test-subj="nginxIntegrationLink"
-                                    href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
-                                    key=".0"
-                                  >
-                                    <a
-                                      className="euiLink euiLink--primary"
-                                      data-test-subj="nginxIntegrationLink"
-                                      href="dashboards#/view/96847220-5261-44d0-89b4-65f3a659f13a"
-                                      rel="noreferrer"
-                                    >
-                                      Placeholder Nginx Integration
-                                    </a>
-                                  </EuiLink>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_source_1_1"
-                              mobileOptions={
-                                Object {
-                                  "header": "Source",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Source
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiLink
-                                    className=""
-                                    data-test-subj="nginxIntegrationDescription"
-                                    href="#/available/nginx"
-                                    key=".0"
-                                  >
-                                    <a
-                                      className="euiLink euiLink--primary"
-                                      data-test-subj="nginxIntegrationDescription"
-                                      href="#/available/nginx"
-                                      rel="noreferrer"
-                                    >
-                                      nginx
-                                    </a>
-                                  </EuiLink>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_type_1_2"
-                              mobileOptions={
-                                Object {
-                                  "header": "Type",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Type
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiText
-                                    className=""
-                                    data-test-subj="nginxIntegrationDescription"
-                                    key=".0"
-                                  >
-                                    <div
-                                      className="euiText euiText--medium"
-                                      data-test-subj="nginxIntegrationDescription"
-                                    />
-                                  </EuiText>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_dateAdded_1_3"
-                              mobileOptions={
-                                Object {
-                                  "header": "Date Added",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Date Added
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiText
-                                    className=""
-                                    data-test-subj="nginxIntegrationDescription"
-                                    key=".0"
-                                  >
-                                    <div
-                                      className="euiText euiText--medium"
-                                      data-test-subj="nginxIntegrationDescription"
-                                    >
-                                      2023-05-30T14:56:35.137Z
-                                    </div>
-                                  </EuiText>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_author_1_4"
-                              mobileOptions={
-                                Object {
-                                  "header": "Added By",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Added By
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiText
-                                    className=""
-                                    data-test-subj="nginxIntegrationDescription"
-                                    key=".0"
-                                  >
-                                    <div
-                                      className="euiText euiText--medium"
-                                      data-test-subj="nginxIntegrationDescription"
-                                    >
-                                      unknown
-                                    </div>
-                                  </EuiText>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_status_1_5"
-                              mobileOptions={
-                                Object {
-                                  "header": "Status",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Status
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiText
-                                    className=""
-                                    data-test-subj="Placeholder Nginx IntegrationIntegrationStatus"
-                                    key=".0"
-                                  >
-                                    <div
-                                      className="euiText euiText--medium"
-                                      data-test-subj="Placeholder Nginx IntegrationIntegrationStatus"
+                                      data-test-subj="nginxIntegrationStatus"
                                     >
                                       unknown
                                     </div>
@@ -1794,7 +1347,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                       10,
                       15,
                     ],
-                    "totalItemCount": 2,
+                    "totalItemCount": 1,
                   }
                 }
               >
