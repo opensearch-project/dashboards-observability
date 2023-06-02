@@ -195,16 +195,17 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
 
 export const addedIntegrationData: AddedIntegrationsTableProps = {
   data: {
+    total: 1,
     hits: [
       {
-        name: 'Placeholder Nginx Integration',
+        name: 'nginx',
         templateName: 'nginx',
         dataSource: {
           sourceType: 'logs',
           dataset: 'nginx',
           namespace: 'prod',
         },
-        creationDate: '2023-05-30T14:56:30.139Z',
+        creationDate: '2023-06-02T15:30:35.281Z',
         status: 'unknown',
         assets: [
           {
@@ -212,137 +213,154 @@ export const addedIntegrationData: AddedIntegrationsTableProps = {
             assetId: '47892350-b495-11ed-af0a-cf5c93b5a3b6',
             status: 'available',
             isDefaultAsset: false,
+            description: 'sso_logs-*-*',
           },
           {
             assetType: 'search',
             assetId: 'd80e05b2-518c-4c3d-9651-4c9d8632dce4',
             status: 'available',
             isDefaultAsset: false,
+            description: '[NGINX Core Logs 1.0] Nginx Access Logs',
           },
           {
             assetType: 'visualization',
             assetId: '3b49a65d-54d8-483d-a8f0-3d7c855e1ecf',
             status: 'available',
             isDefaultAsset: false,
+            description: '[NGINX Core Logs 1.0] Response codes over time',
           },
           {
             assetType: 'search',
             assetId: '9f820fbe-ddde-43a2-9402-30bd295c97f6',
             status: 'available',
             isDefaultAsset: false,
+            description: '[NGINX Core Logs 1.0] Nginx Error Logs',
           },
           {
             assetType: 'visualization',
             assetId: '865e577b-634b-4a65-b9d6-7e324c395d18',
             status: 'available',
             isDefaultAsset: false,
+            description: '[NGINX Core Logs 1.0] Errors over time',
           },
           {
             assetType: 'visualization',
             assetId: 'dc1803f0-b478-11ed-9063-ebe46f9ac203',
             status: 'available',
             isDefaultAsset: false,
+            description: 'Top Paths',
           },
           {
             assetType: 'visualization',
             assetId: '99acc580-b47a-11ed-9063-ebe46f9ac203',
             status: 'available',
             isDefaultAsset: false,
+            description: 'Data Volume',
           },
           {
             assetType: 'visualization',
             assetId: '01ea64d0-b62f-11ed-a677-43d7aa86763b',
             status: 'available',
             isDefaultAsset: false,
+            description: 'Req-per-min',
           },
           {
             assetType: 'dashboard',
             assetId: '96847220-5261-44d0-89b4-65f3a659f13a',
             status: 'available',
             isDefaultAsset: true,
-          },
-          {
-            status: 'available',
-            isDefaultAsset: false,
+            description: '[NGINX Core Logs 1.0] Overview',
           },
         ],
         addedBy: 'unknown',
-      },
-      {
-        name: 'Placeholder Nginx Integration',
-        templateName: 'nginx',
-        dataSource: {
-          sourceType: 'logs',
-          dataset: 'nginx',
-          namespace: 'prod',
-        },
-        creationDate: '2023-05-30T14:56:35.137Z',
-        status: 'unknown',
-        assets: [
-          {
-            assetType: 'index-pattern',
-            assetId: '47892350-b495-11ed-af0a-cf5c93b5a3b6',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'search',
-            assetId: 'd80e05b2-518c-4c3d-9651-4c9d8632dce4',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'visualization',
-            assetId: '3b49a65d-54d8-483d-a8f0-3d7c855e1ecf',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'search',
-            assetId: '9f820fbe-ddde-43a2-9402-30bd295c97f6',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'visualization',
-            assetId: '865e577b-634b-4a65-b9d6-7e324c395d18',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'visualization',
-            assetId: 'dc1803f0-b478-11ed-9063-ebe46f9ac203',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'visualization',
-            assetId: '99acc580-b47a-11ed-9063-ebe46f9ac203',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'visualization',
-            assetId: '01ea64d0-b62f-11ed-a677-43d7aa86763b',
-            status: 'available',
-            isDefaultAsset: false,
-          },
-          {
-            assetType: 'dashboard',
-            assetId: '96847220-5261-44d0-89b4-65f3a659f13a',
-            status: 'available',
-            isDefaultAsset: true,
-          },
-          {
-            status: 'available',
-            isDefaultAsset: false,
-          },
-        ],
-        addedBy: 'unknown',
+        id: '6b3b8010-015a-11ee-8bf8-9f447e9961b0',
       },
     ],
   },
   loading: false,
+};
+
+export const testIntegrationInstanceData = {
+  data: {
+    data: {
+      id: '46f47b60-016b-11ee-8bf8-9f447e9961b0',
+      name: 'test integration',
+      templateName: 'nginx',
+      dataSource: {
+        sourceType: 'logs',
+        dataset: 'nginx',
+        namespace: 'prod',
+      },
+      creationDate: '2023-06-02T17:31:15.862Z',
+      status: 'unknown',
+      assets: [
+        {
+          assetType: 'index-pattern',
+          assetId: '47892350-b495-11ed-af0a-cf5c93b5a3b6',
+          status: 'available',
+          isDefaultAsset: false,
+          description: 'sso_logs-*-*',
+        },
+        {
+          assetType: 'search',
+          assetId: 'd80e05b2-518c-4c3d-9651-4c9d8632dce4',
+          status: 'available',
+          isDefaultAsset: false,
+          description: '[NGINX Core Logs 1.0] Nginx Access Logs',
+        },
+        {
+          assetType: 'visualization',
+          assetId: '3b49a65d-54d8-483d-a8f0-3d7c855e1ecf',
+          status: 'available',
+          isDefaultAsset: false,
+          description: '[NGINX Core Logs 1.0] Response codes over time',
+        },
+        {
+          assetType: 'search',
+          assetId: '9f820fbe-ddde-43a2-9402-30bd295c97f6',
+          status: 'available',
+          isDefaultAsset: false,
+          description: '[NGINX Core Logs 1.0] Nginx Error Logs',
+        },
+        {
+          assetType: 'visualization',
+          assetId: '865e577b-634b-4a65-b9d6-7e324c395d18',
+          status: 'available',
+          isDefaultAsset: false,
+          description: '[NGINX Core Logs 1.0] Errors over time',
+        },
+        {
+          assetType: 'visualization',
+          assetId: 'dc1803f0-b478-11ed-9063-ebe46f9ac203',
+          status: 'available',
+          isDefaultAsset: false,
+          description: 'Top Paths',
+        },
+        {
+          assetType: 'visualization',
+          assetId: '99acc580-b47a-11ed-9063-ebe46f9ac203',
+          status: 'available',
+          isDefaultAsset: false,
+          description: 'Data Volume',
+        },
+        {
+          assetType: 'visualization',
+          assetId: '01ea64d0-b62f-11ed-a677-43d7aa86763b',
+          status: 'available',
+          isDefaultAsset: false,
+          description: 'Req-per-min',
+        },
+        {
+          assetType: 'dashboard',
+          assetId: '96847220-5261-44d0-89b4-65f3a659f13a',
+          status: 'available',
+          isDefaultAsset: true,
+          description: '[NGINX Core Logs 1.0] Overview',
+        },
+      ],
+      addedBy: 'unknown',
+    },
+  },
 };
 
 export const nginxIntegrationData = {

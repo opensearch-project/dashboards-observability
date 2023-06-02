@@ -18,6 +18,7 @@ describe('IntegrationsKibanaBackend', () => {
     mockClient = {
       find: jest.fn(),
       create: jest.fn(),
+      delete: jest.fn(),
     } as any;
     mockRepository = {
       get: jest.fn(),
@@ -82,6 +83,14 @@ describe('IntegrationsKibanaBackend', () => {
     });
     expect(mockClient.create).toHaveBeenCalledWith('integration-instance', instance);
     expect(result).toEqual(instance);
+  });
+
+  it('should delete an integration instance', async () => {
+    const mockDelete = jest.fn();
+    (mockClient.create as jest.Mock).mockResolvedValue(mockDelete);
+
+    await backend.deleteIntegrationInstance('deletedId');
+    expect(mockClient.delete).toHaveBeenCalledWith('integration-instance', 'deletedId');
   });
 
   it('should reject when loading an integration instance fails', async () => {

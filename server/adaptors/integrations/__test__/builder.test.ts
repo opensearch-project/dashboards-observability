@@ -36,8 +36,8 @@ describe('IntegrationInstanceBuilder', () => {
     };
     const mockResponse = {
       saved_objects: [
-        { type: 'dashboard', id: 'dashboard1' },
-        { type: 'visualization', id: 'visualization1' },
+        { type: 'dashboard', id: 'dashboard1', attributes: { title: 'hi' } },
+        { type: 'visualization', id: 'visualization1', attributes: { title: 'hi' } },
       ],
     };
     const expectedInstance = {
@@ -57,12 +57,14 @@ describe('IntegrationInstanceBuilder', () => {
           assetId: 'dashboard1',
           status: 'available',
           isDefaultAsset: true,
+          description: 'hi',
         },
         {
           assetType: 'visualization',
           assetId: 'visualization1',
           status: 'available',
           isDefaultAsset: false,
+          description: 'hi',
         },
       ],
       addedBy: 'unknown',
