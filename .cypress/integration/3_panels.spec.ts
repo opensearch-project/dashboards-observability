@@ -12,6 +12,7 @@ import {
   delay,
   NEW_VISUALIZATION_NAME,
   PPL_FILTER,
+  PPL_VISUALIZATION_CONFIGS,
   PPL_VISUALIZATIONS,
   PPL_VISUALIZATIONS_NAMES,
   TEST_PANEL,
@@ -337,7 +338,11 @@ describe('Panels testing with Sample Data', () => {
       console.log('Add PPL  Test');
       createSavedObjectPanel().as('thePanel');
 
-      createVisualization(PPL_VISUALIZATIONS_NAMES[2], PPL_VISUALIZATIONS[2]).as('vis1');
+      createVisualization(
+        PPL_VISUALIZATIONS_NAMES[2],
+        PPL_VISUALIZATIONS[2],
+        PPL_VISUALIZATION_CONFIGS[2]
+      ).as('vis1');
 
       cy.then(function () {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
@@ -354,6 +359,7 @@ describe('Panels testing with Sample Data', () => {
       cy.get('[data-test-subj="superDatePickerQuickMenu"')
         .first()
         .within(() => {
+          cy.get('input[aria-label="Time value"]').type('2', { force: true });
           cy.get('select[aria-label="Time unit"]').select('years');
           cy.get('button').contains('Apply').click();
         });
@@ -726,7 +732,7 @@ const addVisualizationsToPanel = (panel, additionalVisualizationIds: string[]) =
   });
 };
 
-const createVisualization = (newName, query) => {
+const createVisualization = (newName, query, vizConfig) => {
   return cy
     .request({
       method: 'POST',
@@ -760,8 +766,7 @@ const createVisualization = (newName, query) => {
             name: newName,
             description: '',
             type: 'bar',
-            user_configs:
-              '{"dataConfig":{"dimensions":[{"label":"Carrier","name":"Carrier"}],"series":[{"customLabel":"","label":"Cancelled","name":"Cancelled","aggregation":"count"}],"breakdowns":[]}}',
+            user_configs: vizConfig,
             sub_type: 'visualization',
           },
         },
