@@ -84,4 +84,41 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
   additionalProperties: false,
 };
 
+const instanceSchema: JSONSchemaType<IntegrationInstance> = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    templateName: { type: 'string' },
+    dataSource: {
+      type: 'object',
+      properties: {
+        sourceType: { type: 'string' },
+        dataset: { type: 'string' },
+        namespace: { type: 'string' },
+      },
+      required: ['sourceType', 'dataset', 'namespace'],
+      additionalProperties: false,
+    },
+    creationDate: { type: 'string', format: 'date-time' },
+    tags: { type: 'array', items: { type: 'string' }, nullable: true },
+    status: { type: 'string' },
+    assets: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          assetType: { type: 'string' },
+          assetId: { type: 'string', format: 'uuid' },
+          status: { type: 'string' },
+          isDefaultAsset: { type: 'boolean' },
+          description: { type: 'string' },
+        },
+        required: ['assetType', 'assetId', 'status', 'isDefaultAsset', 'description'],
+      },
+    },
+  },
+  required: ['name', 'templateName', 'dataSource', 'creationDate', 'status', 'assets'],
+};
+
 export const templateValidator = ajv.compile(templateSchema);
+export const instanceValidator = ajv.compile(instanceSchema);

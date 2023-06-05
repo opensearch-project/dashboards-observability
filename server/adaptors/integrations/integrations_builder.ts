@@ -82,7 +82,7 @@ export class IntegrationInstanceBuilder {
         namespace: options.namespace,
       },
       tags: options.tags,
-      creationDate: new Date(),
+      creationDate: new Date().toISOString(),
       status: 'unknown',
       assets: refs,
       addedBy: 'unknown',

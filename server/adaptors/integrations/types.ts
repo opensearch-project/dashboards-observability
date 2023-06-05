@@ -62,10 +62,9 @@ interface IntegrationInstance {
     dataset: string;
     namespace: string;
   };
-  creationDate: Date;
+  creationDate: string;
   tags?: string[];
   status: string;
-  addedBy?: string;
   assets: AssetReference[];
 }
 
@@ -77,10 +76,9 @@ interface IntegrationInstanceResult {
     dataset: string;
     namespace: string;
   };
-  creationDate: Date;
+  creationDate: string;
   tags?: string[];
   status: string;
-  addedBy?: string;
   assets: AssetReference[];
   id: string;
 }
