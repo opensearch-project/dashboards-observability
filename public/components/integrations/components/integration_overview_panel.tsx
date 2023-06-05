@@ -25,7 +25,10 @@ const pageStyles: CSS.Properties = {
 export function IntegrationOverview(props: any) {
   const { data } = props;
   return (
-    <EuiPageHeader style={{ justifyContent: 'center' }}>
+    <EuiPageHeader
+      style={{ justifyContent: 'center' }}
+      data-test-subj={`${data.data.name}-overview`}
+    >
       <img
         src={`${INTEGRATIONS_BASE}/repository/${data.data.name}/static/logo`}
         alt="React Logo"
@@ -49,6 +52,7 @@ export function IntegrationOverview(props: any) {
                   props.showFlyout(data.data.name);
                 }}
                 fill
+                data-test-subj="add-integration-button"
               >
                 Add
               </EuiButton>

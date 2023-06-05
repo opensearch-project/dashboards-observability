@@ -2,17 +2,17 @@
 
 exports[`Added Integration Table View Test Renders added integration table view using dummy data 1`] = `
 <EuiPageContent
-  id="addedIntegrationsArea"
+  data-test-subj="addedIntegrationsArea"
 >
   <EuiPanel
     className="euiPageContent"
-    id="addedIntegrationsArea"
+    data-test-subj="addedIntegrationsArea"
     paddingSize="l"
     role="main"
   >
     <div
       className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
-      id="addedIntegrationsArea"
+      data-test-subj="addedIntegrationsArea"
       role="main"
     >
       <EuiPageContentHeaderSection>

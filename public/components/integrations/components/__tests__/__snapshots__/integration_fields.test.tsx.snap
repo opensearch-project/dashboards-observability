@@ -1,9 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Available Integration Table View Test Renders nginx integration table view using dummy data 1`] = `
-<EuiPanel>
+<EuiPanel
+  data-test-subj="nginx-fields"
+>
   <div
     className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    data-test-subj="nginx-fields"
   >
     <PanelTitle
       title="nginx Fields"

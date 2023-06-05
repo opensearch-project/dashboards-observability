@@ -137,6 +137,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                             >
                               <EuiButton
                                 color="danger"
+                                data-test-subj="deleteInstanceButton"
                                 fill={true}
                                 onClick={[Function]}
                                 size="s"
@@ -144,6 +145,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
                                   color="danger"
+                                  data-test-subj="deleteInstanceButton"
                                   disabled={false}
                                   element="button"
                                   fill={true}
@@ -154,6 +156,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                 >
                                   <button
                                     className="euiButton euiButton--danger euiButton--small euiButton--fill"
+                                    data-test-subj="deleteInstanceButton"
                                     disabled={false}
                                     onClick={[Function]}
                                     style={

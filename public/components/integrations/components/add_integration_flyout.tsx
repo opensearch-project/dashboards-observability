@@ -51,18 +51,33 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       <>
         <EuiForm component="form">
           <EuiFormRow label="Name" helpText="The name identifies the integration as a whole.">
-            <EuiFieldText name="first" onChange={(e) => onNameChange(e)} value={name} />
+            <EuiFieldText
+              data-test-subj="instance-name"
+              name="first"
+              onChange={(e) => onNameChange(e)}
+              value={name}
+            />
           </EuiFormRow>
           <EuiSpacer />
           <EuiFormRow label="Namespace" helpText="The enviornment for which to ingest data.">
-            <EuiFieldText name="first" onChange={(e) => onNamespaceChange(e)} value={namespace} />
+            <EuiFieldText
+              data-test-subj="instance-namespace"
+              name="first"
+              onChange={(e) => onNamespaceChange(e)}
+              value={namespace}
+            />
           </EuiFormRow>
           <EuiSpacer />
           <EuiFormRow
             label="Tags (optional)"
             helpText="Tags you want associated with this integration."
           >
-            <EuiFieldText name="first" onChange={(e) => onTagsChange(e)} value={tags} />
+            <EuiFieldText
+              data-test-subj="instance-tags"
+              name="first"
+              onChange={(e) => onTagsChange(e)}
+              value={tags}
+            />
           </EuiFormRow>
           <EuiSpacer />
         </EuiForm>
@@ -71,9 +86,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   };
 
   return (
-    <EuiFlyout data-test-subj="serviceDetailFlyout" onClose={onClose} size="s">
+    <EuiFlyout data-test-subj="addIntegrationFlyout" onClose={onClose} size="s">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle data-test-subj="serviceDetailFlyoutTitle">
+        <EuiTitle data-test-subj="addIntegrationFlyoutTitle">
           <h2>Add Integration</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -92,6 +107,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 onClose();
               }}
               fill
+              data-test-subj="createInstanceButton"
             >
               Add Integration
             </EuiButton>

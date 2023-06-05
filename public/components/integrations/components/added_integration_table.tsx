@@ -18,7 +18,6 @@ import React from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  console.log(props);
   const integrations = props.data.hits;
 
   const tableColumns = [
@@ -29,7 +28,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       truncateText: true,
       render: (value, record) => (
         <EuiLink
-          data-test-subj={`${record.templateName}IntegrationLink`}
+          data-test-subj={`${record.name}IntegrationLink`}
           // href={`#/added/${record.id}`}
           href={`#/installed/${record.id}`}
         >
@@ -108,7 +107,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   };
 
   return (
-    <EuiPageContent id="addedIntegrationsArea">
+    <EuiPageContent data-test-subj="addedIntegrationsArea">
       <EuiPageContentHeaderSection>
         <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
           <h3>Added Integrations</h3>

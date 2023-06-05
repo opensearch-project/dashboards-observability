@@ -116,6 +116,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                   onClick={() => {
                     getModal();
                   }}
+                  data-test-subj="deleteInstanceButton"
                 >
                   Remove Integration
                 </EuiButton>
@@ -192,15 +193,16 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         sortable: true,
         truncateText: true,
         render: (value, record) => {
+          console.log(record);
           return record.isDefaultAsset ? (
             <EuiLink
-              data-test-subj={`${record.name}IntegrationLink`}
+              data-test-subj={`IntegrationAssetLink`}
               onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
             >
               {_.truncate(record.description, { length: 100 })}
             </EuiLink>
           ) : (
-            <EuiText data-test-subj={`${record.name}IntegrationLink`}>
+            <EuiText data-test-subj={`IntegrationAssetText`}>
               {_.truncate(record.description, { length: 100 })}
             </EuiText>
           );
