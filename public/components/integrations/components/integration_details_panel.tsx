@@ -14,7 +14,7 @@ export function IntegrationDetails(props: any) {
   }
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj={`${props.data.data.name}-details`}>
       <PanelTitle title={props.data.data.name + ' Details'} />
       <EuiSpacer />
       <EuiText>{props.data.data.description}</EuiText>

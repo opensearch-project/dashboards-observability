@@ -66,7 +66,7 @@ export function IntegrationAssets(props: any) {
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj={`${props.data.data.name}-assets`}>
       <PanelTitle title={props.data.data.name + ' Assets'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable

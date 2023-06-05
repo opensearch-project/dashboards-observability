@@ -70,7 +70,6 @@ describe('IntegrationInstanceBuilder', () => {
           description: 'hi',
         },
       ],
-      addedBy: 'unknown',
     };
 
     (mockClient.bulkCreate as jest.Mock).mockResolvedValue(mockResponse);

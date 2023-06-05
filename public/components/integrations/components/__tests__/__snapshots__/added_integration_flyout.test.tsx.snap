@@ -7,7 +7,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
   onCreate={[Function]}
 >
   <EuiFlyout
-    data-test-subj="serviceDetailFlyout"
+    data-test-subj="addIntegrationFlyout"
     onClose={[Function]}
     size="s"
   >
@@ -36,7 +36,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
             >
               <div
                 class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                data-test-subj="serviceDetailFlyout"
+                data-test-subj="addIntegrationFlyout"
                 role="dialog"
                 tabindex="-1"
               >
@@ -62,7 +62,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                 >
                   <h2
                     class="euiTitle euiTitle--medium"
-                    data-test-subj="serviceDetailFlyoutTitle"
+                    data-test-subj="addIntegrationFlyoutTitle"
                   >
                     Add Integration
                   </h2>
@@ -106,6 +106,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 <input
                                   aria-describedby="random_html_id-help-0"
                                   class="euiFieldText"
+                                  data-test-subj="instance-name"
                                   id="random_html_id"
                                   name="first"
                                   type="text"
@@ -150,6 +151,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 <input
                                   aria-describedby="random_html_id-help-0"
                                   class="euiFieldText"
+                                  data-test-subj="instance-namespace"
                                   id="random_html_id"
                                   name="first"
                                   type="text"
@@ -194,6 +196,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 <input
                                   aria-describedby="random_html_id-help-0"
                                   class="euiFieldText"
+                                  data-test-subj="instance-tags"
                                   id="random_html_id"
                                   name="first"
                                   type="text"
@@ -245,6 +248,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                     >
                       <button
                         class="euiButton euiButton--primary euiButton--fill"
+                        data-test-subj="createInstanceButton"
                         type="button"
                       >
                         <span
@@ -360,7 +364,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                     >
                       <div
                         class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                        data-test-subj="serviceDetailFlyout"
+                        data-test-subj="addIntegrationFlyout"
                         role="dialog"
                         tabindex="-1"
                       >
@@ -386,7 +390,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                         >
                           <h2
                             class="euiTitle euiTitle--medium"
-                            data-test-subj="serviceDetailFlyoutTitle"
+                            data-test-subj="addIntegrationFlyoutTitle"
                           >
                             Add Integration
                           </h2>
@@ -430,6 +434,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         <input
                                           aria-describedby="random_html_id-help-0"
                                           class="euiFieldText"
+                                          data-test-subj="instance-name"
                                           id="random_html_id"
                                           name="first"
                                           type="text"
@@ -474,6 +479,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         <input
                                           aria-describedby="random_html_id-help-0"
                                           class="euiFieldText"
+                                          data-test-subj="instance-namespace"
                                           id="random_html_id"
                                           name="first"
                                           type="text"
@@ -518,6 +524,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         <input
                                           aria-describedby="random_html_id-help-0"
                                           class="euiFieldText"
+                                          data-test-subj="instance-tags"
                                           id="random_html_id"
                                           name="first"
                                           type="text"
@@ -569,6 +576,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             >
                               <button
                                 class="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="createInstanceButton"
                                 type="button"
                               >
                                 <span
@@ -616,7 +624,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       >
                         <div
                           class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                          data-test-subj="serviceDetailFlyout"
+                          data-test-subj="addIntegrationFlyout"
                           role="dialog"
                           tabindex="-1"
                         >
@@ -642,7 +650,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                           >
                             <h2
                               class="euiTitle euiTitle--medium"
-                              data-test-subj="serviceDetailFlyoutTitle"
+                              data-test-subj="addIntegrationFlyoutTitle"
                             >
                               Add Integration
                             </h2>
@@ -686,6 +694,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText"
+                                            data-test-subj="instance-name"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -730,6 +739,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText"
+                                            data-test-subj="instance-namespace"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -774,6 +784,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText"
+                                            data-test-subj="instance-tags"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -825,6 +836,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               >
                                 <button
                                   class="euiButton euiButton--primary euiButton--fill"
+                                  data-test-subj="createInstanceButton"
                                   type="button"
                                 >
                                   <span
@@ -872,7 +884,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                         >
                           <div
                             class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                            data-test-subj="serviceDetailFlyout"
+                            data-test-subj="addIntegrationFlyout"
                             role="dialog"
                             tabindex="-1"
                           >
@@ -898,7 +910,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             >
                               <h2
                                 class="euiTitle euiTitle--medium"
-                                data-test-subj="serviceDetailFlyoutTitle"
+                                data-test-subj="addIntegrationFlyoutTitle"
                               >
                                 Add Integration
                               </h2>
@@ -942,6 +954,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText"
+                                              data-test-subj="instance-name"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -986,6 +999,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText"
+                                              data-test-subj="instance-namespace"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -1030,6 +1044,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText"
+                                              data-test-subj="instance-tags"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -1081,6 +1096,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 >
                                   <button
                                     class="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="createInstanceButton"
                                     type="button"
                                   >
                                     <span
@@ -1116,7 +1132,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                           >
                             <div
                               class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                              data-test-subj="serviceDetailFlyout"
+                              data-test-subj="addIntegrationFlyout"
                               role="dialog"
                               tabindex="-1"
                             >
@@ -1142,7 +1158,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               >
                                 <h2
                                   class="euiTitle euiTitle--medium"
-                                  data-test-subj="serviceDetailFlyoutTitle"
+                                  data-test-subj="addIntegrationFlyoutTitle"
                                 >
                                   Add Integration
                                 </h2>
@@ -1186,6 +1202,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText"
+                                                data-test-subj="instance-name"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -1230,6 +1247,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText"
+                                                data-test-subj="instance-namespace"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -1274,6 +1292,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText"
+                                                data-test-subj="instance-tags"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -1325,6 +1344,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   >
                                     <button
                                       class="euiButton euiButton--primary euiButton--fill"
+                                      data-test-subj="createInstanceButton"
                                       type="button"
                                     >
                                       <span
@@ -1379,7 +1399,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                     >
                       <div
                         className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                        data-test-subj="serviceDetailFlyout"
+                        data-test-subj="addIntegrationFlyout"
                         onMouseDown={[Function]}
                         onMouseUp={[Function]}
                         onTouchEnd={[Function]}
@@ -1445,11 +1465,11 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
                             <EuiTitle
-                              data-test-subj="serviceDetailFlyoutTitle"
+                              data-test-subj="addIntegrationFlyoutTitle"
                             >
                               <h2
                                 className="euiTitle euiTitle--medium"
-                                data-test-subj="serviceDetailFlyoutTitle"
+                                data-test-subj="addIntegrationFlyoutTitle"
                               >
                                 Add Integration
                               </h2>
@@ -1509,6 +1529,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         >
                                           <EuiFieldText
                                             aria-describedby="random_html_id-help-0"
+                                            data-test-subj="instance-name"
                                             id="random_html_id"
                                             name="first"
                                             onBlur={[Function]}
@@ -1530,6 +1551,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                     <input
                                                       aria-describedby="random_html_id-help-0"
                                                       className="euiFieldText"
+                                                      data-test-subj="instance-name"
                                                       id="random_html_id"
                                                       name="first"
                                                       onBlur={[Function]}
@@ -1600,6 +1622,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         >
                                           <EuiFieldText
                                             aria-describedby="random_html_id-help-0"
+                                            data-test-subj="instance-namespace"
                                             id="random_html_id"
                                             name="first"
                                             onBlur={[Function]}
@@ -1621,6 +1644,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                     <input
                                                       aria-describedby="random_html_id-help-0"
                                                       className="euiFieldText"
+                                                      data-test-subj="instance-namespace"
                                                       id="random_html_id"
                                                       name="first"
                                                       onBlur={[Function]}
@@ -1691,6 +1715,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         >
                                           <EuiFieldText
                                             aria-describedby="random_html_id-help-0"
+                                            data-test-subj="instance-tags"
                                             id="random_html_id"
                                             name="first"
                                             onBlur={[Function]}
@@ -1712,6 +1737,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                     <input
                                                       aria-describedby="random_html_id-help-0"
                                                       className="euiFieldText"
+                                                      data-test-subj="instance-tags"
                                                       id="random_html_id"
                                                       name="first"
                                                       onBlur={[Function]}
@@ -1817,11 +1843,13 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     className="euiFlexItem"
                                   >
                                     <EuiButton
+                                      data-test-subj="createInstanceButton"
                                       fill={true}
                                       onClick={[Function]}
                                     >
                                       <EuiButtonDisplay
                                         baseClassName="euiButton"
+                                        data-test-subj="createInstanceButton"
                                         disabled={false}
                                         element="button"
                                         fill={true}
@@ -1831,6 +1859,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       >
                                         <button
                                           className="euiButton euiButton--primary euiButton--fill"
+                                          data-test-subj="createInstanceButton"
                                           disabled={false}
                                           onClick={[Function]}
                                           style={

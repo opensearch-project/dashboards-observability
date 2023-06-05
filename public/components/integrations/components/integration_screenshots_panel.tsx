@@ -15,7 +15,7 @@ export function IntegrationScreenshots(props: any) {
   }
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj={`${props.data.data.name}-screenshots`}>
       <PanelTitle title={'Screenshots'} />
       <EuiFlexGroup gutterSize="l">
         {screenshots?.map((i, v) => {

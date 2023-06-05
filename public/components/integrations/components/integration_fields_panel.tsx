@@ -110,7 +110,7 @@ export function IntegrationFields(props: any) {
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj={`${props.data.data.name}-fields`}>
       <PanelTitle title={props.data.data.name + ' Fields'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable

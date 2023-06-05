@@ -2,17 +2,17 @@
 
 exports[`Added Integration Table View Test Renders added integration table view using dummy data 1`] = `
 <EuiPageContent
-  id="addedIntegrationsArea"
+  data-test-subj="addedIntegrationsArea"
 >
   <EuiPanel
     className="euiPageContent"
-    id="addedIntegrationsArea"
+    data-test-subj="addedIntegrationsArea"
     paddingSize="l"
     role="main"
   >
     <div
       className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
-      id="addedIntegrationsArea"
+      data-test-subj="addedIntegrationsArea"
       role="main"
     >
       <EuiPageContentHeaderSection>
@@ -65,13 +65,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
             Object {
               "field": "dateAdded",
               "name": "Date Added",
-              "render": [Function],
-              "sortable": true,
-              "truncateText": true,
-            },
-            Object {
-              "field": "author",
-              "name": "Added By",
               "render": [Function],
               "sortable": true,
               "truncateText": true,
@@ -592,13 +585,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "truncateText": true,
                 },
                 Object {
-                  "field": "author",
-                  "name": "Added By",
-                  "render": [Function],
-                  "sortable": true,
-                  "truncateText": true,
-                },
-                Object {
                   "field": "status",
                   "name": "Status",
                   "render": [Function],
@@ -952,58 +938,12 @@ exports[`Added Integration Table View Test Renders added integration table view 
                           </EuiTableHeaderCell>
                           <EuiTableHeaderCell
                             align="left"
-                            data-test-subj="tableHeaderCell_author_4"
-                            key="_data_h_author_4"
+                            data-test-subj="tableHeaderCell_status_4"
+                            key="_data_h_status_4"
                           >
                             <th
                               className="euiTableHeaderCell"
-                              data-test-subj="tableHeaderCell_author_4"
-                              role="columnheader"
-                              scope="col"
-                              style={
-                                Object {
-                                  "width": undefined,
-                                }
-                              }
-                            >
-                              <CellContents
-                                className="euiTableCellContent"
-                                showSortMsg={false}
-                              >
-                                <span
-                                  className="euiTableCellContent"
-                                >
-                                  <EuiInnerText>
-                                    <EuiI18n
-                                      default="{innerText}; {description}"
-                                      token="euiTableHeaderCell.titleTextWithDesc"
-                                      values={
-                                        Object {
-                                          "description": undefined,
-                                          "innerText": "Added By",
-                                        }
-                                      }
-                                    >
-                                      <span
-                                        className="euiTableCellContent__text"
-                                        title="Added By"
-                                      >
-                                        Added By
-                                      </span>
-                                    </EuiI18n>
-                                  </EuiInnerText>
-                                </span>
-                              </CellContents>
-                            </th>
-                          </EuiTableHeaderCell>
-                          <EuiTableHeaderCell
-                            align="left"
-                            data-test-subj="tableHeaderCell_status_5"
-                            key="_data_h_status_5"
-                          >
-                            <th
-                              className="euiTableHeaderCell"
-                              data-test-subj="tableHeaderCell_status_5"
+                              data-test-subj="tableHeaderCell_status_4"
                               role="columnheader"
                               scope="col"
                               style={
@@ -1240,51 +1180,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_author_6b3b8010-015a-11ee-8bf8-9f447e9961b0_4"
-                              mobileOptions={
-                                Object {
-                                  "header": "Added By",
-                                  "render": undefined,
-                                }
-                              }
-                              setScopeRow={false}
-                              textOnly={false}
-                              truncateText={true}
-                            >
-                              <td
-                                className="euiTableRowCell"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <div
-                                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                >
-                                  Added By
-                                </div>
-                                <div
-                                  className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                >
-                                  <EuiText
-                                    className=""
-                                    data-test-subj="nginxIntegrationDescription"
-                                    key=".0"
-                                  >
-                                    <div
-                                      className="euiText euiText--medium"
-                                      data-test-subj="nginxIntegrationDescription"
-                                    >
-                                      unknown
-                                    </div>
-                                  </EuiText>
-                                </div>
-                              </td>
-                            </EuiTableRowCell>
-                            <EuiTableRowCell
-                              align="left"
-                              key="_data_column_status_6b3b8010-015a-11ee-8bf8-9f447e9961b0_5"
+                              key="_data_column_status_6b3b8010-015a-11ee-8bf8-9f447e9961b0_4"
                               mobileOptions={
                                 Object {
                                   "header": "Status",

@@ -52,7 +52,6 @@ export class IntegrationInstanceBuilder {
     try {
       const deserializedAssets = assets.map((asset) => JSON.parse(asset.body));
       const response = await this.client.bulkCreate(deserializedAssets);
-      console.log('bAWIEHIOGHIAORHGIOAEHRG' + JSON.stringify(response));
       const refs: AssetReference[] = response.saved_objects.map((obj: any) => {
         return {
           assetType: obj.type,
@@ -85,7 +84,6 @@ export class IntegrationInstanceBuilder {
       creationDate: new Date().toISOString(),
       status: 'unknown',
       assets: refs,
-      addedBy: 'unknown',
     });
   }
 }
