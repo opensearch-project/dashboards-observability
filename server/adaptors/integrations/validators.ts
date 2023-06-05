@@ -11,6 +11,8 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
     license: { type: 'string' },
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
+    link: { type: 'string', nullable: true },
+    status: { type: 'string', nullable: true },
     tags: {
       type: 'array',
       items: {
@@ -49,6 +51,12 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
           },
           required: [],
           nullable: true,
+        },
+        gallery: {
+          type: 'array',
+          items: {
+            type: 'object',
+          },
         },
       },
       additionalProperties: false,

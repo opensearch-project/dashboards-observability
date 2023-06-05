@@ -19,6 +19,7 @@ describe('IntegrationsKibanaBackend', () => {
       find: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
+      get: jest.fn(),
     } as any;
     mockRepository = {
       get: jest.fn(),
@@ -87,10 +88,30 @@ describe('IntegrationsKibanaBackend', () => {
 
   it('should delete an integration instance', async () => {
     const mockDelete = jest.fn();
+    const testData = {
+      id: '4b4a56e0-03ae-11ee-97be-8901a6e0519c',
+      type: 'integration-instance',
+      namespaces: ['default'],
+      updated_at: '2023-06-05T14:36:01.742Z',
+      version: 'WzIyMSwxXQ==',
+      attributes: {
+        name: 'nginx',
+        templateName: 'nginx',
+        dataSource: { sourceType: 'logs', dataset: 'nginx', namespace: 'prod' },
+        creationDate: '2023-06-05T14:36:01.742Z',
+        status: 'unknown',
+        assets: [{ assetId: 'child', assetType: 'viz' }],
+      },
+      references: [],
+      migrationVersion: undefined,
+    };
     (mockClient.create as jest.Mock).mockResolvedValue(mockDelete);
+    (mockClient.get as jest.Mock).mockResolvedValue(testData);
 
     await backend.deleteIntegrationInstance('deletedId');
     expect(mockClient.delete).toHaveBeenCalledWith('integration-instance', 'deletedId');
+    // deleting an instance also deletes its children saved objects
+    expect(mockClient.delete).toHaveBeenCalledWith('viz', 'child');
   });
 
   it('should reject when loading an integration instance fails', async () => {

@@ -18,6 +18,14 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     this.repository = repository ?? new IntegrationsRepository();
   }
   deleteIntegrationInstance = async (id: string): Promise<any> => {
+    const children: any = await this.client.get('integration-instance', id);
+    children.attributes.assets
+      .map((i) => {
+        return { id: i.assetId, type: i.assetType };
+      })
+      .forEach(async (element) => {
+        await this.client.delete(element.type, element.id);
+      });
     const result = await this.client.delete('integration-instance', id);
     return Promise.resolve(result);
   };

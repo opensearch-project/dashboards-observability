@@ -25,6 +25,7 @@ export class IntegrationInstanceBuilder {
     template: IntegrationTemplate,
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
+    console.log(template);
     const result = this.validate(template)
       .then(() => this.post_assets(template.displayAssets))
       .then((refs) => this.build_instance(template, refs, options));
