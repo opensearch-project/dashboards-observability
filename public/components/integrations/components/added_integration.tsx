@@ -149,13 +149,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
-                <h4>Added By</h4>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiText>{data?.data?.addedBy}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
                 <h4>Tags</h4>
               </EuiText>
               <EuiSpacer size="m" />

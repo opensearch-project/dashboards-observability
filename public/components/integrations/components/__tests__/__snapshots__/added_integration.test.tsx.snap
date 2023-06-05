@@ -298,33 +298,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                               className="euiText euiText--medium"
                             >
                               <h4>
-                                Added By
-                              </h4>
-                            </div>
-                          </EuiText>
-                          <EuiSpacer
-                            size="m"
-                          >
-                            <div
-                              className="euiSpacer euiSpacer--m"
-                            />
-                          </EuiSpacer>
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <h4>
                                 Tags
                               </h4>
                             </div>

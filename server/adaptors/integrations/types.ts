@@ -65,7 +65,6 @@ interface IntegrationInstance {
   creationDate: Date;
   tags?: string[];
   status: string;
-  addedBy?: string;
   assets: AssetReference[];
 }
 
@@ -80,7 +79,6 @@ interface IntegrationInstanceResult {
   creationDate: Date;
   tags?: string[];
   status: string;
-  addedBy?: string;
   assets: AssetReference[];
   id: string;
 }

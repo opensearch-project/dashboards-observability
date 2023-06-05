@@ -74,17 +74,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       ),
     },
     {
-      field: 'author',
-      name: 'Added By',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
-          {_.truncate(record.addedBy, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
       field: 'status',
       name: 'Status',
       sortable: true,

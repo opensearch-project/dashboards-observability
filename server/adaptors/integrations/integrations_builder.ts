@@ -85,7 +85,6 @@ export class IntegrationInstanceBuilder {
       creationDate: new Date(),
       status: 'unknown',
       assets: refs,
-      addedBy: 'unknown',
     });
   }
 }
