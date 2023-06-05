@@ -20,11 +20,11 @@ describe('IntegrationInstanceBuilder', () => {
 
   it('should build an integration instance', async () => {
     const displayAssets = [
-      { body: '{"type":"dashboard","title":"Dashboard 1"}' },
-      { body: '{"type":"visualization","title":"Visualization 1"}' },
+      { body: '{"type":"dashboard","title":"Dashboard 1", "references": []}' },
+      { body: '{"type":"visualization","title":"Visualization 1", "references": []}' },
     ];
     const template: IntegrationTemplate = {
-      name: 'test-template',
+      name: 'nginx',
       version: '1.0',
       integrationType: 'logs',
       license: 'Apache-2.0',
@@ -52,7 +52,7 @@ describe('IntegrationInstanceBuilder', () => {
         namespace: options.namespace,
       },
       tags: options.tags,
-      creationDate: expect.any(Date),
+      creationDate: expect.any(String),
       status: 'unknown',
       assets: [
         {
@@ -84,11 +84,11 @@ describe('IntegrationInstanceBuilder', () => {
 
   it('should reject when posting assets fails', async () => {
     const displayAssets = [
-      { body: '{"type":"dashboard","title":"Dashboard 1"}' },
-      { body: '{"type":"visualization","title":"Visualization 1"}' },
+      { body: '{"type":"dashboard","title":"Dashboard 1", "references":[]}' },
+      { body: '{"type":"visualization","title":"Visualization 1", "references": []}' },
     ];
     const template: IntegrationTemplate = {
-      name: 'test-template',
+      name: 'nginx',
       version: '1.0',
       integrationType: 'logs',
       license: 'Apache-2.0',

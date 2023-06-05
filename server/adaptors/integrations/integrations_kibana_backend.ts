@@ -7,7 +7,6 @@ import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { IntegrationsRepository } from './integrations_repository';
-import { SimpleSavedObject } from '../../../../../src/core/public';
 
 export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
