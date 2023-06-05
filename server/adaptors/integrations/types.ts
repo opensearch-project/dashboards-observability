@@ -68,18 +68,7 @@ interface IntegrationInstance {
   assets: AssetReference[];
 }
 
-interface IntegrationInstanceResult {
-  name: string;
-  templateName: string;
-  dataSource: {
-    sourceType: string;
-    dataset: string;
-    namespace: string;
-  };
-  creationDate: string;
-  tags?: string[];
-  status: string;
-  assets: AssetReference[];
+interface IntegrationInstanceResult extends IntegrationInstance {
   id: string;
 }
 

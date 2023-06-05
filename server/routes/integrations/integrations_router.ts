@@ -13,8 +13,6 @@ import {
 } from '../../../../../src/core/server/http/router';
 import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
 
-const added = false;
-
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
  * This is a convenience method that handles common error handling and response formatting.
@@ -152,9 +150,7 @@ export function registerIntegrationsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return await a.getIntegrationInstances({
-          added,
-        });
+        return await a.getIntegrationInstances({});
       });
     }
   );
@@ -194,34 +190,10 @@ export function registerIntegrationsRoute(router: IRouter) {
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         return {
           data: await a.getIntegrationInstance({
-            added,
             id: request.params.id,
           }),
         };
       });
     }
   );
-
-  // router.get(
-  //   {
-  //     path: `${INTEGRATIONS_BASE}/repository/{name}`,
-  //     validate: {
-  //       params: schema.object({
-  //         name: schema.string(),
-  //       }),
-  //     },
-  //   },
-  //   async (context, request, response): Promise<any> => {
-  //     const adaptor = getAdaptor(context, request);
-  //     return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-  //       return {
-  //         data: (
-  //           await a.getIntegrationTemplates({
-  //             name: request.params.name,
-  //           })
-  //         ).hits[0],
-  //       };
-  //     });
-  //   }
-  // );
 }

@@ -17,6 +17,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     this.client = client;
     this.repository = repository ?? new IntegrationsRepository();
   }
+
   deleteIntegrationInstance = async (id: string): Promise<any> => {
     const children: any = await this.client.get('integration-instance', id);
     children.attributes.assets
@@ -38,7 +39,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       return Promise.resolve({ hits: [result] });
     }
     const result = await this.repository.get();
-    console.log(`Retrieving ${result.length} templates from catalog`);
     return Promise.resolve({
       hits: result,
     });
@@ -48,7 +48,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstancesSearchResult> => {
     const result = await this.client.find({ type: 'integration-instance' });
-    console.log(result);
     return Promise.resolve({
       total: result.total,
       hits: result.saved_objects?.map((x) => ({
@@ -61,9 +60,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   getIntegrationInstance = async (
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceResult> => {
-    console.log(`id:${_query!.id}`);
     const result = await this.client.get('integration-instance', `${_query!.id}`);
-    console.log(savedObjectToIntegrationInstance(result));
     return Promise.resolve(savedObjectToIntegrationInstance(result));
   };
 
