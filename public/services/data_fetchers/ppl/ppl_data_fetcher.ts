@@ -8,7 +8,7 @@ import { IDefaultTimestampState, IQuery } from '../../../../common/types/explore
 import { IDataFetcher } from '../fetch_interface';
 import { DataFetcherBase } from '../fetcher_base';
 import {
-  buildQuery,
+  buildRawQuery,
   composeFinalQuery,
   getIndexPatternFromRawQuery,
 } from '../../../../common/utils';
@@ -35,8 +35,6 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     protected readonly notifications
   ) {
     super();
-    // index/index patterns for this search
-    this.queryIndex = this.getIndex(this.searchParams.query.rawQuery);
   }
 
   async setTimestamp(index: string) {
@@ -215,11 +213,4 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
       }
     });
   }
-}
-
-function buildRawQuery(query: any, appBaseQuery: string) {
-  const rawQueryStr = (query.rawQuery as string).includes(appBaseQuery)
-    ? query.rawQuery
-    : buildQuery(appBaseQuery, query.rawQuery);
-  return rawQueryStr;
 }
