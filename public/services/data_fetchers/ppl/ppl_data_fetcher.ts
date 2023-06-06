@@ -65,8 +65,11 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
       selectedInterval,
     } = this.searchParams;
 
-    this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
     if (isEmpty(query)) return;
+
+    this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
+
+    if (this.queryIndex === '') return; // Returns if page is refreshed
 
     const {
       tabId,
