@@ -7,7 +7,11 @@ import { isEmpty } from 'lodash';
 import { IDefaultTimestampState, IQuery } from '../../../../common/types/explorer';
 import { IDataFetcher } from '../fetch_interface';
 import { DataFetcherBase } from '../fetcher_base';
-import { composeFinalQuery, getIndexPatternFromRawQuery } from '../../../../common/utils';
+import {
+  buildRawQuery,
+  composeFinalQuery,
+  getIndexPatternFromRawQuery,
+} from '../../../../common/utils';
 import {
   FILTERED_PATTERN,
   PATTERNS_REGEX,
@@ -31,8 +35,6 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     protected readonly notifications
   ) {
     super();
-    // index/index patterns for this search
-    this.queryIndex = this.getIndex(this.searchParams.query.rawQuery);
   }
 
   async setTimestamp(index: string) {
@@ -65,6 +67,10 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     if (isEmpty(query)) return;
 
+    this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
+
+    if (this.queryIndex === '') return; // Returns if page is refreshed
+
     const {
       tabId,
       findAutoInterval,
@@ -77,7 +83,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     } = this.searchContext;
     const { dispatch, changeQuery } = this.storeContext;
 
-    await this.processTimestamp(query);
+    await this.processTimestamp(query, appBaseQuery);
     if (isEmpty(this.timestamp)) return;
 
     const curStartTime = startingTime || this.query[SELECTED_DATE_RANGE][0];
@@ -97,7 +103,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     );
 
     // update UI with new query state
-    await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp);
+    await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp, appBaseQuery);
     // calculate proper time interval for count distribution
     if (!selectedInterval.current || selectedInterval.current.text === 'Auto') {
       findAutoInterval(curStartTime, curEndTime);
@@ -152,8 +158,8 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     }
   }
 
-  async processTimestamp(query: IQuery) {
-    if (query[SELECTED_TIMESTAMP]) {
+  async processTimestamp(query: IQuery, appBaseQuery: string) {
+    if (query[SELECTED_TIMESTAMP] && appBaseQuery === '') {
       this.timestamp = query[SELECTED_TIMESTAMP];
     } else {
       await this.setTimestamp(this.queryIndex);
@@ -169,7 +175,12 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     return await timestampUtils.getTimestamp(indexPattern);
   }
 
-  async updateQueryState(rawQuery: string, finalQuery: string, curTimestamp: string) {
+  async updateQueryState(
+    rawQuery: string,
+    finalQuery: string,
+    curTimestamp: string,
+    appBaseQuery: string
+  ) {
     const { batch, dispatch, changeQuery, changeVizConfig } = this.storeContext;
     const { query } = this.searchParams;
     const {
@@ -186,7 +197,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
           tabId,
           query: {
             finalQuery,
-            [RAW_QUERY]: query.rawQuery,
+            [RAW_QUERY]: buildRawQuery(query, appBaseQuery),
             [SELECTED_TIMESTAMP]: curTimestamp,
           },
         })
