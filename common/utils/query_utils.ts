@@ -123,6 +123,13 @@ export const buildQuery = (baseQuery: string, currQuery: string) => {
   return fullQuery;
 };
 
+export const buildRawQuery = (query: any, appBaseQuery: string) => {
+  const rawQueryStr = (query.rawQuery as string).includes(appBaseQuery)
+    ? query.rawQuery
+    : buildQuery(appBaseQuery, query.rawQuery);
+  return rawQueryStr;
+};
+
 export const composeFinalQuery = (
   curQuery: string,
   startingTime: string,
