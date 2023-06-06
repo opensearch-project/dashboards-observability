@@ -175,7 +175,7 @@ export const Home = (props: HomeProps) => {
         toastLifeTimeMs={6000}
       />
       <HashRouter>
-        <Route
+        {/* <Route
           exact
           path={['/']}
           render={(routerProps) => (
@@ -189,7 +189,7 @@ export const Home = (props: HomeProps) => {
               />
             </TraceSideBar>
           )}
-        />
+        /> */}
         <Route
           exact
           path="/traces"
@@ -218,7 +218,7 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           exact
-          path="/services"
+          path={['/services', '/']}
           render={(routerProps) => (
             <TraceSideBar>
               <Services
