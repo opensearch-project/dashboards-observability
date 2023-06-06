@@ -58,7 +58,7 @@ export class IntegrationInstanceBuilder {
           assetId: obj.id,
           status: 'available', // Assuming a successfully created object is available
           isDefaultAsset: obj.type === 'dashboard', // Assuming for now that dashboards are default
-          description: obj.attributes.title,
+          description: obj.attributes?.title,
         };
       });
       return Promise.resolve(refs);

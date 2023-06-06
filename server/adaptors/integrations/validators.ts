@@ -107,7 +107,7 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
       required: ['sourceType', 'dataset', 'namespace'],
       additionalProperties: false,
     },
-    creationDate: { type: 'string', format: 'date-time' },
+    creationDate: { type: 'string' },
     tags: { type: 'array', items: { type: 'string' }, nullable: true },
     status: { type: 'string' },
     assets: {
@@ -116,7 +116,7 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
         type: 'object',
         properties: {
           assetType: { type: 'string' },
-          assetId: { type: 'string', format: 'uuid' },
+          assetId: { type: 'string' },
           status: { type: 'string' },
           isDefaultAsset: { type: 'boolean' },
           description: { type: 'string' },
