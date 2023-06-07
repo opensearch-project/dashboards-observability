@@ -2,6 +2,16 @@ import Ajv, { JSONSchemaType } from 'ajv';
 
 const ajv = new Ajv();
 
+const staticAsset: JSONSchemaType<StaticAsset> = {
+  type: 'object',
+  properties: {
+    mimeType: { type: 'string' },
+    path: { type: 'string' },
+    annotation: { type: 'string', nullable: true },
+  },
+  required: ['mimeType', 'path'],
+};
+
 const templateSchema: JSONSchemaType<IntegrationTemplate> = {
   type: 'object',
   properties: {
@@ -11,53 +21,14 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
     license: { type: 'string' },
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
-    link: { type: 'string', nullable: true },
-    status: { type: 'string', nullable: true },
-    tags: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-      nullable: true,
-    },
     sourceUrl: { type: 'string', nullable: true },
     statics: {
       type: 'object',
       properties: {
-        mapping: {
-          type: 'object',
-          properties: {
-            logo: { type: 'string', nullable: true },
-            gallery: { type: 'array', items: { type: 'string' }, nullable: true },
-            darkModeLogo: { type: 'string', nullable: true },
-            darkModeGallery: { type: 'array', items: { type: 'string' }, nullable: true },
-          },
-          additionalProperties: false,
-          nullable: true,
-        },
-        assets: {
-          type: 'object',
-          patternProperties: {
-            '^.*$': {
-              type: 'object',
-              properties: {
-                mimeType: { type: 'string' },
-                annotation: { type: 'string', nullable: true },
-                data: { type: 'string' },
-              },
-              required: ['mimeType', 'data'],
-              additionalProperties: false,
-            },
-          },
-          required: [],
-          nullable: true,
-        },
-        gallery: {
-          type: 'array',
-          items: {
-            type: 'object',
-          },
-        },
+        logo: { ...staticAsset, nullable: true },
+        gallery: { type: 'array', items: staticAsset, nullable: true },
+        darkModeLogo: { ...staticAsset, nullable: true },
+        darkModeGallery: { type: 'array', items: staticAsset, nullable: true },
       },
       additionalProperties: false,
       nullable: true,
@@ -69,22 +40,22 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
         properties: {
           name: { type: 'string' },
           version: { type: 'string' },
-          description: { type: 'string', nullable: true },
-          sourceUrl: { type: 'string', nullable: true },
-          schemaBody: { type: 'string' },
-          mappingBody: { type: 'string' },
         },
-        required: ['name', 'version', 'schemaBody', 'mappingBody'],
+        required: ['name', 'version'],
       },
     },
     displayAssets: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          body: { type: 'string' },
+      type: 'object',
+      properties: {
+        savedObjects: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            version: { type: 'string' },
+          },
+          required: ['name', 'version'],
+          nullable: true,
         },
-        required: ['body'],
       },
     },
   },

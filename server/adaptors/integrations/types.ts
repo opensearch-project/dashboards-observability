@@ -10,36 +10,31 @@ interface IntegrationTemplate {
   license: string;
   author?: string;
   description?: string;
-  tags?: string[];
   sourceUrl?: string;
   statics?: {
-    mapping?: {
-      logo?: string;
-      gallery?: string[];
-      darkModeLogo?: string; // Fallback to light mode if absent
-      darkModeGallery?: string[];
-    };
-    assets?: {
-      [key: string]: StaticAsset;
-    };
+    logo?: StaticAsset;
+    gallery?: StaticAsset[];
+    darkModeLogo?: StaticAsset;
+    darkModeGallery?: StaticAsset[];
   };
   components: IntegrationComponent[];
-  displayAssets: DisplayAsset[];
+  displayAssets: {
+    savedObjects?: {
+      name: string;
+      version: string;
+    };
+  };
 }
 
 interface StaticAsset {
   mimeType: string;
   annotation?: string;
-  data: string;
+  path: string;
 }
 
 interface IntegrationComponent {
   name: string;
   version: string;
-  description?: string;
-  sourceUrl?: string;
-  schemaBody: string;
-  mappingBody: string;
 }
 
 interface DisplayAsset {
