@@ -34,7 +34,6 @@ export const handleWithCallback = async (
 ): Promise<any> => {
   try {
     const data = await callback(adaptor);
-    // console.log(`handleWithCallback: callback returned ${data.toString().length} bytes`);
     return response.ok({
       body: {
         data,
@@ -185,8 +184,6 @@ export function registerIntegrationsRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      console.log(request);
-      console.log(request.params.id);
       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
         return {
           data: await a.getIntegrationInstance({
