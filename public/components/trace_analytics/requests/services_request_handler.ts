@@ -66,7 +66,7 @@ export const handleTraceGroupsRequest = async (
   return handleDslRequest(http, DSL, getTraceGroupsQuery(), mode)
     .then ((response) => {
       return response.aggregations.traceGroup.buckets.map((bucket: any) => {
-        return bucket.key
+        return {label: bucket.key}
       })
     })
     .then((newItems) => {
