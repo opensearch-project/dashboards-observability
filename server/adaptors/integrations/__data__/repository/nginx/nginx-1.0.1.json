@@ -4,7 +4,6 @@
     "integrationType": "logs",
     "description": "Nginx HTTP server collector",
     "license": "Apache-2.0",
-    "link": "https://www.nginx.com/",
     "author": "John Doe",
     "sourceUrl": "https://github.com/",
     "statics": {

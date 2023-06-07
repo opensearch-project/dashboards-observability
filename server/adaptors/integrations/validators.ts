@@ -10,6 +10,7 @@ const staticAsset: JSONSchemaType<StaticAsset> = {
     annotation: { type: 'string', nullable: true },
   },
   required: ['mimeType', 'path'],
+  additionalProperties: false,
 };
 
 const templateSchema: JSONSchemaType<IntegrationTemplate> = {
@@ -55,8 +56,10 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
           },
           required: ['name', 'version'],
           nullable: true,
+          additionalProperties: false,
         },
       },
+      additionalProperties: false,
     },
   },
   required: ['name', 'version', 'integrationType', 'license', 'components', 'displayAssets'],

@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { templateValidator } from './validators';
 
 /**
  * Provides relatively low-level operations for reading the repository on the file system.
@@ -12,7 +13,7 @@ export class RepositoryFileSystem {
     this.repoDirectory = repoDirectory;
   }
 
-  async get_integration_latest(name: string): Promise<string | null> {
+  async get_latest_path(name: string): Promise<string | null> {
     const integrationDirectory = path.join(this.repoDirectory, name);
 
     try {
@@ -33,7 +34,7 @@ export class RepositoryFileSystem {
     return null;
   }
 
-  async get_latest_integrations(): Promise<string[]> {
+  async get_latest_integration_paths(): Promise<string[]> {
     try {
       const directories = await fs.readdir(this.repoDirectory);
       const integrationDirectories = directories
@@ -44,7 +45,7 @@ export class RepositoryFileSystem {
 
       for (const integrationDirectory of integrationDirectories) {
         const integrationName = path.basename(integrationDirectory);
-        const latestConfig = await this.get_integration_latest(integrationName);
+        const latestConfig = await this.get_latest_path(integrationName);
         if (latestConfig) {
           integrationConfigs.push(latestConfig);
         }
@@ -54,6 +55,30 @@ export class RepositoryFileSystem {
     } catch (error) {
       console.error(`Error reading integration directories in: ${this.repoDirectory}`, error);
       return [];
+    }
+  }
+
+  async get_integration(integrationPath: string): Promise<IntegrationTemplate> {
+    try {
+      const content = await fs.readFile(integrationPath, { encoding: 'utf-8' });
+      const integration = JSON.parse(content);
+      if (templateValidator(integration)) {
+        return Promise.resolve(integration);
+      }
+      const errors = templateValidator.errors
+        ?.filter((e) => e.message)
+        .map((e) => e.message)
+        .join(', ');
+      return Promise.reject({
+        statusCode: 400,
+        message: 'Invalid integration: ' + errors,
+      });
+    } catch (error) {
+      console.error(`Error getting integration at ${integrationPath}`, error);
+      return Promise.reject({
+        statusCode: 500,
+        message: 'Could not get integration',
+      });
     }
   }
 }
