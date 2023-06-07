@@ -13,6 +13,29 @@ import { getServiceMapTargetResources } from '../../components/common/helper_fun
 import { ServiceObject } from '../../components/common/plots/service_map';
 import { TraceAnalyticsMode } from '../../home';
 
+export const getTraceGroupsQuery = () => {
+  const query = {
+    size: 0,
+    query:{
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      }
+    },
+    aggs: {
+      traceGroup: {
+        terms: {
+          field: "traceGroup",
+          size: 500
+        }
+      }
+    }
+  }
+  return query;
+}
+
 export const getServicesQuery = (mode: TraceAnalyticsMode, serviceName: string | undefined, DSL?: any) => {
   const query = {
     size: 0,

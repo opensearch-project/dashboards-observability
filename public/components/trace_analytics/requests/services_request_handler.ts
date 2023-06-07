@@ -14,6 +14,7 @@ import {
   getServiceMetricsQuery,
   getServiceNodesQuery,
   getServicesQuery,
+  getTraceGroupsQuery,
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
 import { HttpSetup } from '../../../../../../src/core/public';
@@ -49,6 +50,24 @@ export const handleServicesRequest = async (
             };
           })
       );
+    })
+    .then((newItems) => {
+      setItems(newItems);
+    })
+    .catch((error) => console.error(error));
+};
+
+export const handleTraceGroupsRequest = async (
+  http: HttpSetup,
+  DSL: any,
+  mode: TraceAnalyticsMode,
+  setItems: any,
+) => {
+  return handleDslRequest(http, DSL, getTraceGroupsQuery(), mode)
+    .then ((response) => {
+      return response.aggregations.traceGroup.buckets.map((bucket: any) => {
+        return bucket.key
+      })
     })
     .then((newItems) => {
       setItems(newItems);

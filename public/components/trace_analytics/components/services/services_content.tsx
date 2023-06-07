@@ -4,12 +4,13 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
+  handleTraceGroupsRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
@@ -18,6 +19,7 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
+import { OptionType } from '../../../../../common/types/application_analytics';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -42,6 +44,8 @@ export function ServicesContent(props: ServicesProps) {
     jaegerIndicesExist,
   } = props;
   const [tableItems, setTableItems] = useState([]);
+  const [traceGroups, setTraceGroups] = useState<OptionType[]>([]);
+  // console.log(traceGroups)
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
@@ -104,6 +108,7 @@ export function ServicesContent(props: ServicesProps) {
         setServiceMap,
         currService || filteredService
       ),
+      ...[mode === 'data_prepper' && dataPrepperIndicesExist ? [handleTraceGroupsRequest(http, DSL, mode, setTraceGroups)] : []]
     ]);
     setLoading(false);
   };
@@ -125,6 +130,18 @@ export function ServicesContent(props: ServicesProps) {
 
   return (
     <>
+      {mode === 'data_prepper' && dataPrepperIndicesExist && traceGroups ? (<EuiComboBox
+            aria-label="Select trace group"
+            placeholder="Select or add trace group"
+            options={traceGroups}
+            singleSelection={{ asPlainText: true }}
+            // selectedOptions={selectedTraces}
+            // onChange={onTraceChange}
+            // onCreateOption={onCreateTrace}
+            isClearable={false}
+            data-test-subj="traceGroupsComboBox"
+          />)
+      : null}
       <SearchBar
         query={query}
         filters={filters}
