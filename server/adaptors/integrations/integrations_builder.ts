@@ -4,6 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { uuidRx } from 'public/components/custom_panels/redux/panel_slice';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { templateValidator } from './validators';
 
@@ -13,6 +14,20 @@ interface BuilderOptions {
   namespace: string;
   tags?: string[];
 }
+
+export const assetsMap: { [key: string]: string[] } = {
+  nginx: [
+    'nginx-index-pattern',
+    'nginx-search-0',
+    'nginx-panel-0',
+    'nginx-search-1',
+    'nginx-viz-0',
+    'nginx-viz-1',
+    'nginx-viz-2',
+    'nginx-viz-3',
+    'nginx-dashboard-0',
+  ],
+};
 
 export class IntegrationInstanceBuilder {
   client: SavedObjectsClientContract;
@@ -26,7 +41,7 @@ export class IntegrationInstanceBuilder {
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
     const result = this.validate(template)
-      .then(() => this.post_assets(template.displayAssets))
+      .then(() => this.post_assets(template.displayAssets, template.name))
       .then((refs) => this.build_instance(template, refs, options));
     return result;
   }
@@ -48,10 +63,29 @@ export class IntegrationInstanceBuilder {
     return template && template.name && typeof template.name === 'string';
   }
 
-  async post_assets(assets: DisplayAsset[]): Promise<AssetReference[]> {
+  dynamicallyGenerateIds(assets: any[], templateName: string) {
+    assetsMap[templateName].forEach((element) => {
+      const uuid = uuidv4();
+      assets.forEach((asset) => {
+        if (asset.id === element) {
+          asset.id = uuid;
+        }
+        asset.references.forEach((e) => {
+          if (e.id === element) {
+            e.id = uuid;
+          }
+        });
+      });
+    });
+    return assets;
+  }
+
+  async post_assets(assets: DisplayAsset[], templateName: string): Promise<AssetReference[]> {
     try {
       const deserializedAssets = assets.map((asset) => JSON.parse(asset.body));
-      const response = await this.client.bulkCreate(deserializedAssets);
+      const response = await this.client.bulkCreate(
+        this.dynamicallyGenerateIds(deserializedAssets, templateName)
+      );
       const refs: AssetReference[] = response.saved_objects.map((obj: any) => {
         return {
           assetType: obj.type,
