@@ -27,9 +27,9 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         .forEach(async (element) => {
           await this.client.delete(element.type, element.id);
         });
-      const result = await this.client.delete('integration-instance', id);
+      await this.client.delete('integration-instance', id);
     }
-    return Promise.resolve(result);
+    return Promise.resolve({});
   };
 
   getIntegrationTemplates = async (
