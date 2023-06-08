@@ -82,10 +82,17 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   };
 
   async function deleteAddedIntegration(integrationInstance: string) {
-    http.delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`).then(() => {
-      setToast(`${stateData.data.data?.name} integration successfully deleted!`, 'success');
-      window.location.hash = '#/installed';
-    });
+    http
+      .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
+      .then(() => {
+        setToast(`${stateData.data.data?.name} integration successfully deleted!`, 'success');
+      })
+      .catch((err) => {
+        setToast(`Error deleting ${stateData.data.data?.name} or its assets`, 'danger');
+      })
+      .finally(() => {
+        window.location.hash = '#/installed';
+      });
   }
 
   async function handleDataRequest() {

@@ -80,141 +80,255 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       <form
                         class="euiForm"
                       >
-                        <div
-                          class="euiFormRow"
-                          id="random_html_id-row"
-                        >
-                          <div
-                            class="euiFormRow__labelWrapper"
+                        <fieldset>
+                          <legend
+                            class="euiFormLegend"
                           >
+                            <span>
+                               Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                            </span>
+                          </legend>
+                          <div
+                            class="euiRadio euiRadioGroup__item"
+                          >
+                            <input
+                              checked=""
+                              class="euiRadio__input"
+                              id="0"
+                              name="radio group"
+                              type="radio"
+                              value=""
+                            />
+                            <div
+                              class="euiRadio__circle"
+                            />
                             <label
-                              class="euiFormLabel euiFormRow__label"
-                              for="random_html_id"
+                              class="euiRadio__label"
+                              for="0"
                             >
-                              Name
+                              I Have Data
                             </label>
                           </div>
                           <div
-                            class="euiFormRow__fieldWrapper"
+                            class="euiRadio euiRadioGroup__item"
                           >
+                            <input
+                              class="euiRadio__input"
+                              id="1"
+                              name="radio group"
+                              type="radio"
+                              value=""
+                            />
                             <div
-                              class="euiFormControlLayout"
-                            >
-                              <div
-                                class="euiFormControlLayout__childrenWrapper"
-                              >
-                                <input
-                                  aria-describedby="random_html_id-help-0"
-                                  class="euiFieldText"
-                                  data-test-subj="instance-name"
-                                  id="random_html_id"
-                                  name="first"
-                                  type="text"
-                                  value="test"
-                                />
-                              </div>
-                            </div>
-                            <div
-                              class="euiFormHelpText euiFormRow__text"
-                              id="random_html_id-help-0"
-                            >
-                              The name identifies the integration as a whole.
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="euiSpacer euiSpacer--l"
-                        />
-                        <div
-                          class="euiFormRow"
-                          id="random_html_id-row"
-                        >
-                          <div
-                            class="euiFormRow__labelWrapper"
-                          >
+                              class="euiRadio__circle"
+                            />
                             <label
-                              class="euiFormLabel euiFormRow__label"
-                              for="random_html_id"
+                              class="euiRadio__label"
+                              for="1"
                             >
-                              Namespace
+                              I Don't Have Data
                             </label>
                           </div>
-                          <div
-                            class="euiFormRow__fieldWrapper"
-                          >
-                            <div
-                              class="euiFormControlLayout"
-                            >
-                              <div
-                                class="euiFormControlLayout__childrenWrapper"
-                              >
-                                <input
-                                  aria-describedby="random_html_id-help-0"
-                                  class="euiFieldText"
-                                  data-test-subj="instance-namespace"
-                                  id="random_html_id"
-                                  name="first"
-                                  type="text"
-                                  value=""
-                                />
-                              </div>
-                            </div>
-                            <div
-                              class="euiFormHelpText euiFormRow__text"
-                              id="random_html_id-help-0"
-                            >
-                              The enviornment for which to ingest data.
-                            </div>
-                          </div>
-                        </div>
+                        </fieldset>
                         <div
                           class="euiSpacer euiSpacer--l"
                         />
-                        <div
-                          class="euiFormRow"
-                          id="random_html_id-row"
-                        >
+                        <div>
                           <div
-                            class="euiFormRow__labelWrapper"
-                          >
-                            <label
-                              class="euiFormLabel euiFormRow__label"
-                              for="random_html_id"
-                            >
-                              Tags (optional)
-                            </label>
-                          </div>
-                          <div
-                            class="euiFormRow__fieldWrapper"
+                            class="euiFormRow"
+                            id="random_html_id-row"
                           >
                             <div
-                              class="euiFormControlLayout"
+                              class="euiFormRow__labelWrapper"
+                            >
+                              <label
+                                aria-invalid="false"
+                                class="euiFormLabel euiFormRow__label"
+                                for="random_html_id"
+                              >
+                                Data Source
+                              </label>
+                            </div>
+                            <div
+                              class="euiFormRow__fieldWrapper"
                             >
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiFormControlLayout euiFormControlLayout--group"
                               >
-                                <input
-                                  aria-describedby="random_html_id-help-0"
-                                  class="euiFieldText"
-                                  data-test-subj="instance-tags"
-                                  id="random_html_id"
-                                  name="first"
-                                  type="text"
-                                  value=""
-                                />
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-describedby="random_html_id-help-0"
+                                    class="euiFieldText euiFieldText--inGroup"
+                                    data-test-subj="instance-name"
+                                    id="random_html_id"
+                                    name="first"
+                                    type="text"
+                                    value=""
+                                  />
+                                </div>
+                                <button
+                                  class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                  data-test-subj="resetCustomEmbeddablePanelTitle"
+                                  disabled=""
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Validate
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                class="euiFormHelpText euiFormRow__text"
+                                id="random_html_id-help-0"
+                              >
+                                The index pattern or data stream the integration will read from.
                               </div>
                             </div>
+                          </div>
+                          <div
+                            class="euiFormRow"
+                            id="random_html_id-row"
+                          >
                             <div
-                              class="euiFormHelpText euiFormRow__text"
-                              id="random_html_id-help-0"
+                              class="euiFormRow__labelWrapper"
                             >
-                              Tags you want associated with this integration.
+                              <label
+                                class="euiFormLabel euiFormRow__label"
+                                for="random_html_id"
+                              >
+                                Name
+                              </label>
+                            </div>
+                            <div
+                              class="euiFormRow__fieldWrapper"
+                            >
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-describedby="random_html_id-help-0"
+                                    class="euiFieldText"
+                                    data-test-subj="instance-name"
+                                    id="random_html_id"
+                                    name="first"
+                                    type="text"
+                                    value="test"
+                                  />
+                                </div>
+                              </div>
+                              <div
+                                class="euiFormHelpText euiFormRow__text"
+                                id="random_html_id-help-0"
+                              >
+                                The name identifies the integration as a whole.
+                              </div>
                             </div>
                           </div>
+                          <div
+                            class="euiSpacer euiSpacer--l"
+                          />
+                          <div
+                            class="euiFormRow"
+                            id="random_html_id-row"
+                          >
+                            <div
+                              class="euiFormRow__labelWrapper"
+                            >
+                              <label
+                                class="euiFormLabel euiFormRow__label"
+                                for="random_html_id"
+                              >
+                                Namespace
+                              </label>
+                            </div>
+                            <div
+                              class="euiFormRow__fieldWrapper"
+                            >
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-describedby="random_html_id-help-0"
+                                    class="euiFieldText"
+                                    data-test-subj="instance-namespace"
+                                    id="random_html_id"
+                                    name="first"
+                                    type="text"
+                                    value=""
+                                  />
+                                </div>
+                              </div>
+                              <div
+                                class="euiFormHelpText euiFormRow__text"
+                                id="random_html_id-help-0"
+                              >
+                                The enviornment for which to ingest data.
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiSpacer euiSpacer--l"
+                          />
+                          <div
+                            class="euiFormRow"
+                            id="random_html_id-row"
+                          >
+                            <div
+                              class="euiFormRow__labelWrapper"
+                            >
+                              <label
+                                class="euiFormLabel euiFormRow__label"
+                                for="random_html_id"
+                              >
+                                Tags (optional)
+                              </label>
+                            </div>
+                            <div
+                              class="euiFormRow__fieldWrapper"
+                            >
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-describedby="random_html_id-help-0"
+                                    class="euiFieldText"
+                                    data-test-subj="instance-tags"
+                                    id="random_html_id"
+                                    name="first"
+                                    type="text"
+                                    value=""
+                                  />
+                                </div>
+                              </div>
+                              <div
+                                class="euiFormHelpText euiFormRow__text"
+                                id="random_html_id-help-0"
+                              >
+                                Tags you want associated with this integration.
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiSpacer euiSpacer--l"
+                          />
                         </div>
-                        <div
-                          class="euiSpacer euiSpacer--l"
-                        />
                       </form>
                     </div>
                   </div>
@@ -408,266 +522,119 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               <form
                                 class="euiForm"
                               >
-                                <div
-                                  class="euiFormRow"
-                                  id="random_html_id-row"
-                                >
-                                  <div
-                                    class="euiFormRow__labelWrapper"
+                                <fieldset>
+                                  <legend
+                                    class="euiFormLegend"
                                   >
+                                    <span>
+                                       Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                    </span>
+                                  </legend>
+                                  <div
+                                    class="euiRadio euiRadioGroup__item"
+                                  >
+                                    <input
+                                      checked=""
+                                      class="euiRadio__input"
+                                      id="0"
+                                      name="radio group"
+                                      type="radio"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiRadio__circle"
+                                    />
                                     <label
-                                      class="euiFormLabel euiFormRow__label"
-                                      for="random_html_id"
+                                      class="euiRadio__label"
+                                      for="0"
                                     >
-                                      Name
+                                      I Have Data
                                     </label>
                                   </div>
                                   <div
-                                    class="euiFormRow__fieldWrapper"
+                                    class="euiRadio euiRadioGroup__item"
                                   >
+                                    <input
+                                      class="euiRadio__input"
+                                      id="1"
+                                      name="radio group"
+                                      type="radio"
+                                      value=""
+                                    />
                                     <div
-                                      class="euiFormControlLayout"
-                                    >
-                                      <div
-                                        class="euiFormControlLayout__childrenWrapper"
-                                      >
-                                        <input
-                                          aria-describedby="random_html_id-help-0"
-                                          class="euiFieldText"
-                                          data-test-subj="instance-name"
-                                          id="random_html_id"
-                                          name="first"
-                                          type="text"
-                                          value="test"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div
-                                      class="euiFormHelpText euiFormRow__text"
-                                      id="random_html_id-help-0"
-                                    >
-                                      The name identifies the integration as a whole.
-                                    </div>
-                                  </div>
-                                </div>
-                                <div
-                                  class="euiSpacer euiSpacer--l"
-                                />
-                                <div
-                                  class="euiFormRow"
-                                  id="random_html_id-row"
-                                >
-                                  <div
-                                    class="euiFormRow__labelWrapper"
-                                  >
+                                      class="euiRadio__circle"
+                                    />
                                     <label
-                                      class="euiFormLabel euiFormRow__label"
-                                      for="random_html_id"
+                                      class="euiRadio__label"
+                                      for="1"
                                     >
-                                      Namespace
+                                      I Don't Have Data
                                     </label>
                                   </div>
-                                  <div
-                                    class="euiFormRow__fieldWrapper"
-                                  >
-                                    <div
-                                      class="euiFormControlLayout"
-                                    >
-                                      <div
-                                        class="euiFormControlLayout__childrenWrapper"
-                                      >
-                                        <input
-                                          aria-describedby="random_html_id-help-0"
-                                          class="euiFieldText"
-                                          data-test-subj="instance-namespace"
-                                          id="random_html_id"
-                                          name="first"
-                                          type="text"
-                                          value=""
-                                        />
-                                      </div>
-                                    </div>
-                                    <div
-                                      class="euiFormHelpText euiFormRow__text"
-                                      id="random_html_id-help-0"
-                                    >
-                                      The enviornment for which to ingest data.
-                                    </div>
-                                  </div>
-                                </div>
+                                </fieldset>
                                 <div
                                   class="euiSpacer euiSpacer--l"
                                 />
-                                <div
-                                  class="euiFormRow"
-                                  id="random_html_id-row"
-                                >
+                                <div>
                                   <div
-                                    class="euiFormRow__labelWrapper"
-                                  >
-                                    <label
-                                      class="euiFormLabel euiFormRow__label"
-                                      for="random_html_id"
-                                    >
-                                      Tags (optional)
-                                    </label>
-                                  </div>
-                                  <div
-                                    class="euiFormRow__fieldWrapper"
+                                    class="euiFormRow"
+                                    id="random_html_id-row"
                                   >
                                     <div
-                                      class="euiFormControlLayout"
+                                      class="euiFormRow__labelWrapper"
+                                    >
+                                      <label
+                                        aria-invalid="false"
+                                        class="euiFormLabel euiFormRow__label"
+                                        for="random_html_id"
+                                      >
+                                        Data Source
+                                      </label>
+                                    </div>
+                                    <div
+                                      class="euiFormRow__fieldWrapper"
                                     >
                                       <div
-                                        class="euiFormControlLayout__childrenWrapper"
+                                        class="euiFormControlLayout euiFormControlLayout--group"
                                       >
-                                        <input
-                                          aria-describedby="random_html_id-help-0"
-                                          class="euiFieldText"
-                                          data-test-subj="instance-tags"
-                                          id="random_html_id"
-                                          name="first"
-                                          type="text"
-                                          value=""
-                                        />
+                                        <div
+                                          class="euiFormControlLayout__childrenWrapper"
+                                        >
+                                          <input
+                                            aria-describedby="random_html_id-help-0"
+                                            class="euiFieldText euiFieldText--inGroup"
+                                            data-test-subj="instance-name"
+                                            id="random_html_id"
+                                            name="first"
+                                            type="text"
+                                            value=""
+                                          />
+                                        </div>
+                                        <button
+                                          class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                          data-test-subj="resetCustomEmbeddablePanelTitle"
+                                          disabled=""
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButton__content"
+                                          >
+                                            <span
+                                              class="euiButton__text"
+                                            >
+                                              Validate
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </div>
+                                      <div
+                                        class="euiFormHelpText euiFormRow__text"
+                                        id="random_html_id-help-0"
+                                      >
+                                        The index pattern or data stream the integration will read from.
                                       </div>
                                     </div>
-                                    <div
-                                      class="euiFormHelpText euiFormRow__text"
-                                      id="random_html_id-help-0"
-                                    >
-                                      Tags you want associated with this integration.
-                                    </div>
                                   </div>
-                                </div>
-                                <div
-                                  class="euiSpacer euiSpacer--l"
-                                />
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="euiFlyoutFooter"
-                        >
-                          <div
-                            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                          >
-                            <div
-                              class="euiFlexItem"
-                            >
-                              <button
-                                class="euiButton euiButton--danger"
-                                type="button"
-                              >
-                                <span
-                                  class="euiButtonContent euiButton__content"
-                                >
-                                  <span
-                                    class="euiButton__text"
-                                  >
-                                    Cancel
-                                  </span>
-                                </span>
-                              </button>
-                            </div>
-                            <div
-                              class="euiFlexItem"
-                            >
-                              <button
-                                class="euiButton euiButton--primary euiButton--fill"
-                                data-test-subj="createInstanceButton"
-                                type="button"
-                              >
-                                <span
-                                  class="euiButtonContent euiButton__content"
-                                >
-                                  <span
-                                    class="euiButton__text"
-                                  >
-                                    Add Integration
-                                  </span>
-                                </span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  onActivation={[Function]}
-                  onDeactivation={[Function]}
-                  persistentFocus={false}
-                  returnFocus={[Function]}
-                  shards={Array []}
-                  sideCar={
-                    Object {
-                      "assignMedium": [Function],
-                      "assignSyncMedium": [Function],
-                      "options": Object {
-                        "async": true,
-                        "ssr": false,
-                      },
-                      "read": [Function],
-                      "useMedium": [Function],
-                    }
-                  }
-                >
-                  <SideCar
-                    autoFocus={true}
-                    crossFrame={true}
-                    disabled={false}
-                    id={Object {}}
-                    observed={
-                      <div
-                        data-focus-lock-disabled="false"
-                      >
-                        <div
-                          class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                          data-test-subj="addIntegrationFlyout"
-                          role="dialog"
-                          tabindex="-1"
-                        >
-                          <button
-                            aria-label="Close this dialog"
-                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
-                            data-test-subj="euiFlyoutCloseButton"
-                            type="button"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                              focusable="false"
-                              height="16"
-                              role="img"
-                              viewBox="0 0 16 16"
-                              width="16"
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </button>
-                          <div
-                            class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-                          >
-                            <h2
-                              class="euiTitle euiTitle--medium"
-                              data-test-subj="addIntegrationFlyoutTitle"
-                            >
-                              Add Integration
-                            </h2>
-                          </div>
-                          <div
-                            class="euiFlyoutBody"
-                          >
-                            <div
-                              class="euiFlyoutBody__overflow"
-                              tabindex="0"
-                            >
-                              <div
-                                class="euiFlyoutBody__overflowContent"
-                              >
-                                <form
-                                  class="euiForm"
-                                >
                                   <div
                                     class="euiFormRow"
                                     id="random_html_id-row"
@@ -803,131 +770,245 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <div
                                     class="euiSpacer euiSpacer--l"
                                   />
-                                </form>
-                              </div>
+                                </div>
+                              </form>
                             </div>
                           </div>
+                        </div>
+                        <div
+                          class="euiFlyoutFooter"
+                        >
                           <div
-                            class="euiFlyoutFooter"
+                            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
                             <div
-                              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              class="euiFlexItem"
                             >
-                              <div
-                                class="euiFlexItem"
+                              <button
+                                class="euiButton euiButton--danger"
+                                type="button"
                               >
-                                <button
-                                  class="euiButton euiButton--danger"
-                                  type="button"
+                                <span
+                                  class="euiButtonContent euiButton__content"
                                 >
                                   <span
-                                    class="euiButtonContent euiButton__content"
+                                    class="euiButton__text"
                                   >
-                                    <span
-                                      class="euiButton__text"
-                                    >
-                                      Cancel
-                                    </span>
+                                    Cancel
                                   </span>
-                                </button>
-                              </div>
-                              <div
-                                class="euiFlexItem"
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <button
+                                class="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="createInstanceButton"
+                                type="button"
                               >
-                                <button
-                                  class="euiButton euiButton--primary euiButton--fill"
-                                  data-test-subj="createInstanceButton"
-                                  type="button"
+                                <span
+                                  class="euiButtonContent euiButton__content"
                                 >
                                   <span
-                                    class="euiButtonContent euiButton__content"
+                                    class="euiButton__text"
                                   >
-                                    <span
-                                      class="euiButton__text"
-                                    >
-                                      Add Integration
-                                    </span>
+                                    Add Integration
                                   </span>
-                                </button>
-                              </div>
+                                </span>
+                              </button>
                             </div>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  }
+                  onActivation={[Function]}
+                  onDeactivation={[Function]}
+                  persistentFocus={false}
+                  returnFocus={[Function]}
+                  shards={Array []}
+                  sideCar={
+                    Object {
+                      "assignMedium": [Function],
+                      "assignSyncMedium": [Function],
+                      "options": Object {
+                        "async": true,
+                        "ssr": false,
+                      },
+                      "read": [Function],
+                      "useMedium": [Function],
                     }
-                    onActivation={[Function]}
-                    onDeactivation={[Function]}
-                    persistentFocus={false}
-                    returnFocus={[Function]}
-                    shards={Array []}
-                    sideCar={
-                      Object {
-                        "assignMedium": [Function],
-                        "assignSyncMedium": [Function],
-                        "options": Object {
-                          "async": true,
-                          "ssr": false,
-                        },
-                        "read": [Function],
-                        "useMedium": [Function],
-                      }
-                    }
-                  >
-                    <SideEffect(FocusWatcher)
-                      autoFocus={true}
-                      crossFrame={true}
-                      disabled={false}
-                      id={Object {}}
-                      observed={
+                  }
+                >
+                  <SideCar
+                    autoFocus={true}
+                    crossFrame={true}
+                    disabled={false}
+                    id={Object {}}
+                    observed={
+                      <div
+                        data-focus-lock-disabled="false"
+                      >
                         <div
-                          data-focus-lock-disabled="false"
+                          class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                          data-test-subj="addIntegrationFlyout"
+                          role="dialog"
+                          tabindex="-1"
                         >
-                          <div
-                            class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                            data-test-subj="addIntegrationFlyout"
-                            role="dialog"
-                            tabindex="-1"
+                          <button
+                            aria-label="Close this dialog"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                            data-test-subj="euiFlyoutCloseButton"
+                            type="button"
                           >
-                            <button
-                              aria-label="Close this dialog"
-                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
-                              data-test-subj="euiFlyoutCloseButton"
-                              type="button"
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            />
+                          </button>
+                          <div
+                            class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                          >
+                            <h2
+                              class="euiTitle euiTitle--medium"
+                              data-test-subj="addIntegrationFlyoutTitle"
                             >
-                              <svg
-                                aria-hidden="true"
-                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                focusable="false"
-                                height="16"
-                                role="img"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </button>
+                              Add Integration
+                            </h2>
+                          </div>
+                          <div
+                            class="euiFlyoutBody"
+                          >
                             <div
-                              class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-                            >
-                              <h2
-                                class="euiTitle euiTitle--medium"
-                                data-test-subj="addIntegrationFlyoutTitle"
-                              >
-                                Add Integration
-                              </h2>
-                            </div>
-                            <div
-                              class="euiFlyoutBody"
+                              class="euiFlyoutBody__overflow"
+                              tabindex="0"
                             >
                               <div
-                                class="euiFlyoutBody__overflow"
-                                tabindex="0"
+                                class="euiFlyoutBody__overflowContent"
                               >
-                                <div
-                                  class="euiFlyoutBody__overflowContent"
+                                <form
+                                  class="euiForm"
                                 >
-                                  <form
-                                    class="euiForm"
-                                  >
+                                  <fieldset>
+                                    <legend
+                                      class="euiFormLegend"
+                                    >
+                                      <span>
+                                         Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                      </span>
+                                    </legend>
+                                    <div
+                                      class="euiRadio euiRadioGroup__item"
+                                    >
+                                      <input
+                                        checked=""
+                                        class="euiRadio__input"
+                                        id="0"
+                                        name="radio group"
+                                        type="radio"
+                                        value=""
+                                      />
+                                      <div
+                                        class="euiRadio__circle"
+                                      />
+                                      <label
+                                        class="euiRadio__label"
+                                        for="0"
+                                      >
+                                        I Have Data
+                                      </label>
+                                    </div>
+                                    <div
+                                      class="euiRadio euiRadioGroup__item"
+                                    >
+                                      <input
+                                        class="euiRadio__input"
+                                        id="1"
+                                        name="radio group"
+                                        type="radio"
+                                        value=""
+                                      />
+                                      <div
+                                        class="euiRadio__circle"
+                                      />
+                                      <label
+                                        class="euiRadio__label"
+                                        for="1"
+                                      >
+                                        I Don't Have Data
+                                      </label>
+                                    </div>
+                                  </fieldset>
+                                  <div
+                                    class="euiSpacer euiSpacer--l"
+                                  />
+                                  <div>
+                                    <div
+                                      class="euiFormRow"
+                                      id="random_html_id-row"
+                                    >
+                                      <div
+                                        class="euiFormRow__labelWrapper"
+                                      >
+                                        <label
+                                          aria-invalid="false"
+                                          class="euiFormLabel euiFormRow__label"
+                                          for="random_html_id"
+                                        >
+                                          Data Source
+                                        </label>
+                                      </div>
+                                      <div
+                                        class="euiFormRow__fieldWrapper"
+                                      >
+                                        <div
+                                          class="euiFormControlLayout euiFormControlLayout--group"
+                                        >
+                                          <div
+                                            class="euiFormControlLayout__childrenWrapper"
+                                          >
+                                            <input
+                                              aria-describedby="random_html_id-help-0"
+                                              class="euiFieldText euiFieldText--inGroup"
+                                              data-test-subj="instance-name"
+                                              id="random_html_id"
+                                              name="first"
+                                              type="text"
+                                              value=""
+                                            />
+                                          </div>
+                                          <button
+                                            class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                            data-test-subj="resetCustomEmbeddablePanelTitle"
+                                            disabled=""
+                                            type="button"
+                                          >
+                                            <span
+                                              class="euiButtonContent euiButton__content"
+                                            >
+                                              <span
+                                                class="euiButton__text"
+                                              >
+                                                Validate
+                                              </span>
+                                            </span>
+                                          </button>
+                                        </div>
+                                        <div
+                                          class="euiFormHelpText euiFormRow__text"
+                                          id="random_html_id-help-0"
+                                        >
+                                          The index pattern or data stream the integration will read from.
+                                        </div>
+                                      </div>
+                                    </div>
                                     <div
                                       class="euiFormRow"
                                       id="random_html_id-row"
@@ -1063,119 +1144,245 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     <div
                                       class="euiSpacer euiSpacer--l"
                                     />
-                                  </form>
-                                </div>
+                                  </div>
+                                </form>
                               </div>
                             </div>
+                          </div>
+                          <div
+                            class="euiFlyoutFooter"
+                          >
                             <div
-                              class="euiFlyoutFooter"
+                              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
                               <div
-                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                class="euiFlexItem"
                               >
-                                <div
-                                  class="euiFlexItem"
+                                <button
+                                  class="euiButton euiButton--danger"
+                                  type="button"
                                 >
-                                  <button
-                                    class="euiButton euiButton--danger"
-                                    type="button"
+                                  <span
+                                    class="euiButtonContent euiButton__content"
                                   >
                                     <span
-                                      class="euiButtonContent euiButton__content"
+                                      class="euiButton__text"
                                     >
-                                      <span
-                                        class="euiButton__text"
-                                      >
-                                        Cancel
-                                      </span>
+                                      Cancel
                                     </span>
-                                  </button>
-                                </div>
-                                <div
-                                  class="euiFlexItem"
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                class="euiFlexItem"
+                              >
+                                <button
+                                  class="euiButton euiButton--primary euiButton--fill"
+                                  data-test-subj="createInstanceButton"
+                                  type="button"
                                 >
-                                  <button
-                                    class="euiButton euiButton--primary euiButton--fill"
-                                    data-test-subj="createInstanceButton"
-                                    type="button"
+                                  <span
+                                    class="euiButtonContent euiButton__content"
                                   >
                                     <span
-                                      class="euiButtonContent euiButton__content"
+                                      class="euiButton__text"
                                     >
-                                      <span
-                                        class="euiButton__text"
-                                      >
-                                        Add Integration
-                                      </span>
+                                      Add Integration
                                     </span>
-                                  </button>
-                                </div>
+                                  </span>
+                                </button>
                               </div>
                             </div>
                           </div>
                         </div>
+                      </div>
+                    }
+                    onActivation={[Function]}
+                    onDeactivation={[Function]}
+                    persistentFocus={false}
+                    returnFocus={[Function]}
+                    shards={Array []}
+                    sideCar={
+                      Object {
+                        "assignMedium": [Function],
+                        "assignSyncMedium": [Function],
+                        "options": Object {
+                          "async": true,
+                          "ssr": false,
+                        },
+                        "read": [Function],
+                        "useMedium": [Function],
                       }
-                      onActivation={[Function]}
-                      onDeactivation={[Function]}
-                      persistentFocus={false}
-                      returnFocus={[Function]}
-                      shards={Array []}
-                    >
-                      <FocusWatcher
-                        autoFocus={true}
-                        crossFrame={true}
-                        disabled={false}
-                        id={Object {}}
-                        observed={
+                    }
+                  >
+                    <SideEffect(FocusWatcher)
+                      autoFocus={true}
+                      crossFrame={true}
+                      disabled={false}
+                      id={Object {}}
+                      observed={
+                        <div
+                          data-focus-lock-disabled="false"
+                        >
                           <div
-                            data-focus-lock-disabled="false"
+                            class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                            data-test-subj="addIntegrationFlyout"
+                            role="dialog"
+                            tabindex="-1"
                           >
-                            <div
-                              class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-                              data-test-subj="addIntegrationFlyout"
-                              role="dialog"
-                              tabindex="-1"
+                            <button
+                              aria-label="Close this dialog"
+                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                              data-test-subj="euiFlyoutCloseButton"
+                              type="button"
                             >
-                              <button
-                                aria-label="Close this dialog"
-                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
-                                data-test-subj="euiFlyoutCloseButton"
-                                type="button"
+                              <svg
+                                aria-hidden="true"
+                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                focusable="false"
+                                height="16"
+                                role="img"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </button>
+                            <div
+                              class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                            >
+                              <h2
+                                class="euiTitle euiTitle--medium"
+                                data-test-subj="addIntegrationFlyoutTitle"
                               >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                />
-                              </button>
+                                Add Integration
+                              </h2>
+                            </div>
+                            <div
+                              class="euiFlyoutBody"
+                            >
                               <div
-                                class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-                              >
-                                <h2
-                                  class="euiTitle euiTitle--medium"
-                                  data-test-subj="addIntegrationFlyoutTitle"
-                                >
-                                  Add Integration
-                                </h2>
-                              </div>
-                              <div
-                                class="euiFlyoutBody"
+                                class="euiFlyoutBody__overflow"
+                                tabindex="0"
                               >
                                 <div
-                                  class="euiFlyoutBody__overflow"
-                                  tabindex="0"
+                                  class="euiFlyoutBody__overflowContent"
                                 >
-                                  <div
-                                    class="euiFlyoutBody__overflowContent"
+                                  <form
+                                    class="euiForm"
                                   >
-                                    <form
-                                      class="euiForm"
-                                    >
+                                    <fieldset>
+                                      <legend
+                                        class="euiFormLegend"
+                                      >
+                                        <span>
+                                           Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                        </span>
+                                      </legend>
+                                      <div
+                                        class="euiRadio euiRadioGroup__item"
+                                      >
+                                        <input
+                                          checked=""
+                                          class="euiRadio__input"
+                                          id="0"
+                                          name="radio group"
+                                          type="radio"
+                                          value=""
+                                        />
+                                        <div
+                                          class="euiRadio__circle"
+                                        />
+                                        <label
+                                          class="euiRadio__label"
+                                          for="0"
+                                        >
+                                          I Have Data
+                                        </label>
+                                      </div>
+                                      <div
+                                        class="euiRadio euiRadioGroup__item"
+                                      >
+                                        <input
+                                          class="euiRadio__input"
+                                          id="1"
+                                          name="radio group"
+                                          type="radio"
+                                          value=""
+                                        />
+                                        <div
+                                          class="euiRadio__circle"
+                                        />
+                                        <label
+                                          class="euiRadio__label"
+                                          for="1"
+                                        >
+                                          I Don't Have Data
+                                        </label>
+                                      </div>
+                                    </fieldset>
+                                    <div
+                                      class="euiSpacer euiSpacer--l"
+                                    />
+                                    <div>
+                                      <div
+                                        class="euiFormRow"
+                                        id="random_html_id-row"
+                                      >
+                                        <div
+                                          class="euiFormRow__labelWrapper"
+                                        >
+                                          <label
+                                            aria-invalid="false"
+                                            class="euiFormLabel euiFormRow__label"
+                                            for="random_html_id"
+                                          >
+                                            Data Source
+                                          </label>
+                                        </div>
+                                        <div
+                                          class="euiFormRow__fieldWrapper"
+                                        >
+                                          <div
+                                            class="euiFormControlLayout euiFormControlLayout--group"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout__childrenWrapper"
+                                            >
+                                              <input
+                                                aria-describedby="random_html_id-help-0"
+                                                class="euiFieldText euiFieldText--inGroup"
+                                                data-test-subj="instance-name"
+                                                id="random_html_id"
+                                                name="first"
+                                                type="text"
+                                                value=""
+                                              />
+                                            </div>
+                                            <button
+                                              class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                              data-test-subj="resetCustomEmbeddablePanelTitle"
+                                              disabled=""
+                                              type="button"
+                                            >
+                                              <span
+                                                class="euiButtonContent euiButton__content"
+                                              >
+                                                <span
+                                                  class="euiButton__text"
+                                                >
+                                                  Validate
+                                                </span>
+                                              </span>
+                                            </button>
+                                          </div>
+                                          <div
+                                            class="euiFormHelpText euiFormRow__text"
+                                            id="random_html_id-help-0"
+                                          >
+                                            The index pattern or data stream the integration will read from.
+                                          </div>
+                                        </div>
+                                      </div>
                                       <div
                                         class="euiFormRow"
                                         id="random_html_id-row"
@@ -1311,6 +1518,369 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       <div
                                         class="euiSpacer euiSpacer--l"
                                       />
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlyoutFooter"
+                            >
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <div
+                                  class="euiFlexItem"
+                                >
+                                  <button
+                                    class="euiButton euiButton--danger"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Cancel
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div
+                                  class="euiFlexItem"
+                                >
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="createInstanceButton"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Add Integration
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                      onActivation={[Function]}
+                      onDeactivation={[Function]}
+                      persistentFocus={false}
+                      returnFocus={[Function]}
+                      shards={Array []}
+                    >
+                      <FocusWatcher
+                        autoFocus={true}
+                        crossFrame={true}
+                        disabled={false}
+                        id={Object {}}
+                        observed={
+                          <div
+                            data-focus-lock-disabled="false"
+                          >
+                            <div
+                              class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                              data-test-subj="addIntegrationFlyout"
+                              role="dialog"
+                              tabindex="-1"
+                            >
+                              <button
+                                aria-label="Close this dialog"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                                data-test-subj="euiFlyoutCloseButton"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                />
+                              </button>
+                              <div
+                                class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                              >
+                                <h2
+                                  class="euiTitle euiTitle--medium"
+                                  data-test-subj="addIntegrationFlyoutTitle"
+                                >
+                                  Add Integration
+                                </h2>
+                              </div>
+                              <div
+                                class="euiFlyoutBody"
+                              >
+                                <div
+                                  class="euiFlyoutBody__overflow"
+                                  tabindex="0"
+                                >
+                                  <div
+                                    class="euiFlyoutBody__overflowContent"
+                                  >
+                                    <form
+                                      class="euiForm"
+                                    >
+                                      <fieldset>
+                                        <legend
+                                          class="euiFormLegend"
+                                        >
+                                          <span>
+                                             Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                          </span>
+                                        </legend>
+                                        <div
+                                          class="euiRadio euiRadioGroup__item"
+                                        >
+                                          <input
+                                            checked=""
+                                            class="euiRadio__input"
+                                            id="0"
+                                            name="radio group"
+                                            type="radio"
+                                            value=""
+                                          />
+                                          <div
+                                            class="euiRadio__circle"
+                                          />
+                                          <label
+                                            class="euiRadio__label"
+                                            for="0"
+                                          >
+                                            I Have Data
+                                          </label>
+                                        </div>
+                                        <div
+                                          class="euiRadio euiRadioGroup__item"
+                                        >
+                                          <input
+                                            class="euiRadio__input"
+                                            id="1"
+                                            name="radio group"
+                                            type="radio"
+                                            value=""
+                                          />
+                                          <div
+                                            class="euiRadio__circle"
+                                          />
+                                          <label
+                                            class="euiRadio__label"
+                                            for="1"
+                                          >
+                                            I Don't Have Data
+                                          </label>
+                                        </div>
+                                      </fieldset>
+                                      <div
+                                        class="euiSpacer euiSpacer--l"
+                                      />
+                                      <div>
+                                        <div
+                                          class="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            class="euiFormRow__labelWrapper"
+                                          >
+                                            <label
+                                              aria-invalid="false"
+                                              class="euiFormLabel euiFormRow__label"
+                                              for="random_html_id"
+                                            >
+                                              Data Source
+                                            </label>
+                                          </div>
+                                          <div
+                                            class="euiFormRow__fieldWrapper"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout euiFormControlLayout--group"
+                                            >
+                                              <div
+                                                class="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <input
+                                                  aria-describedby="random_html_id-help-0"
+                                                  class="euiFieldText euiFieldText--inGroup"
+                                                  data-test-subj="instance-name"
+                                                  id="random_html_id"
+                                                  name="first"
+                                                  type="text"
+                                                  value=""
+                                                />
+                                              </div>
+                                              <button
+                                                class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                                data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                disabled=""
+                                                type="button"
+                                              >
+                                                <span
+                                                  class="euiButtonContent euiButton__content"
+                                                >
+                                                  <span
+                                                    class="euiButton__text"
+                                                  >
+                                                    Validate
+                                                  </span>
+                                                </span>
+                                              </button>
+                                            </div>
+                                            <div
+                                              class="euiFormHelpText euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                            >
+                                              The index pattern or data stream the integration will read from.
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            class="euiFormRow__labelWrapper"
+                                          >
+                                            <label
+                                              class="euiFormLabel euiFormRow__label"
+                                              for="random_html_id"
+                                            >
+                                              Name
+                                            </label>
+                                          </div>
+                                          <div
+                                            class="euiFormRow__fieldWrapper"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout"
+                                            >
+                                              <div
+                                                class="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <input
+                                                  aria-describedby="random_html_id-help-0"
+                                                  class="euiFieldText"
+                                                  data-test-subj="instance-name"
+                                                  id="random_html_id"
+                                                  name="first"
+                                                  type="text"
+                                                  value="test"
+                                                />
+                                              </div>
+                                            </div>
+                                            <div
+                                              class="euiFormHelpText euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                            >
+                                              The name identifies the integration as a whole.
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiSpacer euiSpacer--l"
+                                        />
+                                        <div
+                                          class="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            class="euiFormRow__labelWrapper"
+                                          >
+                                            <label
+                                              class="euiFormLabel euiFormRow__label"
+                                              for="random_html_id"
+                                            >
+                                              Namespace
+                                            </label>
+                                          </div>
+                                          <div
+                                            class="euiFormRow__fieldWrapper"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout"
+                                            >
+                                              <div
+                                                class="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <input
+                                                  aria-describedby="random_html_id-help-0"
+                                                  class="euiFieldText"
+                                                  data-test-subj="instance-namespace"
+                                                  id="random_html_id"
+                                                  name="first"
+                                                  type="text"
+                                                  value=""
+                                                />
+                                              </div>
+                                            </div>
+                                            <div
+                                              class="euiFormHelpText euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                            >
+                                              The enviornment for which to ingest data.
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiSpacer euiSpacer--l"
+                                        />
+                                        <div
+                                          class="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            class="euiFormRow__labelWrapper"
+                                          >
+                                            <label
+                                              class="euiFormLabel euiFormRow__label"
+                                              for="random_html_id"
+                                            >
+                                              Tags (optional)
+                                            </label>
+                                          </div>
+                                          <div
+                                            class="euiFormRow__fieldWrapper"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout"
+                                            >
+                                              <div
+                                                class="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <input
+                                                  aria-describedby="random_html_id-help-0"
+                                                  class="euiFieldText"
+                                                  data-test-subj="instance-tags"
+                                                  id="random_html_id"
+                                                  name="first"
+                                                  type="text"
+                                                  value=""
+                                                />
+                                              </div>
+                                            </div>
+                                            <div
+                                              class="euiFormHelpText euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                            >
+                                              Tags you want associated with this integration.
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiSpacer euiSpacer--l"
+                                        />
+                                      </div>
                                     </form>
                                   </div>
                                 </div>
@@ -1493,285 +2063,567 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <form
                                     className="euiForm"
                                   >
-                                    <EuiFormRow
-                                      describedByIds={Array []}
-                                      display="row"
-                                      fullWidth={false}
-                                      hasChildLabel={true}
-                                      hasEmptyLabelSpace={false}
-                                      helpText="The name identifies the integration as a whole."
-                                      label="Name"
-                                      labelType="label"
+                                    <EuiRadioGroup
+                                      idSelected="0"
+                                      legend={
+                                        Object {
+                                          "children": <span>
+                                             Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                          </span>,
+                                          "compressed": undefined,
+                                        }
+                                      }
+                                      name="radio group"
+                                      onChange={[Function]}
+                                      options={
+                                        Array [
+                                          Object {
+                                            "id": "0",
+                                            "label": "I Have Data",
+                                          },
+                                          Object {
+                                            "id": "1",
+                                            "label": "I Don't Have Data",
+                                          },
+                                        ]
+                                      }
                                     >
-                                      <div
-                                        className="euiFormRow"
-                                        id="random_html_id-row"
+                                      <EuiFormFieldset
+                                        legend={
+                                          Object {
+                                            "children": <span>
+                                               Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                            </span>,
+                                            "compressed": undefined,
+                                          }
+                                        }
                                       >
-                                        <div
-                                          className="euiFormRow__labelWrapper"
-                                        >
-                                          <EuiFormLabel
-                                            className="euiFormRow__label"
-                                            htmlFor="random_html_id"
-                                            isFocused={false}
-                                            type="label"
-                                          >
-                                            <label
-                                              className="euiFormLabel euiFormRow__label"
-                                              htmlFor="random_html_id"
+                                        <fieldset>
+                                          <EuiFormLegend>
+                                            <legend
+                                              className="euiFormLegend"
                                             >
-                                              Name
-                                            </label>
-                                          </EuiFormLabel>
-                                        </div>
-                                        <div
-                                          className="euiFormRow__fieldWrapper"
-                                        >
-                                          <EuiFieldText
-                                            aria-describedby="random_html_id-help-0"
-                                            data-test-subj="instance-name"
-                                            id="random_html_id"
-                                            name="first"
-                                            onBlur={[Function]}
+                                              <span>
+                                                 Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                              </span>
+                                            </legend>
+                                          </EuiFormLegend>
+                                          <EuiRadio
+                                            checked={true}
+                                            className="euiRadioGroup__item"
+                                            id="0"
+                                            key="0"
+                                            label="I Have Data"
+                                            name="radio group"
                                             onChange={[Function]}
-                                            onFocus={[Function]}
-                                            value="test"
-                                          >
-                                            <EuiFormControlLayout
-                                              fullWidth={false}
-                                              inputId="random_html_id"
-                                            >
-                                              <div
-                                                className="euiFormControlLayout"
-                                              >
-                                                <div
-                                                  className="euiFormControlLayout__childrenWrapper"
-                                                >
-                                                  <EuiValidatableControl>
-                                                    <input
-                                                      aria-describedby="random_html_id-help-0"
-                                                      className="euiFieldText"
-                                                      data-test-subj="instance-name"
-                                                      id="random_html_id"
-                                                      name="first"
-                                                      onBlur={[Function]}
-                                                      onChange={[Function]}
-                                                      onFocus={[Function]}
-                                                      type="text"
-                                                      value="test"
-                                                    />
-                                                  </EuiValidatableControl>
-                                                  <EuiFormControlLayoutIcons />
-                                                </div>
-                                              </div>
-                                            </EuiFormControlLayout>
-                                          </EuiFieldText>
-                                          <EuiFormHelpText
-                                            className="euiFormRow__text"
-                                            id="random_html_id-help-0"
-                                            key="The name identifies the integration as a whole."
                                           >
                                             <div
-                                              className="euiFormHelpText euiFormRow__text"
-                                              id="random_html_id-help-0"
+                                              className="euiRadio euiRadioGroup__item"
                                             >
-                                              The name identifies the integration as a whole.
+                                              <input
+                                                checked={true}
+                                                className="euiRadio__input"
+                                                id="0"
+                                                name="radio group"
+                                                onChange={[Function]}
+                                                type="radio"
+                                              />
+                                              <div
+                                                className="euiRadio__circle"
+                                              />
+                                              <label
+                                                className="euiRadio__label"
+                                                htmlFor="0"
+                                              >
+                                                I Have Data
+                                              </label>
                                             </div>
-                                          </EuiFormHelpText>
-                                        </div>
-                                      </div>
-                                    </EuiFormRow>
+                                          </EuiRadio>
+                                          <EuiRadio
+                                            checked={false}
+                                            className="euiRadioGroup__item"
+                                            id="1"
+                                            key="1"
+                                            label="I Don't Have Data"
+                                            name="radio group"
+                                            onChange={[Function]}
+                                          >
+                                            <div
+                                              className="euiRadio euiRadioGroup__item"
+                                            >
+                                              <input
+                                                checked={false}
+                                                className="euiRadio__input"
+                                                id="1"
+                                                name="radio group"
+                                                onChange={[Function]}
+                                                type="radio"
+                                              />
+                                              <div
+                                                className="euiRadio__circle"
+                                              />
+                                              <label
+                                                className="euiRadio__label"
+                                                htmlFor="1"
+                                              >
+                                                I Don't Have Data
+                                              </label>
+                                            </div>
+                                          </EuiRadio>
+                                        </fieldset>
+                                      </EuiFormFieldset>
+                                    </EuiRadioGroup>
                                     <EuiSpacer>
                                       <div
                                         className="euiSpacer euiSpacer--l"
                                       />
                                     </EuiSpacer>
-                                    <EuiFormRow
-                                      describedByIds={Array []}
-                                      display="row"
-                                      fullWidth={false}
-                                      hasChildLabel={true}
-                                      hasEmptyLabelSpace={false}
-                                      helpText="The enviornment for which to ingest data."
-                                      label="Namespace"
-                                      labelType="label"
-                                    >
-                                      <div
-                                        className="euiFormRow"
-                                        id="random_html_id-row"
+                                    <div>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        error={Array []}
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText="The index pattern or data stream the integration will read from."
+                                        isInvalid={false}
+                                        label="Data Source"
+                                        labelType="label"
                                       >
                                         <div
-                                          className="euiFormRow__labelWrapper"
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
                                         >
-                                          <EuiFormLabel
-                                            className="euiFormRow__label"
-                                            htmlFor="random_html_id"
-                                            isFocused={false}
-                                            type="label"
+                                          <div
+                                            className="euiFormRow__labelWrapper"
                                           >
-                                            <label
-                                              className="euiFormLabel euiFormRow__label"
+                                            <EuiFormLabel
+                                              aria-invalid={false}
+                                              className="euiFormRow__label"
                                               htmlFor="random_html_id"
+                                              isFocused={false}
+                                              isInvalid={false}
+                                              type="label"
                                             >
-                                              Namespace
-                                            </label>
-                                          </EuiFormLabel>
-                                        </div>
-                                        <div
-                                          className="euiFormRow__fieldWrapper"
-                                        >
-                                          <EuiFieldText
-                                            aria-describedby="random_html_id-help-0"
-                                            data-test-subj="instance-namespace"
-                                            id="random_html_id"
-                                            name="first"
-                                            onBlur={[Function]}
-                                            onChange={[Function]}
-                                            onFocus={[Function]}
-                                            value=""
+                                              <label
+                                                aria-invalid={false}
+                                                className="euiFormLabel euiFormRow__label"
+                                                htmlFor="random_html_id"
+                                              >
+                                                Data Source
+                                              </label>
+                                            </EuiFormLabel>
+                                          </div>
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
                                           >
-                                            <EuiFormControlLayout
-                                              fullWidth={false}
-                                              inputId="random_html_id"
+                                            <EuiFieldText
+                                              append={
+                                                <EuiButton
+                                                  data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                  disabled={true}
+                                                  onClick={[Function]}
+                                                >
+                                                  Validate
+                                                </EuiButton>
+                                              }
+                                              aria-describedby="random_html_id-help-0"
+                                              data-test-subj="instance-name"
+                                              id="random_html_id"
+                                              isInvalid={false}
+                                              name="first"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value=""
                                             >
-                                              <div
-                                                className="euiFormControlLayout"
+                                              <EuiFormControlLayout
+                                                append={
+                                                  <EuiButton
+                                                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                    disabled={true}
+                                                    onClick={[Function]}
+                                                  >
+                                                    Validate
+                                                  </EuiButton>
+                                                }
+                                                fullWidth={false}
+                                                inputId="random_html_id"
                                               >
                                                 <div
-                                                  className="euiFormControlLayout__childrenWrapper"
+                                                  className="euiFormControlLayout euiFormControlLayout--group"
                                                 >
-                                                  <EuiValidatableControl>
-                                                    <input
-                                                      aria-describedby="random_html_id-help-0"
-                                                      className="euiFieldText"
-                                                      data-test-subj="instance-namespace"
-                                                      id="random_html_id"
-                                                      name="first"
-                                                      onBlur={[Function]}
-                                                      onChange={[Function]}
-                                                      onFocus={[Function]}
-                                                      type="text"
-                                                      value=""
-                                                    />
-                                                  </EuiValidatableControl>
-                                                  <EuiFormControlLayoutIcons />
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl
+                                                      isInvalid={false}
+                                                    >
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText euiFieldText--inGroup"
+                                                        data-test-subj="instance-name"
+                                                        id="random_html_id"
+                                                        name="first"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value=""
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
+                                                  <EuiButton
+                                                    className="euiFormControlLayout__append"
+                                                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                    disabled={true}
+                                                    key="0/.0"
+                                                    onClick={[Function]}
+                                                  >
+                                                    <EuiButtonDisplay
+                                                      baseClassName="euiButton"
+                                                      className="euiFormControlLayout__append"
+                                                      data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                      disabled={true}
+                                                      element="button"
+                                                      isDisabled={true}
+                                                      onClick={[Function]}
+                                                      type="button"
+                                                    >
+                                                      <button
+                                                        className="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                                        data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                        disabled={true}
+                                                        onClick={[Function]}
+                                                        style={
+                                                          Object {
+                                                            "minWidth": undefined,
+                                                          }
+                                                        }
+                                                        type="button"
+                                                      >
+                                                        <EuiButtonContent
+                                                          className="euiButton__content"
+                                                          iconSide="left"
+                                                          textProps={
+                                                            Object {
+                                                              "className": "euiButton__text",
+                                                            }
+                                                          }
+                                                        >
+                                                          <span
+                                                            className="euiButtonContent euiButton__content"
+                                                          >
+                                                            <span
+                                                              className="euiButton__text"
+                                                            >
+                                                              Validate
+                                                            </span>
+                                                          </span>
+                                                        </EuiButtonContent>
+                                                      </button>
+                                                    </EuiButtonDisplay>
+                                                  </EuiButton>
                                                 </div>
-                                              </div>
-                                            </EuiFormControlLayout>
-                                          </EuiFieldText>
-                                          <EuiFormHelpText
-                                            className="euiFormRow__text"
-                                            id="random_html_id-help-0"
-                                            key="The enviornment for which to ingest data."
-                                          >
-                                            <div
-                                              className="euiFormHelpText euiFormRow__text"
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
                                               id="random_html_id-help-0"
+                                              key="The index pattern or data stream the integration will read from."
                                             >
-                                              The enviornment for which to ingest data.
-                                            </div>
-                                          </EuiFormHelpText>
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                The index pattern or data stream the integration will read from.
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </EuiFormRow>
-                                    <EuiSpacer>
-                                      <div
-                                        className="euiSpacer euiSpacer--l"
-                                      />
-                                    </EuiSpacer>
-                                    <EuiFormRow
-                                      describedByIds={Array []}
-                                      display="row"
-                                      fullWidth={false}
-                                      hasChildLabel={true}
-                                      hasEmptyLabelSpace={false}
-                                      helpText="Tags you want associated with this integration."
-                                      label="Tags (optional)"
-                                      labelType="label"
-                                    >
-                                      <div
-                                        className="euiFormRow"
-                                        id="random_html_id-row"
+                                      </EuiFormRow>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText="The name identifies the integration as a whole."
+                                        label="Name"
+                                        labelType="label"
                                       >
                                         <div
-                                          className="euiFormRow__labelWrapper"
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
                                         >
-                                          <EuiFormLabel
-                                            className="euiFormRow__label"
-                                            htmlFor="random_html_id"
-                                            isFocused={false}
-                                            type="label"
+                                          <div
+                                            className="euiFormRow__labelWrapper"
                                           >
-                                            <label
-                                              className="euiFormLabel euiFormRow__label"
+                                            <EuiFormLabel
+                                              className="euiFormRow__label"
                                               htmlFor="random_html_id"
+                                              isFocused={false}
+                                              type="label"
                                             >
-                                              Tags (optional)
-                                            </label>
-                                          </EuiFormLabel>
-                                        </div>
-                                        <div
-                                          className="euiFormRow__fieldWrapper"
-                                        >
-                                          <EuiFieldText
-                                            aria-describedby="random_html_id-help-0"
-                                            data-test-subj="instance-tags"
-                                            id="random_html_id"
-                                            name="first"
-                                            onBlur={[Function]}
-                                            onChange={[Function]}
-                                            onFocus={[Function]}
-                                            value=""
+                                              <label
+                                                className="euiFormLabel euiFormRow__label"
+                                                htmlFor="random_html_id"
+                                              >
+                                                Name
+                                              </label>
+                                            </EuiFormLabel>
+                                          </div>
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
                                           >
-                                            <EuiFormControlLayout
-                                              fullWidth={false}
-                                              inputId="random_html_id"
+                                            <EuiFieldText
+                                              aria-describedby="random_html_id-help-0"
+                                              data-test-subj="instance-name"
+                                              id="random_html_id"
+                                              name="first"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value="test"
                                             >
-                                              <div
-                                                className="euiFormControlLayout"
+                                              <EuiFormControlLayout
+                                                fullWidth={false}
+                                                inputId="random_html_id"
                                               >
                                                 <div
-                                                  className="euiFormControlLayout__childrenWrapper"
+                                                  className="euiFormControlLayout"
                                                 >
-                                                  <EuiValidatableControl>
-                                                    <input
-                                                      aria-describedby="random_html_id-help-0"
-                                                      className="euiFieldText"
-                                                      data-test-subj="instance-tags"
-                                                      id="random_html_id"
-                                                      name="first"
-                                                      onBlur={[Function]}
-                                                      onChange={[Function]}
-                                                      onFocus={[Function]}
-                                                      type="text"
-                                                      value=""
-                                                    />
-                                                  </EuiValidatableControl>
-                                                  <EuiFormControlLayoutIcons />
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl>
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText"
+                                                        data-test-subj="instance-name"
+                                                        id="random_html_id"
+                                                        name="first"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value="test"
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
                                                 </div>
-                                              </div>
-                                            </EuiFormControlLayout>
-                                          </EuiFieldText>
-                                          <EuiFormHelpText
-                                            className="euiFormRow__text"
-                                            id="random_html_id-help-0"
-                                            key="Tags you want associated with this integration."
-                                          >
-                                            <div
-                                              className="euiFormHelpText euiFormRow__text"
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
                                               id="random_html_id-help-0"
+                                              key="The name identifies the integration as a whole."
                                             >
-                                              Tags you want associated with this integration.
-                                            </div>
-                                          </EuiFormHelpText>
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                The name identifies the integration as a whole.
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </EuiFormRow>
-                                    <EuiSpacer>
-                                      <div
-                                        className="euiSpacer euiSpacer--l"
-                                      />
-                                    </EuiSpacer>
+                                      </EuiFormRow>
+                                      <EuiSpacer>
+                                        <div
+                                          className="euiSpacer euiSpacer--l"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText="The enviornment for which to ingest data."
+                                        label="Namespace"
+                                        labelType="label"
+                                      >
+                                        <div
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            className="euiFormRow__labelWrapper"
+                                          >
+                                            <EuiFormLabel
+                                              className="euiFormRow__label"
+                                              htmlFor="random_html_id"
+                                              isFocused={false}
+                                              type="label"
+                                            >
+                                              <label
+                                                className="euiFormLabel euiFormRow__label"
+                                                htmlFor="random_html_id"
+                                              >
+                                                Namespace
+                                              </label>
+                                            </EuiFormLabel>
+                                          </div>
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
+                                          >
+                                            <EuiFieldText
+                                              aria-describedby="random_html_id-help-0"
+                                              data-test-subj="instance-namespace"
+                                              id="random_html_id"
+                                              name="first"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value=""
+                                            >
+                                              <EuiFormControlLayout
+                                                fullWidth={false}
+                                                inputId="random_html_id"
+                                              >
+                                                <div
+                                                  className="euiFormControlLayout"
+                                                >
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl>
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText"
+                                                        data-test-subj="instance-namespace"
+                                                        id="random_html_id"
+                                                        name="first"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value=""
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
+                                                </div>
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                              key="The enviornment for which to ingest data."
+                                            >
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                The enviornment for which to ingest data.
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
+                                        </div>
+                                      </EuiFormRow>
+                                      <EuiSpacer>
+                                        <div
+                                          className="euiSpacer euiSpacer--l"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText="Tags you want associated with this integration."
+                                        label="Tags (optional)"
+                                        labelType="label"
+                                      >
+                                        <div
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            className="euiFormRow__labelWrapper"
+                                          >
+                                            <EuiFormLabel
+                                              className="euiFormRow__label"
+                                              htmlFor="random_html_id"
+                                              isFocused={false}
+                                              type="label"
+                                            >
+                                              <label
+                                                className="euiFormLabel euiFormRow__label"
+                                                htmlFor="random_html_id"
+                                              >
+                                                Tags (optional)
+                                              </label>
+                                            </EuiFormLabel>
+                                          </div>
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
+                                          >
+                                            <EuiFieldText
+                                              aria-describedby="random_html_id-help-0"
+                                              data-test-subj="instance-tags"
+                                              id="random_html_id"
+                                              name="first"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value=""
+                                            >
+                                              <EuiFormControlLayout
+                                                fullWidth={false}
+                                                inputId="random_html_id"
+                                              >
+                                                <div
+                                                  className="euiFormControlLayout"
+                                                >
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl>
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText"
+                                                        data-test-subj="instance-tags"
+                                                        id="random_html_id"
+                                                        name="first"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value=""
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
+                                                </div>
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                              key="Tags you want associated with this integration."
+                                            >
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                Tags you want associated with this integration.
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
+                                        </div>
+                                      </EuiFormRow>
+                                      <EuiSpacer>
+                                        <div
+                                          className="euiSpacer euiSpacer--l"
+                                        />
+                                      </EuiSpacer>
+                                    </div>
                                   </form>
                                 </EuiForm>
                               </div>
