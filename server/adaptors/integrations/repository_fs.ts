@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { templateValidator } from './validators';
