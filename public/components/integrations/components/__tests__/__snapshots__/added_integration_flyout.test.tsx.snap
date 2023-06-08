@@ -85,7 +85,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             class="euiFormLegend"
                           >
                             <span>
-                               Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                               
+                              Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                             </span>
                           </legend>
                           <div
@@ -527,7 +528,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     class="euiFormLegend"
                                   >
                                     <span>
-                                       Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                       
+                                      Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                     </span>
                                   </legend>
                                   <div
@@ -901,7 +903,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       class="euiFormLegend"
                                     >
                                       <span>
-                                         Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                         
+                                        Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                       </span>
                                     </legend>
                                     <div
@@ -1275,7 +1278,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormLegend"
                                       >
                                         <span>
-                                           Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                           
+                                          Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                         </span>
                                       </legend>
                                       <div
@@ -1637,7 +1641,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormLegend"
                                         >
                                           <span>
-                                             Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                             
+                                            Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                           </span>
                                         </legend>
                                         <div
@@ -2068,7 +2073,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       legend={
                                         Object {
                                           "children": <span>
-                                             Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                             
+                                            Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                           </span>,
                                           "compressed": undefined,
                                         }
@@ -2092,7 +2098,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         legend={
                                           Object {
                                             "children": <span>
-                                               Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                               
+                                              Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                             </span>,
                                             "compressed": undefined,
                                           }
@@ -2104,7 +2111,8 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               className="euiFormLegend"
                                             >
                                               <span>
-                                                 Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
+                                                 
+                                                Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data source for this integration to read from
                                               </span>
                                             </legend>
                                           </EuiFormLegend>
