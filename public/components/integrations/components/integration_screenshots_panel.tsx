@@ -18,14 +18,14 @@ export function IntegrationScreenshots(props: any) {
     <EuiPanel data-test-subj={`${props.data.data.name}-screenshots`}>
       <PanelTitle title={'Screenshots'} />
       <EuiFlexGroup gutterSize="l">
-        {screenshots?.map((i, v) => {
+        {screenshots?.map((screenshot: { path: string }) => {
           return (
-            <EuiFlexItem key={v}>
+            <EuiFlexItem key={screenshot.path}>
               <img
                 style={{ width: 300, height: 300 }}
                 alt=""
                 className="synopsisIcon"
-                src={`${INTEGRATIONS_BASE}/repository/${props.data.data.name}/static/logo`}
+                src={`${INTEGRATIONS_BASE}/repository/${props.data.data.name}/static/${screenshot.path}`}
               />
             </EuiFlexItem>
           );

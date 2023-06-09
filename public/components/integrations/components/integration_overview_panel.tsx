@@ -30,7 +30,7 @@ export function IntegrationOverview(props: any) {
       data-test-subj={`${data.data.name}-overview`}
     >
       <img
-        src={`${INTEGRATIONS_BASE}/repository/${data.data.name}/static/logo`}
+        src={`${INTEGRATIONS_BASE}/repository/${data.data.name}/static/${data.data.statics.logo.path}`}
         alt="React Logo"
         style={{ height: 53, width: 53 }}
       />
