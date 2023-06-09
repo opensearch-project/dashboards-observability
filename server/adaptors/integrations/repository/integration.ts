@@ -59,6 +59,9 @@ export class Integration {
     for (const file of files) {
       if (path.extname(file) === '.json' && file.startsWith(`${this.name}-`)) {
         const version = file.substring(this.name.length + 1, file.length - 5);
+        if (!version.match(/^\d+(\.\d+)*$/)) {
+          continue;
+        }
         versions.push(version);
       }
     }

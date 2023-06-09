@@ -67,6 +67,15 @@ describe('Integration', () => {
 
       expect(result).toBeNull();
     });
+
+    it('should ignore files without a decimal version', async () => {
+      const files: unknown[] = ['sample-1.0.0.json', 'sample-2.0.two.json', 'sample-three.json'];
+      jest.spyOn(fs, 'readdir').mockResolvedValue(files as Dirent[]);
+
+      const result = await integration.getLatestVersion();
+
+      expect(result).toBe('1.0.0');
+    });
   });
 
   describe('getConfig', () => {
