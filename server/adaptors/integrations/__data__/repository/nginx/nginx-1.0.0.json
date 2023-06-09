@@ -9,23 +9,19 @@
     "sourceUrl": "https://github.com/",
     "statics": {
         "logo": {
-            "mimeType": "image/svg",
             "annotation": "NginX Logo",
             "path": "logo.svg"
         },
         "gallery": [
             {
-                "mimeType": "image/svg",
                 "annotation": "NginX Logo",
                 "path": "logo.svg"
             },
             {
-                "mimeType": "image/svg",
                 "annotation": "NginX Logo",
                 "path": "logo.svg"
             },
             {
-                "mimeType": "image/svg",
                 "annotation": "NginX Logo",
                 "path": "logo.svg"
             }
