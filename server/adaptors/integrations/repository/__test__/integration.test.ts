@@ -169,5 +169,16 @@ describe('Integration', () => {
       );
       expect(readFileMock).toBeCalledWith('sample/statics/logo.png');
     });
+
+    it('should return null and log an error if the static file is not found', async () => {
+      const logErrorsMock = jest.spyOn(console, 'error');
+      jest.spyOn(fs, 'readFile').mockImplementation((..._args) => {
+        const error: any = new Error('ENOENT: File not found');
+        error.code = 'ENOENT';
+        return Promise.reject(error);
+      });
+      expect(await integration.getStatic('/logo.png')).toBeNull();
+      expect(logErrorsMock).toBeCalledWith(expect.any(String));
+    });
   });
 });
