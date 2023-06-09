@@ -191,7 +191,7 @@ export class Integration {
    * @returns A buffer with the static's data if present, otherwise null.
    */
   async getStatic(staticPath: string): Promise<Buffer | null> {
-    const fullStaticPath = path.join(this.directory, 'statics', staticPath);
+    const fullStaticPath = path.join(this.directory, 'static', staticPath);
     try {
       return await fs.readFile(fullStaticPath);
     } catch (err: any) {

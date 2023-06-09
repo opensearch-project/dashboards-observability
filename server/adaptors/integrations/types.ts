@@ -27,7 +27,6 @@ interface IntegrationTemplate {
 }
 
 interface StaticAsset {
-  mimeType: string;
   annotation?: string;
   path: string;
 }

@@ -125,12 +125,12 @@ export function registerIntegrationsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       try {
-        const logo = await adaptor.getStatic(request.params.id, `/${request.params.path}`);
+        const result = await adaptor.getStatic(request.params.id, request.params.path);
         return response.ok({
           headers: {
-            'Content-Type': logo.mimeType,
+            'Content-Type': undefined, // Response defaults to application/text, clear it to let browser infer
           },
-          body: Buffer.from(logo.data, 'base64'),
+          body: result,
         });
       } catch (err: any) {
         return response.custom({

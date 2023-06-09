@@ -6,11 +6,11 @@
 import { IntegrationsKibanaBackend } from '../integrations_kibana_backend';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { IntegrationsRepository } from '../integrations_repository';
+import { Repository } from '../repository/repository';
 
 describe('IntegrationsKibanaBackend', () => {
   let mockClient: SavedObjectsClientContract;
-  let mockRepository: IntegrationsRepository;
+  let mockRepository: Repository;
   let backend: IntegrationsKibanaBackend;
 
   beforeEach(() => {

@@ -3,28 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import path from 'path';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
-import { IntegrationsRepository } from './integrations_repository';
-import { SimpleSavedObject } from '../../../../../src/core/public';
+import { Repository } from './repository/repository';
 
 export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
-  repository: IntegrationsRepository;
+  repository: Repository;
 
-  constructor(client: SavedObjectsClientContract, repository?: IntegrationsRepository) {
+  constructor(client: SavedObjectsClientContract, repository?: Repository) {
     this.client = client;
-    this.repository = repository ?? new IntegrationsRepository();
+    this.repository = repository ?? new Repository(path.join(__dirname, '__data__/repository'));
   }
 
   deleteIntegrationInstance = async (id: string): Promise<any> => {
     const children: any = await this.client.get('integration-instance', id);
     children.attributes.assets
-      .map((i) => {
+      .map((i: any) => {
         return { id: i.assetId, type: i.assetType };
       })
-      .forEach(async (element) => {
+      .forEach(async (element: any) => {
         await this.client.delete(element.type, element.id);
       });
     const result = await this.client.delete('integration-instance', id);
@@ -35,13 +35,13 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
     if (query?.name) {
-      const result = await this.repository.getByName(query.name);
-      return Promise.resolve({ hits: [result] });
+      const integration = await this.repository.getIntegration(query.name);
+      const config = await integration?.getConfig();
+      return Promise.resolve({ hits: config ? [config] : [] });
     }
-    const result = await this.repository.get();
-    return Promise.resolve({
-      hits: result,
-    });
+    const integrationList = await this.repository.getIntegrationList();
+    const configList = await Promise.all(integrationList.map((x) => x.getConfig()));
+    return Promise.resolve({ hits: configList.filter((x) => x !== null) as IntegrationTemplate[] });
   };
 
   getIntegrationInstances = async (
@@ -68,9 +68,9 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     templateName: string,
     name: string
   ): Promise<IntegrationInstance> => {
-    const template = await this.repository.getByName(templateName);
+    const template = await (await this.repository.getIntegration(templateName))?.getConfig();
     try {
-      const result = await new IntegrationInstanceBuilder(this.client).build(template, {
+      const result = await new IntegrationInstanceBuilder(this.client).build(template!, {
         name,
         dataset: 'nginx',
         namespace: 'prod',
@@ -85,12 +85,11 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     }
   };
 
-  getStatic = async (templateName: string, path: string): Promise<StaticAsset> => {
-    const template = await this.repository.getByName(templateName);
-    const data = template.statics?.assets?.[path];
-    if (data === undefined) {
+  getStatic = async (templateName: string, staticPath: string): Promise<Buffer> => {
+    const data = await (await this.repository.getIntegration(templateName))?.getStatic(staticPath);
+    if (!data) {
       return Promise.reject({
-        message: `Asset ${path} not found`,
+        message: `Asset ${staticPath} not found`,
         statusCode: 404,
       });
     }

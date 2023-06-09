@@ -5,11 +5,10 @@ const ajv = new Ajv();
 const staticAsset: JSONSchemaType<StaticAsset> = {
   type: 'object',
   properties: {
-    mimeType: { type: 'string' },
     path: { type: 'string' },
     annotation: { type: 'string', nullable: true },
   },
-  required: ['mimeType', 'path'],
+  required: ['path'],
   additionalProperties: false,
 };
 
