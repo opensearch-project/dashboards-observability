@@ -110,10 +110,11 @@ export class Integration {
     savedObjects?: object[];
   }> {
     const config = await this.getConfig(version);
-    const result = {
-      savedObjects: undefined,
-    };
-    if (config?.assets.savedObjects) {
+    if (config === null) {
+      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+    }
+    const result: { savedObjects?: object[] } = {};
+    if (config.assets.savedObjects) {
       const sobjPath = path.join(
         this.directory,
         'assets',

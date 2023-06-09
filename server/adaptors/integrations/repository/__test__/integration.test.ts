@@ -151,5 +151,11 @@ describe('Integration', () => {
 
       expect(result.savedObjects).toEqual([{ name: 'asset1' }, { name: 'asset2' }]);
     });
+
+    it('should reject a return if the provided version has no config', async () => {
+      integration.getConfig = jest.fn().mockResolvedValue(null);
+
+      expect(integration.getAssets()).rejects.toThrowError();
+    });
   });
 });
