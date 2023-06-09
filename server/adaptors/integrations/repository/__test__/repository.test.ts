@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import { Repository } from '../repository';
 import { Integration } from '../integration';
+import { Dirent, Stats } from 'fs';
 
 jest.mock('fs/promises');
 
@@ -14,10 +15,10 @@ describe('Repository', () => {
   describe('getIntegrationList', () => {
     it('should return an array of Integration instances', async () => {
       // Mock fs.readdir to return a list of folders
-      jest.spyOn(fs, 'readdir').mockResolvedValue(['folder1', 'folder2']);
+      jest.spyOn(fs, 'readdir').mockResolvedValue((['folder1', 'folder2'] as unknown) as Dirent[]);
 
       // Mock fs.lstat to return a directory status
-      jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true });
+      jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
 
       // Mock Integration check method to always return true
       jest.spyOn(Integration.prototype, 'check').mockResolvedValue(true);
@@ -30,14 +31,14 @@ describe('Repository', () => {
     });
 
     it('should filter out null values from the integration list', async () => {
-      jest.spyOn(fs, 'readdir').mockResolvedValue(['folder1', 'folder2']);
+      jest.spyOn(fs, 'readdir').mockResolvedValue((['folder1', 'folder2'] as unknown) as Dirent[]);
 
       // Mock fs.lstat to return a mix of directories and files
       jest.spyOn(fs, 'lstat').mockImplementation(async (path) => {
         if (path === 'path/to/directory/folder1') {
-          return { isDirectory: () => true };
-        } else if (path === 'path/to/directory/folder2') {
-          return { isDirectory: () => false };
+          return { isDirectory: () => true } as Stats;
+        } else {
+          return { isDirectory: () => false } as Stats;
         }
       });
 
