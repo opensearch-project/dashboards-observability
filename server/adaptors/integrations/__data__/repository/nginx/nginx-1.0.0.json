@@ -1,0 +1,54 @@
+{
+    "name": "nginx",
+    "version": "1.0.0",
+    "integrationType": "logs",
+    "description": "Nginx HTTP server collector",
+    "license": "Apache-2.0",
+    "link": "https://www.nginx.com/",
+    "author": "John Doe",
+    "sourceUrl": "https://github.com/",
+    "statics": {
+        "logo": {
+            "mimeType": "image/svg",
+            "annotation": "NginX Logo",
+            "path": "logo.svg"
+        },
+        "gallery": [
+            {
+                "mimeType": "image/svg",
+                "annotation": "NginX Logo",
+                "path": "logo.svg"
+            },
+            {
+                "mimeType": "image/svg",
+                "annotation": "NginX Logo",
+                "path": "logo.svg"
+            },
+            {
+                "mimeType": "image/svg",
+                "annotation": "NginX Logo",
+                "path": "logo.svg"
+            }
+        ]
+    },
+    "components": [
+        {
+            "name": "communication",
+            "version": "1.0.0"
+        },
+        {
+            "name": "http",
+            "version": "1.0.0"
+        },
+        {
+            "name": "logs",
+            "version": "1.0.0"
+        }
+    ],
+    "assets": {
+        "savedObjects": {
+            "name": "nginx",
+            "version": "1.0.0"
+        }
+    }
+}

@@ -17,7 +17,7 @@ import { PanelTitle } from '../../trace_analytics/components/common/helper_funct
 const FILTER_OPTIONS = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
 export function IntegrationAssets(props: any) {
-  const data = props.data.data.displayAssets.map((x: any) => JSON.parse(x.body)) || [];
+  const data: any[] = [];
 
   const search = {
     box: {

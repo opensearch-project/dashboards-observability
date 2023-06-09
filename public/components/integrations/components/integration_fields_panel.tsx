@@ -16,12 +16,7 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {
-  const data =
-    props.data.data.components.map((x: any) => ({
-      name: x.name,
-      version: x.version,
-      mapping: JSON.parse(x.mappingBody),
-    })) || [];
+  const data = [];
 
   const search = {
     box: {

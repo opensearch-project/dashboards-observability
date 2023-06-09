@@ -18,5 +18,5 @@ export interface IntegrationsAdaptor {
 
   deleteIntegrationInstance: (id: string) => Promise<any>;
 
-  getStatic: (templateName: string, path: string) => Promise<StaticAsset>;
+  getStatic: (templateName: string, path: string) => Promise<Buffer>;
 }

@@ -41,7 +41,7 @@ export class IntegrationInstanceBuilder {
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
     const result = this.validate(template)
-      .then(() => this.post_assets(template.displayAssets, template.name))
+      .then(() => this.post_assets(template.assets, template.name))
       .then((refs) => this.build_instance(template, refs, options));
     return result;
   }

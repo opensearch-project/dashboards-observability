@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import * as mime from 'mime';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
@@ -125,12 +126,12 @@ export function registerIntegrationsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
       try {
-        const logo = await adaptor.getStatic(request.params.id, `/${request.params.path}`);
+        const result = await adaptor.getStatic(request.params.id, request.params.path);
         return response.ok({
           headers: {
-            'Content-Type': logo.mimeType,
+            'Content-Type': mime.getType(request.params.path),
           },
-          body: Buffer.from(logo.data, 'base64'),
+          body: result,
         });
       } catch (err: any) {
         return response.custom({

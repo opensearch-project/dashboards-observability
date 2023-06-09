@@ -29,7 +29,7 @@ describe('IntegrationInstanceBuilder', () => {
       integrationType: 'logs',
       license: 'Apache-2.0',
       components: [],
-      displayAssets,
+      assets: displayAssets,
     };
     const options = {
       name: 'Instance 1',
@@ -93,7 +93,7 @@ describe('IntegrationInstanceBuilder', () => {
       integrationType: 'logs',
       license: 'Apache-2.0',
       components: [],
-      displayAssets,
+      assets: displayAssets,
     };
     const options = { name: 'Instance 1', dataset: 'dataset', namespace: 'namespace' };
     const errorMessage = 'An error occurred while posting assets';
@@ -113,7 +113,7 @@ describe('IntegrationInstanceBuilder', () => {
       integrationType: 'logs',
       license: 'Apache-2.0',
       components: [],
-      displayAssets: [],
+      assets: [],
     };
 
     const result = await builder.validate(template);
