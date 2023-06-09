@@ -103,4 +103,26 @@ export class Integration {
       throw new Error('Could not load integration', { cause: err });
     }
   }
+
+  async getAssets(
+    version?: string
+  ): Promise<{
+    savedObjects?: object[];
+  }> {
+    const config = await this.getConfig(version);
+    const result = {
+      savedObjects: undefined,
+    };
+    if (config?.assets.savedObjects) {
+      const sobjPath = path.join(
+        this.directory,
+        'assets',
+        `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`
+      );
+      const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
+      const parsed = JSON.parse(`[${ndjson.replace('\n', ',')}]`);
+      result.savedObjects = parsed;
+    }
+    return result;
+  }
 }

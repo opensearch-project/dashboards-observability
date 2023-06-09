@@ -17,7 +17,6 @@ describe('Integration', () => {
 
   beforeEach(() => {
     integration = new Integration('./sample');
-    jest.resetAllMocks();
   });
 
   describe('check', () => {
@@ -88,7 +87,7 @@ describe('Integration', () => {
     });
 
     it('should return null and log validation errors if the config template is invalid', async () => {
-      const invalidTemplate = { name: sampleIntegration.name, version: 2 };
+      const invalidTemplate = { ...sampleIntegration, version: 2 };
       jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(invalidTemplate));
       const logValidationErrorsMock = jest.spyOn(console, 'error');
 
@@ -111,7 +110,7 @@ describe('Integration', () => {
     it('should return null and log errors if the integration config does not exist', async () => {
       integration.directory = './non-existing-directory';
       const logErrorsMock = jest.spyOn(console, 'error');
-      const readFileMock = jest.spyOn(fs, 'readFile').mockImplementation((..._args) => {
+      jest.spyOn(fs, 'readFile').mockImplementation((..._args) => {
         // Can't find any information on how to mock an actual file not found error,
         // But at least according to the current implementation this should be equivalent.
         const error: any = new Error('ENOENT: File not found');
@@ -121,9 +120,36 @@ describe('Integration', () => {
 
       const result = await integration.getConfig(sampleIntegration.version);
 
-      expect(readFileMock).toHaveBeenCalled();
+      expect(jest.spyOn(fs, 'readFile')).toHaveBeenCalled();
       expect(logErrorsMock).toHaveBeenCalledWith(expect.any(String));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getAssets', () => {
+    it('should return linked saved object assets when available', async () => {
+      jest.spyOn(fs, 'readFile').mockImplementation(async (path, ..._args) => {
+        console.error('readFile with', path);
+        if (path === 'sample/sample-2.0.0.json') {
+          return JSON.stringify({
+            ...sampleIntegration,
+            assets: {
+              savedObjects: {
+                name: 'sample',
+                version: '1.0.1',
+              },
+            },
+          });
+        }
+        if (path === 'sample/assets/sample-1.0.1.ndjson') {
+          return '{"name":"asset1"}\n{"name":"asset2"}';
+        }
+        throw Error(`${path} not found in mock file system`);
+      });
+
+      const result = await integration.getAssets(sampleIntegration.version);
+
+      expect(result.savedObjects).toEqual([{ name: 'asset1' }, { name: 'asset2' }]);
     });
   });
 });
