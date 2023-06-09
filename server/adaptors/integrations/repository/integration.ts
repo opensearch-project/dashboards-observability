@@ -120,9 +120,13 @@ export class Integration {
         'assets',
         `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`
       );
-      const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
-      const parsed = JSON.parse(`[${ndjson.replace('\n', ',')}]`);
-      result.savedObjects = parsed;
+      try {
+        const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
+        const parsed = JSON.parse(`[${ndjson.replace('\n', ',')}]`);
+        result.savedObjects = parsed;
+      } catch (err: any) {
+        console.error("Failed to load saved object assets, proceeding as if it's absent", err);
+      }
     }
     return result;
   }

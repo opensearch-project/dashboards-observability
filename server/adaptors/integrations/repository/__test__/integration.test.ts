@@ -12,7 +12,12 @@ describe('Integration', () => {
     integrationType: 'sample',
     license: 'Apache-2.0',
     components: [],
-    assets: {},
+    assets: {
+      savedObjects: {
+        name: 'sample',
+        version: '1.0.1',
+      },
+    },
   };
 
   beforeEach(() => {
@@ -128,24 +133,8 @@ describe('Integration', () => {
 
   describe('getAssets', () => {
     it('should return linked saved object assets when available', async () => {
-      jest.spyOn(fs, 'readFile').mockImplementation(async (path, ..._args) => {
-        console.error('readFile with', path);
-        if (path === 'sample/sample-2.0.0.json') {
-          return JSON.stringify({
-            ...sampleIntegration,
-            assets: {
-              savedObjects: {
-                name: 'sample',
-                version: '1.0.1',
-              },
-            },
-          });
-        }
-        if (path === 'sample/assets/sample-1.0.1.ndjson') {
-          return '{"name":"asset1"}\n{"name":"asset2"}';
-        }
-        throw Error(`${path} not found in mock file system`);
-      });
+      integration.getConfig = jest.fn().mockResolvedValue(sampleIntegration);
+      jest.spyOn(fs, 'readFile').mockResolvedValue('{"name":"asset1"}\n{"name":"asset2"}');
 
       const result = await integration.getAssets(sampleIntegration.version);
 
@@ -156,6 +145,17 @@ describe('Integration', () => {
       integration.getConfig = jest.fn().mockResolvedValue(null);
 
       expect(integration.getAssets()).rejects.toThrowError();
+    });
+
+    it('should log an error if the saved object assets are invalid', async () => {
+      const logErrorsMock = jest.spyOn(console, 'error');
+      integration.getConfig = jest.fn().mockResolvedValue(sampleIntegration);
+      jest.spyOn(fs, 'readFile').mockResolvedValue('{"unclosed":');
+
+      const result = await integration.getAssets(sampleIntegration.version);
+
+      expect(logErrorsMock).toHaveBeenCalledWith(expect.any(String), expect.any(Error));
+      expect(result.savedObjects).toBeUndefined();
     });
   });
 });
