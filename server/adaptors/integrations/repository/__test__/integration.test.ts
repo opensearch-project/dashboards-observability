@@ -12,7 +12,7 @@ describe('Integration', () => {
     integrationType: 'sample',
     license: 'Apache-2.0',
     components: [],
-    displayAssets: {},
+    assets: {},
   };
 
   beforeEach(() => {

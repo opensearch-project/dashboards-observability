@@ -45,7 +45,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
         required: ['name', 'version'],
       },
     },
-    displayAssets: {
+    assets: {
       type: 'object',
       properties: {
         savedObjects: {
@@ -62,7 +62,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
       additionalProperties: false,
     },
   },
-  required: ['name', 'version', 'integrationType', 'license', 'components', 'displayAssets'],
+  required: ['name', 'version', 'integrationType', 'license', 'components', 'assets'],
   additionalProperties: false,
 };
 

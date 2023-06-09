@@ -18,7 +18,7 @@ interface IntegrationTemplate {
     darkModeGallery?: StaticAsset[];
   };
   components: IntegrationComponent[];
-  displayAssets: {
+  assets: {
     savedObjects?: {
       name: string;
       version: string;
