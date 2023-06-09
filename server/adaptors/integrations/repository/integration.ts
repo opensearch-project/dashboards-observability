@@ -1,13 +1,12 @@
-import { existsSync } from 'fs';
 import * as fs from 'fs/promises';
 import path from 'path';
 import { ValidateFunction } from 'ajv';
 import { templateValidator } from '../validators';
 
 // Helper function to compare version numbers
-function compareVersions(a: string, b: string) {
-  const aParts = a.split('.').map(Number);
-  const bParts = b.split('.').map(Number);
+function compareVersions(a: string, b: string): number {
+  const aParts = a.split('.').map(Number.parseInt);
+  const bParts = b.split('.').map(Number.parseInt);
 
   for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
     const aValue = i < aParts.length ? aParts[i] : 0;
@@ -21,6 +20,15 @@ function compareVersions(a: string, b: string) {
   }
 
   return 0; // a == b
+}
+
+async function isDirectory(dirPath: string): Promise<boolean> {
+  try {
+    const stats = await fs.stat(dirPath);
+    return stats.isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 function logValidationErrors(integration: string, validator: ValidateFunction<any>) {
@@ -38,7 +46,7 @@ export class Integration {
   }
 
   async check(): Promise<boolean> {
-    if (!existsSync(this.directory)) {
+    if (!(await isDirectory(this.directory))) {
       return false;
     }
     return (await this.getConfig()) !== null;
@@ -46,38 +54,50 @@ export class Integration {
 
   async getLatestVersion(): Promise<string | null> {
     const files = await fs.readdir(this.directory);
-    const versions = files
-      .filter((file) => path.extname(file) === '.json' && file.startsWith(`${this.name}-`))
-      .map((file) => file.substring(this.name.length + 1, file.length - 5)) // Extract version from the file name
-      .sort((a, b) => compareVersions(a, b)); // Sort versions in descending order
+    const versions: string[] = [];
 
-    if (versions.length > 0) {
-      return versions[0];
+    for (const file of files) {
+      if (path.extname(file) === '.json' && file.startsWith(`${this.name}-`)) {
+        const version = file.substring(this.name.length + 1, file.length - 5);
+        versions.push(version);
+      }
     }
-    return null;
+
+    versions.sort((a, b) => compareVersions(a, b));
+
+    return versions.length > 0 ? versions[0] : null;
   }
 
   async getConfig(version?: string): Promise<IntegrationTemplate | null> {
     const maybeVersion: string | null = version ? version : await this.getLatestVersion();
+
     if (maybeVersion === null) {
       return null;
     }
+
     const configFile = `${this.name}-${maybeVersion}.json`;
     const configPath = path.join(this.directory, configFile);
-    const config = await fs.readFile(configPath, { encoding: 'utf-8' });
+
     try {
+      const config = await fs.readFile(configPath, { encoding: 'utf-8' });
       const possibleTemplate = JSON.parse(config);
+
       if (!templateValidator(possibleTemplate)) {
-        logValidationErrors(`${configFile}`, templateValidator);
+        logValidationErrors(configFile, templateValidator);
         return null;
       }
+
       return possibleTemplate;
     } catch (err: any) {
       if (err instanceof SyntaxError) {
         console.error(`Syntax errors in ${configFile}`, err);
         return null;
       }
-      throw Error('Could not load integration', { cause: err });
+      if (err instanceof Error && (err as { code?: string }).code === 'ENOENT') {
+        console.error(`Attempted to retrieve non-existent config ${configFile}`);
+        return null;
+      }
+      throw new Error('Could not load integration', { cause: err });
     }
   }
 }
