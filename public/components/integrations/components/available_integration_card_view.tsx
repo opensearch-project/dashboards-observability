@@ -32,22 +32,13 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             return (
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
-                  icon={getImage(`${INTEGRATIONS_BASE}/repository/${i.name}/static/logo`)}
+                  icon={getImage(
+                    `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                  )}
                   title={i.name}
                   description={i.description}
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
-                  // footer={
-                  //     <EuiButton
-                  //       aria-label="Go to Developers Tools"
-                  //       onClick={() => {
-                  //         props.showModal(i.name);
-                  //       }}
-                  //       size="s"
-                  //     >
-                  //       Add
-                  //     </EuiButton>
-                  // }
                   onClick={() => (window.location.hash = `#/available/${i.name}`)}
                 />
               </EuiFlexItem>

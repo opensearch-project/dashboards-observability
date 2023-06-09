@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import * as mime from 'mime';
 import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
@@ -128,9 +129,7 @@ export function registerIntegrationsRoute(router: IRouter) {
         const result = await adaptor.getStatic(request.params.id, request.params.path);
         return response.ok({
           headers: {
-            // Since we don't currently support a method to infer the content type,
-            // we manually clear the default value and leave it up to the browser.
-            'Content-Type': undefined,
+            'Content-Type': mime.getType(request.params.path),
           },
           body: result,
         });
