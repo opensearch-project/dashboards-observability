@@ -128,7 +128,9 @@ export function registerIntegrationsRoute(router: IRouter) {
         const result = await adaptor.getStatic(request.params.id, request.params.path);
         return response.ok({
           headers: {
-            'Content-Type': undefined, // Response defaults to application/text, clear it to let browser infer
+            // Since we don't currently support a method to infer the content type,
+            // we manually clear the default value and leave it up to the browser.
+            'Content-Type': undefined,
           },
           body: result,
         });
