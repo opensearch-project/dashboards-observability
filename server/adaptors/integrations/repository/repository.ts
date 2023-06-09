@@ -24,10 +24,7 @@ export class Repository {
             return null;
           }
           const integ = new Integration(integPath);
-          if (!(await integ.check())) {
-            return null;
-          }
-          return integ;
+          return (await integ.check()) ? integ : null;
         })
       );
       return (await integrations).filter((x) => x !== null) as Integration[];
@@ -39,9 +36,6 @@ export class Repository {
 
   async getIntegration(name: string): Promise<Integration | null> {
     const integ = new Integration(path.join(this.directory, name));
-    if (!(await integ.check())) {
-      return null;
-    }
-    return integ;
+    return (await integ.check()) ? integ : null;
   }
 }
