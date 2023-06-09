@@ -158,4 +158,16 @@ describe('Integration', () => {
       expect(result.savedObjects).toBeUndefined();
     });
   });
+
+  describe('getStatic', () => {
+    it('should return data as a buffer if the static is present', async () => {
+      const readFileMock = jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValue(Buffer.from('logo data', 'ascii'));
+      expect(await integration.getStatic('/logo.png')).toStrictEqual(
+        Buffer.from('logo data', 'ascii')
+      );
+      expect(readFileMock).toBeCalledWith('sample/statics/logo.png');
+    });
+  });
 });

@@ -130,4 +130,17 @@ export class Integration {
     }
     return result;
   }
+
+  async getStatic(staticPath: string): Promise<Buffer | null> {
+    const fullStaticPath = path.join(this.directory, 'statics', staticPath);
+    try {
+      return fs.readFile(fullStaticPath);
+    } catch (err: any) {
+      if (err instanceof Error && (err as { code?: string }).code === 'ENOENT') {
+        console.error(`Static not found: ${staticPath}`);
+        return null;
+      }
+      throw err;
+    }
+  }
 }
