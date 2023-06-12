@@ -12,6 +12,7 @@ describe('Integration', () => {
     version: '2.0.0',
     integrationType: 'sample',
     license: 'Apache-2.0',
+    type: '',
     components: [],
     assets: {
       savedObjects: {
