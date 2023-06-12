@@ -151,8 +151,8 @@ export class Integration {
   /**
    * Retrieve assets associated with the integration.
    * This method greedily retrieves all assets.
-   * It's assumed that a valid version will be provided.
    * If the version is invalid, an error is thrown.
+   * If an asset is invalid, it will be skipped.
    *
    * @param version The version of the integration to retrieve assets for.
    * @returns An object containing the different types of assets.
@@ -180,6 +180,52 @@ export class Integration {
       } catch (err: any) {
         console.error("Failed to load saved object assets, proceeding as if it's absent", err);
       }
+    }
+    return result;
+  }
+
+  /**
+   * Retrieve schema data associated with the integration.
+   * This method greedily retrieves all mappings and schemas.
+   * It's assumed that a valid version will be provided.
+   * If the version is invalid, an error is thrown.
+   * If a schema is invalid, an error will be thrown.
+   *
+   * @param version The version of the integration to retrieve assets for.
+   * @returns An object containing the different types of assets.
+   */
+  async getSchemas(
+    version?: string
+  ): Promise<{
+    mappings: { [key: string]: any };
+    schemas: { [key: string]: any };
+  }> {
+    const config = await this.getConfig(version);
+    if (config === null) {
+      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+    }
+    const result: { mappings: { [key: string]: any }; schemas: { [key: string]: any } } = {
+      mappings: {},
+      schemas: {},
+    };
+    try {
+      for (const component of config.components) {
+        const [mappingFile, schemaFile] = [
+          `${component.name}-${component.version}.mapping.json`,
+          `${component.name}-${component.version}.schema.json`,
+        ];
+        const [rawMapping, rawSchema] = await Promise.all([
+          fs.readFile(path.join(this.directory, 'mappings', mappingFile), { encoding: 'utf-8' }),
+          fs.readFile(path.join(this.directory, 'schemas', schemaFile), { encoding: 'utf-8' }),
+        ]);
+        const [parsedMapping, parsedSchema] = [JSON.parse(rawMapping), JSON.parse(rawSchema)];
+        result.mappings[component.name] = parsedMapping;
+        result.schemas[component.name] = parsedSchema;
+      }
+    } catch (err: any) {
+      // It's not clear that an invalid schema can be recovered from.
+      // For integrations to function, we need schemas to be valid.
+      return Promise.reject(new Error('Could not load schema', { cause: err }));
     }
     return result;
   }
