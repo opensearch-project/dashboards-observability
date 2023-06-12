@@ -23,23 +23,43 @@ export class IntegrationInstanceBuilder {
   }
 
   async build(integration: Integration, options: BuilderOptions): Promise<IntegrationInstance> {
-    const result = integration
+    const instance = integration
       .deepCheck()
-      .then(async (_) => {
-        // Assumes no IO errors between deepCheck and now
-        // Also assumes savedObjects is present for now, need to update later
-        const sobjs = (await integration.getAssets()).savedObjects!;
-        return this.post_assets(sobjs);
+      .then((result) => {
+        if (!result) {
+          return Promise.reject(new Error('Integration is not valid'));
+        }
       })
-      .then((refs) => this.build_instance(integration, refs, options));
-    return result;
+      .then(() => integration.getAssets())
+      .then((assets) => this.remapIDs(assets.savedObjects!))
+      .then((assets) => this.postAssets(assets))
+      .then((refs) => this.buildInstance(integration, refs, options));
+    return instance;
   }
 
-  is_integration_template(template: any): template is IntegrationTemplate {
-    return template && template.name && typeof template.name === 'string';
+  remapIDs(assets: any[]): any[] {
+    const toRemap = assets.filter((asset) => asset.hasOwnProperity('id'));
+    const idMap = new Map<string, string>();
+    return toRemap.map((item) => {
+      if (idMap.has(item.id)) {
+        idMap.set(item.id, uuidv4());
+      }
+      item.id = idMap.get(item.id)!;
+      for (const ref in item.references) {
+        if (!item.references.hasOwnProperity(ref)) {
+          continue;
+        }
+        const refId = item.references[ref].id;
+        if (!idMap.has(refId)) {
+          idMap.set(refId, uuidv4());
+        }
+        item.references[ref].id = idMap.get(refId)!;
+      }
+      return item;
+    });
   }
 
-  async post_assets(assets: any[]): Promise<AssetReference[]> {
+  async postAssets(assets: any[]): Promise<AssetReference[]> {
     try {
       const response = await this.client.bulkCreate(assets as SavedObjectsBulkCreateObject[]);
       const refs: AssetReference[] = response.saved_objects.map((obj: any) => {
@@ -57,7 +77,7 @@ export class IntegrationInstanceBuilder {
     }
   }
 
-  async build_instance(
+  async buildInstance(
     integration: Integration,
     refs: AssetReference[],
     options: BuilderOptions
