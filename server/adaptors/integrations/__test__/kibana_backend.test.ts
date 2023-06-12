@@ -14,16 +14,16 @@ describe('IntegrationsKibanaBackend', () => {
   let backend: IntegrationsKibanaBackend;
 
   beforeEach(() => {
-    mockSavedObjectsClient = {
+    mockSavedObjectsClient = ({
       get: jest.fn(),
       find: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
-    };
-    mockRepository = {
+    } as unknown) as SavedObjectsClientContract;
+    mockRepository = ({
       getIntegration: jest.fn(),
       getIntegrationList: jest.fn(),
-    };
+    } as unknown) as Repository;
     backend = new IntegrationsKibanaBackend(mockSavedObjectsClient, mockRepository);
   });
 
@@ -39,8 +39,8 @@ describe('IntegrationsKibanaBackend', () => {
         },
       };
       const deleteResult = { result: 'deleted' };
-      mockSavedObjectsClient.get.mockResolvedValue(integrationInstance);
-      mockSavedObjectsClient.delete.mockResolvedValue(deleteResult);
+      (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue(integrationInstance);
+      (mockSavedObjectsClient.delete as jest.Mock).mockResolvedValue(deleteResult);
 
       const result = await backend.deleteIntegrationInstance(instanceId);
 
@@ -59,7 +59,7 @@ describe('IntegrationsKibanaBackend', () => {
     it('should get integration templates by name', async () => {
       const query = { name: 'template1' };
       const integration = { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) };
-      mockRepository.getIntegration.mockResolvedValue(integration);
+      (mockRepository.getIntegration as jest.Mock).mockResolvedValue(integration);
 
       const result = await backend.getIntegrationTemplates(query);
 
@@ -74,7 +74,7 @@ describe('IntegrationsKibanaBackend', () => {
         { getConfig: jest.fn().mockResolvedValue(null) },
         { getConfig: jest.fn().mockResolvedValue({ name: 'template2' }) },
       ];
-      mockRepository.getIntegrationList.mockResolvedValue(integrationList);
+      (mockRepository.getIntegrationList as jest.Mock).mockResolvedValue(integrationList);
 
       const result = await backend.getIntegrationTemplates();
 
@@ -95,7 +95,7 @@ describe('IntegrationsKibanaBackend', () => {
         { id: 'instance2', attributes: { name: 'instance2' } },
       ];
       const findResult = { total: savedObjects.length, saved_objects: savedObjects };
-      mockSavedObjectsClient.find.mockResolvedValue(findResult);
+      (mockSavedObjectsClient.find as jest.Mock).mockResolvedValue(findResult);
 
       const result = await backend.getIntegrationInstances();
 
@@ -111,7 +111,7 @@ describe('IntegrationsKibanaBackend', () => {
     it('should get integration instance by ID', async () => {
       const instanceId = 'instance1';
       const integrationInstance = { id: instanceId, attributes: { name: 'instance1' } };
-      mockSavedObjectsClient.get.mockResolvedValue(integrationInstance);
+      (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue(integrationInstance);
 
       const result = await backend.getIntegrationInstance({ id: instanceId });
 
@@ -131,8 +131,8 @@ describe('IntegrationsKibanaBackend', () => {
         build: jest.fn().mockResolvedValue({ name, dataset: 'nginx', namespace: 'prod' }),
       };
       const createdInstance = { name, dataset: 'nginx', namespace: 'prod' };
-      mockRepository.getIntegration.mockResolvedValue(template);
-      mockSavedObjectsClient.create.mockResolvedValue({ result: 'created' });
+      (mockRepository.getIntegration as jest.Mock).mockResolvedValue(template);
+      (mockSavedObjectsClient.create as jest.Mock).mockResolvedValue({ result: 'created' });
       backend.instanceBuilder = (instanceBuilder as unknown) as IntegrationInstanceBuilder;
 
       const result = await backend.loadIntegrationInstance(templateName, name);
@@ -152,7 +152,7 @@ describe('IntegrationsKibanaBackend', () => {
 
     it('should reject with a 404 if template is not found', async () => {
       const templateName = 'template1';
-      mockRepository.getIntegration.mockResolvedValue(null);
+      (mockRepository.getIntegration as jest.Mock).mockResolvedValue(null);
 
       await expect(
         backend.loadIntegrationInstance(templateName, 'instance1')
@@ -169,7 +169,7 @@ describe('IntegrationsKibanaBackend', () => {
         build: jest.fn().mockRejectedValue(new Error('Failed to build instance')),
       };
       backend.instanceBuilder = (instanceBuilder as unknown) as IntegrationInstanceBuilder;
-      mockRepository.getIntegration.mockResolvedValue(template);
+      (mockRepository.getIntegration as jest.Mock).mockResolvedValue(template);
 
       await expect(backend.loadIntegrationInstance(templateName, name)).rejects.toHaveProperty(
         'statusCode'
@@ -185,7 +185,7 @@ describe('IntegrationsKibanaBackend', () => {
       const integration = {
         getStatic: jest.fn().mockResolvedValue(assetData),
       };
-      mockRepository.getIntegration.mockResolvedValue(integration);
+      (mockRepository.getIntegration as jest.Mock).mockResolvedValue(integration);
 
       const result = await backend.getStatic(templateName, staticPath);
 
@@ -197,7 +197,7 @@ describe('IntegrationsKibanaBackend', () => {
     it('should reject with a 404 if asset is not found', async () => {
       const templateName = 'template1';
       const staticPath = 'path/to/static';
-      mockRepository.getIntegration.mockResolvedValue(null);
+      (mockRepository.getIntegration as jest.Mock).mockResolvedValue(null);
 
       await expect(backend.getStatic(templateName, staticPath)).rejects.toHaveProperty(
         'statusCode',

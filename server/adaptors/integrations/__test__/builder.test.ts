@@ -7,17 +7,16 @@ import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { Integration } from '../repository/integration';
 
-const mockSavedObjectsClient: SavedObjectsClientContract = {
+const mockSavedObjectsClient: SavedObjectsClientContract = ({
   bulkCreate: jest.fn(),
   create: jest.fn(),
   delete: jest.fn(),
   find: jest.fn(),
   get: jest.fn(),
   update: jest.fn(),
-  errors: jest.fn(),
-};
+} as unknown) as SavedObjectsClientContract;
 
-const sampleIntegration: Integration = {
+const sampleIntegration: Integration = ({
   deepCheck: jest.fn().mockResolvedValue(true),
   getAssets: jest.fn().mockResolvedValue({
     savedObjects: [
@@ -35,7 +34,7 @@ const sampleIntegration: Integration = {
     name: 'integration-template',
     type: 'integration-type',
   }),
-};
+} as unknown) as Integration;
 
 describe('IntegrationInstanceBuilder', () => {
   let builder: IntegrationInstanceBuilder;
@@ -111,7 +110,7 @@ describe('IntegrationInstanceBuilder', () => {
       const remapIDsSpy = jest.spyOn(builder, 'remapIDs');
       const postAssetsSpy = jest.spyOn(builder, 'postAssets');
 
-      mockSavedObjectsClient.bulkCreate.mockResolvedValue(postAssetsResponse);
+      (mockSavedObjectsClient.bulkCreate as jest.Mock).mockResolvedValue(postAssetsResponse);
 
       const instance = await builder.build(sampleIntegration, options);
 
@@ -247,7 +246,7 @@ describe('IntegrationInstanceBuilder', () => {
         ],
       };
 
-      mockSavedObjectsClient.bulkCreate.mockResolvedValue(bulkCreateResponse);
+      (mockSavedObjectsClient.bulkCreate as jest.Mock).mockResolvedValue(bulkCreateResponse);
 
       const refs = await builder.postAssets(assets);
 
@@ -264,7 +263,7 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const errorMessage = 'Failed to create assets';
-      mockSavedObjectsClient.bulkCreate.mockRejectedValue(new Error(errorMessage));
+      (mockSavedObjectsClient.bulkCreate as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
       await expect(builder.postAssets(assets)).rejects.toThrowError(errorMessage);
     });
@@ -305,7 +304,11 @@ describe('IntegrationInstanceBuilder', () => {
         assets: refs,
       };
 
-      const instance = await builder.buildInstance(integration as Integration, refs, options);
+      const instance = await builder.buildInstance(
+        (integration as unknown) as Integration,
+        refs,
+        options
+      );
 
       expect(integration.getConfig).toHaveBeenCalled();
       expect(instance).toEqual(expectedInstance);
@@ -331,7 +334,7 @@ describe('IntegrationInstanceBuilder', () => {
       };
 
       await expect(
-        builder.buildInstance(integration as Integration, refs, options)
+        builder.buildInstance((integration as unknown) as Integration, refs, options)
       ).rejects.toThrowError();
     });
   });
