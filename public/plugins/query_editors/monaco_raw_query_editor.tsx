@@ -13,5 +13,5 @@ import React from 'react';
 import MonacoEditor, { MonacoEditorProps } from 'react-monaco-editor';
 
 export const MonacoRawQueryEditor = React.memo((props: MonacoEditorProps) => {
-  return <MonacoEditor {...props} />;
+  return <MonacoEditor theme="euiColors" {...props} />;
 });
