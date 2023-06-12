@@ -346,7 +346,6 @@ export const Explorer = ({
   }, [appBasedRef.current]);
 
   useEffect(() => {
-    if (queryRef.current!.isLoaded) return;
     let objectId;
     if (queryRef.current![TAB_CREATED_TYPE] === NEW_TAB || appLogEvents) {
       objectId = queryRef.current!.savedObjectId || '';
@@ -356,7 +355,7 @@ export const Explorer = ({
     if (objectId) {
       updateTabData(objectId);
     } else {
-      fetchData();
+      fetchData(startTime, endTime);
     }
     if (
       routerContext &&
