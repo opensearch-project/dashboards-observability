@@ -5,176 +5,204 @@
 
 import { IntegrationsKibanaBackend } from '../integrations_kibana_backend';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/types';
-import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { Repository } from '../repository/repository';
+import { IntegrationInstanceBuilder } from '../integrations_builder';
 
 describe('IntegrationsKibanaBackend', () => {
-  let mockClient: SavedObjectsClientContract;
+  let mockSavedObjectsClient: SavedObjectsClientContract;
   let mockRepository: Repository;
   let backend: IntegrationsKibanaBackend;
 
   beforeEach(() => {
-    // Create mock instances for each test
-    mockClient = {
+    mockSavedObjectsClient = {
+      get: jest.fn(),
       find: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
-      get: jest.fn(),
-    } as any;
+    };
     mockRepository = {
-      get: jest.fn(),
-      getByName: jest.fn(),
-    } as any;
-    backend = new IntegrationsKibanaBackend(mockClient, mockRepository);
-  });
-
-  it('should get integration templates from the repository', async () => {
-    const templates = [{ name: 'Template 1' }, { name: 'Template 2' }];
-    (mockRepository.get as jest.Mock).mockResolvedValue(templates);
-
-    const result = await backend.getIntegrationTemplates();
-
-    expect(mockRepository.get).toHaveBeenCalled();
-    expect(result).toEqual({ hits: templates });
-  });
-
-  it('should get integration instances from the client', async () => {
-    const mockResult = {
-      total: 2,
-      saved_objects: [
-        { attributes: { name: 'Instance 1' } },
-        { attributes: { name: 'Instance 2' } },
-      ],
+      getIntegration: jest.fn(),
+      getIntegrationList: jest.fn(),
     };
-    (mockClient.find as jest.Mock).mockResolvedValue(mockResult);
-
-    const result = await backend.getIntegrationInstances();
-
-    expect(mockClient.find).toHaveBeenCalledWith({ type: 'integration-instance' });
-    expect(result).toEqual({
-      total: mockResult.total,
-      hits: mockResult.saved_objects.map((x) => x.attributes),
-    });
+    backend = new IntegrationsKibanaBackend(mockSavedObjectsClient, mockRepository);
   });
 
-  it('should load an integration instance', async () => {
-    const templateName = 'Template 1';
-    const template = { name: templateName };
-    const instance = { name: 'Instance 1' };
-    const builderMock = {
-      build: jest.fn().mockResolvedValue(instance),
-    };
-    const mockCreate = jest.fn();
-    (mockClient.create as jest.Mock).mockResolvedValue(mockCreate);
-    (mockRepository.getByName as jest.Mock).mockResolvedValue(template);
-    jest
-      .spyOn(IntegrationInstanceBuilder.prototype, 'build')
-      .mockImplementationOnce(builderMock.build);
-
-    const result = await backend.loadIntegrationInstance(
-      templateName,
-      'Placeholder Nginx Integration'
-    );
-
-    expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
-    expect(builderMock.build).toHaveBeenCalledWith(template, {
-      name: 'Placeholder Nginx Integration',
-      dataset: 'nginx',
-      namespace: 'prod',
-    });
-    expect(mockClient.create).toHaveBeenCalledWith('integration-instance', instance);
-    expect(result).toEqual(instance);
-  });
-
-  it('should delete an integration instance', async () => {
-    const mockDelete = jest.fn();
-    const testData = {
-      id: '4b4a56e0-03ae-11ee-97be-8901a6e0519c',
-      type: 'integration-instance',
-      namespaces: ['default'],
-      updated_at: '2023-06-05T14:36:01.742Z',
-      version: 'WzIyMSwxXQ==',
-      attributes: {
-        name: 'nginx',
-        templateName: 'nginx',
-        dataSource: { sourceType: 'logs', dataset: 'nginx', namespace: 'prod' },
-        creationDate: '2023-06-05T14:36:01.742Z',
-        status: 'unknown',
-        assets: [{ assetId: 'child', assetType: 'viz' }],
-      },
-      references: [],
-      migrationVersion: undefined,
-    };
-    (mockClient.create as jest.Mock).mockResolvedValue(mockDelete);
-    (mockClient.get as jest.Mock).mockResolvedValue(testData);
-
-    await backend.deleteIntegrationInstance('deletedId');
-    expect(mockClient.delete).toHaveBeenCalledWith('integration-instance', 'deletedId');
-    // deleting an instance also deletes its children saved objects
-    expect(mockClient.delete).toHaveBeenCalledWith('viz', 'child');
-  });
-
-  it('should reject when loading an integration instance fails', async () => {
-    const templateName = 'Template 1';
-    const template = { name: templateName };
-    const errorMessage = 'An error occurred during instance creation';
-    const builderMock = {
-      build: jest.fn().mockRejectedValue(new Error(errorMessage)),
-    };
-    (mockRepository.getByName as jest.Mock).mockResolvedValue(template);
-    jest
-      .spyOn(IntegrationInstanceBuilder.prototype, 'build')
-      .mockImplementationOnce(builderMock.build);
-
-    await expect(backend.loadIntegrationInstance(templateName, 'test')).rejects.toEqual({
-      message: errorMessage,
-      statusCode: 500,
-    });
-
-    expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
-    expect(builderMock.build).toHaveBeenCalledWith(template, {
-      name: 'test',
-      dataset: 'nginx',
-      namespace: 'prod',
-    });
-    expect(mockClient.create).not.toHaveBeenCalled();
-  });
-
-  test('should get a static asset from the template', async () => {
-    const templateName = 'Template 1';
-    const template = {
-      name: templateName,
-      statics: {
-        assets: {
-          'file.jpg': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD',
+  describe('deleteIntegrationInstance', () => {
+    it('should delete integration instance and its assets', async () => {
+      const instanceId = 'instance1';
+      const integrationInstance = {
+        attributes: {
+          assets: [
+            { assetType: 'dashboard', assetId: 'dashboard1' },
+            { assetType: 'visualization', assetId: 'visualization1' },
+          ],
         },
-      },
-    };
-    (mockRepository.getByName as jest.Mock).mockResolvedValue(template);
+      };
+      const deleteResult = { result: 'deleted' };
+      mockSavedObjectsClient.get.mockResolvedValue(integrationInstance);
+      mockSavedObjectsClient.delete.mockResolvedValue(deleteResult);
 
-    const result = await backend.getStatic(templateName, 'file.jpg');
+      const result = await backend.deleteIntegrationInstance(instanceId);
 
-    expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
-    expect(result).toEqual(template.statics.assets['file.jpg']);
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('integration-instance', instanceId);
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('dashboard', 'dashboard1');
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('visualization', 'visualization1');
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'integration-instance',
+        instanceId
+      );
+      expect(result).toEqual(deleteResult);
+    });
   });
 
-  test('should reject when the static asset is not found', async () => {
-    const templateName = 'Template 1';
-    const template = {
-      name: templateName,
-      statics: {
-        assets: {
-          'file.jpg': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD',
-        },
-      },
-    };
-    (mockRepository.getByName as jest.Mock).mockResolvedValue(template);
+  describe('getIntegrationTemplates', () => {
+    it('should get integration templates by name', async () => {
+      const query = { name: 'template1' };
+      const integration = { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) };
+      mockRepository.getIntegration.mockResolvedValue(integration);
 
-    await expect(backend.getStatic(templateName, 'file.png')).rejects.toEqual({
-      message: 'Asset file.png not found',
-      statusCode: 404,
+      const result = await backend.getIntegrationTemplates(query);
+
+      expect(mockRepository.getIntegration).toHaveBeenCalledWith(query.name);
+      expect(integration.getConfig).toHaveBeenCalled();
+      expect(result).toEqual({ hits: [await integration.getConfig()] });
     });
 
-    expect(mockRepository.getByName).toHaveBeenCalledWith(templateName);
+    it('should get all integration templates', async () => {
+      const integrationList = [
+        { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) },
+        { getConfig: jest.fn().mockResolvedValue(null) },
+        { getConfig: jest.fn().mockResolvedValue({ name: 'template2' }) },
+      ];
+      mockRepository.getIntegrationList.mockResolvedValue(integrationList);
+
+      const result = await backend.getIntegrationTemplates();
+
+      expect(mockRepository.getIntegrationList).toHaveBeenCalled();
+      expect(integrationList[0].getConfig).toHaveBeenCalled();
+      expect(integrationList[1].getConfig).toHaveBeenCalled();
+      expect(integrationList[2].getConfig).toHaveBeenCalled();
+      expect(result).toEqual({
+        hits: [await integrationList[0].getConfig(), await integrationList[2].getConfig()],
+      });
+    });
+  });
+
+  describe('getIntegrationInstances', () => {
+    it('should get all integration instances', async () => {
+      const savedObjects = [
+        { id: 'instance1', attributes: { name: 'instance1' } },
+        { id: 'instance2', attributes: { name: 'instance2' } },
+      ];
+      const findResult = { total: savedObjects.length, saved_objects: savedObjects };
+      mockSavedObjectsClient.find.mockResolvedValue(findResult);
+
+      const result = await backend.getIntegrationInstances();
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({ type: 'integration-instance' });
+      expect(result).toEqual({
+        total: findResult.total,
+        hits: savedObjects.map((obj) => ({ id: obj.id, ...obj.attributes })),
+      });
+    });
+  });
+
+  describe('getIntegrationInstance', () => {
+    it('should get integration instance by ID', async () => {
+      const instanceId = 'instance1';
+      const integrationInstance = { id: instanceId, attributes: { name: 'instance1' } };
+      mockSavedObjectsClient.get.mockResolvedValue(integrationInstance);
+
+      const result = await backend.getIntegrationInstance({ id: instanceId });
+
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('integration-instance', instanceId);
+      expect(result).toEqual({ id: instanceId, status: 'unknown', name: 'instance1' });
+    });
+  });
+
+  describe('loadIntegrationInstance', () => {
+    it('should load and create an integration instance', async () => {
+      const templateName = 'template1';
+      const name = 'instance1';
+      const template = {
+        getConfig: jest.fn().mockResolvedValue({ name: templateName }),
+      };
+      const instanceBuilder = {
+        build: jest.fn().mockResolvedValue({ name, dataset: 'nginx', namespace: 'prod' }),
+      };
+      const createdInstance = { name, dataset: 'nginx', namespace: 'prod' };
+      mockRepository.getIntegration.mockResolvedValue(template);
+      mockSavedObjectsClient.create.mockResolvedValue({ result: 'created' });
+      backend.instanceBuilder = (instanceBuilder as unknown) as IntegrationInstanceBuilder;
+
+      const result = await backend.loadIntegrationInstance(templateName, name);
+
+      expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
+      expect(instanceBuilder.build).toHaveBeenCalledWith(template, {
+        name,
+        dataset: 'nginx',
+        namespace: 'prod',
+      });
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        'integration-instance',
+        createdInstance
+      );
+      expect(result).toEqual(createdInstance);
+    });
+
+    it('should reject with a 404 if template is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue(null);
+
+      await expect(
+        backend.loadIntegrationInstance(templateName, 'instance1')
+      ).rejects.toHaveProperty('statusCode', 404);
+    });
+
+    it('should reject with an error status if building fails', async () => {
+      const templateName = 'template1';
+      const name = 'instance1';
+      const template = {
+        getConfig: jest.fn().mockResolvedValue({ name: templateName }),
+      };
+      const instanceBuilder = {
+        build: jest.fn().mockRejectedValue(new Error('Failed to build instance')),
+      };
+      backend.instanceBuilder = (instanceBuilder as unknown) as IntegrationInstanceBuilder;
+      mockRepository.getIntegration.mockResolvedValue(template);
+
+      await expect(backend.loadIntegrationInstance(templateName, name)).rejects.toHaveProperty(
+        'statusCode'
+      );
+    });
+  });
+
+  describe('getStatic', () => {
+    it('should get static asset data', async () => {
+      const templateName = 'template1';
+      const staticPath = 'path/to/static';
+      const assetData = Buffer.from('asset data');
+      const integration = {
+        getStatic: jest.fn().mockResolvedValue(assetData),
+      };
+      mockRepository.getIntegration.mockResolvedValue(integration);
+
+      const result = await backend.getStatic(templateName, staticPath);
+
+      expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
+      expect(integration.getStatic).toHaveBeenCalledWith(staticPath);
+      expect(result).toEqual(assetData);
+    });
+
+    it('should reject with a 404 if asset is not found', async () => {
+      const templateName = 'template1';
+      const staticPath = 'path/to/static';
+      mockRepository.getIntegration.mockResolvedValue(null);
+
+      await expect(backend.getStatic(templateName, staticPath)).rejects.toHaveProperty(
+        'statusCode',
+        404
+      );
+    });
   });
 });

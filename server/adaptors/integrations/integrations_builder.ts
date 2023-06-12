@@ -12,7 +12,6 @@ interface BuilderOptions {
   name: string;
   dataset: string;
   namespace: string;
-  tags?: string[];
 }
 
 export class IntegrationInstanceBuilder {
@@ -41,7 +40,7 @@ export class IntegrationInstanceBuilder {
     const toRemap = assets.filter((asset) => asset.id);
     const idMap = new Map<string, string>();
     return toRemap.map((item) => {
-      if (idMap.has(item.id)) {
+      if (!idMap.has(item.id)) {
         idMap.set(item.id, uuidv4());
       }
       item.id = idMap.get(item.id)!;
@@ -88,7 +87,6 @@ export class IntegrationInstanceBuilder {
         dataset: options.dataset,
         namespace: options.namespace,
       },
-      tags: options.tags,
       creationDate: new Date().toISOString(),
       assets: refs,
     });
