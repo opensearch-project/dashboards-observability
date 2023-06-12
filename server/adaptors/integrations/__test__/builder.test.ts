@@ -53,7 +53,6 @@ describe('IntegrationInstanceBuilder', () => {
       },
       tags: options.tags,
       creationDate: expect.any(Date),
-      status: 'unknown',
       assets: [
         {
           assetType: 'dashboard',

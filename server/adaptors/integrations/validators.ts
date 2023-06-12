@@ -82,7 +82,6 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
       additionalProperties: false,
     },
     creationDate: { type: 'string' },
-    tags: { type: 'array', items: { type: 'string' }, nullable: true },
     assets: {
       type: 'array',
       items: {

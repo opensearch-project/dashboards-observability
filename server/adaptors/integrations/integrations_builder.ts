@@ -5,7 +5,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
-import { templateValidator } from './validators';
+import { Integration } from './repository/integration';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 
 interface BuilderOptions {
   name: string;
@@ -21,37 +22,26 @@ export class IntegrationInstanceBuilder {
     this.client = client;
   }
 
-  async build(
-    template: IntegrationTemplate,
-    options: BuilderOptions
-  ): Promise<IntegrationInstance> {
-    const result = this.validate(template)
-      .then(() => this.post_assets(template.assets))
-      .then((refs) => this.build_instance(template, refs, options));
+  async build(integration: Integration, options: BuilderOptions): Promise<IntegrationInstance> {
+    const result = integration
+      .deepCheck()
+      .then(async (_) => {
+        // Assumes no IO errors between deepCheck and now
+        // Also assumes savedObjects is present for now, need to update later
+        const sobjs = (await integration.getAssets()).savedObjects!;
+        return this.post_assets(sobjs);
+      })
+      .then((refs) => this.build_instance(integration, refs, options));
     return result;
-  }
-
-  async validate(template: IntegrationTemplate): Promise<void> {
-    if (templateValidator(template)) {
-      return Promise.resolve();
-    }
-    return Promise.reject({
-      status: 400,
-      message: templateValidator.errors
-        ?.filter((e) => e.message)
-        .map((e) => e.message)
-        .join(', '),
-    });
   }
 
   is_integration_template(template: any): template is IntegrationTemplate {
     return template && template.name && typeof template.name === 'string';
   }
 
-  async post_assets(assets: DisplayAsset[]): Promise<AssetReference[]> {
+  async post_assets(assets: any[]): Promise<AssetReference[]> {
     try {
-      const deserializedAssets = assets.map((asset) => JSON.parse(asset.body));
-      const response = await this.client.bulkCreate(deserializedAssets);
+      const response = await this.client.bulkCreate(assets as SavedObjectsBulkCreateObject[]);
       const refs: AssetReference[] = response.saved_objects.map((obj: any) => {
         return {
           assetType: obj.type,
@@ -68,21 +58,21 @@ export class IntegrationInstanceBuilder {
   }
 
   async build_instance(
-    template: IntegrationTemplate,
+    integration: Integration,
     refs: AssetReference[],
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
+    const config: IntegrationTemplate = (await integration.getConfig())!;
     return Promise.resolve({
       name: options.name,
-      templateName: template.name,
+      templateName: config.name,
       dataSource: {
-        sourceType: template.integrationType,
+        sourceType: config.type,
         dataset: options.dataset,
         namespace: options.namespace,
       },
       tags: options.tags,
       creationDate: new Date().toISOString(),
-      status: 'unknown',
       assets: refs,
     });
   }

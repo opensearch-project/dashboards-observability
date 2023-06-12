@@ -204,7 +204,8 @@ export class Integration {
       );
       try {
         const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
-        const parsed = JSON.parse(`[${ndjson.replace('\n', ',')}]`);
+        const asJson = '[' + ndjson.replace(/\n/g, ',') + ']';
+        const parsed = JSON.parse(asJson);
         result.savedObjects = parsed;
       } catch (err: any) {
         console.error("Failed to load saved object assets, proceeding as if it's absent", err);

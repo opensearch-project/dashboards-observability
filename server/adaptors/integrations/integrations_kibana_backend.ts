@@ -68,7 +68,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     templateName: string,
     name: string
   ): Promise<IntegrationInstance> => {
-    const template = await (await this.repository.getIntegration(templateName))?.getConfig();
+    const template = await await this.repository.getIntegration(templateName);
     try {
       const result = await new IntegrationInstanceBuilder(this.client).build(template!, {
         name,
