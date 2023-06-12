@@ -84,6 +84,35 @@ export class Integration {
   }
 
   /**
+   * Like check(), but thoroughly checks all nested integration dependencies.
+   *
+   * @returns true if the integration is valid.
+   */
+  async deepCheck(): Promise<boolean> {
+    if (!(await this.check())) {
+      return false;
+    }
+
+    try {
+      // An integration must have at least one mapping
+      const schemas = await this.getSchemas();
+      if (Object.keys(schemas.mappings).length === 0) {
+        return false;
+      }
+      // An integration must have at least one asset
+      const assets = await this.getAssets();
+      if (Object.keys(assets).length === 0) {
+        return false;
+      }
+    } catch (err: any) {
+      // Any loading errors are considered invalid
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Get the latest version of the integration available.
    * This method relies on the fact that integration configs have their versions in their name.
    * Any files that don't match the config naming convention will be ignored.
