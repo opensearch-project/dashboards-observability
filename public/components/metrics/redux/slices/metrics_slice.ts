@@ -56,14 +56,16 @@ const fetchRemoteMetrics = async (pplService: any) => {
       pplService,
       `source = ${dataSource.DATASOURCE_NAME}.information_schema.tables`
     );
-    const normalizedData = catalogData.jsonData.map((obj: any) => ({
-      id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
-      name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
-      catalog: `${dataSource.DATASOURCE_NAME}`,
-      type: obj.TABLE_TYPE,
-      recentlyCreated: false,
-    }));
-    dataSet.push(normalizedData);
+    if (catalogData !== undefined) {
+      const normalizedData = catalogData.jsonData.map((obj: any) => ({
+        id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
+        name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
+        catalog: `${dataSource.DATASOURCE_NAME}`,
+        type: obj.TABLE_TYPE,
+        recentlyCreated: false,
+      }));
+      dataSet.push(normalizedData);
+    }
   }
   return dataSet;
 };

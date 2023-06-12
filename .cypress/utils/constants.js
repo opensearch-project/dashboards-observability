@@ -66,6 +66,7 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .type('{selectall}' + endTime, { force: true });
   }
   if (refresh) cy.get('.euiButton__text').contains('Refresh').click();
+  cy.get('.euiTableRow').should('have.length.greaterThan', 3);//Replaces Wait
 };
 
 // notebooks

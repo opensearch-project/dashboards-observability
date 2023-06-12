@@ -43,6 +43,7 @@ describe('Metrics Grid Component', () => {
     const onRefresh = true;
     const editActionType = 'save';
     const spanParam = '1h';
+    const setEditActionType = jest.fn();
 
     const wrapper = mount(
       <Provider store={store}>
@@ -58,6 +59,7 @@ describe('Metrics Grid Component', () => {
           moveToEvents={onEditClick}
           onRefresh={onRefresh}
           editActionType={editActionType}
+          setEditActionType={setEditActionType}
           spanParam={spanParam}
         />
       </Provider>

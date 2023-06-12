@@ -260,9 +260,6 @@ export const Explorer = ({
 
   const fetchData = async (startingTime?: string, endingTime?: string) => {
     const curQuery: IQuery = queryRef.current!;
-    const rawQueryStr = (curQuery![RAW_QUERY] as string).includes(appBaseQuery)
-      ? curQuery![RAW_QUERY]
-      : buildQuery(appBasedRef.current, curQuery![RAW_QUERY]);
     new PPLDataFetcher(
       { ...curQuery },
       { batch, dispatch, changeQuery, changeVizConfig },
@@ -349,7 +346,6 @@ export const Explorer = ({
   }, [appBasedRef.current]);
 
   useEffect(() => {
-    if (queryRef.current!.isLoaded) return;
     let objectId;
     if (queryRef.current![TAB_CREATED_TYPE] === NEW_TAB || appLogEvents) {
       objectId = queryRef.current!.savedObjectId || '';
@@ -359,7 +355,7 @@ export const Explorer = ({
     if (objectId) {
       updateTabData(objectId);
     } else {
-      fetchData();
+      fetchData(startTime, endTime);
     }
     if (
       routerContext &&
