@@ -8,6 +8,7 @@ interface IntegrationTemplate {
   version: string;
   integrationType: string;
   license: string;
+  type: string;
   author?: string;
   description?: string;
   sourceUrl?: string;
@@ -57,13 +58,12 @@ interface IntegrationInstance {
     namespace: string;
   };
   creationDate: string;
-  tags?: string[];
-  status: string;
   assets: AssetReference[];
 }
 
 interface IntegrationInstanceResult extends IntegrationInstance {
   id: string;
+  status: string;
 }
 
 interface AssetReference {

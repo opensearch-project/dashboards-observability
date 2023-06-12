@@ -97,9 +97,6 @@ export class ObservabilityPlugin
           creationDate: {
             type: 'date',
           },
-          tags: {
-            type: 'nested',
-          },
           addedBy: {
             type: 'text',
           },

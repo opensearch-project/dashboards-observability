@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import { Integration } from '../integration';
 import { Dirent, Stats } from 'fs';
+import * as path from 'path';
 
 jest.mock('fs/promises');
 
@@ -11,6 +12,7 @@ describe('Integration', () => {
     version: '2.0.0',
     integrationType: 'sample',
     license: 'Apache-2.0',
+    type: '',
     components: [],
     assets: {
       savedObjects: {
@@ -159,6 +161,78 @@ describe('Integration', () => {
     });
   });
 
+  describe('getSchemas', () => {
+    it('should retrieve mappings and schemas for all components in the config', async () => {
+      const sampleConfig = {
+        components: [
+          { name: 'component1', version: '1.0.0' },
+          { name: 'component2', version: '2.0.0' },
+        ],
+      };
+      integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
+
+      const mappingFile1 = 'component1-1.0.0.mapping.json';
+      const schemaFile1 = 'component1-1.0.0.schema.json';
+      const mappingFile2 = 'component2-2.0.0.mapping.json';
+      const schemaFile2 = 'component2-2.0.0.schema.json';
+
+      jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping1' }))
+        .mockResolvedValueOnce(JSON.stringify({ schema: 'schema1' }))
+        .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping2' }))
+        .mockResolvedValueOnce(JSON.stringify({ schema: 'schema2' }));
+
+      const result = await integration.getSchemas();
+
+      expect(result).toEqual({
+        mappings: {
+          component1: { mapping: 'mapping1' },
+          component2: { mapping: 'mapping2' },
+        },
+        schemas: {
+          component1: { schema: 'schema1' },
+          component2: { schema: 'schema2' },
+        },
+      });
+
+      expect(fs.readFile).toHaveBeenCalledWith(
+        path.join(integration.directory, 'schemas', mappingFile1),
+        { encoding: 'utf-8' }
+      );
+      expect(fs.readFile).toHaveBeenCalledWith(
+        path.join(integration.directory, 'schemas', schemaFile1),
+        { encoding: 'utf-8' }
+      );
+      expect(fs.readFile).toHaveBeenCalledWith(
+        path.join(integration.directory, 'schemas', mappingFile2),
+        { encoding: 'utf-8' }
+      );
+      expect(fs.readFile).toHaveBeenCalledWith(
+        path.join(integration.directory, 'schemas', schemaFile2),
+        { encoding: 'utf-8' }
+      );
+    });
+
+    it('should reject with an error if the config is null', async () => {
+      integration.getConfig = jest.fn().mockResolvedValue(null);
+
+      await expect(integration.getSchemas()).rejects.toThrowError(
+        'Attempted to get assets of invalid config'
+      );
+    });
+
+    it('should reject with an error if a schema file is invalid', async () => {
+      const sampleConfig = {
+        components: [{ name: 'component1', version: '1.0.0' }],
+      };
+      integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
+      jest.spyOn(fs, 'readFile').mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping1' }));
+
+      await expect(integration.getSchemas()).rejects.toThrowError('Could not load schema');
+    });
+  });
+
   describe('getStatic', () => {
     it('should return data as a buffer if the static is present', async () => {
       const readFileMock = jest
@@ -167,7 +241,7 @@ describe('Integration', () => {
       expect(await integration.getStatic('/logo.png')).toStrictEqual(
         Buffer.from('logo data', 'ascii')
       );
-      expect(readFileMock).toBeCalledWith('sample/statics/logo.png');
+      expect(readFileMock).toBeCalledWith('sample/static/logo.png');
     });
 
     it('should return null and log an error if the static file is not found', async () => {

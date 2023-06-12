@@ -11,11 +11,13 @@ import { Repository } from './repository/repository';
 
 export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
+  instanceBuilder: IntegrationInstanceBuilder;
   repository: Repository;
 
   constructor(client: SavedObjectsClientContract, repository?: Repository) {
     this.client = client;
     this.repository = repository ?? new Repository(path.join(__dirname, '__data__/repository'));
+    this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }
 
   deleteIntegrationInstance = async (id: string): Promise<any> => {
@@ -58,9 +60,9 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   };
 
   getIntegrationInstance = async (
-    _query?: IntegrationInstanceQuery
+    query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceResult> => {
-    const result = await this.client.get('integration-instance', `${_query!.id}`);
+    const result = await this.client.get('integration-instance', `${query!.id}`);
     return Promise.resolve(savedObjectToIntegrationInstance(result));
   };
 
@@ -68,9 +70,15 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     templateName: string,
     name: string
   ): Promise<IntegrationInstance> => {
-    const template = await (await this.repository.getIntegration(templateName))?.getConfig();
+    const template = await this.repository.getIntegration(templateName);
+    if (template === null) {
+      return Promise.reject({
+        message: `Template ${templateName} not found`,
+        statusCode: 404,
+      });
+    }
     try {
-      const result = await new IntegrationInstanceBuilder(this.client).build(template!, {
+      const result = await this.instanceBuilder.build(template, {
         name,
         dataset: 'nginx',
         namespace: 'prod',
@@ -102,5 +110,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
  */
 const savedObjectToIntegrationInstance = (so: any): IntegrationInstanceResult => ({
   id: so.id,
+  status: 'unknown',
   ...so.attributes,
 });

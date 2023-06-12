@@ -19,6 +19,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
     version: { type: 'string' },
     integrationType: { type: 'string' },
     license: { type: 'string' },
+    type: { type: 'string' },
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
     sourceUrl: { type: 'string', nullable: true },
@@ -61,7 +62,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
       additionalProperties: false,
     },
   },
-  required: ['name', 'version', 'integrationType', 'license', 'components', 'assets'],
+  required: ['name', 'version', 'integrationType', 'license', 'type', 'components', 'assets'],
   additionalProperties: false,
 };
 
@@ -81,8 +82,6 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
       additionalProperties: false,
     },
     creationDate: { type: 'string' },
-    tags: { type: 'array', items: { type: 'string' }, nullable: true },
-    status: { type: 'string' },
     assets: {
       type: 'array',
       items: {
@@ -98,7 +97,7 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
       },
     },
   },
-  required: ['name', 'templateName', 'dataSource', 'creationDate', 'status', 'assets'],
+  required: ['name', 'templateName', 'dataSource', 'creationDate', 'assets'],
 };
 
 export const templateValidator = ajv.compile(templateSchema);
