@@ -90,6 +90,7 @@ export class Integration {
    */
   async deepCheck(): Promise<boolean> {
     if (!(await this.check())) {
+      console.error('check failed');
       return false;
     }
 
@@ -106,6 +107,7 @@ export class Integration {
       }
     } catch (err: any) {
       // Any loading errors are considered invalid
+      console.error('Deep check failed for exception', err);
       return false;
     }
 
@@ -245,7 +247,7 @@ export class Integration {
           `${component.name}-${component.version}.schema.json`,
         ];
         const [rawMapping, rawSchema] = await Promise.all([
-          fs.readFile(path.join(this.directory, 'mappings', mappingFile), { encoding: 'utf-8' }),
+          fs.readFile(path.join(this.directory, 'schemas', mappingFile), { encoding: 'utf-8' }),
           fs.readFile(path.join(this.directory, 'schemas', schemaFile), { encoding: 'utf-8' }),
         ]);
         const [parsedMapping, parsedSchema] = [JSON.parse(rawMapping), JSON.parse(rawSchema)];
@@ -255,6 +257,7 @@ export class Integration {
     } catch (err: any) {
       // It's not clear that an invalid schema can be recovered from.
       // For integrations to function, we need schemas to be valid.
+      console.error('Error loading schema', err);
       return Promise.reject(new Error('Could not load schema', { cause: err }));
     }
     return result;

@@ -38,17 +38,14 @@ export class IntegrationInstanceBuilder {
   }
 
   remapIDs(assets: any[]): any[] {
-    const toRemap = assets.filter((asset) => asset.hasOwnProperity('id'));
+    const toRemap = assets.filter((asset) => asset.id);
     const idMap = new Map<string, string>();
     return toRemap.map((item) => {
       if (idMap.has(item.id)) {
         idMap.set(item.id, uuidv4());
       }
       item.id = idMap.get(item.id)!;
-      for (const ref in item.references) {
-        if (!item.references.hasOwnProperity(ref)) {
-          continue;
-        }
+      for (let ref = 0; ref < item.references.length; ref++) {
         const refId = item.references[ref].id;
         if (!idMap.has(refId)) {
           idMap.set(refId, uuidv4());
