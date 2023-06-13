@@ -4,7 +4,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import {
   FILTERED_PATTERN,
@@ -49,11 +49,16 @@ const EventPatterns = ({
     requestParams: { tabId },
   });
 
+  // refresh filters on opening page
+  useEffect(() => {
+    onPatternSelection('');
+  }, []);
+
   const onPatternSelection = async (pattern: string) => {
     if (query[FILTERED_PATTERN] === pattern) {
       return;
     }
-    dispatch(
+    await dispatch(
       changeQuery({
         tabId,
         query: {
@@ -62,7 +67,7 @@ const EventPatterns = ({
       })
     );
     // workaround to refresh callback and trigger fetch data
-    await setTempQuery(query[RAW_QUERY]);
+    // await setTempQuery(query[RAW_QUERY]);
     await handleTimeRangePickerRefresh(true);
   };
 
