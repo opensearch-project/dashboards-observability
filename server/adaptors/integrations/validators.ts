@@ -17,6 +17,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
   properties: {
     name: { type: 'string' },
     version: { type: 'string' },
+    displayName: { type: 'string', nullable: true },
     integrationType: { type: 'string' },
     license: { type: 'string' },
     type: { type: 'string' },
