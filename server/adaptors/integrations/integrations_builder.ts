@@ -13,7 +13,7 @@ interface BuilderOptions {
   name: string;
   dataset: string;
   namespace: string;
-  dataSource: string | undefined;
+  dataSource: string;
 }
 
 export const assetsMap: { [key: string]: string[] } = {

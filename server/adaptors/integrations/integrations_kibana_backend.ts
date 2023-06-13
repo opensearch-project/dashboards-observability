@@ -69,7 +69,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   loadIntegrationInstance = async (
     templateName: string,
     name: string,
-    dataSource: string | undefined
+    dataSource: string
   ): Promise<IntegrationInstance> => {
     const template = await this.repository.getIntegration(templateName);
     if (template === null) {
