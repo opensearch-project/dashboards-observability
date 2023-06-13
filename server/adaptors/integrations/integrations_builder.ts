@@ -16,20 +16,6 @@ interface BuilderOptions {
   dataSource: string;
 }
 
-export const assetsMap: { [key: string]: string[] } = {
-  nginx: [
-    'nginx-index-pattern',
-    'nginx-search-0',
-    'nginx-panel-0',
-    'nginx-search-1',
-    'nginx-viz-0',
-    'nginx-viz-1',
-    'nginx-viz-2',
-    'nginx-viz-3',
-    'nginx-dashboard-0',
-  ],
-};
-
 export const indexPatternsMap: { [key: string]: string[] } = {
   nginx: ['ss4o_logs-*-*'],
 };
