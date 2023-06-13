@@ -64,9 +64,9 @@ export function registerIntegrationsRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return await a.getIntegrationTemplates();
-      });
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.getIntegrationTemplates()
+      );
     }
   );
 
@@ -84,9 +84,9 @@ export function registerIntegrationsRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return a.loadIntegrationInstance(request.params.templateName, request.body.name);
-      });
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.loadIntegrationInstance(request.params.templateName, request.body.name)
+      );
     }
   );
 
@@ -101,15 +101,16 @@ export function registerIntegrationsRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return {
-          data: (
+      return handleWithCallback(
+        adaptor,
+        response,
+        async (a: IntegrationsAdaptor) =>
+          (
             await a.getIntegrationTemplates({
               name: request.params.name,
             })
-          ).hits[0],
-        };
-      });
+          ).hits[0]
+      );
     }
   );
 
@@ -144,14 +145,31 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
+      path: `${INTEGRATIONS_BASE}/repository/{id}/schema`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.getSchemas(request.params.id)
+      );
+    }
+  );
+
+  router.get(
+    {
       path: `${INTEGRATIONS_BASE}/store/list_added`,
       validate: false,
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return await a.getIntegrationInstances({});
-      });
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.getIntegrationInstances({})
+      );
     }
   );
 
@@ -166,11 +184,9 @@ export function registerIntegrationsRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return {
-          data: await a.deleteIntegrationInstance(request.params.id),
-        };
-      });
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.deleteIntegrationInstance(request.params.id)
+      );
     }
   );
 
@@ -185,13 +201,11 @@ export function registerIntegrationsRoute(router: IRouter) {
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-        return {
-          data: await a.getIntegrationInstance({
-            id: request.params.id,
-          }),
-        };
-      });
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.getIntegrationInstance({
+          id: request.params.id,
+        })
+      );
     }
   );
 }

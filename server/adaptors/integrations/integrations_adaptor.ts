@@ -19,4 +19,8 @@ export interface IntegrationsAdaptor {
   deleteIntegrationInstance: (id: string) => Promise<any>;
 
   getStatic: (templateName: string, path: string) => Promise<Buffer>;
+
+  getSchemas: (
+    templateName: string
+  ) => Promise<{ mappings: { [key: string]: any }; schemas: { [key: string]: any } }>;
 }
