@@ -7,6 +7,9 @@
 import { EuiButton, EuiComboBox, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { EuiComboBoxOption } from '@opensearch-project/oui';
+import { data } from 'jquery';
+import { trace } from 'console';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
@@ -20,9 +23,6 @@ import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
 import { OptionType } from '../../../../../common/types/application_analytics';
-import { EuiComboBoxOption } from '@opensearch-project/oui';
-import { data } from 'jquery';
-import { trace } from 'console';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -60,9 +60,15 @@ export function ServicesContent(props: ServicesProps) {
   const onTraceGroupChange = (selectedOptions: OptionType[]) => {
     // We should only get back either 0 or 1 options.
     if (selectedOptions && selectedOptions.length) {
-      addFilter({field: 'traceGroup', operator: 'is', value: selectedOptions[0].label, inverted: false, disabled: false})
+      addFilter({
+        field: 'traceGroup',
+        operator: 'is',
+        value: selectedOptions[0].label,
+        inverted: false,
+        disabled: false,
+      });
     } else {
-      //remove traceGroup filter
+      // remove traceGroup filter
       setFilters(filters.filter((filter) => !(filter.field === 'traceGroup')));
     }
     setSelectedTraceGroup(selectedOptions);
@@ -93,22 +99,22 @@ export function ServicesContent(props: ServicesProps) {
       appConfigs
     );
     if (mode === 'data_prepper' && dataPrepperIndicesExist) {
-      handleTraceGroupsRequest(http, DSL, mode, setTraceGroups)
+      handleTraceGroupsRequest(http, DSL, mode, setTraceGroups);
     }
-  }, [mode, jaegerIndicesExist, dataPrepperIndicesExist])
+  }, [mode, jaegerIndicesExist, dataPrepperIndicesExist, startTime, endTime]);
 
   useEffect(() => {
-    let traceGroupFilter = ''
+    let traceGroupFilter = '';
     for (const filter of filters) {
       if (filter.field === 'traceGroup') {
-        traceGroupFilter = filter.value
+        traceGroupFilter = filter.value;
         break;
       }
     }
-    if (traceGroupFilter){
-      setSelectedTraceGroup([{label: traceGroupFilter}])
+    if (traceGroupFilter) {
+      setSelectedTraceGroup([{ label: traceGroupFilter }]);
     } else {
-      setSelectedTraceGroup([])
+      setSelectedTraceGroup([]);
     }
     let newFilteredService = '';
     for (const filter of filters) {
@@ -172,18 +178,19 @@ export function ServicesContent(props: ServicesProps) {
 
   return (
     <>
-      {mode === 'data_prepper' && dataPrepperIndicesExist && traceGroups ? (<EuiComboBox
-            aria-label="Select trace group"
-            placeholder="Select trace group"
-            options={traceGroups}
-            singleSelection={{ asPlainText: true }}
-            selectedOptions={selectedTraceGroup}
-            onChange={onTraceGroupChange}
-            // onCreateOption={onCreateTrace}
-            isClearable={true}
-            data-test-subj="traceGroupsComboBox"
-          />)
-      : null}
+      {mode === 'data_prepper' && dataPrepperIndicesExist && traceGroups ? (
+        <EuiComboBox
+          aria-label="Select trace group"
+          placeholder="Select trace group"
+          options={traceGroups}
+          singleSelection={{ asPlainText: true }}
+          selectedOptions={selectedTraceGroup}
+          onChange={onTraceGroupChange}
+          // onCreateOption={onCreateTrace}
+          isClearable={true}
+          data-test-subj="traceGroupsComboBox"
+        />
+      ) : null}
       <SearchBar
         query={query}
         filters={filters}
