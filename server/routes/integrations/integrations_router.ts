@@ -79,14 +79,19 @@ export function registerIntegrationsRoute(router: IRouter) {
         }),
         body: schema.object({
           name: schema.string(),
+          dataSource: schema.string(),
         }),
       },
     },
     async (context, request, response): Promise<any> => {
       const adaptor = getAdaptor(context, request);
-      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-        a.loadIntegrationInstance(request.params.templateName, request.body.name)
-      );
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
+        return a.loadIntegrationInstance(
+          request.params.templateName,
+          request.body.name,
+          request.body.dataSource
+        );
+      });
     }
   );
 

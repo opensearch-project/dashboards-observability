@@ -85,11 +85,11 @@ export function Integration(props: AvailableIntegrationProps) {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  async function addIntegrationRequest(templateName: string, name: string) {
+  async function addIntegrationRequest(templateName: string, name: string, dataSource: string) {
     console.log(name);
     http
       .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, dataSource }),
       })
       .then((res) => {
         setToast(
@@ -145,8 +145,8 @@ export function Integration(props: AvailableIntegrationProps) {
           onClose={() => {
             setIsFlyoutVisible(false);
           }}
-          onCreate={(name) => {
-            addIntegrationRequest(integrationTemplateId, name);
+          onCreate={(name, dataSource) => {
+            addIntegrationRequest(integrationTemplateId, name, dataSource);
           }}
           integrationName={integrationTemplateId}
         />
