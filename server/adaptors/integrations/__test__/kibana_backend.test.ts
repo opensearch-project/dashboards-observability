@@ -64,7 +64,7 @@ describe('IntegrationsKibanaBackend', () => {
     it('should handle a 404 error when getting the integration instance', async () => {
       const instanceId = 'instance-id';
 
-      mockSavedObjectsClient.get.mockRejectedValue({ statusCode: 404 });
+      mockSavedObjectsClient.get.mockRejectedValue({ output: { statusCode: 404 } });
 
       const result = await backend.deleteIntegrationInstance(instanceId);
 
@@ -97,9 +97,9 @@ describe('IntegrationsKibanaBackend', () => {
       };
 
       mockSavedObjectsClient.get.mockResolvedValue(instanceData as SavedObject<unknown>);
-      mockSavedObjectsClient.delete.mockRejectedValueOnce({ statusCode: 404 });
-      mockSavedObjectsClient.delete.mockRejectedValueOnce({ statusCode: 404 });
-      mockSavedObjectsClient.delete.mockRejectedValueOnce({ statusCode: 404 });
+      mockSavedObjectsClient.delete.mockRejectedValueOnce({ output: { statusCode: 404 } });
+      mockSavedObjectsClient.delete.mockRejectedValueOnce({ output: { statusCode: 404 } });
+      mockSavedObjectsClient.delete.mockRejectedValueOnce({ output: { statusCode: 404 } });
 
       const result = await backend.deleteIntegrationInstance(instanceId);
 
@@ -130,7 +130,7 @@ describe('IntegrationsKibanaBackend', () => {
       const error = new Error('Internal Server Error');
 
       mockSavedObjectsClient.get.mockResolvedValue(instanceData as SavedObject<unknown>);
-      mockSavedObjectsClient.delete.mockRejectedValueOnce({ statusCode: 404 });
+      mockSavedObjectsClient.delete.mockRejectedValueOnce({ output: { statusCode: 404 } });
       mockSavedObjectsClient.delete.mockRejectedValueOnce(error);
 
       await expect(backend.deleteIntegrationInstance(instanceId)).rejects.toThrow(error);

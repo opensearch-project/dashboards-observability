@@ -25,7 +25,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     try {
       children = await this.client.get('integration-instance', id);
     } catch (err: any) {
-      return err.statusCode === 404 ? Promise.resolve([id]) : Promise.reject(err);
+      return err.output?.statusCode === 404 ? Promise.resolve([id]) : Promise.reject(err);
     }
 
     const toDelete = children.attributes.assets
@@ -42,7 +42,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
             await this.client.delete(asset.type, asset.id);
             return Promise.resolve(asset.id);
           } catch (err: any) {
-            return err.statusCode === 404 ? Promise.resolve(asset.id) : Promise.reject(err);
+            return err.output?.statusCode === 404 ? Promise.resolve(asset.id) : Promise.reject(err);
           }
         }
       )
