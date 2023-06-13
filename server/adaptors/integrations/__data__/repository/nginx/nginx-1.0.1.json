@@ -14,6 +14,10 @@
         },
         "gallery": [
             {
+                "annotation": "NginX Dashboard",
+                "path": "dashboard1.png"
+            },
+            {
                 "annotation": "NginX Logo",
                 "path": "logo.svg"
             }
