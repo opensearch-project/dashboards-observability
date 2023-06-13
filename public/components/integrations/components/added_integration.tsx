@@ -54,12 +54,12 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         href: '#/installed',
       },
       {
-        text: `${stateData.data.data?.name}`,
-        href: `#/installed/${stateData.data.data?.id}`,
+        text: `${stateData.data?.name}`,
+        href: `#/installed/${stateData.data?.id}`,
       },
     ]);
     handleDataRequest();
-  }, [integrationInstanceId, stateData.data.data?.name]);
+  }, [integrationInstanceId, stateData.data?.name]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
@@ -85,10 +85,10 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     http
       .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
       .then(() => {
-        setToast(`${stateData.data.data?.name} integration successfully deleted!`, 'success');
+        setToast(`${stateData.data?.name} integration successfully deleted!`, 'success');
       })
       .catch((err) => {
-        setToast(`Error deleting ${stateData.data.data?.name} or its assets`, 'danger');
+        setToast(`Error deleting ${stateData.data?.name} or its assets`, 'danger');
       })
       .finally(() => {
         window.location.hash = '#/installed';
@@ -112,7 +112,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                  <h1>{data?.data?.name}</h1>
+                  <h1>{data?.name}</h1>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -137,30 +137,28 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 <h4>Template</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiLink href={`#/available/${data?.data?.templateName}`}>
-                {data?.data?.templateName}
-              </EuiLink>
+              <EuiLink href={`#/available/${data?.templateName}`}>{data?.templateName}</EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <h4>Date Added</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data?.data?.creationDate?.split('T')[0]}</EuiText>
+              <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <h4>Status</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data?.data?.status}</EuiText>
+              <EuiText size="m">{data?.status}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <h4>Tags</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data?.data?.license}</EuiText>
+              <EuiText size="m">{data?.license}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageHeaderSection>
@@ -171,7 +169,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   function AddedAssets(assetProps: any) {
     const { data } = assetProps.data;
 
-    const assets = data?.data?.assets || [];
+    const assets = data?.assets || [];
     console.log(assets);
 
     const search = {
@@ -262,7 +260,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   }
 
   function AddedIntegrationFields(fieldProps: any) {
-    const data = fieldProps.data?.data?.fields || [];
+    const data = fieldProps.data?.fields || [];
 
     const search = {
       box: {
