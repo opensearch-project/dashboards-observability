@@ -23,14 +23,11 @@ const pageStyles: CSS.Properties = {
 };
 
 export function IntegrationOverview(props: any) {
-  const { data } = props;
+  const config = props.integration;
   return (
-    <EuiPageHeader
-      style={{ justifyContent: 'center' }}
-      data-test-subj={`${data.data.name}-overview`}
-    >
+    <EuiPageHeader style={{ justifyContent: 'center' }} data-test-subj={`${config.name}-overview`}>
       <img
-        src={`${INTEGRATIONS_BASE}/repository/${data.data.name}/static/${data.data.statics.logo.path}`}
+        src={`${INTEGRATIONS_BASE}/repository/${config.name}/static/${config.statics.logo.path}`}
         alt="React Logo"
         style={{ height: 53, width: 53 }}
       />
@@ -40,8 +37,8 @@ export function IntegrationOverview(props: any) {
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                <EuiLink href={data.data.link} external={true} target="blank">
-                  {data.data.name}
+                <EuiLink href={config.link} external={true} target="blank">
+                  {config.name}
                 </EuiLink>
               </EuiTitle>
             </EuiFlexItem>
@@ -49,7 +46,7 @@ export function IntegrationOverview(props: any) {
               <EuiButton
                 size="m"
                 onClick={() => {
-                  props.showFlyout(data.data.name);
+                  props.showFlyout(config.name);
                 }}
                 fill
                 data-test-subj="add-integration-button"
@@ -66,29 +63,29 @@ export function IntegrationOverview(props: any) {
               <h4>Status</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{data.data.status}</EuiText>
+            <EuiText size="m">{config.status}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{data.data.version}</EuiText>
+            <EuiText size="m">{config.version}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Category</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{data.data.components?.map((x: any) => x.name).join(', ')}</EuiText>
+            <EuiText size="m">{config.components?.map((x: any) => x.name).join(', ')}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <h4>Contributer</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiLink href={data.data.sourceUrl} external={true} target="blank">
-              {data.data.author}
+            <EuiLink href={config.sourceUrl} external={true} target="blank">
+              {config.author}
             </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -96,7 +93,7 @@ export function IntegrationOverview(props: any) {
               <h4>License</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{data.data.license}</EuiText>
+            <EuiText size="m">{config.license}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeaderSection>

@@ -116,6 +116,17 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     }
     return Promise.resolve(integration.getSchemas());
   };
+
+  getAssets = async (templateName: string): Promise<{ savedObjects?: any }> => {
+    const integration = await this.repository.getIntegration(templateName);
+    if (integration === null) {
+      return Promise.reject({
+        message: `Template ${templateName} not found`,
+        statusCode: 404,
+      });
+    }
+    return Promise.resolve(integration.getAssets());
+  };
 }
 
 /*

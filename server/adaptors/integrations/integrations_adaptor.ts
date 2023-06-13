@@ -27,4 +27,6 @@ export interface IntegrationsAdaptor {
   getSchemas: (
     templateName: string
   ) => Promise<{ mappings: { [key: string]: any }; schemas: { [key: string]: any } }>;
+
+  getAssets: (templateName: string) => Promise<{ savedObjects?: any }>;
 }

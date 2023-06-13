@@ -9,13 +9,14 @@ import { PanelTitle } from '../../trace_analytics/components/common/helper_funct
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function IntegrationScreenshots(props: any) {
+  const config = props.integration;
   let screenshots;
-  if (props.data.data.statics.gallery) {
-    screenshots = props.data.data.statics.gallery;
+  if (config.statics.gallery) {
+    screenshots = config.statics.gallery;
   }
 
   return (
-    <EuiPanel data-test-subj={`${props.data.data.name}-screenshots`}>
+    <EuiPanel data-test-subj={`${config.name}-screenshots`}>
       <PanelTitle title={'Screenshots'} />
       <EuiFlexGroup gutterSize="l">
         {screenshots?.map((screenshot: { path: string }) => {
@@ -25,7 +26,7 @@ export function IntegrationScreenshots(props: any) {
                 style={{ width: 300, height: 300 }}
                 alt=""
                 className="synopsisIcon"
-                src={`${INTEGRATIONS_BASE}/repository/${props.data.data.name}/static/${screenshot.path}`}
+                src={`${INTEGRATIONS_BASE}/repository/${config.name}/static/${screenshot.path}`}
               />
             </EuiFlexItem>
           );

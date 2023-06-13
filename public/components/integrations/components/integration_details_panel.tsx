@@ -8,16 +8,17 @@ import React from 'react';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationDetails(props: any) {
+  const config = props.integration;
   let screenshots;
-  if (props.data.data.statics.gallery) {
-    screenshots = props.data.data.statics.gallery;
+  if (config.statics.gallery) {
+    screenshots = config.statics.gallery;
   }
 
   return (
-    <EuiPanel data-test-subj={`${props.data.data.name}-details`}>
-      <PanelTitle title={props.data.data.name + ' Details'} />
+    <EuiPanel data-test-subj={`${config.name}-details`}>
+      <PanelTitle title={config.name + ' Details'} />
       <EuiSpacer />
-      <EuiText>{props.data.data.description}</EuiText>
+      <EuiText>{config.description}</EuiText>
     </EuiPanel>
   );
 }

@@ -16,8 +16,8 @@ import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {
-  const config = props.data.data;
-  const data: any[] = [];
+  const config = props.integration;
+  const mapping = props.integrationMapping;
 
   const search = {
     box: {
@@ -106,18 +106,13 @@ export function IntegrationFields(props: any) {
   };
 
   return (
-    <EuiPanel data-test-subj={`${props.data.data.name}-fields`}>
-      <PanelTitle title={props.data.data.name + ' Fields'} />
+    <EuiPanel data-test-subj={`${config.name}-fields`}>
+      <PanelTitle title={config.name + ' Fields'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
         loading={false}
-        items={data
-          .map((x: any) => {
-            const properties = x.mapping.template.mappings.properties;
-            return traverseTypes(properties, x.name);
-          })
-          .flat()}
+        items={mapping ? traverseTypes(mapping.template.mappings.properties, config.type) : []}
         columns={tableColumns}
         pagination={{
           initialPageSize: 10,

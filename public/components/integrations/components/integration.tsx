@@ -30,33 +30,10 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [data, setData] = useState({
-    data: null,
-  });
+  const [integration, setIntegration] = useState({});
 
-  // const getModal = (name: string) => {
-  //   setModalLayout(
-  //     getAddIntegrationModal(
-  //       () => {
-  //         addIntegrationRequest(name);
-  //         setIsModalVisible(false);
-  //       },
-  //       () => {
-  //         setIsModalVisible(false);
-  //       },
-  //       'Name',
-  //       'Namespace',
-  //       'Tags (optional)',
-  //       name,
-  //       'prod',
-  //       'Add Integration Options',
-  //       'Cancel',
-  //       'Add',
-  //       'test'
-  //     )
-  //   );
-  //   setIsModalVisible(true);
-  // };
+  const [integrationMapping, setMapping] = useState(null);
+  const [integrationAssets, setAssets] = useState([]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -76,9 +53,45 @@ export function Integration(props: AvailableIntegrationProps) {
   async function handleDataRequest() {
     // TODO fill in ID request here
     http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`).then((exists) => {
-      setData(exists.data);
+      setIntegration(exists.data);
     });
   }
+
+  useEffect(() => {
+    if (Object.keys(integration).length === 0) {
+      return;
+    }
+    fetch(`${INTEGRATIONS_BASE}/repository/${integration.name}/schema`)
+      .then((response) => response.json())
+      .then((parsedResponse) => {
+        if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
+          throw new Error('Request for schema failed: ' + parsedResponse.message);
+        }
+        return parsedResponse.data.mappings[integration.type];
+      })
+      .then((mapping) => setMapping(mapping))
+      .catch((err: any) => {
+        console.error(err.message);
+      });
+  }, [integration]);
+
+  useEffect(() => {
+    if (Object.keys(integration).length === 0) {
+      return;
+    }
+    fetch(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`)
+      .then((response) => response.json())
+      .then((parsedResponse) => {
+        if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
+          throw new Error('Request for assets failed: ' + parsedResponse.message);
+        }
+        return parsedResponse.data;
+      })
+      .then((assets) => setAssets(assets))
+      .catch((err: any) => {
+        console.error(err.message);
+      });
+  }, [integration]);
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {
     if (!text) text = '';
@@ -106,12 +119,12 @@ export function Integration(props: AvailableIntegrationProps) {
       );
   }
 
-  // return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
-  //   body: JSON.stringify(body),
-  // });
-
-  if (!data.data) {
-    return <EuiLoadingSpinner />;
+  if (Object.keys(integration).length === 0) {
+    return (
+      <EuiOverlayMask>
+        <EuiLoadingSpinner size="xl" />
+      </EuiOverlayMask>
+    );
   }
   return (
     <EuiPage>
@@ -125,19 +138,19 @@ export function Integration(props: AvailableIntegrationProps) {
       <EuiPageBody>
         <EuiSpacer size="xl" />
         {IntegrationOverview({
-          data,
+          integration,
           showFlyout: () => {
             setIsFlyoutVisible(true);
           },
         })}
         <EuiSpacer />
-        {IntegrationDetails({ data })}
+        {IntegrationDetails({ integration })}
         <EuiSpacer />
-        {IntegrationScreenshots({ data })}
+        {IntegrationScreenshots({ integration })}
         <EuiSpacer />
-        {IntegrationAssets({ data })}
+        {IntegrationAssets({ integration, integrationAssets })}
         <EuiSpacer />
-        {IntegrationFields({ data })}
+        {IntegrationFields({ integration, integrationMapping })}
         <EuiSpacer />
       </EuiPageBody>
       {isFlyoutVisible && (

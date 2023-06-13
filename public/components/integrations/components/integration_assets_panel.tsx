@@ -17,7 +17,7 @@ import { PanelTitle } from '../../trace_analytics/components/common/helper_funct
 const FILTER_OPTIONS = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
 export function IntegrationAssets(props: any) {
-  const data: any[] = [];
+  const [config, assets] = [props.integration, props.integrationAssets];
 
   const search = {
     box: {
@@ -57,7 +57,7 @@ export function IntegrationAssets(props: any) {
       name: 'Type',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
+      render: (_value, record) => (
         <EuiText data-test-subj={`${record.type}IntegrationDescription`}>
           {_.truncate(record.type, { length: 100 })}
         </EuiText>
@@ -66,13 +66,15 @@ export function IntegrationAssets(props: any) {
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
   return (
-    <EuiPanel data-test-subj={`${props.data.data.name}-assets`}>
-      <PanelTitle title={props.data.data.name + ' Assets'} />
+    <EuiPanel data-test-subj={`${config.name}-assets`}>
+      <PanelTitle title={config.name + ' Assets'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
         loading={false}
-        items={data.filter((x: any) => x.type !== undefined)}
+        items={
+          assets?.savedObjects ? assets.savedObjects.filter((x: any) => x.type !== undefined) : []
+        }
         columns={tableColumns}
         pagination={{
           initialPageSize: 10,
