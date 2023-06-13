@@ -68,7 +68,8 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
 
   loadIntegrationInstance = async (
     templateName: string,
-    name: string
+    name: string,
+    dataSource: string
   ): Promise<IntegrationInstance> => {
     const template = await this.repository.getIntegration(templateName);
     if (template === null) {
@@ -82,6 +83,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         name,
         dataset: 'nginx',
         namespace: 'prod',
+        dataSource,
       });
       await this.client.create('integration-instance', result);
       return Promise.resolve(result);

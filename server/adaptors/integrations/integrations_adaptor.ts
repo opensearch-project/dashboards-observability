@@ -14,7 +14,11 @@ export interface IntegrationsAdaptor {
 
   getIntegrationInstance: (query?: IntegrationInstanceQuery) => Promise<IntegrationInstanceResult>;
 
-  loadIntegrationInstance: (templateName: string, name: string) => Promise<IntegrationInstance>;
+  loadIntegrationInstance: (
+    templateName: string,
+    name: string,
+    dataSource: string
+  ) => Promise<IntegrationInstance>;
 
   deleteIntegrationInstance: (id: string) => Promise<any>;
 
