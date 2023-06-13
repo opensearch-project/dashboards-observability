@@ -13,6 +13,7 @@ interface BuilderOptions {
   name: string;
   dataset: string;
   namespace: string;
+  dataSource: string | undefined;
 }
 
 export const assetsMap: { [key: string]: string[] } = {
@@ -27,6 +28,10 @@ export const assetsMap: { [key: string]: string[] } = {
     'nginx-viz-3',
     'nginx-dashboard-0',
   ],
+};
+
+export const indexPatternsMap: { [key: string]: string[] } = {
+  nginx: ['ss4o_logs-*-*'],
 };
 
 export class IntegrationInstanceBuilder {
@@ -46,9 +51,22 @@ export class IntegrationInstanceBuilder {
       })
       .then(() => integration.getAssets())
       .then((assets) => this.remapIDs(assets.savedObjects!))
+      .then((assets) => this.remapDataSource(assets, options.name, options.dataSource))
       .then((assets) => this.postAssets(assets))
       .then((refs) => this.buildInstance(integration, refs, options));
     return instance;
+  }
+
+  remapDataSource(assets: any[], templateName: string, dataSource: string | undefined): any[] {
+    if (!dataSource) return assets;
+    indexPatternsMap[templateName].forEach((element) => {
+      assets.forEach((asset) => {
+        if (asset.attributes.title === element) {
+          asset.attributes.title = dataSource;
+        }
+      });
+    });
+    return assets;
   }
 
   remapIDs(assets: any[]): any[] {

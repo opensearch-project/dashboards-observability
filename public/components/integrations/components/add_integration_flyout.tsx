@@ -32,7 +32,7 @@ import { create } from '../../../../../../src/plugins/data/common/search/aggs/me
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
-  onCreate: (name: string, namespace: string, tags: string) => void;
+  onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
 }
 
@@ -343,7 +343,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           <EuiFlexItem>
             <EuiButton
               onClick={() => {
-                onCreate(name, namespace, tags);
+                onCreate(name, dataSource);
                 onClose();
               }}
               fill
