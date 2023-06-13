@@ -20,17 +20,34 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }
 
-  deleteIntegrationInstance = async (id: string): Promise<any> => {
-    const children: any = await this.client.get('integration-instance', id);
-    children.attributes.assets
+  deleteIntegrationInstance = async (id: string): Promise<string[]> => {
+    let children: any;
+    try {
+      children = await this.client.get('integration-instance', id);
+    } catch (err: any) {
+      return err.statusCode === 404 ? Promise.resolve([id]) : Promise.reject(err);
+    }
+
+    const toDelete = children.attributes.assets
+      .filter((i: any) => i.assetId)
       .map((i: any) => {
         return { id: i.assetId, type: i.assetType };
-      })
-      .forEach(async (element: any) => {
-        await this.client.delete(element.type, element.id);
       });
-    const result = await this.client.delete('integration-instance', id);
-    return Promise.resolve(result);
+    toDelete.push({ id, type: 'integration-instance' });
+
+    const result = Promise.all(
+      toDelete.map(
+        async (asset: { type: string; id: string }): Promise<string> => {
+          try {
+            await this.client.delete(asset.type, asset.id);
+            return Promise.resolve(asset.id);
+          } catch (err: any) {
+            return err.statusCode === 404 ? Promise.resolve(asset.id) : Promise.reject(err);
+          }
+        }
+      )
+    );
+    return result;
   };
 
   getIntegrationTemplates = async (
