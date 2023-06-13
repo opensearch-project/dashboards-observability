@@ -35,7 +35,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   icon={getImage(
                     `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
                   )}
-                  title={i.name}
+                  title={i.displayName ? i.displayName : i.name}
                   description={i.description}
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"

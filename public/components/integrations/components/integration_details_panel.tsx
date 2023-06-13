@@ -16,7 +16,7 @@ export function IntegrationDetails(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-details`}>
-      <PanelTitle title={config.name + ' Details'} />
+      <PanelTitle title={'Details'} />
       <EuiSpacer />
       <EuiText>{config.description}</EuiText>
     </EuiPanel>

@@ -27,6 +27,7 @@ export interface AvailableIntegrationType {
   description: string;
   assetUrl?: string | undefined;
   version?: string | undefined;
+  displayName?: string;
   integrationType: string;
   statics: any;
   components: any[];

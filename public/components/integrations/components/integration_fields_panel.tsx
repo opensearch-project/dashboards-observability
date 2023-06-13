@@ -107,7 +107,7 @@ export function IntegrationFields(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-fields`}>
-      <PanelTitle title={config.name + ' Fields'} />
+      <PanelTitle title={'Fields'} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"

@@ -38,7 +38,7 @@ export function IntegrationOverview(props: any) {
             <EuiFlexItem>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
                 <EuiLink href={config.link} external={true} target="blank">
-                  {config.name}
+                  {config.displayName || config.name}
                 </EuiLink>
               </EuiTitle>
             </EuiFlexItem>
