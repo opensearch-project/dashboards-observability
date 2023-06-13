@@ -16,10 +16,6 @@ interface BuilderOptions {
   dataSource: string;
 }
 
-export const indexPatternsMap: { [key: string]: string[] } = {
-  nginx: ['ss4o_logs-*-*'],
-};
-
 export class IntegrationInstanceBuilder {
   client: SavedObjectsClientContract;
 
@@ -37,20 +33,19 @@ export class IntegrationInstanceBuilder {
       })
       .then(() => integration.getAssets())
       .then((assets) => this.remapIDs(assets.savedObjects!))
-      .then((assets) => this.remapDataSource(assets, options.name, options.dataSource))
+      .then((assets) => this.remapDataSource(assets, options.dataSource))
       .then((assets) => this.postAssets(assets))
       .then((refs) => this.buildInstance(integration, refs, options));
     return instance;
   }
 
-  remapDataSource(assets: any[], templateName: string, dataSource: string | undefined): any[] {
+  remapDataSource(assets: any[], dataSource: string | undefined): any[] {
     if (!dataSource) return assets;
-    indexPatternsMap[templateName].forEach((element) => {
-      assets.forEach((asset) => {
-        if (asset.attributes.title === element) {
-          asset.attributes.title = dataSource;
-        }
-      });
+    assets = assets.map((asset) => {
+      if (asset.type === 'index-pattern') {
+        asset.attributes.title = dataSource;
+      }
+      return asset;
     });
     return assets;
   }
