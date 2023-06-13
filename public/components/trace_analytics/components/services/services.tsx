@@ -20,9 +20,6 @@ export interface ServicesProps extends TraceAnalyticsComponentDeps {
 export function Services(props: ServicesProps) {
   return (
     <>
-      <EuiTitle size="l">
-        <h2 style={{ fontWeight: 430 }}>Services</h2>
-      </EuiTitle>
       <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />
       <ServicesContent {...props} />
     </>

@@ -4,12 +4,9 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiButton, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { EuiComboBoxOption } from '@opensearch-project/oui';
-import { data } from 'jquery';
-import { trace } from 'console';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
@@ -178,19 +175,6 @@ export function ServicesContent(props: ServicesProps) {
 
   return (
     <>
-      {mode === 'data_prepper' && dataPrepperIndicesExist && traceGroups ? (
-        <EuiComboBox
-          aria-label="Select trace group"
-          placeholder="Select trace group"
-          options={traceGroups}
-          singleSelection={{ asPlainText: true }}
-          selectedOptions={selectedTraceGroup}
-          onChange={onTraceGroupChange}
-          // onCreateOption={onCreateTrace}
-          isClearable={true}
-          data-test-subj="traceGroupsComboBox"
-        />
-      ) : null}
       <SearchBar
         query={query}
         filters={filters}
