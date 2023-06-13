@@ -31,7 +31,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
           data-test-subj={`${record.name}IntegrationLink`}
           href={`#/available/${record.name}`}
         >
-          {_.truncate(record.name, { length: 100 })}
+          {_.truncate(record.displayName || record.name, { length: 100 })}
         </EuiLink>
       ),
     },
