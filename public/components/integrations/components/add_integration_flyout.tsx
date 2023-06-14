@@ -131,7 +131,10 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const fetchDataSourceMappings = async (
     targetDataSource: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
-    return fetch(`/proxy?path=${targetDataSource}/_mapping&method=GET`)
+    return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
+      method: 'POST',
+      headers: [['osd-xsrf', 'true']],
+    })
       .then((response) => response.json())
       .then((response) => {
         // Un-nest properties by a level for caller convenience
@@ -213,20 +216,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 append={
                   <EuiButton
                     data-test-subj="resetCustomEmbeddablePanelTitle"
-                    onClick={() => {
-                      if (dataSource.length) {
-                        if (dataSource === 'ss4o') {
-                          setDataSourceValid(true);
-                        } else if (dataSource === 'test') {
-                          setDataSourceValid(false);
-                          setErrors([
-                            "This index matches the schema, but doesn't follow ss4o naming conventions",
-                          ]);
-                        } else {
-                          setDataSourceValid(false);
-                          setErrors(["This index doesn't match the schema"]);
-                        }
-                      }
+                    onClick={async () => {
+                      const validationResult = await doExistingDataSourceValidation(dataSource);
+                      setDataSourceValid(validationResult);
                     }}
                     disabled={dataSource.length === 0}
                   >
