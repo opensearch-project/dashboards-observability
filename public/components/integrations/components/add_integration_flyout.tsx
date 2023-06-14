@@ -184,9 +184,13 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       validationErrors.push('Failed to retrieve schema information');
       return false;
     }
-    return Object.values(dataSourceMappings).every((value) =>
+    const validationResult = Object.values(dataSourceMappings).every((value) =>
       doPropertyValidation(integrationType, value.properties, integrationMappings)
     );
+    if (!validationResult) {
+      validationErrors.push('The provided index does not match the schema');
+    }
+    return validationResult;
   };
 
   const formContent = () => {
