@@ -49,7 +49,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     setDataSource(e.target.value);
   };
 
-  const onCheckChange = (e) => {
+  const onCheckChange = (e: any) => {
     setChecked(e.target.checked);
   };
 
@@ -153,7 +153,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const fetchIntegrationMappings = async (
     targetName: string
-  ): Promise<{ [key: string]: { properties: any } } | null> => {
+  ): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
     return fetch(`/api/integrations/repository/${targetName}/schema`)
       .then((response) => response.json())
       .then((response) => {
@@ -168,11 +168,65 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       });
   };
 
+  const doTypeValidation = (toCheck: any, required: any): boolean => {
+    if (!required.type) {
+      return true;
+    }
+    if (required.type === 'object') {
+      return Boolean(toCheck.properties);
+    }
+    return required.type === toCheck.type;
+  };
+
+  const doNestedPropertyValidation = (
+    toCheck: { type?: string; properties?: any },
+    required: { type?: string; properties?: any }
+  ): boolean => {
+    if (!doTypeValidation(toCheck, required)) {
+      return false;
+    }
+    if (required.properties) {
+      return Object.keys(required.properties).every((property: string) => {
+        if (!toCheck.properties[property]) {
+          return false;
+        }
+        return doNestedPropertyValidation(
+          toCheck.properties[property],
+          required.properties[property]
+        );
+      });
+    }
+    return true;
+  };
+
   const doPropertyValidation = (
     rootType: string,
-    dataSourceProps: any,
-    requiredMappings: any
+    dataSourceProps: { [key: string]: { properties?: any } },
+    requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
   ): boolean => {
+    // Check root object type (without dependencies)
+    for (const [key, value] of Object.entries(
+      requiredMappings[rootType].template.mappings.properties
+    )) {
+      if (
+        !dataSourceProps[key] ||
+        !doNestedPropertyValidation(dataSourceProps[key], value as any)
+      ) {
+        return false;
+      }
+    }
+    // Check nested dependencies
+    for (const [key, value] of Object.entries(requiredMappings)) {
+      if (key === rootType) {
+        continue;
+      }
+      if (
+        !dataSourceProps[key] ||
+        !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties)
+      ) {
+        return false;
+      }
+    }
     return true;
   };
 
@@ -322,7 +376,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const [radioIdSelected, setRadioIdSelected] = useState(`0`);
 
-  const onChange = (optionId) => {
+  const onChange = (optionId: any) => {
     setRadioIdSelected(optionId);
   };
 
