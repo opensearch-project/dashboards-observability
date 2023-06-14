@@ -116,7 +116,7 @@ describe('Validation', () => {
         },
       };
 
-      const result = doPropertyValidation(rootType, dataSourceProps, requiredMappings);
+      const result = doPropertyValidation(rootType, dataSourceProps as any, requiredMappings);
 
       expect(result).toBe(true);
     });
@@ -140,7 +140,7 @@ describe('Validation', () => {
         },
       };
 
-      const result = doPropertyValidation(rootType, dataSourceProps, requiredMappings);
+      const result = doPropertyValidation(rootType, dataSourceProps as any, requiredMappings);
 
       expect(result).toBe(false);
     });
@@ -163,7 +163,7 @@ describe('Validation', () => {
         },
       };
 
-      const result = doPropertyValidation(rootType, dataSourceProps, requiredMappings);
+      const result = doPropertyValidation(rootType, dataSourceProps as any, requiredMappings);
 
       expect(result).toBe(false);
     });
