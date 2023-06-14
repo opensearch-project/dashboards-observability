@@ -4,7 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
@@ -20,6 +20,7 @@ import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
 import { OptionType } from '../../../../../common/types/application_analytics';
+import { DashboardContent } from '../dashboard/dashboard_content';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -46,6 +47,8 @@ export function ServicesContent(props: ServicesProps) {
   const [tableItems, setTableItems] = useState([]);
   const [traceGroups, setTraceGroups] = useState<OptionType[]>([]);
   const [selectedTraceGroup, setSelectedTraceGroup] = useState<OptionType[]>();
+
+  const [trigger, setTrigger] = useState<'open' | 'closed' | undefined>('closed');
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
@@ -53,6 +56,11 @@ export function ServicesContent(props: ServicesProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [filteredService, setFilteredService] = useState('');
+
+  const onToggle = (isOpen) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setTrigger(newState);
+  };
 
   const onTraceGroupChange = (selectedOptions: OptionType[]) => {
     // We should only get back either 0 or 1 options.
@@ -214,6 +222,18 @@ export function ServicesContent(props: ServicesProps) {
       ) : (
         <div />
       )}
+      <EuiSpacer size="m" />
+      <EuiPanel>
+        <EuiAccordion
+          id="accordion1"
+          buttonContent="Trace Groups"
+          forceState={trigger}
+          onToggle={onToggle}
+        >
+          <EuiSpacer size="m" />
+          {trigger === 'open' && <DashboardContent {...props} />}
+        </EuiAccordion>
+      </EuiPanel>
     </>
   );
 }
