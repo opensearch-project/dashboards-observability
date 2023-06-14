@@ -120,7 +120,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       setErrors(validationErrors);
       return false;
     }
-    const nameValidity: boolean = Boolean(targetDataSource.match(/^ss4o_[^\-]+-[^\-]+-[^\-]+$/));
+    const nameValidity: boolean = Boolean(
+      targetDataSource.match(new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`))
+    );
     if (!nameValidity) {
       validationErrors.push('This index does not match the suggested naming convention.');
       setErrors(validationErrors);
@@ -252,17 +254,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               />
             </EuiFormRow>
             <EuiSpacer />
-            <EuiFormRow
-              label="Tags (optional)"
-              helpText="Tags you want associated with this integration."
-            >
-              <EuiFieldText
-                data-test-subj="instance-tags"
-                name="first"
-                onChange={(e) => onTagsChange(e)}
-                value={tags}
-              />
-            </EuiFormRow>
             <EuiSpacer />
           </div>
         );
