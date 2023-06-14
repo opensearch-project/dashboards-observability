@@ -727,7 +727,7 @@ export const Explorer = ({
       if (availability !== true) {
         await updateQueryInStore(tempQuery);
       }
-      await fetchData();
+      await fetchData(startTime, endTime);
     },
     [tempQuery, query]
   );

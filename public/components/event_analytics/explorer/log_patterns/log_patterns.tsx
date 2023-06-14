@@ -49,7 +49,7 @@ const EventPatterns = ({
     requestParams: { tabId },
   });
 
-  // refresh filters on opening page
+  // refresh patterns on opening page
   useEffect(() => {
     onPatternSelection('');
   }, []);
@@ -58,6 +58,8 @@ const EventPatterns = ({
     if (query[FILTERED_PATTERN] === pattern) {
       return;
     }
+    // await here allows react to render update properly and display it.
+    // it forces the query to be changed before running it, without await the visual wont update.
     await dispatch(
       changeQuery({
         tabId,
@@ -66,9 +68,7 @@ const EventPatterns = ({
         },
       })
     );
-    // workaround to refresh callback and trigger fetch data
-    // await setTempQuery(query[RAW_QUERY]);
-    await handleTimeRangePickerRefresh(true);
+    handleTimeRangePickerRefresh(true);
   };
 
   const showToastError = (errorMsg: string) => {
