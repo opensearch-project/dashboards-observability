@@ -6,7 +6,6 @@
 import _ from 'lodash';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,27 +16,82 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiRadio,
   EuiRadioGroup,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
   EuiTitle,
-  OuiComboBox,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
-import { useEffect } from 'react';
-import { useToast } from '../../../../public/components/common/toast';
-import { create } from '../../../../../../src/plugins/data/common/search/aggs/metrics/lib/get_response_agg_config_class';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
   onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
+  integrationType: string;
 }
 
+export const doTypeValidation = (toCheck: any, required: any): boolean => {
+  if (!required.type) {
+    return true;
+  }
+  if (required.type === 'object') {
+    return Boolean(toCheck.properties);
+  }
+  return required.type === toCheck.type;
+};
+
+export const doNestedPropertyValidation = (
+  toCheck: { type?: string; properties?: any },
+  required: { type?: string; properties?: any }
+): boolean => {
+  if (!doTypeValidation(toCheck, required)) {
+    return false;
+  }
+  if (required.properties) {
+    return Object.keys(required.properties).every((property: string) => {
+      if (!toCheck.properties[property]) {
+        return false;
+      }
+      return doNestedPropertyValidation(
+        toCheck.properties[property],
+        required.properties[property]
+      );
+    });
+  }
+  return true;
+};
+
+export const doPropertyValidation = (
+  rootType: string,
+  dataSourceProps: { [key: string]: { properties?: any } },
+  requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
+): boolean => {
+  // Check root object type (without dependencies)
+  for (const [key, value] of Object.entries(
+    requiredMappings[rootType].template.mappings.properties
+  )) {
+    if (!dataSourceProps[key] || !doNestedPropertyValidation(dataSourceProps[key], value as any)) {
+      return false;
+    }
+  }
+  // Check nested dependencies
+  for (const [key, value] of Object.entries(requiredMappings)) {
+    if (key === rootType) {
+      continue;
+    }
+    if (
+      !dataSourceProps[key] ||
+      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties)
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName } = props;
+  const { onClose, onCreate, integrationName, integrationType } = props;
 
   const [checked, setChecked] = useState(false);
 
@@ -54,7 +108,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     setDataSource(e.target.value);
   };
 
-  const onCheckChange = (e) => {
+  const onCheckChange = (e: any) => {
     setChecked(e.target.checked);
   };
 
@@ -67,8 +121,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
-
-  const [superSelectvalue, setSuperSelectValue] = useState<string>();
 
   const [createDatasourceOption, setCreateDatasourceOption] = useState<string>();
 
@@ -104,41 +156,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     },
   ];
 
-  const superSelectOptions = [
-    {
-      value: 'option_one',
-      inputDisplay: 'I Have Data',
-      dropdownDisplay: (
-        <Fragment>
-          <strong>I Have Data</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Add an integration based on a SS4O compliant existing index pattern or data stream
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-    {
-      value: 'option_two',
-      inputDisplay: "I Don't Have Data",
-      dropdownDisplay: (
-        <Fragment>
-          <strong>{"I Don't Have Data"}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Create a SS4O compliant data source for this integration to read from
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-  ];
-
-  const onSuperSelectChange = (value: any) => {
-    setSuperSelectValue(value);
-  };
-
   const onCreateSelectChange = (value: any) => {
     setCreateDatasourceOption(value);
   };
@@ -152,6 +169,91 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const onTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTags(e.target.value);
+  };
+
+  // Returns true if the data source is a legal name.
+  // Appends any additional validation errors to the provided errors array.
+  const checkDataSourceName = (targetDataSource: string, validationErrors: string[]): boolean => {
+    if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-]*$/))) {
+      validationErrors.push('This is not a valid index name.');
+      setErrors(validationErrors);
+      return false;
+    }
+    const nameValidity: boolean = Boolean(
+      targetDataSource.match(new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`))
+    );
+    if (!nameValidity) {
+      validationErrors.push('This index does not match the suggested naming convention.');
+      setErrors(validationErrors);
+    }
+    return true;
+  };
+
+  const fetchDataSourceMappings = async (
+    targetDataSource: string
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
+      method: 'POST',
+      headers: [['osd-xsrf', 'true']],
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        // Un-nest properties by a level for caller convenience
+        Object.keys(response).forEach((key) => {
+          response[key].properties = response[key].mappings.properties;
+        });
+        return response;
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return null;
+      });
+  };
+
+  const fetchIntegrationMappings = async (
+    targetName: string
+  ): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
+    return fetch(`/api/integrations/repository/${targetName}/schema`)
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.statusCode && response.statusCode !== 200) {
+          throw new Error('Failed to retrieve Integration schema', { cause: response });
+        }
+        return response.data.mappings;
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return null;
+      });
+  };
+
+  const doExistingDataSourceValidation = async (targetDataSource: string): Promise<boolean> => {
+    const validationErrors: string[] = [];
+    if (!checkDataSourceName(targetDataSource, validationErrors)) {
+      return false;
+    }
+    const [dataSourceMappings, integrationMappings] = await Promise.all([
+      fetchDataSourceMappings(targetDataSource),
+      fetchIntegrationMappings(name),
+    ]);
+    if (!dataSourceMappings) {
+      validationErrors.push('Provided data source could not be retrieved');
+      setErrors(validationErrors);
+      return false;
+    }
+    if (!integrationMappings) {
+      validationErrors.push('Failed to retrieve integration schema information');
+      setErrors(validationErrors);
+      return false;
+    }
+    const validationResult = Object.values(dataSourceMappings).every((value) =>
+      doPropertyValidation(integrationType, value.properties, integrationMappings)
+    );
+    if (!validationResult) {
+      validationErrors.push('The provided index does not match the schema');
+      setErrors(validationErrors);
+    }
+    return validationResult;
   };
 
   const formContent = () => {
@@ -174,20 +276,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 append={
                   <EuiButton
                     data-test-subj="resetCustomEmbeddablePanelTitle"
-                    onClick={() => {
-                      if (dataSource.length) {
-                        if (dataSource === 'ss4o') {
-                          setDataSourceValid(true);
-                        } else if (dataSource === 'test') {
-                          setDataSourceValid(false);
-                          setErrors([
-                            "This index matches the schema, but doesn't follow ss4o naming conventions",
-                          ]);
-                        } else {
-                          setDataSourceValid(false);
-                          setErrors(["This index doesn't match the schema"]);
-                        }
-                      }
+                    onClick={async () => {
+                      const validationResult = await doExistingDataSourceValidation(dataSource);
+                      setDataSourceValid(validationResult);
                     }}
                     disabled={dataSource.length === 0}
                   >
@@ -214,17 +305,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               />
             </EuiFormRow>
             <EuiSpacer />
-            <EuiFormRow
-              label="Tags (optional)"
-              helpText="Tags you want associated with this integration."
-            >
-              <EuiFieldText
-                data-test-subj="instance-tags"
-                name="first"
-                onChange={(e) => onTagsChange(e)}
-                value={tags}
-              />
-            </EuiFormRow>
             <EuiSpacer />
           </div>
         );
@@ -293,7 +373,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const [radioIdSelected, setRadioIdSelected] = useState(`0`);
 
-  const onChange = (optionId) => {
+  const onChange = (optionId: any) => {
     setRadioIdSelected(optionId);
   };
 
