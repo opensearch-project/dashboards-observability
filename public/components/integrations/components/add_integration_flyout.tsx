@@ -28,10 +28,11 @@ interface IntegrationFlyoutProps {
   onClose: () => void;
   onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
+  integrationType: string;
 }
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName } = props;
+  const { onClose, onCreate, integrationName, integrationType } = props;
 
   const [checked, setChecked] = useState(false);
 
@@ -109,6 +110,83 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const onTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTags(e.target.value);
+  };
+
+  // Returns true if the data source is a legal name.
+  // Appends any additional validation errors to the provided errors array.
+  const checkDataSourceName = (validationErrors: string[]): boolean => {
+    if (!Boolean(dataSource.match(/^[a-z\d\.][a-z\d\._\-]*$/))) {
+      validationErrors.push('This is not a valid index name.');
+      setErrors(validationErrors);
+      return false;
+    }
+    const nameValidity: boolean = Boolean(dataSource.match(/^ss4o_[^\-]+-[^\-]+-[^\-]+$/));
+    if (!nameValidity) {
+      validationErrors.push('This index does not match the suggested naming convention.');
+      setErrors(validationErrors);
+    }
+    return true;
+  };
+
+  const fetchDataSourceMappings = async (
+    targetDataSource: string
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    return fetch(`/proxy?path=${targetDataSource}/_mapping&method=GET`)
+      .then((response) => response.json())
+      .then((response) => {
+        // Un-nest properties by a level for caller convenience
+        Object.keys(response).forEach((key) => {
+          response[key].properties = response[key].mappings.properties;
+        });
+        return response;
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return null;
+      });
+  };
+
+  const fetchIntegrationMappings = async (
+    targetName: string
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    return fetch(`/api/integrations/repository/${targetName}/schema`)
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.statusCode && response.statusCode !== 200) {
+          throw new Error('Failed to retrieve Integration schema', { cause: response });
+        }
+        return response.data.mappings;
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return null;
+      });
+  };
+
+  const doPropertyValidation = (
+    rootType: string,
+    dataSourceProps: any,
+    requiredMappings: any
+  ): boolean => {
+    return true;
+  };
+
+  const doExistingDataSourceValidation = async (targetDataSource: string): Promise<boolean> => {
+    const validationErrors: string[] = [];
+    if (!checkDataSourceName(validationErrors)) {
+      return false;
+    }
+    const [dataSourceMappings, integrationMappings] = await Promise.all([
+      fetchDataSourceMappings(targetDataSource),
+      fetchIntegrationMappings(name),
+    ]);
+    if (!dataSourceMappings || !integrationMappings) {
+      validationErrors.push('Failed to retrieve schema information');
+      return false;
+    }
+    return Object.values(dataSourceMappings).every((value) =>
+      doPropertyValidation(integrationType, value.properties, integrationMappings)
+    );
   };
 
   const formContent = () => {

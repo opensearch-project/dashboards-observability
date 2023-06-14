@@ -162,6 +162,7 @@ export function Integration(props: AvailableIntegrationProps) {
             addIntegrationRequest(integrationTemplateId, name, dataSource);
           }}
           integrationName={integrationTemplateId}
+          integrationType={integration.type}
         />
       )}
     </EuiPage>
