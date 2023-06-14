@@ -31,6 +31,65 @@ interface IntegrationFlyoutProps {
   integrationType: string;
 }
 
+export const doTypeValidation = (toCheck: any, required: any): boolean => {
+  if (!required.type) {
+    return true;
+  }
+  if (required.type === 'object') {
+    return Boolean(toCheck.properties);
+  }
+  return required.type === toCheck.type;
+};
+
+export const doNestedPropertyValidation = (
+  toCheck: { type?: string; properties?: any },
+  required: { type?: string; properties?: any }
+): boolean => {
+  if (!doTypeValidation(toCheck, required)) {
+    return false;
+  }
+  if (required.properties) {
+    return Object.keys(required.properties).every((property: string) => {
+      if (!toCheck.properties[property]) {
+        return false;
+      }
+      return doNestedPropertyValidation(
+        toCheck.properties[property],
+        required.properties[property]
+      );
+    });
+  }
+  return true;
+};
+
+export const doPropertyValidation = (
+  rootType: string,
+  dataSourceProps: { [key: string]: { properties?: any } },
+  requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
+): boolean => {
+  // Check root object type (without dependencies)
+  for (const [key, value] of Object.entries(
+    requiredMappings[rootType].template.mappings.properties
+  )) {
+    if (!dataSourceProps[key] || !doNestedPropertyValidation(dataSourceProps[key], value as any)) {
+      return false;
+    }
+  }
+  // Check nested dependencies
+  for (const [key, value] of Object.entries(requiredMappings)) {
+    if (key === rootType) {
+      continue;
+    }
+    if (
+      !dataSourceProps[key] ||
+      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties)
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const { onClose, onCreate, integrationName, integrationType } = props;
 
@@ -166,68 +225,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         console.error(err);
         return null;
       });
-  };
-
-  const doTypeValidation = (toCheck: any, required: any): boolean => {
-    if (!required.type) {
-      return true;
-    }
-    if (required.type === 'object') {
-      return Boolean(toCheck.properties);
-    }
-    return required.type === toCheck.type;
-  };
-
-  const doNestedPropertyValidation = (
-    toCheck: { type?: string; properties?: any },
-    required: { type?: string; properties?: any }
-  ): boolean => {
-    if (!doTypeValidation(toCheck, required)) {
-      return false;
-    }
-    if (required.properties) {
-      return Object.keys(required.properties).every((property: string) => {
-        if (!toCheck.properties[property]) {
-          return false;
-        }
-        return doNestedPropertyValidation(
-          toCheck.properties[property],
-          required.properties[property]
-        );
-      });
-    }
-    return true;
-  };
-
-  const doPropertyValidation = (
-    rootType: string,
-    dataSourceProps: { [key: string]: { properties?: any } },
-    requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
-  ): boolean => {
-    // Check root object type (without dependencies)
-    for (const [key, value] of Object.entries(
-      requiredMappings[rootType].template.mappings.properties
-    )) {
-      if (
-        !dataSourceProps[key] ||
-        !doNestedPropertyValidation(dataSourceProps[key], value as any)
-      ) {
-        return false;
-      }
-    }
-    // Check nested dependencies
-    for (const [key, value] of Object.entries(requiredMappings)) {
-      if (key === rootType) {
-        continue;
-      }
-      if (
-        !dataSourceProps[key] ||
-        !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties)
-      ) {
-        return false;
-      }
-    }
-    return true;
   };
 
   const doExistingDataSourceValidation = async (targetDataSource: string): Promise<boolean> => {
