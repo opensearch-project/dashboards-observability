@@ -225,7 +225,7 @@ export function Application(props: AppDetailProps) {
       },
       {
         text: application.name,
-        href: `${observabilityApplicationsID}/${appId}`,
+        href: `#/${appId}`,
       },
     ]);
     setStartTimeForApp(sessionStorage.getItem(`${application.name}StartTime`) || 'now-24h');
