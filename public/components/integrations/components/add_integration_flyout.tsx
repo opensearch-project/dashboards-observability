@@ -6,7 +6,6 @@
 import _ from 'lodash';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,18 +16,13 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiRadio,
   EuiRadioGroup,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
   EuiTitle,
-  OuiComboBox,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
-import { useEffect } from 'react';
-import { useToast } from '../../../../public/components/common/toast';
-import { create } from '../../../../../../src/plugins/data/common/search/aggs/metrics/lib/get_response_agg_config_class';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
@@ -68,8 +62,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     setName(e.target.value);
   };
 
-  const [superSelectvalue, setSuperSelectValue] = useState<string>();
-
   const [createDatasourceOption, setCreateDatasourceOption] = useState<string>();
 
   const createDatasourceOptions = [
@@ -103,41 +95,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       ),
     },
   ];
-
-  const superSelectOptions = [
-    {
-      value: 'option_one',
-      inputDisplay: 'I Have Data',
-      dropdownDisplay: (
-        <Fragment>
-          <strong>I Have Data</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Add an integration based on a SS4O compliant existing index pattern or data stream
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-    {
-      value: 'option_two',
-      inputDisplay: "I Don't Have Data",
-      dropdownDisplay: (
-        <Fragment>
-          <strong>{"I Don't Have Data"}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Create a SS4O compliant data source for this integration to read from
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-  ];
-
-  const onSuperSelectChange = (value: any) => {
-    setSuperSelectValue(value);
-  };
 
   const onCreateSelectChange = (value: any) => {
     setCreateDatasourceOption(value);
