@@ -114,13 +114,13 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   // Returns true if the data source is a legal name.
   // Appends any additional validation errors to the provided errors array.
-  const checkDataSourceName = (validationErrors: string[]): boolean => {
-    if (!Boolean(dataSource.match(/^[a-z\d\.][a-z\d\._\-]*$/))) {
+  const checkDataSourceName = (targetDataSource: string, validationErrors: string[]): boolean => {
+    if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-]*$/))) {
       validationErrors.push('This is not a valid index name.');
       setErrors(validationErrors);
       return false;
     }
-    const nameValidity: boolean = Boolean(dataSource.match(/^ss4o_[^\-]+-[^\-]+-[^\-]+$/));
+    const nameValidity: boolean = Boolean(targetDataSource.match(/^ss4o_[^\-]+-[^\-]+-[^\-]+$/));
     if (!nameValidity) {
       validationErrors.push('This index does not match the suggested naming convention.');
       setErrors(validationErrors);
@@ -176,15 +176,21 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const doExistingDataSourceValidation = async (targetDataSource: string): Promise<boolean> => {
     const validationErrors: string[] = [];
-    if (!checkDataSourceName(validationErrors)) {
+    if (!checkDataSourceName(targetDataSource, validationErrors)) {
       return false;
     }
     const [dataSourceMappings, integrationMappings] = await Promise.all([
       fetchDataSourceMappings(targetDataSource),
       fetchIntegrationMappings(name),
     ]);
-    if (!dataSourceMappings || !integrationMappings) {
-      validationErrors.push('Failed to retrieve schema information');
+    if (!dataSourceMappings) {
+      validationErrors.push('Provided data source could not be retrieved');
+      setErrors(validationErrors);
+      return false;
+    }
+    if (!integrationMappings) {
+      validationErrors.push('Failed to retrieve integration schema information');
+      setErrors(validationErrors);
       return false;
     }
     const validationResult = Object.values(dataSourceMappings).every((value) =>
@@ -192,6 +198,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     );
     if (!validationResult) {
       validationErrors.push('The provided index does not match the schema');
+      setErrors(validationErrors);
     }
     return validationResult;
   };
