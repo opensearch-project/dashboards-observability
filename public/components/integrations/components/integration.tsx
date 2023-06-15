@@ -99,9 +99,8 @@ export function Integration(props: AvailableIntegrationProps) {
   };
 
   async function addIntegrationRequest(templateName: string, name: string, dataSource: string) {
-    console.log(name);
     http
-      .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
+      .post(`${INTEGRATIONS_BASE}/store/dataSource/${templateName}`, {
         body: JSON.stringify({ name, dataSource }),
       })
       .then((res) => {
@@ -117,6 +116,26 @@ export function Integration(props: AvailableIntegrationProps) {
           'danger'
         )
       );
+  }
+
+  async function createCompliantDataSource(templateName: string, dataSource: string) {
+    const basePath = http.basePath.get();
+    http.post(`${INTEGRATIONS_BASE}/store/dataSource/${templateName}`, {
+      body: JSON.stringify({ dataSource, basePath }),
+    });
+    // .then((res) => {
+    //   setToast(
+    //     `${name} integration successfully added!`,
+    //     'success',
+    //     `View the added assets from ${name} in the Added Integrations list`
+    //   );
+    // })
+    // .catch((err) =>
+    //   setToast(
+    //     'Failed to load integration. Check Added Integrations table for more details',
+    //     'danger'
+    //   )
+    // );
   }
 
   if (Object.keys(integration).length === 0) {
@@ -162,6 +181,9 @@ export function Integration(props: AvailableIntegrationProps) {
             addIntegrationRequest(integrationTemplateId, name, dataSource);
           }}
           integrationName={integrationTemplateId}
+          createCompliantDataSource={(datasource) => {
+            createCompliantDataSource(integrationTemplateId, datasource);
+          }}
         />
       )}
     </EuiPage>

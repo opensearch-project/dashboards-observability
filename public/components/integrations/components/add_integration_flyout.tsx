@@ -29,15 +29,17 @@ import React, { Fragment, useState } from 'react';
 import { useEffect } from 'react';
 import { useToast } from '../../../../public/components/common/toast';
 import { create } from '../../../../../../src/plugins/data/common/search/aggs/metrics/lib/get_response_agg_config_class';
+import { HttpStart } from '../../../../../../src/core/public';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
   onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
+  createCompliantDataSource: (dataSource: string) => void;
 }
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName } = props;
+  const { onClose, onCreate, integrationName, createCompliantDataSource } = props;
 
   const [checked, setChecked] = useState(false);
 
@@ -103,6 +105,31 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       ),
     },
   ];
+
+  const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
+    createCompliantDataSource(targetDataSource);
+
+    // return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
+    //   method: 'POST',
+    //   headers: [['osd-xsrf', 'true']],
+    //   body:
+    // })
+    //   .then((response) => response.json())
+    //   .then((response) => {
+    //     // Un-nest properties by a level for caller convenience
+    //     Object.keys(response).forEach((key) => {
+    //       response[key].properties = response[key].mappings.properties;
+    //     });
+    //     return response;
+    //   })
+    //   .catch((err: any) => {
+    //     console.error(err);
+    //     return null;
+    //   });
+    // fetch(`/api/console/proxy?path=http_template/_mapping&method=POST`, {
+    //     method: 'POST',
+    //     headers: [['osd-xsrf', 'true']],});
+  };
 
   const superSelectOptions = [
     {
@@ -256,7 +283,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 append={
                   <EuiButton
                     data-test-subj="resetCustomEmbeddablePanelTitle"
-                    onClick={() => {}}
+                    onClick={() => {
+                      createDataSourceMappings(createDataSource);
+                    }}
                     disabled={createDataSource.length === 0}
                   >
                     Create
