@@ -71,15 +71,15 @@ export function ServiceMap({
   const toggleButtons = [
     {
       id: 'latency',
-      label: 'Latency',
+      label: 'Duration',
     },
     {
       id: 'error_rate',
-      label: 'Error rate',
+      label: 'Errors',
     },
     {
       id: 'throughput',
-      label: 'Throughput',
+      label: 'Rate',
     },
   ];
 

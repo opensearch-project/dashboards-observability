@@ -45,8 +45,6 @@ export function ServicesContent(props: ServicesProps) {
     jaegerIndicesExist,
   } = props;
   const [tableItems, setTableItems] = useState([]);
-  const [traceGroups, setTraceGroups] = useState<OptionType[]>([]);
-  const [selectedTraceGroup, setSelectedTraceGroup] = useState<OptionType[]>();
 
   const [trigger, setTrigger] = useState<'open' | 'closed' | undefined>('closed');
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
@@ -62,23 +60,6 @@ export function ServicesContent(props: ServicesProps) {
     setTrigger(newState);
   };
 
-  const onTraceGroupChange = (selectedOptions: OptionType[]) => {
-    // We should only get back either 0 or 1 options.
-    if (selectedOptions && selectedOptions.length) {
-      addFilter({
-        field: 'traceGroup',
-        operator: 'is',
-        value: selectedOptions[0].label,
-        inverted: false,
-        disabled: false,
-      });
-    } else {
-      // remove traceGroup filter
-      setFilters(filters.filter((filter) => !(filter.field === 'traceGroup')));
-    }
-    setSelectedTraceGroup(selectedOptions);
-  };
-
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'services');
@@ -92,35 +73,7 @@ export function ServicesContent(props: ServicesProps) {
     setRedirect(false);
   }, [mode]);
 
-  // Get trace groups at start and don't refresh on selection
   useEffect(() => {
-    const DSL = filtersToDsl(
-      mode,
-      filters,
-      query,
-      processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
-      page,
-      appConfigs
-    );
-    if (mode === 'data_prepper' && dataPrepperIndicesExist) {
-      handleTraceGroupsRequest(http, DSL, mode, setTraceGroups);
-    }
-  }, [mode, jaegerIndicesExist, dataPrepperIndicesExist, startTime, endTime]);
-
-  useEffect(() => {
-    let traceGroupFilter = '';
-    for (const filter of filters) {
-      if (filter.field === 'traceGroup') {
-        traceGroupFilter = filter.value;
-        break;
-      }
-    }
-    if (traceGroupFilter) {
-      setSelectedTraceGroup([{ label: traceGroupFilter }]);
-    } else {
-      setSelectedTraceGroup([]);
-    }
     let newFilteredService = '';
     for (const filter of filters) {
       if (filter.field === 'serviceName') {
@@ -226,7 +179,7 @@ export function ServicesContent(props: ServicesProps) {
       <EuiPanel>
         <EuiAccordion
           id="accordion1"
-          buttonContent="Trace Groups"
+          // buttonContent={mode === 'data_prepper' ? "Trace Groups" : "Service and Operations"}
           forceState={trigger}
           onToggle={onToggle}
         >

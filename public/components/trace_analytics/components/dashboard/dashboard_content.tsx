@@ -61,10 +61,6 @@ export function DashboardContent(props: DashboardProps) {
   const [jaegerErrorTableItems, setJaegerErrorTableItems] = useState([]);
   const [throughputPltItems, setThroughputPltItems] = useState({ items: [], fixedInterval: '1h' });
   const [errorRatePltItems, setErrorRatePltItems] = useState({ items: [], fixedInterval: '1h' });
-  const [serviceMap, setServiceMap] = useState<ServiceObject>({});
-  const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
-    'latency' | 'error_rate' | 'throughput'
-  >('latency');
   const [percentileMap, setPercentileMap] = useState<{ [traceGroup: string]: number[] }>({});
   const [filteredService, setFilteredService] = useState('');
   const [redirect, setRedirect] = useState(true);
@@ -210,13 +206,13 @@ export function DashboardContent(props: DashboardProps) {
       serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
         (must: any) => must?.term?.serviceName == null
       );
-      handleServiceMapRequest(
-        http,
-        serviceMapDSL,
-        mode,
-        setServiceMap,
-        currService || filteredService
-      );
+      // handleServiceMapRequest(
+      //   http,
+      //   serviceMapDSL,
+      //   mode,
+      //   setServiceMap,
+      //   currService || filteredService
+      // );
     }
 
     handleDashboardThroughputPltRequest(
@@ -298,21 +294,6 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      <SearchBar
-        query={query}
-        filters={filters}
-        appConfigs={appConfigs}
-        setFilters={setFilters}
-        setQuery={setQuery}
-        startTime={startTime}
-        setStartTime={setStartTime}
-        endTime={endTime}
-        setEndTime={setEndTime}
-        refresh={refresh}
-        page={page}
-        mode={mode}
-      />
-      <EuiSpacer size="m" />
       {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
       (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
@@ -329,18 +310,8 @@ export function DashboardContent(props: DashboardProps) {
               />
               <EuiSpacer />
               <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={4}>
-                  <ServiceMap
-                    addFilter={addFilter}
-                    serviceMap={serviceMap}
-                    idSelected={serviceMapIdSelected}
-                    setIdSelected={setServiceMapIdSelected}
-                    currService={filteredService}
-                    page={page}
-                  />
-                </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFlexGroup direction="column">
+                  <EuiFlexGroup direction="row">
                     <EuiFlexItem>
                       <ErrorRatePlt
                         items={errorRatePltItems}
