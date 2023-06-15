@@ -69,6 +69,15 @@ const EventPatterns = ({
       })
     );
     handleTimeRangePickerRefresh(true);
+    // after rendering the patterns visual, we want the pattern to be reset for future searches
+    await dispatch(
+      changeQuery({
+        tabId,
+        query: {
+          [FILTERED_PATTERN]: '',
+        },
+      })
+    );
   };
 
   const showToastError = (errorMsg: string) => {
