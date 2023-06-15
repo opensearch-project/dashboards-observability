@@ -184,7 +184,7 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${INTEGRATIONS_BASE}/store/list_added`,
+      path: `${INTEGRATIONS_BASE}/store`,
       validate: false,
     },
     async (context, request, response): Promise<any> => {

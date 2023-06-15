@@ -53,7 +53,7 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${INTEGRATIONS_BASE}/store/list_added`).then((exists) => setData(exists.data));
+    http.get(`${INTEGRATIONS_BASE}/store`).then((exists) => setData(exists.data));
   }
 
   return (
