@@ -209,7 +209,7 @@ describe('IntegrationsKibanaBackend', () => {
       const result = await backend.getIntegrationInstance({ id: instanceId });
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('integration-instance', instanceId);
-      expect(result).toEqual({ id: instanceId, status: 'unknown', name: 'instance1' });
+      expect(result).toEqual({ id: instanceId, status: 'available', name: 'instance1' });
     });
   });
 
@@ -299,6 +299,88 @@ describe('IntegrationsKibanaBackend', () => {
         'statusCode',
         404
       );
+    });
+  });
+
+  describe('getAssetStatus', () => {
+    it('should return "available" if all assets are available', async () => {
+      const assets = [
+        { assetId: 'asset1', assetType: 'type1' },
+        { assetId: 'asset2', assetType: 'type2' },
+      ];
+
+      const result = await backend.getAssetStatus(assets as AssetReference[]);
+
+      expect(result).toBe('available');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type1', 'asset1');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type2', 'asset2');
+    });
+
+    it('should return "unavailable" if every asset is unavailable', async () => {
+      mockSavedObjectsClient.get = jest
+        .fn()
+        .mockRejectedValueOnce({ output: { statusCode: 404 } })
+        .mockRejectedValueOnce({ output: { statusCode: 404 } })
+        .mockRejectedValueOnce({ output: { statusCode: 404 } });
+
+      const assets = [
+        { assetId: 'asset1', assetType: 'type1' },
+        { assetId: 'asset2', assetType: 'type2' },
+        { assetId: 'asset3', assetType: 'type3' },
+      ];
+
+      const result = await backend.getAssetStatus(assets as AssetReference[]);
+
+      expect(result).toBe('unavailable');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type1', 'asset1');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type2', 'asset2');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type3', 'asset3');
+    });
+
+    it('should return "partially-available" if some assets are available and some are unavailable', async () => {
+      mockSavedObjectsClient.get = jest
+        .fn()
+        .mockResolvedValueOnce({}) // Available
+        .mockRejectedValueOnce({ output: { statusCode: 404 } }) // Unavailable
+        .mockResolvedValueOnce({}); // Available
+
+      const assets = [
+        { assetId: 'asset1', assetType: 'type1' },
+        { assetId: 'asset2', assetType: 'type2' },
+        { assetId: 'asset3', assetType: 'type3' },
+      ];
+
+      const result = await backend.getAssetStatus(assets as AssetReference[]);
+
+      expect(result).toBe('partially-available');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type1', 'asset1');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type2', 'asset2');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type3', 'asset3');
+    });
+
+    it('should return "unknown" if at least one asset has an unknown status', async () => {
+      mockSavedObjectsClient.get = jest
+        .fn()
+        .mockResolvedValueOnce({}) // Available
+        .mockRejectedValueOnce({}) // Unknown
+        .mockResolvedValueOnce({}); // Available
+
+      const assets = [
+        { assetId: 'asset1', assetType: 'type1' },
+        { assetId: 'asset2', assetType: 'type2' },
+        { assetId: 'asset3', assetType: 'type3' },
+      ];
+
+      const result = await backend.getAssetStatus(assets as AssetReference[]);
+
+      expect(result).toBe('unknown');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type1', 'asset1');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type2', 'asset2');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('type3', 'asset3');
     });
   });
 });
