@@ -99,7 +99,6 @@ export function Integration(props: AvailableIntegrationProps) {
   };
 
   async function addIntegrationRequest(templateName: string, name: string, dataSource: string) {
-    console.log(name);
     http
       .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
         body: JSON.stringify({ name, dataSource }),
@@ -163,6 +162,7 @@ export function Integration(props: AvailableIntegrationProps) {
           }}
           integrationName={integrationTemplateId}
           integrationType={integration.type}
+          http={http}
         />
       )}
     </EuiPage>

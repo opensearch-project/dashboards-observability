@@ -23,12 +23,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
+import { HttpStart } from '../../../../../../src/core/public';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
   onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
   integrationType: string;
+  http: HttpStart;
 }
 
 export const doTypeValidation = (toCheck: any, required: any): boolean => {
@@ -156,6 +159,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     },
   ];
 
+  const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
+    const data = await fetch(`${INTEGRATIONS_BASE}/repository/${integrationName}/schema`).then(
+      (response) => {
+        return response.json();
+      }
+    );
+    Object.keys(data.data.mappings).forEach(function (k) {
+      createMappings(k, data.data.mappings[k], targetDataSource);
+    });
+  };
+
   const onCreateSelectChange = (value: any) => {
     setCreateDatasourceOption(value);
   };
@@ -208,6 +222,43 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         console.error(err);
         return null;
       });
+  };
+
+  const createMappings = async (
+    componentName: string,
+    payload: any,
+    dataSourceName: string
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    if (componentName !== integrationType) {
+      return fetch(`/api/console/proxy?path=_component_template/${componentName}&method=POST`, {
+        method: 'POST',
+        headers: [
+          ['osd-xsrf', 'true'],
+          ['Content-Type', 'application/json'],
+        ],
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.json())
+        .catch((err: any) => {
+          console.error(err);
+          return null;
+        });
+    } else {
+      payload.index_patterns = [dataSourceName];
+      return fetch(`/api/console/proxy?path=_index_template/${componentName}&method=POST`, {
+        method: 'POST',
+        headers: [
+          ['osd-xsrf', 'true'],
+          ['Content-Type', 'application/json'],
+        ],
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.json())
+        .catch((err: any) => {
+          console.error(err);
+          return null;
+        });
+    }
   };
 
   const fetchIntegrationMappings = async (
@@ -336,7 +387,9 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 append={
                   <EuiButton
                     data-test-subj="resetCustomEmbeddablePanelTitle"
-                    onClick={() => {}}
+                    onClick={() => {
+                      createDataSourceMappings(createDataSource);
+                    }}
                     disabled={createDataSource.length === 0}
                   >
                     Create

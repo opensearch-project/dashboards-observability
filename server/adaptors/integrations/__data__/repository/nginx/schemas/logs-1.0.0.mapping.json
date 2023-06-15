@@ -1,6 +1,6 @@
 {
     "index_patterns": [
-        "sso_logs-*-*"
+        "ss4o_logs-*-*"
     ],
     "data_stream": {},
     "template": {
@@ -215,8 +215,8 @@
         }
     },
     "composed_of": [
-        "http_template",
-        "communication_template"
+        "communication",
+        "http"
     ],
     "version": 1,
     "_meta": {
