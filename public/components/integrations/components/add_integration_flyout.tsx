@@ -166,7 +166,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       }
     );
     Object.keys(data.data.mappings).forEach(function (k) {
-      createMappings(k, JSON.stringify(data.data.mappings[k]));
+      createMappings(k, data.data.mappings[k], targetDataSource);
     });
   };
 
@@ -226,7 +226,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const createMappings = async (
     componentName: string,
-    payload: any
+    payload: any,
+    dataSourceName: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     if (componentName !== integrationType) {
       return fetch(`/api/console/proxy?path=_component_template/${componentName}&method=POST`, {
@@ -235,7 +236,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           ['osd-xsrf', 'true'],
           ['Content-Type', 'application/json'],
         ],
-        body: payload,
+        body: JSON.stringify(payload),
       })
         .then((response) => response.json())
         .catch((err: any) => {
@@ -243,13 +244,14 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           return null;
         });
     } else {
+      payload.index_patterns = [dataSourceName];
       return fetch(`/api/console/proxy?path=_index_template/${componentName}&method=POST`, {
         method: 'POST',
         headers: [
           ['osd-xsrf', 'true'],
           ['Content-Type', 'application/json'],
         ],
-        body: payload,
+        body: JSON.stringify(payload),
       })
         .then((response) => response.json())
         .catch((err: any) => {
