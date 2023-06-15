@@ -23,9 +23,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
-import { useEffect } from 'react';
-import { useToast } from '../../../../public/components/common/toast';
-import { create } from '../../../../../../src/plugins/data/common/search/aggs/metrics/lib/get_response_agg_config_class';
 import { HttpStart } from '../../../../../../src/core/public';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
@@ -33,7 +30,6 @@ interface IntegrationFlyoutProps {
   onClose: () => void;
   onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
-  createCompliantDataSource: (dataSource: string) => void;
   integrationType: string;
   http: HttpStart;
 }
@@ -164,7 +160,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   ];
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
-    // createCompliantDataSource(targetDataSource);
     const data = await fetch(`${INTEGRATIONS_BASE}/repository/${integrationName}/schema`).then(
       (response) => {
         return response.json();
@@ -173,72 +168,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     Object.keys(data.data.mappings).forEach(function (k) {
       createMappings(k, JSON.stringify(data.data.mappings[k]));
     });
-    // .then((parsedResponse) => {
-    //   if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
-    //     throw new Error('Request for schema failed: ' + parsedResponse.message);
-    //   }
-    //   return parsedResponse.data.mappings[integration.type];
-    // })
-    // .then((mapping) => setMapping(mapping))
-    // .catch((err: any) => {
-    //   console.error(err.message);
-    // });
-
-    // return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
-    //   method: 'POST',
-    //   headers: [['osd-xsrf', 'true']],
-    //   body:
-    // })
-    //   .then((response) => response.json())
-    //   .then((response) => {
-    //     // Un-nest properties by a level for caller convenience
-    //     Object.keys(response).forEach((key) => {
-    //       response[key].properties = response[key].mappings.properties;
-    //     });
-    //     return response;
-    //   })
-    //   .catch((err: any) => {
-    //     console.error(err);
-    //     return null;
-    //   });
-    // fetch(`/api/console/proxy?path=http_template/_mapping&method=POST`, {
-    //     method: 'POST',
-    //     headers: [['osd-xsrf', 'true']],});
-  };
-
-  const superSelectOptions = [
-    {
-      value: 'option_one',
-      inputDisplay: 'I Have Data',
-      dropdownDisplay: (
-        <Fragment>
-          <strong>I Have Data</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Add an integration based on a SS4O compliant existing index pattern or data stream
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-    {
-      value: 'option_two',
-      inputDisplay: "I Don't Have Data",
-      dropdownDisplay: (
-        <Fragment>
-          <strong>{"I Don't Have Data"}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Create a SS4O compliant data source for this integration to read from
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-  ];
-
-  const onSuperSelectChange = (value: any) => {
-    setSuperSelectValue(value);
   };
 
   const onCreateSelectChange = (value: any) => {

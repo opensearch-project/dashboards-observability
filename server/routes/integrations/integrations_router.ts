@@ -5,12 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import * as mime from 'mime';
-import {
-  BasePath,
-  HttpServiceSetup,
-  IRouter,
-  RequestHandlerContext,
-} from '../../../../../src/core/server';
+import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
 import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
 import {
@@ -18,9 +13,6 @@ import {
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
 import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
-import { HOME_APP_BASE_PATH } from '../../../../../src/plugins/home/common/constants';
-import { HttpServer } from '../../../../../src/core/server/http/http_server';
-import { CoreApp } from '../../../../../src/core/server/core_app';
 
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
@@ -100,60 +92,6 @@ export function registerIntegrationsRoute(router: IRouter) {
           request.body.dataSource
         );
       });
-    }
-  );
-
-  router.post(
-    {
-      path: `${INTEGRATIONS_BASE}/store/dataSource/{templateName}`,
-      validate: {
-        params: schema.object({
-          templateName: schema.string(),
-        }),
-        body: schema.object({
-          dataSource: schema.string(),
-          basePath: schema.string(),
-        }),
-      },
-    },
-    async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request);
-      console.log('AWIEHFOAHWEOIFHOIAWEHFIOAHWEF' + request.body.basePath);
-
-      for (const [key, value] of Object.entries(
-        (await adaptor.getSchemas(request.params.templateName)).mappings
-      )) {
-        fetch(`/api/console/proxy?path=_component_template/http_template&method=POST`, {
-          method: 'POST',
-          headers: [['osd-xsrf', 'true']],
-          body: value,
-        });
-      }
-      // return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-      //   return a.loadIntegrationInstance(
-      //     request.params.templateName,
-      //     request.body.name,
-      //     request.body.dataSource
-      //   );
-      // });
-
-      // return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
-      //   method: 'POST',
-      //   headers: [['osd-xsrf', 'true']],
-      //   body:
-      // })
-      //   .then((response) => response.json())
-      //   .then((response) => {
-      //     // Un-nest properties by a level for caller convenience
-      //     Object.keys(response).forEach((key) => {
-      //       response[key].properties = response[key].mappings.properties;
-      //     });
-      //     return response;
-      //   })
-      //   .catch((err: any) => {
-      //     console.error(err);
-      //     return null;
-      //   });
     }
   );
 
