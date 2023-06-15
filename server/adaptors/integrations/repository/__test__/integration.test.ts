@@ -241,7 +241,7 @@ describe('Integration', () => {
       expect(await integration.getStatic('/logo.png')).toStrictEqual(
         Buffer.from('logo data', 'ascii')
       );
-      expect(readFileMock).toBeCalledWith('sample/static/logo.png');
+      expect(readFileMock).toBeCalledWith(path.join('sample', 'static', 'logo.png'));
     });
 
     it('should return null and log an error if the static file is not found', async () => {

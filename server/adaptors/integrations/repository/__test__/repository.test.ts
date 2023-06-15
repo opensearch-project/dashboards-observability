@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import { Repository } from '../repository';
 import { Integration } from '../integration';
 import { Dirent, Stats } from 'fs';
+import path from 'path';
 
 jest.mock('fs/promises');
 
@@ -34,8 +35,8 @@ describe('Repository', () => {
       jest.spyOn(fs, 'readdir').mockResolvedValue((['folder1', 'folder2'] as unknown) as Dirent[]);
 
       // Mock fs.lstat to return a mix of directories and files
-      jest.spyOn(fs, 'lstat').mockImplementation(async (path) => {
-        if (path === 'path/to/directory/folder1') {
+      jest.spyOn(fs, 'lstat').mockImplementation(async (toLstat) => {
+        if (toLstat === path.join('path', 'to', 'directory', 'folder1')) {
           return { isDirectory: () => true } as Stats;
         } else {
           return { isDirectory: () => false } as Stats;
