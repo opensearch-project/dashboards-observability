@@ -5,7 +5,7 @@
 
 import path from 'path';
 import { IntegrationsAdaptor } from './integrations_adaptor';
-import { SavedObjectsClientContract } from '../../../../../src/core/server/types';
+import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { Repository } from './repository/repository';
 
@@ -80,7 +80,48 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceResult> => {
     const result = await this.client.get('integration-instance', `${query!.id}`);
-    return Promise.resolve(savedObjectToIntegrationInstance(result));
+    return Promise.resolve(this.buildInstanceResponse(result));
+  };
+
+  buildInstanceResponse = async (
+    savedObj: SavedObject<unknown>
+  ): Promise<IntegrationInstanceResult> => {
+    const assets: AssetReference[] | undefined = (savedObj.attributes as any)?.assets;
+    const status: string = assets ? await this.getAssetStatus(assets) : 'available';
+
+    return {
+      id: savedObj.id,
+      status,
+      ...(savedObj.attributes as any),
+    };
+  };
+
+  getAssetStatus = async (assets: AssetReference[]): Promise<string> => {
+    const statuses: Array<{ id: string; status: string }> = await Promise.all(
+      assets.map(async (asset) => {
+        try {
+          await this.client.get(asset.assetType, asset.assetId);
+          return { id: asset.assetId, status: 'available' };
+        } catch (err: any) {
+          const statusCode = err.output?.statusCode;
+          if (statusCode && 400 <= statusCode && statusCode < 500) {
+            return { id: asset.assetId, status: 'unavailable' };
+          }
+          console.error('Failed to get asset status', err);
+          return { id: asset.assetId, status: 'unknown' };
+        }
+      })
+    );
+
+    const [available, unavailable, unknown] = [
+      statuses.filter((x) => x.status === 'available').length,
+      statuses.filter((x) => x.status === 'unavailable').length,
+      statuses.filter((x) => x.status === 'unknown').length,
+    ];
+    if (unknown > 0) return 'unknown';
+    if (unavailable > 0 && available > 0) return 'partially-available';
+    if (unavailable > 0) return 'unavailable';
+    return 'available';
   };
 
   loadIntegrationInstance = async (
@@ -145,12 +186,3 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return Promise.resolve(integration.getAssets());
   };
 }
-
-/*
- ** UTILITY FUNCTIONS
- */
-const savedObjectToIntegrationInstance = (so: any): IntegrationInstanceResult => ({
-  id: so.id,
-  status: 'unknown',
-  ...so.attributes,
-});

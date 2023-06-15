@@ -70,7 +70,6 @@ interface IntegrationInstanceResult extends IntegrationInstance {
 interface AssetReference {
   assetType: string;
   assetId: string;
-  status: string;
   isDefaultAsset: boolean;
   description: string;
 }
