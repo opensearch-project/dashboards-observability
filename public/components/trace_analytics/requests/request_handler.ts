@@ -34,7 +34,7 @@ export async function handleDslRequest(
     body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
   }
   if (timeout) {
-    const id = setTimeout(() => setShowTimeoutToast!(), 30000);
+    const id = setTimeout(() => setShowTimeoutToast!(), 3);
 
     try {
       return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {

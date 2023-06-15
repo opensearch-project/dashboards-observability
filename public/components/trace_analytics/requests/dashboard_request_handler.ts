@@ -28,6 +28,7 @@ export const handleDashboardRequest = async (
   items,
   setItems,
   mode,
+  setShowTimeoutToast,
   setPercentileMap?
 ) => {
   // latency_variance should only be affected by timefilter
@@ -49,7 +50,7 @@ export const handleDashboardRequest = async (
     .catch((error) => console.error(error));
   if (setPercentileMap) setPercentileMap(latencyVariances);
 
-  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode)
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {

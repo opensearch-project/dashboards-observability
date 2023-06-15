@@ -226,6 +226,8 @@ export const Home = (props: HomeProps) => {
                 childBreadcrumbs={serviceBreadcrumbs}
                 nameColumnAction={nameColumnAction}
                 traceColumnAction={traceColumnAction}
+                setToast={setToast}
+                toasts={toasts}
                 {...commonProps}
               />
             </TraceSideBar>

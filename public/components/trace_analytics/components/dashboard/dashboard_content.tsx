@@ -33,6 +33,7 @@ import { SearchBar } from '../common/search_bar';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
+import { useToast } from '../../../../../public/components/common/toast';
 
 export function DashboardContent(props: DashboardProps) {
   const {
@@ -68,7 +69,7 @@ export function DashboardContent(props: DashboardProps) {
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
 
   useEffect(() => {
-    if (showTimeoutToast === true && toasts.length === 0) {
+    if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
       setToast!(
         'Query took too long to execute.',
         'danger',
@@ -199,6 +200,7 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setTableItems,
         mode,
+        () => setShowTimeoutToast(true),
         setPercentileMap
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)

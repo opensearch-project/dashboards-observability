@@ -18,9 +18,9 @@ export interface TracesProps extends TraceAnalyticsComponentDeps {
 export function Traces(props: TracesProps) {
   return (
     <>
-      <EuiTitle size="l">
+      {/* <EuiTitle size="l">
         <h2 style={{ fontWeight: 430 }}>Traces</h2>
-      </EuiTitle>
+      </EuiTitle> */}
       <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />
       <TracesContent {...props} />
     </>

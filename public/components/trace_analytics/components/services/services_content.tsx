@@ -134,6 +134,10 @@ export function ServicesContent(props: ServicesProps) {
     setFilters(newFilters);
   };
 
+  const dashboardContent = () => {
+    return  <DashboardContent {...props} />
+  }
+
   return (
     <>
       <SearchBar
@@ -179,12 +183,12 @@ export function ServicesContent(props: ServicesProps) {
       <EuiPanel>
         <EuiAccordion
           id="accordion1"
-          // buttonContent={mode === 'data_prepper' ? "Trace Groups" : "Service and Operations"}
+          buttonContent={mode === 'data_prepper' ? "Trace Groups" : "Service and Operations"}
           forceState={trigger}
           onToggle={onToggle}
         >
           <EuiSpacer size="m" />
-          {trigger === 'open' && <DashboardContent {...props} />}
+          {trigger === 'open' && dashboardContent()}
         </EuiAccordion>
       </EuiPanel>
     </>
