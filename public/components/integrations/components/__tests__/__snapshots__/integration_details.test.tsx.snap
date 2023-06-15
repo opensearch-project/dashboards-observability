@@ -9,7 +9,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     data-test-subj="nginx-details"
   >
     <PanelTitle
-      title="nginx Details"
+      title="Details"
     >
       <EuiText
         size="m"
@@ -20,7 +20,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           <span
             className="panel-title"
           >
-            nginx Details
+            Details
           </span>
         </div>
       </EuiText>

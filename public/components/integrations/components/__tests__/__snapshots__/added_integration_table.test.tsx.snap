@@ -83,81 +83,79 @@ exports[`Added Integration Table View Test Renders added integration table view 
         items={
           Array [
             Object {
-              "addedBy": "unknown",
               "assets": Array [
                 Object {
-                  "assetId": "47892350-b495-11ed-af0a-cf5c93b5a3b6",
+                  "assetId": "3fc41705-8a23-49f4-926c-2819e0d7306d",
                   "assetType": "index-pattern",
-                  "description": "sso_logs-*-*",
+                  "description": "ss4o_logs-nginx-prod",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "d80e05b2-518c-4c3d-9651-4c9d8632dce4",
+                  "assetId": "a0415ddd-047d-4c02-8769-d14bfb70f525",
                   "assetType": "search",
                   "description": "[NGINX Core Logs 1.0] Nginx Access Logs",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "3b49a65d-54d8-483d-a8f0-3d7c855e1ecf",
+                  "assetId": "a17cd453-fb2f-4c24-81db-aedfc8682829",
                   "assetType": "visualization",
                   "description": "[NGINX Core Logs 1.0] Response codes over time",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "9f820fbe-ddde-43a2-9402-30bd295c97f6",
+                  "assetId": "3e47dfed-d9ff-4c1b-b425-04ffc8ed3fa9",
                   "assetType": "search",
                   "description": "[NGINX Core Logs 1.0] Nginx Error Logs",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "865e577b-634b-4a65-b9d6-7e324c395d18",
+                  "assetId": "641c2a03-eead-4900-94ee-e12d2fef8383",
                   "assetType": "visualization",
                   "description": "[NGINX Core Logs 1.0] Errors over time",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "dc1803f0-b478-11ed-9063-ebe46f9ac203",
-                  "assetType": "visualization",
-                  "description": "Top Paths",
-                  "isDefaultAsset": false,
-                  "status": "available",
-                },
-                Object {
-                  "assetId": "99acc580-b47a-11ed-9063-ebe46f9ac203",
+                  "assetId": "ce61594d-8307-4358-9b7e-71101b3ed722",
                   "assetType": "visualization",
                   "description": "Data Volume",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "01ea64d0-b62f-11ed-a677-43d7aa86763b",
+                  "assetId": "452bd6e3-3b50-407f-88f2-c35a29c56051",
                   "assetType": "visualization",
-                  "description": "Req-per-min",
+                  "description": "Top Paths",
                   "isDefaultAsset": false,
                   "status": "available",
                 },
                 Object {
-                  "assetId": "96847220-5261-44d0-89b4-65f3a659f13a",
+                  "assetId": "14a1ddab-08c1-4aba-ba3b-88bae36f7e50",
+                  "assetType": "visualization",
+                  "description": "Requests per Minute",
+                  "isDefaultAsset": false,
+                  "status": "available",
+                },
+                Object {
+                  "assetId": "179bad58-c840-4c6c-9fd8-1667c14bd03a",
                   "assetType": "dashboard",
                   "description": "[NGINX Core Logs 1.0] Overview",
                   "isDefaultAsset": true,
                   "status": "available",
                 },
               ],
-              "creationDate": "2023-06-02T15:30:35.281Z",
+              "creationDate": "2023-06-15T16:28:36.370Z",
               "dataSource": Object {
                 "dataset": "nginx",
                 "namespace": "prod",
                 "sourceType": "logs",
               },
-              "id": "6b3b8010-015a-11ee-8bf8-9f447e9961b0",
+              "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
               "name": "nginx",
-              "status": "unknown",
               "templateName": "nginx",
             },
           ]
@@ -598,81 +596,79 @@ exports[`Added Integration Table View Test Renders added integration table view 
             items={
               Array [
                 Object {
-                  "addedBy": "unknown",
                   "assets": Array [
                     Object {
-                      "assetId": "47892350-b495-11ed-af0a-cf5c93b5a3b6",
+                      "assetId": "3fc41705-8a23-49f4-926c-2819e0d7306d",
                       "assetType": "index-pattern",
-                      "description": "sso_logs-*-*",
+                      "description": "ss4o_logs-nginx-prod",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "d80e05b2-518c-4c3d-9651-4c9d8632dce4",
+                      "assetId": "a0415ddd-047d-4c02-8769-d14bfb70f525",
                       "assetType": "search",
                       "description": "[NGINX Core Logs 1.0] Nginx Access Logs",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "3b49a65d-54d8-483d-a8f0-3d7c855e1ecf",
+                      "assetId": "a17cd453-fb2f-4c24-81db-aedfc8682829",
                       "assetType": "visualization",
                       "description": "[NGINX Core Logs 1.0] Response codes over time",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "9f820fbe-ddde-43a2-9402-30bd295c97f6",
+                      "assetId": "3e47dfed-d9ff-4c1b-b425-04ffc8ed3fa9",
                       "assetType": "search",
                       "description": "[NGINX Core Logs 1.0] Nginx Error Logs",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "865e577b-634b-4a65-b9d6-7e324c395d18",
+                      "assetId": "641c2a03-eead-4900-94ee-e12d2fef8383",
                       "assetType": "visualization",
                       "description": "[NGINX Core Logs 1.0] Errors over time",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "dc1803f0-b478-11ed-9063-ebe46f9ac203",
-                      "assetType": "visualization",
-                      "description": "Top Paths",
-                      "isDefaultAsset": false,
-                      "status": "available",
-                    },
-                    Object {
-                      "assetId": "99acc580-b47a-11ed-9063-ebe46f9ac203",
+                      "assetId": "ce61594d-8307-4358-9b7e-71101b3ed722",
                       "assetType": "visualization",
                       "description": "Data Volume",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "01ea64d0-b62f-11ed-a677-43d7aa86763b",
+                      "assetId": "452bd6e3-3b50-407f-88f2-c35a29c56051",
                       "assetType": "visualization",
-                      "description": "Req-per-min",
+                      "description": "Top Paths",
                       "isDefaultAsset": false,
                       "status": "available",
                     },
                     Object {
-                      "assetId": "96847220-5261-44d0-89b4-65f3a659f13a",
+                      "assetId": "14a1ddab-08c1-4aba-ba3b-88bae36f7e50",
+                      "assetType": "visualization",
+                      "description": "Requests per Minute",
+                      "isDefaultAsset": false,
+                      "status": "available",
+                    },
+                    Object {
+                      "assetId": "179bad58-c840-4c6c-9fd8-1667c14bd03a",
                       "assetType": "dashboard",
                       "description": "[NGINX Core Logs 1.0] Overview",
                       "isDefaultAsset": true,
                       "status": "available",
                     },
                   ],
-                  "creationDate": "2023-06-02T15:30:35.281Z",
+                  "creationDate": "2023-06-15T16:28:36.370Z",
                   "dataSource": Object {
                     "dataset": "nginx",
                     "namespace": "prod",
                     "sourceType": "logs",
                   },
-                  "id": "6b3b8010-015a-11ee-8bf8-9f447e9961b0",
+                  "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
                   "name": "nginx",
-                  "status": "unknown",
                   "templateName": "nginx",
                 },
               ]
@@ -998,7 +994,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                           >
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_name_6b3b8010-015a-11ee-8bf8-9f447e9961b0_0"
+                              key="_data_column_name_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_0"
                               mobileOptions={
                                 Object {
                                   "header": "Asset name",
@@ -1028,13 +1024,13 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   <EuiLink
                                     className=""
                                     data-test-subj="nginxIntegrationLink"
-                                    href="#/installed/6b3b8010-015a-11ee-8bf8-9f447e9961b0"
+                                    href="#/installed/ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
                                     key=".0"
                                   >
                                     <a
                                       className="euiLink euiLink--primary"
                                       data-test-subj="nginxIntegrationLink"
-                                      href="#/installed/6b3b8010-015a-11ee-8bf8-9f447e9961b0"
+                                      href="#/installed/ad7e6e30-0b99-11ee-b27c-c9863222e9bf"
                                       rel="noreferrer"
                                     >
                                       nginx
@@ -1045,7 +1041,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_source_6b3b8010-015a-11ee-8bf8-9f447e9961b0_1"
+                              key="_data_column_source_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_1"
                               mobileOptions={
                                 Object {
                                   "header": "Source",
@@ -1092,7 +1088,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_type_6b3b8010-015a-11ee-8bf8-9f447e9961b0_2"
+                              key="_data_column_type_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_2"
                               mobileOptions={
                                 Object {
                                   "header": "Type",
@@ -1136,7 +1132,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_dateAdded_6b3b8010-015a-11ee-8bf8-9f447e9961b0_3"
+                              key="_data_column_dateAdded_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_3"
                               mobileOptions={
                                 Object {
                                   "header": "Date Added",
@@ -1172,7 +1168,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                       className="euiText euiText--medium"
                                       data-test-subj="nginxIntegrationDescription"
                                     >
-                                      2023-06-02T15:30:35.281Z
+                                      2023-06-15T16:28:36.370Z
                                     </div>
                                   </EuiText>
                                 </div>
@@ -1180,7 +1176,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             </EuiTableRowCell>
                             <EuiTableRowCell
                               align="left"
-                              key="_data_column_status_6b3b8010-015a-11ee-8bf8-9f447e9961b0_4"
+                              key="_data_column_status_ad7e6e30-0b99-11ee-b27c-c9863222e9bf_4"
                               mobileOptions={
                                 Object {
                                   "header": "Status",
@@ -1215,9 +1211,7 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                     <div
                                       className="euiText euiText--medium"
                                       data-test-subj="nginxIntegrationStatus"
-                                    >
-                                      unknown
-                                    </div>
+                                    />
                                   </EuiText>
                                 </div>
                               </td>
