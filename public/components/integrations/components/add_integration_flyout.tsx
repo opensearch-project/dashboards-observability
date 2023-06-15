@@ -27,6 +27,7 @@ import { useEffect } from 'react';
 import { useToast } from '../../../../public/components/common/toast';
 import { create } from '../../../../../../src/plugins/data/common/search/aggs/metrics/lib/get_response_agg_config_class';
 import { HttpStart } from '../../../../../../src/core/public';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
@@ -34,6 +35,7 @@ interface IntegrationFlyoutProps {
   integrationName: string;
   createCompliantDataSource: (dataSource: string) => void;
   integrationType: string;
+  http: HttpStart;
 }
 
 export const doTypeValidation = (toCheck: any, required: any): boolean => {
@@ -96,7 +98,7 @@ export const doPropertyValidation = (
 };
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName, createCompliantDataSource } = props;
+  const { onClose, onCreate, integrationName, integrationType } = props;
 
   const [checked, setChecked] = useState(false);
 
@@ -162,7 +164,25 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   ];
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
-    createCompliantDataSource(targetDataSource);
+    // createCompliantDataSource(targetDataSource);
+    const data = await fetch(`${INTEGRATIONS_BASE}/repository/${integrationName}/schema`).then(
+      (response) => {
+        return response.json();
+      }
+    );
+    Object.keys(data.data.mappings).forEach(function (k) {
+      createMappings(k, JSON.stringify(data.data.mappings[k]));
+    });
+    // .then((parsedResponse) => {
+    //   if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
+    //     throw new Error('Request for schema failed: ' + parsedResponse.message);
+    //   }
+    //   return parsedResponse.data.mappings[integration.type];
+    // })
+    // .then((mapping) => setMapping(mapping))
+    // .catch((err: any) => {
+    //   console.error(err.message);
+    // });
 
     // return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
     //   method: 'POST',
@@ -273,6 +293,41 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         console.error(err);
         return null;
       });
+  };
+
+  const createMappings = async (
+    componentName: string,
+    payload: any
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    if (componentName !== integrationType) {
+      return fetch(`/api/console/proxy?path=_component_template/${componentName}&method=POST`, {
+        method: 'POST',
+        headers: [
+          ['osd-xsrf', 'true'],
+          ['Content-Type', 'application/json'],
+        ],
+        body: payload,
+      })
+        .then((response) => response.json())
+        .catch((err: any) => {
+          console.error(err);
+          return null;
+        });
+    } else {
+      return fetch(`/api/console/proxy?path=_index_template/${componentName}&method=POST`, {
+        method: 'POST',
+        headers: [
+          ['osd-xsrf', 'true'],
+          ['Content-Type', 'application/json'],
+        ],
+        body: payload,
+      })
+        .then((response) => response.json())
+        .catch((err: any) => {
+          console.error(err);
+          return null;
+        });
+    }
   };
 
   const fetchIntegrationMappings = async (

@@ -185,6 +185,7 @@ export function Integration(props: AvailableIntegrationProps) {
             createCompliantDataSource(integrationTemplateId, datasource);
           }}
           integrationType={integration.type}
+          http={http}
         />
       )}
     </EuiPage>
