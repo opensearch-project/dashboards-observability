@@ -285,48 +285,6 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             class="euiSpacer euiSpacer--l"
                           />
                           <div
-                            class="euiFormRow"
-                            id="random_html_id-row"
-                          >
-                            <div
-                              class="euiFormRow__labelWrapper"
-                            >
-                              <label
-                                class="euiFormLabel euiFormRow__label"
-                                for="random_html_id"
-                              >
-                                Tags (optional)
-                              </label>
-                            </div>
-                            <div
-                              class="euiFormRow__fieldWrapper"
-                            >
-                              <div
-                                class="euiFormControlLayout"
-                              >
-                                <div
-                                  class="euiFormControlLayout__childrenWrapper"
-                                >
-                                  <input
-                                    aria-describedby="random_html_id-help-0"
-                                    class="euiFieldText"
-                                    data-test-subj="instance-tags"
-                                    id="random_html_id"
-                                    name="first"
-                                    type="text"
-                                    value=""
-                                  />
-                                </div>
-                              </div>
-                              <div
-                                class="euiFormHelpText euiFormRow__text"
-                                id="random_html_id-help-0"
-                              >
-                                Tags you want associated with this integration.
-                              </div>
-                            </div>
-                          </div>
-                          <div
                             class="euiSpacer euiSpacer--l"
                           />
                         </div>
@@ -728,48 +686,6 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     class="euiSpacer euiSpacer--l"
                                   />
                                   <div
-                                    class="euiFormRow"
-                                    id="random_html_id-row"
-                                  >
-                                    <div
-                                      class="euiFormRow__labelWrapper"
-                                    >
-                                      <label
-                                        class="euiFormLabel euiFormRow__label"
-                                        for="random_html_id"
-                                      >
-                                        Tags (optional)
-                                      </label>
-                                    </div>
-                                    <div
-                                      class="euiFormRow__fieldWrapper"
-                                    >
-                                      <div
-                                        class="euiFormControlLayout"
-                                      >
-                                        <div
-                                          class="euiFormControlLayout__childrenWrapper"
-                                        >
-                                          <input
-                                            aria-describedby="random_html_id-help-0"
-                                            class="euiFieldText"
-                                            data-test-subj="instance-tags"
-                                            id="random_html_id"
-                                            name="first"
-                                            type="text"
-                                            value=""
-                                          />
-                                        </div>
-                                      </div>
-                                      <div
-                                        class="euiFormHelpText euiFormRow__text"
-                                        id="random_html_id-help-0"
-                                      >
-                                        Tags you want associated with this integration.
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
                                     class="euiSpacer euiSpacer--l"
                                   />
                                 </div>
@@ -1102,48 +1018,6 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     <div
                                       class="euiSpacer euiSpacer--l"
                                     />
-                                    <div
-                                      class="euiFormRow"
-                                      id="random_html_id-row"
-                                    >
-                                      <div
-                                        class="euiFormRow__labelWrapper"
-                                      >
-                                        <label
-                                          class="euiFormLabel euiFormRow__label"
-                                          for="random_html_id"
-                                        >
-                                          Tags (optional)
-                                        </label>
-                                      </div>
-                                      <div
-                                        class="euiFormRow__fieldWrapper"
-                                      >
-                                        <div
-                                          class="euiFormControlLayout"
-                                        >
-                                          <div
-                                            class="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <input
-                                              aria-describedby="random_html_id-help-0"
-                                              class="euiFieldText"
-                                              data-test-subj="instance-tags"
-                                              id="random_html_id"
-                                              name="first"
-                                              type="text"
-                                              value=""
-                                            />
-                                          </div>
-                                        </div>
-                                        <div
-                                          class="euiFormHelpText euiFormRow__text"
-                                          id="random_html_id-help-0"
-                                        >
-                                          Tags you want associated with this integration.
-                                        </div>
-                                      </div>
-                                    </div>
                                     <div
                                       class="euiSpacer euiSpacer--l"
                                     />
@@ -1478,48 +1352,6 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiSpacer euiSpacer--l"
                                       />
                                       <div
-                                        class="euiFormRow"
-                                        id="random_html_id-row"
-                                      >
-                                        <div
-                                          class="euiFormRow__labelWrapper"
-                                        >
-                                          <label
-                                            class="euiFormLabel euiFormRow__label"
-                                            for="random_html_id"
-                                          >
-                                            Tags (optional)
-                                          </label>
-                                        </div>
-                                        <div
-                                          class="euiFormRow__fieldWrapper"
-                                        >
-                                          <div
-                                            class="euiFormControlLayout"
-                                          >
-                                            <div
-                                              class="euiFormControlLayout__childrenWrapper"
-                                            >
-                                              <input
-                                                aria-describedby="random_html_id-help-0"
-                                                class="euiFieldText"
-                                                data-test-subj="instance-tags"
-                                                id="random_html_id"
-                                                name="first"
-                                                type="text"
-                                                value=""
-                                              />
-                                            </div>
-                                          </div>
-                                          <div
-                                            class="euiFormHelpText euiFormRow__text"
-                                            id="random_html_id-help-0"
-                                          >
-                                            Tags you want associated with this integration.
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div
                                         class="euiSpacer euiSpacer--l"
                                       />
                                     </div>
@@ -1840,48 +1672,6 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         <div
                                           class="euiSpacer euiSpacer--l"
                                         />
-                                        <div
-                                          class="euiFormRow"
-                                          id="random_html_id-row"
-                                        >
-                                          <div
-                                            class="euiFormRow__labelWrapper"
-                                          >
-                                            <label
-                                              class="euiFormLabel euiFormRow__label"
-                                              for="random_html_id"
-                                            >
-                                              Tags (optional)
-                                            </label>
-                                          </div>
-                                          <div
-                                            class="euiFormRow__fieldWrapper"
-                                          >
-                                            <div
-                                              class="euiFormControlLayout"
-                                            >
-                                              <div
-                                                class="euiFormControlLayout__childrenWrapper"
-                                              >
-                                                <input
-                                                  aria-describedby="random_html_id-help-0"
-                                                  class="euiFieldText"
-                                                  data-test-subj="instance-tags"
-                                                  id="random_html_id"
-                                                  name="first"
-                                                  type="text"
-                                                  value=""
-                                                />
-                                              </div>
-                                            </div>
-                                            <div
-                                              class="euiFormHelpText euiFormRow__text"
-                                              id="random_html_id-help-0"
-                                            >
-                                              Tags you want associated with this integration.
-                                            </div>
-                                          </div>
-                                        </div>
                                         <div
                                           class="euiSpacer euiSpacer--l"
                                         />
@@ -2538,94 +2328,6 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           className="euiSpacer euiSpacer--l"
                                         />
                                       </EuiSpacer>
-                                      <EuiFormRow
-                                        describedByIds={Array []}
-                                        display="row"
-                                        fullWidth={false}
-                                        hasChildLabel={true}
-                                        hasEmptyLabelSpace={false}
-                                        helpText="Tags you want associated with this integration."
-                                        label="Tags (optional)"
-                                        labelType="label"
-                                      >
-                                        <div
-                                          className="euiFormRow"
-                                          id="random_html_id-row"
-                                        >
-                                          <div
-                                            className="euiFormRow__labelWrapper"
-                                          >
-                                            <EuiFormLabel
-                                              className="euiFormRow__label"
-                                              htmlFor="random_html_id"
-                                              isFocused={false}
-                                              type="label"
-                                            >
-                                              <label
-                                                className="euiFormLabel euiFormRow__label"
-                                                htmlFor="random_html_id"
-                                              >
-                                                Tags (optional)
-                                              </label>
-                                            </EuiFormLabel>
-                                          </div>
-                                          <div
-                                            className="euiFormRow__fieldWrapper"
-                                          >
-                                            <EuiFieldText
-                                              aria-describedby="random_html_id-help-0"
-                                              data-test-subj="instance-tags"
-                                              id="random_html_id"
-                                              name="first"
-                                              onBlur={[Function]}
-                                              onChange={[Function]}
-                                              onFocus={[Function]}
-                                              value=""
-                                            >
-                                              <EuiFormControlLayout
-                                                fullWidth={false}
-                                                inputId="random_html_id"
-                                              >
-                                                <div
-                                                  className="euiFormControlLayout"
-                                                >
-                                                  <div
-                                                    className="euiFormControlLayout__childrenWrapper"
-                                                  >
-                                                    <EuiValidatableControl>
-                                                      <input
-                                                        aria-describedby="random_html_id-help-0"
-                                                        className="euiFieldText"
-                                                        data-test-subj="instance-tags"
-                                                        id="random_html_id"
-                                                        name="first"
-                                                        onBlur={[Function]}
-                                                        onChange={[Function]}
-                                                        onFocus={[Function]}
-                                                        type="text"
-                                                        value=""
-                                                      />
-                                                    </EuiValidatableControl>
-                                                    <EuiFormControlLayoutIcons />
-                                                  </div>
-                                                </div>
-                                              </EuiFormControlLayout>
-                                            </EuiFieldText>
-                                            <EuiFormHelpText
-                                              className="euiFormRow__text"
-                                              id="random_html_id-help-0"
-                                              key="Tags you want associated with this integration."
-                                            >
-                                              <div
-                                                className="euiFormHelpText euiFormRow__text"
-                                                id="random_html_id-help-0"
-                                              >
-                                                Tags you want associated with this integration.
-                                              </div>
-                                            </EuiFormHelpText>
-                                          </div>
-                                        </div>
-                                      </EuiFormRow>
                                       <EuiSpacer>
                                         <div
                                           className="euiSpacer euiSpacer--l"

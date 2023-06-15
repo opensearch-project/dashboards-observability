@@ -43,7 +43,7 @@ Array [
               <img
                 alt=""
                 className="synopsisIcon"
-                src="/api/integrations/repository/nginx/static/logo"
+                src="/api/integrations/repository/nginx/static/logo.svg"
                 style={
                   Object {
                     "height": 100,
@@ -53,7 +53,7 @@ Array [
               />
             }
             onClick={[Function]}
-            title="nginx"
+            title="NginX Dashboard"
             titleElement="span"
           >
             <EuiPanel
@@ -74,7 +74,7 @@ Array [
                   <img
                     alt=""
                     className="synopsisIcon euiCard__icon"
-                    src="/api/integrations/repository/nginx/static/logo"
+                    src="/api/integrations/repository/nginx/static/logo.svg"
                     style={
                       Object {
                         "height": 100,
@@ -101,7 +101,7 @@ Array [
                         disabled={false}
                         onClick={[Function]}
                       >
-                        nginx
+                        NginX Dashboard
                       </button>
                     </span>
                   </EuiTitle>
