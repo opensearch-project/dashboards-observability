@@ -16,7 +16,7 @@ export interface IPluginMeta {
 
 export abstract class DataExplorerPlugin<T extends IPluginMeta> {
   metadata: T; // plugin meta data
-  error?: boolean; // if there's error when loading plugin
+  hasError?: boolean; // if there's error when loading plugin
 
   constructor() {
     this.metadata = {} as T;
