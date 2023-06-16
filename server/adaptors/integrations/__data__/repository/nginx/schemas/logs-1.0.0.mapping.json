@@ -215,8 +215,8 @@
         }
     },
     "composed_of": [
-        "communication",
-        "http"
+        "communication_template",
+        "http_template"
     ],
     "version": 1,
     "_meta": {

@@ -165,8 +165,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return response.json();
       }
     );
-    Object.keys(data.data.mappings).forEach(function (k) {
-      createMappings(k, data.data.mappings[k], targetDataSource);
+    Object.entries(data.data.mappings).forEach(async ([key, mapping]) => {
+      await createMappings(key, mapping, targetDataSource);
     });
   };
 
@@ -230,14 +230,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     dataSourceName: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     if (componentName !== integrationType) {
-      return fetch(`/api/console/proxy?path=_component_template/${componentName}&method=POST`, {
-        method: 'POST',
-        headers: [
-          ['osd-xsrf', 'true'],
-          ['Content-Type', 'application/json'],
-        ],
-        body: JSON.stringify(payload),
-      })
+      return fetch(
+        `/api/console/proxy?path=_component_template/${componentName}_template&method=POST`,
+        {
+          method: 'POST',
+          headers: [
+            ['osd-xsrf', 'true'],
+            ['Content-Type', 'application/json'],
+          ],
+          body: JSON.stringify(payload),
+        }
+      )
         .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
