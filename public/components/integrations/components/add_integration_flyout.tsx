@@ -130,10 +130,10 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const createDatasourceOptions = [
     {
       value: 'option_one',
-      inputDisplay: 'Create Data Source Automatically',
+      inputDisplay: 'Create Data Stream Automatically',
       dropdownDisplay: (
         <Fragment>
-          <strong>Create Data Source Automatically</strong>
+          <strong>Create Data Stream Automatically</strong>
           <EuiText size="s" color="subdued">
             <p className="ouiTextColor--subdued">
               Create an SS4O compliant index pattern or data stream
@@ -150,7 +150,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           <strong>{"I'll Do it Myself"}</strong>
           <EuiText size="s" color="subdued">
             <p className="ouiTextColor--subdued">
-              Create a SS4O compliant data source first, then come back and create an integration
+              Create a SS4O compliant data stream first, then come back and create an integration
               from it.
             </p>
           </EuiText>
@@ -185,10 +185,10 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     setTags(e.target.value);
   };
 
-  // Returns true if the data source is a legal name.
+  // Returns true if the data stream is a legal name.
   // Appends any additional validation errors to the provided errors array.
   const checkDataSourceName = (targetDataSource: string, validationErrors: string[]): boolean => {
-    if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-]*$/))) {
+    if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-\*]*$/))) {
       validationErrors.push('This is not a valid index name.');
       setErrors(validationErrors);
       return false;
@@ -291,7 +291,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       fetchIntegrationMappings(name),
     ]);
     if (!dataSourceMappings) {
-      validationErrors.push('Provided data source could not be retrieved');
+      validationErrors.push('Provided data stream could not be retrieved');
       setErrors(validationErrors);
       return false;
     }
@@ -316,7 +316,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return (
           <div>
             <EuiFormRow
-              label="Data Source"
+              label="Data Stream"
               helpText="The index pattern or data stream the integration will read from."
               isInvalid={!isDataSourceValid}
               error={errors}
@@ -365,7 +365,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       case '1':
         return (
           <div>
-            <EuiFormRow label="Create Data Source Options">
+            <EuiFormRow label="Create Data Stream Options">
               <EuiSuperSelect
                 options={createDatasourceOptions}
                 valueOfSelected={createDatasourceOption}
@@ -376,8 +376,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             </EuiFormRow>
             <EuiSpacer />
             <EuiFormRow
-              label="Data Source"
-              helpText="Create an SS4O compliant data source."
+              label="Data Stream"
+              helpText="Create an SS4O compliant data stream."
               isInvalid={!isCreateDatasourceValid}
               error={[]}
             >
@@ -447,7 +447,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 <span>
                   {' '}
                   Add an integration based on a SS4O compliant existing index pattern or data stream
-                  or create a SS4O compliant data source for this integration to read from
+                  or create a SS4O compliant data stream for this integration to read from
                 </span>
               ),
             }}
