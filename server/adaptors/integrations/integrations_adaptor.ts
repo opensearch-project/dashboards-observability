@@ -20,13 +20,13 @@ export interface IntegrationsAdaptor {
     dataSource: string
   ) => Promise<IntegrationInstance>;
 
-  deleteIntegrationInstance: (id: string) => Promise<any>;
+  deleteIntegrationInstance: (id: string) => Promise<unknown>;
 
   getStatic: (templateName: string, path: string) => Promise<Buffer>;
 
   getSchemas: (
     templateName: string
-  ) => Promise<{ mappings: { [key: string]: any }; schemas: { [key: string]: any } }>;
+  ) => Promise<{ mappings: { [key: string]: unknown }; schemas: { [key: string]: unknown } }>;
 
-  getAssets: (templateName: string) => Promise<{ savedObjects?: any }>;
+  getAssets: (templateName: string) => Promise<{ savedObjects?: unknown }>;
 }
