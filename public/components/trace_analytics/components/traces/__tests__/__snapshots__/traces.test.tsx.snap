@@ -136,20 +136,6 @@ exports[`Traces component renders empty traces page 1`] = `
   startTime="now-5m"
   traceIdColumnAction={[Function]}
 >
-  <EuiTitle
-    size="l"
-  >
-    <h2
-      className="euiTitle euiTitle--large"
-      style={
-        Object {
-          "fontWeight": 430,
-        }
-      }
-    >
-      Traces
-    </h2>
-  </EuiTitle>
   <DataSourcePicker
     modes={
       Array [
@@ -1493,20 +1479,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
   startTime="now-5m"
   traceIdColumnAction={[Function]}
 >
-  <EuiTitle
-    size="l"
-  >
-    <h2
-      className="euiTitle euiTitle--large"
-      style={
-        Object {
-          "fontWeight": 430,
-        }
-      }
-    >
-      Traces
-    </h2>
-  </EuiTitle>
   <DataSourcePicker
     modes={
       Array [
@@ -2878,20 +2850,6 @@ exports[`Traces component renders traces page 1`] = `
   startTime="now-5m"
   traceIdColumnAction={[Function]}
 >
-  <EuiTitle
-    size="l"
-  >
-    <h2
-      className="euiTitle euiTitle--large"
-      style={
-        Object {
-          "fontWeight": 430,
-        }
-      }
-    >
-      Traces
-    </h2>
-  </EuiTitle>
   <DataSourcePicker
     modes={
       Array [

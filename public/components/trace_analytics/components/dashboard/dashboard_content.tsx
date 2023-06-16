@@ -55,7 +55,7 @@ export function DashboardContent(props: DashboardProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
-    setToast,
+    // setToast,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -67,6 +67,7 @@ export function DashboardContent(props: DashboardProps) {
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
+  const { setToast } = useToast();
 
   useEffect(() => {
     if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
@@ -296,6 +297,21 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
+      <SearchBar
+        query={query}
+        filters={filters}
+        appConfigs={appConfigs}
+        setFilters={setFilters}
+        setQuery={setQuery}
+        startTime={startTime}
+        setStartTime={setStartTime}
+        endTime={endTime}
+        setEndTime={setEndTime}
+        refresh={refresh}
+        page={page}
+        mode={mode}
+      />
+      <EuiSpacer size="m" />
       {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
       (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
