@@ -1,23 +1,24 @@
-import { DeepPartial } from 'redux';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../../src/core/server/http/router';
 import { handleWithCallback } from '../integrations_router';
 import { IntegrationsAdaptor } from 'server/adaptors/integrations/integrations_adaptor';
 
-jest
-  .mock('../../../../../../src/core/server', () => jest.fn())
-  .mock('../../../../../../src/core/server/http/router', () => jest.fn());
+describe('handleWithCallback', () => {
+  let adaptorMock: jest.Mocked<IntegrationsAdaptor>;
+  let responseMock: jest.Mocked<OpenSearchDashboardsResponseFactory>;
 
-describe('Data wrapper', () => {
-  const adaptorMock: Partial<IntegrationsAdaptor> = {};
-  const responseMock: DeepPartial<OpenSearchDashboardsResponseFactory> = {
-    custom: jest.fn((data) => data),
-    ok: jest.fn((data) => data),
-  };
+  beforeEach(() => {
+    adaptorMock = {} as any;
+    responseMock = {
+      custom: jest.fn((data) => data),
+      ok: jest.fn((data) => data),
+    } as any;
+  });
 
   it('retrieves data from the callback method', async () => {
     const callback = jest.fn((_) => {
       return { test: 'data' };
     });
+
     const result = await handleWithCallback(
       adaptorMock as IntegrationsAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
@@ -33,6 +34,7 @@ describe('Data wrapper', () => {
     const callback = jest.fn((_) => {
       throw new Error('test error');
     });
+
     const result = await handleWithCallback(
       adaptorMock as IntegrationsAdaptor,
       responseMock as OpenSearchDashboardsResponseFactory,
