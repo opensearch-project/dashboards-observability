@@ -32,6 +32,7 @@ export const Visualization = ({
     if (isEmpty(series)) return [false, VISUALIZATION_ERROR.INVALID_DATA]; // series is required to any visualization type
 
     // bars, pie
+    console.log('dimensions in viz: ', dimensions);
     if (dimensions.length < 1 && isEmpty(span)) return [false, VISUALIZATION_ERROR.INVALID_DATA];
 
     return [true, ''];

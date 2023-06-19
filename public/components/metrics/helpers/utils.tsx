@@ -21,6 +21,7 @@ import { MetricType } from '../../../../common/types/metrics';
 import { VisualizationType } from '../../../../common/types/custom_panels';
 import { DEFAULT_METRIC_HEIGHT, DEFAULT_METRIC_WIDTH } from '../../../../common/constants/metrics';
 import { updateQuerySpanInterval } from '../../custom_panels/helpers/utils';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 
 export const onTimeChange = (
   start: ShortDate,
@@ -30,14 +31,14 @@ export const onTimeChange = (
   setStart: React.Dispatch<React.SetStateAction<string>>,
   setEnd: React.Dispatch<React.SetStateAction<string>>
 ) => {
-  const recentlyUsedRange = recentlyUsedRanges.filter((recentlyUsedRange) => {
+  const recentlyUsedDurationRange = recentlyUsedRanges.filter((recentlyUsedRange) => {
     const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
     return !isDuplicate;
   });
-  recentlyUsedRange.unshift({ start, end });
+  recentlyUsedDurationRange.unshift({ start, end });
   setStart(start);
   setEnd(end);
-  setRecentlyUsedRanges(recentlyUsedRange.slice(0, 9));
+  setRecentlyUsedRanges(recentlyUsedDurationRange.slice(0, 9));
 };
 
 // PPL Service requestor
@@ -58,21 +59,29 @@ export const getVisualizations = (http: CoreStart['http']) => {
     });
 };
 
-interface boxType {
+export const getVisualization = (http: CoreStart['http'], savedVisualization: string) => {
+  return http
+    .get(`${CUSTOM_PANELS_API_PREFIX}/visualizations/${savedVisualization}`)
+    .catch((err) => {
+      console.error(`Issue in fetching saved visualization ${savedVisualization}`);
+    });
+};
+
+interface BoxType {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
 }
 
-const calculatOverlapArea = (bb1: boxType, bb2: boxType) => {
-  const x_left = Math.max(bb1.x1, bb2.x1);
-  const y_top = Math.max(bb1.y1, bb2.y1);
-  const x_right = Math.min(bb1.x2, bb2.x2);
-  const y_bottom = Math.min(bb1.y2, bb2.y2);
+const calculatOverlapArea = (bb1: BoxType, bb2: BoxType) => {
+  const XLeft = Math.max(bb1.x1, bb2.x1);
+  const YTop = Math.max(bb1.y1, bb2.y1);
+  const XRight = Math.min(bb1.x2, bb2.x2);
+  const YBottom = Math.min(bb1.y2, bb2.y2);
 
-  if (x_right < x_left || y_bottom < y_top) return 0;
-  return (x_right - x_left) * (y_bottom - y_top);
+  if (XRight < XLeft || YBottom < YTop) return 0;
+  return (XRight - XLeft) * (YBottom - YTop);
 };
 
 const getTotalOverlapArea = (panelVisualizations: MetricType[]) => {
@@ -149,7 +158,7 @@ export const mergeLayoutAndMetrics = (
 
   for (let i = 0; i < newVisualizationList.length; i++) {
     for (let j = 0; j < layout.length; j++) {
-      if (newVisualizationList[i].id == layout[j].i) {
+      if (newVisualizationList[i].id === layout[j].i) {
         newPanelVisualizations.push({
           ...newVisualizationList[i],
           x: layout[j].x,
@@ -183,7 +192,11 @@ export const createPrometheusMetricById = (metricId: string) => {
       tokens: [],
     },
     sub_type: 'metric',
-    user_configs: {},
+    user_configs: {
+      dataConfig: {
+        breakdowns: [],
+      },
+    },
   };
 };
 

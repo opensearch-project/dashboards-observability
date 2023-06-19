@@ -26,6 +26,10 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
+import {
+  getVisualization,
+  pplServiceRequestor,
+} from '../../../../../public/components/metrics/helpers/utils';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import {
@@ -74,6 +78,7 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   spanParam?: string;
+  metricsPanel?: boolean;
 }
 
 export const VisualizationContainer = ({
@@ -93,6 +98,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   spanParam,
+  metricsPanel,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -106,6 +112,10 @@ export const VisualizationContainer = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
+
+  const [dimensions, setDimensions] = useState();
+  const [queryDimensions, setQueryDimensions] = useState([]);
+  const [queryAggregation, setQueryAggregation] = useState('avg()');
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {
@@ -215,6 +225,49 @@ export const VisualizationContainer = ({
     popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
   }
 
+  useEffect(() => {
+    getMetricsFunctions();
+  }, []);
+
+  const getMetricsFunctions = async () => {
+    if (metricsPanel) {
+      if (catalogVisualization) {
+        const catalogData = await pplServiceRequestor(
+          pplService,
+          `describe ${savedVisualizationId}`
+        );
+        console.log('catalogData', catalogData);
+        const attributes = catalogData.data.COLUMN_NAME.reduce(
+          (acc: Array<{ label: string }>, column: string) => {
+            if (!column.includes('@')) {
+              acc.push({ label: column });
+            }
+            console.log('acc', acc);
+            return acc;
+          },
+          []
+        );
+        console.log('attributes', attributes);
+        setDimensions(attributes || []);
+        //   } else {
+        //   const savedVisualization = await getVisualization(http, savedVisualizationId);
+        //   const pplResponse = await pplServiceRequestor(
+        //     pplService,
+        //     savedVisualization.visualization.query.split('|')[0]
+        //   );
+        //   setDimensions(
+        //     pplResponse.metadata.fields.map((row: any) => ({
+        //       label: row.name,
+        //     }))
+        //   );
+      }
+    }
+  };
+
+  useEffect(() => {
+    console.log('blah blah dimensions: ', dimensions);
+  }, [dimensions]);
+
   const loadVisaulization = async () => {
     if (catalogVisualization)
       await renderCatalogVisualization(
@@ -230,7 +283,8 @@ export const VisualizationContainer = ({
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
+        setIsError,
+        dimensions
       );
     else
       await renderSavedVisualization(
@@ -285,7 +339,9 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh]);
+    console.log('dimensions in useEffect', dimensions);
+    console.log('typeof dimensions: ', typeof dimensions);
+  }, [onRefresh, dimensions]);
 
   return (
     <>

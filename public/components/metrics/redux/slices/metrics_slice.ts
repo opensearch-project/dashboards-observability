@@ -4,6 +4,7 @@
  */
 
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { useState } from 'react';
 import {
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
@@ -50,7 +51,10 @@ const fetchCustomMetrics = async (http: any) => {
 
 const fetchRemoteMetrics = async (pplService: any) => {
   const dataSet = [];
+  const setDataSources = [];
   const dataSources = await pplServiceRequestor(pplService, PPL_DATASOURCES_REQUEST);
+  setDataSources.push(dataSources.jsonData);
+  console.log('setDataSources: ', setDataSources);
   for (const dataSource of dataSources.jsonData) {
     const catalogData = await pplServiceRequestor(
       pplService,

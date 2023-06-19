@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import React, { useEffect, useState } from 'react';
-import { CoreStart } from '../../../../../../src/core/public';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -15,10 +13,12 @@ import {
   EuiFlexItem,
   EuiForm,
 } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
+import { CoreStart } from '../../../../../../src/core/public';
 import { createPrometheusMetricById } from '../helpers/utils';
 import { MetricType } from '../../../../common/types/metrics';
 import { fetchVisualizationById } from '../../custom_panels/helpers/utils';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchPanels,
   selectPanelList,
@@ -29,9 +29,9 @@ interface MetricsExportPanelProps {
   visualizationsMetaData: any;
   setVisualizationsMetaData: React.Dispatch<any>;
   sortedMetricsLayout: MetricType[];
-  selectedPanelOptions: EuiComboBoxOptionOption<unknown>[] | undefined;
+  selectedPanelOptions: Array<EuiComboBoxOptionOption<unknown>> | undefined;
   setSelectedPanelOptions: React.Dispatch<
-    React.SetStateAction<EuiComboBoxOptionOption<unknown>[] | undefined>
+    React.SetStateAction<Array<EuiComboBoxOptionOption<unknown>> | undefined>
   >;
 }
 
@@ -63,22 +63,26 @@ export const MetricsExportPanel = ({
   }, []);
 
   const fetchAllvisualizationsById = async () => {
-    let tempVisualizationsMetaData = await Promise.all(
+    console.log('fetchAllvisualizationsById');
+    const tempVisualizationsMetaData = await Promise.all(
       sortedMetricsLayout.map(async (metricLayout) => {
         return metricLayout.metricType === 'savedCustomMetric'
           ? await fetchVisualizationById(http, metricLayout.id, setErrorResponse)
           : createPrometheusMetricById(metricLayout.id);
       })
     );
+    console.log('here we have metrics');
+    console.log('here: ', tempVisualizationsMetaData.user_configs);
     setVisualizationsMetaData(tempVisualizationsMetaData);
   };
 
   useEffect(() => {
+    console.log('useEffect');
     fetchAllvisualizationsById();
   }, []);
 
   const onNameChange = (index: number, name: string) => {
-    let tempVisualizationsMetaData = [...visualizationsMetaData];
+    const tempVisualizationsMetaData = [...visualizationsMetaData];
     tempVisualizationsMetaData[index].name = name;
     setVisualizationsMetaData(tempVisualizationsMetaData);
   };
@@ -91,8 +95,8 @@ export const MetricsExportPanel = ({
       >
         <EuiComboBox
           placeholder="Select dashboards/applications"
-          onChange={(options) => {
-            setSelectedPanelOptions(options);
+          onChange={(panels) => {
+            setSelectedPanelOptions(panels);
           }}
           selectedOptions={selectedPanelOptions}
           options={customPanels.map((option: any) => {

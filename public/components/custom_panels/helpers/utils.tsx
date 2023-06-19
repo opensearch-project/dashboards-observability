@@ -289,7 +289,8 @@ const createCatalogVisualizationMetaData = (
   catalogSource: string,
   visualizationQuery: string,
   visualizationType: string,
-  visualizationTimeField: string
+  visualizationTimeField: string,
+  dimensions: []
 ) => {
   return {
     name: catalogSource,
@@ -309,6 +310,11 @@ const createCatalogVisualizationMetaData = (
       text: '',
       tokens: [],
     },
+    user_configs: {
+      dataConfig: {
+        breakdowns: dimensions,
+      },
+    },
   };
 };
 
@@ -327,7 +333,8 @@ export const renderCatalogVisualization = async (
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
-  spanResolution?: string
+  spanResolution?: string,
+  dimensions?: any[]
 ) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -343,12 +350,13 @@ export const renderCatalogVisualization = async (
       spanParam
     );
   }
-
+  console.log('dimensions lols: ', dimensions);
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
     visualizationQuery,
     visualizationType,
-    visualizationTimeField
+    visualizationTimeField,
+    dimensions
   );
   setVisualizationTitle(catalogSource);
   setVisualizationType(visualizationType);
@@ -474,6 +482,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   }
 
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
+  console.log('dataConfig: ', dataConfig);
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
