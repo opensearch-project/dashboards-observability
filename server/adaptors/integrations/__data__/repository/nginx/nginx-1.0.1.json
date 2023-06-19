@@ -2,7 +2,6 @@
     "name": "nginx",
     "version": "1.0.1",
     "displayName": "NginX Dashboard",
-    "integrationType": "logs",
     "description": "Nginx HTTP server collector",
     "license": "Apache-2.0",
     "type": "logs",

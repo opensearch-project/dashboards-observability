@@ -18,7 +18,6 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
     name: { type: 'string' },
     version: { type: 'string' },
     displayName: { type: 'string', nullable: true },
-    integrationType: { type: 'string' },
     license: { type: 'string' },
     type: { type: 'string' },
     author: { type: 'string', nullable: true },
@@ -63,7 +62,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
       additionalProperties: false,
     },
   },
-  required: ['name', 'version', 'integrationType', 'license', 'type', 'components', 'assets'],
+  required: ['name', 'version', 'license', 'type', 'components', 'assets'],
   additionalProperties: false,
 };
 
@@ -90,11 +89,10 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
         properties: {
           assetType: { type: 'string' },
           assetId: { type: 'string' },
-          status: { type: 'string' },
           isDefaultAsset: { type: 'boolean' },
           description: { type: 'string' },
         },
-        required: ['assetType', 'assetId', 'status', 'isDefaultAsset', 'description'],
+        required: ['assetType', 'assetId', 'isDefaultAsset', 'description'],
       },
     },
   },

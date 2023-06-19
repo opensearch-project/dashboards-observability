@@ -7,7 +7,6 @@ interface IntegrationTemplate {
   name: string;
   version: string;
   displayName?: string;
-  integrationType: string;
   license: string;
   type: string;
   author?: string;
