@@ -55,7 +55,10 @@ export function DataSourcePicker(props: {
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >
-        {label}
+        {label +
+          (selectedMode === 'custom' && customIndexPattern.length !== 0
+            ? `: ${customIndexPattern}`
+            : '')}
       </EuiButtonEmpty>
     );
   };
@@ -81,6 +84,7 @@ export function DataSourcePicker(props: {
               value={value}
               onClick={() => {
                 setCustomIndexPattern(value);
+                sessionStorage.setItem('CustomIndexPattern', value);
                 setPopoverIsOpen(false);
               }}
               disabled={value.length === 0}

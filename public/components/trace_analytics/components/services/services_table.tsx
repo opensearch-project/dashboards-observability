@@ -36,6 +36,7 @@ interface ServicesTableProps {
   mode: TraceAnalyticsMode;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  customIndexPatternExists: boolean;
 }
 
 export function ServicesTable(props: ServicesTableProps) {
@@ -49,6 +50,7 @@ export function ServicesTable(props: ServicesTableProps) {
     setRedirect,
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    customIndexPatternExists,
   } = props;
   const renderTitleBar = (totalItems?: number) => {
     return (
@@ -171,7 +173,8 @@ export function ServicesTable(props: ServicesTableProps) {
         <EuiHorizontalRule margin="none" />
         {!(
           (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-          (mode === 'jaeger' && jaegerIndicesExist)
+          (mode === 'jaeger' && jaegerIndicesExist) ||
+          (mode === 'custom' && customIndexPatternExists)
         ) ? (
           <MissingConfigurationMessage mode={mode} />
         ) : items?.length > 0 ? (

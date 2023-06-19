@@ -56,10 +56,19 @@ export function TracesContent(props: TracesProps) {
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist) || (mode === 'custom' && customIndexPatternExists))
+        (mode === 'jaeger' && jaegerIndicesExist) ||
+        (mode === 'custom' && customIndexPatternExists))
     )
       refresh();
-  }, [filters, appConfigs, redirect, mode, dataPrepperIndicesExist, jaegerIndicesExist]);
+  }, [
+    filters,
+    appConfigs,
+    redirect,
+    mode,
+    dataPrepperIndicesExist,
+    jaegerIndicesExist,
+    customIndexPatternExists,
+  ]);
 
   const refresh = async (sort?: PropertySort) => {
     setLoading(true);
@@ -80,7 +89,17 @@ export function TracesContent(props: TracesProps) {
       processTimeStamp(endTime, mode),
       page
     );
-    await handleTracesRequest(http, DSL, timeFilterDSL, tableItems, setTableItems, mode, customIndexPattern, sort);
+    console.log(mode, customIndexPattern);
+    await handleTracesRequest(
+      http,
+      DSL,
+      timeFilterDSL,
+      tableItems,
+      setTableItems,
+      mode,
+      customIndexPattern,
+      sort
+    );
     setLoading(false);
   };
 
@@ -109,6 +128,7 @@ export function TracesContent(props: TracesProps) {
         traceIdColumnAction={traceIdColumnAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        customIndexPatternExists={customIndexPatternExists}
       />
     </>
   );

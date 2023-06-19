@@ -41,6 +41,7 @@ export function ServicesContent(props: ServicesProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     customIndexPattern,
+    customIndexPatternExists,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
@@ -75,10 +76,19 @@ export function ServicesContent(props: ServicesProps) {
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
+        (mode === 'jaeger' && jaegerIndicesExist) ||
+        (mode === 'custom' && customIndexPatternExists))
     )
       refresh(newFilteredService);
-  }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
+  }, [
+    filters,
+    appConfigs,
+    redirect,
+    mode,
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
+    customIndexPatternExists,
+  ]);
 
   const refresh = async (currService?: string) => {
     setLoading(true);
@@ -97,7 +107,7 @@ export function ServicesContent(props: ServicesProps) {
       (must: any) => must?.term?.serviceName == null
     );
     await Promise.all([
-      handleServicesRequest(http, DSL, setTableItems, mode),
+      handleServicesRequest(http, DSL, setTableItems, mode, customIndexPattern),
       handleServiceMapRequest(
         http,
         serviceMapDSL,
@@ -151,6 +161,7 @@ export function ServicesContent(props: ServicesProps) {
         traceColumnAction={traceColumnAction}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
+        customIndexPatternExists={customIndexPatternExists}
       />
       <EuiSpacer size="m" />
       {mode === 'data_prepper' && dataPrepperIndicesExist ? (

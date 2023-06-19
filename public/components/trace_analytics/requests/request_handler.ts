@@ -32,16 +32,21 @@ export async function handleDslRequest(
       bodyQuery.query.bool.minimum_should_match = DSL.query.bool.minimum_should_match;
   }
   let body = bodyQuery;
+  console.log(bodyQuery, mode, customIndexPattern);
   if (!bodyQuery.index) {
     switch (mode) {
       case 'jaeger':
         body = { ...bodyQuery, index: JAEGER_INDEX_NAME };
+        break;
       case 'data_prepper':
         body = { ...bodyQuery, index: DATA_PREPPER_INDEX_NAME };
+        break;
       case 'custom':
         body = { ...bodyQuery, index: customIndexPattern };
+        break;
     }
   }
+  console.log(body);
   if (timeout) {
     const id = setTimeout(() => setShowTimeoutToast!(), 30000);
 
@@ -88,11 +93,11 @@ export async function handleDataPrepperIndicesExistRequest(
 export async function handleCustomIndexPatternExistsRequest(
   http: CoreStart['http'],
   setCustomIndexPatternExists,
-  customIndexPattern,
+  customIndexPattern
 ) {
   http
     .post(TRACE_ANALYTICS_CUSTOM_INDEX_PATTERNS_ROUTE, {
-      body: JSON.stringify({indexPattern: customIndexPattern}),
+      body: JSON.stringify({ indexPattern: customIndexPattern }),
     })
     .then((exists) => setCustomIndexPatternExists(exists))
     .catch(() => setCustomIndexPatternExists(false));

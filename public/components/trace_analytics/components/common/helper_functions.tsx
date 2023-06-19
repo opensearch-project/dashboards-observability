@@ -51,15 +51,27 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
   );
 }
 
-export function MissingConfigurationMessage(props: {mode: TraceAnalyticsMode}) {
+export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode }) {
   return (
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
         body={
-          <EuiText>
-            {`The indices required for trace analytics (${props.mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME} and ${props.mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
-          </EuiText>
+          props.mode === 'custom' ? (
+            <EuiText>
+              {`No indices match the inputted index pattern or you do not have permission to access them.`}
+            </EuiText>
+          ) : (
+            <EuiText>
+              {`The indices required for trace analytics (${
+                props.mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME
+              } and ${
+                props.mode === 'jaeger'
+                  ? JAEGER_SERVICE_INDEX_NAME
+                  : DATA_PREPPER_SERVICE_INDEX_NAME
+              }) do not exist or you do not have permission to access them.`}
+            </EuiText>
+          )
         }
         actions={
           <EuiButton
@@ -381,7 +393,7 @@ export const filtersToDsl = (
 
       let filterQuery = {};
       let field = filter.field;
-      if (field === 'latency'){
+      if (field === 'latency') {
         if (mode === 'data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
@@ -391,7 +403,7 @@ export const filtersToDsl = (
         if (mode === 'data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
-          field = 'tag.error'
+          field = 'tag.error';
         }
       }
       let value;

@@ -48,7 +48,9 @@ export const Home = (props: HomeProps) => {
   const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
   const [customIndexPatternExists, setCustomIndexPatternExists] = useState(false);
-  const [customIndexPattern, setCustomIndexPattern] = useState('');
+  const [customIndexPattern, setCustomIndexPattern] = useState(
+    sessionStorage.getItem('CustomIndexPattern') || ''
+  );
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
   );
@@ -90,8 +92,15 @@ export const Home = (props: HomeProps) => {
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist);
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
-    handleCustomIndexPatternExistsRequest(props.http, setCustomIndexPatternExists, customIndexPattern)
   }, []);
+
+  useEffect(() => {
+    handleCustomIndexPatternExistsRequest(
+      props.http,
+      setCustomIndexPatternExists,
+      customIndexPattern
+    );
+  }, [customIndexPattern]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },

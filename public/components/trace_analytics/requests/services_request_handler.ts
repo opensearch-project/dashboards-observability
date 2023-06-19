@@ -23,10 +23,17 @@ export const handleServicesRequest = async (
   DSL: any,
   setItems: any,
   mode: TraceAnalyticsMode,
+  customIndexPattern: string,
   setServiceMap?: any,
   serviceNameFilter?: string
 ) => {
-  return handleDslRequest(http, DSL, getServicesQuery(mode, serviceNameFilter, DSL), mode)
+  return handleDslRequest(
+    http,
+    DSL,
+    getServicesQuery(mode, serviceNameFilter, DSL),
+    mode,
+    customIndexPattern
+  )
     .then(async (response) => {
       const serviceObject: ServiceObject = await handleServiceMapRequest(
         http,
