@@ -61,6 +61,17 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
       },
       additionalProperties: false,
     },
+    sampleData: {
+      type: 'object',
+      properties: {
+        path: {
+          type: 'string',
+        },
+      },
+      required: ['path'],
+      additionalProperties: false,
+      nullable: true,
+    },
   },
   required: ['name', 'version', 'license', 'type', 'components', 'assets'],
   additionalProperties: false,

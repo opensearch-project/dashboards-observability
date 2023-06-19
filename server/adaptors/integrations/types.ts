@@ -25,6 +25,9 @@ interface IntegrationTemplate {
       version: string;
     };
   };
+  sampleData?: {
+    path: string;
+  };
 }
 
 interface StaticAsset {
