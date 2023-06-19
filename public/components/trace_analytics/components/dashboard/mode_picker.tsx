@@ -60,7 +60,7 @@ export function DataSourcePicker(props: {
     );
   };
 
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(customIndexPattern);
 
   const onChange = (e) => {
     setValue(e.target.value);
@@ -78,6 +78,7 @@ export function DataSourcePicker(props: {
           append={
             <EuiButton
               data-test-subj="enterCustomIndexPattern"
+              value={value}
               onClick={() => {
                 setCustomIndexPattern(value);
                 setPopoverIsOpen(false);

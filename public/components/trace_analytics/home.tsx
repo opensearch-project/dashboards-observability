@@ -14,6 +14,7 @@ import { Dashboard } from './components/dashboard';
 import { Services, ServiceView } from './components/services';
 import { Traces, TraceView } from './components/traces';
 import {
+  handleCustomIndexPatternExistsRequest,
   handleDataPrepperIndicesExistRequest,
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
@@ -40,11 +41,13 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   dataPrepperIndicesExist: boolean;
   customIndexPattern: string;
   setCustomIndexPattern: (indexPattern: string) => void;
+  customIndexPatternExists: boolean;
 }
 
 export const Home = (props: HomeProps) => {
   const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
+  const [customIndexPatternExists, setCustomIndexPatternExists] = useState(false);
   const [customIndexPattern, setCustomIndexPattern] = useState('');
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
@@ -87,6 +90,7 @@ export const Home = (props: HomeProps) => {
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(props.http, setDataPrepperIndicesExist);
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist);
+    handleCustomIndexPatternExistsRequest(props.http, setCustomIndexPatternExists, customIndexPattern)
   }, []);
 
   const modes = [
@@ -169,6 +173,7 @@ export const Home = (props: HomeProps) => {
     dataPrepperIndicesExist,
     customIndexPattern,
     setCustomIndexPattern,
+    customIndexPatternExists,
   };
 
   return (

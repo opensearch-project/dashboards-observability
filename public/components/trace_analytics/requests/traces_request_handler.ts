@@ -38,6 +38,7 @@ export const handleTracesRequest = async (
   items: any,
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
+  customIndexPattern: string,
   sort?: any,
 ) => {
   const binarySearch = (arr: number[], target: number) => {
@@ -58,7 +59,8 @@ export const handleTracesRequest = async (
     http,
     timeFilterDSL,
     getTraceGroupPercentilesQuery(),
-    mode
+    mode,
+    customIndexPattern,
   ).then((response) => {
     const map: any = {};
     response.aggregations.trace_group_name.buckets.forEach((traceGroup: any) => {
@@ -69,7 +71,7 @@ export const handleTracesRequest = async (
     return map;
   });
 
-  return handleDslRequest(http, DSL, getTracesQuery(mode, undefined, sort), mode)
+  return handleDslRequest(http, DSL, getTracesQuery(mode, undefined, sort), mode, customIndexPattern,)
     .then((response) => {
       return Promise.all(
         response.aggregations.traces.buckets.map((bucket: any) => {

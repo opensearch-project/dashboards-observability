@@ -15,29 +15,21 @@ import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
 
 const getFields = (mode: TraceAnalyticsMode, page: 'dashboard' | 'traces' | 'services' | 'app') =>
-  mode === 'data_prepper' || mode === 'custom'
-    ? {
-        dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
-        traces: ['traceId', 'traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
-        services: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
-        app: ['traceId', 'traceGroup', 'serviceName'],
-      }[page]
-    : {
-        dashboard: ['process.serviceName', 'error', 'latency'],
-        traces: ['traceID', 'operationName', 'process.serviceName', 'error', 'latency'],
-        services: ['process.serviceName', 'error', 'latency'],
-        app: ['traceID', 'process.serviceName'],
-      }[page];
+  (mode === 'data_prepper'|| mode === 'custom' ? {
+    dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
+    traces: ['traceId', 'traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
+    services: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
+    app: ['traceId', 'traceGroup', 'serviceName'],
+  }[page] : {
+    dashboard: ['process.serviceName', 'error', 'latency'],
+    traces: ['traceID', 'operationName', 'process.serviceName', 'error', 'latency'],
+    services: ['process.serviceName', 'error', 'latency'],
+    app: ['traceID', 'process.serviceName'],
+  }[page]);
 // filters will take effect and can be manually added
-export const getFilterFields = (
-  mode: TraceAnalyticsMode,
-  page: 'dashboard' | 'traces' | 'services' | 'app'
-) => getFields(mode, page);
+export const getFilterFields = (mode: TraceAnalyticsMode, page: 'dashboard' | 'traces' | 'services' | 'app') => getFields(mode, page);
 // filters will take effect
-export const getValidFilterFields = (
-  mode: TraceAnalyticsMode,
-  page: 'dashboard' | 'traces' | 'services' | 'app'
-) => {
+export const getValidFilterFields = (mode: TraceAnalyticsMode, page: 'dashboard' | 'traces' | 'services' | 'app') => {
   const fields = getFields(mode, page);
   if (page !== 'services') return [...fields, 'Latency percentile within trace group'];
   return fields;
@@ -212,7 +204,7 @@ export const getValueComponent = (
             onChange={setValue}
             selectedOptions={value || []}
             singleSelection={true}
-          />
+        />
         </EuiFormRow>
       </>
     );

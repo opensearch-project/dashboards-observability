@@ -18,3 +18,4 @@ export const TRACE_ANALYTICS_DOCUMENTATION_LINK = 'https://opensearch.org/docs/l
 export const TRACE_ANALYTICS_JAEGER_INDICES_ROUTE = '/api/observability/trace_analytics/jaeger_indices';
 export const TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE = '/api/observability/trace_analytics/data_prepper_indices';
 export const TRACE_ANALYTICS_DSL_ROUTE = '/api/observability/trace_analytics/query';
+export const TRACE_ANALYTICS_CUSTOM_INDEX_PATTERNS_ROUTE = '/api/observability/trace_analytics/custom_index_patterns';

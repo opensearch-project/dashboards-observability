@@ -23,7 +23,6 @@ export const handleServicesRequest = async (
   DSL: any,
   setItems: any,
   mode: TraceAnalyticsMode,
-  cusotmIndexPattern: string,
   setServiceMap?: any,
   serviceNameFilter?: string
 ) => {

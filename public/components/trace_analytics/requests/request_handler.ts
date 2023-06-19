@@ -10,6 +10,7 @@ import {
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
   JAEGER_INDEX_NAME,
   DATA_PREPPER_INDEX_NAME,
+  TRACE_ANALYTICS_CUSTOM_INDEX_PATTERNS_ROUTE,
 } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../home';
 
@@ -18,6 +19,7 @@ export async function handleDslRequest(
   DSL: any,
   bodyQuery: any,
   mode: TraceAnalyticsMode,
+  customIndexPattern: string,
   timeout?: boolean,
   setShowTimeoutToast?: () => void
 ) {
@@ -31,7 +33,14 @@ export async function handleDslRequest(
   }
   let body = bodyQuery;
   if (!bodyQuery.index) {
-    body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
+    switch (mode) {
+      case 'jaeger':
+        body = { ...bodyQuery, index: JAEGER_INDEX_NAME };
+      case 'data_prepper':
+        body = { ...bodyQuery, index: DATA_PREPPER_INDEX_NAME };
+      case 'custom':
+        body = { ...bodyQuery, index: customIndexPattern };
+    }
   }
   if (timeout) {
     const id = setTimeout(() => setShowTimeoutToast!(), 30000);
@@ -74,4 +83,17 @@ export async function handleDataPrepperIndicesExistRequest(
     .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE)
     .then((exists) => setDataPrepperIndicesExist(exists))
     .catch(() => setDataPrepperIndicesExist(false));
+}
+
+export async function handleCustomIndexPatternExistsRequest(
+  http: CoreStart['http'],
+  setCustomIndexPatternExists,
+  customIndexPattern,
+) {
+  http
+    .post(TRACE_ANALYTICS_CUSTOM_INDEX_PATTERNS_ROUTE, {
+      body: JSON.stringify({indexPattern: customIndexPattern}),
+    })
+    .then((exists) => setCustomIndexPatternExists(exists))
+    .catch(() => setCustomIndexPatternExists(false));
 }
