@@ -10,7 +10,6 @@ describe('Integration', () => {
   const sampleIntegration: IntegrationTemplate = {
     name: 'sample',
     version: '2.0.0',
-    integrationType: 'sample',
     license: 'Apache-2.0',
     type: '',
     components: [],
@@ -172,16 +171,12 @@ describe('Integration', () => {
       integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
 
       const mappingFile1 = 'component1-1.0.0.mapping.json';
-      const schemaFile1 = 'component1-1.0.0.schema.json';
       const mappingFile2 = 'component2-2.0.0.mapping.json';
-      const schemaFile2 = 'component2-2.0.0.schema.json';
 
       jest
         .spyOn(fs, 'readFile')
         .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping1' }))
-        .mockResolvedValueOnce(JSON.stringify({ schema: 'schema1' }))
-        .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping2' }))
-        .mockResolvedValueOnce(JSON.stringify({ schema: 'schema2' }));
+        .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping2' }));
 
       const result = await integration.getSchemas();
 
@@ -190,10 +185,6 @@ describe('Integration', () => {
           component1: { mapping: 'mapping1' },
           component2: { mapping: 'mapping2' },
         },
-        schemas: {
-          component1: { schema: 'schema1' },
-          component2: { schema: 'schema2' },
-        },
       });
 
       expect(fs.readFile).toHaveBeenCalledWith(
@@ -201,15 +192,7 @@ describe('Integration', () => {
         { encoding: 'utf-8' }
       );
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, 'schemas', schemaFile1),
-        { encoding: 'utf-8' }
-      );
-      expect(fs.readFile).toHaveBeenCalledWith(
         path.join(integration.directory, 'schemas', mappingFile2),
-        { encoding: 'utf-8' }
-      );
-      expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, 'schemas', schemaFile2),
         { encoding: 'utf-8' }
       );
     });
@@ -222,12 +205,12 @@ describe('Integration', () => {
       );
     });
 
-    it('should reject with an error if a schema file is invalid', async () => {
+    it('should reject with an error if a mapping file is invalid', async () => {
       const sampleConfig = {
         components: [{ name: 'component1', version: '1.0.0' }],
       };
       integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
-      jest.spyOn(fs, 'readFile').mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping1' }));
+      jest.spyOn(fs, 'readFile').mockRejectedValueOnce(new Error('Could not load schema'));
 
       await expect(integration.getSchemas()).rejects.toThrowError('Could not load schema');
     });

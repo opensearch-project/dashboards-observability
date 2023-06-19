@@ -230,29 +230,22 @@ export class Integration {
     version?: string
   ): Promise<{
     mappings: { [key: string]: any };
-    schemas: { [key: string]: any };
   }> {
     const config = await this.getConfig(version);
     if (config === null) {
       return Promise.reject(new Error('Attempted to get assets of invalid config'));
     }
-    const result: { mappings: { [key: string]: any }; schemas: { [key: string]: any } } = {
+    const result: { mappings: { [key: string]: any } } = {
       mappings: {},
-      schemas: {},
     };
     try {
       for (const component of config.components) {
-        const [mappingFile, schemaFile] = [
-          `${component.name}-${component.version}.mapping.json`,
-          `${component.name}-${component.version}.schema.json`,
-        ];
-        const [rawMapping, rawSchema] = await Promise.all([
-          fs.readFile(path.join(this.directory, 'schemas', mappingFile), { encoding: 'utf-8' }),
-          fs.readFile(path.join(this.directory, 'schemas', schemaFile), { encoding: 'utf-8' }),
-        ]);
-        const [parsedMapping, parsedSchema] = [JSON.parse(rawMapping), JSON.parse(rawSchema)];
-        result.mappings[component.name] = parsedMapping;
-        result.schemas[component.name] = parsedSchema;
+        const schemaFile = `${component.name}-${component.version}.mapping.json`;
+        const rawSchema = await fs.readFile(path.join(this.directory, 'schemas', schemaFile), {
+          encoding: 'utf-8',
+        });
+        const parsedSchema = JSON.parse(rawSchema);
+        result.mappings[component.name] = parsedSchema;
       }
     } catch (err: any) {
       // It's not clear that an invalid schema can be recovered from.
