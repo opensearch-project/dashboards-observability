@@ -40,6 +40,7 @@ export function ServicesContent(props: ServicesProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    customIndexPattern,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});

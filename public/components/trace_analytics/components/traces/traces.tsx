@@ -21,7 +21,13 @@ export function Traces(props: TracesProps) {
       <EuiTitle size="l">
         <h2 style={{ fontWeight: 430 }}>Traces</h2>
       </EuiTitle>
-      <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />
+      <DataSourcePicker
+        modes={props.modes}
+        selectedMode={props.mode}
+        setMode={props.setMode!}
+        customIndexPattern={props.customIndexPattern}
+        setCustomIndexPattern={props.setCustomIndexPattern}
+      />
       <TracesContent {...props} />
     </>
   );

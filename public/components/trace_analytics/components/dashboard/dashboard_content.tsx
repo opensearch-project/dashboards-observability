@@ -55,6 +55,7 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
     toasts,
     setToast,
+    customIndexPattern,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);

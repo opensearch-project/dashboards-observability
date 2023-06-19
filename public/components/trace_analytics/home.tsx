@@ -27,7 +27,7 @@ export interface TraceAnalyticsCoreDeps {
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
 
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'custom';
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
@@ -38,11 +38,14 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  customIndexPattern: string;
+  setCustomIndexPattern: (indexPattern: string) => void;
 }
 
 export const Home = (props: HomeProps) => {
   const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
+  const [customIndexPattern, setCustomIndexPattern] = useState('');
   const [mode, setMode] = useState<TraceAnalyticsMode>(
     (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
   );
@@ -89,6 +92,7 @@ export const Home = (props: HomeProps) => {
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
+    { id: 'custom', title: 'Custom Index Pattern', 'data-test-subj': 'custom-mode' },
   ];
 
   useEffect(() => {
@@ -163,6 +167,8 @@ export const Home = (props: HomeProps) => {
     },
     jaegerIndicesExist,
     dataPrepperIndicesExist,
+    customIndexPattern,
+    setCustomIndexPattern,
   };
 
   return (

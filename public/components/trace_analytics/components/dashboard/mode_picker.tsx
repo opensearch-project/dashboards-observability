@@ -3,24 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { TraceAnalyticsMode } from '../../home';
 
 const labels = new Map([
   ['jaeger', 'Jaeger'],
   ['data_prepper', 'Data Prepper'],
+  ['custom', 'Custom Index Pattern'],
 ]);
 
 export function DataSourcePicker(props: {
-  modes: {
+  modes: Array<{
     id: string;
     title: string;
-  }[];
+  }>;
   selectedMode: TraceAnalyticsMode;
   setMode: (mode: TraceAnalyticsMode) => void;
+  customIndexPattern: string;
+  setCustomIndexPattern: (customIndexPattern: string) => void;
 }) {
-  const { modes, selectedMode, setMode } = props;
+  const { modes, selectedMode, setMode, customIndexPattern, setCustomIndexPattern } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const trigger = {
@@ -47,6 +60,38 @@ export function DataSourcePicker(props: {
     );
   };
 
+  const [value, setValue] = useState('');
+
+  const onChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  const renderIndexPatternPicker = () => {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiFieldText
+          placeholder={customIndexPattern}
+          value={value}
+          onChange={(e) => onChange(e)}
+          aria-label="Use aria labels when no actual label is in use"
+          append={
+            <EuiButton
+              data-test-subj="enterCustomIndexPattern"
+              onClick={() => {
+                setCustomIndexPattern(value);
+                setPopoverIsOpen(false);
+              }}
+              disabled={value.length === 0}
+            >
+              Enter
+            </EuiButton>
+          }
+        />
+      </>
+    );
+  };
+
   return (
     <>
       <EuiPopover
@@ -70,17 +115,19 @@ export function DataSourcePicker(props: {
               key: x.id,
               value: x.id,
               checked: x.id === selectedMode ? 'on' : undefined,
-              "data-test-subj": x.id + '-mode',
+              'data-test-subj': x.id + '-mode',
             }))}
             onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
+              const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
                 label: string;
                 key: TraceAnalyticsMode;
               };
               setMode(choice.key);
-              setPopoverIsOpen(false);
               sessionStorage.setItem('TraceAnalyticsMode', choice.key);
+              if (choice.key !== 'custom') {
+                setPopoverIsOpen(false);
+              }
             }}
             searchProps={{
               compressed: true,
@@ -94,6 +141,7 @@ export function DataSourcePicker(props: {
             )}
           </EuiSelectable>
         </div>
+        {selectedMode === 'custom' ? renderIndexPatternPicker() : null}
       </EuiPopover>
     </>
   );

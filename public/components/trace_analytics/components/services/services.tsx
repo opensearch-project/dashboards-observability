@@ -23,7 +23,13 @@ export function Services(props: ServicesProps) {
       <EuiTitle size="l">
         <h2 style={{ fontWeight: 430 }}>Services</h2>
       </EuiTitle>
-      <DataSourcePicker modes={props.modes} selectedMode={props.mode} setMode={props.setMode!} />
+      <DataSourcePicker
+        modes={props.modes}
+        selectedMode={props.mode}
+        setMode={props.setMode!}
+        customIndexPattern={props.customIndexPattern}
+        setCustomIndexPattern={props.setCustomIndexPattern}
+      />
       <ServicesContent {...props} />
     </>
   );

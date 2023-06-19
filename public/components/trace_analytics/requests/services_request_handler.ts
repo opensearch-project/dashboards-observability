@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
 
 import _ from 'lodash';
 import dateMath from '@elastic/datemath';
@@ -24,12 +23,18 @@ export const handleServicesRequest = async (
   DSL: any,
   setItems: any,
   mode: TraceAnalyticsMode,
+  cusotmIndexPattern: string,
   setServiceMap?: any,
-  serviceNameFilter?: string,
+  serviceNameFilter?: string
 ) => {
   return handleDslRequest(http, DSL, getServicesQuery(mode, serviceNameFilter, DSL), mode)
     .then(async (response) => {
-      const serviceObject: ServiceObject = await handleServiceMapRequest(http, DSL, mode, setServiceMap);
+      const serviceObject: ServiceObject = await handleServiceMapRequest(
+        http,
+        DSL,
+        mode,
+        setServiceMap
+      );
       return Promise.all(
         response.aggregations.service.buckets
           .filter((bucket: any) => serviceObject[bucket.key])
@@ -61,7 +66,7 @@ export const handleServiceMapRequest = async (
   DSL: DSLService | any,
   mode: TraceAnalyticsMode,
   setItems?: any,
-  currService?: string,
+  currService?: string
 ) => {
   let minutesInDateRange: number;
   const startTime = DSL.custom?.timeFilter?.[0]?.range?.startTime;
@@ -126,8 +131,8 @@ export const handleServiceMapRequest = async (
   const latencies = await handleDslRequest(
     http,
     DSL,
-    getServiceMetricsQuery(DSL, Object.keys(map), map, mode), 
-    mode,
+    getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
+    mode
   );
   latencies.aggregations.service_name.buckets.map((bucket: any) => {
     map[bucket.key].latency = bucket.average_latency.value;
@@ -163,7 +168,7 @@ export const handleServiceViewRequest = (
   http: HttpSetup,
   DSL: any,
   setFields: any,
-  mode: TraceAnalyticsMode,
+  mode: TraceAnalyticsMode
 ) => {
   handleDslRequest(http, DSL, getServicesQuery(mode, serviceName), mode)
     .then(async (response) => {
