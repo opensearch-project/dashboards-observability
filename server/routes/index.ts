@@ -20,16 +20,16 @@ import { registerSqlRoute } from './notebooks/sqlRouter';
 import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_router';
 import { registerAppAnalyticsRouter } from './application_analytics/app_analytics_router';
 import { registerMetricsRoute } from './metrics/metrics_rounter';
-
+import { registerIntegrationsRoute } from './integrations/integrations_router';
 
 export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });
-  registerDslRoute({ router, facet: new DSLFacet(client)});
+  registerDslRoute({ router, facet: new DSLFacet(client) });
   registerEventAnalyticsRouter({ router, savedObjectFacet: new SavedObjectFacet(client) });
   registerAppAnalyticsRouter(router);
-  
+
   // TODO remove trace analytics route when DSL route for autocomplete is added
   registerTraceAnalyticsDslRouter(router);
 
@@ -41,4 +41,5 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
   registerSqlRoute(router, queryService);
 
   registerMetricsRoute(router);
-};
+  registerIntegrationsRoute(router);
+}
