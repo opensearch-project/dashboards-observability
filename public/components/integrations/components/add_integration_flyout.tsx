@@ -165,9 +165,20 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return response.json();
       }
     );
-    Object.entries(data.data.mappings).forEach(async ([key, mapping]) => {
-      await createMappings(key, mapping, targetDataSource);
+    const mappings = data.data.mappings;
+    mappings[integrationType].composed_of = mappings[integrationType].composed_of.map(
+      (templateName: string) => {
+        const version = mappings[templateName].template.mappings._meta.version;
+        return `ss4o_${templateName}_${version}_template`;
+      }
+    );
+    Object.entries(mappings).forEach(async ([key, mapping]) => {
+      if (key === integrationType) {
+        return;
+      }
+      await createMappings(key, mapping as any, targetDataSource);
     });
+    await createMappings(integrationType, mappings[integrationType], targetDataSource);
   };
 
   const onCreateSelectChange = (value: any) => {
@@ -226,12 +237,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const createMappings = async (
     componentName: string,
-    payload: any,
+    payload: {
+      template: { mappings: { _meta: { version: string } } };
+      composed_of: string[];
+      index_patterns: string[];
+    },
     dataSourceName: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
+    const version = payload.template.mappings._meta.version;
     if (componentName !== integrationType) {
       return fetch(
-        `/api/console/proxy?path=_component_template/${componentName}_template&method=POST`,
+        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
         {
           method: 'POST',
           headers: [
