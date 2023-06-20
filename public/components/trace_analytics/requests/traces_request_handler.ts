@@ -20,16 +20,9 @@ import {
   getSpansQuery,
   getTraceGroupPercentilesQuery,
   getTracesQuery,
-  getValidTraceIdsQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
 import { TraceAnalyticsMode } from '../home';
-
-export const handleValidTraceIds = (http: HttpSetup, DSL: any, mode: TraceAnalyticsMode) => {
-  return handleDslRequest(http, {}, getValidTraceIdsQuery(DSL), mode)
-    .then((response) => response.aggregations.traces.buckets.map((bucket: any) => bucket.key))
-    .catch((error) => console.error(error));
-};
 
 export const handleTracesRequest = async (
   http: HttpSetup,

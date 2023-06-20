@@ -56,6 +56,7 @@ export function DashboardContent(props: DashboardProps) {
     toasts,
     setToast,
     customIndexPattern,
+    customIndexPatternExists,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -114,7 +115,7 @@ export function DashboardContent(props: DashboardProps) {
     if (
       !redirect &&
       ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
+        (mode === 'jaeger' && jaegerIndicesExist) || (mode === 'custom' && customIndexPatternExists))
     )
       refresh(newFilteredService);
   }, [
@@ -126,6 +127,7 @@ export function DashboardContent(props: DashboardProps) {
     mode,
     dataPrepperIndicesExist,
     jaegerIndicesExist,
+    customIndexPatternExists,
   ]);
 
   const refresh = async (currService?: string) => {
@@ -195,7 +197,7 @@ export function DashboardContent(props: DashboardProps) {
         // },
         setPercentileMap
       ).finally(() => setLoading(false));
-    } else if (mode === 'data_prepper') {
+    } else if (mode === 'data_prepper' || mode === 'custom') {
       handleDashboardRequest(
         http,
         DSL,
@@ -204,6 +206,7 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setTableItems,
         mode,
+        customIndexPattern,
         setPercentileMap
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
@@ -215,6 +218,7 @@ export function DashboardContent(props: DashboardProps) {
         http,
         serviceMapDSL,
         mode,
+        customIndexPattern,
         setServiceMap,
         currService || filteredService
       );
@@ -226,7 +230,8 @@ export function DashboardContent(props: DashboardProps) {
       fixedInterval,
       throughputPltItems,
       setThroughputPltItems,
-      mode
+      mode,
+      customIndexPattern,
     );
 
     handleDashboardErrorRatePltRequest(
@@ -235,7 +240,8 @@ export function DashboardContent(props: DashboardProps) {
       fixedInterval,
       errorRatePltItems,
       setErrorRatePltItems,
-      mode
+      mode,
+      customIndexPattern,
     );
   };
 
@@ -315,9 +321,9 @@ export function DashboardContent(props: DashboardProps) {
       />
       <EuiSpacer size="m" />
       {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
-      (mode === 'jaeger' && jaegerIndicesExist) ? (
+      (mode === 'jaeger' && jaegerIndicesExist)  || (mode === 'custom' && customIndexPatternExists)? (
         <div>
-          {mode === 'data_prepper' ? (
+          {mode === 'data_prepper' || mode === 'custom' ? (
             <>
               <DashboardTable
                 items={tableItems}

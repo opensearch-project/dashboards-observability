@@ -71,6 +71,7 @@ export const handleServiceMapRequest = async (
   http: HttpSetup,
   DSL: DSLService | any,
   mode: TraceAnalyticsMode,
+  customIndexPattern: string,
   setItems?: any,
   currService?: string
 ) => {
@@ -83,7 +84,7 @@ export const handleServiceMapRequest = async (
   }
   const map: ServiceObject = {};
   let id = 1;
-  await handleDslRequest(http, null, getServiceNodesQuery(mode), mode)
+  await handleDslRequest(http, null, getServiceNodesQuery(mode), mode, customIndexPattern)
     .then((response) =>
       response.aggregations.service_name.buckets.map(
         (bucket: any) =>

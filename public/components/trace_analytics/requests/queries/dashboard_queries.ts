@@ -517,7 +517,7 @@ export const getJaegerErrorTrendQuery = () => {
 
 
 export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buckets?: any[]) => {
-  if (mode === 'data_prepper') { 
+  if (mode === 'data_prepper' || mode === 'custom') { 
     return {
       size: 0,
       query: {
@@ -616,7 +616,7 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buck
 };
 
 export const getErrorRatePltQuery = (mode: TraceAnalyticsMode, fixedInterval) => {
-  if (mode === 'data_prepper') {
+  if (mode === 'data_prepper' || mode === 'custom') {
     return {
       size: 0,
       query: {

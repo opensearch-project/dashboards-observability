@@ -28,6 +28,7 @@ export const handleDashboardRequest = async (
   items,
   setItems,
   mode,
+  customIndexPattern,
   setPercentileMap?
 ) => {
   // latency_variance should only be affected by timefilter
@@ -35,7 +36,8 @@ export const handleDashboardRequest = async (
     http,
     timeFilterDSL,
     getDashboardTraceGroupPercentiles(mode),
-    mode
+    mode,
+    customIndexPattern
   )
     .then((response) => {
       const map: any = {};
@@ -49,7 +51,7 @@ export const handleDashboardRequest = async (
     .catch((error) => console.error(error));
   if (setPercentileMap) setPercentileMap(latencyVariances);
 
-  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode)
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode, customIndexPattern)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -104,7 +106,7 @@ export const handleDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getDashboardQuery(), mode)
+  await handleDslRequest(http, DSL, getDashboardQuery(), mode, customIndexPattern)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -324,8 +326,8 @@ export const handleJaegerErrorDashboardRequest = async (
     .catch((error) => console.error(error));
 };
 
-export const handleDashboardThroughputPltRequest = (http, DSL, fixedInterval, items, setItems, mode) => {
-  return handleDslRequest(http, DSL, getDashboardThroughputPltQuery(mode, fixedInterval), mode)
+export const handleDashboardThroughputPltRequest = (http, DSL, fixedInterval, items, setItems, mode, customIndexPattern) => {
+  return handleDslRequest(http, DSL, getDashboardThroughputPltQuery(mode, fixedInterval), mode, customIndexPattern)
     .then((response) => {
       const buckets = response.aggregations.throughput.buckets;
       const texts = buckets.map(
@@ -357,8 +359,8 @@ export const handleDashboardThroughputPltRequest = (http, DSL, fixedInterval, it
     .catch((error) => console.error(error));
 };
 
-export const handleDashboardErrorRatePltRequest = (http, DSL, fixedInterval, items, setItems, mode) => {
-  return handleDslRequest(http, DSL, getErrorRatePltQuery(mode, fixedInterval), mode)
+export const handleDashboardErrorRatePltRequest = (http, DSL, fixedInterval, items, setItems, mode, customIndexPattern) => {
+  return handleDslRequest(http, DSL, getErrorRatePltQuery(mode, fixedInterval), mode, customIndexPattern)
     .then((response) => {
       const buckets = response.aggregations.error_rate.buckets;
       const texts = buckets.map(
