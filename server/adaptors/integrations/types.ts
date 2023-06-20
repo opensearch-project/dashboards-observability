@@ -7,7 +7,6 @@ interface IntegrationTemplate {
   name: string;
   version: string;
   displayName?: string;
-  integrationType: string;
   license: string;
   type: string;
   author?: string;
@@ -25,6 +24,9 @@ interface IntegrationTemplate {
       name: string;
       version: string;
     };
+  };
+  sampleData?: {
+    path: string;
   };
 }
 
