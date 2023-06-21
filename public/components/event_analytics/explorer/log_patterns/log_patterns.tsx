@@ -51,7 +51,7 @@ const EventPatterns = ({
 
   // refresh patterns on opening page
   useEffect(() => {
-    onPatternSelection('');
+    getPatterns(selectedIntervalUnit?.value?.replace(/^auto_/, '') || 'y');
   }, []);
 
   const onPatternSelection = async (pattern: string) => {
