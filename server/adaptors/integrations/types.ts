@@ -55,11 +55,7 @@ interface IntegrationTemplateQuery {
 interface IntegrationInstance {
   name: string;
   templateName: string;
-  dataSource: {
-    sourceType: string;
-    dataset: string;
-    namespace: string;
-  };
+  dataSource: string;
   creationDate: string;
   assets: AssetReference[];
 }
