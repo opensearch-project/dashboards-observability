@@ -28,6 +28,8 @@ import {
   SOURCE_PICKER_PANEL_TEST_SUBJ,
   SOURCE_PICKER_FOOTER_CANCEL_BTN_TEXT,
   SOURCE_PICKER_FOOTER_SELECT_BTN_TEXT,
+  SOURCE_PICKER_BTN_TEST_SUBJ,
+  SOURCE_PICKER_PANEL_SEARCH_TEST_SUBJ,
 } from './constants';
 
 export const DatasourcePicker = ({
@@ -49,6 +51,7 @@ export const DatasourcePicker = ({
         iconType="arrowDown"
         iconSide="right"
         onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+        data-test-subj={SOURCE_PICKER_BTN_TEST_SUBJ}
       >
         {selectedSource?.title || SOURCE_PICKER_BTN_DEFAULT_TEXT}
       </OuiButton>
@@ -78,7 +81,7 @@ export const DatasourcePicker = ({
         aria-label="Multi-selectable source panel"
         searchable
         searchProps={{
-          'data-test-subj': SOURCE_PICKER_PANEL_TEST_SUBJ,
+          'data-test-subj': SOURCE_PICKER_PANEL_SEARCH_TEST_SUBJ,
         }}
         options={datasourceList.map((dsItem: IDatasourceListOption) => {
           return {
@@ -96,6 +99,7 @@ export const DatasourcePicker = ({
           });
         }}
         singleSelection={true}
+        data-test-subj={SOURCE_PICKER_PANEL_TEST_SUBJ}
       >
         {(list, search) => (
           <>
@@ -113,7 +117,12 @@ export const DatasourcePicker = ({
             </OuiButton>
           </OuiFlexItem>
           <OuiFlexItem grow={false}>
-            <OuiButton size="s" fill onClick={onSelectSource}>
+            <OuiButton
+              size="s"
+              fill
+              onClick={onSelectSource}
+              data-test-subj="datasourcePickerSelect"
+            >
               {SOURCE_PICKER_FOOTER_SELECT_BTN_TEXT}
             </OuiButton>
           </OuiFlexItem>
