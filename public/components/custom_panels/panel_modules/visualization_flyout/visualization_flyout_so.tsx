@@ -173,13 +173,15 @@ export const VisaulizationFlyoutSO = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle));
+      dispatch(
+        replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle)
+      );
     } else {
-        const visualizationsWithNewPanel = addVisualizationPanel({
-          savedVisualizationId: selectValue,
-          onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
-          onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`
-        });
+      const visualizationsWithNewPanel = addVisualizationPanel({
+        savedVisualizationId: selectValue,
+        onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
+        onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`,
+      });
     }
     closeFlyout();
   };
@@ -334,15 +336,20 @@ export const VisaulizationFlyoutSO = ({
       .then((res) => {
         if (res.visualizations.length > 0) {
           setSavedVisualizations(res.visualizations);
-          const filterAppVis = res.visualizations.filter((vis: SavedVisualizationType) => {
-            return appId
-              ? vis.hasOwnProperty('application_id')
-                ? vis.application_id === appId
-                : false
-              : !vis.hasOwnProperty('application_id');
-          });
+          // const filterAppVis = res.visualizations.filter((vis: SavedVisualizationType) => {
+          //   return appId
+          //     ? vis.hasOwnProperty('application_id')
+          //       ? vis.application_id === appId
+          //       : false
+          //     : !vis.hasOwnProperty('application_id');
+          // });
+          // setVisualizationOptions(
+          //   filterAppVis.map((visualization: SavedVisualizationType) => {
+          //     return { value: visualization.id, text: visualization.name };
+          //   })
+          // );
           setVisualizationOptions(
-            filterAppVis.map((visualization: SavedVisualizationType) => {
+            res.visualizations.map((visualization: SavedVisualizationType) => {
               return { value: visualization.id, text: visualization.name };
             })
           );
