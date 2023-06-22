@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import Ajv, { JSONSchemaType } from 'ajv';
 
 const ajv = new Ajv();
@@ -82,16 +87,7 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
   properties: {
     name: { type: 'string' },
     templateName: { type: 'string' },
-    dataSource: {
-      type: 'object',
-      properties: {
-        sourceType: { type: 'string' },
-        dataset: { type: 'string' },
-        namespace: { type: 'string' },
-      },
-      required: ['sourceType', 'dataset', 'namespace'],
-      additionalProperties: false,
-    },
+    dataSource: { type: 'string' },
     creationDate: { type: 'string' },
     assets: {
       type: 'array',

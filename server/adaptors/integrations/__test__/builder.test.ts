@@ -50,9 +50,8 @@ describe('IntegrationInstanceBuilder', () => {
   describe('build', () => {
     it('should build an integration instance', async () => {
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
 
       const remappedAssets = [
@@ -74,11 +73,7 @@ describe('IntegrationInstanceBuilder', () => {
       const expectedInstance = {
         name: 'instance-name',
         templateName: 'integration-template',
-        dataSource: {
-          sourceType: 'integration-type',
-          dataset: 'instance-dataset',
-          namespace: 'instance-namespace',
-        },
+        dataSource: 'instance-datasource',
         creationDate: expect.any(String),
         assets: [
           {
@@ -123,9 +118,8 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if integration is not valid', async () => {
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
       sampleIntegration.deepCheck = jest.fn().mockResolvedValue(false);
 
@@ -136,9 +130,8 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if getAssets throws an error', async () => {
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
 
       const errorMessage = 'Failed to get assets';
@@ -150,9 +143,8 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if postAssets throws an error', async () => {
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
       const remappedAssets = [
         {
@@ -170,9 +162,8 @@ describe('IntegrationInstanceBuilder', () => {
 
     it('should reject with an error if getConfig returns null', async () => {
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
       sampleIntegration.getConfig = jest.fn().mockResolvedValue(null);
 
@@ -287,18 +278,13 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
       const expectedInstance = {
         name: 'instance-name',
         templateName: 'integration-template',
-        dataSource: {
-          sourceType: 'integration-type',
-          dataset: 'instance-dataset',
-          namespace: 'instance-namespace',
-        },
+        dataSource: 'instance-datasource',
         tags: undefined,
         creationDate: expect.any(String),
         assets: refs,
@@ -328,9 +314,8 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const options = {
+        dataSource: 'instance-datasource',
         name: 'instance-name',
-        dataset: 'instance-dataset',
-        namespace: 'instance-namespace',
       };
 
       await expect(

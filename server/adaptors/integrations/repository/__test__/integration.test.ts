@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as fs from 'fs/promises';
 import { Integration } from '../integration';
 import { Dirent, Stats } from 'fs';

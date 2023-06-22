@@ -235,8 +235,6 @@ describe('IntegrationsKibanaBackend', () => {
       expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
       expect(instanceBuilder.build).toHaveBeenCalledWith(template, {
         name,
-        dataset: 'nginx',
-        namespace: 'prod',
         dataSource: 'datasource',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(

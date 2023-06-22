@@ -11,8 +11,6 @@ import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 
 interface BuilderOptions {
   name: string;
-  dataset: string;
-  namespace: string;
   dataSource: string;
 }
 
@@ -96,11 +94,7 @@ export class IntegrationInstanceBuilder {
     return Promise.resolve({
       name: options.name,
       templateName: config.name,
-      dataSource: {
-        sourceType: config.type,
-        dataset: options.dataset,
-        namespace: options.namespace,
-      },
+      dataSource: options.dataSource,
       creationDate: new Date().toISOString(),
       assets: refs,
     });

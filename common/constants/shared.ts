@@ -74,13 +74,7 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
-const BASE_INTEGRATIONS_URI = '/_plugins/_integrations';
-export const OPENSEARCH_INTEGRATIONS_API = {
-  OBJECT: `${BASE_INTEGRATIONS_URI}/object`,
-  ALL: `${BASE_INTEGRATIONS_URI}/store/list_all`,
-  ADDED: `${BASE_INTEGRATIONS_URI}/store/list_added`,
-  ADDED_POP: `${BASE_INTEGRATIONS_URI}/store/list_added_pop`,
-};
+const BASE_INTEGRATIONS_URI = '/_plugins/_integrations'; // Used later in front-end for routing
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };

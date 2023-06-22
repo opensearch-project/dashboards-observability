@@ -139,8 +139,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     try {
       const result = await this.instanceBuilder.build(template, {
         name,
-        dataset: 'nginx',
-        namespace: 'prod',
         dataSource,
       });
       await this.client.create('integration-instance', result);
