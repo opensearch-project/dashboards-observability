@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "osd": "node ../../scripts/osd",
+    "prebuild": "node fetch_schema_mappings.js",
     "build": "yarn plugin-helpers build",
     "test": "../../node_modules/.bin/jest --config ./test/jest.config.js",
     "cypress:run": "TZ=America/Los_Angeles cypress run",
