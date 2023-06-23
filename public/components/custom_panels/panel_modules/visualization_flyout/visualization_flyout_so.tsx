@@ -336,18 +336,6 @@ export const VisaulizationFlyoutSO = ({
       .then((res) => {
         if (res.visualizations.length > 0) {
           setSavedVisualizations(res.visualizations);
-          // const filterAppVis = res.visualizations.filter((vis: SavedVisualizationType) => {
-          //   return appId
-          //     ? vis.hasOwnProperty('application_id')
-          //       ? vis.application_id === appId
-          //       : false
-          //     : !vis.hasOwnProperty('application_id');
-          // });
-          // setVisualizationOptions(
-          //   filterAppVis.map((visualization: SavedVisualizationType) => {
-          //     return { value: visualization.id, text: visualization.name };
-          //   })
-          // );
           setVisualizationOptions(
             res.visualizations.map((visualization: SavedVisualizationType) => {
               return { value: visualization.id, text: visualization.name };

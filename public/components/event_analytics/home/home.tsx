@@ -119,12 +119,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       sortOrder: 'desc',
       fromIndex: 0,
     });
-    // const nonAppObjects = observabilityObjects.observabilityObjectList.filter(
-    //   (object: ObservabilitySavedObject) =>
-    //     (object.savedVisualization && !object.savedVisualization.application_id) ||
-    //     object.savedQuery
-    // );
-    // setSavedHistories(nonAppObjects);
     setSavedHistories(observabilityObjects.observabilityObjectList);
   };
 
