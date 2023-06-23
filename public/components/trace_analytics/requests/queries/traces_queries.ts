@@ -205,7 +205,7 @@ export const getServiceBreakdownQuery = (traceId: string, mode: TraceAnalyticsMo
     aggs: {
       service_type: {
         terms: {
-          field: 'process.serviceName',
+          field: 'process.serviceName.keyword',
           order: [
             {
               total_latency_nanos: 'desc',
@@ -474,7 +474,7 @@ export const getValidTraceIdsQuery = (DSL) => {
     aggs: {
       traces: {
         terms: {
-          field: 'traceID',
+          field: 'traceID.keyword',
           size: 10000,
         },
       },

@@ -111,10 +111,10 @@ export const getJaegerDashboardQuery = () => {
         multi_terms: {
           terms: [
             {
-              field: "process.serviceName"
+              field: "process.serviceName.keyword"
             },
             {
-              field: "operationName"
+              field: "operationName.keyword"
             },
           ],
           order: {
@@ -133,7 +133,7 @@ export const getJaegerDashboardQuery = () => {
             init_script: 'state.traceIDToLatencyMap = [:];',
             map_script: `
               if (doc.containsKey('duration') && !doc['duration'].empty) {
-                def traceID = doc['traceID'].value;
+                def traceID = doc['traceID.keyword'].value;
                 if (!state.traceIDToLatencyMap.containsKey(traceID)) {
                   state.traceIDToLatencyMap[traceID] = doc['duration'].value;
                 }
@@ -169,7 +169,7 @@ export const getJaegerDashboardQuery = () => {
       
           trace_count: {
             cardinality: {
-              field: 'traceID',
+              field: 'traceID.keyword',
             },
           },
           error_count: {
@@ -181,7 +181,7 @@ export const getJaegerDashboardQuery = () => {
             aggs: {
               trace_count: {
                 cardinality: {
-                  field: 'traceID',
+                  field: 'traceID.keyword',
                 },
               },
             },
@@ -217,10 +217,10 @@ export const getJaegerErrorDashboardQuery = () => {
         multi_terms: {
           terms: [
             {
-              field: "process.serviceName"
+              field: "process.serviceName.keyword"
             },
             {
-              field: "operationName"
+              field: "operationName.keyword"
             },
           ],
           order: {
@@ -234,7 +234,7 @@ export const getJaegerErrorDashboardQuery = () => {
             init_script: 'state.traceIDToLatencyMap = [:];',
             map_script: `
               if (doc.containsKey('duration') && !doc['duration'].empty) {
-                def traceID = doc['traceID'].value;
+                def traceID = doc['traceID.keyword'].value;
                 if (!state.traceIDToLatencyMap.containsKey(traceID)) {
                   state.traceIDToLatencyMap[traceID] = doc['duration'].value;
                 }
@@ -270,7 +270,7 @@ export const getJaegerErrorDashboardQuery = () => {
       
           trace_count: {
             cardinality: {
-              field: 'traceID',
+              field: 'traceID.keyword',
             },
           },
           error_count: {
@@ -282,7 +282,7 @@ export const getJaegerErrorDashboardQuery = () => {
             aggs: {
               trace_count: {
                 cardinality: {
-                  field: 'traceID',
+                  field: 'traceID.keyword',
                 },
               },
             },
@@ -388,10 +388,10 @@ export const getJaegerLatencyTrendQuery = () => {
         multi_terms: {
           terms: [
             {
-              field: "process.serviceName"
+              field: "process.serviceName.keyword"
             },
             {
-              field: "operationName"
+              field: "operationName.keyword"
             },
           ],
         },
@@ -407,7 +407,7 @@ export const getJaegerLatencyTrendQuery = () => {
                   init_script: 'state.traceIdToLatencyMap = [:];',
                   map_script: `
                     if (doc.containsKey('traceGroupFields.durationInNanos') && !doc['traceGroupFields.durationInNanos'].empty) {
-                      def traceId = doc['traceId'].value;
+                      def traceId = doc['traceID.keyword'].value;
                       if (!state.traceIdToLatencyMap.containsKey(traceId)) {
                         state.traceIdToLatencyMap[traceId] = doc['traceGroupFields.durationInNanos'].value;
                       }
@@ -464,10 +464,10 @@ export const getJaegerErrorTrendQuery = () => {
         multi_terms: {
           terms: [
             {
-              field: "process.serviceName"
+              field: "process.serviceName.keyword"
             },
             {
-              field: "operationName"
+              field: "operationName.keyword"
             },
           ],
         },
@@ -487,14 +487,14 @@ export const getJaegerErrorTrendQuery = () => {
                 aggs: {
                   trace_count: {
                     cardinality: {
-                      field: 'traceID',
+                      field: 'traceID.keyword',
                     },
                   },
                 },
               },
               trace_count: {
                 cardinality: {
-                  field: 'traceID',
+                  field: 'traceID.keyword',
                 },
               },
               error_rate: {
@@ -577,10 +577,10 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buck
         multi_terms: {
           terms: [
             {
-              field: "process.serviceName"
+              field: "process.serviceName.keyword"
             },
             {
-              field: "operationName"
+              field: "operationName.keyword"
             },
           ],
         },
@@ -602,10 +602,10 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buck
           must: [
             {
             term: {
-              'process.serviceName': item[0]
+              'process.serviceName.keyword': item[0]
             }},{
             term: {
-              'operationName': item[1]
+              'operationName.keyword': item[1]
             },
           }]
         }})
@@ -693,14 +693,14 @@ export const getErrorRatePltQuery = (mode: TraceAnalyticsMode, fixedInterval) =>
               aggs: {
                 trace_count: {
                   cardinality: {
-                    field: 'traceID',
+                    field: 'traceID.keyword',
                   },
                 },
               },
             },
             trace_count: {
               cardinality: {
-                field: 'traceID',
+                field: 'traceID.keyword',
               },
             },
             error_rate: {
@@ -746,7 +746,7 @@ export const getTopErrorRatePltQuery = (fixedInterval) => {
             aggs: {
               trace_count: {
                 cardinality: {
-                  field: 'traceID',
+                  field: 'traceID.keyword',
                 },
               },
             },
@@ -792,7 +792,7 @@ export const getDashboardThroughputPltQuery = (mode: TraceAnalyticsMode, fixedIn
         aggs: {
           trace_count: {
             cardinality: {
-              field: mode === 'jaeger' ? 'traceID': 'traceId',
+              field: mode === 'jaeger' ? 'traceID.keyword': 'traceId',
             },
           },
         },
@@ -817,10 +817,10 @@ export const getDashboardErrorTopGroupsQuery = (mode: TraceAnalyticsMode) => {
         multi_terms: {
           terms: [
             {
-              "field": "process.serviceName"
+              "field": "process.serviceName.keyword"
             },
             {
-              "field": "operationName"
+              "field": "operationName.keyword"
             }
           ],
           order: {
@@ -838,14 +838,14 @@ export const getDashboardErrorTopGroupsQuery = (mode: TraceAnalyticsMode) => {
             aggs: {
               trace_count: {
                 cardinality: {
-                  field: 'traceID',
+                  field: 'traceID.keyword',
                 },
               },
             },
           },
           trace_count: {
             cardinality: {
-              field: 'traceID',
+              field: 'traceID.keyword',
             },
           },
           error_rate: {
@@ -898,7 +898,7 @@ export const getDashboardThroughputTopGroupsQuery = (mode: TraceAnalyticsMode) =
           },
           trace_count: {
             cardinality: {
-              field: mode === 'jaeger' ? 'traceID': 'traceId',
+              field: mode === 'jaeger' ? 'traceID.keyword': 'traceId',
             },
           },
           average_latency: {
