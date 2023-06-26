@@ -16,7 +16,7 @@ RUN /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install fi
 ```
 
 ## Docker imageVersion
-The docker images used by this file are all referencing the [.env](.env) environment file that contains the version field an user/password field that needs to be changed to match your own system. 
+The docker images used by this file are all referencing the [.env](.env) environment file that contains the version and user/password fields that need to be changed to match your own system. 
 
 ## Run the docker image build
 To build the docker image use the next command:
