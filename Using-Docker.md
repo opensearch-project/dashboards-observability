@@ -37,5 +37,5 @@ The dashboard service uses port `localhost:5601` for access and this was already
 ```
 
 ## Security Notice
-The default User:Password for this demo test is (admin:admin) - pay attention not to use this configuration in a production or any environment that may contain
+The default User:Password for this demo test is embedded within the  [.env](.env) environment file - pay attention not to use this configuration in a production or any environment that may contain
 confident or personal information without first changing the security definition for accessing the servers.
