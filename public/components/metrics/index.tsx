@@ -83,8 +83,7 @@ export const Home = ({
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onRefreshFilters = (startTime: ShortDate, endTime: ShortDate) => {
-    // eslint-disable-line
+  const onRefreshFilters = (startTimeFilter: ShortDate, endTimeFilter: ShortDate) => {
     if (spanValue < 1) {
       setToast('Please add a valid span interval', 'danger');
       return;
@@ -222,6 +221,7 @@ export const Home = ({
                           moveToEvents={onEditClick}
                           onRefresh={onRefresh}
                           editActionType={editActionType}
+                          setEditActionType={setEditActionType}
                           spanParam={spanValue + resolutionValue}
                         />
                       ) : (

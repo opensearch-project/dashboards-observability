@@ -58,18 +58,21 @@ export const Sidebar = (props: ISidebarProps) => {
           metricsList={recentlyCreatedMetrics}
           headerName="Recently Created Metrics"
           handleClick={handleAddMetric}
+          dataTestSubj="metricsListItems_recentlyCreated"
         />
         <EuiSpacer size="s" />
         <MetricsAccordion
           metricsList={selectedMetrics}
           headerName="Selected Metrics"
           handleClick={handleRemoveMetric}
+          dataTestSubj="metricsListItems_selectedMetrics"
         />
         <EuiSpacer size="s" />
         <MetricsAccordion
           metricsList={availableMetricsDisplay}
           headerName="Available Metrics"
           handleClick={handleAddMetric}
+          dataTestSubj="metricsListItems_availableMetrics"
         />
       </section>
     </I18nProvider>

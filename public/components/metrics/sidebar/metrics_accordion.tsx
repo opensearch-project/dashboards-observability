@@ -11,10 +11,11 @@ interface IMetricNameProps {
   metricsList: [];
   headerName: string;
   handleClick: (props: any) => void;
+  dataTestSubj: string;
 }
 
 export const MetricsAccordion = (props: IMetricNameProps) => {
-  const { metricsList, headerName, handleClick } = props;
+  const { metricsList, headerName, handleClick, dataTestSubj } = props;
 
   return (
     <EuiAccordion
@@ -29,7 +30,7 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
     >
       <ul className="metricsList">
         {metricsList.slice(0, 100).map((metric: any) => (
-          <li key={metric.id} className="metricsListContainer">
+          <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>
             <MetricName metric={metric} handleClick={handleClick} />
           </li>
         ))}

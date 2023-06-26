@@ -5,14 +5,14 @@
 
 import PPLService from 'public/services/requests/ppl';
 import React, { useEffect, useState } from 'react';
-import { CoreStart } from '../../../../../../src/core/public';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
+import _ from 'lodash';
+import { useDispatch } from 'react-redux';
+import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import { MetricType } from '../../../../common/types/metrics';
-import _ from 'lodash';
 import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
-import { useDispatch } from 'react-redux';
 import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
@@ -33,6 +33,7 @@ interface MetricsGridProps {
   moveToEvents: (savedVisualizationId: string) => any;
   onRefresh: boolean;
   editActionType: string;
+  setEditActionType: React.Dispatch<React.SetStateAction<string>>;
   spanParam: string;
 }
 
@@ -48,6 +49,7 @@ export const MetricsGrid = ({
   moveToEvents,
   onRefresh,
   editActionType,
+  setEditActionType,
   spanParam,
 }: MetricsGridProps) => {
   // Redux tools
@@ -60,7 +62,7 @@ export const MetricsGrid = ({
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
   const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
   const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
-  const [removeMetricsList, setRemoveMetricsList] = useState<{ id: string }[]>([]);
+  const [removeMetricsList, setRemoveMetricsList] = useState<Array<{ id: string }>>([]);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   // Reset Size of Visualizations when layout is changed
@@ -135,6 +137,7 @@ export const MetricsGrid = ({
     if (editActionType === 'save') {
       removeMetricsList.map((value) => handleRemoveMetric(value));
       updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
+      setEditActionType('');
     }
   }, [editActionType]);
 
