@@ -25,7 +25,6 @@ export interface LogPatternProps {
     text: string;
     value: string;
   };
-  setTempQuery: () => string;
   handleTimeRangePickerRefresh: (flag: boolean) => {};
   patterns: PatternTableData[];
   query: IQuery;
@@ -33,7 +32,6 @@ export interface LogPatternProps {
 
 const EventPatterns = ({
   selectedIntervalUnit,
-  setTempQuery,
   handleTimeRangePickerRefresh,
   patterns,
   query,

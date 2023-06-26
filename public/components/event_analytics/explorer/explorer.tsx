@@ -556,7 +556,6 @@ export const Explorer = ({
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
-                      setTempQuery={setTempQuery}
                       handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
                     />
                   </>
