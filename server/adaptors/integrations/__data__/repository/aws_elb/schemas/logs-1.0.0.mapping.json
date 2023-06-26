@@ -1,6 +1,6 @@
 {
     "index_patterns": [
-      "sso_logs-*-*"
+      "ss4o_logs-*-*"
     ],
     "data_stream": {},
     "template": {
@@ -219,13 +219,11 @@
       }
     },
     "composed_of": [
-<<<<<<< Updated upstream
-      "http",
-      "communication"
-=======
       "http_template",
-      "communication_template"
->>>>>>> Stashed changes
+      "communication_template",
+      "aws_elb_template",
+      "container_template", 
+      "cloud_template"
     ],
     "version": 1,
     "_meta": {
@@ -245,8 +243,4 @@
         }
       ]
     }
-<<<<<<< Updated upstream
   }
-=======
-  }
->>>>>>> Stashed changes
