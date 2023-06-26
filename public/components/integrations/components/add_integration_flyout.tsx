@@ -168,20 +168,20 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return response.json();
       }
     );
-    let error: any = null;
-    Object.entries(data.data.mappings).forEach(async ([key, mapping]) => {
+    let error = null;
+
+    for (const [key, mapping] of Object.entries(data.data.mappings)) {
       const result = await createMappings(key, mapping, targetDataSource);
-      console.log(result);
+
       if (result && result.error) {
-        console.log(result.error);
         error = (result.error as any).reason;
       }
-    });
-    console.log(error);
+    }
+
     if (error !== null) {
       setToast('Failure creating index template', 'danger', error);
     } else {
-      setToast('success');
+      setToast(`Successfully created index template`);
     }
   };
 
