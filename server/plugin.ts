@@ -86,19 +86,16 @@ export class ObservabilityPlugin
         dynamic: false,
         properties: {
           name: {
-            type: 'text',
+            type: 'keyword',
           },
           templateName: {
-            type: 'text',
+            type: 'keyword',
           },
           dataSource: {
-            type: 'nested',
+            type: 'keyword',
           },
           creationDate: {
             type: 'date',
-          },
-          addedBy: {
-            type: 'text',
           },
           assets: {
             type: 'nested',
