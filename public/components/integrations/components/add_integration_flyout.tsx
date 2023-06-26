@@ -25,6 +25,7 @@ import {
 import React, { Fragment, useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
@@ -96,6 +97,8 @@ export const doPropertyValidation = (
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const { onClose, onCreate, integrationName, integrationType } = props;
 
+  const { setToast } = useToast();
+
   const [checked, setChecked] = useState(false);
 
   const [isDataSourceValid, setDataSourceValid] = useState(true);
@@ -165,9 +168,21 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return response.json();
       }
     );
+    let error: any = null;
     Object.entries(data.data.mappings).forEach(async ([key, mapping]) => {
-      await createMappings(key, mapping, targetDataSource);
+      const result = await createMappings(key, mapping, targetDataSource);
+      console.log(result);
+      if (result && result.error) {
+        console.log(result.error);
+        error = (result.error as any).reason;
+      }
     });
+    console.log(error);
+    if (error !== null) {
+      setToast('Failure creating index template', 'danger', error);
+    } else {
+      setToast('success');
+    }
   };
 
   const onCreateSelectChange = (value: any) => {
@@ -244,7 +259,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
-          return null;
+          return err;
         });
     } else {
       payload.index_patterns = [dataSourceName];
@@ -259,7 +274,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
-          return null;
+          return err;
         });
     }
   };
