@@ -15,6 +15,13 @@ Once the build is completed, make sure to overide the [Dockerfile](Dockerfile) t
 RUN /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/observabilityDashboards-3.0.0.zip
 ```
 
+## Docker imageVersion
+The docker images used by this file are all referencing the [.env](.env) environment file that contains the version field an user/password field that needs to be changed to match your own system. 
+
+## Run the docker image build
+To build the docker image use the next command:
+> `docker build --build-arg VERSION=$(grep VERSION .env | cut -d '=' -f2) -t your_image_name .`
+
 ## Run the docker compose
 The [docker-compose](docker-compose.yml) file represents a simple assembly of an OpenSearch cluster with two nodes and an opensearch dashboard that has the updated image with the latest changes in this plugin.
 

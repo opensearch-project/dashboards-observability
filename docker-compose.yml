@@ -21,7 +21,7 @@ networks:
 services:
   # OpenSearch store - node1
   opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
-    image: opensearchproject/opensearch:3.0.0 # Specifying the latest available image - modify if you want a specific version
+    image: opensearchproject/opensearch:${VERSION} # Specifying the latest available image - modify if you want a specific version
     container_name: opensearch-node1
     environment:
       - cluster.name=opensearch-cluster # Name the cluster
@@ -40,7 +40,7 @@ services:
     volumes:
       - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://opensearch-node1:9200/_cluster/health?wait_for_status=yellow", "-ku admin:admin"]
+      test: ["CMD", "curl", "-f", "https://opensearch-node1:9200/_cluster/health?wait_for_status=yellow", "-ku ${USER}:${PASSWORD}"]
       interval: 5s
       timeout: 25s
       retries: 4
@@ -50,7 +50,7 @@ services:
 
   # OpenSearch store - node2
   opensearch-node2:
-    image: opensearchproject/opensearch:3.0.0 # This should be the same image used for opensearch-node1 to avoid issues
+    image: opensearchproject/opensearch:${VERSION} # This should be the same image used for opensearch-node1 to avoid issues
     container_name: opensearch-node2
     environment:
       - cluster.name=opensearch-cluster
@@ -75,6 +75,9 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        - VERSION=${VERSION}
+
     ports:
       - 5601:5601 # Map host port 5601 to container port 5601
     expose:

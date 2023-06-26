@@ -1,5 +1,8 @@
+# Declare a build argument for the version
+ARG VERSION
+
 # Use OpenSearch image as base
-FROM opensearchproject/opensearch-dashboards:3.0.0
+FROM opensearchproject/opensearch-dashboards:${VERSION}
 
 # Copy plugin zip into image
 COPY ./build /tmp
