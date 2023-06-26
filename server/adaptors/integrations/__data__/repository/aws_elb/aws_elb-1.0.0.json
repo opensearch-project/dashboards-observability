@@ -2,24 +2,24 @@
     "name": "aws_elb",
     "version": "1.0.0",
     "displayName": "AWS ELB",
-    "description": "Nginx HTTP server collector",
+    "description": "AWS Elastic Load Balancer Collector",
     "license": "Apache-2.0",
     "type": "logs",
-    "author": "John Doe",
-    "sourceUrl": "https://github.com/",
+    "author": "Daniel Dong",
+    "sourceUrl": "https://github.com/YANG-DB/observability/tree/aws_alb_integration",
     "statics": {
         "logo": {
-            "annotation": "NginX Logo",
-            "path": "logo.svg"
+            "annotation": "ELB Logo",
+            "path": "logo.png"
         },
         "gallery": [
             {
-                "annotation": "NginX Dashboard",
+                "annotation": "ELB Dashboard",
                 "path": "dashboard1.png"
             },
             {
-                "annotation": "NginX Logo",
-                "path": "logo.svg"
+                "annotation": "ELB Logo",
+                "path": "logo.png"
             }
         ]
     },
