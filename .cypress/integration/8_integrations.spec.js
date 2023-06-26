@@ -49,9 +49,9 @@ import {
     it('Navigates to nginx page and triggers the adds the instance flow', () => {
       moveToAvailableNginxIntegration();
       cy.get('[data-test-subj="add-integration-button"]').click();
-      cy.get('[data-test-subj="instance-name"]').should('have.value', 'nginx');
+      cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
       cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
-      cy.get('[data-test-subj="instance-name"]').type('-test');
+      cy.get('[data-test-subj="new-instance-name"]').type('-test');
       cy.get('[data-test-subj="createInstanceButton"]').click();
       cy.get('.euiToastHeader__title').should('contain', 'successfully');
     })
