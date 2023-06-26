@@ -86,13 +86,13 @@ export class ObservabilityPlugin
         dynamic: false,
         properties: {
           name: {
-            type: 'keyword',
+            type: 'text',
           },
           templateName: {
-            type: 'keyword',
+            type: 'text',
           },
           dataSource: {
-            type: 'keyword',
+            type: 'text',
           },
           creationDate: {
             type: 'date',
