@@ -26,9 +26,9 @@ export const Sidebar = (props: { children: React.ReactNode }) => {
           href: '#/available',
         },
         {
-          name: 'Installed integrations',
+          name: 'Added Integrations',
           id: 2,
-          href: '#/installed',
+          href: '#/added',
         },
       ],
     },
