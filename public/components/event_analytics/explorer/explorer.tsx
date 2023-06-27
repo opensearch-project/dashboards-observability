@@ -556,7 +556,6 @@ export const Explorer = ({
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
-                      setTempQuery={setTempQuery}
                       handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
                     />
                   </>
@@ -727,7 +726,7 @@ export const Explorer = ({
       if (availability !== true) {
         await updateQueryInStore(tempQuery);
       }
-      await fetchData();
+      await fetchData(startTime, endTime);
     },
     [tempQuery, query]
   );
