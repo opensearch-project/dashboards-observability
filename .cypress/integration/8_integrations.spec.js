@@ -17,8 +17,8 @@ import {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/available/nginx`);
   };
 
-  const moveToInstalledeIntegrations = () => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/installed`);
+  const moveToAddedIntegrations = () => {
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/added`);
   };
   
 
@@ -56,14 +56,14 @@ import {
       cy.get('.euiToastHeader__title').should('contain', 'successfully');
     })
 
-    it('Navigates to installed integrations page and verifies that nginx-test exists', () => {
-      moveToInstalledeIntegrations();
+    it('Navigates to added integrations page and verifies that nginx-test exists', () => {
+      moveToAddedIntegrations();
       cy.contains(TEST_INTEGRATION_INSTANCE).should('exist');
       cy.get('[data-test-subj="nginx-testIntegrationLink"]').click();
     })
 
-    it('Navigates to installed integrations page and verifies that nginx-test exists and linked asset works as expected', () => {
-      moveToInstalledeIntegrations();
+    it('Navigates to added integrations page and verifies that nginx-test exists and linked asset works as expected', () => {
+      moveToAddedIntegrations();
       cy.contains(TEST_INTEGRATION_INSTANCE).should('exist');
       cy.get('[data-test-subj="nginx-testIntegrationLink"]').click();
       cy.get(`[data-test-subj="IntegrationAssetLink"]`).click();
@@ -72,7 +72,7 @@ import {
     })
 
     it('Navigates to installed nginx-test instance page and deletes it', () => {
-      moveToInstalledeIntegrations();
+      moveToAddedIntegrations();
       cy.contains(TEST_INTEGRATION_INSTANCE).should('exist');
       cy.get('[data-test-subj="nginx-testIntegrationLink"]').click();
       cy.get('[data-test-subj="deleteInstanceButton"]').click();

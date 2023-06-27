@@ -27,11 +27,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationLink`}
-          // href={`#/added/${record.id}`}
-          href={`#/installed/${record.id}`}
-        >
+        <EuiLink data-test-subj={`${record.name}IntegrationLink`} href={`#/added/${record.id}`}>
           {_.truncate(record.name, { length: 100 })}
         </EuiLink>
       ),

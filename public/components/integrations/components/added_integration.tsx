@@ -50,12 +50,12 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         href: '#/',
       },
       {
-        text: 'Installed Integration',
-        href: '#/installed',
+        text: 'Added Integration',
+        href: '#/added',
       },
       {
         text: `${stateData.data?.name}`,
-        href: `#/installed/${stateData.data?.id}`,
+        href: `#/added/${stateData.data?.id}`,
       },
     ]);
     handleDataRequest();
@@ -91,7 +91,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         setToast(`Error deleting ${stateData.data?.name} or its assets`, 'danger');
       })
       .finally(() => {
-        window.location.hash = '#/installed';
+        window.location.hash = '#/added';
       });
   }
 

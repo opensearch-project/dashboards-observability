@@ -220,7 +220,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <input
                                     aria-describedby="random_html_id-help-0"
                                     class="euiFieldText"
-                                    data-test-subj="instance-name"
+                                    data-test-subj="new-instance-name"
                                     id="random_html_id"
                                     name="first"
                                     type="text"
@@ -621,7 +621,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText"
-                                            data-test-subj="instance-name"
+                                            data-test-subj="new-instance-name"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -954,7 +954,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText"
-                                              data-test-subj="instance-name"
+                                              data-test-subj="new-instance-name"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -1287,7 +1287,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText"
-                                                data-test-subj="instance-name"
+                                                data-test-subj="new-instance-name"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -1608,7 +1608,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 <input
                                                   aria-describedby="random_html_id-help-0"
                                                   class="euiFieldText"
-                                                  data-test-subj="instance-name"
+                                                  data-test-subj="new-instance-name"
                                                   id="random_html_id"
                                                   name="first"
                                                   type="text"
@@ -2178,7 +2178,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           >
                                             <EuiFieldText
                                               aria-describedby="random_html_id-help-0"
-                                              data-test-subj="instance-name"
+                                              data-test-subj="new-instance-name"
                                               id="random_html_id"
                                               name="first"
                                               onBlur={[Function]}
@@ -2200,7 +2200,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                       <input
                                                         aria-describedby="random_html_id-help-0"
                                                         className="euiFieldText"
-                                                        data-test-subj="instance-name"
+                                                        data-test-subj="new-instance-name"
                                                         id="random_html_id"
                                                         name="first"
                                                         onBlur={[Function]}

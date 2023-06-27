@@ -13,11 +13,11 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                 "text": "Integrations",
               },
               Object {
-                "href": "#/installed",
-                "text": "Installed Integration",
+                "href": "#/added",
+                "text": "Added Integration",
               },
               Object {
-                "href": "#/installed/undefined",
+                "href": "#/added/undefined",
                 "text": "undefined",
               },
             ],
