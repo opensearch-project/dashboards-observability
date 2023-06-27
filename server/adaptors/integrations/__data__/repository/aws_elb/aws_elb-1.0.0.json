@@ -2,7 +2,7 @@
     "name": "aws_elb",
     "version": "1.0.0",
     "displayName": "AWS ELB",
-    "description": "AWS Elastic Load Balancer Collector",
+    "description": "AWS Elastic Load Balancer collector",
     "license": "Apache-2.0",
     "type": "logs",
     "author": "Daniel Dong",
@@ -38,6 +38,10 @@
         },
         {
             "name": "aws_elb",
+            "version": "1.0.0"
+        },
+        {
+            "name": "container",
             "version": "1.0.0"
         },
         {
