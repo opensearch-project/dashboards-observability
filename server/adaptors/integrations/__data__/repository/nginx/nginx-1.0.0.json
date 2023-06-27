@@ -15,16 +15,8 @@
         },
         "gallery": [
             {
-                "annotation": "NginX Logo",
-                "path": "logo.svg"
-            },
-            {
-                "annotation": "NginX Logo",
-                "path": "logo.svg"
-            },
-            {
-                "annotation": "NginX Logo",
-                "path": "logo.svg"
+                "annotation": "NginX Dashboard",
+                "path": "dashboard1.png"
             }
         ]
     },
