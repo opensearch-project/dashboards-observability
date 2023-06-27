@@ -219,13 +219,8 @@
       }
     },
     "composed_of": [
-<<<<<<< Updated upstream
       "http",
       "communication"
-=======
-      "http_template",
-      "communication_template"
->>>>>>> Stashed changes
     ],
     "version": 1,
     "_meta": {
@@ -245,8 +240,4 @@
         }
       ]
     }
-<<<<<<< Updated upstream
   }
-=======
-  }
->>>>>>> Stashed changes
