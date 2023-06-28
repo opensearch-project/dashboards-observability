@@ -6,6 +6,7 @@
 import _ from 'lodash';
 import {
   EuiButton,
+  EuiCallOut,
   EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
@@ -16,6 +17,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiRadioGroup,
   EuiSpacer,
   EuiSuperSelect,
@@ -128,40 +130,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     setName(e.target.value);
   };
 
-  const [createDatasourceOption, setCreateDatasourceOption] = useState<string>();
-
-  const createDatasourceOptions = [
-    {
-      value: 'option_one',
-      inputDisplay: 'Create Data Stream Automatically',
-      dropdownDisplay: (
-        <Fragment>
-          <strong>Create Data Stream Automatically</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Create an SS4O compliant index pattern or data stream
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-    {
-      value: 'option_two',
-      inputDisplay: "I'll Do It Myself",
-      dropdownDisplay: (
-        <Fragment>
-          <strong>{"I'll Do it Myself"}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="ouiTextColor--subdued">
-              Create a SS4O compliant data stream first, then come back and create an integration
-              from it.
-            </p>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-  ];
-
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
     const data = await fetch(`${INTEGRATIONS_BASE}/repository/${integrationName}/schema`).then(
       (response) => {
@@ -183,21 +151,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     } else {
       setToast(`Successfully created index template`);
     }
-  };
-
-  const onCreateSelectChange = (value: any) => {
-    setCreateDatasourceOption(value);
-  };
-
-  const [namespace, setNamespace] = useState(''); // sets input value
-
-  const onNamespaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNamespace(e.target.value);
-  };
-  const [tags, setTags] = useState(''); // sets input value
-
-  const onTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTags(e.target.value);
   };
 
   // Returns true if the data stream is a legal name.
@@ -331,8 +284,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return (
           <div>
             <EuiFormRow
-              label="Data Stream"
-              helpText="The index pattern or data stream the integration will read from."
+              label="Index name or wildcard pattern"
+              helpText="Input an index name or wildcard pattern that your integration will query."
               isInvalid={!isDataSourceValid}
               error={errors}
             >
@@ -356,7 +309,10 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 }
               />
             </EuiFormRow>
-            <EuiFormRow label="Name" helpText="The name identifies the integration as a whole.">
+            <EuiFormRow
+              label="Name"
+              helpText="This will be used to label the newly added integration."
+            >
               <EuiFieldText
                 data-test-subj="new-instance-name"
                 name="first"
@@ -364,35 +320,14 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 value={name}
               />
             </EuiFormRow>
-            <EuiSpacer />
-            <EuiFormRow label="Namespace" helpText="The enviornment for which to ingest data.">
-              <EuiFieldText
-                data-test-subj="instance-namespace"
-                name="first"
-                onChange={(e) => onNamespaceChange(e)}
-                value={namespace}
-              />
-            </EuiFormRow>
-            <EuiSpacer />
-            <EuiSpacer />
           </div>
         );
       case '1':
         return (
           <div>
-            <EuiFormRow label="Create Data Stream Options">
-              <EuiSuperSelect
-                options={createDatasourceOptions}
-                valueOfSelected={createDatasourceOption}
-                onChange={(value) => onCreateSelectChange(value)}
-                itemLayoutAlign="top"
-                hasDividers
-              />
-            </EuiFormRow>
-            <EuiSpacer />
             <EuiFormRow
-              label="Data Stream"
-              helpText="Create an SS4O compliant data stream."
+              label="Create index name or wildcard pattern"
+              helpText="Create an SS4O compliant index or index pattern."
               isInvalid={!isCreateDatasourceValid}
               error={[]}
             >
@@ -415,6 +350,44 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 }
               />
             </EuiFormRow>
+            <EuiFormRow
+              label="Index name or wildcard pattern"
+              helpText="Input an index name or wildcard pattern that your integration will query."
+              isInvalid={!isDataSourceValid}
+              error={errors}
+            >
+              <EuiFieldText
+                data-test-subj="datasource-name"
+                name="first"
+                onChange={(e) => onDatasourceChange(e)}
+                value={dataSource}
+                isInvalid={!isDataSourceValid}
+                append={
+                  <EuiButton
+                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                    onClick={async () => {
+                      const validationResult = await doExistingDataSourceValidation(dataSource);
+                      setDataSourceValid(validationResult);
+                    }}
+                    disabled={dataSource.length === 0}
+                  >
+                    Validate
+                  </EuiButton>
+                }
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label="Name"
+              helpText="This will be used to label the newly added integration."
+            >
+              <EuiFieldText
+                data-test-subj="new-instance-name"
+                name="first"
+                onChange={(e) => onNameChange(e)}
+                value={name}
+              />
+            </EuiFormRow>
 
             <EuiFormRow>
               <EuiCheckbox
@@ -424,6 +397,16 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 onChange={(e) => onCheckChange(e)}
               />
             </EuiFormRow>
+            <EuiSpacer />
+            {!checked ? (
+              <EuiCallOut title="No sample data" iconType="documentation">
+                <p>
+                  Without sample data, you will need to manually create an index that maps to the
+                  ss4o schema{' '}
+                  <EuiLink href="https://opensearch.org/docs/latest/">Learn more</EuiLink>
+                </p>
+              </EuiCallOut>
+            ) : null}
           </div>
         );
       default:
@@ -434,11 +417,11 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const radios = [
     {
       id: `0`,
-      label: 'I Have Data',
+      label: 'Yes, I do.',
     },
     {
       id: `1`,
-      label: "I Don't Have Data",
+      label: 'No, I do not.',
     },
   ];
 
@@ -459,13 +442,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             data-test-subj="data-choice"
             name="radio group"
             legend={{
-              children: (
-                <span>
-                  {' '}
-                  Add an integration based on a SS4O compliant existing index pattern or data stream
-                  or create a SS4O compliant data stream for this integration to read from
-                </span>
-              ),
+              children: <span> Do you have a SS4O compliant index name or wildcard pattern?</span>,
             }}
           />
 
