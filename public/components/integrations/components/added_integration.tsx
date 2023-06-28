@@ -170,7 +170,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     const { data } = assetProps.data;
 
     const assets = data?.assets || [];
-    console.log(assets);
 
     const search = {
       box: {
@@ -198,7 +197,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         sortable: true,
         truncateText: true,
         render: (value, record) => {
-          console.log(record);
           return record.isDefaultAsset ? (
             <EuiLink
               data-test-subj={`IntegrationAssetLink`}

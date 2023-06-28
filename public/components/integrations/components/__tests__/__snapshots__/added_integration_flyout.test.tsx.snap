@@ -80,7 +80,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       <form
                         class="euiForm"
                       >
-                        <fieldset>
+                        <fieldset
+                          data-test-subj="data-choice"
+                        >
                           <legend
                             class="euiFormLegend"
                           >
@@ -162,7 +164,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <input
                                     aria-describedby="random_html_id-help-0"
                                     class="euiFieldText euiFieldText--inGroup"
-                                    data-test-subj="instance-name"
+                                    data-test-subj="datasource-name"
                                     id="random_html_id"
                                     name="first"
                                     type="text"
@@ -481,7 +483,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               <form
                                 class="euiForm"
                               >
-                                <fieldset>
+                                <fieldset
+                                  data-test-subj="data-choice"
+                                >
                                   <legend
                                     class="euiFormLegend"
                                   >
@@ -563,7 +567,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText euiFieldText--inGroup"
-                                            data-test-subj="instance-name"
+                                            data-test-subj="datasource-name"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -814,7 +818,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 <form
                                   class="euiForm"
                                 >
-                                  <fieldset>
+                                  <fieldset
+                                    data-test-subj="data-choice"
+                                  >
                                     <legend
                                       class="euiFormLegend"
                                     >
@@ -896,7 +902,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText euiFieldText--inGroup"
-                                              data-test-subj="instance-name"
+                                              data-test-subj="datasource-name"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -1147,7 +1153,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <form
                                     class="euiForm"
                                   >
-                                    <fieldset>
+                                    <fieldset
+                                      data-test-subj="data-choice"
+                                    >
                                       <legend
                                         class="euiFormLegend"
                                       >
@@ -1229,7 +1237,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText euiFieldText--inGroup"
-                                                data-test-subj="instance-name"
+                                                data-test-subj="datasource-name"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -1468,7 +1476,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     <form
                                       class="euiForm"
                                     >
-                                      <fieldset>
+                                      <fieldset
+                                        data-test-subj="data-choice"
+                                      >
                                         <legend
                                           class="euiFormLegend"
                                         >
@@ -1550,7 +1560,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 <input
                                                   aria-describedby="random_html_id-help-0"
                                                   class="euiFieldText euiFieldText--inGroup"
-                                                  data-test-subj="instance-name"
+                                                  data-test-subj="datasource-name"
                                                   id="random_html_id"
                                                   name="first"
                                                   type="text"
@@ -1859,6 +1869,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     className="euiForm"
                                   >
                                     <EuiRadioGroup
+                                      data-test-subj="data-choice"
                                       idSelected="0"
                                       legend={
                                         Object {
@@ -1885,6 +1896,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       }
                                     >
                                       <EuiFormFieldset
+                                        data-test-subj="data-choice"
                                         legend={
                                           Object {
                                             "children": <span>
@@ -1895,7 +1907,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           }
                                         }
                                       >
-                                        <fieldset>
+                                        <fieldset
+                                          data-test-subj="data-choice"
+                                        >
                                           <EuiFormLegend>
                                             <legend
                                               className="euiFormLegend"
@@ -2027,7 +2041,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 </EuiButton>
                                               }
                                               aria-describedby="random_html_id-help-0"
-                                              data-test-subj="instance-name"
+                                              data-test-subj="datasource-name"
                                               id="random_html_id"
                                               isInvalid={false}
                                               name="first"
@@ -2061,7 +2075,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                       <input
                                                         aria-describedby="random_html_id-help-0"
                                                         className="euiFieldText euiFieldText--inGroup"
-                                                        data-test-subj="instance-name"
+                                                        data-test-subj="datasource-name"
                                                         id="random_html_id"
                                                         name="first"
                                                         onBlur={[Function]}

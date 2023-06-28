@@ -25,6 +25,7 @@ import {
 import React, { Fragment, useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
@@ -96,6 +97,8 @@ export const doPropertyValidation = (
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const { onClose, onCreate, integrationName, integrationType } = props;
 
+  const { setToast } = useToast();
+
   const [checked, setChecked] = useState(false);
 
   const [isDataSourceValid, setDataSourceValid] = useState(true);
@@ -165,9 +168,21 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return response.json();
       }
     );
-    Object.entries(data.data.mappings).forEach(async ([key, mapping]) => {
-      await createMappings(key, mapping, targetDataSource);
-    });
+    let error = null;
+
+    for (const [key, mapping] of Object.entries(data.data.mappings)) {
+      const result = await createMappings(key, mapping, targetDataSource);
+
+      if (result && result.error) {
+        error = (result.error as any).reason;
+      }
+    }
+
+    if (error !== null) {
+      setToast('Failure creating index template', 'danger', error);
+    } else {
+      setToast(`Successfully created index template`);
+    }
   };
 
   const onCreateSelectChange = (value: any) => {
@@ -244,7 +259,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
-          return null;
+          return err;
         });
     } else {
       payload.index_patterns = [dataSourceName];
@@ -259,7 +274,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
-          return null;
+          return err;
         });
     }
   };
@@ -322,7 +337,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               error={errors}
             >
               <EuiFieldText
-                data-test-subj="instance-name"
+                data-test-subj="datasource-name"
                 name="first"
                 onChange={(e) => onDatasourceChange(e)}
                 value={dataSource}
@@ -382,14 +397,14 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               error={[]}
             >
               <EuiFieldText
-                data-test-subj="instance-name"
+                data-test-subj="create-indextemplate-name"
                 name="first"
                 onChange={(e) => onCreateDatasourceChange(e)}
                 value={createDataSource}
                 isInvalid={!isCreateDatasourceValid}
                 append={
                   <EuiButton
-                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                    data-test-subj="create-index-template-button"
                     onClick={() => {
                       createDataSourceMappings(createDataSource);
                     }}
@@ -441,6 +456,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             options={radios}
             idSelected={radioIdSelected}
             onChange={(id) => onChange(id)}
+            data-test-subj="data-choice"
             name="radio group"
             legend={{
               children: (
