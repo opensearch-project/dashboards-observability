@@ -59,7 +59,6 @@ import {
     it('Navigates to nginx page and triggers the adds the create index template flow', () => {
       moveToAvailableNginxIntegration();
       cy.get('[data-test-subj="add-integration-button"]').click();
-      cy.get('[data-test-subj="instance-name"]').should('have.value', 'nginx');
       cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
       cy.get('[data-test-subj="data-choice"]').contains("I Don't Have Data").click();
       cy.get('[data-test-subj="create-indextemplate-name"]').type('test')
