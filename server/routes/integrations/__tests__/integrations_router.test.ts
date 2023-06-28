@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { DeepPartial } from 'redux';
 import { OpenSearchDashboardsResponseFactory } from '../../../../../../src/core/server/http/router';
 import { handleWithCallback } from '../integrations_router';
