@@ -4,7 +4,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import {
   FILTERED_PATTERN,
@@ -25,7 +25,6 @@ export interface LogPatternProps {
     text: string;
     value: string;
   };
-  setTempQuery: () => string;
   handleTimeRangePickerRefresh: (flag: boolean) => {};
   patterns: PatternTableData[];
   query: IQuery;
@@ -33,7 +32,6 @@ export interface LogPatternProps {
 
 const EventPatterns = ({
   selectedIntervalUnit,
-  setTempQuery,
   handleTimeRangePickerRefresh,
   patterns,
   query,
@@ -49,11 +47,18 @@ const EventPatterns = ({
     requestParams: { tabId },
   });
 
+  // refresh patterns on opening page
+  useEffect(() => {
+    getPatterns(selectedIntervalUnit?.value?.replace(/^auto_/, '') || 'y');
+  }, []);
+
   const onPatternSelection = async (pattern: string) => {
     if (query[FILTERED_PATTERN] === pattern) {
       return;
     }
-    dispatch(
+    // await here allows react to render update properly and display it.
+    // it forces the query to be changed before running it, without await the visual wont update.
+    await dispatch(
       changeQuery({
         tabId,
         query: {
@@ -61,9 +66,16 @@ const EventPatterns = ({
         },
       })
     );
-    // workaround to refresh callback and trigger fetch data
-    await setTempQuery(query[RAW_QUERY]);
-    await handleTimeRangePickerRefresh(true);
+    handleTimeRangePickerRefresh(true);
+    // after rendering the patterns visual, we want the pattern to be reset for future searches
+    await dispatch(
+      changeQuery({
+        tabId,
+        query: {
+          [FILTERED_PATTERN]: '',
+        },
+      })
+    );
   };
 
   const showToastError = (errorMsg: string) => {
