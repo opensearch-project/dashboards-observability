@@ -17,8 +17,8 @@ import {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/available/nginx`);
   };
 
-  const moveToInstalledeIntegrations = () => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/installed`);
+  const moveToAddedIntegrations = () => {
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/added`);
   };
   
 
@@ -49,14 +49,14 @@ import {
     it('Navigates to nginx page and triggers the adds the instance flow', () => {
       moveToAvailableNginxIntegration();
       cy.get('[data-test-subj="add-integration-button"]').click();
-      cy.get('[data-test-subj="instance-name"]').should('have.value', 'nginx');
+      cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
       cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
-      cy.get('[data-test-subj="instance-name"]').type('-test');
+      cy.get('[data-test-subj="new-instance-name"]').type('-test');
       cy.get('[data-test-subj="createInstanceButton"]').click();
       cy.get('.euiToastHeader__title').should('contain', 'successfully');
     })
 
-    it.only('Navigates to nginx page and triggers the adds the create index template flow', () => {
+    it('Navigates to nginx page and triggers the adds the create index template flow', () => {
       moveToAvailableNginxIntegration();
       cy.get('[data-test-subj="add-integration-button"]').click();
       cy.get('[data-test-subj="instance-name"]').should('have.value', 'nginx');
@@ -73,8 +73,8 @@ import {
       cy.get('[data-test-subj="nginx-testIntegrationLink"]').click();
     })
 
-    it('Navigates to installed integrations page and verifies that nginx-test exists and linked asset works as expected', () => {
-      moveToInstalledeIntegrations();
+    it('Navigates to added integrations page and verifies that nginx-test exists and linked asset works as expected', () => {
+      moveToAddedIntegrations();
       cy.contains(TEST_INTEGRATION_INSTANCE).should('exist');
       cy.get('[data-test-subj="nginx-testIntegrationLink"]').click();
       cy.get(`[data-test-subj="IntegrationAssetLink"]`).click();
@@ -83,7 +83,7 @@ import {
     })
 
     it('Navigates to installed nginx-test instance page and deletes it', () => {
-      moveToInstalledeIntegrations();
+      moveToAddedIntegrations();
       cy.contains(TEST_INTEGRATION_INSTANCE).should('exist');
       cy.get('[data-test-subj="nginx-testIntegrationLink"]').click();
       cy.get('[data-test-subj="deleteInstanceButton"]').click();

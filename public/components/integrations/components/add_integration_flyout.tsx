@@ -358,7 +358,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             </EuiFormRow>
             <EuiFormRow label="Name" helpText="The name identifies the integration as a whole.">
               <EuiFieldText
-                data-test-subj="instance-name"
+                data-test-subj="new-instance-name"
                 name="first"
                 onChange={(e) => onNameChange(e)}
                 value={name}

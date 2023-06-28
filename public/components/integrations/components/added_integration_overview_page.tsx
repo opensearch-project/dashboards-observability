@@ -45,8 +45,8 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
         href: '#/',
       },
       {
-        text: 'Installed Integrations',
-        href: '#/installed',
+        text: 'Added Integrations',
+        href: '#/added',
       },
     ]);
     handleDataRequest();

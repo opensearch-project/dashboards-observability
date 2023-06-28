@@ -92,13 +92,10 @@ export class ObservabilityPlugin
             type: 'text',
           },
           dataSource: {
-            type: 'nested',
+            type: 'text',
           },
           creationDate: {
             type: 'date',
-          },
-          addedBy: {
-            type: 'text',
           },
           assets: {
             type: 'nested',
