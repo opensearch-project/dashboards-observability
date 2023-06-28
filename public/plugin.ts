@@ -11,6 +11,7 @@ import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
@@ -191,7 +192,7 @@ export class ObservabilityPlugin
     core.application.register({
       id: observabilityIntegrationsID,
       title: observabilityIntegrationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       order: observabilityIntegrationsPluginOrder,
       mount: appMountWithStartPage('integrations'),
     });
