@@ -56,6 +56,17 @@ import {
       cy.get('.euiToastHeader__title').should('contain', 'successfully');
     })
 
+    it.only('Navigates to nginx page and triggers the adds the create index template flow', () => {
+      moveToAvailableNginxIntegration();
+      cy.get('[data-test-subj="add-integration-button"]').click();
+      cy.get('[data-test-subj="instance-name"]').should('have.value', 'nginx');
+      cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
+      cy.get('[data-test-subj="data-choice"]').contains("I Don't Have Data").click();
+      cy.get('[data-test-subj="create-indextemplate-name"]').type('test')
+      cy.get('[data-test-subj="create-index-template-button"]').click();
+      cy.get('.euiToastHeader__title').should('contain', 'successfully');
+    })
+
     it('Navigates to installed integrations page and verifies that nginx-test exists', () => {
       moveToInstalledeIntegrations();
       cy.contains(TEST_INTEGRATION_INSTANCE).should('exist');

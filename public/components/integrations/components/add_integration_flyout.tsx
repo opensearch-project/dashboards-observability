@@ -337,7 +337,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               error={errors}
             >
               <EuiFieldText
-                data-test-subj="instance-name"
+                data-test-subj="datasource-name"
                 name="first"
                 onChange={(e) => onDatasourceChange(e)}
                 value={dataSource}
@@ -397,14 +397,14 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               error={[]}
             >
               <EuiFieldText
-                data-test-subj="instance-name"
+                data-test-subj="create-indextemplate-name"
                 name="first"
                 onChange={(e) => onCreateDatasourceChange(e)}
                 value={createDataSource}
                 isInvalid={!isCreateDatasourceValid}
                 append={
                   <EuiButton
-                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                    data-test-subj="create-index-template-button"
                     onClick={() => {
                       createDataSourceMappings(createDataSource);
                     }}
@@ -456,6 +456,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             options={radios}
             idSelected={radioIdSelected}
             onChange={(id) => onChange(id)}
+            data-test-subj="data-choice"
             name="radio group"
             legend={{
               children: (
