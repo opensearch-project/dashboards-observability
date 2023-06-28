@@ -625,14 +625,6 @@ const moveToThePanel = (panelId) => {
   });
 };
 
-const moveToTestPanel = () => {
-  moveToPanelHome();
-  testPanelTableCell().trigger('mouseover').click();
-  cy.get('h1').contains(TEST_PANEL).should('exist');
-};
-
-const TEST_PANEL_RX = new RegExp(TEST_PANEL + '.*');
-
 const eraseLegacyPanels = () => {
   cy.request({
     method: 'GET',
