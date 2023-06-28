@@ -87,8 +87,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             class="euiFormLegend"
                           >
                             <span>
-                               
-                              Do you have a SS4O compliant index name or wildcard pattern?
+                               Do you have a SS4O compliant index name or wildcard pattern?
                             </span>
                           </legend>
                           <div
@@ -439,8 +438,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     class="euiFormLegend"
                                   >
                                     <span>
-                                       
-                                      Do you have a SS4O compliant index name or wildcard pattern?
+                                       Do you have a SS4O compliant index name or wildcard pattern?
                                     </span>
                                   </legend>
                                   <div
@@ -723,8 +721,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       class="euiFormLegend"
                                     >
                                       <span>
-                                         
-                                        Do you have a SS4O compliant index name or wildcard pattern?
+                                         Do you have a SS4O compliant index name or wildcard pattern?
                                       </span>
                                     </legend>
                                     <div
@@ -1007,8 +1004,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormLegend"
                                       >
                                         <span>
-                                           
-                                          Do you have a SS4O compliant index name or wildcard pattern?
+                                           Do you have a SS4O compliant index name or wildcard pattern?
                                         </span>
                                       </legend>
                                       <div
@@ -1279,8 +1275,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormLegend"
                                         >
                                           <span>
-                                             
-                                            Do you have a SS4O compliant index name or wildcard pattern?
+                                             Do you have a SS4O compliant index name or wildcard pattern?
                                           </span>
                                         </legend>
                                         <div
@@ -1619,8 +1614,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       legend={
                                         Object {
                                           "children": <span>
-                                             
-                                            Do you have a SS4O compliant index name or wildcard pattern?
+                                             Do you have a SS4O compliant index name or wildcard pattern?
                                           </span>,
                                           "compressed": undefined,
                                         }
@@ -1645,8 +1639,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         legend={
                                           Object {
                                             "children": <span>
-                                               
-                                              Do you have a SS4O compliant index name or wildcard pattern?
+                                               Do you have a SS4O compliant index name or wildcard pattern?
                                             </span>,
                                             "compressed": undefined,
                                           }
@@ -1660,8 +1653,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               className="euiFormLegend"
                                             >
                                               <span>
-                                                 
-                                                Do you have a SS4O compliant index name or wildcard pattern?
+                                                 Do you have a SS4O compliant index name or wildcard pattern?
                                               </span>
                                             </legend>
                                           </EuiFormLegend>
