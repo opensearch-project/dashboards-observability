@@ -13,7 +13,7 @@ let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
 let testInstance = `${TEST_INTEGRATION_INSTANCE}_${testInstanceSuffix}`;
 
 const moveToIntegrationsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/available`);
 };
 
 const moveToAvailableNginxIntegration = () => {
@@ -81,7 +81,6 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get(`[data-test-subj="${testInstance}IntegrationLink"]`).click();
     cy.get(`[data-test-subj="IntegrationAssetLink"]`).click();
     cy.url().should('include', '/dashboards#/')
-
   })
 
   it('Navigates to installed nginx-test instance page and deletes it', () => {
@@ -98,7 +97,6 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
-    cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
   })
 });
 

@@ -26,11 +26,6 @@ export function IntegrationOverview(props: any) {
   const config = props.integration;
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }} data-test-subj={`${config.name}-overview`}>
-      <img
-        src={`${INTEGRATIONS_BASE}/repository/${config.name}/static/${config.statics.logo.path}`}
-        alt="React Logo"
-        style={{ height: 53, width: 53 }}
-      />
       <EuiSpacer size="m" />
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
@@ -51,7 +46,7 @@ export function IntegrationOverview(props: any) {
                 fill
                 data-test-subj="add-integration-button"
               >
-                Add
+                Set Up
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
