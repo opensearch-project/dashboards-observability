@@ -104,7 +104,6 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   };
 
   async function addIntegrationRequest(name: string) {
-    console.log('name', name);
     http
       .post(`${INTEGRATIONS_BASE}/store`)
       .then((res) => {

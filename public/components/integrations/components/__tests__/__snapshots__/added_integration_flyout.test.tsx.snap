@@ -80,13 +80,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       <form
                         class="euiForm"
                       >
-                        <fieldset>
+                        <fieldset
+                          data-test-subj="data-choice"
+                        >
                           <legend
                             class="euiFormLegend"
                           >
                             <span>
-                               
-                              Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                               Do you have a SS4O compliant index name or wildcard pattern?
                             </span>
                           </legend>
                           <div
@@ -107,7 +108,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiRadio__label"
                               for="0"
                             >
-                              I Have Data
+                              Yes, I do.
                             </label>
                           </div>
                           <div
@@ -127,7 +128,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiRadio__label"
                               for="1"
                             >
-                              I Don't Have Data
+                              No, I do not.
                             </label>
                           </div>
                         </fieldset>
@@ -147,7 +148,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 class="euiFormLabel euiFormRow__label"
                                 for="random_html_id"
                               >
-                                Data Stream
+                                Index name or wildcard pattern
                               </label>
                             </div>
                             <div
@@ -162,7 +163,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <input
                                     aria-describedby="random_html_id-help-0"
                                     class="euiFieldText euiFieldText--inGroup"
-                                    data-test-subj="instance-name"
+                                    data-test-subj="datasource-name"
                                     id="random_html_id"
                                     name="first"
                                     type="text"
@@ -190,7 +191,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 class="euiFormHelpText euiFormRow__text"
                                 id="random_html_id-help-0"
                               >
-                                The index pattern or data stream the integration will read from.
+                                Input an index name or wildcard pattern that your integration will query.
                               </div>
                             </div>
                           </div>
@@ -232,61 +233,10 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 class="euiFormHelpText euiFormRow__text"
                                 id="random_html_id-help-0"
                               >
-                                The name identifies the integration as a whole.
+                                This will be used to label the newly added integration.
                               </div>
                             </div>
                           </div>
-                          <div
-                            class="euiSpacer euiSpacer--l"
-                          />
-                          <div
-                            class="euiFormRow"
-                            id="random_html_id-row"
-                          >
-                            <div
-                              class="euiFormRow__labelWrapper"
-                            >
-                              <label
-                                class="euiFormLabel euiFormRow__label"
-                                for="random_html_id"
-                              >
-                                Namespace
-                              </label>
-                            </div>
-                            <div
-                              class="euiFormRow__fieldWrapper"
-                            >
-                              <div
-                                class="euiFormControlLayout"
-                              >
-                                <div
-                                  class="euiFormControlLayout__childrenWrapper"
-                                >
-                                  <input
-                                    aria-describedby="random_html_id-help-0"
-                                    class="euiFieldText"
-                                    data-test-subj="instance-namespace"
-                                    id="random_html_id"
-                                    name="first"
-                                    type="text"
-                                    value=""
-                                  />
-                                </div>
-                              </div>
-                              <div
-                                class="euiFormHelpText euiFormRow__text"
-                                id="random_html_id-help-0"
-                              >
-                                The enviornment for which to ingest data.
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="euiSpacer euiSpacer--l"
-                          />
-                          <div
-                            class="euiSpacer euiSpacer--l"
-                          />
                         </div>
                       </form>
                     </div>
@@ -481,13 +431,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               <form
                                 class="euiForm"
                               >
-                                <fieldset>
+                                <fieldset
+                                  data-test-subj="data-choice"
+                                >
                                   <legend
                                     class="euiFormLegend"
                                   >
                                     <span>
-                                       
-                                      Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                       Do you have a SS4O compliant index name or wildcard pattern?
                                     </span>
                                   </legend>
                                   <div
@@ -508,7 +459,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       class="euiRadio__label"
                                       for="0"
                                     >
-                                      I Have Data
+                                      Yes, I do.
                                     </label>
                                   </div>
                                   <div
@@ -528,7 +479,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       class="euiRadio__label"
                                       for="1"
                                     >
-                                      I Don't Have Data
+                                      No, I do not.
                                     </label>
                                   </div>
                                 </fieldset>
@@ -548,7 +499,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormLabel euiFormRow__label"
                                         for="random_html_id"
                                       >
-                                        Data Stream
+                                        Index name or wildcard pattern
                                       </label>
                                     </div>
                                     <div
@@ -563,7 +514,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText euiFieldText--inGroup"
-                                            data-test-subj="instance-name"
+                                            data-test-subj="datasource-name"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -591,7 +542,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormHelpText euiFormRow__text"
                                         id="random_html_id-help-0"
                                       >
-                                        The index pattern or data stream the integration will read from.
+                                        Input an index name or wildcard pattern that your integration will query.
                                       </div>
                                     </div>
                                   </div>
@@ -633,61 +584,10 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiFormHelpText euiFormRow__text"
                                         id="random_html_id-help-0"
                                       >
-                                        The name identifies the integration as a whole.
+                                        This will be used to label the newly added integration.
                                       </div>
                                     </div>
                                   </div>
-                                  <div
-                                    class="euiSpacer euiSpacer--l"
-                                  />
-                                  <div
-                                    class="euiFormRow"
-                                    id="random_html_id-row"
-                                  >
-                                    <div
-                                      class="euiFormRow__labelWrapper"
-                                    >
-                                      <label
-                                        class="euiFormLabel euiFormRow__label"
-                                        for="random_html_id"
-                                      >
-                                        Namespace
-                                      </label>
-                                    </div>
-                                    <div
-                                      class="euiFormRow__fieldWrapper"
-                                    >
-                                      <div
-                                        class="euiFormControlLayout"
-                                      >
-                                        <div
-                                          class="euiFormControlLayout__childrenWrapper"
-                                        >
-                                          <input
-                                            aria-describedby="random_html_id-help-0"
-                                            class="euiFieldText"
-                                            data-test-subj="instance-namespace"
-                                            id="random_html_id"
-                                            name="first"
-                                            type="text"
-                                            value=""
-                                          />
-                                        </div>
-                                      </div>
-                                      <div
-                                        class="euiFormHelpText euiFormRow__text"
-                                        id="random_html_id-help-0"
-                                      >
-                                        The enviornment for which to ingest data.
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
-                                    class="euiSpacer euiSpacer--l"
-                                  />
-                                  <div
-                                    class="euiSpacer euiSpacer--l"
-                                  />
                                 </div>
                               </form>
                             </div>
@@ -814,13 +714,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 <form
                                   class="euiForm"
                                 >
-                                  <fieldset>
+                                  <fieldset
+                                    data-test-subj="data-choice"
+                                  >
                                     <legend
                                       class="euiFormLegend"
                                     >
                                       <span>
-                                         
-                                        Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                         Do you have a SS4O compliant index name or wildcard pattern?
                                       </span>
                                     </legend>
                                     <div
@@ -841,7 +742,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiRadio__label"
                                         for="0"
                                       >
-                                        I Have Data
+                                        Yes, I do.
                                       </label>
                                     </div>
                                     <div
@@ -861,7 +762,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         class="euiRadio__label"
                                         for="1"
                                       >
-                                        I Don't Have Data
+                                        No, I do not.
                                       </label>
                                     </div>
                                   </fieldset>
@@ -881,7 +782,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormLabel euiFormRow__label"
                                           for="random_html_id"
                                         >
-                                          Data Stream
+                                          Index name or wildcard pattern
                                         </label>
                                       </div>
                                       <div
@@ -896,7 +797,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText euiFieldText--inGroup"
-                                              data-test-subj="instance-name"
+                                              data-test-subj="datasource-name"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -924,7 +825,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormHelpText euiFormRow__text"
                                           id="random_html_id-help-0"
                                         >
-                                          The index pattern or data stream the integration will read from.
+                                          Input an index name or wildcard pattern that your integration will query.
                                         </div>
                                       </div>
                                     </div>
@@ -966,61 +867,10 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiFormHelpText euiFormRow__text"
                                           id="random_html_id-help-0"
                                         >
-                                          The name identifies the integration as a whole.
+                                          This will be used to label the newly added integration.
                                         </div>
                                       </div>
                                     </div>
-                                    <div
-                                      class="euiSpacer euiSpacer--l"
-                                    />
-                                    <div
-                                      class="euiFormRow"
-                                      id="random_html_id-row"
-                                    >
-                                      <div
-                                        class="euiFormRow__labelWrapper"
-                                      >
-                                        <label
-                                          class="euiFormLabel euiFormRow__label"
-                                          for="random_html_id"
-                                        >
-                                          Namespace
-                                        </label>
-                                      </div>
-                                      <div
-                                        class="euiFormRow__fieldWrapper"
-                                      >
-                                        <div
-                                          class="euiFormControlLayout"
-                                        >
-                                          <div
-                                            class="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <input
-                                              aria-describedby="random_html_id-help-0"
-                                              class="euiFieldText"
-                                              data-test-subj="instance-namespace"
-                                              id="random_html_id"
-                                              name="first"
-                                              type="text"
-                                              value=""
-                                            />
-                                          </div>
-                                        </div>
-                                        <div
-                                          class="euiFormHelpText euiFormRow__text"
-                                          id="random_html_id-help-0"
-                                        >
-                                          The enviornment for which to ingest data.
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div
-                                      class="euiSpacer euiSpacer--l"
-                                    />
-                                    <div
-                                      class="euiSpacer euiSpacer--l"
-                                    />
                                   </div>
                                 </form>
                               </div>
@@ -1147,13 +997,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <form
                                     class="euiForm"
                                   >
-                                    <fieldset>
+                                    <fieldset
+                                      data-test-subj="data-choice"
+                                    >
                                       <legend
                                         class="euiFormLegend"
                                       >
                                         <span>
-                                           
-                                          Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                           Do you have a SS4O compliant index name or wildcard pattern?
                                         </span>
                                       </legend>
                                       <div
@@ -1174,7 +1025,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiRadio__label"
                                           for="0"
                                         >
-                                          I Have Data
+                                          Yes, I do.
                                         </label>
                                       </div>
                                       <div
@@ -1194,7 +1045,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           class="euiRadio__label"
                                           for="1"
                                         >
-                                          I Don't Have Data
+                                          No, I do not.
                                         </label>
                                       </div>
                                     </fieldset>
@@ -1214,7 +1065,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiFormLabel euiFormRow__label"
                                             for="random_html_id"
                                           >
-                                            Data Stream
+                                            Index name or wildcard pattern
                                           </label>
                                         </div>
                                         <div
@@ -1229,7 +1080,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText euiFieldText--inGroup"
-                                                data-test-subj="instance-name"
+                                                data-test-subj="datasource-name"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -1257,7 +1108,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiFormHelpText euiFormRow__text"
                                             id="random_html_id-help-0"
                                           >
-                                            The index pattern or data stream the integration will read from.
+                                            Input an index name or wildcard pattern that your integration will query.
                                           </div>
                                         </div>
                                       </div>
@@ -1299,61 +1150,10 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiFormHelpText euiFormRow__text"
                                             id="random_html_id-help-0"
                                           >
-                                            The name identifies the integration as a whole.
+                                            This will be used to label the newly added integration.
                                           </div>
                                         </div>
                                       </div>
-                                      <div
-                                        class="euiSpacer euiSpacer--l"
-                                      />
-                                      <div
-                                        class="euiFormRow"
-                                        id="random_html_id-row"
-                                      >
-                                        <div
-                                          class="euiFormRow__labelWrapper"
-                                        >
-                                          <label
-                                            class="euiFormLabel euiFormRow__label"
-                                            for="random_html_id"
-                                          >
-                                            Namespace
-                                          </label>
-                                        </div>
-                                        <div
-                                          class="euiFormRow__fieldWrapper"
-                                        >
-                                          <div
-                                            class="euiFormControlLayout"
-                                          >
-                                            <div
-                                              class="euiFormControlLayout__childrenWrapper"
-                                            >
-                                              <input
-                                                aria-describedby="random_html_id-help-0"
-                                                class="euiFieldText"
-                                                data-test-subj="instance-namespace"
-                                                id="random_html_id"
-                                                name="first"
-                                                type="text"
-                                                value=""
-                                              />
-                                            </div>
-                                          </div>
-                                          <div
-                                            class="euiFormHelpText euiFormRow__text"
-                                            id="random_html_id-help-0"
-                                          >
-                                            The enviornment for which to ingest data.
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div
-                                        class="euiSpacer euiSpacer--l"
-                                      />
-                                      <div
-                                        class="euiSpacer euiSpacer--l"
-                                      />
                                     </div>
                                   </form>
                                 </div>
@@ -1468,13 +1268,14 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     <form
                                       class="euiForm"
                                     >
-                                      <fieldset>
+                                      <fieldset
+                                        data-test-subj="data-choice"
+                                      >
                                         <legend
                                           class="euiFormLegend"
                                         >
                                           <span>
-                                             
-                                            Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                             Do you have a SS4O compliant index name or wildcard pattern?
                                           </span>
                                         </legend>
                                         <div
@@ -1495,7 +1296,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiRadio__label"
                                             for="0"
                                           >
-                                            I Have Data
+                                            Yes, I do.
                                           </label>
                                         </div>
                                         <div
@@ -1515,7 +1316,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             class="euiRadio__label"
                                             for="1"
                                           >
-                                            I Don't Have Data
+                                            No, I do not.
                                           </label>
                                         </div>
                                       </fieldset>
@@ -1535,7 +1336,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               class="euiFormLabel euiFormRow__label"
                                               for="random_html_id"
                                             >
-                                              Data Stream
+                                              Index name or wildcard pattern
                                             </label>
                                           </div>
                                           <div
@@ -1550,7 +1351,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 <input
                                                   aria-describedby="random_html_id-help-0"
                                                   class="euiFieldText euiFieldText--inGroup"
-                                                  data-test-subj="instance-name"
+                                                  data-test-subj="datasource-name"
                                                   id="random_html_id"
                                                   name="first"
                                                   type="text"
@@ -1578,7 +1379,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               class="euiFormHelpText euiFormRow__text"
                                               id="random_html_id-help-0"
                                             >
-                                              The index pattern or data stream the integration will read from.
+                                              Input an index name or wildcard pattern that your integration will query.
                                             </div>
                                           </div>
                                         </div>
@@ -1620,61 +1421,10 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               class="euiFormHelpText euiFormRow__text"
                                               id="random_html_id-help-0"
                                             >
-                                              The name identifies the integration as a whole.
+                                              This will be used to label the newly added integration.
                                             </div>
                                           </div>
                                         </div>
-                                        <div
-                                          class="euiSpacer euiSpacer--l"
-                                        />
-                                        <div
-                                          class="euiFormRow"
-                                          id="random_html_id-row"
-                                        >
-                                          <div
-                                            class="euiFormRow__labelWrapper"
-                                          >
-                                            <label
-                                              class="euiFormLabel euiFormRow__label"
-                                              for="random_html_id"
-                                            >
-                                              Namespace
-                                            </label>
-                                          </div>
-                                          <div
-                                            class="euiFormRow__fieldWrapper"
-                                          >
-                                            <div
-                                              class="euiFormControlLayout"
-                                            >
-                                              <div
-                                                class="euiFormControlLayout__childrenWrapper"
-                                              >
-                                                <input
-                                                  aria-describedby="random_html_id-help-0"
-                                                  class="euiFieldText"
-                                                  data-test-subj="instance-namespace"
-                                                  id="random_html_id"
-                                                  name="first"
-                                                  type="text"
-                                                  value=""
-                                                />
-                                              </div>
-                                            </div>
-                                            <div
-                                              class="euiFormHelpText euiFormRow__text"
-                                              id="random_html_id-help-0"
-                                            >
-                                              The enviornment for which to ingest data.
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          class="euiSpacer euiSpacer--l"
-                                        />
-                                        <div
-                                          class="euiSpacer euiSpacer--l"
-                                        />
                                       </div>
                                     </form>
                                   </div>
@@ -1859,12 +1609,12 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     className="euiForm"
                                   >
                                     <EuiRadioGroup
+                                      data-test-subj="data-choice"
                                       idSelected="0"
                                       legend={
                                         Object {
                                           "children": <span>
-                                             
-                                            Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                             Do you have a SS4O compliant index name or wildcard pattern?
                                           </span>,
                                           "compressed": undefined,
                                         }
@@ -1875,34 +1625,35 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         Array [
                                           Object {
                                             "id": "0",
-                                            "label": "I Have Data",
+                                            "label": "Yes, I do.",
                                           },
                                           Object {
                                             "id": "1",
-                                            "label": "I Don't Have Data",
+                                            "label": "No, I do not.",
                                           },
                                         ]
                                       }
                                     >
                                       <EuiFormFieldset
+                                        data-test-subj="data-choice"
                                         legend={
                                           Object {
                                             "children": <span>
-                                               
-                                              Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                               Do you have a SS4O compliant index name or wildcard pattern?
                                             </span>,
                                             "compressed": undefined,
                                           }
                                         }
                                       >
-                                        <fieldset>
+                                        <fieldset
+                                          data-test-subj="data-choice"
+                                        >
                                           <EuiFormLegend>
                                             <legend
                                               className="euiFormLegend"
                                             >
                                               <span>
-                                                 
-                                                Add an integration based on a SS4O compliant existing index pattern or data stream or create a SS4O compliant data stream for this integration to read from
+                                                 Do you have a SS4O compliant index name or wildcard pattern?
                                               </span>
                                             </legend>
                                           </EuiFormLegend>
@@ -1911,7 +1662,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             className="euiRadioGroup__item"
                                             id="0"
                                             key="0"
-                                            label="I Have Data"
+                                            label="Yes, I do."
                                             name="radio group"
                                             onChange={[Function]}
                                           >
@@ -1933,7 +1684,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 className="euiRadio__label"
                                                 htmlFor="0"
                                               >
-                                                I Have Data
+                                                Yes, I do.
                                               </label>
                                             </div>
                                           </EuiRadio>
@@ -1942,7 +1693,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             className="euiRadioGroup__item"
                                             id="1"
                                             key="1"
-                                            label="I Don't Have Data"
+                                            label="No, I do not."
                                             name="radio group"
                                             onChange={[Function]}
                                           >
@@ -1964,7 +1715,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 className="euiRadio__label"
                                                 htmlFor="1"
                                               >
-                                                I Don't Have Data
+                                                No, I do not.
                                               </label>
                                             </div>
                                           </EuiRadio>
@@ -1984,9 +1735,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         fullWidth={false}
                                         hasChildLabel={true}
                                         hasEmptyLabelSpace={false}
-                                        helpText="The index pattern or data stream the integration will read from."
+                                        helpText="Input an index name or wildcard pattern that your integration will query."
                                         isInvalid={false}
-                                        label="Data Stream"
+                                        label="Index name or wildcard pattern"
                                         labelType="label"
                                       >
                                         <div
@@ -2009,7 +1760,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 className="euiFormLabel euiFormRow__label"
                                                 htmlFor="random_html_id"
                                               >
-                                                Data Stream
+                                                Index name or wildcard pattern
                                               </label>
                                             </EuiFormLabel>
                                           </div>
@@ -2027,7 +1778,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 </EuiButton>
                                               }
                                               aria-describedby="random_html_id-help-0"
-                                              data-test-subj="instance-name"
+                                              data-test-subj="datasource-name"
                                               id="random_html_id"
                                               isInvalid={false}
                                               name="first"
@@ -2061,7 +1812,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                       <input
                                                         aria-describedby="random_html_id-help-0"
                                                         className="euiFieldText euiFieldText--inGroup"
-                                                        data-test-subj="instance-name"
+                                                        data-test-subj="datasource-name"
                                                         id="random_html_id"
                                                         name="first"
                                                         onBlur={[Function]}
@@ -2130,13 +1881,13 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <EuiFormHelpText
                                               className="euiFormRow__text"
                                               id="random_html_id-help-0"
-                                              key="The index pattern or data stream the integration will read from."
+                                              key="Input an index name or wildcard pattern that your integration will query."
                                             >
                                               <div
                                                 className="euiFormHelpText euiFormRow__text"
                                                 id="random_html_id-help-0"
                                               >
-                                                The index pattern or data stream the integration will read from.
+                                                Input an index name or wildcard pattern that your integration will query.
                                               </div>
                                             </EuiFormHelpText>
                                           </div>
@@ -2148,7 +1899,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         fullWidth={false}
                                         hasChildLabel={true}
                                         hasEmptyLabelSpace={false}
-                                        helpText="The name identifies the integration as a whole."
+                                        helpText="This will be used to label the newly added integration."
                                         label="Name"
                                         labelType="label"
                                       >
@@ -2218,121 +1969,18 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <EuiFormHelpText
                                               className="euiFormRow__text"
                                               id="random_html_id-help-0"
-                                              key="The name identifies the integration as a whole."
+                                              key="This will be used to label the newly added integration."
                                             >
                                               <div
                                                 className="euiFormHelpText euiFormRow__text"
                                                 id="random_html_id-help-0"
                                               >
-                                                The name identifies the integration as a whole.
+                                                This will be used to label the newly added integration.
                                               </div>
                                             </EuiFormHelpText>
                                           </div>
                                         </div>
                                       </EuiFormRow>
-                                      <EuiSpacer>
-                                        <div
-                                          className="euiSpacer euiSpacer--l"
-                                        />
-                                      </EuiSpacer>
-                                      <EuiFormRow
-                                        describedByIds={Array []}
-                                        display="row"
-                                        fullWidth={false}
-                                        hasChildLabel={true}
-                                        hasEmptyLabelSpace={false}
-                                        helpText="The enviornment for which to ingest data."
-                                        label="Namespace"
-                                        labelType="label"
-                                      >
-                                        <div
-                                          className="euiFormRow"
-                                          id="random_html_id-row"
-                                        >
-                                          <div
-                                            className="euiFormRow__labelWrapper"
-                                          >
-                                            <EuiFormLabel
-                                              className="euiFormRow__label"
-                                              htmlFor="random_html_id"
-                                              isFocused={false}
-                                              type="label"
-                                            >
-                                              <label
-                                                className="euiFormLabel euiFormRow__label"
-                                                htmlFor="random_html_id"
-                                              >
-                                                Namespace
-                                              </label>
-                                            </EuiFormLabel>
-                                          </div>
-                                          <div
-                                            className="euiFormRow__fieldWrapper"
-                                          >
-                                            <EuiFieldText
-                                              aria-describedby="random_html_id-help-0"
-                                              data-test-subj="instance-namespace"
-                                              id="random_html_id"
-                                              name="first"
-                                              onBlur={[Function]}
-                                              onChange={[Function]}
-                                              onFocus={[Function]}
-                                              value=""
-                                            >
-                                              <EuiFormControlLayout
-                                                fullWidth={false}
-                                                inputId="random_html_id"
-                                              >
-                                                <div
-                                                  className="euiFormControlLayout"
-                                                >
-                                                  <div
-                                                    className="euiFormControlLayout__childrenWrapper"
-                                                  >
-                                                    <EuiValidatableControl>
-                                                      <input
-                                                        aria-describedby="random_html_id-help-0"
-                                                        className="euiFieldText"
-                                                        data-test-subj="instance-namespace"
-                                                        id="random_html_id"
-                                                        name="first"
-                                                        onBlur={[Function]}
-                                                        onChange={[Function]}
-                                                        onFocus={[Function]}
-                                                        type="text"
-                                                        value=""
-                                                      />
-                                                    </EuiValidatableControl>
-                                                    <EuiFormControlLayoutIcons />
-                                                  </div>
-                                                </div>
-                                              </EuiFormControlLayout>
-                                            </EuiFieldText>
-                                            <EuiFormHelpText
-                                              className="euiFormRow__text"
-                                              id="random_html_id-help-0"
-                                              key="The enviornment for which to ingest data."
-                                            >
-                                              <div
-                                                className="euiFormHelpText euiFormRow__text"
-                                                id="random_html_id-help-0"
-                                              >
-                                                The enviornment for which to ingest data.
-                                              </div>
-                                            </EuiFormHelpText>
-                                          </div>
-                                        </div>
-                                      </EuiFormRow>
-                                      <EuiSpacer>
-                                        <div
-                                          className="euiSpacer euiSpacer--l"
-                                        />
-                                      </EuiSpacer>
-                                      <EuiSpacer>
-                                        <div
-                                          className="euiSpacer euiSpacer--l"
-                                        />
-                                      </EuiSpacer>
                                     </div>
                                   </form>
                                 </EuiForm>
