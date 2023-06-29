@@ -31,7 +31,7 @@ import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
-  onCreate: (name: string, dataSource: string) => void;
+  onCreate: (name: string, dataSource: string, sampleData: boolean) => void;
   integrationName: string;
   integrationType: string;
   http: HttpStart;
@@ -235,14 +235,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         });
     } else {
       payload.index_patterns = [dataSourceName];
-      return fetch(`/api/console/proxy?path=_index_template/${componentName}&method=POST`, {
-        method: 'POST',
-        headers: [
-          ['osd-xsrf', 'true'],
-          ['Content-Type', 'application/json'],
-        ],
-        body: JSON.stringify(payload),
-      })
+      return fetch(
+        `/api/console/proxy?path=_index_template/${componentName}${'abc123'}&method=POST`,
+        {
+          method: 'POST',
+          headers: [
+            ['osd-xsrf', 'true'],
+            ['Content-Type', 'application/json'],
+          ],
+          body: JSON.stringify(payload),
+        }
+      )
         .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
@@ -491,7 +494,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           <EuiFlexItem>
             <EuiButton
               onClick={() => {
-                onCreate(name, dataSource);
+                onCreate(name, dataSource, checked);
                 onClose();
               }}
               fill

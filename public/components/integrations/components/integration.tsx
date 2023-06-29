@@ -98,24 +98,59 @@ export function Integration(props: AvailableIntegrationProps) {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  async function addIntegrationRequest(templateName: string, name: string, dataSource: string) {
-    http
+  async function addIntegrationRequest(
+    templateName: string,
+    name: string,
+    dataSource: string,
+    checked: boolean
+  ) {
+    const response: boolean = await http
       .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
         body: JSON.stringify({ name, dataSource }),
       })
-      .then((res) => {
+      .then((_res) => {
         setToast(
           `${name} integration successfully added!`,
           'success',
           `View the added assets from ${name} in the Added Integrations list`
         );
+        return true;
       })
-      .catch((err) =>
+      .catch((_err) => {
         setToast(
           'Failed to load integration. Check Added Integrations table for more details',
           'danger'
-        )
-      );
+        );
+        return false;
+      });
+    if (!checked || !response) {
+      return;
+    }
+    const data: { sampleData: unknown[] } = await http
+      .get(`${INTEGRATIONS_BASE}/repository/${templateName}/data`)
+      .then((res) => res.data)
+      .catch((err) => {
+        console.error(err);
+        setToast('The sample data could not be retrieved', 'danger');
+        return { sampleData: [] };
+      });
+    const requestBody =
+      data.sampleData
+        .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
+        .join('\n') + '\n';
+    console.log('data:' + JSON.stringify(data));
+    console.log('reqB:' + requestBody);
+    fetch(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, {
+      method: 'POST',
+      body: requestBody,
+      headers: [
+        ['osd-xsrf', 'true'],
+        ['Content-Type', 'application/json; charset=utf-8'],
+      ],
+    }).catch((err) => {
+      console.error(err);
+      setToast('Failed to load sample data', 'danger');
+    });
   }
 
   if (Object.keys(integration).length === 0) {
@@ -157,8 +192,8 @@ export function Integration(props: AvailableIntegrationProps) {
           onClose={() => {
             setIsFlyoutVisible(false);
           }}
-          onCreate={(name, dataSource) => {
-            addIntegrationRequest(integrationTemplateId, name, dataSource);
+          onCreate={(name, dataSource, checked) => {
+            addIntegrationRequest(integrationTemplateId, name, dataSource, checked);
           }}
           integrationName={integrationTemplateId}
           integrationType={integration.type}
