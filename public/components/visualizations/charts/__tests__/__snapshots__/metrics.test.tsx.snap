@@ -599,7 +599,6 @@ exports[`Metrics component Renders Metrics component 1`] = `
           ],
         },
         "fulllabel": "Metrics",
-        "icon": [Function],
         "icontype": "stats",
         "id": "metrics",
         "label": "Metrics",
