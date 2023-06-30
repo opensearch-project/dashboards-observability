@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 import './empty_placeholder.scss';
 
-export const VisCanvassPlaceholder = (props: { message: string; icon: string }) => (
+export const VisWorkspaceDefault = (props: { message: string; icon: string }) => (
   <>
     <EuiText
       className="visWorkspaceNoData"
