@@ -5,7 +5,6 @@
 
 import { TreeMap } from './treemaps';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartBar } from '../../assets/chart_bar';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
 import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
 import {
@@ -24,9 +23,7 @@ const VIS_CATEGORY = getPlotlyCategory();
 
 const { SortSectors } = DEFAULT_CHART_STYLES;
 
-export interface BarTypeParams {}
-
-export const createTreeMapDefinition = (params: BarTypeParams = {}) => ({
+export const createTreeMapDefinition = (params: any) => ({
   name: 'tree_map',
   type: 'tree_map',
   id: 'tree_map',
@@ -37,7 +34,6 @@ export const createTreeMapDefinition = (params: BarTypeParams = {}) => ({
   },
   category: VIS_CATEGORY.BASICS,
   icontype: 'heatmap',
-  icon: LensIconChartBar,
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   orientation: 'v',
