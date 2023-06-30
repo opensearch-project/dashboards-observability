@@ -101,11 +101,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const { setToast } = useToast();
 
-  const [checked, setChecked] = useState(false);
-
   const [isDataSourceValid, setDataSourceValid] = useState(true);
-
-  const [isCreateDatasourceValid, setCreateDataSourceValid] = useState(true);
 
   const [name, setName] = useState(integrationName || ''); // sets input value
   const [dataSource, setDataSource] = useState('');
@@ -114,10 +110,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const onDatasourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDataSource(e.target.value);
-  };
-
-  const onCheckChange = (e: any) => {
-    setChecked(e.target.checked);
   };
 
   const onCreateDatasourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -298,177 +290,50 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   };
 
   const formContent = () => {
-    switch (radioIdSelected) {
-      case '0':
-        return (
-          <div>
-            <EuiFormRow
-              label="Index name or wildcard pattern"
-              helpText="Input an index name or wildcard pattern that your integration will query."
-              isInvalid={!isDataSourceValid}
-              error={errors}
-            >
-              <EuiFieldText
-                data-test-subj="datasource-name"
-                name="first"
-                onChange={(e) => onDatasourceChange(e)}
-                value={dataSource}
-                isInvalid={!isDataSourceValid}
-                append={
-                  <EuiButton
-                    data-test-subj="resetCustomEmbeddablePanelTitle"
-                    onClick={async () => {
-                      const validationResult = await doExistingDataSourceValidation(dataSource);
-                      setDataSourceValid(validationResult);
-                    }}
-                    disabled={dataSource.length === 0}
-                  >
-                    Validate
-                  </EuiButton>
-                }
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label="Name"
-              helpText="This will be used to label the newly added integration."
-            >
-              <EuiFieldText
-                data-test-subj="new-instance-name"
-                name="first"
-                onChange={(e) => onNameChange(e)}
-                value={name}
-              />
-            </EuiFormRow>
-          </div>
-        );
-      case '1':
-        return (
-          <div>
-            <EuiFormRow
-              label="Create index name or wildcard pattern"
-              helpText="Create an SS4O compliant index or index pattern."
-              isInvalid={!isCreateDatasourceValid}
-              error={[]}
-            >
-              <EuiFieldText
-                data-test-subj="create-indextemplate-name"
-                name="first"
-                onChange={(e) => onCreateDatasourceChange(e)}
-                value={createDataSource}
-                isInvalid={!isCreateDatasourceValid}
-                append={
-                  <EuiButton
-                    data-test-subj="create-index-template-button"
-                    onClick={() => {
-                      createDataSourceMappings(createDataSource);
-                    }}
-                    disabled={createDataSource.length === 0}
-                  >
-                    Create
-                  </EuiButton>
-                }
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label="Index name or wildcard pattern"
-              helpText="Input an index name or wildcard pattern that your integration will query."
-              isInvalid={!isDataSourceValid}
-              error={errors}
-            >
-              <EuiFieldText
-                data-test-subj="datasource-name"
-                name="first"
-                onChange={(e) => onDatasourceChange(e)}
-                value={dataSource}
-                isInvalid={!isDataSourceValid}
-                append={
-                  <EuiButton
-                    data-test-subj="resetCustomEmbeddablePanelTitle"
-                    onClick={async () => {
-                      const validationResult = await doExistingDataSourceValidation(dataSource);
-                      setDataSourceValid(validationResult);
-                    }}
-                    disabled={dataSource.length === 0}
-                  >
-                    Validate
-                  </EuiButton>
-                }
-              />
-            </EuiFormRow>
-
-            <EuiFormRow
-              label="Name"
-              helpText="This will be used to label the newly added integration."
-            >
-              <EuiFieldText
-                data-test-subj="new-instance-name"
-                name="first"
-                onChange={(e) => onNameChange(e)}
-                value={name}
-              />
-            </EuiFormRow>
-
-            <EuiFormRow>
-              <EuiCheckbox
-                id={'test'}
-                label="Add Sample Data"
-                checked={checked}
-                onChange={(e) => onCheckChange(e)}
-              />
-            </EuiFormRow>
-            <EuiSpacer />
-            {!checked ? (
-              <EuiCallOut title="No sample data" iconType="documentation">
-                <p>
-                  Without sample data, you will need to manually create an index that maps to the
-                  ss4o schema{' '}
-                  <EuiLink href="https://opensearch.org/docs/latest/">Learn more</EuiLink>
-                </p>
-              </EuiCallOut>
-            ) : null}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const radios = [
-    {
-      id: `0`,
-      label: 'Yes, I do.',
-    },
-    {
-      id: `1`,
-      label: 'No, I do not.',
-    },
-  ];
-
-  const [radioIdSelected, setRadioIdSelected] = useState(`0`);
-
-  const onChange = (optionId: any) => {
-    setRadioIdSelected(optionId);
+    return (
+      <div>
+        <EuiFormRow
+          label="Index name or wildcard pattern"
+          helpText="Input an index name or wildcard pattern that your integration will query."
+          isInvalid={!isDataSourceValid}
+          error={errors}
+        >
+          <EuiFieldText
+            data-test-subj="datasource-name"
+            name="first"
+            onChange={(e) => onDatasourceChange(e)}
+            value={dataSource}
+            isInvalid={!isDataSourceValid}
+            append={
+              <EuiButton
+                data-test-subj="resetCustomEmbeddablePanelTitle"
+                onClick={async () => {
+                  const validationResult = await doExistingDataSourceValidation(dataSource);
+                  setDataSourceValid(validationResult);
+                }}
+                disabled={dataSource.length === 0}
+              >
+                Validate
+              </EuiButton>
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Name" helpText="This will be used to label the newly added integration.">
+          <EuiFieldText
+            data-test-subj="new-instance-name"
+            name="first"
+            onChange={(e) => onNameChange(e)}
+            value={name}
+          />
+        </EuiFormRow>
+      </div>
+    );
   };
 
   const renderContent = () => {
     return (
       <>
-        <EuiForm component="form">
-          <EuiRadioGroup
-            options={radios}
-            idSelected={radioIdSelected}
-            onChange={(id) => onChange(id)}
-            data-test-subj="data-choice"
-            name="radio group"
-            legend={{
-              children: <span> Do you have a SS4O compliant index name or wildcard pattern?</span>,
-            }}
-          />
-
-          <EuiSpacer />
-
-          {formContent()}
-        </EuiForm>
+        <EuiForm component="form">{formContent()}</EuiForm>
       </>
     );
   };
