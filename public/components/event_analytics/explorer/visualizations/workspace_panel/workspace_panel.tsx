@@ -25,10 +25,10 @@ export function WorkspacePanel({ visualizations }: IWorkSpacePanel) {
   }, [visualizations]);
 
   return (
-    <div className="explorerViz__commonPanel ws__visCanvas">
-      <EuiPanel className="ws__visCanvasControl" paddingSize="s" color="plain" hasBorder={false}>
+    <div className="explorerViz__commonPanel ws__workspace_visPanel">
+      <EuiPanel className="workspace_visPanel" paddingSize="s" color="plain" hasBorder={false}>
         <EuiSwitch
-          className="ws__visCanvasControl--switch"
+          className="workspace_visPanel--switch"
           label="Table view"
           type="button"
           disabled={isEmpty(visualizations?.data?.explorer?.explorerData)}
@@ -43,7 +43,7 @@ export function WorkspacePanel({ visualizations }: IWorkSpacePanel) {
       </EuiPanel>
       <EuiPanel
         paddingSize="s"
-        className={`ws__visCanvas--space ${
+        className={`ws__workspace_visPanel--space ${
           uiSettingsService.get('theme:darkMode') ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'
         }`}
       >

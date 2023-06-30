@@ -5,4 +5,4 @@
 
 export * from './empty_placeholder';
 export { ToolbarButtonProps, ToolbarButton } from './toolbar_button';
-export { VisCanvassPlaceholder } from './vis_canvass_placeholder'
+export { VisWorkspaceDefault } from './vis_canvass_placeholder';
