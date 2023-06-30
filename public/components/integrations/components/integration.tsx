@@ -65,7 +65,7 @@ export function Integration(props: AvailableIntegrationProps) {
     } else {
       payload.index_patterns = [dataSourceName];
       return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}${'abc123'}&method=POST`,
+        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
         {
           method: 'POST',
           headers: [
@@ -185,9 +185,9 @@ export function Integration(props: AvailableIntegrationProps) {
     dataSource?: string
   ) {
     if (addSample) {
-      createDataSourceMappings(integrationTemplateId);
-      name = 'test';
-      dataSource = integrationTemplateId;
+      createDataSourceMappings(`ss4o_${integration.type}-${integrationTemplateId}-sample-*-*`);
+      name = `${integrationTemplateId}-sample`;
+      dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample_sample_sample`;
     }
 
     const response: boolean = await http
@@ -212,6 +212,7 @@ export function Integration(props: AvailableIntegrationProps) {
     if (!addSample || !response) {
       return;
     }
+    console.log(dataSource);
     const data: { sampleData: unknown[] } = await http
       .get(`${INTEGRATIONS_BASE}/repository/${templateName}/data`)
       .then((res) => res.data)
@@ -224,8 +225,6 @@ export function Integration(props: AvailableIntegrationProps) {
       data.sampleData
         .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
         .join('\n') + '\n';
-    console.log('data:' + JSON.stringify(data));
-    console.log('reqB:' + requestBody);
     fetch(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, {
       method: 'POST',
       body: requestBody,

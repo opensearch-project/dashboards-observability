@@ -161,54 +161,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       });
   };
 
-  const createMappings = async (
-    componentName: string,
-    payload: {
-      template: { mappings: { _meta: { version: string } } };
-      composed_of: string[];
-      index_patterns: string[];
-    },
-    dataSourceName: string
-  ): Promise<{ [key: string]: { properties: any } } | null> => {
-    const version = payload.template.mappings._meta.version;
-    if (componentName !== integrationType) {
-      return fetch(
-        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    } else {
-      payload.index_patterns = [dataSourceName];
-      return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}${'abc123'}&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    }
-  };
-
   const fetchIntegrationMappings = async (
     targetName: string
   ): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {

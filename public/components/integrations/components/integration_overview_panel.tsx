@@ -56,7 +56,7 @@ export function IntegrationOverview(props: any) {
                   props.setUpSample();
                 }}
                 fill
-                data-test-subj="add-integration-button"
+                data-test-subj="try-it-button"
               >
                 Try It
               </EuiButton>
