@@ -501,7 +501,6 @@ exports[`Gauge component Renders gauge component 1`] = `
           ],
         },
         "fulllabel": "Gauge",
-        "icon": [Function],
         "icontype": "visGauge",
         "id": "gauge",
         "label": "Gauge",
