@@ -5,9 +5,6 @@
 
 import { DataTable } from './data_table';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
-import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
-import { ConfigAvailability } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
 import {
   InputFieldItem,
@@ -28,7 +25,6 @@ export const createDatatableTypeDefinition = (params: any = {}) => ({
   fulllabel: 'Table View',
   icontype: 'visTable',
   category: VIS_CATEGORY.BASICS,
-  icon: LensIconChartDatatable,
   showtableheader: true,
   enablepagination: true,
   colunmfilter: false,
