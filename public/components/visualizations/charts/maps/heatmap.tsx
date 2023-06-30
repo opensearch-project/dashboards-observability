@@ -18,7 +18,6 @@ import {
   getPropName,
 } from '../../../../components/event_analytics/utils/utils';
 import { IVisualizationContainerProps } from '../../../../../common/types/explorer';
-import { VisCanvassPlaceholder } from '../../../event_analytics/explorer/visualizations/shared_components/vis_canvass_placeholder';
 import { Plt } from '../../plotly/plot';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import { PLOT_MARGIN } from '../../../../../common/constants/shared';

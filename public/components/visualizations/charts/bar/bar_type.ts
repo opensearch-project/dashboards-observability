@@ -5,7 +5,6 @@
 
 import { Bar } from './bar';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartBar } from '../../assets/chart_bar';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
 import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
 import {
@@ -41,7 +40,6 @@ export const createBarTypeDefinition = (params: any) => ({
     dataLoss: 'nothing',
   },
   category: VIS_CATEGORY.BASICS,
-  icon: LensIconChartBar,
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   orientation: isHorizontalBar(params.type) ? BarOrientation.horizontal : BarOrientation.vertical,
