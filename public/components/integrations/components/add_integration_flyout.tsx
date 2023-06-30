@@ -31,7 +31,7 @@ import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
-  onCreate: (name: string, dataSource: string, sampleData: boolean) => void;
+  onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
   integrationType: string;
   http: HttpStart;
@@ -120,43 +120,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
-  };
-
-  const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
-    const data = await fetch(`${INTEGRATIONS_BASE}/repository/${integrationName}/schema`).then(
-      (response) => {
-        return response.json();
-      }
-    );
-    let error = null;
-    const mappings = data.data.mappings;
-    mappings[integrationType].composed_of = mappings[integrationType].composed_of.map(
-      (templateName: string) => {
-        const version = mappings[templateName].template.mappings._meta.version;
-        return `ss4o_${templateName}_${version}_template`;
-      }
-    );
-    Object.entries(mappings).forEach(async ([key, mapping]) => {
-      if (key === integrationType) {
-        return;
-      }
-      await createMappings(key, mapping as any, targetDataSource);
-    });
-    await createMappings(integrationType, mappings[integrationType], targetDataSource);
-
-    for (const [key, mapping] of Object.entries(data.data.mappings)) {
-      const result = await createMappings(key, mapping as any, targetDataSource);
-
-      if (result && result.error) {
-        error = (result.error as any).reason;
-      }
-    }
-
-    if (error !== null) {
-      setToast('Failure creating index template', 'danger', error);
-    } else {
-      setToast(`Successfully created index template`);
-    }
   };
 
   // Returns true if the data stream is a legal name.
@@ -359,7 +322,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           <EuiFlexItem>
             <EuiButton
               onClick={() => {
-                onCreate(name, dataSource, checked);
+                onCreate(name, dataSource);
                 onClose();
               }}
               fill
