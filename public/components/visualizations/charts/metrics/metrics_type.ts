@@ -5,7 +5,6 @@
 
 import { Metrics } from './metrics';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartLine } from '../../assets/chart_line';
 import { PLOTLY_COLOR } from '../../../../../common/constants/shared';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
 import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
@@ -17,7 +16,6 @@ import {
   TextInputFieldItem,
 } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls';
 import { fetchConfigObject } from '../../../event_analytics/utils/utils';
-import { ConfigAvailability } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { DEFAULT_METRICS_CHART_PARAMETERS } from '../../../../../common/constants/explorer';
 
 const sharedConfigs = getPlotlySharedConfigs();
@@ -40,7 +38,6 @@ export const createMetricsTypeDefinition = (params: any = {}) => ({
   fulllabel: 'Metrics',
   icontype: 'stats',
   category: VIS_CATEGORY.BASICS,
-  icon: LensIconChartLine,
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   charttype: DefaultChartType,

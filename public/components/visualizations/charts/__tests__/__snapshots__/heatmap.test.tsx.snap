@@ -636,7 +636,6 @@ exports[`Heatmap component Renders heatmap component 1`] = `
         "fillopacity": 100,
         "fulllabel": "Vertical bar",
         "groupwidth": 0.7,
-        "icon": [Function],
         "icontype": "visBarVerticalStacked",
         "id": "bar",
         "label": "Vertical bar",
