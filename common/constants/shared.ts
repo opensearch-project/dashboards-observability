@@ -54,7 +54,7 @@ export const observabilityPanelsPluginOrder = 5095;
 
 export const observabilityIntegrationsID = 'observability-integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
-export const observabilityIntegrationsPluginOrder = 9000;
+export const observabilityIntegrationsPluginOrder = 9020;
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';

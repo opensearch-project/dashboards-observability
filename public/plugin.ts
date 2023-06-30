@@ -192,7 +192,7 @@ export class ObservabilityPlugin
     core.application.register({
       id: observabilityIntegrationsID,
       title: observabilityIntegrationsTitle,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      category: DEFAULT_APP_CATEGORIES.management,
       order: observabilityIntegrationsPluginOrder,
       mount: appMountWithStartPage('integrations'),
     });
