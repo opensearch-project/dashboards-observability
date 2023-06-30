@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
-import { CUSTOM_PANELS_DOCUMENTATION_URL } from '../../../../common/constants/custom_panels';
+import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/custom_panels';
 
 export function IntegrationHeader() {
   return (
@@ -29,7 +29,7 @@ export function IntegrationHeader() {
       <EuiText size="s" color="subdued">
         View or add available integrations to use pre-canned assets immediately in your OpenSearch
         setup.{' '}
-        <EuiLink external={true} href={CUSTOM_PANELS_DOCUMENTATION_URL} target="blank">
+        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
       </EuiText>

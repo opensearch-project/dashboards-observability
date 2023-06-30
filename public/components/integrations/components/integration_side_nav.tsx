@@ -21,14 +21,14 @@ export const Sidebar = (props: { children: React.ReactNode }) => {
       id: 0,
       items: [
         {
-          name: 'Available integrations',
+          name: 'Added Integrations',
           id: 1,
-          href: '#/available',
+          href: '#/added',
         },
         {
-          name: 'Added Integrations',
+          name: 'Available integrations',
           id: 2,
-          href: '#/added',
+          href: '#/available',
         },
       ],
     },
@@ -40,8 +40,7 @@ export const Sidebar = (props: { children: React.ReactNode }) => {
     initial = true,
     reverse = false
   ): boolean {
-    // Default page is Events Analytics
-    // But it is kept as second option in side nav
+    // Default page is Added Integrations
     if (hash === '#/') {
       items[0].items[0].isSelected = true;
       return true;

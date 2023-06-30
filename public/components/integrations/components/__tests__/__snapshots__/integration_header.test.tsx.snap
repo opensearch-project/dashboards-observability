@@ -51,12 +51,12 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
              
             <EuiLink
               external={true}
-              href="https://opensearch.org/docs/latest/observability-plugin/operational-panels/"
+              href="https://opensearch.org/docs/latest"
               target="blank"
             >
               <a
                 className="euiLink euiLink--primary"
-                href="https://opensearch.org/docs/latest/observability-plugin/operational-panels/"
+                href="https://opensearch.org/docs/latest"
                 rel="noreferrer"
                 target="blank"
               >

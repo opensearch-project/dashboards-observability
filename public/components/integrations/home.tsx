@@ -44,7 +44,7 @@ export const Home = (props: HomeProps) => {
         <Switch>
           <Route
             exact
-            path={['/', '/available']}
+            path={'/available'}
             render={() => (
               <Sidebar>
                 <AvailableIntegrationOverviewPage {...commonProps} />
@@ -53,7 +53,7 @@ export const Home = (props: HomeProps) => {
           />
           <Route
             exact
-            path={'/added'}
+            path={['/', '/added']}
             render={() => (
               <Sidebar>
                 <AddedIntegrationOverviewPage {...commonProps} />

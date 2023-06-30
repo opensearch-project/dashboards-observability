@@ -110,7 +110,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         </EuiTitle>
       </EuiPageContentHeaderSection>
       <EuiSpacer />
-      {integrations ? (
+      {integrations && integrations.length > 0 ? (
         <EuiInMemoryTable
           loading={props.loading}
           items={integrations}
