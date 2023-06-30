@@ -16,7 +16,6 @@ import {
   TextInputFieldItem,
 } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls';
 import { fetchConfigObject } from '../../../event_analytics/utils/utils';
-import { ConfigAvailability } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { DEFAULT_METRICS_CHART_PARAMETERS } from '../../../../../common/constants/explorer';
 
 const sharedConfigs = getPlotlySharedConfigs();

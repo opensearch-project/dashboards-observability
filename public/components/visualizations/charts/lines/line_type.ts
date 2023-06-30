@@ -6,13 +6,11 @@
 import { Line } from './line';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
-import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
 import {
   ConfigThresholds,
   ConfigLineChartStyles,
   ConfigLegend,
   InputFieldItem,
-  ConfigColorTheme,
 } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls';
 import { ConfigAvailability } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import {
