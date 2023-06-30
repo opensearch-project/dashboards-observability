@@ -7,10 +7,10 @@ import React from 'react';
 import { EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 import './empty_placeholder.scss';
 
-export const VisCanvassPlaceholder = (props: { message: string; icon: string }) => (
+export const VisWorkspaceDefault = (props: { message: string; icon: string }) => (
   <>
     <EuiText
-      className="lnsChart__empty"
+      className="visWorkspaceNoData"
       textAlign="center"
       color="subdued"
       size="xs"
@@ -18,9 +18,7 @@ export const VisCanvassPlaceholder = (props: { message: string; icon: string }) 
     >
       <EuiIcon type={props.icon} color="subdued" size="xxl" />
       <EuiSpacer size="l" />
-      <p>
-        { props.message }
-      </p>
+      <p>{props.message}</p>
     </EuiText>
   </>
 );
