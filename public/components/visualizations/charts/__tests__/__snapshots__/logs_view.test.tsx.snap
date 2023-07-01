@@ -26,6 +26,11 @@ exports[`Logs View component Renders logs view component 1`] = `
           "fromApp": false,
         },
         "defaultAxes": Object {},
+        "explorer": Object {
+          "explorerData": Object {
+            "jsonData": Array [],
+          },
+        },
         "indexFields": Object {
           "availableFields": Array [
             Object {
