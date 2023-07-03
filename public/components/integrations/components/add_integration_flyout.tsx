@@ -106,14 +106,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const [name, setName] = useState(integrationName || ''); // sets input value
   const [dataSource, setDataSource] = useState('');
 
-  const [createDataSource, setCreateDataSource] = useState('');
-
   const onDatasourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDataSource(e.target.value);
-  };
-
-  const onCreateDatasourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCreateDataSource(e.target.value);
   };
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -217,7 +211,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           error={errors}
         >
           <EuiFieldText
-            data-test-subj="datasource-name"
+            data-test-subj="data-source-name"
             name="first"
             onChange={(e) => onDatasourceChange(e)}
             value={dataSource}
@@ -278,6 +272,12 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 onClose();
               }}
               fill
+              disabled={
+                dataSource.length < 1 ||
+                dataSource.length > 50 ||
+                name.length < 1 ||
+                name.length > 50
+              }
               data-test-subj="createInstanceButton"
             >
               Add Integration

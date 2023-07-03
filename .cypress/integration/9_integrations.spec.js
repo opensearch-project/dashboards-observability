@@ -53,7 +53,9 @@ describe('Tests the add nginx integration instance flow', () => {
     moveToAvailableNginxIntegration();
     cy.get('[data-test-subj="add-integration-button"]').click();
     cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
+    cy.get('[data-test-subj="createInstanceButton"]').should('be.disabled')
     cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
+    cy.get('[data-test-subj="data-source-name"]').type('test');
     cy.get('[data-test-subj="new-instance-name"]').type(testInstance.substring(5));
     cy.get('[data-test-subj="createInstanceButton"]').click();
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
@@ -97,8 +99,6 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
     moveToAddedIntegrations();
     cy.contains(TEST_SAMPLE_INSTANCE).should('exist');
-
-
   })
 });
 
