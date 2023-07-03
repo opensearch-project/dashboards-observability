@@ -49,6 +49,18 @@ export function IntegrationOverview(props: any) {
                 Set Up
               </EuiButton>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="m"
+                onClick={() => {
+                  props.setUpSample();
+                }}
+                fill
+                data-test-subj="try-it-button"
+              >
+                Try It
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageContentHeaderSection>
         <EuiSpacer />

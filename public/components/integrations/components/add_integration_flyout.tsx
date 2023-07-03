@@ -31,7 +31,7 @@ import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
   onClose: () => void;
-  onCreate: (name: string, dataSource: string, sampleData: boolean) => void;
+  onCreate: (name: string, dataSource: string) => void;
   integrationName: string;
   integrationType: string;
   http: HttpStart;
@@ -122,43 +122,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     setName(e.target.value);
   };
 
-  const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
-    const data = await fetch(`${INTEGRATIONS_BASE}/repository/${integrationName}/schema`).then(
-      (response) => {
-        return response.json();
-      }
-    );
-    let error = null;
-    const mappings = data.data.mappings;
-    mappings[integrationType].composed_of = mappings[integrationType].composed_of.map(
-      (templateName: string) => {
-        const version = mappings[templateName].template.mappings._meta.version;
-        return `ss4o_${templateName}_${version}_template`;
-      }
-    );
-    Object.entries(mappings).forEach(async ([key, mapping]) => {
-      if (key === integrationType) {
-        return;
-      }
-      await createMappings(key, mapping as any, targetDataSource);
-    });
-    await createMappings(integrationType, mappings[integrationType], targetDataSource);
-
-    for (const [key, mapping] of Object.entries(data.data.mappings)) {
-      const result = await createMappings(key, mapping as any, targetDataSource);
-
-      if (result && result.error) {
-        error = (result.error as any).reason;
-      }
-    }
-
-    if (error !== null) {
-      setToast('Failure creating index template', 'danger', error);
-    } else {
-      setToast(`Successfully created index template`);
-    }
-  };
-
   // Returns true if the data stream is a legal name.
   // Appends any additional validation errors to the provided errors array.
   const checkDataSourceName = (targetDataSource: string, validationErrors: string[]): boolean => {
@@ -196,54 +159,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         console.error(err);
         return null;
       });
-  };
-
-  const createMappings = async (
-    componentName: string,
-    payload: {
-      template: { mappings: { _meta: { version: string } } };
-      composed_of: string[];
-      index_patterns: string[];
-    },
-    dataSourceName: string
-  ): Promise<{ [key: string]: { properties: any } } | null> => {
-    const version = payload.template.mappings._meta.version;
-    if (componentName !== integrationType) {
-      return fetch(
-        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    } else {
-      payload.index_patterns = [dataSourceName];
-      return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}${'abc123'}&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    }
   };
 
   const fetchIntegrationMappings = async (
@@ -359,7 +274,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           <EuiFlexItem>
             <EuiButton
               onClick={() => {
-                onCreate(name, dataSource, checked);
+                onCreate(name, dataSource);
                 onClose();
               }}
               fill

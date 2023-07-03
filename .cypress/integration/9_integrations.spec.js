@@ -6,7 +6,7 @@
 /// <reference types="cypress" />
 
 import {
-  TEST_INTEGRATION_INSTANCE,
+  TEST_INTEGRATION_INSTANCE, TEST_SAMPLE_INSTANCE,
 } from '../utils/constants';
 
 let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
@@ -87,6 +87,18 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
+  })
+});
+
+describe('Tests the add nginx integration instance flow', () => {
+  it('Navigates to nginx page and triggers the try it flow', () => {
+    moveToAvailableNginxIntegration();
+    cy.get('[data-test-subj="try-it-button"]').click();
+    cy.get('.euiToastHeader__title').should('contain', 'successfully');
+    moveToAddedIntegrations();
+    cy.contains(TEST_SAMPLE_INSTANCE).should('exist');
+
+
   })
 });
 
