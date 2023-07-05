@@ -465,7 +465,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         "fillopacity": 70,
         "fulllabel": "Vertical bar",
         "groupwidth": 0.7,
-        "icon": [Function],
         "icontype": "visBarVerticalStacked",
         "id": "bar",
         "label": "Vertical bar",
@@ -781,7 +780,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "fillopacity": 70,
               "fulllabel": "Vertical bar",
               "groupwidth": 0.7,
-              "icon": [Function],
               "iconType": "visBarVerticalStacked",
               "icontype": "visBarVerticalStacked",
               "id": "bar",
@@ -1080,7 +1078,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "fillopacity": 70,
               "fulllabel": "Horizontal bar",
               "groupwidth": 0.7,
-              "icon": [Function],
               "icontype": "visBarHorizontalStacked",
               "id": "horizontal_bar",
               "label": "Horizontal bar",
@@ -1408,7 +1405,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 ],
               },
               "fulllabel": "Time series",
-              "icon": [Function],
               "icontype": "visLine",
               "id": "line",
               "label": "Time series",
@@ -1649,7 +1645,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 ],
               },
               "fulllabel": "Pie",
-              "icon": [Function],
               "icontype": "visPie",
               "id": "pie",
               "label": "Pie",
@@ -2089,7 +2084,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 ],
               },
               "fulllabel": "Hubble",
-              "icon": [Function],
               "icontype": "heatmap",
               "id": "heatmap",
               "label": "Heatmap",
@@ -2142,7 +2136,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 ],
               },
               "fulllabel": "Markdown",
-              "icon": [Function],
               "icontype": "visText",
               "id": "text",
               "label": "Markdown",
@@ -2470,7 +2463,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "fillopacity": 70,
               "fulllabel": "Vertical bar",
               "groupwidth": 0.7,
-              "icon": [Function],
               "iconType": "visBarVerticalStacked",
               "icontype": "visBarVerticalStacked",
               "id": "bar",
@@ -2801,7 +2793,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   "fillopacity": 70,
                   "fulllabel": "Vertical bar",
                   "groupwidth": 0.7,
-                  "icon": [Function],
                   "iconType": "visBarVerticalStacked",
                   "icontype": "visBarVerticalStacked",
                   "id": "bar",
@@ -3138,7 +3129,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fillopacity={70}
                       fulllabel="Vertical bar"
                       groupwidth={0.7}
-                      icon={[Function]}
                       iconType="visBarVerticalStacked"
                       icontype="visBarVerticalStacked"
                       id="bar"
@@ -3408,7 +3398,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           "fillopacity": 70,
                           "fulllabel": "Vertical bar",
                           "groupwidth": 0.7,
-                          "icon": [Function],
                           "iconType": "visBarVerticalStacked",
                           "icontype": "visBarVerticalStacked",
                           "id": "bar",
@@ -3746,7 +3735,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         fillopacity={70}
                         fulllabel="Vertical bar"
                         groupwidth={0.7}
-                        icon={[Function]}
                         iconType="visBarVerticalStacked"
                         icontype="visBarVerticalStacked"
                         id="bar"
@@ -4053,7 +4041,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             fillopacity={70}
                             fulllabel="Vertical bar"
                             groupwidth={0.7}
-                            icon={[Function]}
                             icontype="visBarVerticalStacked"
                             id="bar"
                             labelangle={0}
@@ -4978,7 +4965,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "fillopacity": 70,
                     "fulllabel": "Vertical bar",
                     "groupwidth": 0.7,
-                    "icon": [Function],
                     "icontype": "visBarVerticalStacked",
                     "id": "bar",
                     "label": "Vertical bar",
@@ -5755,7 +5741,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "fillopacity": 70,
                       "fulllabel": "Vertical bar",
                       "groupwidth": 0.7,
-                      "icon": [Function],
                       "icontype": "visBarVerticalStacked",
                       "id": "bar",
                       "label": "Vertical bar",
@@ -6294,7 +6279,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "fillopacity": 70,
                       "fulllabel": "Vertical bar",
                       "groupwidth": 0.7,
-                      "icon": [Function],
                       "icontype": "visBarVerticalStacked",
                       "id": "bar",
                       "label": "Vertical bar",
@@ -7115,7 +7099,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "fillopacity": 70,
                     "fulllabel": "Vertical bar",
                     "groupwidth": 0.7,
-                    "icon": [Function],
                     "icontype": "visBarVerticalStacked",
                     "id": "bar",
                     "label": "Vertical bar",
@@ -7668,7 +7651,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "fillopacity": 70,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
-                                  "icon": [Function],
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
@@ -8488,7 +8470,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "fillopacity": 70,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
-                                  "icon": [Function],
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
@@ -9807,7 +9788,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "fillopacity": 70,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
-                                  "icon": [Function],
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
@@ -11147,7 +11127,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "fillopacity": 70,
                                   "fulllabel": "Vertical bar",
                                   "groupwidth": 0.7,
-                                  "icon": [Function],
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
