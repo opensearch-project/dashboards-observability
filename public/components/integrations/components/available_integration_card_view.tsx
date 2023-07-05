@@ -36,22 +36,26 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
 
   const toggleButtonsIcons = [
     {
-      id: `0`,
+      id: '0',
       label: 'list',
       iconType: 'list',
     },
     {
-      id: `1`,
+      id: '1',
       label: 'grid',
       iconType: 'grid',
     },
   ];
 
-  const [toggleIconIdSelected, setToggleIconIdSelected] = useState(`1`);
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const onChangeIcons = (optionId) => {
     setToggleIconIdSelected(optionId);
-    props.setCardView(!props.isCardView);
+    if (optionId === '0') {
+      props.setCardView(false);
+    } else {
+      props.setCardView(true);
+    }
   };
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
