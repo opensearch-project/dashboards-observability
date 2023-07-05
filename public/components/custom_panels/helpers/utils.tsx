@@ -468,7 +468,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-  const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
+  const dataConfig = { ...(JSON.parse(metaData.user_configs).dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
@@ -498,7 +498,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       ...finalDataConfig,
     },
     layoutConfig: {
-      ...(metaData.user_configs?.layoutConfig || {}),
+      ...(JSON.parse(metaData.user_configs).layoutConfig || {}),
     },
   };
 
