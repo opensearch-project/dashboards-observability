@@ -16,10 +16,6 @@
             {
                 "annotation": "ELB Dashboard",
                 "path": "dashboard1.png"
-            },
-            {
-                "annotation": "ELB Logo",
-                "path": "logo.png"
             }
         ]
     },

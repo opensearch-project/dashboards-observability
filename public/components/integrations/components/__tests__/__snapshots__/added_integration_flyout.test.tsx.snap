@@ -108,7 +108,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   <input
                                     aria-describedby="random_html_id-help-0"
                                     class="euiFieldText euiFieldText--inGroup"
-                                    data-test-subj="datasource-name"
+                                    data-test-subj="data-source-name"
                                     id="random_html_id"
                                     name="first"
                                     type="text"
@@ -215,8 +215,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                       class="euiFlexItem"
                     >
                       <button
-                        class="euiButton euiButton--primary euiButton--fill"
+                        class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
                         data-test-subj="createInstanceButton"
+                        disabled=""
                         type="button"
                       >
                         <span
@@ -404,7 +405,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           <input
                                             aria-describedby="random_html_id-help-0"
                                             class="euiFieldText euiFieldText--inGroup"
-                                            data-test-subj="datasource-name"
+                                            data-test-subj="data-source-name"
                                             id="random_html_id"
                                             name="first"
                                             type="text"
@@ -511,8 +512,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               class="euiFlexItem"
                             >
                               <button
-                                class="euiButton euiButton--primary euiButton--fill"
+                                class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
                                 data-test-subj="createInstanceButton"
+                                disabled=""
                                 type="button"
                               >
                                 <span
@@ -632,7 +634,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <input
                                               aria-describedby="random_html_id-help-0"
                                               class="euiFieldText euiFieldText--inGroup"
-                                              data-test-subj="datasource-name"
+                                              data-test-subj="data-source-name"
                                               id="random_html_id"
                                               name="first"
                                               type="text"
@@ -739,8 +741,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 class="euiFlexItem"
                               >
                                 <button
-                                  class="euiButton euiButton--primary euiButton--fill"
+                                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
                                   data-test-subj="createInstanceButton"
+                                  disabled=""
                                   type="button"
                                 >
                                   <span
@@ -860,7 +863,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <input
                                                 aria-describedby="random_html_id-help-0"
                                                 class="euiFieldText euiFieldText--inGroup"
-                                                data-test-subj="datasource-name"
+                                                data-test-subj="data-source-name"
                                                 id="random_html_id"
                                                 name="first"
                                                 type="text"
@@ -967,8 +970,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   class="euiFlexItem"
                                 >
                                   <button
-                                    class="euiButton euiButton--primary euiButton--fill"
+                                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
                                     data-test-subj="createInstanceButton"
+                                    disabled=""
                                     type="button"
                                   >
                                     <span
@@ -1076,7 +1080,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 <input
                                                   aria-describedby="random_html_id-help-0"
                                                   class="euiFieldText euiFieldText--inGroup"
-                                                  data-test-subj="datasource-name"
+                                                  data-test-subj="data-source-name"
                                                   id="random_html_id"
                                                   name="first"
                                                   type="text"
@@ -1183,8 +1187,9 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     class="euiFlexItem"
                                   >
                                     <button
-                                      class="euiButton euiButton--primary euiButton--fill"
+                                      class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
                                       data-test-subj="createInstanceButton"
+                                      disabled=""
                                       type="button"
                                     >
                                       <span
@@ -1384,7 +1389,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 </EuiButton>
                                               }
                                               aria-describedby="random_html_id-help-0"
-                                              data-test-subj="datasource-name"
+                                              data-test-subj="data-source-name"
                                               id="random_html_id"
                                               isInvalid={false}
                                               name="first"
@@ -1418,7 +1423,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                       <input
                                                         aria-describedby="random_html_id-help-0"
                                                         className="euiFieldText euiFieldText--inGroup"
-                                                        data-test-subj="datasource-name"
+                                                        data-test-subj="data-source-name"
                                                         id="random_html_id"
                                                         name="first"
                                                         onBlur={[Function]}
@@ -1660,23 +1665,24 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   >
                                     <EuiButton
                                       data-test-subj="createInstanceButton"
+                                      disabled={true}
                                       fill={true}
                                       onClick={[Function]}
                                     >
                                       <EuiButtonDisplay
                                         baseClassName="euiButton"
                                         data-test-subj="createInstanceButton"
-                                        disabled={false}
+                                        disabled={true}
                                         element="button"
                                         fill={true}
-                                        isDisabled={false}
+                                        isDisabled={true}
                                         onClick={[Function]}
                                         type="button"
                                       >
                                         <button
-                                          className="euiButton euiButton--primary euiButton--fill"
+                                          className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
                                           data-test-subj="createInstanceButton"
-                                          disabled={false}
+                                          disabled={true}
                                           onClick={[Function]}
                                           style={
                                             Object {

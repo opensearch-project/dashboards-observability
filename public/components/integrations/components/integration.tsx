@@ -26,7 +26,7 @@ import { AddIntegrationFlyout } from './add_integration_flyout';
 import { useToast } from '../../../../public/components/common/toast';
 
 export function Integration(props: AvailableIntegrationProps) {
-  const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
+  const { http, integrationTemplateId, chrome } = props;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
@@ -34,6 +34,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const createMappings = async (
     componentName: string,
@@ -122,14 +123,13 @@ export function Integration(props: AvailableIntegrationProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
         text: 'Integrations',
         href: '#/',
       },
       {
         text: integrationTemplateId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/${integrationTemplateId}`,
+        href: `#/available/${integrationTemplateId}`,
       },
     ]);
     handleDataRequest();
@@ -184,6 +184,7 @@ export function Integration(props: AvailableIntegrationProps) {
     name?: string,
     dataSource?: string
   ) {
+    setLoading(true);
     if (addSample) {
       createDataSourceMappings(`ss4o_${integration.type}-${integrationTemplateId}-sample-*-*`);
       name = `${integrationTemplateId}-sample`;
@@ -210,6 +211,7 @@ export function Integration(props: AvailableIntegrationProps) {
         return false;
       });
     if (!addSample || !response) {
+      setLoading(false);
       return;
     }
     console.log(dataSource);
@@ -232,10 +234,14 @@ export function Integration(props: AvailableIntegrationProps) {
         ['osd-xsrf', 'true'],
         ['Content-Type', 'application/json; charset=utf-8'],
       ],
-    }).catch((err) => {
-      console.error(err);
-      setToast('Failed to load sample data', 'danger');
-    });
+    })
+      .catch((err) => {
+        console.error(err);
+        setToast('Failed to load sample data', 'danger');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   if (Object.keys(integration).length === 0) {
@@ -257,6 +263,7 @@ export function Integration(props: AvailableIntegrationProps) {
           setUpSample: () => {
             addIntegrationRequest(true, integrationTemplateId);
           },
+          loading,
         })}
         <EuiSpacer />
         {IntegrationDetails({ integration })}

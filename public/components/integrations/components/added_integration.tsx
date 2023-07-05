@@ -24,9 +24,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { ReactChild, useEffect, useState } from 'react';
-import { last } from 'lodash';
-import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
@@ -36,7 +34,7 @@ import { AddedIntegrationProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegration(props: AddedIntegrationProps) {
-  const { http, integrationInstanceId, chrome, parentBreadcrumbs } = props;
+  const { http, integrationInstanceId, chrome } = props;
 
   const { setToast } = useToast();
 
@@ -44,7 +42,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
         text: 'Integrations',
         href: '#/',

@@ -52,7 +52,7 @@ export const observabilityPanelsID = 'observability-dashboards';
 export const observabilityPanelsTitle = 'Dashboards';
 export const observabilityPanelsPluginOrder = 5095;
 
-export const observabilityIntegrationsID = 'observability-integrations';
+export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
 

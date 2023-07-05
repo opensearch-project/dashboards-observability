@@ -22,24 +22,15 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
 }
 
 export const Home = (props: HomeProps) => {
-  const { parentBreadcrumbs, http, chrome } = props;
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const { http, chrome } = props;
 
   const commonProps = {
-    parentBreadcrumbs,
     http,
     chrome,
   };
 
   return (
     <div>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        toastLifeTimeMs={6000}
-      />
       <HashRouter>
         <Switch>
           <Route
