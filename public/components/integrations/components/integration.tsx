@@ -11,6 +11,8 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { last } from 'lodash';
@@ -214,7 +216,6 @@ export function Integration(props: AvailableIntegrationProps) {
       setLoading(false);
       return;
     }
-    console.log(dataSource);
     const data: { sampleData: unknown[] } = await http
       .get(`${INTEGRATIONS_BASE}/repository/${templateName}/data`)
       .then((res) => res.data)
@@ -244,6 +245,38 @@ export function Integration(props: AvailableIntegrationProps) {
       });
   }
 
+  const tabs = [
+    {
+      id: 'assets',
+      name: 'Asset List',
+      disabled: false,
+    },
+    {
+      id: 'fields',
+      name: 'Integration Fields',
+      disabled: false,
+    },
+  ];
+
+  const [selectedTabId, setSelectedTabId] = useState('assets');
+
+  const onSelectedTabChanged = (id) => {
+    setSelectedTabId(id);
+  };
+
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        disabled={tab.disabled}
+        key={index}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  };
+
   if (Object.keys(integration).length === 0) {
     return (
       <EuiOverlayMask>
@@ -270,9 +303,11 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiSpacer />
         {IntegrationScreenshots({ integration })}
         <EuiSpacer />
-        {IntegrationAssets({ integration, integrationAssets })}
-        <EuiSpacer />
-        {IntegrationFields({ integration, integrationMapping })}
+        <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+        <EuiSpacer size="s" />
+        {selectedTabId === 'assets'
+          ? IntegrationAssets({ integration, integrationAssets })
+          : IntegrationFields({ integration, integrationMapping })}
         <EuiSpacer />
       </EuiPageBody>
       {isFlyoutVisible && (
