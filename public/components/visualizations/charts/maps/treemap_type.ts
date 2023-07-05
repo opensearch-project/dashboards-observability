@@ -5,7 +5,6 @@
 
 import { TreeMap } from './treemaps';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartBar } from '../../assets/chart_bar';
 import { VizDataPanel } from '../../../explorer/visualizations/config_panel/config_editor/default_vis_editor';
 import { ConfigEditor } from '../../../explorer/visualizations/config_panel/config_editor/config_editor';
 import { ConfigValueOptions } from '../../../explorer/visualizations/config_panel/config_editor/config_controls';
@@ -25,7 +24,6 @@ export const createTreeMapDefinition = (params: BarTypeParams = {}) => ({
     dataLoss: 'nothing',
   },
   category: VIS_CATEGORY.BASICS,
-  icon: LensIconChartBar,
   categoryAxis: 'xaxis',
   seriesAxis: 'yaxis',
   orientation: 'v',

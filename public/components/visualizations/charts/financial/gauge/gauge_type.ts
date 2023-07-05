@@ -5,7 +5,6 @@
 
 import { Gauge } from './gauge';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../../shared/shared_configs';
-import { LensIconChartLine } from '../../../assets/chart_line';
 import { VizDataPanel } from '../../../../explorer/visualizations/config_panel/config_editor/default_vis_editor';
 import { ConfigEditor } from '../../../../explorer/visualizations/config_panel/config_editor/config_editor';
 import {
@@ -28,7 +27,6 @@ export const createGaugeTypeDefinition = (params: any = {}) => ({
   selection: {
     dataLoss: 'nothing',
   },
-  icon: LensIconChartLine,
   valueSeries: 'yaxis',
   editorConfig: {
     panelTabs: [
