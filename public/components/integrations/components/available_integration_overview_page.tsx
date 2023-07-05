@@ -50,7 +50,7 @@ export interface AvailableIntegrationsCardViewProps {
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
-  const { chrome, parentBreadcrumbs, http } = props;
+  const { chrome, http } = props;
 
   const [isCardView, setCardView] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -85,7 +85,6 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
         text: 'Integrations',
         href: '#/',

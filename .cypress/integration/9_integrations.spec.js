@@ -13,17 +13,16 @@ let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
 let testInstance = `${TEST_INTEGRATION_INSTANCE}_${testInstanceSuffix}`;
 
 const moveToIntegrationsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/available`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/available`);
 };
 
 const moveToAvailableNginxIntegration = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/available/nginx`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/available/nginx`);
 };
 
 const moveToAddedIntegrations = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/added`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/added`);
 };
-
 
 
 describe('Basic sanity test for integrations plugin', () => {

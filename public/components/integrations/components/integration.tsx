@@ -26,7 +26,7 @@ import { AddIntegrationFlyout } from './add_integration_flyout';
 import { useToast } from '../../../../public/components/common/toast';
 
 export function Integration(props: AvailableIntegrationProps) {
-  const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
+  const { http, integrationTemplateId, chrome } = props;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
@@ -123,14 +123,13 @@ export function Integration(props: AvailableIntegrationProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
         text: 'Integrations',
         href: '#/',
       },
       {
         text: integrationTemplateId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/${integrationTemplateId}`,
+        href: `#/available/${integrationTemplateId}`,
       },
     ]);
     handleDataRequest();
