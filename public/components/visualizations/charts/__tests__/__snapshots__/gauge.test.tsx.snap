@@ -26,6 +26,11 @@ exports[`Gauge component Renders gauge component 1`] = `
           "fromApp": false,
         },
         "defaultAxes": Object {},
+        "explorer": Object {
+          "explorerData": Object {
+            "jsonData": Array [],
+          },
+        },
         "indexFields": Object {
           "availableFields": Array [
             Object {
@@ -349,7 +354,6 @@ exports[`Gauge component Renders gauge component 1`] = `
           ],
         },
         "fulllabel": "Gauge",
-        "icon": [Function],
         "icontype": "visGauge",
         "id": "gauge",
         "label": "Gauge",

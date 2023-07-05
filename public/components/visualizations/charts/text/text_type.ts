@@ -5,7 +5,6 @@
 
 import { Text } from './text';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartLine } from '../../assets/chart_line';
 import { PLOTLY_COLOR } from '../../../../../common/constants/shared';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
 import { ConfigText } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls';
@@ -24,7 +23,6 @@ export const createTextTypeDefinition = (params: any = {}) => ({
   selection: {
     dataLoss: 'nothing',
   },
-  icon: LensIconChartLine,
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   editorconfig: {

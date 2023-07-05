@@ -5,15 +5,12 @@
 
 import { Line } from './line';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartLine } from '../../assets/chart_line';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
-import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
 import {
   ConfigThresholds,
   ConfigLineChartStyles,
   ConfigLegend,
   InputFieldItem,
-  ConfigColorTheme,
 } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls';
 import { ConfigAvailability } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import {
@@ -49,7 +46,6 @@ export const createLineTypeDefinition = (params: any = {}) => ({
   selection: {
     dataLoss: 'nothing',
   },
-  icon: LensIconChartLine,
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   editorconfig: {
