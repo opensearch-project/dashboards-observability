@@ -15,28 +15,24 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
           Object {
             "type": "return",
             "value": Observable {
-              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
-              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
-              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
-              "_isScalar": false,
               "_subscribe": [Function],
             },
           },

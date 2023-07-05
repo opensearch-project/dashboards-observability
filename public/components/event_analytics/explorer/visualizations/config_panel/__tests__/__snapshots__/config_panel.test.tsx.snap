@@ -291,7 +291,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
           ],
         },
         "fullLabel": "Bar",
-        "icon": [Function],
         "iconType": "visBarVerticalStacked",
         "id": "bar",
         "label": "Bar",
@@ -467,7 +466,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     ],
                   },
                   "fullLabel": "Bar",
-                  "icon": [Function],
                   "iconType": "visBarVerticalStacked",
                   "id": "bar",
                   "label": "Bar",
@@ -595,7 +593,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     ],
                   },
                   "fullLabel": "Line",
-                  "icon": [Function],
                   "iconType": "visLine",
                   "id": "line",
                   "label": "Line",
@@ -736,7 +733,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     ],
                   },
                   "fullLabel": "Pie",
-                  "icon": [Function],
                   "iconType": "visPie",
                   "id": "pie",
                   "label": "Pie",
@@ -829,7 +825,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     ],
                   },
                   "fullLabel": "Hubble",
-                  "icon": [Function],
                   "iconType": "heatmap",
                   "id": "heatmap",
                   "label": "Heatmap",
@@ -882,7 +877,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     ],
                   },
                   "fullLabel": "Text",
-                  "icon": [Function],
                   "iconType": "visText",
                   "id": "text",
                   "label": "Text",
@@ -1057,7 +1051,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     ],
                   },
                   "fullLabel": "Bar",
-                  "icon": [Function],
                   "iconType": "visBarVerticalStacked",
                   "id": "bar",
                   "label": "Bar",
@@ -1230,7 +1223,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         ],
                       },
                       "fullLabel": "Bar",
-                      "icon": [Function],
                       "iconType": "visBarVerticalStacked",
                       "id": "bar",
                       "label": "Bar",
@@ -1414,7 +1406,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             }
                           }
                           fullLabel="Bar"
-                          icon={[Function]}
                           iconType="visBarVerticalStacked"
                           id="bar"
                           key="bar"
@@ -1526,7 +1517,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 ],
                               },
                               "fullLabel": "Bar",
-                              "icon": [Function],
                               "iconType": "visBarVerticalStacked",
                               "id": "bar",
                               "label": "Bar",
@@ -1704,7 +1694,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               }
                             }
                             fullLabel="Bar"
-                            icon={[Function]}
                             iconType="visBarVerticalStacked"
                             id="bar"
                             name="bar"
@@ -1852,7 +1841,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   }
                                 }
                                 fullLabel="Bar"
-                                icon={[Function]}
                                 id="bar"
                                 name="bar"
                                 orientation="v"
@@ -2505,7 +2493,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               ],
                             },
                             "fullLabel": "Bar",
-                            "icon": [Function],
                             "iconType": "visBarVerticalStacked",
                             "id": "bar",
                             "label": "Bar",
@@ -2926,7 +2913,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 ],
                               },
                               "fullLabel": "Bar",
-                              "icon": [Function],
                               "iconType": "visBarVerticalStacked",
                               "id": "bar",
                               "label": "Bar",
@@ -3284,7 +3270,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 ],
                               },
                               "fullLabel": "Bar",
-                              "icon": [Function],
                               "iconType": "visBarVerticalStacked",
                               "id": "bar",
                               "label": "Bar",
@@ -3794,7 +3779,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               ],
                             },
                             "fullLabel": "Bar",
-                            "icon": [Function],
                             "iconType": "visBarVerticalStacked",
                             "id": "bar",
                             "label": "Bar",
@@ -4148,7 +4132,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             ],
                                           },
                                           "fullLabel": "Bar",
-                                          "icon": [Function],
                                           "iconType": "visBarVerticalStacked",
                                           "id": "bar",
                                           "label": "Bar",
@@ -4749,7 +4732,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             ],
                                           },
                                           "fullLabel": "Bar",
-                                          "icon": [Function],
                                           "iconType": "visBarVerticalStacked",
                                           "id": "bar",
                                           "label": "Bar",
@@ -5762,7 +5744,6 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             ],
                                           },
                                           "fullLabel": "Bar",
-                                          "icon": [Function],
                                           "iconType": "visBarVerticalStacked",
                                           "id": "bar",
                                           "label": "Bar",
