@@ -5,18 +5,14 @@
 
 import { Pie } from './pie';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartPie } from '../../assets/chart_pie';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
-import { ConfigEditor } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/json_editor';
 import {
-  ColorPalettePicker,
   ConfigChartOptions,
   ConfigLegend,
   InputFieldItem,
   ButtonGroupItem,
 } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls';
 import { fetchConfigObject } from '../../../../components/event_analytics/utils/utils';
-import { DEFAULT_PALETTE, PIE_PALETTES } from '../../../../../common/constants/colors';
 import { PLOTLY_COLOR, DEFAULT_CHART_STYLES } from '../../../../../common/constants/shared';
 import { DEFAULT_PIE_CHART_PARAMETERS } from '../../../../../common/constants/explorer';
 
@@ -39,7 +35,6 @@ export const createPieTypeDefinition = (params: any) => ({
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   mode: DefaultMode,
-  icon: LensIconChartPie,
   editorconfig: {
     panelTabs: [
       {
