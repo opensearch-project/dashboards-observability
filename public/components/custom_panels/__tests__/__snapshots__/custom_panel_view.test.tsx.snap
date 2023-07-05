@@ -15,24 +15,28 @@ exports[`Panels View Component renders panel view container with visualizations 
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
@@ -1439,24 +1443,28 @@ exports[`Panels View Component renders panel view container with visualizations 
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
@@ -1641,24 +1649,28 @@ exports[`Panels View Component renders panel view container without visualizatio
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
           Object {
             "type": "return",
             "value": Observable {
+              "_isScalar": false,
               "_subscribe": [Function],
             },
           },
@@ -3032,24 +3044,28 @@ exports[`Panels View Component renders panel view container without visualizatio
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
                           Object {
                             "type": "return",
                             "value": Observable {
+                              "_isScalar": false,
                               "_subscribe": [Function],
                             },
                           },
