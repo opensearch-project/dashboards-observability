@@ -26,6 +26,11 @@ exports[`Metrics component Renders Metrics component 1`] = `
           "fromApp": false,
         },
         "defaultAxes": Object {},
+        "explorer": Object {
+          "explorerData": Object {
+            "jsonData": Array [],
+          },
+        },
         "indexFields": Object {
           "availableFields": Array [
             Object {
@@ -447,7 +452,6 @@ exports[`Metrics component Renders Metrics component 1`] = `
           ],
         },
         "fulllabel": "Metrics",
-        "icon": [Function],
         "icontype": "stats",
         "id": "metrics",
         "label": "Metrics",

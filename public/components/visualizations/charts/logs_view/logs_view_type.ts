@@ -5,7 +5,6 @@
 
 import { LogsView } from './logs_view';
 import { getPlotlyCategory, getPlotlySharedConfigs } from '../shared/shared_configs';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { VizDataPanel } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/default_vis_editor';
 import { PLOTLY_COLOR } from '../../../../../common/constants/shared';
 
@@ -23,7 +22,6 @@ export const createLogsViewTypeDefinition = (params: any = {}) => ({
   selection: {
     dataLoss: 'nothing',
   },
-  icon: LensIconChartDatatable,
   categoryaxis: 'xaxis',
   seriesaxis: 'yaxis',
   editorconfig: {
