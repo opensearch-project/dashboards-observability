@@ -5,7 +5,6 @@
 
 import { Bubble } from './bubble';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartPie } from '../../assets/chart_pie';
 import { VizDataPanel } from '../../../explorer/visualizations/config_panel/config_editor/default_vis_editor';
 import { ConfigEditor } from '../../../explorer/visualizations/config_panel/config_editor/config_editor';
 import { ConfigValueOptions } from '../../../explorer/visualizations/config_panel/config_editor/config_controls';
@@ -62,7 +61,6 @@ export const createBubbleVisDefinition = () => ({
       },
     ],
   },
-  icon: LensIconChartPie,
   visConfig: {
     layout: {
       ...sharedConfigs.layout,
