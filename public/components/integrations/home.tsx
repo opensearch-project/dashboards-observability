@@ -36,43 +36,31 @@ export const Home = (props: HomeProps) => {
           <Route
             exact
             path={'/available'}
-            render={() => (
-              <Sidebar>
-                <AvailableIntegrationOverviewPage {...commonProps} />
-              </Sidebar>
-            )}
+            render={() => <AvailableIntegrationOverviewPage {...commonProps} />}
           />
           <Route
             exact
             path={['/', '/added']}
-            render={() => (
-              <Sidebar>
-                <AddedIntegrationOverviewPage {...commonProps} />
-              </Sidebar>
-            )}
+            render={() => <AddedIntegrationOverviewPage {...commonProps} />}
           />
           <Route
             exact
             path={'/added/:id+'}
             render={(routerProps) => (
-              <Sidebar>
-                <AddedIntegration
-                  integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
-                  {...commonProps}
-                />
-              </Sidebar>
+              <AddedIntegration
+                integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
+                {...commonProps}
+              />
             )}
           />
           <Route
             exact
             path={'/available/:id+'}
             render={(routerProps) => (
-              <Sidebar>
-                <Integration
-                  integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
-                  {...commonProps}
-                />
-              </Sidebar>
+              <Integration
+                integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
+                {...commonProps}
+              />
             )}
           />
         </Switch>

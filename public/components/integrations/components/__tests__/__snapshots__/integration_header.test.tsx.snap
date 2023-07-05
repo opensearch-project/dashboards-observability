@@ -102,6 +102,64 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
         className="euiSpacer euiSpacer--l"
       />
     </EuiSpacer>
+    <EuiTabs
+      display="condensed"
+    >
+      <div
+        className="euiTabs euiTabs--condensed"
+        role="tablist"
+      >
+        <EuiTab
+          disabled={false}
+          isSelected={true}
+          key="0"
+          onClick={[Function]}
+        >
+          <button
+            aria-selected={true}
+            className="euiTab euiTab-isSelected"
+            disabled={false}
+            onClick={[Function]}
+            role="tab"
+            type="button"
+          >
+            <span
+              className="euiTab__content"
+            >
+              Added
+            </span>
+          </button>
+        </EuiTab>
+        <EuiTab
+          disabled={false}
+          isSelected={false}
+          key="1"
+          onClick={[Function]}
+        >
+          <button
+            aria-selected={false}
+            className="euiTab"
+            disabled={false}
+            onClick={[Function]}
+            role="tab"
+            type="button"
+          >
+            <span
+              className="euiTab__content"
+            >
+              Available
+            </span>
+          </button>
+        </EuiTab>
+      </div>
+    </EuiTabs>
+    <EuiSpacer
+      size="s"
+    >
+      <div
+        className="euiSpacer euiSpacer--s"
+      />
+    </EuiSpacer>
   </div>
 </IntegrationHeader>
 `;

@@ -4,23 +4,16 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import {
-  EuiFlexItem,
-  EuiGlobalToastList,
-  EuiOverlayMask,
-  EuiPage,
-  EuiPageBody,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiOverlayMask, EuiPage, EuiPageBody, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactChild, useEffect, useState } from 'react';
-import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import React, { useEffect, useState } from 'react';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { getAddIntegrationModal } from './add_integration_modal';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
+import { useToast } from '../../../../public/components/common/toast';
 
 export interface AvailableIntegrationType {
   name: string;
@@ -38,6 +31,8 @@ export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
   showModal: (input: string) => void;
+  isCardView: boolean;
+  setCardView: (input: boolean) => void;
 }
 
 export interface AvailableIntegrationsList {
@@ -47,13 +42,15 @@ export interface AvailableIntegrationsList {
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
   showModal: (input: string) => void;
+  isCardView: boolean;
+  setCardView: (input: boolean) => void;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
   const { chrome, http } = props;
 
   const [isCardView, setCardView] = useState(true);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const { setToast } = useToast();
   const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -97,11 +94,6 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => setData(exists.data));
   }
 
-  const setToast = (title: string, color = 'success', text?: ReactChild) => {
-    if (!text) text = '';
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
-
   async function addIntegrationRequest(name: string) {
     http
       .post(`${INTEGRATIONS_BASE}/store`)
@@ -122,27 +114,17 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
 
   return (
     <EuiPage>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        toastLifeTimeMs={6000}
-      />
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        <EuiFlexItem grow={false} style={{ marginBottom: 20 }}>
-          <EuiSwitch
-            label="Card View"
-            checked={isCardView}
-            onChange={() => {
-              setCardView(!isCardView);
-            }}
-          />
-        </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ data, showModal: getModal })
-          : AvailableIntegrationsTable({ loading: false, data, showModal: getModal })}
+          ? AvailableIntegrationsCardView({ data, showModal: getModal, isCardView, setCardView })
+          : AvailableIntegrationsTable({
+              loading: false,
+              data,
+              showModal: getModal,
+              isCardView,
+              setCardView,
+            })}
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>

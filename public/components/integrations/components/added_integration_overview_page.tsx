@@ -43,10 +43,6 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
         text: 'Integrations',
         href: '#/',
       },
-      {
-        text: 'Added Integrations',
-        href: '#/added',
-      },
     ]);
     handleDataRequest();
   }, []);

@@ -4,14 +4,15 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
@@ -104,11 +105,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
 
   return (
     <EuiPageContent data-test-subj="addedIntegrationsArea">
-      <EuiPageContentHeaderSection>
-        <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
-          <h3>Added Integrations</h3>
-        </EuiTitle>
-      </EuiPageContentHeaderSection>
       <EuiSpacer />
       {integrations && integrations.length > 0 ? (
         <EuiInMemoryTable
@@ -136,8 +132,13 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         />
       ) : (
         <>
-          <EuiSpacer size="xxl" />
-          <EuiText textAlign="center">
+          <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexItem grow={true}>
+              <EuiIcon size="xxl" type="help" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiText textAlign="center" data-test-subj="no-added-integrations">
             <h2>
               There are currently no added integrations. Add them{' '}
               <EuiLink href={'#/available'}>here</EuiLink> to start using pre-canned assets!

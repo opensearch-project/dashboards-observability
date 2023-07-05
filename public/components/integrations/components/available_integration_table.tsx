@@ -4,21 +4,47 @@
  */
 
 import {
+  EuiButtonGroup,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiPageContentHeaderSection,
   EuiSpacer,
+  EuiSwitch,
   EuiTableFieldDataColumnType,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
+
+  const toggleButtonsIcons = [
+    {
+      id: '0',
+      label: 'list',
+      iconType: 'list',
+    },
+    {
+      id: '1',
+      label: 'grid',
+      iconType: 'grid',
+    },
+  ];
+
+  const [toggleIconIdSelected, setToggleIconIdSelectedc] = useState('0');
+
+  const onChangeIcons = (optionId) => {
+    setToggleIconIdSelectedc(optionId);
+    if (optionId === '0') {
+      props.setCardView(false);
+    } else {
+      props.setCardView(true);
+    }
+  };
 
   const tableColumns = [
     {
@@ -76,7 +102,20 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
 
   const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
 
+  const renderToggle = () => {
+    return (
+      <EuiButtonGroup
+        legend="Text align"
+        options={toggleButtonsIcons}
+        idSelected={toggleIconIdSelected}
+        onChange={(id) => onChangeIcons(id)}
+        isIconOnly
+      />
+    );
+  };
+
   const search = {
+    toolsRight: renderToggle(),
     box: {
       incremental: true,
     },
@@ -97,11 +136,6 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
 
   return (
     <EuiPageContent id="availableIntegrationsArea">
-      <EuiPageContentHeaderSection>
-        <EuiTitle data-test-subj="applicationHomePageTitle" size="s">
-          <h3>Availble Integrations</h3>
-        </EuiTitle>
-      </EuiPageContentHeaderSection>
       <EuiSpacer />
       {integrations.length > 0 ? (
         <EuiInMemoryTable
