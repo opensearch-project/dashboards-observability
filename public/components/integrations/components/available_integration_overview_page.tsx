@@ -38,6 +38,8 @@ export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
   showModal: (input: string) => void;
+  isCardView: boolean;
+  setCardView: (input: boolean) => void;
 }
 
 export interface AvailableIntegrationsList {
@@ -47,6 +49,8 @@ export interface AvailableIntegrationsList {
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
   showModal: (input: string) => void;
+  isCardView: boolean;
+  setCardView: (input: boolean) => void;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
@@ -131,18 +135,15 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       />
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        <EuiFlexItem grow={false} style={{ marginBottom: 20 }}>
-          <EuiSwitch
-            label="Card View"
-            checked={isCardView}
-            onChange={() => {
-              setCardView(!isCardView);
-            }}
-          />
-        </EuiFlexItem>
         {isCardView
-          ? AvailableIntegrationsCardView({ data, showModal: getModal })
-          : AvailableIntegrationsTable({ loading: false, data, showModal: getModal })}
+          ? AvailableIntegrationsCardView({ data, showModal: getModal, isCardView, setCardView })
+          : AvailableIntegrationsTable({
+              loading: false,
+              data,
+              showModal: getModal,
+              isCardView,
+              setCardView,
+            })}
       </EuiPageBody>
       {isModalVisible && modalLayout}
     </EuiPage>

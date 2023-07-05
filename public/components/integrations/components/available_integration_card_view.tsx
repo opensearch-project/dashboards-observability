@@ -3,9 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSearchBar,
+  EuiButton,
+  EuiFieldSearch,
+  EuiSwitch,
+  EuiButtonGroup,
+} from '@elastic/eui';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,
@@ -21,6 +32,26 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
       );
     }
     return optionalImg;
+  };
+
+  const toggleButtonsIcons = [
+    {
+      id: `0`,
+      label: 'list',
+      iconType: 'list',
+    },
+    {
+      id: `1`,
+      label: 'grid',
+      iconType: 'grid',
+    },
+  ];
+
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState(`1`);
+
+  const onChangeIcons = (optionId) => {
+    setToggleIconIdSelected(optionId);
+    props.setCardView(!props.isCardView);
   };
 
   const renderRows = (integrations: AvailableIntegrationType[]) => {
@@ -50,5 +81,35 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     );
   };
 
-  return <>{renderRows(props.data.hits)}</>;
+  return (
+    <EuiPanel>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            isClearable={false}
+            placeholder="Search available integration names and categories"
+            data-test-subj="search-bar-input-box"
+            // value={query}
+            onChange={(e) => {
+              // setQuery(e.target.value);
+              // setGlobalQuery(e.target.value);
+            }}
+            // onSearch={props.refresh}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="Text align"
+            options={toggleButtonsIcons}
+            idSelected={toggleIconIdSelected}
+            onChange={(id) => onChangeIcons(id)}
+            isIconOnly
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      {renderRows(props.data.hits)}
+    </EuiPanel>
+  );
 }
