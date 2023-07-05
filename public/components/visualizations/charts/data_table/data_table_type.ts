@@ -5,7 +5,6 @@
 
 import { DataTable } from './data_table';
 import { getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
 
 const VIS_CATEGORY = getPlotlyCategory();
 
@@ -20,7 +19,6 @@ export const createDatatableTypeDefinition = (params: any = {}) => ({
   selection: {
     dataLoss: 'nothing',
   },
-  icon: LensIconChartDatatable,
   editorConfig: {
     editor: null,
     schemas: [
