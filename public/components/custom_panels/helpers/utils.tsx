@@ -492,7 +492,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   const mixedUserConfigs = {
     availabilityConfig: {
-      ...(metaData.user_configs?.availabilityConfig || {}),
+      ...(JSON.parse(metaData.user_configs).availabilityConfig || {}),
     },
     dataConfig: {
       ...finalDataConfig,
