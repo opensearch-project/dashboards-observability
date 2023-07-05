@@ -307,7 +307,6 @@ exports[`Heatmap component Renders heatmap component 1`] = `
           ],
         },
         "fullLabel": "Bar",
-        "icon": [Function],
         "iconType": "visBarVerticalStacked",
         "id": "bar",
         "label": "Bar",
