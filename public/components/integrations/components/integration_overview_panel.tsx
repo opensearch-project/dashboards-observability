@@ -16,7 +16,6 @@ import {
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 const pageStyles: CSS.Properties = {
   width: '80%',
@@ -44,6 +43,7 @@ export function IntegrationOverview(props: any) {
                   props.showFlyout(config.name);
                 }}
                 fill
+                disabled={props.loading}
                 data-test-subj="add-integration-button"
               >
                 Set Up
@@ -56,6 +56,7 @@ export function IntegrationOverview(props: any) {
                   props.setUpSample();
                 }}
                 fill
+                disabled={props.loading}
                 data-test-subj="try-it-button"
               >
                 Try It
