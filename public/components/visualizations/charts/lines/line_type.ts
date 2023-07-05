@@ -5,7 +5,6 @@
 
 import { Line } from './line';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartLine } from '../../assets/chart_line';
 import { PLOTLY_COLOR } from '../../../../../common/constants/shared';
 import { VizDataPanel } from '../../../explorer/visualizations/config_panel/config_editor/default_vis_editor';
 import { ConfigEditor } from '../../../explorer/visualizations/config_panel/config_editor/config_editor';
@@ -29,7 +28,6 @@ export const createLineTypeDefinition = (params: any = {}) => ({
   selection: {
     dataLoss: 'nothing',
   },
-  icon: LensIconChartLine,
   categoryAxis: 'xaxis',
   seriesAxis: 'yaxis',
   editorConfig: {
