@@ -13,33 +13,11 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
   }
 >
   <Component
-    http={[MockFunction]}
-    selectedPanelOptions={Array []}
-    setSelectedPanelOptions={[MockFunction]}
-    setVisualizationsMetaData={[MockFunction]}
-    sortedMetricsLayout={
-      Array [
-        Object {
-          "h": 2,
-          "id": "Y4muP4QBiaYaSxpXk7r8",
-          "metricType": "savedCustomMetric",
-          "savedVisualizationId": "Y4muP4QBiaYaSxpXk7r8",
-          "w": 12,
-          "x": 0,
-          "y": 0,
-        },
-        Object {
-          "h": 2,
-          "id": "prometheus.process_resident_memory_bytes",
-          "metricType": "prometheusMetric",
-          "savedVisualizationId": "prometheus.process_resident_memory_bytes",
-          "w": 12,
-          "x": 0,
-          "y": 2,
-        },
-      ]
-    }
-    visualizationsMetaData={Array []}
+    endTime="0"
+    resolutionValue="h"
+    setIsSavePanelOpen={[MockFunction]}
+    spanValue={1}
+    startTime="0"
   >
     <div
       style={
@@ -309,6 +287,116 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
           </div>
         </div>
       </EuiFormRow>
+       
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiButtonEmpty
+                data-test-subj="metrics__SaveCancel"
+                onClick={[Function]}
+                size="s"
+              >
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                  data-test-subj="metrics__SaveCancel"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButtonEmpty__content"
+                    iconSide="left"
+                    iconSize="m"
+                    textProps={
+                      Object {
+                        "className": "euiButtonEmpty__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        Cancel
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonEmpty>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiButton
+                data-test-subj="metrics__SaveConfirm"
+                fill={true}
+                onClick={[Function]}
+                size="s"
+              >
+                <EuiButtonDisplay
+                  baseClassName="euiButton"
+                  data-test-subj="metrics__SaveConfirm"
+                  disabled={false}
+                  element="button"
+                  fill={true}
+                  isDisabled={false}
+                  onClick={[Function]}
+                  size="s"
+                  type="button"
+                >
+                  <button
+                    className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                    data-test-subj="metrics__SaveConfirm"
+                    disabled={false}
+                    onClick={[Function]}
+                    style={
+                      Object {
+                        "minWidth": undefined,
+                      }
+                    }
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButton__content"
+                      iconSide="left"
+                      textProps={
+                        Object {
+                          "className": "euiButton__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButton__content"
+                      >
+                        <span
+                          className="euiButton__text"
+                        >
+                          Save
+                        </span>
+                      </span>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonDisplay>
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
     </div>
   </Component>
 </Provider>
