@@ -461,6 +461,19 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
               <EuiCard
                 data-test-subj="integration_card_nginx"
                 description="Nginx HTTP server collector"
+                footer={
+                  <EuiBadgeGroup>
+                    <EuiBadge>
+                      communication
+                    </EuiBadge>
+                    <EuiBadge>
+                      http
+                    </EuiBadge>
+                    <EuiBadge>
+                      logs
+                    </EuiBadge>
+                  </EuiBadgeGroup>
+                }
                 icon={
                   <img
                     alt=""
@@ -541,6 +554,103 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                           </p>
                         </div>
                       </EuiText>
+                    </div>
+                    <div
+                      className="euiCard__footer"
+                    >
+                      <EuiBadgeGroup>
+                        <div
+                          className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
+                        >
+                          <span
+                            className="euiBadgeGroup__item"
+                            key=".0"
+                          >
+                            <EuiBadge>
+                              <EuiInnerText>
+                                <span
+                                  className="euiBadge euiBadge--iconLeft"
+                                  style={
+                                    Object {
+                                      "backgroundColor": "#d3dae6",
+                                      "color": "#000",
+                                    }
+                                  }
+                                  title="communication"
+                                >
+                                  <span
+                                    className="euiBadge__content"
+                                  >
+                                    <span
+                                      className="euiBadge__text"
+                                    >
+                                      communication
+                                    </span>
+                                  </span>
+                                </span>
+                              </EuiInnerText>
+                            </EuiBadge>
+                          </span>
+                          <span
+                            className="euiBadgeGroup__item"
+                            key=".1"
+                          >
+                            <EuiBadge>
+                              <EuiInnerText>
+                                <span
+                                  className="euiBadge euiBadge--iconLeft"
+                                  style={
+                                    Object {
+                                      "backgroundColor": "#d3dae6",
+                                      "color": "#000",
+                                    }
+                                  }
+                                  title="http"
+                                >
+                                  <span
+                                    className="euiBadge__content"
+                                  >
+                                    <span
+                                      className="euiBadge__text"
+                                    >
+                                      http
+                                    </span>
+                                  </span>
+                                </span>
+                              </EuiInnerText>
+                            </EuiBadge>
+                          </span>
+                          <span
+                            className="euiBadgeGroup__item"
+                            key=".2"
+                          >
+                            <EuiBadge>
+                              <EuiInnerText>
+                                <span
+                                  className="euiBadge euiBadge--iconLeft"
+                                  style={
+                                    Object {
+                                      "backgroundColor": "#d3dae6",
+                                      "color": "#000",
+                                    }
+                                  }
+                                  title="logs"
+                                >
+                                  <span
+                                    className="euiBadge__content"
+                                  >
+                                    <span
+                                      className="euiBadge__text"
+                                    >
+                                      logs
+                                    </span>
+                                  </span>
+                                </span>
+                              </EuiInnerText>
+                            </EuiBadge>
+                          </span>
+                        </div>
+                      </EuiBadgeGroup>
                     </div>
                   </div>
                 </EuiPanel>

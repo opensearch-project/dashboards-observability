@@ -96,15 +96,8 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 "truncateText": true,
               },
               Object {
-                "field": "status",
-                "name": "Status",
-                "render": [Function],
-                "sortable": true,
-                "truncateText": true,
-              },
-              Object {
-                "field": "actions",
-                "name": "Actions",
+                "field": "categories",
+                "name": "Categories",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -918,15 +911,8 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                     "truncateText": true,
                   },
                   Object {
-                    "field": "status",
-                    "name": "Status",
-                    "render": [Function],
-                    "sortable": true,
-                    "truncateText": true,
-                  },
-                  Object {
-                    "field": "actions",
-                    "name": "Actions",
+                    "field": "categories",
+                    "name": "Categories",
                     "render": [Function],
                     "sortable": true,
                     "truncateText": true,
@@ -1155,12 +1141,12 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                             </EuiTableHeaderCell>
                             <EuiTableHeaderCell
                               align="left"
-                              data-test-subj="tableHeaderCell_status_2"
-                              key="_data_h_status_2"
+                              data-test-subj="tableHeaderCell_categories_2"
+                              key="_data_h_categories_2"
                             >
                               <th
                                 className="euiTableHeaderCell"
-                                data-test-subj="tableHeaderCell_status_2"
+                                data-test-subj="tableHeaderCell_categories_2"
                                 role="columnheader"
                                 scope="col"
                                 style={
@@ -1183,61 +1169,15 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                         values={
                                           Object {
                                             "description": undefined,
-                                            "innerText": "Status",
+                                            "innerText": "Categories",
                                           }
                                         }
                                       >
                                         <span
                                           className="euiTableCellContent__text"
-                                          title="Status"
+                                          title="Categories"
                                         >
-                                          Status
-                                        </span>
-                                      </EuiI18n>
-                                    </EuiInnerText>
-                                  </span>
-                                </CellContents>
-                              </th>
-                            </EuiTableHeaderCell>
-                            <EuiTableHeaderCell
-                              align="left"
-                              data-test-subj="tableHeaderCell_actions_3"
-                              key="_data_h_actions_3"
-                            >
-                              <th
-                                className="euiTableHeaderCell"
-                                data-test-subj="tableHeaderCell_actions_3"
-                                role="columnheader"
-                                scope="col"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <CellContents
-                                  className="euiTableCellContent"
-                                  showSortMsg={false}
-                                >
-                                  <span
-                                    className="euiTableCellContent"
-                                  >
-                                    <EuiInnerText>
-                                      <EuiI18n
-                                        default="{innerText}; {description}"
-                                        token="euiTableHeaderCell.titleTextWithDesc"
-                                        values={
-                                          Object {
-                                            "description": undefined,
-                                            "innerText": "Actions",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiTableCellContent__text"
-                                          title="Actions"
-                                        >
-                                          Actions
+                                          Categories
                                         </span>
                                       </EuiI18n>
                                     </EuiInnerText>
@@ -1352,10 +1292,10 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                               </EuiTableRowCell>
                               <EuiTableRowCell
                                 align="left"
-                                key="_data_column_status_0_2"
+                                key="_data_column_categories_0_2"
                                 mobileOptions={
                                   Object {
-                                    "header": "Status",
+                                    "header": "Categories",
                                     "render": undefined,
                                   }
                                 }
@@ -1374,69 +1314,107 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                   <div
                                     className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                   >
-                                    Status
+                                    Categories
                                   </div>
                                   <div
                                     className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                   >
-                                    <EuiText
+                                    <EuiBadgeGroup
                                       className=""
-                                      data-test-subj="nginxIntegrationStatus"
                                       key=".0"
                                     >
                                       <div
-                                        className="euiText euiText--medium"
-                                        data-test-subj="nginxIntegrationStatus"
-                                      />
-                                    </EuiText>
-                                  </div>
-                                </td>
-                              </EuiTableRowCell>
-                              <EuiTableRowCell
-                                align="left"
-                                key="_data_column_actions_0_3"
-                                mobileOptions={
-                                  Object {
-                                    "header": "Actions",
-                                    "render": undefined,
-                                  }
-                                }
-                                setScopeRow={false}
-                                textOnly={false}
-                                truncateText={true}
-                              >
-                                <td
-                                  className="euiTableRowCell"
-                                  style={
-                                    Object {
-                                      "width": undefined,
-                                    }
-                                  }
-                                >
-                                  <div
-                                    className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                  >
-                                    Actions
-                                  </div>
-                                  <div
-                                    className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                  >
-                                    <EuiLink
-                                      className=""
-                                      data-test-subj="nginxIntegrationAction"
-                                      key=".0"
-                                      onClick={[Function]}
-                                    >
-                                      <button
-                                        className="euiLink euiLink--primary"
-                                        data-test-subj="nginxIntegrationAction"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        type="button"
+                                        className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
                                       >
-                                        Add
-                                      </button>
-                                    </EuiLink>
+                                        <span
+                                          className="euiBadgeGroup__item"
+                                          key=".0"
+                                        >
+                                          <EuiBadge>
+                                            <EuiInnerText>
+                                              <span
+                                                className="euiBadge euiBadge--iconLeft"
+                                                style={
+                                                  Object {
+                                                    "backgroundColor": "#d3dae6",
+                                                    "color": "#000",
+                                                  }
+                                                }
+                                                title="communication"
+                                              >
+                                                <span
+                                                  className="euiBadge__content"
+                                                >
+                                                  <span
+                                                    className="euiBadge__text"
+                                                  >
+                                                    communication
+                                                  </span>
+                                                </span>
+                                              </span>
+                                            </EuiInnerText>
+                                          </EuiBadge>
+                                        </span>
+                                        <span
+                                          className="euiBadgeGroup__item"
+                                          key=".1"
+                                        >
+                                          <EuiBadge>
+                                            <EuiInnerText>
+                                              <span
+                                                className="euiBadge euiBadge--iconLeft"
+                                                style={
+                                                  Object {
+                                                    "backgroundColor": "#d3dae6",
+                                                    "color": "#000",
+                                                  }
+                                                }
+                                                title="http"
+                                              >
+                                                <span
+                                                  className="euiBadge__content"
+                                                >
+                                                  <span
+                                                    className="euiBadge__text"
+                                                  >
+                                                    http
+                                                  </span>
+                                                </span>
+                                              </span>
+                                            </EuiInnerText>
+                                          </EuiBadge>
+                                        </span>
+                                        <span
+                                          className="euiBadgeGroup__item"
+                                          key=".2"
+                                        >
+                                          <EuiBadge>
+                                            <EuiInnerText>
+                                              <span
+                                                className="euiBadge euiBadge--iconLeft"
+                                                style={
+                                                  Object {
+                                                    "backgroundColor": "#d3dae6",
+                                                    "color": "#000",
+                                                  }
+                                                }
+                                                title="logs"
+                                              >
+                                                <span
+                                                  className="euiBadge__content"
+                                                >
+                                                  <span
+                                                    className="euiBadge__text"
+                                                  >
+                                                    logs
+                                                  </span>
+                                                </span>
+                                              </span>
+                                            </EuiInnerText>
+                                          </EuiBadge>
+                                        </span>
+                                      </div>
+                                    </EuiBadgeGroup>
                                   </div>
                                 </td>
                               </EuiTableRowCell>
