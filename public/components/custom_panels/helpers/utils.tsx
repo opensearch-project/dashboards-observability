@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { isEmpty } from 'lodash';
+import _, { forEach, isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
@@ -30,6 +30,7 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
+import { testData } from '../../metrics/view/test_data';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -462,6 +463,39 @@ export const isPPLFilterValid = (
   return true;
 };
 
+export const processMetricsData = (schema: any, dataConfig: any) => {
+  console.log('schema: ', schema);
+  if (
+    schema.length === 4 &&
+    schema.every((schemaField) =>
+      ['seriesLabels', 'value', 'timestamp', 'labels'].includes(schemaField.name)
+    )
+  ) {
+    return prepareMetricsData(schema, dataConfig);
+  }
+  return {};
+};
+
+export const prepareMetricsData = (schema: any, dataConfig: any) => {
+  const metricBreakdown = [];
+  const metricSeries = [];
+  const metricDimension = [];
+
+  forEach(schema, (field) => {
+    if (field.name === 'seriesLabels')
+      metricBreakdown.push({ name: 'seriesLabels', label: 'seriesLabels' });
+    if (field.name === 'value') metricSeries.push({ name: 'value', customLabel: 'value' });
+    if (field.name === 'timestamp') metricDimension.push({ name: 'timestamp', label: 'timestamp' });
+  });
+
+  return {
+    breakdowns: metricBreakdown,
+    series: metricSeries,
+    dimensions: metricDimension,
+    span: {},
+  };
+};
+
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
@@ -487,12 +521,15 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     );
   }
 
-  const finalDataConfig = {
+  let finalDataConfig = {
     ...dataConfig,
     ...realTimeParsedStats,
     dimensions: finalDimensions,
     breakdowns,
   };
+
+  // add metric specific overriding
+  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
 
   const mixedUserConfigs = {
     availabilityConfig: {

@@ -109,9 +109,12 @@ export const preprocessJsonData = (
           .join(',');
         const concatedBreakdownLabel = breakdowns
           ? breakdowns
-              .map((breakdown) => backtickRemovedEntry[removeBacktick(breakdown.name)])
+              .map((breakdown) =>
+                JSON.stringify(backtickRemovedEntry[removeBacktick(breakdown.name)])
+              )
               .join(',')
           : '';
+        console.log('concatedBreakdownLabel: ', JSON.stringify(concatedBreakdownLabel));
         tabularVizData = {
           value: backtickRemovedEntry[serieKey],
           x: concatedXaxisLabel,
