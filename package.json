@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@cypress/skip-test": "^2.6.1",
+    "@jedmao/redux-mock-store": "^3.0.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/mime": "^3.0.1",
     "@types/react-plotly.js": "^2.5.0",

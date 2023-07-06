@@ -152,6 +152,11 @@
     gud "^1.0.0"
     warning "^4.0.3"
 
+"@jedmao/redux-mock-store@^3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@jedmao/redux-mock-store/-/redux-mock-store-3.0.5.tgz#015fa4fc96bfc02b61ca221d9ea0476b78c70c97"
+  integrity sha512-zNcVCd5/ekSMdQWk64CqTPM24D9Lo59st9KvS+fljGpQXV4SliB7Vo0NFQIgvQJWPYeeobdngnrGy0XbCaARNw==
+
 "@jest/schemas@^29.4.3":
   version "29.4.3"
   resolved "https://registry.yarnpkg.com/@jest/schemas/-/schemas-29.4.3.tgz#39cf1b8469afc40b6f5a2baaa146e332c4151788"
