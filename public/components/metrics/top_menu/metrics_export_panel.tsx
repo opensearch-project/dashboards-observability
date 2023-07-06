@@ -78,8 +78,9 @@ export const MetricsExportPanel = ({
   const dispatch = useDispatch();
 
   useEffect(() => {
+    console.log('fetchPanels');
     dispatch(fetchPanels());
-  }, [dispatch]);
+  }, []);
 
   const fetchAllvisualizationsById = async () => {
     const tempVisualizationsMetaData = await Promise.all(
@@ -93,8 +94,9 @@ export const MetricsExportPanel = ({
   };
 
   useEffect(() => {
+    console.log('fetchAllVisualizationsById');
     fetchAllvisualizationsById();
-  }, []);
+  }, [metricsLayout]);
 
   const onNameChange = (index: number, name: string) => {
     const tempVisualizationsMetaData = [...visualizationsMetaData];

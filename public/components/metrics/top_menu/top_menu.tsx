@@ -6,19 +6,23 @@
 import {
   EuiButton,
   EuiComboBoxOptionOption,
+  EuiContextMenu,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiSelect,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiText,
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { CoreStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import { resolutionOptions } from '../../../../common/constants/metrics';
@@ -84,6 +88,7 @@ export const TopMenu = ({
 
   const [originalPanelVisualizations, setOriginalPanelVisualizations] = useState<MetricType[]>([]);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
+  const [isPopoverOpen, setPopover] = useState(false);
 
   // toggle between panel edit mode
   const editPanel = (editType: string) => {
@@ -107,6 +112,78 @@ export const TopMenu = ({
       }
     }
     setEditActionType(editType);
+  };
+
+  function flattenPanelTree(tree, array = []) {
+    array.push(tree);
+
+    if (tree.items) {
+      tree.items.forEach((item) => {
+        if (item.panel) {
+          flattenPanelTree(item.panel, array);
+          item.panel = item.panel.id;
+        }
+      });
+    }
+
+    return array;
+  }
+
+  const createPanelTree = (SaveContent) => {
+    return flattenPanelTree({
+      id: 0,
+      title: 'Actions',
+      items: [
+        {
+          name: 'Save',
+          icon: 'save',
+          panel: {
+            id: 1,
+            width: 400,
+            title: 'See more',
+            content: <SaveContent />,
+          },
+        },
+        {
+          name: 'Edit',
+          icon: 'edit',
+          onClick: () => {
+            closePopover();
+          },
+        },
+        {
+          isSeparator: true,
+          key: 'sep',
+        },
+      ],
+    });
+  };
+
+  const metricExportPanel = useMemo(() => {
+    console.log('rendering metric panel');
+    return (
+      <MetricsExportPanel
+        setIsSavePanelOpen={setIsSavePanelOpen}
+        startTime={startTime}
+        endTime={endTime}
+        resolutionValue={resolutionValue}
+        spanValue={spanValue}
+      />
+    );
+  }, [setIsSavePanelOpen, startTime, endTime, resolutionValue, spanValue]);
+
+  const panels = createPanelTree(() => (
+    <EuiText style={{ padding: 24 }} textAlign="center">
+      {metricExportPanel}
+    </EuiText>
+  ));
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
   };
 
   const onResolutionChange = (e) => {
@@ -156,6 +233,12 @@ export const TopMenu = ({
     </EuiButton>
   );
 
+  const button = (
+    <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+      Actions
+    </EuiButton>
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="s">
@@ -199,17 +282,14 @@ export const TopMenu = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            button={Savebutton}
-            isOpen={isSavePanelOpen}
-            closePopover={() => setIsSavePanelOpen(false)}
+            id="contextMenuNormal"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="upLeft"
           >
-            <MetricsExportPanel
-              setIsSavePanelOpen={setIsSavePanelOpen}
-              startTime={startTime}
-              endTime={endTime}
-              resolutionValue={resolutionValue}
-              spanValue={spanValue}
-            />
+            <EuiContextMenu initialPanelId={0} panels={panels} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
