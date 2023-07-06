@@ -468,7 +468,12 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-  const dataConfig = { ...(JSON.parse(metaData.user_configs).dataConfig || {}) };
+
+  if (metaData.user_configs !== undefined) {
+    metaData.user_configs = JSON.parse(metaData.user_configs);
+  }
+
+  const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
@@ -492,13 +497,13 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   const mixedUserConfigs = {
     availabilityConfig: {
-      ...(JSON.parse(metaData.user_configs).availabilityConfig || {}),
+      ...(metaData.user_configs?.availabilityConfig || {}),
     },
     dataConfig: {
       ...finalDataConfig,
     },
     layoutConfig: {
-      ...(JSON.parse(metaData.user_configs).layoutConfig || {}),
+      ...(metaData.user_configs?.layoutConfig || {}),
     },
   };
 
