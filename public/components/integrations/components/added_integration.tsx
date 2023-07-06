@@ -5,6 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +28,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
-import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import { ASSET_FILTER_OPTIONS, FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/constants/shared';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AddedIntegrationProps } from './integration_types';
@@ -60,6 +61,18 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const badge = (status) => {
+    console.log(status);
+    switch (status) {
+      case 'available':
+        return <EuiBadge color="success">Healthy</EuiBadge>;
+      case 'partially-available':
+        return <EuiBadge color="warning">Partially Available</EuiBadge>;
+      default:
+        return <EuiBadge color="danger">Critical</EuiBadge>;
+    }
+  };
 
   const getModal = () => {
     setModalLayout(
@@ -143,19 +156,12 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               <EuiSpacer size="m" />
               <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiText>
                 <h4>Status</h4>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="m">{data?.status}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <h4>Tags</h4>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiText size="m">{data?.license}</EuiText>
+              {badge(data?.status)}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageHeaderSection>
@@ -175,10 +181,10 @@ export function AddedIntegration(props: AddedIntegrationProps) {
       filters: [
         {
           type: 'field_value_selection',
-          field: 'type',
+          field: 'assetType',
           name: 'Type',
           multiSelect: false,
-          options: FILTER_OPTIONS.map((i) => ({
+          options: ASSET_FILTER_OPTIONS.map((i) => ({
             value: i,
             name: i,
             view: i,
@@ -234,6 +240,8 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         ),
       },
     ] as Array<EuiTableFieldDataColumnType<any>>;
+
+    console.log(assets);
 
     return (
       <EuiPanel>

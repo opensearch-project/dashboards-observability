@@ -167,9 +167,24 @@ exports[`Added Integration Table View Test Renders added integration table view 
                 "name": "Type",
                 "options": Array [
                   Object {
-                    "name": "logs",
-                    "value": "logs",
-                    "view": "logs",
+                    "name": "index-pattern",
+                    "value": "index-pattern",
+                    "view": "index-pattern",
+                  },
+                  Object {
+                    "name": "search",
+                    "value": "search",
+                    "view": "search",
+                  },
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                  Object {
+                    "name": "dashboard",
+                    "value": "dashboard",
+                    "view": "dashboard",
                   },
                 ],
                 "type": "field_value_selection",
@@ -194,9 +209,24 @@ exports[`Added Integration Table View Test Renders added integration table view 
                   "name": "Type",
                   "options": Array [
                     Object {
-                      "name": "logs",
-                      "value": "logs",
-                      "view": "logs",
+                      "name": "index-pattern",
+                      "value": "index-pattern",
+                      "view": "index-pattern",
+                    },
+                    Object {
+                      "name": "search",
+                      "value": "search",
+                      "view": "search",
+                    },
+                    Object {
+                      "name": "visualization",
+                      "value": "visualization",
+                      "view": "visualization",
+                    },
+                    Object {
+                      "name": "dashboard",
+                      "value": "dashboard",
+                      "view": "dashboard",
                     },
                   ],
                   "type": "field_value_selection",
@@ -332,9 +362,24 @@ exports[`Added Integration Table View Test Renders added integration table view 
                             "name": "Type",
                             "options": Array [
                               Object {
-                                "name": "logs",
-                                "value": "logs",
-                                "view": "logs",
+                                "name": "index-pattern",
+                                "value": "index-pattern",
+                                "view": "index-pattern",
+                              },
+                              Object {
+                                "name": "search",
+                                "value": "search",
+                                "view": "search",
+                              },
+                              Object {
+                                "name": "visualization",
+                                "value": "visualization",
+                                "view": "visualization",
+                              },
+                              Object {
+                                "name": "dashboard",
+                                "value": "dashboard",
+                                "view": "dashboard",
                               },
                             ],
                             "type": "field_value_selection",
@@ -374,9 +419,24 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                 "name": "Type",
                                 "options": Array [
                                   Object {
-                                    "name": "logs",
-                                    "value": "logs",
-                                    "view": "logs",
+                                    "name": "index-pattern",
+                                    "value": "index-pattern",
+                                    "view": "index-pattern",
+                                  },
+                                  Object {
+                                    "name": "search",
+                                    "value": "search",
+                                    "view": "search",
+                                  },
+                                  Object {
+                                    "name": "visualization",
+                                    "value": "visualization",
+                                    "view": "visualization",
+                                  },
+                                  Object {
+                                    "name": "dashboard",
+                                    "value": "dashboard",
+                                    "view": "dashboard",
                                   },
                                 ],
                                 "type": "field_value_selection",

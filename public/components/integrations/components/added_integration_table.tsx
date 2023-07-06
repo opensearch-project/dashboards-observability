@@ -17,6 +17,7 @@ import {
 import _ from 'lodash';
 import React from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
+import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/explorer';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   const integrations = props.data.hits;
@@ -94,7 +95,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         field: 'type',
         name: 'Type',
         multiSelect: false,
-        options: FILTER_OPTIONS.map((i) => ({
+        options: ASSET_FILTER_OPTIONS.map((i) => ({
           value: i,
           name: i,
           view: i,

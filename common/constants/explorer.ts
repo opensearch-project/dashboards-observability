@@ -38,6 +38,7 @@ export const CREATE_TAB_PARAM = {
 } as const;
 export const HAS_SAVED_TIMESTAMP = 'hasSavedTimestamp';
 export const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
+export const ASSET_FILTER_OPTIONS = ['index-pattern', 'search', 'visualization', 'dashboard'];
 export const SAVED_QUERY = 'savedQuery';
 export const SAVED_VISUALIZATION = 'savedVisualization';
 export const SAVED_OBJECT_ID = 'savedObjectId';

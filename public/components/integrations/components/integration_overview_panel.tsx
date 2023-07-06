@@ -68,13 +68,6 @@ export function IntegrationOverview(props: any) {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText>
-              <h4>Status</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiText size="m">{config.status}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />

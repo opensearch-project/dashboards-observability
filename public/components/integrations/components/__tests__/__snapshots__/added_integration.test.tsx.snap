@@ -263,9 +263,11 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                           </EuiText>
                         </div>
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                      >
                         <div
-                          className="euiFlexItem"
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <EuiText>
                             <div
@@ -283,42 +285,32 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                               className="euiSpacer euiSpacer--m"
                             />
                           </EuiSpacer>
-                          <EuiText
-                            size="m"
+                          <EuiBadge
+                            color="danger"
                           >
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <h4>
-                                Tags
-                              </h4>
-                            </div>
-                          </EuiText>
-                          <EuiSpacer
-                            size="m"
-                          >
-                            <div
-                              className="euiSpacer euiSpacer--m"
-                            />
-                          </EuiSpacer>
-                          <EuiText
-                            size="m"
-                          >
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
+                            <EuiInnerText>
+                              <span
+                                className="euiBadge euiBadge--iconLeft"
+                                style={
+                                  Object {
+                                    "backgroundColor": "#ff7e62",
+                                    "color": "#000",
+                                  }
+                                }
+                                title="Critical"
+                              >
+                                <span
+                                  className="euiBadge__content"
+                                >
+                                  <span
+                                    className="euiBadge__text"
+                                  >
+                                    Critical
+                                  </span>
+                                </span>
+                              </span>
+                            </EuiInnerText>
+                          </EuiBadge>
                         </div>
                       </EuiFlexItem>
                     </div>
@@ -407,24 +399,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     },
                     "filters": Array [
                       Object {
-                        "field": "type",
+                        "field": "assetType",
                         "multiSelect": false,
                         "name": "Type",
                         "options": Array [
                           Object {
-                            "name": "Visualization",
-                            "value": "Visualization",
-                            "view": "Visualization",
+                            "name": "index-pattern",
+                            "value": "index-pattern",
+                            "view": "index-pattern",
                           },
                           Object {
-                            "name": "Query",
-                            "value": "Query",
-                            "view": "Query",
+                            "name": "search",
+                            "value": "search",
+                            "view": "search",
                           },
                           Object {
-                            "name": "Metric",
-                            "value": "Metric",
-                            "view": "Metric",
+                            "name": "visualization",
+                            "value": "visualization",
+                            "view": "visualization",
+                          },
+                          Object {
+                            "name": "dashboard",
+                            "value": "dashboard",
+                            "view": "dashboard",
                           },
                         ],
                         "type": "field_value_selection",
@@ -444,24 +441,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     filters={
                       Array [
                         Object {
-                          "field": "type",
+                          "field": "assetType",
                           "multiSelect": false,
                           "name": "Type",
                           "options": Array [
                             Object {
-                              "name": "Visualization",
-                              "value": "Visualization",
-                              "view": "Visualization",
+                              "name": "index-pattern",
+                              "value": "index-pattern",
+                              "view": "index-pattern",
                             },
                             Object {
-                              "name": "Query",
-                              "value": "Query",
-                              "view": "Query",
+                              "name": "search",
+                              "value": "search",
+                              "view": "search",
                             },
                             Object {
-                              "name": "Metric",
-                              "value": "Metric",
-                              "view": "Metric",
+                              "name": "visualization",
+                              "value": "visualization",
+                              "view": "visualization",
+                            },
+                            Object {
+                              "name": "dashboard",
+                              "value": "dashboard",
+                              "view": "dashboard",
                             },
                           ],
                           "type": "field_value_selection",
@@ -592,24 +594,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                               filters={
                                 Array [
                                   Object {
-                                    "field": "type",
+                                    "field": "assetType",
                                     "multiSelect": false,
                                     "name": "Type",
                                     "options": Array [
                                       Object {
-                                        "name": "Visualization",
-                                        "value": "Visualization",
-                                        "view": "Visualization",
+                                        "name": "index-pattern",
+                                        "value": "index-pattern",
+                                        "view": "index-pattern",
                                       },
                                       Object {
-                                        "name": "Query",
-                                        "value": "Query",
-                                        "view": "Query",
+                                        "name": "search",
+                                        "value": "search",
+                                        "view": "search",
                                       },
                                       Object {
-                                        "name": "Metric",
-                                        "value": "Metric",
-                                        "view": "Metric",
+                                        "name": "visualization",
+                                        "value": "visualization",
+                                        "view": "visualization",
+                                      },
+                                      Object {
+                                        "name": "dashboard",
+                                        "value": "dashboard",
+                                        "view": "dashboard",
                                       },
                                     ],
                                     "type": "field_value_selection",
@@ -644,24 +651,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                   <FieldValueSelectionFilter
                                     config={
                                       Object {
-                                        "field": "type",
+                                        "field": "assetType",
                                         "multiSelect": false,
                                         "name": "Type",
                                         "options": Array [
                                           Object {
-                                            "name": "Visualization",
-                                            "value": "Visualization",
-                                            "view": "Visualization",
+                                            "name": "index-pattern",
+                                            "value": "index-pattern",
+                                            "view": "index-pattern",
                                           },
                                           Object {
-                                            "name": "Query",
-                                            "value": "Query",
-                                            "view": "Query",
+                                            "name": "search",
+                                            "value": "search",
+                                            "view": "search",
                                           },
                                           Object {
-                                            "name": "Metric",
-                                            "value": "Metric",
-                                            "view": "Metric",
+                                            "name": "visualization",
+                                            "value": "visualization",
+                                            "view": "visualization",
+                                          },
+                                          Object {
+                                            "name": "dashboard",
+                                            "value": "dashboard",
+                                            "view": "dashboard",
                                           },
                                         ],
                                         "type": "field_value_selection",
