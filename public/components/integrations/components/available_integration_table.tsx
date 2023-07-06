@@ -72,32 +72,6 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
         </EuiText>
       ),
     },
-    {
-      field: 'status',
-      name: 'Status',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationStatus`}>
-          {_.truncate(record.status, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'actions',
-      name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationAction`}
-          // TO DO REPLACE WITH API CALL TO ADD
-          onClick={() => props.showModal(record.templateName)}
-        >
-          Add
-        </EuiLink>
-      ),
-    },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
   const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
