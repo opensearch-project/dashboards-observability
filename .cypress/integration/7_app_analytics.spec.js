@@ -4,6 +4,7 @@
  */
 
 /// <reference types="cypress" />
+import { suppressResizeObserverIssue } from '../utils/constants';
 
 import {
   delay,
@@ -33,6 +34,8 @@ import {
   TYPING_DELAY,
   timeoutDelay
 } from '../utils/app_constants';
+
+suppressResizeObserverIssue();//needs to be in file once
 
 describe('Creating application', () => {
   beforeEach(() => {
@@ -376,8 +379,8 @@ describe('Viewing application', () => {
     cy.wait(delay*5);
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[id="explorerPlotComponent"]').should('exist');
-    //cy.get('[class="lines"]').should('exist');
-    //cy.get('.textpoint').contains('Available').should('exist');
+    cy.get('[class="lines"]').should('exist');
+    cy.get('.textpoint').contains('Available').should('exist');
     cy.get('.euiBreadcrumb[href="#/"]').click();
     cy.get('[data-test-subj="AvailableAvailabilityBadge"]').should('contain', 'Available');
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('exist');
