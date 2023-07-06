@@ -5,7 +5,6 @@
 
 import { Pie } from './pie';
 import { getPlotlySharedConfigs, getPlotlyCategory } from '../shared/shared_configs';
-import { LensIconChartPie } from '../../assets/chart_pie';
 import { PLOTLY_COLOR } from '../../../../../common/constants/shared';
 import { VizDataPanel } from '../../../explorer/visualizations/config_panel/config_editor/default_vis_editor';
 import { ConfigEditor } from '../../../explorer/visualizations/config_panel/config_editor/config_editor';
@@ -27,7 +26,6 @@ export const createPieTypeDefinition = (params: any) => ({
   },
   categoryAxis: 'xaxis',
   seriesAxis: 'yaxis',
-  icon: LensIconChartPie,
   editorConfig: {
     panelTabs: [
       {
