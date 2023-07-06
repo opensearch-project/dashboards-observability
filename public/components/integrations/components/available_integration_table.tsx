@@ -18,6 +18,7 @@ import {
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
+import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
@@ -71,6 +72,13 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
           {_.truncate(record.description, { length: 100 })}
         </EuiText>
       ),
+    },
+    {
+      field: 'categories',
+      name: 'Categories',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => badges(record.components),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 

@@ -14,6 +14,9 @@ import {
   EuiFieldSearch,
   EuiSwitch,
   EuiButtonGroup,
+  EuiBadgeGroup,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
@@ -22,6 +25,7 @@ import {
   AvailableIntegrationType,
 } from './available_integration_overview_page';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
   const getImage = (url?: string) => {
@@ -75,6 +79,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
                   onClick={() => (window.location.hash = `#/available/${i.name}`)}
+                  footer={badges(i.components)}
                 />
               </EuiFlexItem>
             );
