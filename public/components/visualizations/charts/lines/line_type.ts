@@ -83,7 +83,7 @@ export const createLineTypeDefinition = (params: any = {}) => ({
                     { name: 'Right', id: 'v' },
                     { name: 'Bottom', id: 'h' },
                   ],
-                  defaultSelections: [{ name: 'Right', id: LegendPosition }],
+                  defaultSelections: [{ name: 'Bottom', id: LegendPosition }],
                 },
               },
               {

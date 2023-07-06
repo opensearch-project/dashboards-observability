@@ -19,6 +19,8 @@ import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualiz
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
 import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
+import { processMetricsData } from '../../../custom_panels/helpers/utils';
+import { testData, testData2 } from '../../../metrics/view/test_data';
 
 export const Line = ({ visualizations, layout, config }: any) => {
   const {
@@ -32,11 +34,11 @@ export const Line = ({ visualizations, layout, config }: any) => {
     DefaultModeScatter,
     LabelAngle,
   } = DEFAULT_CHART_STYLES;
-
   const {
     data: {
       explorer: {
-        explorerData: { jsonData },
+        // explorerData: { schema, jsonData },
+        // explorerData: testData,
       },
       userConfigs: {
         dataConfig: {
@@ -123,12 +125,21 @@ export const Line = ({ visualizations, layout, config }: any) => {
   };
 
   let lines = useMemo(() => {
-    const visConfig = {
+    let visConfig = {
       dimensions,
       series,
       breakdowns,
       span,
     };
+    console.log(
+      'processMetricsData(testData.schema, visConfig): ',
+      processMetricsData(testData.schema, visConfig)
+    );
+    visConfig = {
+      ...visConfig,
+      ...processMetricsData(testData.schema, visConfig),
+    };
+    console.log('visConfig: ', visConfig);
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -142,15 +153,53 @@ export const Line = ({ visualizations, layout, config }: any) => {
       y_coordinate: 'y',
     };
 
-    return addStylesToTraces(
-      transformPreprocessedDataToTraces(
-        preprocessJsonData(jsonData, visConfig),
-        visConfig,
-        lineSpecficMetaData
-      ),
+    // return addStylesToTraces(
+    //   transformPreprocessedDataToTraces(
+    //     preprocessJsonData(testData.jsonData, visConfig),
+    //     visConfig,
+    //     lineSpecficMetaData
+    //   ),
+    //   traceStyles
+    // );
+    const result = addStylesToTraces(
+      testData2.jsonData.map((trace) => {
+        return {
+          ...trace,
+          x: trace.timestamps,
+          y: trace.values,
+          name: JSON.stringify(trace.metric),
+        };
+      }),
       traceStyles
     );
-  }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
+    console.log('result: ', result);
+    return result;
+  }, [
+    chartStyles,
+    testData.jsonData,
+    dimensions,
+    series,
+    span,
+    breakdowns,
+    panelOptions,
+    tooltipOptions,
+  ]);
+
+  const prepareAnnotations = (examplerData) => {
+    return examplerData.map((exmp) => {
+      return {
+        x: exmp.timestamp,
+        y: exmp.value,
+        xref: 'x',
+        yref: 'y',
+        text: JSON.stringify(exmp.labels),
+        showarrow: true,
+        arrowhead: 7,
+        ax: 0,
+        ay: -40,
+      };
+    });
+  };
 
   const mergedLayout = useMemo(() => {
     const axisLabelsStyle = {
@@ -162,6 +211,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
+    const annotations = prepareAnnotations(testData.jsonData);
+    console.log('anotations: ', annotations);
     return {
       ...layout,
       title: panelOptions.title || layoutConfig.layout?.title || '',
@@ -184,6 +235,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
       showlegend: showLegend,
       margin: PLOT_MARGIN,
+      annotations,
     };
   }, [visualizations]);
 
