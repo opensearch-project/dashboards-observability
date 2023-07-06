@@ -16,7 +16,6 @@ import {
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 const pageStyles: CSS.Properties = {
   width: '80%',
@@ -26,11 +25,6 @@ export function IntegrationOverview(props: any) {
   const config = props.integration;
   return (
     <EuiPageHeader style={{ justifyContent: 'center' }} data-test-subj={`${config.name}-overview`}>
-      <img
-        src={`${INTEGRATIONS_BASE}/repository/${config.name}/static/${config.statics.logo.path}`}
-        alt="React Logo"
-        style={{ height: 53, width: 53 }}
-      />
       <EuiSpacer size="m" />
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
@@ -49,9 +43,23 @@ export function IntegrationOverview(props: any) {
                   props.showFlyout(config.name);
                 }}
                 fill
+                disabled={props.loading}
                 data-test-subj="add-integration-button"
               >
-                Add
+                Set Up
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="m"
+                onClick={() => {
+                  props.setUpSample();
+                }}
+                fill
+                disabled={props.loading}
+                data-test-subj="try-it-button"
+              >
+                Try It
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

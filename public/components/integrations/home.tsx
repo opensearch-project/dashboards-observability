@@ -22,66 +22,45 @@ interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
 }
 
 export const Home = (props: HomeProps) => {
-  const { parentBreadcrumbs, http, chrome } = props;
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const { http, chrome } = props;
 
   const commonProps = {
-    parentBreadcrumbs,
     http,
     chrome,
   };
 
   return (
     <div>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        toastLifeTimeMs={6000}
-      />
       <HashRouter>
         <Switch>
           <Route
             exact
-            path={['/', '/available']}
-            render={() => (
-              <Sidebar>
-                <AvailableIntegrationOverviewPage {...commonProps} />
-              </Sidebar>
-            )}
+            path={'/available'}
+            render={() => <AvailableIntegrationOverviewPage {...commonProps} />}
           />
           <Route
             exact
-            path={'/added'}
-            render={() => (
-              <Sidebar>
-                <AddedIntegrationOverviewPage {...commonProps} />
-              </Sidebar>
-            )}
+            path={['/', '/added']}
+            render={() => <AddedIntegrationOverviewPage {...commonProps} />}
           />
           <Route
             exact
             path={'/added/:id+'}
             render={(routerProps) => (
-              <Sidebar>
-                <AddedIntegration
-                  integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
-                  {...commonProps}
-                />
-              </Sidebar>
+              <AddedIntegration
+                integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
+                {...commonProps}
+              />
             )}
           />
           <Route
             exact
             path={'/available/:id+'}
             render={(routerProps) => (
-              <Sidebar>
-                <Integration
-                  integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
-                  {...commonProps}
-                />
-              </Sidebar>
+              <Integration
+                integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
+                {...commonProps}
+              />
             )}
           />
         </Switch>

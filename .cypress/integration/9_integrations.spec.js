@@ -6,24 +6,23 @@
 /// <reference types="cypress" />
 
 import {
-  TEST_INTEGRATION_INSTANCE,
+  TEST_INTEGRATION_INSTANCE, TEST_SAMPLE_INSTANCE,
 } from '../utils/constants';
 
 let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
 let testInstance = `${TEST_INTEGRATION_INSTANCE}_${testInstanceSuffix}`;
 
 const moveToIntegrationsHome = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/available`);
 };
 
 const moveToAvailableNginxIntegration = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/available/nginx`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/available/nginx`);
 };
 
 const moveToAddedIntegrations = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-integrations#/added`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/added`);
 };
-
 
 
 describe('Basic sanity test for integrations plugin', () => {
@@ -53,20 +52,12 @@ describe('Tests the add nginx integration instance flow', () => {
     moveToAvailableNginxIntegration();
     cy.get('[data-test-subj="add-integration-button"]').click();
     cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
+    cy.get('[data-test-subj="createInstanceButton"]').should('be.disabled')
     cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
+    cy.get('[data-test-subj="data-source-name"]').type('test');
     cy.get('[data-test-subj="new-instance-name"]').type(testInstance.substring(5));
     cy.get('[data-test-subj="createInstanceButton"]').click();
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
-  })
-
-  it('Navigates to nginx page and triggers the adds the create index template flow', () => {
-    moveToAvailableNginxIntegration();
-    cy.get('[data-test-subj="add-integration-button"]').click();
-    cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
-    cy.get('[data-test-subj="data-choice"]').contains("No, I do not.").click();
-    cy.get('[data-test-subj="create-indextemplate-name"]').type('test')
-    cy.get('[data-test-subj="create-index-template-button"]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'Successfully');
   })
 
   it('Navigates to installed integrations page and verifies that nginx-test exists', () => {
@@ -81,7 +72,6 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get(`[data-test-subj="${testInstance}IntegrationLink"]`).click();
     cy.get(`[data-test-subj="IntegrationAssetLink"]`).click();
     cy.url().should('include', '/dashboards#/')
-
   })
 
   it('Navigates to installed nginx-test instance page and deletes it', () => {
@@ -98,7 +88,16 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
     cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
-    cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
+  })
+});
+
+describe('Tests the add nginx integration instance flow', () => {
+  it('Navigates to nginx page and triggers the try it flow', () => {
+    moveToAvailableNginxIntegration();
+    cy.get('[data-test-subj="try-it-button"]').click();
+    cy.get('.euiToastHeader__title').should('contain', 'successfully');
+    moveToAddedIntegrations();
+    cy.contains(TEST_SAMPLE_INSTANCE).should('exist');
   })
 });
 

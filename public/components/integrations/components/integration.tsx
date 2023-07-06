@@ -11,10 +11,11 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { last } from 'lodash';
-import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
@@ -24,27 +25,113 @@ import { AvailableIntegrationProps } from './integration_types';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationScreenshots } from './integration_screenshots_panel';
 import { AddIntegrationFlyout } from './add_integration_flyout';
+import { useToast } from '../../../../public/components/common/toast';
 
 export function Integration(props: AvailableIntegrationProps) {
-  const { http, integrationTemplateId, chrome, parentBreadcrumbs } = props;
+  const { http, integrationTemplateId, chrome } = props;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const { setToast } = useToast();
   const [integration, setIntegration] = useState({});
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const createMappings = async (
+    componentName: string,
+    payload: {
+      template: { mappings: { _meta: { version: string } } };
+      composed_of: string[];
+      index_patterns: string[];
+    },
+    dataSourceName: string
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    const version = payload.template.mappings._meta.version;
+    if (componentName !== integration.type) {
+      return fetch(
+        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
+        {
+          method: 'POST',
+          headers: [
+            ['osd-xsrf', 'true'],
+            ['Content-Type', 'application/json'],
+          ],
+          body: JSON.stringify(payload),
+        }
+      )
+        .then((response) => response.json())
+        .catch((err: any) => {
+          console.error(err);
+          return err;
+        });
+    } else {
+      payload.index_patterns = [dataSourceName];
+      return fetch(
+        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
+        {
+          method: 'POST',
+          headers: [
+            ['osd-xsrf', 'true'],
+            ['Content-Type', 'application/json'],
+          ],
+          body: JSON.stringify(payload),
+        }
+      )
+        .then((response) => response.json())
+        .catch((err: any) => {
+          console.error(err);
+          return err;
+        });
+    }
+  };
+
+  const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
+    const data = await fetch(
+      `${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`
+    ).then((response) => {
+      return response.json();
+    });
+    let error = null;
+    const mappings = data.data.mappings;
+    mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
+      (templateName: string) => {
+        const version = mappings[templateName].template.mappings._meta.version;
+        return `ss4o_${templateName}_${version}_template`;
+      }
+    );
+    Object.entries(mappings).forEach(async ([key, mapping]) => {
+      if (key === integration.type) {
+        return;
+      }
+      await createMappings(key, mapping as any, targetDataSource);
+    });
+    await createMappings(integration.type, mappings[integration.type], targetDataSource);
+
+    for (const [key, mapping] of Object.entries(data.data.mappings)) {
+      const result = await createMappings(key, mapping as any, targetDataSource);
+
+      if (result && result.error) {
+        error = (result.error as any).reason;
+      }
+    }
+
+    if (error !== null) {
+      setToast('Failure creating index template', 'danger', error);
+    } else {
+      setToast(`Successfully created index template`);
+    }
+  };
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
         text: 'Integrations',
         href: '#/',
       },
       {
         text: integrationTemplateId,
-        href: `${last(parentBreadcrumbs)!.href}integrations/${integrationTemplateId}`,
+        href: `#/available/${integrationTemplateId}`,
       },
     ]);
     handleDataRequest();
@@ -93,30 +180,102 @@ export function Integration(props: AvailableIntegrationProps) {
       });
   }, [integration]);
 
-  const setToast = (title: string, color = 'success', text?: ReactChild) => {
-    if (!text) text = '';
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
+  async function addIntegrationRequest(
+    addSample: boolean,
+    templateName: string,
+    name?: string,
+    dataSource?: string
+  ) {
+    setLoading(true);
+    if (addSample) {
+      createDataSourceMappings(`ss4o_${integration.type}-${integrationTemplateId}-sample-*-*`);
+      name = `${integrationTemplateId}-sample`;
+      dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample_sample_sample`;
+    }
 
-  async function addIntegrationRequest(templateName: string, name: string, dataSource: string) {
-    http
+    const response: boolean = await http
       .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
         body: JSON.stringify({ name, dataSource }),
       })
-      .then((res) => {
+      .then((_res) => {
         setToast(
           `${name} integration successfully added!`,
           'success',
           `View the added assets from ${name} in the Added Integrations list`
         );
+        return true;
       })
-      .catch((err) =>
+      .catch((_err) => {
         setToast(
           'Failed to load integration. Check Added Integrations table for more details',
           'danger'
-        )
-      );
+        );
+        return false;
+      });
+    if (!addSample || !response) {
+      setLoading(false);
+      return;
+    }
+    const data: { sampleData: unknown[] } = await http
+      .get(`${INTEGRATIONS_BASE}/repository/${templateName}/data`)
+      .then((res) => res.data)
+      .catch((err) => {
+        console.error(err);
+        setToast('The sample data could not be retrieved', 'danger');
+        return { sampleData: [] };
+      });
+    const requestBody =
+      data.sampleData
+        .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
+        .join('\n') + '\n';
+    fetch(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, {
+      method: 'POST',
+      body: requestBody,
+      headers: [
+        ['osd-xsrf', 'true'],
+        ['Content-Type', 'application/json; charset=utf-8'],
+      ],
+    })
+      .catch((err) => {
+        console.error(err);
+        setToast('Failed to load sample data', 'danger');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
+
+  const tabs = [
+    {
+      id: 'assets',
+      name: 'Asset List',
+      disabled: false,
+    },
+    {
+      id: 'fields',
+      name: 'Integration Fields',
+      disabled: false,
+    },
+  ];
+
+  const [selectedTabId, setSelectedTabId] = useState('assets');
+
+  const onSelectedTabChanged = (id) => {
+    setSelectedTabId(id);
+  };
+
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        disabled={tab.disabled}
+        key={index}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  };
 
   if (Object.keys(integration).length === 0) {
     return (
@@ -127,13 +286,6 @@ export function Integration(props: AvailableIntegrationProps) {
   }
   return (
     <EuiPage>
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={(removedToast) => {
-          setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
-        }}
-        toastLifeTimeMs={6000}
-      />
       <EuiPageBody>
         <EuiSpacer size="xl" />
         {IntegrationOverview({
@@ -141,15 +293,21 @@ export function Integration(props: AvailableIntegrationProps) {
           showFlyout: () => {
             setIsFlyoutVisible(true);
           },
+          setUpSample: () => {
+            addIntegrationRequest(true, integrationTemplateId);
+          },
+          loading,
         })}
         <EuiSpacer />
         {IntegrationDetails({ integration })}
         <EuiSpacer />
         {IntegrationScreenshots({ integration })}
         <EuiSpacer />
-        {IntegrationAssets({ integration, integrationAssets })}
-        <EuiSpacer />
-        {IntegrationFields({ integration, integrationMapping })}
+        <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+        <EuiSpacer size="s" />
+        {selectedTabId === 'assets'
+          ? IntegrationAssets({ integration, integrationAssets })
+          : IntegrationFields({ integration, integrationMapping })}
         <EuiSpacer />
       </EuiPageBody>
       {isFlyoutVisible && (
@@ -158,7 +316,7 @@ export function Integration(props: AvailableIntegrationProps) {
             setIsFlyoutVisible(false);
           }}
           onCreate={(name, dataSource) => {
-            addIntegrationRequest(integrationTemplateId, name, dataSource);
+            addIntegrationRequest(false, integrationTemplateId, name, dataSource);
           }}
           integrationName={integrationTemplateId}
           integrationType={integration.type}

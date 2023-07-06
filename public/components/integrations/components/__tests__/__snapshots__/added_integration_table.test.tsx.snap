@@ -15,23 +15,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
       data-test-subj="addedIntegrationsArea"
       role="main"
     >
-      <EuiPageContentHeaderSection>
-        <div
-          className="euiPageContentHeaderSection"
-        >
-          <EuiTitle
-            data-test-subj="applicationHomePageTitle"
-            size="s"
-          >
-            <h3
-              className="euiTitle euiTitle--small"
-              data-test-subj="applicationHomePageTitle"
-            >
-              Added Integrations
-            </h3>
-          </EuiTitle>
-        </div>
-      </EuiPageContentHeaderSection>
       <EuiSpacer>
         <div
           className="euiSpacer euiSpacer--l"

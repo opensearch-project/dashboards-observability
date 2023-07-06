@@ -33,20 +33,15 @@ export interface AddedIntegrationType {
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
-  const { chrome, parentBreadcrumbs, http } = props;
+  const { chrome, http } = props;
 
   const [data, setData] = useState<AddedIntegrationsList>({ hits: [] });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...parentBreadcrumbs,
       {
         text: 'Integrations',
         href: '#/',
-      },
-      {
-        text: 'Added Integrations',
-        href: '#/added',
       },
     ]);
     handleDataRequest();
