@@ -189,15 +189,14 @@ export const MetricsExportPanel = ({
         <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
           {visualizationsMetaData.map((metaData: any, index: number) => {
             return (
-              <EuiForm component="form" key={index}>
+              <EuiForm component="form" key={'metrics_name_form-' + index}>
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiFormRow label={'Metric Name #' + (index + 1)}>
                       <EuiFieldText
-                        key={'save-panel-id'}
                         value={visualizationsMetaData[index].name}
                         onChange={(e) => onNameChange(index, e.target.value)}
-                        data-test-subj="metrics__querySaveName"
+                        data-test-subj={'save-panel-name-' + index}
                       />
                     </EuiFormRow>
                   </EuiFlexItem>

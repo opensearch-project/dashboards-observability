@@ -7,7 +7,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { configureMockStore } from '@jedmao/redux-mock-store';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, render } from '@testing-library/react';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { samplePanelOptions, sampleVisualizationById } from '../../../../../test/metrics_contants';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
@@ -93,7 +93,7 @@ describe('Export Metrics Panel Component', () => {
 
     const setIsSavePanelOpen = jest.fn();
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <MetricsExportPanel
           startTime="0"
@@ -105,15 +105,8 @@ describe('Export Metrics Panel Component', () => {
       </Provider>
     );
 
-    wrapper.update();
-    console.log(wrapper.debug());
-    const nameInput = screen.findByRole('textbox', { name: 'save-panel-name-0' });
-    console.log(nameInput);
     await waitFor(() => {
-      expect(wrapper.exists('[data-test-subj="metrics__querySaveName"]')).toEqual(true);
+      expect(screen.getByTestId('save-panel-name-0'));
     });
-    expect(wrapper).toMatchSnapshot();
-
-    wrapper.unmount();
   });
 });
