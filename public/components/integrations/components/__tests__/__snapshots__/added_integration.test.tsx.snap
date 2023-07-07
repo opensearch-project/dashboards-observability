@@ -369,13 +369,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                       "sortable": true,
                       "truncateText": true,
                     },
-                    Object {
-                      "field": "actions",
-                      "name": "Actions",
-                      "render": [Function],
-                      "sortable": true,
-                      "truncateText": true,
-                    },
                   ]
                 }
                 itemId="id"
@@ -848,13 +841,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                           "sortable": true,
                           "truncateText": true,
                         },
-                        Object {
-                          "field": "actions",
-                          "name": "Actions",
-                          "render": [Function],
-                          "sortable": true,
-                          "truncateText": true,
-                        },
                       ]
                     }
                     itemId="id"
@@ -1026,52 +1012,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                       </CellContents>
                                     </th>
                                   </EuiTableHeaderCell>
-                                  <EuiTableHeaderCell
-                                    align="left"
-                                    data-test-subj="tableHeaderCell_actions_2"
-                                    key="_data_h_actions_2"
-                                  >
-                                    <th
-                                      className="euiTableHeaderCell"
-                                      data-test-subj="tableHeaderCell_actions_2"
-                                      role="columnheader"
-                                      scope="col"
-                                      style={
-                                        Object {
-                                          "width": undefined,
-                                        }
-                                      }
-                                    >
-                                      <CellContents
-                                        className="euiTableCellContent"
-                                        showSortMsg={false}
-                                      >
-                                        <span
-                                          className="euiTableCellContent"
-                                        >
-                                          <EuiInnerText>
-                                            <EuiI18n
-                                              default="{innerText}; {description}"
-                                              token="euiTableHeaderCell.titleTextWithDesc"
-                                              values={
-                                                Object {
-                                                  "description": undefined,
-                                                  "innerText": "Actions",
-                                                }
-                                              }
-                                            >
-                                              <span
-                                                className="euiTableCellContent__text"
-                                                title="Actions"
-                                              >
-                                                Actions
-                                              </span>
-                                            </EuiI18n>
-                                          </EuiInnerText>
-                                        </span>
-                                      </CellContents>
-                                    </th>
-                                  </EuiTableHeaderCell>
                                 </tr>
                               </thead>
                             </EuiTableHeader>
@@ -1083,12 +1023,12 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                   >
                                     <EuiTableRowCell
                                       align="center"
-                                      colSpan={3}
+                                      colSpan={2}
                                       isMobileFullWidth={true}
                                     >
                                       <td
                                         className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                                        colSpan={3}
+                                        colSpan={2}
                                         style={
                                           Object {
                                             "width": undefined,
