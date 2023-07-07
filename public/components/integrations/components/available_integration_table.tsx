@@ -5,15 +5,25 @@
 
 import {
   EuiButtonGroup,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { ASSET_FILTER_OPTIONS } from 'common/constants/explorer';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 import { badges } from './integration_category_badge_group';
 
@@ -33,10 +43,10 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     },
   ];
 
-  const [toggleIconIdSelected, setToggleIconIdSelectedc] = useState('0');
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('0');
 
   const onChangeIcons = (optionId) => {
-    setToggleIconIdSelectedc(optionId);
+    setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
     } else {
@@ -81,13 +91,18 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
 
   const renderToggle = () => {
     return (
-      <EuiButtonGroup
-        legend="Text align"
-        options={toggleButtonsIcons}
-        idSelected={toggleIconIdSelected}
-        onChange={(id) => onChangeIcons(id)}
-        isIconOnly
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>{props.renderCateogryFilters()}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonGroup
+            legend="Text align"
+            options={toggleButtonsIcons}
+            idSelected={toggleIconIdSelected}
+            onChange={(id) => onChangeIcons(id)}
+            isIconOnly
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 

@@ -40,12 +40,12 @@ export const Home = (props: HomeProps) => {
           />
           <Route
             exact
-            path={['/', '/added']}
+            path={['/', '/installed']}
             render={() => <AddedIntegrationOverviewPage {...commonProps} />}
           />
           <Route
             exact
-            path={'/added/:id+'}
+            path={'/installed/:id+'}
             render={(routerProps) => (
               <AddedIntegration
                 integrationInstanceId={decodeURIComponent(routerProps.match.params.id)}
