@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,
@@ -28,7 +28,10 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
-  const [query, setQuery] = useState('');
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
+  // const query = ''
+
+  // const query = useRef('');
 
   const getImage = (url?: string) => {
     let optionalImg;
@@ -52,8 +55,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
       iconType: 'grid',
     },
   ];
-
-  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const onChangeIcons = (optionId) => {
     setToggleIconIdSelected(optionId);
@@ -101,9 +102,14 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             isClearable={false}
             placeholder="Search..."
             data-test-subj="search-bar-input-box"
+            // value={query}
+            // onClick = {() => query.current.}
             onChange={(e) => {
-              setQuery(e.target.value);
+              props.setQuery(e.target.value);
+              // query.current
+              // setGlobalQuery(e.target.value);
             }}
+            // onSearch={props.refresh}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -117,7 +123,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {renderRows(props.data.hits.filter((x) => x.name.includes(query)))}
+      {renderRows(props.data.hits.filter((x) => x.name.includes(props.query)))}
     </EuiPanel>
   );
 }

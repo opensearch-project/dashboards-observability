@@ -8,18 +8,14 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPageContentHeaderSection,
   EuiSpacer,
-  EuiSwitch,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 import { badges } from './integration_category_badge_group';
-import { INTEGRATION_CATEOGRY_OPTIONS } from '../../../../common/constants/explorer';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
