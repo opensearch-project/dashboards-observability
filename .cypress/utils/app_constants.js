@@ -21,11 +21,9 @@ export const moveToCreatePage = () => {
 
 export const moveToApplication = (name) => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
-  //cy.wait(delay*6);
   cy.get('.euiTableRow').should('have.length.greaterThan', 0);//Replaces Wait
   cy.get(`[data-test-subj="${name}ApplicationLink"]`).click();
   cy.get('.euiTableRow').should('have.length.lessThan', 1);//Replaces Wait
-  //cy.wait(delay);
   cy.get('[data-test-subj="applicationTitle"]').should('contain', name);
   changeTimeTo24('years');
 };
