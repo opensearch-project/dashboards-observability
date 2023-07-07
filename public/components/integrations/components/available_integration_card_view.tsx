@@ -28,6 +28,8 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
+  const [query, setQuery] = useState('');
+
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
@@ -99,12 +101,9 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             isClearable={false}
             placeholder="Search..."
             data-test-subj="search-bar-input-box"
-            // value={query}
             onChange={(e) => {
-              // setQuery(e.target.value);
-              // setGlobalQuery(e.target.value);
+              setQuery(e.target.value);
             }}
-            // onSearch={props.refresh}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -118,7 +117,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {renderRows(props.data.hits)}
+      {renderRows(props.data.hits.filter((x) => x.name.includes(query)))}
     </EuiPanel>
   );
 }
