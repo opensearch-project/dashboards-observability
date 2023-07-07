@@ -9,18 +9,29 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
+  EuiOverlayMask,
   EuiPageContent,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
   const integrations = props.data.hits;
+
+  const { http } = props;
+
+  const { setToast } = useToast();
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   const tableColumns = [
     {
@@ -49,17 +60,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       ),
     },
     {
-      field: 'type',
-      name: 'Type',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
-          {_.truncate(record.dataSource.sourceType, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
       field: 'dateAdded',
       name: 'Date Added',
       sortable: true,
@@ -71,19 +71,51 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       ),
     },
     {
-      field: 'status',
-      name: 'Status',
+      field: 'actions',
+      name: 'Actions',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationStatus`}>
-          {_.truncate(record.status, { length: 100 })}
-        </EuiText>
+        <EuiIcon
+          type={'trash'}
+          onClick={() => {
+            getModal(record.id, record.templateName);
+          }}
+        />
       ),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
-  const FILTER_OPTIONS = ['logs'];
+  async function deleteAddedIntegration(integrationInstance: string, name: string) {
+    http
+      .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
+      .then(() => {
+        setToast(`${name} integration successfully deleted!`, 'success');
+      })
+      .catch((err) => {
+        setToast(`Error deleting ${name} or its assets`, 'danger');
+      })
+      .finally(() => {
+        window.location.hash = '#/added';
+      });
+  }
+
+  const getModal = (integrationInstanceId, name) => {
+    setModalLayout(
+      <DeleteModal
+        onConfirm={() => {
+          setIsModalVisible(false);
+          deleteAddedIntegration(integrationInstanceId, name);
+        }}
+        onCancel={() => {
+          setIsModalVisible(false);
+        }}
+        title={`Delete Assets`}
+        message={`Are you sure you want to delete the selected asset(s)?`}
+      />
+    );
+    setIsModalVisible(true);
+  };
 
   const search = {
     box: {
@@ -148,6 +180,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
           <EuiSpacer size="m" />
         </>
       )}
+      {isModalVisible && modalLayout}
     </EuiPageContent>
   );
 }

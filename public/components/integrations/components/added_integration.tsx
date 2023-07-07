@@ -225,23 +225,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
           </EuiText>
         ),
       },
-      {
-        field: 'actions',
-        name: 'Actions',
-        sortable: true,
-        truncateText: true,
-        render: (value, record) => (
-          <EuiIcon
-            type={'trash'}
-            onClick={() => {
-              getModal();
-            }}
-          />
-        ),
-      },
     ] as Array<EuiTableFieldDataColumnType<any>>;
-
-    console.log(assets);
 
     return (
       <EuiPanel>
