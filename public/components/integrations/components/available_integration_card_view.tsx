@@ -97,7 +97,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
           <EuiFieldSearch
             fullWidth
             isClearable={false}
-            placeholder="Search available integration names and categories"
+            placeholder="Search..."
             data-test-subj="search-bar-input-box"
             // value={query}
             onChange={(e) => {

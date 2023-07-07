@@ -19,6 +19,7 @@ import _ from 'lodash';
 import React, { useState } from 'react';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 import { badges } from './integration_category_badge_group';
+import { INTEGRATION_CATEOGRY_OPTIONS } from '../../../../common/constants/explorer';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
@@ -82,8 +83,6 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
-  const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
-
   const renderToggle = () => {
     return (
       <EuiButtonGroup
@@ -101,19 +100,6 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: 'Type',
-        multiSelect: false,
-        options: FILTER_OPTIONS.map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
   };
 
   return (
