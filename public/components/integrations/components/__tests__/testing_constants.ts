@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { AddedIntegrationsTableProps } from '../added_integration_overview_page';
 import {
   AvailableIntegrationsCardViewProps,
@@ -34,6 +39,7 @@ export const availableCardViewData: AvailableIntegrationsCardViewProps = {
     ],
   },
   showModal: () => {},
+  renderCateogryFilters: () => null as any,
 };
 
 export const availableTableViewData: AvailableIntegrationsTableProps = {
@@ -67,6 +73,7 @@ export const availableTableViewData: AvailableIntegrationsTableProps = {
   },
   showModal: () => {},
   loading: false,
+  renderCateogryFilters: () => null as any,
 };
 
 export const addedIntegrationData: AddedIntegrationsTableProps = {

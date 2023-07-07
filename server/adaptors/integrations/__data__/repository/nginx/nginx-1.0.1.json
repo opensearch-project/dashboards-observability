@@ -5,7 +5,7 @@
     "description": "Nginx HTTP server collector",
     "license": "Apache-2.0",
     "type": "logs",
-    "author": "Simeon Widdis",
+    "author": "OpenSearch",
     "sourceUrl": "https://github.com/opensearch-project/observability/pull/1493/files",
     "statics": {
         "logo": {

@@ -48,12 +48,12 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         href: '#/',
       },
       {
-        text: 'Added Integration',
-        href: '#/added',
+        text: 'Installed Integrations',
+        href: '#/installed',
       },
       {
         text: `${stateData.data?.name}`,
-        href: `#/added/${stateData.data?.id}`,
+        href: `#/installed/${stateData.data?.id}`,
       },
     ]);
     handleDataRequest();
@@ -63,7 +63,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   const badge = (status) => {
-    console.log(status);
     switch (status) {
       case 'available':
         return <EuiBadge color="success">Healthy</EuiBadge>;

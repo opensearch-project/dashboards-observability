@@ -55,6 +55,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
       ],
     }
   }
+  renderCateogryFilters={[Function]}
   showModal={[Function]}
 >
   <EuiPanel>
@@ -153,6 +154,13 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                 </EuiFormControlLayout>
               </EuiFieldSearch>
             </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}

@@ -4,9 +4,22 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiOverlayMask, EuiPage, EuiPageBody, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiOverlayMask,
+  EuiPage,
+  EuiPageBody,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { StringRegexOptions } from 'joi';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
@@ -34,6 +47,7 @@ export interface AvailableIntegrationsTableProps {
   showModal: (input: string) => void;
   isCardView: boolean;
   setCardView: (input: boolean) => void;
+  renderCateogryFilters: () => React.JSX.Element;
 }
 
 export interface AvailableIntegrationsList {
@@ -47,6 +61,7 @@ export interface AvailableIntegrationsCardViewProps {
   setCardView: (input: boolean) => void;
   query: string;
   setQuery: (input: string) => void;
+  renderCateogryFilters: () => React.JSX.Element;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
@@ -59,6 +74,59 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const [items, setItems] = useState([
+    { name: 'http' },
+    { name: 'logs' },
+    { name: 'communication' },
+    { name: 'cloud' },
+    { name: 'aws_elb' },
+    { name: 'container' },
+  ]);
+
+  function updateItem(index) {
+    if (!items[index]) {
+      return;
+    }
+
+    const newItems = [...items];
+
+    switch (newItems[index].checked) {
+      case 'on':
+        newItems[index].checked = undefined;
+        break;
+
+      default:
+        newItems[index].checked = 'on';
+    }
+
+    setItems(newItems);
+  }
+
+  const helper = items.filter((item) => item.checked === 'on').map((x) => x.name);
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={items.length}
+      hasActiveFilters={!!items.find((item) => item.checked === 'on')}
+      numActiveFilters={items.filter((item) => item.checked === 'on').length}
+    >
+      Categories
+    </EuiFilterButton>
+  );
 
   const getModal = (name: string) => {
     setModalLayout(
@@ -116,25 +184,64 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       );
   }
 
+  const renderCateogryFilters = () => {
+    return (
+      <EuiFilterGroup>
+        <EuiPopover
+          id="popoverExampleMultiSelect"
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+        >
+          <EuiPopoverTitle paddingSize="s">
+            <EuiFieldSearch compressed />
+          </EuiPopoverTitle>
+          <div className="ouiFilterSelect__items">
+            {items.map((item, index) => (
+              <EuiFilterSelectItem
+                checked={item.checked}
+                key={index}
+                onClick={() => updateItem(index)}
+              >
+                {item.name}
+              </EuiFilterSelectItem>
+            ))}
+          </div>
+        </EuiPopover>
+      </EuiFilterGroup>
+    );
+  };
+
   return (
     <EuiPage>
-      <EuiPageBody component="div">
+      <EuiPageBody>
         {IntegrationHeader()}
         {isCardView
           ? AvailableIntegrationsCardView({
-              data,
+              data: {
+                hits: data.hits.filter((hit) =>
+                  helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
+                ),
+              },
               showModal: getModal,
               isCardView,
               setCardView,
               query,
               setQuery,
+              renderCateogryFilters,
             })
           : AvailableIntegrationsTable({
               loading: false,
-              data,
+              data: {
+                hits: data.hits.filter((hit) =>
+                  helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
+                ),
+              },
               showModal: getModal,
               isCardView,
               setCardView,
+              renderCateogryFilters,
             })}
       </EuiPageBody>
       {isModalVisible && modalLayout}

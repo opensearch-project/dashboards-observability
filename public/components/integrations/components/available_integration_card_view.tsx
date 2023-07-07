@@ -29,9 +29,6 @@ import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
-  // const query = ''
-
-  // const query = useRef('');
 
   const getImage = (url?: string) => {
     let optionalImg;
@@ -112,6 +109,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             // onSearch={props.refresh}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>{props.renderCateogryFilters()}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             legend="Text align"

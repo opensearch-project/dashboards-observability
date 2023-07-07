@@ -126,7 +126,7 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
             <span
               className="euiTab__content"
             >
-              Added
+              Installed
             </span>
           </button>
         </EuiTab>
