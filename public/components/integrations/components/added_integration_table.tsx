@@ -99,7 +99,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
         setToast(`Error deleting ${name} or its assets`, 'danger');
       })
       .finally(() => {
-        window.location.hash = '#/added';
+        window.location.hash = '#/installed';
       });
   }
 

@@ -21,7 +21,7 @@ const moveToAvailableNginxIntegration = () => {
 };
 
 const moveToAddedIntegrations = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/added`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/installed`);
 };
 
 
