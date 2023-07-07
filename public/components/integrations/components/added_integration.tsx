@@ -174,6 +174,57 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
     const assets = data?.assets || [];
 
+    const renderAsset = (record) => {
+      switch (record.assetType) {
+        case 'dashboard':
+          return (
+            <EuiLink
+              data-test-subj={`IntegrationAssetLink`}
+              onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
+            >
+              {_.truncate(record.description, { length: 100 })}
+            </EuiLink>
+          );
+        case 'index-pattern':
+          return (
+            <EuiLink
+              data-test-subj={`IntegrationIndexPatternLink`}
+              onClick={() =>
+                window.location.assign(
+                  `management/opensearch-dashboards/indexPatterns/patterns/${record.assetId}`
+                )
+              }
+            >
+              {_.truncate(record.description, { length: 100 })}
+            </EuiLink>
+          );
+        case 'search':
+          return (
+            <EuiLink
+              data-test-subj={`IntegrationIndexPatternLink`}
+              onClick={() => window.location.assign(`discover#/view/${record.assetId}`)}
+            >
+              {_.truncate(record.description, { length: 100 })}
+            </EuiLink>
+          );
+        case 'visualization':
+          return (
+            <EuiLink
+              data-test-subj={`IntegrationIndexPatternLink`}
+              onClick={() => window.location.assign(`visualize#/edit/${record.assetId}`)}
+            >
+              {_.truncate(record.description, { length: 100 })}
+            </EuiLink>
+          );
+        default:
+          return (
+            <EuiText data-test-subj={`IntegrationAssetText`}>
+              {_.truncate(record.description, { length: 100 })}
+            </EuiText>
+          );
+      }
+    };
+
     const search = {
       box: {
         incremental: true,
@@ -200,18 +251,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         sortable: true,
         truncateText: true,
         render: (value, record) => {
-          return record.isDefaultAsset ? (
-            <EuiLink
-              data-test-subj={`IntegrationAssetLink`}
-              onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
-            >
-              {_.truncate(record.description, { length: 100 })}
-            </EuiLink>
-          ) : (
-            <EuiText data-test-subj={`IntegrationAssetText`}>
-              {_.truncate(record.description, { length: 100 })}
-            </EuiText>
-          );
+          return renderAsset(record);
         },
       },
       {

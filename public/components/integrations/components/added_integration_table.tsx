@@ -18,7 +18,10 @@ import {
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
-import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import {
+  ASSET_FILTER_OPTIONS,
+  INTEGRATION_TEMPLATE_OPTIONS,
+} from '../../../../common/constants/explorer';
 import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
@@ -124,10 +127,10 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     filters: [
       {
         type: 'field_value_selection',
-        field: 'type',
+        field: 'templateName',
         name: 'Type',
         multiSelect: false,
-        options: ASSET_FILTER_OPTIONS.map((i) => ({
+        options: INTEGRATION_TEMPLATE_OPTIONS.map((i) => ({
           value: i,
           name: i,
           view: i,
