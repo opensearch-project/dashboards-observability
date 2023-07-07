@@ -43,6 +43,7 @@ describe('Basic sanity test for integrations plugin', () => {
     cy.get('[data-test-subj="nginx-details"]').should('exist')
     cy.get('[data-test-subj="nginx-screenshots"]').should('exist')
     cy.get('[data-test-subj="nginx-assets"]').should('exist')
+    cy.get('[data-test-subj="fields"]').click();
     cy.get('[data-test-subj="nginx-fields"]').should('exist')
   })
 });

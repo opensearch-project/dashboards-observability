@@ -23,19 +23,6 @@ export function IntegrationFields(props: any) {
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: 'Type',
-        multiSelect: false,
-        options: FILTER_OPTIONS.map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
   };
 
   const tableColumns = [

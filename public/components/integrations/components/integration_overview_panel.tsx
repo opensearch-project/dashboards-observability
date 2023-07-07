@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiPageContentHeaderSection,
+  EuiBadge,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -68,13 +70,6 @@ export function IntegrationOverview(props: any) {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText>
-              <h4>Status</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiText size="m">{config.status}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />
@@ -85,7 +80,11 @@ export function IntegrationOverview(props: any) {
               <h4>Category</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{config.components?.map((x: any) => x.name).join(', ')}</EuiText>
+            <EuiBadgeGroup>
+              {config.components.map((cateogry) => {
+                return <EuiBadge>{cateogry.name}</EuiBadge>;
+              })}
+            </EuiBadgeGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>

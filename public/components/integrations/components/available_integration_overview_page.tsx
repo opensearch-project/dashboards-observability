@@ -7,6 +7,7 @@
 import { EuiOverlayMask, EuiPage, EuiPageBody, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { StringRegexOptions } from 'joi';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
@@ -44,11 +45,14 @@ export interface AvailableIntegrationsCardViewProps {
   showModal: (input: string) => void;
   isCardView: boolean;
   setCardView: (input: boolean) => void;
+  query: string;
+  setQuery: (input: string) => void;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
   const { chrome, http } = props;
 
+  const [query, setQuery] = useState('');
   const [isCardView, setCardView] = useState(true);
   const { setToast } = useToast();
   const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
@@ -117,7 +121,14 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       <EuiPageBody component="div">
         {IntegrationHeader()}
         {isCardView
-          ? AvailableIntegrationsCardView({ data, showModal: getModal, isCardView, setCardView })
+          ? AvailableIntegrationsCardView({
+              data,
+              showModal: getModal,
+              isCardView,
+              setCardView,
+              query,
+              setQuery,
+            })
           : AvailableIntegrationsTable({
               loading: false,
               data,

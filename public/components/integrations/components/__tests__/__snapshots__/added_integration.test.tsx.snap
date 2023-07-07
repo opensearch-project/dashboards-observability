@@ -263,9 +263,11 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                           </EuiText>
                         </div>
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                      >
                         <div
-                          className="euiFlexItem"
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <EuiText>
                             <div
@@ -283,42 +285,32 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                               className="euiSpacer euiSpacer--m"
                             />
                           </EuiSpacer>
-                          <EuiText
-                            size="m"
+                          <EuiBadge
+                            color="danger"
                           >
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <h4>
-                                Tags
-                              </h4>
-                            </div>
-                          </EuiText>
-                          <EuiSpacer
-                            size="m"
-                          >
-                            <div
-                              className="euiSpacer euiSpacer--m"
-                            />
-                          </EuiSpacer>
-                          <EuiText
-                            size="m"
-                          >
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
+                            <EuiInnerText>
+                              <span
+                                className="euiBadge euiBadge--iconLeft"
+                                style={
+                                  Object {
+                                    "backgroundColor": "#ff7e62",
+                                    "color": "#000",
+                                  }
+                                }
+                                title="Critical"
+                              >
+                                <span
+                                  className="euiBadge__content"
+                                >
+                                  <span
+                                    className="euiBadge__text"
+                                  >
+                                    Critical
+                                  </span>
+                                </span>
+                              </span>
+                            </EuiInnerText>
+                          </EuiBadge>
                         </div>
                       </EuiFlexItem>
                     </div>
@@ -377,13 +369,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                       "sortable": true,
                       "truncateText": true,
                     },
-                    Object {
-                      "field": "actions",
-                      "name": "Actions",
-                      "render": [Function],
-                      "sortable": true,
-                      "truncateText": true,
-                    },
                   ]
                 }
                 itemId="id"
@@ -407,24 +392,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     },
                     "filters": Array [
                       Object {
-                        "field": "type",
+                        "field": "assetType",
                         "multiSelect": false,
                         "name": "Type",
                         "options": Array [
                           Object {
-                            "name": "Visualization",
-                            "value": "Visualization",
-                            "view": "Visualization",
+                            "name": "index-pattern",
+                            "value": "index-pattern",
+                            "view": "index-pattern",
                           },
                           Object {
-                            "name": "Query",
-                            "value": "Query",
-                            "view": "Query",
+                            "name": "search",
+                            "value": "search",
+                            "view": "search",
                           },
                           Object {
-                            "name": "Metric",
-                            "value": "Metric",
-                            "view": "Metric",
+                            "name": "visualization",
+                            "value": "visualization",
+                            "view": "visualization",
+                          },
+                          Object {
+                            "name": "dashboard",
+                            "value": "dashboard",
+                            "view": "dashboard",
                           },
                         ],
                         "type": "field_value_selection",
@@ -444,24 +434,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     filters={
                       Array [
                         Object {
-                          "field": "type",
+                          "field": "assetType",
                           "multiSelect": false,
                           "name": "Type",
                           "options": Array [
                             Object {
-                              "name": "Visualization",
-                              "value": "Visualization",
-                              "view": "Visualization",
+                              "name": "index-pattern",
+                              "value": "index-pattern",
+                              "view": "index-pattern",
                             },
                             Object {
-                              "name": "Query",
-                              "value": "Query",
-                              "view": "Query",
+                              "name": "search",
+                              "value": "search",
+                              "view": "search",
                             },
                             Object {
-                              "name": "Metric",
-                              "value": "Metric",
-                              "view": "Metric",
+                              "name": "visualization",
+                              "value": "visualization",
+                              "view": "visualization",
+                            },
+                            Object {
+                              "name": "dashboard",
+                              "value": "dashboard",
+                              "view": "dashboard",
                             },
                           ],
                           "type": "field_value_selection",
@@ -592,24 +587,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                               filters={
                                 Array [
                                   Object {
-                                    "field": "type",
+                                    "field": "assetType",
                                     "multiSelect": false,
                                     "name": "Type",
                                     "options": Array [
                                       Object {
-                                        "name": "Visualization",
-                                        "value": "Visualization",
-                                        "view": "Visualization",
+                                        "name": "index-pattern",
+                                        "value": "index-pattern",
+                                        "view": "index-pattern",
                                       },
                                       Object {
-                                        "name": "Query",
-                                        "value": "Query",
-                                        "view": "Query",
+                                        "name": "search",
+                                        "value": "search",
+                                        "view": "search",
                                       },
                                       Object {
-                                        "name": "Metric",
-                                        "value": "Metric",
-                                        "view": "Metric",
+                                        "name": "visualization",
+                                        "value": "visualization",
+                                        "view": "visualization",
+                                      },
+                                      Object {
+                                        "name": "dashboard",
+                                        "value": "dashboard",
+                                        "view": "dashboard",
                                       },
                                     ],
                                     "type": "field_value_selection",
@@ -644,24 +644,29 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                   <FieldValueSelectionFilter
                                     config={
                                       Object {
-                                        "field": "type",
+                                        "field": "assetType",
                                         "multiSelect": false,
                                         "name": "Type",
                                         "options": Array [
                                           Object {
-                                            "name": "Visualization",
-                                            "value": "Visualization",
-                                            "view": "Visualization",
+                                            "name": "index-pattern",
+                                            "value": "index-pattern",
+                                            "view": "index-pattern",
                                           },
                                           Object {
-                                            "name": "Query",
-                                            "value": "Query",
-                                            "view": "Query",
+                                            "name": "search",
+                                            "value": "search",
+                                            "view": "search",
                                           },
                                           Object {
-                                            "name": "Metric",
-                                            "value": "Metric",
-                                            "view": "Metric",
+                                            "name": "visualization",
+                                            "value": "visualization",
+                                            "view": "visualization",
+                                          },
+                                          Object {
+                                            "name": "dashboard",
+                                            "value": "dashboard",
+                                            "view": "dashboard",
                                           },
                                         ],
                                         "type": "field_value_selection",
@@ -832,13 +837,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                         Object {
                           "field": "type",
                           "name": "Type",
-                          "render": [Function],
-                          "sortable": true,
-                          "truncateText": true,
-                        },
-                        Object {
-                          "field": "actions",
-                          "name": "Actions",
                           "render": [Function],
                           "sortable": true,
                           "truncateText": true,
@@ -1014,52 +1012,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                       </CellContents>
                                     </th>
                                   </EuiTableHeaderCell>
-                                  <EuiTableHeaderCell
-                                    align="left"
-                                    data-test-subj="tableHeaderCell_actions_2"
-                                    key="_data_h_actions_2"
-                                  >
-                                    <th
-                                      className="euiTableHeaderCell"
-                                      data-test-subj="tableHeaderCell_actions_2"
-                                      role="columnheader"
-                                      scope="col"
-                                      style={
-                                        Object {
-                                          "width": undefined,
-                                        }
-                                      }
-                                    >
-                                      <CellContents
-                                        className="euiTableCellContent"
-                                        showSortMsg={false}
-                                      >
-                                        <span
-                                          className="euiTableCellContent"
-                                        >
-                                          <EuiInnerText>
-                                            <EuiI18n
-                                              default="{innerText}; {description}"
-                                              token="euiTableHeaderCell.titleTextWithDesc"
-                                              values={
-                                                Object {
-                                                  "description": undefined,
-                                                  "innerText": "Actions",
-                                                }
-                                              }
-                                            >
-                                              <span
-                                                className="euiTableCellContent__text"
-                                                title="Actions"
-                                              >
-                                                Actions
-                                              </span>
-                                            </EuiI18n>
-                                          </EuiInnerText>
-                                        </span>
-                                      </CellContents>
-                                    </th>
-                                  </EuiTableHeaderCell>
                                 </tr>
                               </thead>
                             </EuiTableHeader>
@@ -1071,12 +1023,12 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                   >
                                     <EuiTableRowCell
                                       align="center"
-                                      colSpan={3}
+                                      colSpan={2}
                                       isMobileFullWidth={true}
                                     >
                                       <td
                                         className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                                        colSpan={3}
+                                        colSpan={2}
                                         style={
                                           Object {
                                             "width": undefined,

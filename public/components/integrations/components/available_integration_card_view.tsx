@@ -14,16 +14,25 @@ import {
   EuiFieldSearch,
   EuiSwitch,
   EuiButtonGroup,
+  EuiBadgeGroup,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,
 } from './available_integration_overview_page';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
+  // const query = ''
+
+  // const query = useRef('');
+
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
@@ -46,8 +55,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
       iconType: 'grid',
     },
   ];
-
-  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const onChangeIcons = (optionId) => {
     setToggleIconIdSelected(optionId);
@@ -75,6 +82,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
                   onClick={() => (window.location.hash = `#/available/${i.name}`)}
+                  footer={badges(i.components)}
                 />
               </EuiFlexItem>
             );
@@ -92,11 +100,13 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
           <EuiFieldSearch
             fullWidth
             isClearable={false}
-            placeholder="Search available integration names and categories"
+            placeholder="Search..."
             data-test-subj="search-bar-input-box"
             // value={query}
+            // onClick = {() => query.current.}
             onChange={(e) => {
-              // setQuery(e.target.value);
+              props.setQuery(e.target.value);
+              // query.current
               // setGlobalQuery(e.target.value);
             }}
             // onSearch={props.refresh}
@@ -113,7 +123,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {renderRows(props.data.hits)}
+      {renderRows(props.data.hits.filter((x) => x.name.includes(props.query)))}
     </EuiPanel>
   );
 }
