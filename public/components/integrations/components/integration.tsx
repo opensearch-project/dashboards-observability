@@ -199,11 +199,7 @@ export function Integration(props: AvailableIntegrationProps) {
       })
       .then((_res) => {
         console.log(_res);
-        setToast(
-          `${name} integration successfully added!`,
-          'success',
-          `View the added assets from ${name} in the Added Integrations list`
-        );
+        setToast(`${name} integration successfully added!`, 'success');
         window.location.hash = `#/installed/${_res.data?.id}`;
         return true;
       })

@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastList,
+  EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -65,11 +66,11 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   const badge = (status) => {
     switch (status) {
       case 'available':
-        return <EuiBadge color="success">Healthy</EuiBadge>;
+        return <EuiHealth color="success">Active</EuiHealth>;
       case 'partially-available':
-        return <EuiBadge color="warning">Partially Available</EuiBadge>;
+        return <EuiHealth color="warning">Partially Available</EuiHealth>;
       default:
-        return <EuiBadge color="danger">Critical</EuiBadge>;
+        return <EuiHealth color="danger">Critical</EuiHealth>;
     }
   };
 
@@ -100,7 +101,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
         setToast(`Error deleting ${stateData.data?.name} or its assets`, 'danger');
       })
       .finally(() => {
-        window.location.hash = '#/added';
+        window.location.hash = '#/installed';
       });
   }
 
@@ -114,28 +115,31 @@ export function AddedIntegration(props: AddedIntegrationProps) {
     const { data } = overviewProps.data;
 
     return (
-      <EuiPageHeader style={{ justifyContent: 'center' }}>
+      <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
         <EuiSpacer size="m" />
-        <EuiPageHeaderSection style={{ width: '80%' }}>
+        <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
           <EuiPageContentHeaderSection>
             <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem>
-                <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                  <h1>{data?.name}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle data-test-subj="eventHomePageTitle" size="l">
+                    <h1>{data?.name}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ justifyContent: 'center' }}>
+                  {badge(data?.status)}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  size="s"
-                  color="danger"
+                <EuiIcon
+                  type="trash"
+                  size="l"
                   onClick={() => {
                     getModal();
                   }}
                   data-test-subj="deleteInstanceButton"
-                >
-                  Remove Integration
-                </EuiButton>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentHeaderSection>
@@ -154,13 +158,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               </EuiText>
               <EuiSpacer size="m" />
               <EuiText size="m">{data?.creationDate?.split('T')[0]}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h4>Status</h4>
-              </EuiText>
-              <EuiSpacer size="m" />
-              {badge(data?.status)}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageHeaderSection>
