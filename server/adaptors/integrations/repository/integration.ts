@@ -222,6 +222,50 @@ export class Integration {
   }
 
   /**
+   * Retrieve sample data associated with the integration.
+   * If the version is invalid, an error is thrown.
+   * If the sample data is invalid, null will be returned
+   *
+   * @param version The version of the integration to retrieve assets for.
+   * @returns An object containing a list of sample data with adjusted timestamps.
+   */
+  async getSampleData(
+    version?: string
+  ): Promise<{
+    sampleData: object[] | null;
+  }> {
+    const config = await this.getConfig(version);
+    if (config === null) {
+      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+    }
+    const result: { sampleData: object[] | null } = { sampleData: null };
+    if (config.sampleData) {
+      const sobjPath = path.join(this.directory, 'data', config.sampleData?.path);
+      try {
+        const jsonContent = await fs.readFile(sobjPath, { encoding: 'utf-8' });
+        const parsed = JSON.parse(jsonContent) as object[];
+        for (const value of parsed) {
+          if (!('@timestamp' in value)) {
+            continue;
+          }
+          // Randomly scatter timestamps across last 10 minutes
+          // Assume for now that the ordering of events isn't important, can change to a sequence if needed
+          // Also doesn't handle fields like `observedTimestamp` if present
+          Object.assign(value, {
+            '@timestamp': new Date(
+              Date.now() - Math.floor(Math.random() * 1000 * 60 * 10)
+            ).toISOString(),
+          });
+        }
+        result.sampleData = parsed;
+      } catch (err: any) {
+        console.error("Failed to load saved object assets, proceeding as if it's absent", err);
+      }
+    }
+    return result;
+  }
+
+  /**
    * Retrieve schema data associated with the integration.
    * This method greedily retrieves all mappings and schemas.
    * It's assumed that a valid version will be provided.

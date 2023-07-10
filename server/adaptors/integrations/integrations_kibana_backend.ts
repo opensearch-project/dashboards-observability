@@ -141,8 +141,8 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         name,
         dataSource,
       });
-      await this.client.create('integration-instance', result);
-      return Promise.resolve(result);
+      const test = await this.client.create('integration-instance', result);
+      return Promise.resolve({ ...result, id: test.id });
     } catch (err: any) {
       return Promise.reject({
         message: err.message,
@@ -182,5 +182,16 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       });
     }
     return Promise.resolve(integration.getAssets());
+  };
+
+  getSampleData = async (templateName: string): Promise<{ sampleData: object[] | null }> => {
+    const integration = await this.repository.getIntegration(templateName);
+    if (integration === null) {
+      return Promise.reject({
+        message: `Template ${templateName} not found`,
+        statusCode: 404,
+      });
+    }
+    return Promise.resolve(integration.getSampleData());
   };
 }
