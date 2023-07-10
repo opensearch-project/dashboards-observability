@@ -188,9 +188,9 @@ export function Integration(props: AvailableIntegrationProps) {
   ) {
     setLoading(true);
     if (addSample) {
-      createDataSourceMappings(`ss4o_${integration.type}-${integrationTemplateId}-sample-*-*`);
+      createDataSourceMappings(`ss4o_${integration.type}-${integrationTemplateId}-*-sample`);
       name = `${integrationTemplateId}-sample`;
-      dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample_sample_sample`;
+      dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
     }
 
     const response: boolean = await http
