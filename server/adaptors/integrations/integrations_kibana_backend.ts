@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import { addRequestToMetric } from 'server/common/metrics/metrics_helper';
+import { addRequestToMetric } from '../../../server/common/metrics/metrics_helper';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';

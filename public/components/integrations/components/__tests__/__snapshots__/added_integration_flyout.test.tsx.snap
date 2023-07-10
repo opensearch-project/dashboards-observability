@@ -216,6 +216,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                     >
                       <button
                         class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                        data-click-metric-element="integrations.create_from_setup"
                         data-test-subj="createInstanceButton"
                         disabled=""
                         type="button"
@@ -513,6 +514,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                             >
                               <button
                                 class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                data-click-metric-element="integrations.create_from_setup"
                                 data-test-subj="createInstanceButton"
                                 disabled=""
                                 type="button"
@@ -742,6 +744,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               >
                                 <button
                                   class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                  data-click-metric-element="integrations.create_from_setup"
                                   data-test-subj="createInstanceButton"
                                   disabled=""
                                   type="button"
@@ -971,6 +974,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 >
                                   <button
                                     class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                    data-click-metric-element="integrations.create_from_setup"
                                     data-test-subj="createInstanceButton"
                                     disabled=""
                                     type="button"
@@ -1188,6 +1192,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                   >
                                     <button
                                       class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                      data-click-metric-element="integrations.create_from_setup"
                                       data-test-subj="createInstanceButton"
                                       disabled=""
                                       type="button"
@@ -1664,6 +1669,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     className="euiFlexItem"
                                   >
                                     <EuiButton
+                                      data-click-metric-element="integrations.create_from_setup"
                                       data-test-subj="createInstanceButton"
                                       disabled={true}
                                       fill={true}
@@ -1671,6 +1677,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                     >
                                       <EuiButtonDisplay
                                         baseClassName="euiButton"
+                                        data-click-metric-element="integrations.create_from_setup"
                                         data-test-subj="createInstanceButton"
                                         disabled={true}
                                         element="button"
@@ -1681,6 +1688,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       >
                                         <button
                                           className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                          data-click-metric-element="integrations.create_from_setup"
                                           data-test-subj="createInstanceButton"
                                           disabled={true}
                                           onClick={[Function]}

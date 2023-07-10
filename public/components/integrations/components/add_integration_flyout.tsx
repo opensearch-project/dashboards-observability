@@ -283,6 +283,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 isDataSourceValid !== true
               }
               data-test-subj="createInstanceButton"
+              data-click-metric-element="integrations.create_from_setup"
             >
               Add Integration
             </EuiButton>
