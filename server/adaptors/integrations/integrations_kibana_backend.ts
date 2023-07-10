@@ -4,6 +4,7 @@
  */
 
 import path from 'path';
+import { addRequestToMetric } from 'server/common/metrics/metrics_helper';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
@@ -42,11 +43,13 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
             await this.client.delete(asset.type, asset.id);
             return Promise.resolve(asset.id);
           } catch (err: any) {
+            addRequestToMetric('integrations', 'delete', err);
             return err.output?.statusCode === 404 ? Promise.resolve(asset.id) : Promise.reject(err);
           }
         }
       )
     );
+    addRequestToMetric('integrations', 'delete', 'count');
     return result;
   };
 
@@ -66,6 +69,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   getIntegrationInstances = async (
     _query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstancesSearchResult> => {
+    addRequestToMetric('integrations', 'get', 'count');
     const result = await this.client.find({ type: 'integration-instance' });
     return Promise.resolve({
       total: result.total,
@@ -79,6 +83,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   getIntegrationInstance = async (
     query?: IntegrationInstanceQuery
   ): Promise<IntegrationInstanceResult> => {
+    addRequestToMetric('integrations', 'get', 'count');
     const result = await this.client.get('integration-instance', `${query!.id}`);
     return Promise.resolve(this.buildInstanceResponse(result));
   };
@@ -137,6 +142,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       });
     }
     try {
+      addRequestToMetric('integrations', 'create', 'count');
       const result = await this.instanceBuilder.build(template, {
         name,
         dataSource,
@@ -144,6 +150,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       const test = await this.client.create('integration-instance', result);
       return Promise.resolve({ ...result, id: test.id });
     } catch (err: any) {
+      addRequestToMetric('integrations', 'create', err);
       return Promise.reject({
         message: err.message,
         statusCode: 500,
