@@ -469,7 +469,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     return <></>;
   }
 
-  if (metaData.user_configs !== undefined) {
+  if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
     metaData.user_configs = JSON.parse(metaData.user_configs);
   }
 
