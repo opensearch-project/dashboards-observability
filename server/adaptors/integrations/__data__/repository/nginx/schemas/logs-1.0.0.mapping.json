@@ -1,7 +1,8 @@
 {
   "index_patterns": [
-    "sso_logs-*-*"
+    "ss4o_logs-*-*"
   ],
+  "priority": 900,
   "data_stream": {},
   "template": {
     "mappings": {
