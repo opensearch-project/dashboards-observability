@@ -49,6 +49,7 @@ export function IntegrationOverview(props: any) {
                 fill
                 disabled={props.loading}
                 data-test-subj="add-integration-button"
+                data-click-metric-element="integrations.set_up"
               >
                 Set Up
               </EuiButton>
@@ -62,6 +63,7 @@ export function IntegrationOverview(props: any) {
                 fill
                 disabled={props.loading}
                 data-test-subj="try-it-button"
+                data-click-metric-element="integrations.create_from_try_it"
               >
                 Try It
               </EuiButton>
