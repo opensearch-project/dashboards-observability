@@ -55,6 +55,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
       ],
     }
   }
+  renderCateogryFilters={[Function]}
   showModal={[Function]}
 >
   <EuiPanel>
@@ -79,7 +80,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                 isClearable={false}
                 isLoading={false}
                 onChange={[Function]}
-                placeholder="Search available integration names and categories"
+                placeholder="Search..."
               >
                 <EuiFormControlLayout
                   compressed={false}
@@ -99,7 +100,7 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                           data-test-subj="search-bar-input-box"
                           onChange={[Function]}
                           onKeyUp={[Function]}
-                          placeholder="Search available integration names and categories"
+                          placeholder="Search..."
                           type="search"
                         />
                       </EuiValidatableControl>
@@ -153,6 +154,13 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                 </EuiFormControlLayout>
               </EuiFieldSearch>
             </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}
@@ -415,136 +423,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                   </div>
                 </fieldset>
               </EuiButtonGroup>
-            </div>
-          </EuiFlexItem>
-        </div>
-      </EuiFlexGroup>
-      <EuiSpacer>
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
-      <EuiFlexGroup
-        gutterSize="l"
-        style={
-          Object {
-            "flexWrap": "wrap",
-          }
-        }
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-          style={
-            Object {
-              "flexWrap": "wrap",
-            }
-          }
-        >
-          <EuiFlexItem
-            key="0"
-            style={
-              Object {
-                "maxWidth": "14rem",
-                "minWidth": "14rem",
-              }
-            }
-          >
-            <div
-              className="euiFlexItem"
-              style={
-                Object {
-                  "maxWidth": "14rem",
-                  "minWidth": "14rem",
-                }
-              }
-            >
-              <EuiCard
-                data-test-subj="integration_card_nginx"
-                description="Nginx HTTP server collector"
-                icon={
-                  <img
-                    alt=""
-                    className="synopsisIcon"
-                    src="/api/integrations/repository/nginx/static/logo.svg"
-                    style={
-                      Object {
-                        "height": 100,
-                        "width": 100,
-                      }
-                    }
-                  />
-                }
-                onClick={[Function]}
-                title="NginX Dashboard"
-                titleElement="span"
-              >
-                <EuiPanel
-                  className="euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
-                  data-test-subj="integration_card_nginx"
-                  element="div"
-                  hasShadow={true}
-                  onClick={[Function]}
-                >
-                  <div
-                    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
-                    data-test-subj="integration_card_nginx"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="euiCard__top"
-                    >
-                      <img
-                        alt=""
-                        className="synopsisIcon euiCard__icon"
-                        src="/api/integrations/repository/nginx/static/logo.svg"
-                        style={
-                          Object {
-                            "height": 100,
-                            "width": 100,
-                          }
-                        }
-                      />
-                    </div>
-                    <div
-                      className="euiCard__content"
-                    >
-                      <EuiTitle
-                        className="euiCard__title"
-                        id="random_html_idTitle"
-                        size="s"
-                      >
-                        <span
-                          className="euiTitle euiTitle--small euiCard__title"
-                          id="random_html_idTitle"
-                        >
-                          <button
-                            aria-describedby=" random_html_idDescription"
-                            className="euiCard__titleButton"
-                            disabled={false}
-                            onClick={[Function]}
-                          >
-                            NginX Dashboard
-                          </button>
-                        </span>
-                      </EuiTitle>
-                      <EuiText
-                        className="euiCard__description"
-                        id="random_html_idDescription"
-                        size="s"
-                      >
-                        <div
-                          className="euiText euiText--small euiCard__description"
-                          id="random_html_idDescription"
-                        >
-                          <p>
-                            Nginx HTTP server collector
-                          </p>
-                        </div>
-                      </EuiText>
-                    </div>
-                  </div>
-                </EuiPanel>
-              </EuiCard>
             </div>
           </EuiFlexItem>
         </div>

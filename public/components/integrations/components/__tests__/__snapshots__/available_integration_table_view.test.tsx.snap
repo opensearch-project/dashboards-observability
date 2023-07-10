@@ -56,6 +56,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     }
   }
   loading={false}
+  renderCateogryFilters={[Function]}
   showModal={[Function]}
 >
   <EuiPageContent
@@ -96,15 +97,8 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                 "truncateText": true,
               },
               Object {
-                "field": "status",
-                "name": "Status",
-                "render": [Function],
-                "sortable": true,
-                "truncateText": true,
-              },
-              Object {
-                "field": "actions",
-                "name": "Actions",
+                "field": "categories",
+                "name": "Categories",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -181,51 +175,31 @@ exports[`Available Integration Table View Test Renders nginx integration table v
               "box": Object {
                 "incremental": true,
               },
-              "filters": Array [
-                Object {
-                  "field": "type",
-                  "multiSelect": false,
-                  "name": "Type",
-                  "options": Array [
-                    Object {
-                      "name": "Visualization",
-                      "value": "Visualization",
-                      "view": "Visualization",
-                    },
-                    Object {
-                      "name": "Query",
-                      "value": "Query",
-                      "view": "Query",
-                    },
-                    Object {
-                      "name": "Metric",
-                      "value": "Metric",
-                      "view": "Metric",
-                    },
-                  ],
-                  "type": "field_value_selection",
-                },
-              ],
-              "toolsRight": <EuiButtonGroup
-                idSelected="0"
-                isIconOnly={true}
-                legend="Text align"
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "iconType": "list",
-                      "id": "0",
-                      "label": "list",
-                    },
-                    Object {
-                      "iconType": "grid",
-                      "id": "1",
-                      "label": "grid",
-                    },
-                  ]
-                }
-              />,
+              "toolsRight": <EuiFlexGroup>
+                <EuiFlexItem />
+                <EuiFlexItem>
+                  <EuiButtonGroup
+                    idSelected="0"
+                    isIconOnly={true}
+                    legend="Text align"
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "iconType": "list",
+                          "id": "0",
+                          "label": "list",
+                        },
+                        Object {
+                          "iconType": "grid",
+                          "id": "1",
+                          "label": "grid",
+                        },
+                      ]
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>,
             }
           }
           tableLayout="auto"
@@ -237,55 +211,33 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                   "incremental": true,
                 }
               }
-              filters={
-                Array [
-                  Object {
-                    "field": "type",
-                    "multiSelect": false,
-                    "name": "Type",
-                    "options": Array [
-                      Object {
-                        "name": "Visualization",
-                        "value": "Visualization",
-                        "view": "Visualization",
-                      },
-                      Object {
-                        "name": "Query",
-                        "value": "Query",
-                        "view": "Query",
-                      },
-                      Object {
-                        "name": "Metric",
-                        "value": "Metric",
-                        "view": "Metric",
-                      },
-                    ],
-                    "type": "field_value_selection",
-                  },
-                ]
-              }
               onChange={[Function]}
               toolsRight={
-                <EuiButtonGroup
-                  idSelected="0"
-                  isIconOnly={true}
-                  legend="Text align"
-                  onChange={[Function]}
-                  options={
-                    Array [
-                      Object {
-                        "iconType": "list",
-                        "id": "0",
-                        "label": "list",
-                      },
-                      Object {
-                        "iconType": "grid",
-                        "id": "1",
-                        "label": "grid",
-                      },
-                    ]
-                  }
-                />
+                <EuiFlexGroup>
+                  <EuiFlexItem />
+                  <EuiFlexItem>
+                    <EuiButtonGroup
+                      idSelected="0"
+                      isIconOnly={true}
+                      legend="Text align"
+                      onChange={[Function]}
+                      options={
+                        Array [
+                          Object {
+                            "iconType": "list",
+                            "id": "0",
+                            "label": "list",
+                          },
+                          Object {
+                            "iconType": "grid",
+                            "id": "1",
+                            "label": "grid",
+                          },
+                        ]
+                      }
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             >
               <EuiFlexGroup
@@ -400,187 +352,124 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                     </div>
                   </EuiFlexItem>
                   <EuiFlexItem
-                    className="euiSearchBar__filtersHolder"
                     grow={false}
                   >
                     <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <EuiSearchFilters
-                        filters={
-                          Array [
-                            Object {
-                              "field": "type",
-                              "multiSelect": false,
-                              "name": "Type",
-                              "options": Array [
-                                Object {
-                                  "name": "Visualization",
-                                  "value": "Visualization",
-                                  "view": "Visualization",
-                                },
-                                Object {
-                                  "name": "Query",
-                                  "value": "Query",
-                                  "view": "Query",
-                                },
-                                Object {
-                                  "name": "Metric",
-                                  "value": "Metric",
-                                  "view": "Metric",
-                                },
-                              ],
-                              "type": "field_value_selection",
-                            },
-                          ]
-                        }
-                        onChange={[Function]}
-                        query={
-                          Query {
-                            "ast": _AST {
-                              "_clauses": Array [],
-                              "_indexedClauses": Object {
-                                "field": Object {},
-                                "group": Array [],
-                                "is": Object {},
-                                "term": Array [],
-                              },
-                            },
-                            "syntax": Object {
-                              "parse": [Function],
-                              "print": [Function],
-                              "printClause": [Function],
-                            },
-                            "text": "",
-                          }
-                        }
-                      >
-                        <EuiFilterGroup>
-                          <div
-                            className="euiFilterGroup"
-                          >
-                            <FieldValueSelectionFilter
-                              config={
-                                Object {
-                                  "field": "type",
-                                  "multiSelect": false,
-                                  "name": "Type",
-                                  "options": Array [
-                                    Object {
-                                      "name": "Visualization",
-                                      "value": "Visualization",
-                                      "view": "Visualization",
-                                    },
-                                    Object {
-                                      "name": "Query",
-                                      "value": "Query",
-                                      "view": "Query",
-                                    },
-                                    Object {
-                                      "name": "Metric",
-                                      "value": "Metric",
-                                      "view": "Metric",
-                                    },
-                                  ],
-                                  "type": "field_value_selection",
-                                }
-                              }
-                              index={0}
-                              onChange={[Function]}
-                              query={
-                                Query {
-                                  "ast": _AST {
-                                    "_clauses": Array [],
-                                    "_indexedClauses": Object {
-                                      "field": Object {},
-                                      "group": Array [],
-                                      "is": Object {},
-                                      "term": Array [],
-                                    },
-                                  },
-                                  "syntax": Object {
-                                    "parse": [Function],
-                                    "print": [Function],
-                                    "printClause": [Function],
-                                  },
-                                  "text": "",
-                                }
-                              }
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
                             >
-                              <EuiPopover
-                                anchorPosition="downCenter"
-                                button={
-                                  <EuiFilterButton
-                                    grow={true}
-                                    hasActiveFilters={false}
-                                    iconSide="right"
-                                    iconType="arrowDown"
-                                    onClick={[Function]}
-                                  >
-                                    Type
-                                  </EuiFilterButton>
+                              <EuiButtonGroup
+                                idSelected="0"
+                                isIconOnly={true}
+                                legend="Text align"
+                                onChange={[Function]}
+                                options={
+                                  Array [
+                                    Object {
+                                      "iconType": "list",
+                                      "id": "0",
+                                      "label": "list",
+                                    },
+                                    Object {
+                                      "iconType": "grid",
+                                      "id": "1",
+                                      "label": "grid",
+                                    },
+                                  ]
                                 }
-                                closePopover={[Function]}
-                                display="inlineBlock"
-                                hasArrow={true}
-                                id="field_value_selection_0"
-                                isOpen={false}
-                                ownFocus={true}
-                                panelClassName="euiFilterGroup__popoverPanel"
-                                panelPaddingSize="none"
                               >
-                                <div
-                                  className="euiPopover euiPopover--anchorDownCenter"
-                                  id="field_value_selection_0"
+                                <fieldset
+                                  className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                                  disabled={false}
                                 >
-                                  <div
-                                    className="euiPopover__anchor"
-                                  >
-                                    <EuiFilterButton
-                                      grow={true}
-                                      hasActiveFilters={false}
-                                      iconSide="right"
-                                      iconType="arrowDown"
-                                      onClick={[Function]}
+                                  <EuiScreenReaderOnly>
+                                    <legend
+                                      className="euiScreenReaderOnly"
                                     >
-                                      <EuiButtonEmpty
-                                        className="euiFilterButton euiFilterButton--hasIcon"
+                                      Text align
+                                    </legend>
+                                  </EuiScreenReaderOnly>
+                                  <div
+                                    className="euiButtonGroup__buttons"
+                                  >
+                                    <EuiButtonGroupButton
+                                      color="text"
+                                      element="label"
+                                      iconType="list"
+                                      id="0"
+                                      isDisabled={false}
+                                      isIconOnly={true}
+                                      isSelected={true}
+                                      key="0"
+                                      label="list"
+                                      name="random_html_id"
+                                      onChange={[Function]}
+                                      size="s"
+                                    >
+                                      <EuiButtonDisplay
+                                        baseClassName="euiButtonGroupButton"
+                                        className="euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
                                         color="text"
-                                        iconSide="right"
-                                        iconType="arrowDown"
+                                        element="label"
+                                        fill={true}
+                                        htmlFor="random_html_id"
+                                        iconType="list"
+                                        isDisabled={false}
                                         onClick={[Function]}
+                                        size="s"
                                         textProps={
                                           Object {
-                                            "className": "",
+                                            "className": "euiScreenReaderOnly",
+                                            "data-text": "list",
+                                            "ref": [Function],
+                                            "title": "list",
                                           }
                                         }
-                                        type="button"
                                       >
-                                        <button
-                                          className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                                        <label
+                                          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
                                           disabled={false}
+                                          htmlFor="random_html_id"
                                           onClick={[Function]}
-                                          type="button"
+                                          style={
+                                            Object {
+                                              "minWidth": undefined,
+                                            }
+                                          }
                                         >
                                           <EuiButtonContent
-                                            className="euiButtonEmpty__content"
-                                            iconSide="right"
-                                            iconSize="m"
-                                            iconType="arrowDown"
+                                            className="euiButton__content"
+                                            iconSide="left"
+                                            iconType="list"
                                             textProps={
                                               Object {
-                                                "className": "euiButtonEmpty__text",
+                                                "className": "euiButton__text euiScreenReaderOnly",
+                                                "data-text": "list",
+                                                "ref": [Function],
+                                                "title": "list",
                                               }
                                             }
                                           >
                                             <span
-                                              className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                              className="euiButtonContent euiButton__content"
                                             >
                                               <EuiIcon
                                                 className="euiButtonContent__icon"
                                                 color="inherit"
                                                 size="m"
-                                                type="arrowDown"
+                                                type="list"
                                               >
                                                 <EuiIconEmpty
                                                   aria-hidden={true}
@@ -603,291 +492,143 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                                 </EuiIconEmpty>
                                               </EuiIcon>
                                               <span
-                                                className="euiButtonEmpty__text"
+                                                className="euiButton__text euiScreenReaderOnly"
+                                                data-text="list"
+                                                title="list"
                                               >
-                                                <span
-                                                  className="euiFilterButton__textShift"
-                                                  data-text="Type"
-                                                  title="Type"
-                                                >
-                                                  Type
-                                                </span>
+                                                <input
+                                                  checked={true}
+                                                  className="euiScreenReaderOnly"
+                                                  data-test-subj="0"
+                                                  disabled={false}
+                                                  id="random_html_id"
+                                                  name="random_html_id"
+                                                  onChange={[Function]}
+                                                  type="radio"
+                                                />
+                                                list
                                               </span>
                                             </span>
                                           </EuiButtonContent>
-                                        </button>
-                                      </EuiButtonEmpty>
-                                    </EuiFilterButton>
+                                        </label>
+                                      </EuiButtonDisplay>
+                                    </EuiButtonGroupButton>
+                                    <EuiButtonGroupButton
+                                      color="text"
+                                      element="label"
+                                      iconType="grid"
+                                      id="1"
+                                      isDisabled={false}
+                                      isIconOnly={true}
+                                      isSelected={false}
+                                      key="1"
+                                      label="grid"
+                                      name="random_html_id"
+                                      onChange={[Function]}
+                                      size="s"
+                                    >
+                                      <EuiButtonDisplay
+                                        baseClassName="euiButtonGroupButton"
+                                        className="euiButtonGroupButton-isIconOnly"
+                                        color="text"
+                                        element="label"
+                                        fill={false}
+                                        htmlFor="random_html_id"
+                                        iconType="grid"
+                                        isDisabled={false}
+                                        onClick={[Function]}
+                                        size="s"
+                                        textProps={
+                                          Object {
+                                            "className": "euiScreenReaderOnly",
+                                            "data-text": "grid",
+                                            "ref": [Function],
+                                            "title": "grid",
+                                          }
+                                        }
+                                      >
+                                        <label
+                                          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+                                          disabled={false}
+                                          htmlFor="random_html_id"
+                                          onClick={[Function]}
+                                          style={
+                                            Object {
+                                              "minWidth": undefined,
+                                            }
+                                          }
+                                        >
+                                          <EuiButtonContent
+                                            className="euiButton__content"
+                                            iconSide="left"
+                                            iconType="grid"
+                                            textProps={
+                                              Object {
+                                                "className": "euiButton__text euiScreenReaderOnly",
+                                                "data-text": "grid",
+                                                "ref": [Function],
+                                                "title": "grid",
+                                              }
+                                            }
+                                          >
+                                            <span
+                                              className="euiButtonContent euiButton__content"
+                                            >
+                                              <EuiIcon
+                                                className="euiButtonContent__icon"
+                                                color="inherit"
+                                                size="m"
+                                                type="grid"
+                                              >
+                                                <EuiIconEmpty
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  />
+                                                </EuiIconEmpty>
+                                              </EuiIcon>
+                                              <span
+                                                className="euiButton__text euiScreenReaderOnly"
+                                                data-text="grid"
+                                                title="grid"
+                                              >
+                                                <input
+                                                  checked={false}
+                                                  className="euiScreenReaderOnly"
+                                                  data-test-subj="1"
+                                                  disabled={false}
+                                                  id="random_html_id"
+                                                  name="random_html_id"
+                                                  onChange={[Function]}
+                                                  type="radio"
+                                                />
+                                                grid
+                                              </span>
+                                            </span>
+                                          </EuiButtonContent>
+                                        </label>
+                                      </EuiButtonDisplay>
+                                    </EuiButtonGroupButton>
                                   </div>
-                                </div>
-                              </EuiPopover>
-                            </FieldValueSelectionFilter>
-                          </div>
-                        </EuiFilterGroup>
-                      </EuiSearchFilters>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <EuiButtonGroup
-                        idSelected="0"
-                        isIconOnly={true}
-                        legend="Text align"
-                        onChange={[Function]}
-                        options={
-                          Array [
-                            Object {
-                              "iconType": "list",
-                              "id": "0",
-                              "label": "list",
-                            },
-                            Object {
-                              "iconType": "grid",
-                              "id": "1",
-                              "label": "grid",
-                            },
-                          ]
-                        }
-                      >
-                        <fieldset
-                          className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
-                          disabled={false}
-                        >
-                          <EuiScreenReaderOnly>
-                            <legend
-                              className="euiScreenReaderOnly"
-                            >
-                              Text align
-                            </legend>
-                          </EuiScreenReaderOnly>
-                          <div
-                            className="euiButtonGroup__buttons"
-                          >
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              iconType="list"
-                              id="0"
-                              isDisabled={false}
-                              isIconOnly={true}
-                              isSelected={true}
-                              key="0"
-                              label="list"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
-                            >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className="euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
-                                color="text"
-                                element="label"
-                                fill={true}
-                                htmlFor="random_html_id"
-                                iconType="list"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiScreenReaderOnly",
-                                    "data-text": "list",
-                                    "ref": [Function],
-                                    "title": "list",
-                                  }
-                                }
-                              >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
-                                >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
-                                    iconType="list"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButton__text euiScreenReaderOnly",
-                                        "data-text": "list",
-                                        "ref": [Function],
-                                        "title": "list",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
-                                    >
-                                      <EuiIcon
-                                        className="euiButtonContent__icon"
-                                        color="inherit"
-                                        size="m"
-                                        type="list"
-                                      >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                      <span
-                                        className="euiButton__text euiScreenReaderOnly"
-                                        data-text="list"
-                                        title="list"
-                                      >
-                                        <input
-                                          checked={true}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="0"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        list
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                            <EuiButtonGroupButton
-                              color="text"
-                              element="label"
-                              iconType="grid"
-                              id="1"
-                              isDisabled={false}
-                              isIconOnly={true}
-                              isSelected={false}
-                              key="1"
-                              label="grid"
-                              name="random_html_id"
-                              onChange={[Function]}
-                              size="s"
-                            >
-                              <EuiButtonDisplay
-                                baseClassName="euiButtonGroupButton"
-                                className="euiButtonGroupButton-isIconOnly"
-                                color="text"
-                                element="label"
-                                fill={false}
-                                htmlFor="random_html_id"
-                                iconType="grid"
-                                isDisabled={false}
-                                onClick={[Function]}
-                                size="s"
-                                textProps={
-                                  Object {
-                                    "className": "euiScreenReaderOnly",
-                                    "data-text": "grid",
-                                    "ref": [Function],
-                                    "title": "grid",
-                                  }
-                                }
-                              >
-                                <label
-                                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
-                                  disabled={false}
-                                  htmlFor="random_html_id"
-                                  onClick={[Function]}
-                                  style={
-                                    Object {
-                                      "minWidth": undefined,
-                                    }
-                                  }
-                                >
-                                  <EuiButtonContent
-                                    className="euiButton__content"
-                                    iconSide="left"
-                                    iconType="grid"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButton__text euiScreenReaderOnly",
-                                        "data-text": "grid",
-                                        "ref": [Function],
-                                        "title": "grid",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButton__content"
-                                    >
-                                      <EuiIcon
-                                        className="euiButtonContent__icon"
-                                        color="inherit"
-                                        size="m"
-                                        type="grid"
-                                      >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                      <span
-                                        className="euiButton__text euiScreenReaderOnly"
-                                        data-text="grid"
-                                        title="grid"
-                                      >
-                                        <input
-                                          checked={false}
-                                          className="euiScreenReaderOnly"
-                                          data-test-subj="1"
-                                          disabled={false}
-                                          id="random_html_id"
-                                          name="random_html_id"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
-                                        grid
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </label>
-                              </EuiButtonDisplay>
-                            </EuiButtonGroupButton>
-                          </div>
-                        </fieldset>
-                      </EuiButtonGroup>
+                                </fieldset>
+                              </EuiButtonGroup>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
                     </div>
                   </EuiFlexItem>
                 </div>
@@ -918,15 +659,8 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                     "truncateText": true,
                   },
                   Object {
-                    "field": "status",
-                    "name": "Status",
-                    "render": [Function],
-                    "sortable": true,
-                    "truncateText": true,
-                  },
-                  Object {
-                    "field": "actions",
-                    "name": "Actions",
+                    "field": "categories",
+                    "name": "Categories",
                     "render": [Function],
                     "sortable": true,
                     "truncateText": true,
@@ -1155,12 +889,12 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                             </EuiTableHeaderCell>
                             <EuiTableHeaderCell
                               align="left"
-                              data-test-subj="tableHeaderCell_status_2"
-                              key="_data_h_status_2"
+                              data-test-subj="tableHeaderCell_categories_2"
+                              key="_data_h_categories_2"
                             >
                               <th
                                 className="euiTableHeaderCell"
-                                data-test-subj="tableHeaderCell_status_2"
+                                data-test-subj="tableHeaderCell_categories_2"
                                 role="columnheader"
                                 scope="col"
                                 style={
@@ -1183,61 +917,15 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                         values={
                                           Object {
                                             "description": undefined,
-                                            "innerText": "Status",
+                                            "innerText": "Categories",
                                           }
                                         }
                                       >
                                         <span
                                           className="euiTableCellContent__text"
-                                          title="Status"
+                                          title="Categories"
                                         >
-                                          Status
-                                        </span>
-                                      </EuiI18n>
-                                    </EuiInnerText>
-                                  </span>
-                                </CellContents>
-                              </th>
-                            </EuiTableHeaderCell>
-                            <EuiTableHeaderCell
-                              align="left"
-                              data-test-subj="tableHeaderCell_actions_3"
-                              key="_data_h_actions_3"
-                            >
-                              <th
-                                className="euiTableHeaderCell"
-                                data-test-subj="tableHeaderCell_actions_3"
-                                role="columnheader"
-                                scope="col"
-                                style={
-                                  Object {
-                                    "width": undefined,
-                                  }
-                                }
-                              >
-                                <CellContents
-                                  className="euiTableCellContent"
-                                  showSortMsg={false}
-                                >
-                                  <span
-                                    className="euiTableCellContent"
-                                  >
-                                    <EuiInnerText>
-                                      <EuiI18n
-                                        default="{innerText}; {description}"
-                                        token="euiTableHeaderCell.titleTextWithDesc"
-                                        values={
-                                          Object {
-                                            "description": undefined,
-                                            "innerText": "Actions",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiTableCellContent__text"
-                                          title="Actions"
-                                        >
-                                          Actions
+                                          Categories
                                         </span>
                                       </EuiI18n>
                                     </EuiInnerText>
@@ -1352,10 +1040,10 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                               </EuiTableRowCell>
                               <EuiTableRowCell
                                 align="left"
-                                key="_data_column_status_0_2"
+                                key="_data_column_categories_0_2"
                                 mobileOptions={
                                   Object {
-                                    "header": "Status",
+                                    "header": "Categories",
                                     "render": undefined,
                                   }
                                 }
@@ -1374,69 +1062,107 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                   <div
                                     className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                   >
-                                    Status
+                                    Categories
                                   </div>
                                   <div
                                     className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                                   >
-                                    <EuiText
+                                    <EuiBadgeGroup
                                       className=""
-                                      data-test-subj="nginxIntegrationStatus"
                                       key=".0"
                                     >
                                       <div
-                                        className="euiText euiText--medium"
-                                        data-test-subj="nginxIntegrationStatus"
-                                      />
-                                    </EuiText>
-                                  </div>
-                                </td>
-                              </EuiTableRowCell>
-                              <EuiTableRowCell
-                                align="left"
-                                key="_data_column_actions_0_3"
-                                mobileOptions={
-                                  Object {
-                                    "header": "Actions",
-                                    "render": undefined,
-                                  }
-                                }
-                                setScopeRow={false}
-                                textOnly={false}
-                                truncateText={true}
-                              >
-                                <td
-                                  className="euiTableRowCell"
-                                  style={
-                                    Object {
-                                      "width": undefined,
-                                    }
-                                  }
-                                >
-                                  <div
-                                    className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                                  >
-                                    Actions
-                                  </div>
-                                  <div
-                                    className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                                  >
-                                    <EuiLink
-                                      className=""
-                                      data-test-subj="nginxIntegrationAction"
-                                      key=".0"
-                                      onClick={[Function]}
-                                    >
-                                      <button
-                                        className="euiLink euiLink--primary"
-                                        data-test-subj="nginxIntegrationAction"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        type="button"
+                                        className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
                                       >
-                                        Add
-                                      </button>
-                                    </EuiLink>
+                                        <span
+                                          className="euiBadgeGroup__item"
+                                          key=".0"
+                                        >
+                                          <EuiBadge>
+                                            <EuiInnerText>
+                                              <span
+                                                className="euiBadge euiBadge--iconLeft"
+                                                style={
+                                                  Object {
+                                                    "backgroundColor": "#d3dae6",
+                                                    "color": "#000",
+                                                  }
+                                                }
+                                                title="communication"
+                                              >
+                                                <span
+                                                  className="euiBadge__content"
+                                                >
+                                                  <span
+                                                    className="euiBadge__text"
+                                                  >
+                                                    communication
+                                                  </span>
+                                                </span>
+                                              </span>
+                                            </EuiInnerText>
+                                          </EuiBadge>
+                                        </span>
+                                        <span
+                                          className="euiBadgeGroup__item"
+                                          key=".1"
+                                        >
+                                          <EuiBadge>
+                                            <EuiInnerText>
+                                              <span
+                                                className="euiBadge euiBadge--iconLeft"
+                                                style={
+                                                  Object {
+                                                    "backgroundColor": "#d3dae6",
+                                                    "color": "#000",
+                                                  }
+                                                }
+                                                title="http"
+                                              >
+                                                <span
+                                                  className="euiBadge__content"
+                                                >
+                                                  <span
+                                                    className="euiBadge__text"
+                                                  >
+                                                    http
+                                                  </span>
+                                                </span>
+                                              </span>
+                                            </EuiInnerText>
+                                          </EuiBadge>
+                                        </span>
+                                        <span
+                                          className="euiBadgeGroup__item"
+                                          key=".2"
+                                        >
+                                          <EuiBadge>
+                                            <EuiInnerText>
+                                              <span
+                                                className="euiBadge euiBadge--iconLeft"
+                                                style={
+                                                  Object {
+                                                    "backgroundColor": "#d3dae6",
+                                                    "color": "#000",
+                                                  }
+                                                }
+                                                title="logs"
+                                              >
+                                                <span
+                                                  className="euiBadge__content"
+                                                >
+                                                  <span
+                                                    className="euiBadge__text"
+                                                  >
+                                                    logs
+                                                  </span>
+                                                </span>
+                                              </span>
+                                            </EuiInnerText>
+                                          </EuiBadge>
+                                        </span>
+                                      </div>
+                                    </EuiBadgeGroup>
                                   </div>
                                 </td>
                               </EuiTableRowCell>

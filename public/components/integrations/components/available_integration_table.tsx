@@ -5,19 +5,27 @@
 
 import {
   EuiButtonGroup,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPageContentHeaderSection,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
-  EuiSwitch,
   EuiTableFieldDataColumnType,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { ASSET_FILTER_OPTIONS } from 'common/constants/explorer';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
+import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProps) {
   const integrations = props.data.hits;
@@ -35,10 +43,10 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     },
   ];
 
-  const [toggleIconIdSelected, setToggleIconIdSelectedc] = useState('0');
+  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('0');
 
   const onChangeIcons = (optionId) => {
-    setToggleIconIdSelectedc(optionId);
+    setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
     } else {
@@ -73,44 +81,28 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       ),
     },
     {
-      field: 'status',
-      name: 'Status',
+      field: 'categories',
+      name: 'Categories',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.name}IntegrationStatus`}>
-          {_.truncate(record.status, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'actions',
-      name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}IntegrationAction`}
-          // TO DO REPLACE WITH API CALL TO ADD
-          onClick={() => props.showModal(record.templateName)}
-        >
-          Add
-        </EuiLink>
-      ),
+      render: (value, record) => badges(record.components),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
-  const FILTER_OPTIONS = ['Visualization', 'Query', 'Metric'];
-
   const renderToggle = () => {
     return (
-      <EuiButtonGroup
-        legend="Text align"
-        options={toggleButtonsIcons}
-        idSelected={toggleIconIdSelected}
-        onChange={(id) => onChangeIcons(id)}
-        isIconOnly
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>{props.renderCateogryFilters()}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonGroup
+            legend="Text align"
+            options={toggleButtonsIcons}
+            idSelected={toggleIconIdSelected}
+            onChange={(id) => onChangeIcons(id)}
+            isIconOnly
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -119,19 +111,6 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: 'Type',
-        multiSelect: false,
-        options: FILTER_OPTIONS.map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
   };
 
   return (

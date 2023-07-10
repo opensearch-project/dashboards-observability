@@ -11,10 +11,12 @@ import { IntegrationHeader } from './integration_header';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AddedIntegrationOverviewPageProps } from './integration_types';
+import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AddedIntegrationsTableProps {
   loading: boolean;
   data: AddedIntegrationsList;
+  http: HttpStart;
 }
 
 export interface AddedIntegrationsList {
@@ -55,7 +57,7 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
     <EuiPage>
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        {AddedIntegrationsTable({ data, loading: false })}
+        {AddedIntegrationsTable({ data, loading: false, http })}
       </EuiPageBody>
     </EuiPage>
   );

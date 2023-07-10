@@ -198,11 +198,13 @@ export function Integration(props: AvailableIntegrationProps) {
         body: JSON.stringify({ name, dataSource }),
       })
       .then((_res) => {
+        console.log(_res);
         setToast(
           `${name} integration successfully added!`,
           'success',
           `View the added assets from ${name} in the Added Integrations list`
         );
+        window.location.hash = `#/installed/${_res.data?.id}`;
         return true;
       })
       .catch((_err) => {
@@ -271,6 +273,7 @@ export function Integration(props: AvailableIntegrationProps) {
         isSelected={tab.id === selectedTabId}
         disabled={tab.disabled}
         key={index}
+        data-test-subj={tab.id}
       >
         {tab.name}
       </EuiTab>

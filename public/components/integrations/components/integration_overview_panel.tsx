@@ -14,26 +14,30 @@ import {
   EuiFlexItem,
   EuiText,
   EuiPageContentHeaderSection,
+  EuiBadge,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import React from 'react';
 
 const pageStyles: CSS.Properties = {
-  width: '80%',
+  width: '100%',
+  justifyContent: 'spaceBetween',
 };
 
 export function IntegrationOverview(props: any) {
   const config = props.integration;
   return (
-    <EuiPageHeader style={{ justifyContent: 'center' }} data-test-subj={`${config.name}-overview`}>
+    <EuiPageHeader
+      style={{ justifyContent: 'spaceBetween' }}
+      data-test-subj={`${config.name}-overview`}
+    >
       <EuiSpacer size="m" />
       <EuiPageHeaderSection style={pageStyles}>
         <EuiPageContentHeaderSection>
-          <EuiFlexGroup gutterSize="xs">
+          <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                <EuiLink href={config.link} external={true} target="blank">
-                  {config.displayName || config.name}
-                </EuiLink>
+                <h1>{config.displayName || config.name}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -68,13 +72,6 @@ export function IntegrationOverview(props: any) {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText>
-              <h4>Status</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiText size="m">{config.status}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
               <h4>Version</h4>
             </EuiText>
             <EuiSpacer size="m" />
@@ -85,7 +82,11 @@ export function IntegrationOverview(props: any) {
               <h4>Category</h4>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="m">{config.components?.map((x: any) => x.name).join(', ')}</EuiText>
+            <EuiBadgeGroup>
+              {config.components.map((cateogry) => {
+                return <EuiBadge>{cateogry.name}</EuiBadge>;
+              })}
+            </EuiBadgeGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>

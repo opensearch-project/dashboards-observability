@@ -141,8 +141,8 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         name,
         dataSource,
       });
-      await this.client.create('integration-instance', result);
-      return Promise.resolve(result);
+      const test = await this.client.create('integration-instance', result);
+      return Promise.resolve({ ...result, id: test.id });
     } catch (err: any) {
       return Promise.reject({
         message: err.message,

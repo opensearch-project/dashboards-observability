@@ -20,8 +20,8 @@ import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/custo
 export function IntegrationHeader() {
   const tabs = [
     {
-      id: 'added',
-      name: 'Added',
+      id: 'installed',
+      name: 'Installed',
       disabled: false,
     },
     {
@@ -32,7 +32,7 @@ export function IntegrationHeader() {
   ];
 
   const [selectedTabId, setSelectedTabId] = useState(
-    window.location.hash.substring(2) ? window.location.hash.substring(2) : 'added'
+    window.location.hash.substring(2) ? window.location.hash.substring(2) : 'installed'
   );
 
   const onSelectedTabChanged = (id) => {

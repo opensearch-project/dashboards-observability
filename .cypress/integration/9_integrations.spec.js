@@ -21,7 +21,7 @@ const moveToAvailableNginxIntegration = () => {
 };
 
 const moveToAddedIntegrations = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/added`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/integrations#/installed`);
 };
 
 
@@ -43,6 +43,7 @@ describe('Basic sanity test for integrations plugin', () => {
     cy.get('[data-test-subj="nginx-details"]').should('exist')
     cy.get('[data-test-subj="nginx-screenshots"]').should('exist')
     cy.get('[data-test-subj="nginx-assets"]').should('exist')
+    cy.get('[data-test-subj="fields"]').click();
     cy.get('[data-test-subj="nginx-fields"]').should('exist')
   })
 });
