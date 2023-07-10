@@ -1,0 +1,438 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Available Integration Card View Test Renders nginx integration card view using dummy data 1`] = `
+<AvailableIntegrationsCardView
+  data={
+    Object {
+      "hits": Array [
+        Object {
+          "assets": Object {
+            "savedObjects": Object {
+              "name": "nginx",
+              "version": "1.0.1",
+            },
+          },
+          "author": "John Doe",
+          "components": Array [
+            Object {
+              "name": "communication",
+              "version": "1.0.0",
+            },
+            Object {
+              "name": "http",
+              "version": "1.0.0",
+            },
+            Object {
+              "name": "logs",
+              "version": "1.0.0",
+            },
+          ],
+          "description": "Nginx HTTP server collector",
+          "displayName": "NginX Dashboard",
+          "integrationType": "logs",
+          "license": "Apache-2.0",
+          "name": "nginx",
+          "sourceUrl": "https://github.com/",
+          "statics": Object {
+            "gallery": Array [
+              Object {
+                "annotation": "NginX Dashboard",
+                "path": "dashboard1.png",
+              },
+              Object {
+                "annotation": "NginX Logo",
+                "path": "logo.svg",
+              },
+            ],
+            "logo": Object {
+              "annotation": "NginX Logo",
+              "path": "logo.svg",
+            },
+          },
+          "type": "logs",
+          "version": "1.0.1",
+        },
+      ],
+    }
+  }
+  renderCateogryFilters={[Function]}
+  showModal={[Function]}
+>
+  <EuiPanel>
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem>
+            <div
+              className="euiFlexItem"
+            >
+              <EuiFieldSearch
+                compressed={false}
+                data-test-subj="search-bar-input-box"
+                fullWidth={true}
+                incremental={false}
+                isClearable={false}
+                isLoading={false}
+                onChange={[Function]}
+                placeholder="Search..."
+              >
+                <EuiFormControlLayout
+                  compressed={false}
+                  fullWidth={true}
+                  icon="search"
+                  isLoading={false}
+                >
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <EuiValidatableControl>
+                        <input
+                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          data-test-subj="search-bar-input-box"
+                          onChange={[Function]}
+                          onKeyUp={[Function]}
+                          placeholder="Search..."
+                          type="search"
+                        />
+                      </EuiValidatableControl>
+                      <EuiFormControlLayoutIcons
+                        compressed={false}
+                        icon="search"
+                        isLoading={false}
+                      >
+                        <div
+                          className="euiFormControlLayoutIcons"
+                        >
+                          <EuiFormControlLayoutCustomIcon
+                            size="m"
+                            type="search"
+                          >
+                            <span
+                              className="euiFormControlLayoutCustomIcon"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiFormControlLayoutCustomIcon__icon"
+                                size="m"
+                                type="search"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                            </span>
+                          </EuiFormControlLayoutCustomIcon>
+                        </div>
+                      </EuiFormControlLayoutIcons>
+                    </div>
+                  </div>
+                </EuiFormControlLayout>
+              </EuiFieldSearch>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiButtonGroup
+                idSelected="1"
+                isIconOnly={true}
+                legend="Text align"
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "iconType": "list",
+                      "id": "0",
+                      "label": "list",
+                    },
+                    Object {
+                      "iconType": "grid",
+                      "id": "1",
+                      "label": "grid",
+                    },
+                  ]
+                }
+              >
+                <fieldset
+                  className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                  disabled={false}
+                >
+                  <EuiScreenReaderOnly>
+                    <legend
+                      className="euiScreenReaderOnly"
+                    >
+                      Text align
+                    </legend>
+                  </EuiScreenReaderOnly>
+                  <div
+                    className="euiButtonGroup__buttons"
+                  >
+                    <EuiButtonGroupButton
+                      color="text"
+                      element="label"
+                      iconType="list"
+                      id="0"
+                      isDisabled={false}
+                      isIconOnly={true}
+                      isSelected={false}
+                      key="0"
+                      label="list"
+                      name="random_html_id"
+                      onChange={[Function]}
+                      size="s"
+                    >
+                      <EuiButtonDisplay
+                        baseClassName="euiButtonGroupButton"
+                        className="euiButtonGroupButton-isIconOnly"
+                        color="text"
+                        element="label"
+                        fill={false}
+                        htmlFor="random_html_id"
+                        iconType="list"
+                        isDisabled={false}
+                        onClick={[Function]}
+                        size="s"
+                        textProps={
+                          Object {
+                            "className": "euiScreenReaderOnly",
+                            "data-text": "list",
+                            "ref": [Function],
+                            "title": "list",
+                          }
+                        }
+                      >
+                        <label
+                          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+                          disabled={false}
+                          htmlFor="random_html_id"
+                          onClick={[Function]}
+                          style={
+                            Object {
+                              "minWidth": undefined,
+                            }
+                          }
+                        >
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            iconType="list"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text euiScreenReaderOnly",
+                                "data-text": "list",
+                                "ref": [Function],
+                                "title": "list",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButton__content"
+                            >
+                              <EuiIcon
+                                className="euiButtonContent__icon"
+                                color="inherit"
+                                size="m"
+                                type="list"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                              <span
+                                className="euiButton__text euiScreenReaderOnly"
+                                data-text="list"
+                                title="list"
+                              >
+                                <input
+                                  checked={false}
+                                  className="euiScreenReaderOnly"
+                                  data-test-subj="0"
+                                  disabled={false}
+                                  id="random_html_id"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  type="radio"
+                                />
+                                list
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </label>
+                      </EuiButtonDisplay>
+                    </EuiButtonGroupButton>
+                    <EuiButtonGroupButton
+                      color="text"
+                      element="label"
+                      iconType="grid"
+                      id="1"
+                      isDisabled={false}
+                      isIconOnly={true}
+                      isSelected={true}
+                      key="1"
+                      label="grid"
+                      name="random_html_id"
+                      onChange={[Function]}
+                      size="s"
+                    >
+                      <EuiButtonDisplay
+                        baseClassName="euiButtonGroupButton"
+                        className="euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+                        color="text"
+                        element="label"
+                        fill={true}
+                        htmlFor="random_html_id"
+                        iconType="grid"
+                        isDisabled={false}
+                        onClick={[Function]}
+                        size="s"
+                        textProps={
+                          Object {
+                            "className": "euiScreenReaderOnly",
+                            "data-text": "grid",
+                            "ref": [Function],
+                            "title": "grid",
+                          }
+                        }
+                      >
+                        <label
+                          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+                          disabled={false}
+                          htmlFor="random_html_id"
+                          onClick={[Function]}
+                          style={
+                            Object {
+                              "minWidth": undefined,
+                            }
+                          }
+                        >
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            iconType="grid"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text euiScreenReaderOnly",
+                                "data-text": "grid",
+                                "ref": [Function],
+                                "title": "grid",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButton__content"
+                            >
+                              <EuiIcon
+                                className="euiButtonContent__icon"
+                                color="inherit"
+                                size="m"
+                                type="grid"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                              <span
+                                className="euiButton__text euiScreenReaderOnly"
+                                data-text="grid"
+                                title="grid"
+                              >
+                                <input
+                                  checked={true}
+                                  className="euiScreenReaderOnly"
+                                  data-test-subj="1"
+                                  disabled={false}
+                                  id="random_html_id"
+                                  name="random_html_id"
+                                  onChange={[Function]}
+                                  type="radio"
+                                />
+                                grid
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </label>
+                      </EuiButtonDisplay>
+                    </EuiButtonGroupButton>
+                  </div>
+                </fieldset>
+              </EuiButtonGroup>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+    </div>
+  </EuiPanel>
+</AvailableIntegrationsCardView>
+`;
