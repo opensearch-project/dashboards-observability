@@ -70,7 +70,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
           <EuiPageHeader
             style={
               Object {
-                "justifyContent": "center",
+                "justifyContent": "spaceBetween",
               }
             }
           >
@@ -78,7 +78,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
               className="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
               style={
                 Object {
-                  "justifyContent": "center",
+                  "justifyContent": "spaceBetween",
                 }
               }
             >
@@ -92,7 +92,8 @@ exports[`Added Integration View Test Renders added integration view using dummy 
               <EuiPageHeaderSection
                 style={
                   Object {
-                    "width": "80%",
+                    "justifyContent": "space-between",
+                    "width": "100%",
                   }
                 }
               >
@@ -100,7 +101,8 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                   className="euiPageHeaderSection"
                   style={
                     Object {
-                      "width": "80%",
+                      "justifyContent": "space-between",
+                      "width": "100%",
                     }
                   }
                 >
@@ -114,80 +116,141 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                         <div
                           className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <EuiFlexItem>
+                          <EuiFlexGroup>
                             <div
-                              className="euiFlexItem"
+                              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                             >
-                              <EuiTitle
-                                data-test-subj="eventHomePageTitle"
-                                size="l"
+                              <EuiFlexItem
+                                grow={false}
                               >
-                                <h1
-                                  className="euiTitle euiTitle--large"
-                                  data-test-subj="eventHomePageTitle"
-                                />
-                              </EuiTitle>
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <EuiTitle
+                                    data-test-subj="eventHomePageTitle"
+                                    size="l"
+                                  >
+                                    <h1
+                                      className="euiTitle euiTitle--large"
+                                      data-test-subj="eventHomePageTitle"
+                                    />
+                                  </EuiTitle>
+                                </div>
+                              </EuiFlexItem>
+                              <EuiFlexItem
+                                style={
+                                  Object {
+                                    "justifyContent": "center",
+                                  }
+                                }
+                              >
+                                <div
+                                  className="euiFlexItem"
+                                  style={
+                                    Object {
+                                      "justifyContent": "center",
+                                    }
+                                  }
+                                >
+                                  <EuiHealth
+                                    color="danger"
+                                  >
+                                    <div
+                                      className="euiHealth euiHealth--textSizeS"
+                                    >
+                                      <EuiFlexGroup
+                                        alignItems="center"
+                                        gutterSize="xs"
+                                        responsive={false}
+                                      >
+                                        <div
+                                          className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                        >
+                                          <EuiFlexItem
+                                            grow={false}
+                                          >
+                                            <div
+                                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                                            >
+                                              <EuiIcon
+                                                color="danger"
+                                                type="dot"
+                                              >
+                                                <EuiIconEmpty
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--danger euiIcon-isLoading"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--danger euiIcon-isLoading"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  />
+                                                </EuiIconEmpty>
+                                              </EuiIcon>
+                                            </div>
+                                          </EuiFlexItem>
+                                          <EuiFlexItem
+                                            grow={false}
+                                          >
+                                            <div
+                                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                                            >
+                                              Critical
+                                            </div>
+                                          </EuiFlexItem>
+                                        </div>
+                                      </EuiFlexGroup>
+                                    </div>
+                                  </EuiHealth>
+                                </div>
+                              </EuiFlexItem>
                             </div>
-                          </EuiFlexItem>
+                          </EuiFlexGroup>
                           <EuiFlexItem
                             grow={false}
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiButton
-                                color="danger"
+                              <EuiIcon
                                 data-test-subj="deleteInstanceButton"
-                                fill={true}
                                 onClick={[Function]}
-                                size="s"
+                                size="l"
+                                type="trash"
                               >
-                                <EuiButtonDisplay
-                                  baseClassName="euiButton"
-                                  color="danger"
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--large euiIcon-isLoading"
                                   data-test-subj="deleteInstanceButton"
-                                  disabled={false}
-                                  element="button"
-                                  fill={true}
-                                  isDisabled={false}
+                                  focusable="false"
                                   onClick={[Function]}
-                                  size="s"
-                                  type="button"
+                                  role="img"
+                                  style={null}
                                 >
-                                  <button
-                                    className="euiButton euiButton--danger euiButton--small euiButton--fill"
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--large euiIcon-isLoading"
                                     data-test-subj="deleteInstanceButton"
-                                    disabled={false}
+                                    focusable="false"
+                                    height={16}
                                     onClick={[Function]}
-                                    style={
-                                      Object {
-                                        "minWidth": undefined,
-                                      }
-                                    }
-                                    type="button"
-                                  >
-                                    <EuiButtonContent
-                                      className="euiButton__content"
-                                      iconSide="left"
-                                      textProps={
-                                        Object {
-                                          "className": "euiButton__text",
-                                        }
-                                      }
-                                    >
-                                      <span
-                                        className="euiButtonContent euiButton__content"
-                                      >
-                                        <span
-                                          className="euiButton__text"
-                                        >
-                                          Remove Integration
-                                        </span>
-                                      </span>
-                                    </EuiButtonContent>
-                                  </button>
-                                </EuiButtonDisplay>
-                              </EuiButton>
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -261,56 +324,6 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                               className="euiText euiText--medium"
                             />
                           </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        grow={false}
-                      >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <h4>
-                                Status
-                              </h4>
-                            </div>
-                          </EuiText>
-                          <EuiSpacer
-                            size="m"
-                          >
-                            <div
-                              className="euiSpacer euiSpacer--m"
-                            />
-                          </EuiSpacer>
-                          <EuiBadge
-                            color="danger"
-                          >
-                            <EuiInnerText>
-                              <span
-                                className="euiBadge euiBadge--iconLeft"
-                                style={
-                                  Object {
-                                    "backgroundColor": "#ff7e62",
-                                    "color": "#000",
-                                  }
-                                }
-                                title="Critical"
-                              >
-                                <span
-                                  className="euiBadge__content"
-                                >
-                                  <span
-                                    className="euiBadge__text"
-                                  >
-                                    Critical
-                                  </span>
-                                </span>
-                              </span>
-                            </EuiInnerText>
-                          </EuiBadge>
                         </div>
                       </EuiFlexItem>
                     </div>

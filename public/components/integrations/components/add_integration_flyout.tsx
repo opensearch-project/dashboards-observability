@@ -99,9 +99,9 @@ export const doPropertyValidation = (
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const { onClose, onCreate, integrationName, integrationType } = props;
 
-  const { setToast } = useToast();
+  const [isDataSourceValid, setDataSourceValid] = useState<null | false | true>(null);
 
-  const [isDataSourceValid, setDataSourceValid] = useState(true);
+  const { setToast } = useToast();
 
   const [name, setName] = useState(integrationName || ''); // sets input value
   const [dataSource, setDataSource] = useState('');
@@ -207,7 +207,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         <EuiFormRow
           label="Index name or wildcard pattern"
           helpText="Input an index name or wildcard pattern that your integration will query."
-          isInvalid={!isDataSourceValid}
+          isInvalid={isDataSourceValid === false}
           error={errors}
         >
           <EuiFieldText
@@ -215,12 +215,15 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             name="first"
             onChange={(e) => onDatasourceChange(e)}
             value={dataSource}
-            isInvalid={!isDataSourceValid}
+            isInvalid={isDataSourceValid === false}
             append={
               <EuiButton
                 data-test-subj="resetCustomEmbeddablePanelTitle"
                 onClick={async () => {
                   const validationResult = await doExistingDataSourceValidation(dataSource);
+                  if (validationResult) {
+                    setToast('Index name or wildcard pattern is valid', 'success');
+                  }
                   setDataSourceValid(validationResult);
                 }}
                 disabled={dataSource.length === 0}
@@ -276,7 +279,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 dataSource.length < 1 ||
                 dataSource.length > 50 ||
                 name.length < 1 ||
-                name.length > 50
+                name.length > 50 ||
+                isDataSourceValid !== true
               }
               data-test-subj="createInstanceButton"
             >
