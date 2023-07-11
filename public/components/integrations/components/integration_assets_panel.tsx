@@ -13,8 +13,7 @@ import {
 import React from 'react';
 import _ from 'lodash';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
-
-const FILTER_OPTIONS = ['index-pattern', 'search', 'visualization', 'dashboard'];
+import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 
 export function IntegrationAssets(props: any) {
   const [config, assets] = [props.integration, props.integrationAssets];
@@ -29,7 +28,7 @@ export function IntegrationAssets(props: any) {
         field: 'type',
         name: 'Type',
         multiSelect: false,
-        options: FILTER_OPTIONS.map((i) => ({
+        options: ASSET_FILTER_OPTIONS.map((i) => ({
           value: i,
           name: i,
           view: i,
