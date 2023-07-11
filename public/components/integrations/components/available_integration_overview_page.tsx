@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { INTEGRATION_CATEOGRY_OPTIONS } from 'common/constants/integrations';
+import { INTEGRATION_CATEOGRY_OPTIONS } from '../../../../common/constants/integrations';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
