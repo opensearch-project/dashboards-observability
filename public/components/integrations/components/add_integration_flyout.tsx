@@ -217,19 +217,34 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             value={dataSource}
             isInvalid={isDataSourceValid === false}
             append={
-              <EuiButton
-                data-test-subj="validateIndex"
-                onClick={async () => {
-                  const validationResult = await doExistingDataSourceValidation(dataSource);
-                  if (validationResult) {
-                    setToast('Index name or wildcard pattern is valid', 'success');
-                  }
-                  setDataSourceValid(validationResult);
-                }}
-                disabled={dataSource.length === 0}
-              >
-                Validate
-              </EuiButton>
+              <>
+                <EuiFlexItem grow={true}>
+                  <EuiButton
+                    data-test-subj="validateIndex"
+                    onClick={async () => {
+                      const validationResult = await doExistingDataSourceValidation(dataSource);
+                      if (validationResult) {
+                        setToast('Index name or wildcard pattern is valid', 'success');
+                      }
+                      setDataSourceValid(validationResult);
+                    }}
+                    disabled={dataSource.length === 0}
+                  >
+                    Validate
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                  {isDataSourceValid === false && errors.length > 0 ? (
+                    <EuiLink
+                      external={true}
+                      target="blank"
+                      href="https://github.com/Swiddis/observability/blob/osints/tutorials/docs/tutorials/integrations-setup.md"
+                    >
+                      Learn More
+                    </EuiLink>
+                  ) : null}
+                </EuiFlexItem>
+              </>
             }
           />
         </EuiFormRow>
