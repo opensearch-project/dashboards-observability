@@ -210,7 +210,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             isInvalid={isDataSourceValid === false}
             append={
               <EuiButton
-                data-test-subj="resetCustomEmbeddablePanelTitle"
+                data-test-subj="validateIndex"
                 onClick={async () => {
                   const validationResult = await doExistingDataSourceValidation(dataSource);
                   if (validationResult) {
