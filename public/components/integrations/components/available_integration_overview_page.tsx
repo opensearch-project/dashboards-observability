@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { INTEGRATION_CATEOGRY_OPTIONS } from 'common/constants/integrations';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
@@ -74,14 +75,11 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     setIsPopoverOpen(false);
   };
 
-  const [items, setItems] = useState([
-    { name: 'http' },
-    { name: 'logs' },
-    { name: 'communication' },
-    { name: 'cloud' },
-    { name: 'aws_elb' },
-    { name: 'container' },
-  ]);
+  const [items, setItems] = useState(
+    INTEGRATION_CATEOGRY_OPTIONS.map((x) => {
+      return { name: x };
+    })
+  );
 
   function updateItem(index) {
     if (!items[index]) {
