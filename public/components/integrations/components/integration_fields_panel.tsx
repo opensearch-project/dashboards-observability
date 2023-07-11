@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
+import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
 import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {

@@ -99,9 +99,14 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             isClearable={false}
             placeholder="Search..."
             data-test-subj="search-bar-input-box"
+            // value={query}
+            // onClick = {() => query.current.}
             onChange={(e) => {
               props.setQuery(e.target.value);
+              // query.current
+              // setGlobalQuery(e.target.value);
             }}
+            // onSearch={props.refresh}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{props.renderCateogryFilters()}</EuiFlexItem>

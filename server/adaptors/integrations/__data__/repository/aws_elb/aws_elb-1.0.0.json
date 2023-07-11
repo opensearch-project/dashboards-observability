@@ -6,7 +6,7 @@
     "license": "Apache-2.0",
     "type": "logs",
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/blob/main/schema/observability/logs/aws_elb.mapping",
+    "sourceUrl": "https://github.com/YANG-DB/observability/tree/aws_alb_integration",
     "statics": {
         "logo": {
             "annotation": "ELB Logo",

@@ -21,7 +21,7 @@ import { AddedIntegrationsTableProps } from './added_integration_overview_page';
 import {
   ASSET_FILTER_OPTIONS,
   INTEGRATION_TEMPLATE_OPTIONS,
-} from '../../../../common/constants/integrations';
+} from '../../../../common/constants/explorer';
 import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
@@ -154,8 +154,17 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
             pageSizeOptions: [5, 10, 15],
           }}
           search={search}
+          // sorting={{
+          //   sort: {
+          //     field: 'dateModified',
+          //     direction: 'desc',
+          //   },
+          // }}
           allowNeutralSort={false}
           isSelectable={true}
+          // selection={{
+          //   onSelectionChange: (items) => setSelectedApplications(items),
+          // }}
         />
       ) : (
         <>

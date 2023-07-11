@@ -9,17 +9,23 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { StringRegexOptions } from 'joi';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { getAddIntegrationModal } from './add_integration_modal';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
 
@@ -38,6 +44,7 @@ export interface AvailableIntegrationType {
 export interface AvailableIntegrationsTableProps {
   loading: boolean;
   data: AvailableIntegrationsList;
+  showModal: (input: string) => void;
   isCardView: boolean;
   setCardView: (input: boolean) => void;
   renderCateogryFilters: () => React.JSX.Element;
@@ -49,6 +56,7 @@ export interface AvailableIntegrationsList {
 
 export interface AvailableIntegrationsCardViewProps {
   data: AvailableIntegrationsList;
+  showModal: (input: string) => void;
   isCardView: boolean;
   setCardView: (input: boolean) => void;
   query: string;
@@ -63,6 +71,9 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   const [isCardView, setCardView] = useState(true);
   const { setToast } = useToast();
   const [data, setData] = useState<AvailableIntegrationsList>({ hits: [] });
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -116,6 +127,30 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       Categories
     </EuiFilterButton>
   );
+
+  const getModal = (name: string) => {
+    setModalLayout(
+      getAddIntegrationModal(
+        () => {
+          addIntegrationRequest(name);
+          setIsModalVisible(false);
+        },
+        () => {
+          setIsModalVisible(false);
+        },
+        'Name',
+        'Namespace',
+        'Tags (optional)',
+        name,
+        'prod',
+        'Add Integration Options',
+        'Cancel',
+        'Add',
+        'test'
+      )
+    );
+    setIsModalVisible(true);
+  };
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -189,6 +224,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
                   helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
                 ),
               },
+              showModal: getModal,
               isCardView,
               setCardView,
               query,
@@ -202,11 +238,13 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
                   helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
                 ),
               },
+              showModal: getModal,
               isCardView,
               setCardView,
               renderCateogryFilters,
             })}
       </EuiPageBody>
+      {isModalVisible && modalLayout}
     </EuiPage>
   );
 }

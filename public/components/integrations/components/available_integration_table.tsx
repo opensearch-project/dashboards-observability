@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { ASSET_FILTER_OPTIONS } from 'common/constants/explorer';
 import { AvailableIntegrationsTableProps } from './available_integration_overview_page';
 import { badges } from './integration_category_badge_group';
 
@@ -127,8 +128,17 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
             pageSizeOptions: [5, 10, 15],
           }}
           search={search}
+          // sorting={{
+          //   sort: {
+          //     field: 'dateModified',
+          //     direction: 'desc',
+          //   },
+          // }}
           allowNeutralSort={false}
           isSelectable={true}
+          // selection={{
+          //   onSelectionChange: (items) => setSelectedApplications(items),
+          // }}
         />
       ) : (
         <>

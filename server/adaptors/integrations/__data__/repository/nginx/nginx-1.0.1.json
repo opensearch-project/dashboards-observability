@@ -6,7 +6,7 @@
     "license": "Apache-2.0",
     "type": "logs",
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/observability/tree/2.x/integrations/nginx",
+    "sourceUrl": "https://github.com/opensearch-project/observability/pull/1493/files",
     "statics": {
         "logo": {
             "annotation": "NginX Logo",

@@ -6,6 +6,8 @@
 import _ from 'lodash';
 import {
   EuiButton,
+  EuiCallOut,
+  EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,10 +17,16 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
@@ -142,7 +150,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
         return response;
       })
       .catch((err: any) => {
-        console.error(err);
         return null;
       });
   };
@@ -210,7 +217,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             isInvalid={isDataSourceValid === false}
             append={
               <EuiButton
-                data-test-subj="resetCustomEmbeddablePanelTitle"
+                data-test-subj="validateIndex"
                 onClick={async () => {
                   const validationResult = await doExistingDataSourceValidation(dataSource);
                   if (validationResult) {

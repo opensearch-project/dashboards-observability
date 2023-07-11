@@ -20,6 +20,7 @@ import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
 import { IntegrationAssets } from './integration_assets_panel';
+import { getAddIntegrationModal } from './add_integration_modal';
 import { AvailableIntegrationProps } from './integration_types';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationScreenshots } from './integration_screenshots_panel';
