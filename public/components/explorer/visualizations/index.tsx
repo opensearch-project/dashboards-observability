@@ -9,7 +9,6 @@ import _ from 'lodash';
 
 import React from 'react';
 import { FrameLayout } from './frame_layout';
-import { DataPanel } from './datapanel';
 import { Sidebar } from '../sidebar/sidebar';
 import { WorkspacePanel } from './workspace_panel';
 import { ConfigPanelWrapper } from './config_panel';

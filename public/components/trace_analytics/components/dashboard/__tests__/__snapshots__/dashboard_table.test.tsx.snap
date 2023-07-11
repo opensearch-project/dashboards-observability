@@ -2329,7 +2329,6 @@ exports[`Dashboard table component renders dashboard table 1`] = `
                                               },
                                             }
                                           }
-                                          onClick={[Function]}
                                           onHover={[Function]}
                                           style={
                                             Object {

@@ -3,18 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { uniqueId, find } from 'lodash';
-import { DragDrop } from '../drag_drop';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { Bar } from '../../../visualizations/charts/bar';
 import { Line } from '../../../visualizations/charts/line';
 import { HorizontalBar } from '../../../visualizations/charts/horizontal_bar';
-import { LensIconChartBar } from '../assets/chart_bar';
-import { LensIconChartLine } from '../assets/chart_line';
-import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 import SavedObjects from '../../../../services/saved_objects/event_analytics/saved_objects';
+import { EuiComboBoxOptionOption, EuiIcon } from '@elastic/eui';
 
 const plotlySharedlayout = {
   showlegend: true,
@@ -58,14 +55,14 @@ export function WorkspacePanel({
         id: 'bar',
         label: 'Bar',
         fullLabel: 'Bar',
-        icon: LensIconChartBar,
+        icontype: 'visBarVerticalStacked',
         visualizationId: uniqueId('vis-bar-'),
         selection: {
           dataLoss: 'nothing'
         },
         chart: (!visualizations || !visualizations.data) ? 
         <EmptyPlaceholder
-          icon={ LensIconChartBar }
+          icon="visBarVerticalStacked"
         /> : <Bar 
           visualizations={ visualizations }
           barConfig={ plotlySharedConfig }
@@ -76,14 +73,14 @@ export function WorkspacePanel({
         id: 'horizontal_bar',
         label: 'H. Bar',
         fullLabel: 'H. Bar',
-        icon: LensIconChartBarHorizontal,
+        icontype: 'visBarHorizontalStacked',
         visualizationId: uniqueId('vis-horizontal-bar-'),
         selection: {
           dataLoss: 'nothing'
         },
         chart: (!visualizations || !visualizations.data) ? 
         <EmptyPlaceholder
-          icon={ LensIconChartBarHorizontal }
+          icon="visBarHorizontalStacked"
         /> : <HorizontalBar
           visualizations={ visualizations }
           layoutConfig={ plotlySharedlayout }
@@ -94,14 +91,14 @@ export function WorkspacePanel({
         id: 'line',
         label: 'Line',
         fullLabel: 'Line',
-        icon: LensIconChartLine,
+        icontype: 'visLine',
         visualizationId: uniqueId('vis-line-'),
         selection: {
           dataLoss: 'nothing'
         },
         chart: (!visualizations || !visualizations.data) ? 
         <EmptyPlaceholder
-          icon={ LensIconChartLine }
+          icon="visLine"
         /> : <Line
           visualizations={ visualizations }
           layoutConfig={ plotlySharedlayout }
@@ -123,6 +120,29 @@ export function WorkspacePanel({
       return v.id === curVisId;
     });
   }
+
+  const vizSelectableItemRenderer = (option: EuiComboBoxOptionOption<any>) => {
+    const { icontype = 'empty', label = '' } = option;
+
+    return (
+      <div className="configPanel__vizSelector-item">
+        <EuiIcon className="visSwitcher" type={icontype} size="m" />
+        &nbsp;&nbsp;
+        <span>{label}</span>
+      </div>
+    );
+  };
+
+  const getSelectedVisById = useCallback(
+    (visId) => {
+      const selectedOption = find(memorizedVisualizationTypes, (v) => {
+        return v.id === visId;
+      });
+      selectedOption.iconType = selectedOption.icontype;
+      return selectedOption;
+    },
+    [memorizedVisualizationTypes]
+  );
   
   function renderVisualization() {
     return getCurChart()?.chart;
@@ -139,18 +159,11 @@ export function WorkspacePanel({
         setSavePanelName(name) 
       } }
       savePanelName={ savePanelName }
+      getSelectedVisById={getSelectedVisById}
+      vizSelectableItemRenderer={vizSelectableItemRenderer}
+      curVisId={curVisId}
     >
-      <DragDrop
-        className="lnsWorkspacePanel__dragDrop"
-        data-test-subj="lnsWorkspace"
-        draggable={false}
-        droppable={false}
-        onDrop={onDrop}
-      >
-        <div>
-          { renderVisualization() }
-        </div>
-      </DragDrop>
+      { renderVisualization() }
     </WorkspacePanelWrapper>
   );
 }

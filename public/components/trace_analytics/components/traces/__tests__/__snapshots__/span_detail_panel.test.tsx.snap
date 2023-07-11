@@ -402,7 +402,6 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                 },
               }
             }
-            onClick={[Function]}
             onHover={[Function]}
             onUnhover={[Function]}
             style={

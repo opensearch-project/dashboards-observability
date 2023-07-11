@@ -4,19 +4,22 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
-export const EmptyPlaceholder = (props: { icon: IconType }) => (
+export const EmptyPlaceholder = (props: { icon: string }) => (
   <>
-    <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-      <EuiIcon type={props.icon} color="subdued" size="l" />
-      <EuiSpacer size="s" />
+    <EuiText
+      className="visWorkspaceNoData"
+      textAlign="center"
+      color="subdued"
+      size="xs"
+      data-test-subj="vizWorkspace__noData"
+    >
+      <EuiIcon type={props.icon} color="subdued" size="xxl" />
+      <EuiSpacer size="l" />
       <p>
-        <FormattedMessage
-          id="xpack.lens.xyVisualization.noDataLabel"
-          defaultMessage="No results found"
-        />
+        <FormattedMessage id="visualization_noData" defaultMessage="No data found" />
       </p>
     </EuiText>
   </>
