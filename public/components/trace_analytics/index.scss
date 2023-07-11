@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@import '../../../node_modules/vis-network/dist/dist/vis-network.min.css';
+@import "../../../node_modules/vis-network/dist/dist/vis-network.min.css";
 
 .overview-title {
-  color: '#333333';
+  color: #333;
   font-weight: 370;
 }
 
@@ -15,12 +15,12 @@
 }
 
 .panel-title {
-  color: '#3f3f3f';
+  color: #3f3f3f;
   font-weight: 500;
 }
 
 .panel-title-count {
-  color: '#8a9596';
+  color: #8a9596;
   font-weight: 300;
 }
 
@@ -30,22 +30,23 @@ div.vis-network > div.vis-tooltip {
   opacity: 0.9;
   padding: 5px;
   font-size: small;
+
   p {
     padding: 5px;
   }
 }
 
-th[data-test-subj^='tableHeaderCell_dashboard_trace_group_name'],
-th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'],
-th[data-test-subj^='tableHeaderCell_dashboard_average_latency'],
-th[data-test-subj^='tableHeaderCell_dashboard_error_rate'],
-th[data-test-subj^='tableHeaderCell_dashboard_traces'] {
+th[data-test-subj^="tableHeaderCell_dashboard_trace_group_name"],
+th[data-test-subj^="tableHeaderCell_dashboard_latency_variance"],
+th[data-test-subj^="tableHeaderCell_dashboard_average_latency"],
+th[data-test-subj^="tableHeaderCell_dashboard_error_rate"],
+th[data-test-subj^="tableHeaderCell_dashboard_traces"] {
   svg[aria-label^="Sorted in"] {
     margin-top: -20px;
   }
 }
 
-th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
+th[data-test-subj^="tableHeaderCell_dashboard_latency_variance"] {
   svg[aria-label^="Sorted in"] {
     margin-left: -16px;
     position: relative;

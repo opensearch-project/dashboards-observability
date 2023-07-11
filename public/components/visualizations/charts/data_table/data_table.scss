@@ -2,6 +2,7 @@
   display: flex;
   justify-content: space-between;
 }
+
 .custom-pagination-container {
   display: inline-flex;
   padding: 10px 5px;
@@ -18,22 +19,24 @@
 .custom-pagination-container .euiIcon:focus {
   background: transparent !important;
 }
+
 .custom-pagination-container a:focus {
   animation: none !important;
 }
+
 .custom-pagination-container a {
   cursor: pointer;
+  color: #343741;
 }
 
 .custom-pagination-container .disabled {
   cursor: default;
 }
-.custom-pagination-container a {
-  color: #343741;
-}
+
 .dark-theme a {
   color: #dfe5ef;
 }
+
 .custom-pagination-container .selected a {
   color: #1ba9f5;
   text-decoration: underline;

@@ -9,6 +9,7 @@
   */
   doc-table {
     @include euiScrollBar;
+
     overflow: auto;
     flex: 1 1 100%;
     flex-direction: column; /* 1 */
@@ -168,7 +169,7 @@
   }
 
   .osdDocTableCell__toggleDetails {
-    padding: 4px 0 0 0!important;
+    padding: 4px 0 0 !important;
   }
 
   .osdDocTableCell__filter {
@@ -213,6 +214,7 @@
       position: relative;
     }
   }
+
   discover-app {
     flex-grow: 1;
   }
@@ -229,12 +231,13 @@
     padding-right: $euiSizeS;
     margin-top: $euiSizeM;
     z-index: 1;
-    @include euiBreakpoint('xs', 's', 'm') {
+
+    @include euiBreakpoint("xs", "s", "m") {
       padding-left: $euiSizeS;
     }
   }
 
-  @include euiPanel('.dscWrapper__content');
+  @include euiPanel(".dscWrapper__content");
 
   .dscWrapper__content {
     padding-top: $euiSizeXS;
@@ -275,7 +278,6 @@
     left: 0;
     z-index: 20;
     padding-top: $euiSizeM;
-
     opacity: 0.75;
     text-align: center;
     background-color: transparent;
@@ -300,7 +302,7 @@
 
   .dscResults {
     h3 {
-      margin: -20px 0 10px 0;
+      margin: -20px 0 10px;
       text-align: center;
     }
   }
@@ -340,20 +342,21 @@
       z-index: -1;
       min-height: $euiSizeM;
       min-width: $euiSizeM;
-      padding: $euiSizeXS * .5;
+      padding: $euiSizeXS * 0.5;
     }
 
     &.closed {
       width: 0 !important;
       border-right-width: 0;
       border-left-width: 0;
+
       .dscCollapsibleSidebar__collapseButton {
         right: -$euiSizeL + 4;
       }
     }
   }
 
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     .dscCollapsibleSidebar {
       &.closed {
         display: none;
@@ -366,6 +369,7 @@
   }
 
   /* ------------- Detail table cell -------- */
+
   /**
   * 1. Visually align the actions with the tabs. We can improve this by using flexbox instead, at a later point.
   */
@@ -376,7 +380,6 @@
 
   // Overwrite the border on the bootstrap table
   .osdDocTableDetails__row {
-
     > td {
       // Offsets negative margins from an inner flex group
       padding: $euiSizeL !important;
@@ -405,12 +408,15 @@
   .osdDocTableHeader {
     white-space: nowrap;
   }
+
   .osdDocTableHeader button {
     margin-left: $euiSizeXS;
   }
+
   .osdDocTableHeader__move,
   .osdDocTableHeader__sortChange {
     opacity: 0;
+
     th:hover &,
     &:focus {
       opacity: 1;
@@ -433,6 +439,7 @@
       vertical-align: top;
       padding-top: 2px;
     }
+
     .osdDocViewer__field {
       padding-top: 8px;
     }
@@ -461,6 +468,7 @@
   .osdDocViewer__field {
     white-space: nowrap;
   }
+
   .osdDocViewer__buttons {
     width: 60px;
 

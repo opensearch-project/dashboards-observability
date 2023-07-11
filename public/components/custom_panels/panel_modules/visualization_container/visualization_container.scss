@@ -5,18 +5,16 @@
 
 .mouseGrabber {
   & :hover {
-    cursor: -webkit-grab;
     cursor: grab;
   }
+
   & :active {
-    cursor: -webkit-grabbing;
     cursor: grabbing;
   }
 }
 
 .visualization-action-button {
   & :hover {
-    cursor: -webkit-pointer;
     cursor: pointer;
   }
 }
@@ -37,22 +35,20 @@
 %center-div {
   top: 50%;
   left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  -o-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
 
 .visualization-loading-chart {
   margin: 0;
   position: absolute;
+
   @extend %center-div;
 }
 
 .visualization-error-div {
   overflow: auto;
   position: relative;
+
   @extend %center-div;
 }
 

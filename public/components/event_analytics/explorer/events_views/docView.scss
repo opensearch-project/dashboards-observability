@@ -4,7 +4,7 @@
  */
 
 .selected-event-row {
-  background-color: rgba(5, 143, 244, 0.1);
+  background-color: rgba(5, 143, 244, 10%);
 }
 
 .doc-flyout table {
@@ -38,7 +38,7 @@
 .events-flyout-resize {
   position: absolute;
   right: 30px;
-  top: 0px;
+  top: 0;
   z-index: 3;
 }
 

@@ -2,13 +2,13 @@
   display: flex;
   flex: 1 1 100%;
   position: relative;
+
   // flex-direction determined by js
 }
 
 .vgaVis__view {
   z-index: 0;
   flex: 1 1 100%;
-
   display: block;
   max-width: 100%;
   max-height: 100%;
@@ -24,6 +24,7 @@
 
 .vgaVis__controls {
   @include euiFontSizeS;
+
   display: flex;
 
   &:not(:empty) {
@@ -48,7 +49,7 @@
       width: $euiSizeM * 10 - $euiSize;
     }
 
-    input[type='range'] {
+    input[type="range"] {
       width: $euiSizeM * 10;
       display: inline-block;
       vertical-align: middle;
@@ -75,7 +76,7 @@
   top: 0;
   width: 100%;
   margin: auto;
-  opacity: .8;
+  opacity: 0.8;
   z-index: 1;
   list-style: none;
 }
@@ -91,16 +92,17 @@
 
 .vgaVis__message--warn .vgaVis__messageCode {
   $calculatedBackgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
+
   background-color: $calculatedBackgroundColor;
   color: makeHighContrastColor($euiColorWarning, $calculatedBackgroundColor);
 }
 
 .vgaVis__message--err .vgaVis__messageCode {
   $calculateBackgroundColor: tintOrShade($euiColorDanger, 90%, 70%);
+
   background-color: $calculateBackgroundColor;
   color: makeHighContrastColor($euiColorDanger, $calculateBackgroundColor);
 }
-
 
 // Style tooltip popup (gets created dynamically at the top level if dashboard has a Vega vis)
 // Adapted from https://github.com/vega/vega-tooltip
@@ -115,6 +117,7 @@
 
   td {
     @include euiTextTruncate;
+
     padding-top: $euiSizeXS;
     padding-bottom: $euiSizeXS;
 
@@ -131,8 +134,7 @@
     }
   }
 
-
-  @media only screen and (max-width: map-get($euiBreakpoints, 'm')) {
+  @media only screen and (max-width: map-get($euiBreakpoints, "m")) {
     td {
       &.key {
         max-width: $euiSize * 6;

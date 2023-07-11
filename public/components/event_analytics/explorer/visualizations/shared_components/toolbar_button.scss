@@ -10,12 +10,12 @@
   // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
   min-width: 0;
 
-  &[class*='--text'] {
+  &[class*="--text"] {
     // Lighten the border color for all states
     border-color: $euiBorderColor !important; // sass-lint:disable-line no-important
   }
 
-  &[class*='isDisabled'] {
+  &[class*="isDisabled"] {
     // There is a popover `pointer-events: none` that messes with the not-allowed cursor
     pointer-events: initial;
   }
@@ -29,14 +29,13 @@
   }
 
   // Toolbar buttons don't look good with centered text when fullWidth
-  &[class*='fullWidth'] {
+  &[class*="fullWidth"] {
     text-align: left;
 
     .lnsToolbarButton__content {
       justify-content: space-between;
     }
   }
-
 }
 
 .lnsToolbarButton--groupLeft {

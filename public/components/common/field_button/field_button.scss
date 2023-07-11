@@ -2,15 +2,17 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
- 
+
 .osdFieldButton {
   @include euiFontSizeS;
+
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
   display: flex;
   align-items: center;
-  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
-    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+  transition:
+    box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
   &:focus-within,
   &-isActive {
@@ -25,6 +27,7 @@
   &:focus,
   &:focus-within {
     @include euiBottomShadowMedium;
+
     border-radius: $euiBorderRadius;
     z-index: 2;
   }
@@ -82,7 +85,7 @@
 .shard__fieldSelectorField {
   &:hover,
   &:focus-within,
-  &[class*='-isActive'] {
+  &[class*="-isActive"] {
     .dscSidebarItem__action {
       opacity: 1;
     }
