@@ -95,6 +95,35 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                               >
                                 Index name or wildcard pattern
                               </label>
+                               
+                              <div
+                                class="euiText euiText--extraSmall"
+                              >
+                                <a
+                                  class="euiLink euiLink--primary"
+                                  href="https://opensearch.org/docs/latest/integrations/index"
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  Learn More
+                                  <svg
+                                    aria-hidden="true"
+                                    aria-label="External link"
+                                    class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                  <span
+                                    class="euiScreenReaderOnly"
+                                  >
+                                    (opens in a new tab or window)
+                                  </span>
+                                </a>
+                              </div>
                             </div>
                             <div
                               class="euiFormRow__fieldWrapper"
@@ -393,6 +422,35 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                       >
                                         Index name or wildcard pattern
                                       </label>
+                                       
+                                      <div
+                                        class="euiText euiText--extraSmall"
+                                      >
+                                        <a
+                                          class="euiLink euiLink--primary"
+                                          href="https://opensearch.org/docs/latest/integrations/index"
+                                          rel="noopener noreferrer"
+                                          target="_blank"
+                                        >
+                                          Learn More
+                                          <svg
+                                            aria-hidden="true"
+                                            aria-label="External link"
+                                            class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                            focusable="false"
+                                            height="16"
+                                            role="img"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                          <span
+                                            class="euiScreenReaderOnly"
+                                          >
+                                            (opens in a new tab or window)
+                                          </span>
+                                        </a>
+                                      </div>
                                     </div>
                                     <div
                                       class="euiFormRow__fieldWrapper"
@@ -623,6 +681,35 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         >
                                           Index name or wildcard pattern
                                         </label>
+                                         
+                                        <div
+                                          class="euiText euiText--extraSmall"
+                                        >
+                                          <a
+                                            class="euiLink euiLink--primary"
+                                            href="https://opensearch.org/docs/latest/integrations/index"
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                          >
+                                            Learn More
+                                            <svg
+                                              aria-hidden="true"
+                                              aria-label="External link"
+                                              class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                              focusable="false"
+                                              height="16"
+                                              role="img"
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                            <span
+                                              class="euiScreenReaderOnly"
+                                            >
+                                              (opens in a new tab or window)
+                                            </span>
+                                          </a>
+                                        </div>
                                       </div>
                                       <div
                                         class="euiFormRow__fieldWrapper"
@@ -853,6 +940,35 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           >
                                             Index name or wildcard pattern
                                           </label>
+                                           
+                                          <div
+                                            class="euiText euiText--extraSmall"
+                                          >
+                                            <a
+                                              class="euiLink euiLink--primary"
+                                              href="https://opensearch.org/docs/latest/integrations/index"
+                                              rel="noopener noreferrer"
+                                              target="_blank"
+                                            >
+                                              Learn More
+                                              <svg
+                                                aria-hidden="true"
+                                                aria-label="External link"
+                                                class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                focusable="false"
+                                                height="16"
+                                                role="img"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                              <span
+                                                class="euiScreenReaderOnly"
+                                              >
+                                                (opens in a new tab or window)
+                                              </span>
+                                            </a>
+                                          </div>
                                         </div>
                                         <div
                                           class="euiFormRow__fieldWrapper"
@@ -1071,6 +1187,35 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             >
                                               Index name or wildcard pattern
                                             </label>
+                                             
+                                            <div
+                                              class="euiText euiText--extraSmall"
+                                            >
+                                              <a
+                                                class="euiLink euiLink--primary"
+                                                href="https://opensearch.org/docs/latest/integrations/index"
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                              >
+                                                Learn More
+                                                <svg
+                                                  aria-hidden="true"
+                                                  aria-label="External link"
+                                                  class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                  focusable="false"
+                                                  height="16"
+                                                  role="img"
+                                                  viewBox="0 0 16 16"
+                                                  width="16"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                />
+                                                <span
+                                                  class="euiScreenReaderOnly"
+                                                >
+                                                  (opens in a new tab or window)
+                                                </span>
+                                              </a>
+                                            </div>
                                           </div>
                                           <div
                                             class="euiFormRow__fieldWrapper"
@@ -1354,6 +1499,19 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         helpText="Input an index name or wildcard pattern that your integration will query."
                                         isInvalid={false}
                                         label="Index name or wildcard pattern"
+                                        labelAppend={
+                                          <EuiText
+                                            size="xs"
+                                          >
+                                            <EuiLink
+                                              external={true}
+                                              href="https://opensearch.org/docs/latest/integrations/index"
+                                              target="_blank"
+                                            >
+                                              Learn More
+                                            </EuiLink>
+                                          </EuiText>
+                                        }
                                         labelType="label"
                                       >
                                         <div
@@ -1379,6 +1537,69 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                 Index name or wildcard pattern
                                               </label>
                                             </EuiFormLabel>
+                                             
+                                            <EuiText
+                                              size="xs"
+                                            >
+                                              <div
+                                                className="euiText euiText--extraSmall"
+                                              >
+                                                <EuiLink
+                                                  external={true}
+                                                  href="https://opensearch.org/docs/latest/integrations/index"
+                                                  target="_blank"
+                                                >
+                                                  <a
+                                                    className="euiLink euiLink--primary"
+                                                    href="https://opensearch.org/docs/latest/integrations/index"
+                                                    rel="noopener noreferrer"
+                                                    target="_blank"
+                                                  >
+                                                    Learn More
+                                                    <EuiIcon
+                                                      aria-label="External link"
+                                                      className="euiLink__externalIcon"
+                                                      size="s"
+                                                      type="popout"
+                                                    >
+                                                      <EuiIconEmpty
+                                                        aria-hidden={true}
+                                                        aria-label="External link"
+                                                        className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          aria-label="External link"
+                                                          className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </EuiIconEmpty>
+                                                    </EuiIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                      >
+                                                        <EuiI18n
+                                                          default="(opens in a new tab or window)"
+                                                          token="euiLink.newTarget.screenReaderOnlyText"
+                                                        >
+                                                          (opens in a new tab or window)
+                                                        </EuiI18n>
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </a>
+                                                </EuiLink>
+                                              </div>
+                                            </EuiText>
                                           </div>
                                           <div
                                             className="euiFormRow__fieldWrapper"

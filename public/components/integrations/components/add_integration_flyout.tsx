@@ -14,6 +14,8 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
+  EuiText,
+  EuiLink,
   EuiFormRow,
   EuiTitle,
 } from '@elastic/eui';
@@ -201,6 +203,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
           helpText="Input an index name or wildcard pattern that your integration will query."
           isInvalid={isDataSourceValid === false}
           error={errors}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink
+                href="https://opensearch.org/docs/latest/integrations/index"
+                external={true}
+                target="_blank"
+              >
+                Learn More
+              </EuiLink>
+            </EuiText>
+          }
         >
           <EuiFieldText
             data-test-subj="data-source-name"
