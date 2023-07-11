@@ -117,7 +117,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                 </div>
                                 <button
                                   class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
-                                  data-test-subj="resetCustomEmbeddablePanelTitle"
+                                  data-test-subj="validateIndex"
                                   disabled=""
                                   type="button"
                                 >
@@ -415,7 +415,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                         </div>
                                         <button
                                           class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
-                                          data-test-subj="resetCustomEmbeddablePanelTitle"
+                                          data-test-subj="validateIndex"
                                           disabled=""
                                           type="button"
                                         >
@@ -645,7 +645,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                           </div>
                                           <button
                                             class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
-                                            data-test-subj="resetCustomEmbeddablePanelTitle"
+                                            data-test-subj="validateIndex"
                                             disabled=""
                                             type="button"
                                           >
@@ -875,7 +875,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             </div>
                                             <button
                                               class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
-                                              data-test-subj="resetCustomEmbeddablePanelTitle"
+                                              data-test-subj="validateIndex"
                                               disabled=""
                                               type="button"
                                             >
@@ -1093,7 +1093,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               </div>
                                               <button
                                                 class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
-                                                data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                data-test-subj="validateIndex"
                                                 disabled=""
                                                 type="button"
                                               >
@@ -1386,7 +1386,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                             <EuiFieldText
                                               append={
                                                 <EuiButton
-                                                  data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                  data-test-subj="validateIndex"
                                                   disabled={true}
                                                   onClick={[Function]}
                                                 >
@@ -1406,7 +1406,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                               <EuiFormControlLayout
                                                 append={
                                                   <EuiButton
-                                                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                    data-test-subj="validateIndex"
                                                     disabled={true}
                                                     onClick={[Function]}
                                                   >
@@ -1442,7 +1442,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                   </div>
                                                   <EuiButton
                                                     className="euiFormControlLayout__append"
-                                                    data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                    data-test-subj="validateIndex"
                                                     disabled={true}
                                                     key="0/.0"
                                                     onClick={[Function]}
@@ -1450,7 +1450,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                     <EuiButtonDisplay
                                                       baseClassName="euiButton"
                                                       className="euiFormControlLayout__append"
-                                                      data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                      data-test-subj="validateIndex"
                                                       disabled={true}
                                                       element="button"
                                                       isDisabled={true}
@@ -1459,7 +1459,7 @@ exports[`Add Integration Flyout Test Renders add integration flyout with dummy i
                                                     >
                                                       <button
                                                         className="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
-                                                        data-test-subj="resetCustomEmbeddablePanelTitle"
+                                                        data-test-subj="validateIndex"
                                                         disabled={true}
                                                         onClick={[Function]}
                                                         style={
