@@ -7,6 +7,7 @@
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastList,
@@ -132,9 +133,11 @@ export function AddedIntegration(props: AddedIntegrationProps) {
               </EuiFlexGroup>
 
               <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="trash"
+                <EuiButtonIcon
+                  iconType="trash"
+                  aria-label="Delete"
                   size="l"
+                  color="danger"
                   onClick={() => {
                     getModal();
                   }}
@@ -176,6 +179,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
           return (
             <EuiLink
               data-test-subj={`IntegrationAssetLink`}
+              data-click-metric-element="integrations.dashboard_link"
               onClick={() => window.location.assign(`dashboards#/view/${record.assetId}`)}
             >
               {_.truncate(record.description, { length: 100 })}
@@ -185,6 +189,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
           return (
             <EuiLink
               data-test-subj={`IntegrationIndexPatternLink`}
+              data-click-metric-element="integrations.index-pattern_link"
               onClick={() =>
                 window.location.assign(
                   `management/opensearch-dashboards/indexPatterns/patterns/${record.assetId}`
@@ -198,6 +203,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
           return (
             <EuiLink
               data-test-subj={`IntegrationIndexPatternLink`}
+              data-click-metric-element="integrations.search_link"
               onClick={() => window.location.assign(`discover#/view/${record.assetId}`)}
             >
               {_.truncate(record.description, { length: 100 })}
@@ -207,6 +213,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
           return (
             <EuiLink
               data-test-subj={`IntegrationIndexPatternLink`}
+              data-click-metric-element="integrations.viz-link"
               onClick={() => window.location.assign(`visualize#/edit/${record.assetId}`)}
             >
               {_.truncate(record.description, { length: 100 })}
