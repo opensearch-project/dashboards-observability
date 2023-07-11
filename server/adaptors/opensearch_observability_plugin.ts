@@ -9,6 +9,7 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
   const clientAction = components.clientAction.factory;
 
   Client.prototype.observability = components.clientAction.namespaceFactory();
+  Client.prototype.integrations = components.clientAction.namespaceFactory();
   const observability = Client.prototype.observability.prototype;
 
   // Get Object

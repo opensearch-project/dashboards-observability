@@ -186,6 +186,23 @@ export function registerIntegrationsRoute(router: IRouter) {
 
   router.get(
     {
+      path: `${INTEGRATIONS_BASE}/repository/{id}/data`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const adaptor = getAdaptor(context, request);
+      return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
+        a.getSampleData(request.params.id)
+      );
+    }
+  );
+
+  router.get(
+    {
       path: `${INTEGRATIONS_BASE}/store`,
       validate: false,
     },

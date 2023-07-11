@@ -5,7 +5,7 @@
     "description": "AWS Elastic Load Balancer collector",
     "license": "Apache-2.0",
     "type": "logs",
-    "author": "Daniel Dong",
+    "author": "OpenSearch",
     "sourceUrl": "https://github.com/YANG-DB/observability/tree/aws_alb_integration",
     "statics": {
         "logo": {
@@ -16,10 +16,6 @@
             {
                 "annotation": "ELB Dashboard",
                 "path": "dashboard1.png"
-            },
-            {
-                "annotation": "ELB Logo",
-                "path": "logo.png"
             }
         ]
     },

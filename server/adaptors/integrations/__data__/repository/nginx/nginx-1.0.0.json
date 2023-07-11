@@ -6,8 +6,8 @@
     "license": "Apache-2.0",
     "type": "logs",
     "link": "https://www.nginx.com/",
-    "author": "John Doe",
-    "sourceUrl": "https://github.com/",
+    "author": "OpenSearch",
+    "sourceUrl": "https://github.com/opensearch-project/observability/pull/1493/files",
     "statics": {
         "logo": {
             "annotation": "NginX Logo",
