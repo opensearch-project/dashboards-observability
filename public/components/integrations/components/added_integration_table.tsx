@@ -141,7 +141,6 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
 
   return (
     <EuiPageContent data-test-subj="addedIntegrationsArea">
-      <EuiSpacer />
       {integrations && integrations.length > 0 ? (
         <EuiInMemoryTable
           loading={props.loading}

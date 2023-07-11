@@ -101,11 +101,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
         data-test-subj="addedIntegrationsArea"
         role="main"
       >
-        <EuiSpacer>
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
         <EuiInMemoryTable
           allowNeutralSort={false}
           columns={
@@ -250,11 +245,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                       "value": "nginx",
                       "view": "nginx",
                     },
-                    Object {
-                      "name": "aws_elb",
-                      "value": "aws_elb",
-                      "view": "aws_elb",
-                    },
                   ],
                   "type": "field_value_selection",
                 },
@@ -281,11 +271,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                         "name": "nginx",
                         "value": "nginx",
                         "view": "nginx",
-                      },
-                      Object {
-                        "name": "aws_elb",
-                        "value": "aws_elb",
-                        "view": "aws_elb",
                       },
                     ],
                     "type": "field_value_selection",
@@ -425,11 +410,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                   "value": "nginx",
                                   "view": "nginx",
                                 },
-                                Object {
-                                  "name": "aws_elb",
-                                  "value": "aws_elb",
-                                  "view": "aws_elb",
-                                },
                               ],
                               "type": "field_value_selection",
                             },
@@ -471,11 +451,6 @@ exports[`Added Integration Table View Test Renders added integration table view 
                                       "name": "nginx",
                                       "value": "nginx",
                                       "view": "nginx",
-                                    },
-                                    Object {
-                                      "name": "aws_elb",
-                                      "value": "aws_elb",
-                                      "view": "aws_elb",
                                     },
                                   ],
                                   "type": "field_value_selection",
