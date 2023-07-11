@@ -11,6 +11,7 @@ import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
@@ -34,6 +35,9 @@ import {
   observabilityLogsID,
   observabilityLogsTitle,
   observabilityLogsPluginOrder,
+  observabilityIntegrationsID,
+  observabilityIntegrationsTitle,
+  observabilityIntegrationsPluginOrder,
   observabilityPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
@@ -183,6 +187,14 @@ export class ObservabilityPlugin
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityPanelsPluginOrder,
       mount: appMountWithStartPage('dashboards'),
+    });
+
+    core.application.register({
+      id: observabilityIntegrationsID,
+      title: observabilityIntegrationsTitle,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: observabilityIntegrationsPluginOrder,
+      mount: appMountWithStartPage('integrations'),
     });
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
