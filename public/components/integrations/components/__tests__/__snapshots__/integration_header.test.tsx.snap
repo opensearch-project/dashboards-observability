@@ -1,0 +1,165 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Integration Header Test Renders integration header as expected 1`] = `
+<IntegrationHeader>
+  <div>
+    <EuiPageHeader>
+      <header
+        className="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+      >
+        <EuiPageHeaderSection>
+          <div
+            className="euiPageHeaderSection"
+          >
+            <EuiTitle
+              data-test-subj="integrations-header"
+              size="l"
+            >
+              <h1
+                className="euiTitle euiTitle--large"
+                data-test-subj="integrations-header"
+              >
+                Integrations
+              </h1>
+            </EuiTitle>
+          </div>
+        </EuiPageHeaderSection>
+      </header>
+    </EuiPageHeader>
+    <EuiSpacer
+      size="s"
+    >
+      <div
+        className="euiSpacer euiSpacer--s"
+      />
+    </EuiSpacer>
+    <EuiText
+      color="subdued"
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <EuiTextColor
+          color="subdued"
+          component="div"
+        >
+          <div
+            className="euiTextColor euiTextColor--subdued"
+          >
+            View or add available integrations to use pre-canned assets immediately in your OpenSearch setup.
+             
+            <EuiLink
+              external={true}
+              href="https://opensearch.org/docs/latest/integrations/index"
+              target="blank"
+            >
+              <a
+                className="euiLink euiLink--primary"
+                href="https://opensearch.org/docs/latest/integrations/index"
+                rel="noreferrer"
+                target="blank"
+              >
+                Learn more
+                <EuiIcon
+                  aria-label="External link"
+                  className="euiLink__externalIcon"
+                  size="s"
+                  type="popout"
+                >
+                  <EuiIconEmpty
+                    aria-hidden={true}
+                    aria-label="External link"
+                    className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                    focusable="false"
+                    role="img"
+                    style={null}
+                  >
+                    <svg
+                      aria-hidden={true}
+                      aria-label="External link"
+                      className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </EuiIconEmpty>
+                </EuiIcon>
+              </a>
+            </EuiLink>
+          </div>
+        </EuiTextColor>
+      </div>
+    </EuiText>
+    <EuiSpacer
+      size="l"
+    >
+      <div
+        className="euiSpacer euiSpacer--l"
+      />
+    </EuiSpacer>
+    <EuiTabs
+      display="condensed"
+    >
+      <div
+        className="euiTabs euiTabs--condensed"
+        role="tablist"
+      >
+        <EuiTab
+          disabled={false}
+          isSelected={true}
+          key="0"
+          onClick={[Function]}
+        >
+          <button
+            aria-selected={true}
+            className="euiTab euiTab-isSelected"
+            disabled={false}
+            onClick={[Function]}
+            role="tab"
+            type="button"
+          >
+            <span
+              className="euiTab__content"
+            >
+              Installed
+            </span>
+          </button>
+        </EuiTab>
+        <EuiTab
+          disabled={false}
+          isSelected={false}
+          key="1"
+          onClick={[Function]}
+        >
+          <button
+            aria-selected={false}
+            className="euiTab"
+            disabled={false}
+            onClick={[Function]}
+            role="tab"
+            type="button"
+          >
+            <span
+              className="euiTab__content"
+            >
+              Available
+            </span>
+          </button>
+        </EuiTab>
+      </div>
+    </EuiTabs>
+    <EuiSpacer
+      size="s"
+    >
+      <div
+        className="euiSpacer euiSpacer--s"
+      />
+    </EuiSpacer>
+  </div>
+</IntegrationHeader>
+`;
