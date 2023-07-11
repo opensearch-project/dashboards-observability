@@ -221,36 +221,51 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiIcon
+                              <EuiButtonIcon
+                                aria-label="Delete"
+                                color="danger"
                                 data-test-subj="deleteInstanceButton"
+                                iconType="trash"
                                 onClick={[Function]}
                                 size="l"
-                                type="trash"
                               >
-                                <EuiIconEmpty
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--large euiIcon-isLoading"
+                                <button
+                                  aria-label="Delete"
+                                  className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty"
                                   data-test-subj="deleteInstanceButton"
-                                  focusable="false"
+                                  disabled={false}
                                   onClick={[Function]}
-                                  role="img"
-                                  style={null}
+                                  type="button"
                                 >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--large euiIcon-isLoading"
-                                    data-test-subj="deleteInstanceButton"
-                                    focusable="false"
-                                    height={16}
-                                    onClick={[Function]}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
-                              </EuiIcon>
+                                  <EuiIcon
+                                    aria-hidden="true"
+                                    className="euiButtonIcon__icon"
+                                    color="inherit"
+                                    size="m"
+                                    type="trash"
+                                  >
+                                    <EuiIconEmpty
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                      focusable="false"
+                                      role="img"
+                                      style={null}
+                                    >
+                                      <svg
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        height={16}
+                                        role="img"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width={16}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                    </EuiIconEmpty>
+                                  </EuiIcon>
+                                </button>
+                              </EuiButtonIcon>
                             </div>
                           </EuiFlexItem>
                         </div>
