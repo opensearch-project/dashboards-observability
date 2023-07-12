@@ -5,14 +5,14 @@ exports[`Shared components Renders empty placeholder component 1`] = `
   icon={[Function]}
 >
   <EuiText
-    className="lnsChart__empty"
+    className="visWorkspaceNoData"
     color="subdued"
     data-test-subj="vizWorkspace__noData"
     size="xs"
     textAlign="center"
   >
     <div
-      className="euiText euiText--extraSmall lnsChart__empty"
+      className="euiText euiText--extraSmall visWorkspaceNoData"
       data-test-subj="vizWorkspace__noData"
     >
       <EuiTextAlign
