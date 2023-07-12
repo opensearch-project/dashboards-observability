@@ -13,30 +13,11 @@ import {
 } from '@elastic/eui';
 import hjson from 'hjson';
 import { find } from 'lodash';
-import Mustache from 'mustache';
 import { ENABLED_VIS_TYPES } from '../../../../../../common/constants/shared';
 import { getVisTypeData } from '../../../../visualizations/charts/helpers/viz_types';
 import { TabContext } from '../../../hooks';
 import { reset as resetVisualizationConfig } from '../../../redux/slices/viualization_config_slice';
 import { getDefaultSpec } from '../visualization_specs/default_spec';
-
-const CONFIG_LAYOUT_TEMPLATE = `
-{
-  "layout": {},
-  "config": {
-    "scrollZoom": {{config.scrollZoom}},
-    "editable": {{config.editable}},
-    "staticPlot": {{config.staticPlot}},
-    "displayModeBar": {{config.displayModeBar}},
-    "responsive": {{config.responsive}},
-    "doubleClickDelay": {{config.doubleClickDelay}}
-  }
-}
-`;
-
-const HJSON_PARSE_OPTIONS = {
-  keepWsc: true,
-};
 
 const HJSON_STRINGIFY_OPTIONS = {
   keepWsc: true,
@@ -80,14 +61,6 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
       callback(() => switchToAvailability());
     }
   }, [userConfigs, curVisId]);
-
-  const getParsedLayoutConfig = useCallback(
-    (hjsonConfig) =>
-      JSON.parse(
-        Mustache.render(CONFIG_LAYOUT_TEMPLATE, hjson.parse(hjsonConfig, HJSON_PARSE_OPTIONS))
-      ),
-    []
-  );
 
   const handleConfigUpdate = useCallback(
     (updatedConfigs) => {
@@ -194,7 +167,7 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
 
     return (
       <div className="configPanel__vizSelector-item">
-        <EuiIcon className="lnsChartSwitch__chartIcon" type={icontype} size="m" />
+        <EuiIcon className="visSwitcher" type={icontype} size="m" />
         &nbsp;&nbsp;
         <span>{label}</span>
       </div>
