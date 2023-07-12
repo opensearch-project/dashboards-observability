@@ -7,6 +7,7 @@ import './index.scss';
 import {
   EuiButtonIcon,
   EuiGlobalToastList,
+  EuiPanel,
   EuiPage,
   EuiPageBody,
   EuiResizableContainer,
@@ -187,17 +188,25 @@ export const Home = ({
                     setToast={setToast}
                     setSearch={setSearch}
                   />
-                  <div className="dscAppContainer">
-                    <EuiResizableContainer>
-                      {(EuiResizablePanel, EuiResizableButton) => (
-                        <>
-                          <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
-                            <Sidebar http={http} pplService={pplService} search={search} />
-                          </EuiResizablePanel>
+                  <EuiResizableContainer>
+                    {(EuiResizablePanel, EuiResizableButton) => (
+                      <>
+                        <EuiResizablePanel mode="collapsible" initialSize={20} minSize="20%">
+                          <Sidebar http={http} pplService={pplService} search={search} />
+                        </EuiResizablePanel>
+                        <EuiResizableButton />
+                        <EuiResizablePanel mode="collapsible" initialSize={20} minSize="20%">
+                          <EuiPanel class="mtConfig">SOME CONTENT</EuiPanel>
+                        </EuiResizablePanel>
+                        <EuiResizableButton />
 
-                          <EuiResizableButton />
-
-                          <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
+                        <EuiResizablePanel
+                          mode="main"
+                          initialSize={100}
+                          minSize="50px"
+                          scrollable={false}
+                        >
+                          <EuiPanel>
                             {selectedMetrics.length > 0 ? (
                               <MetricsGrid
                                 http={http}
@@ -217,11 +226,11 @@ export const Home = ({
                             ) : (
                               <EmptyMetricsView />
                             )}
-                          </EuiResizablePanel>
-                        </>
-                      )}
-                    </EuiResizableContainer>
-                  </div>
+                          </EuiPanel>
+                        </EuiResizablePanel>
+                      </>
+                    )}
+                  </EuiResizableContainer>
                 </EuiPageBody>
               </EuiPage>
             </div>

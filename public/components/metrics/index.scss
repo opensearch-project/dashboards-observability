@@ -17,4 +17,23 @@
 .mainContentTabs .euiResizableContainer {
   height: calc(100vh - 298px);
 }
-  
+
+.dscAppContainer {
+
+  // @include scrollNavParent;
+
+  display: grid;
+  grid-template-columns: 50% 50%;
+
+}
+
+.mtConfig {
+  @include euiYScrollWithShadows
+
+
+  background: $euiColorLightestShade;
+  border-left: $euiBorderThin;
+  position: relative;
+  overflow-x: hidden;
+
+}
