@@ -1,5 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+<<<<<<< HEAD
 exports[`Shared components Renders tool bar button component 1`] = `
 <ToolbarButton
   fontWeight="bold"
@@ -107,4 +108,92 @@ exports[`Shared components Renders tool bar button component 1`] = `
     </EuiButtonDisplay>
   </EuiButton>
 </ToolbarButton>
+=======
+exports[`Shared components Renders empty placeholder component 1`] = `
+<EmptyPlaceholder
+  icon={[Function]}
+>
+  <EuiText
+    className="vizChart__empty"
+    color="subdued"
+    size="xs"
+    textAlign="center"
+  >
+    <div
+      className="euiText euiText--extraSmall vizChart__empty"
+    >
+      <EuiTextAlign
+        textAlign="center"
+      >
+        <div
+          className="euiTextAlign euiTextAlign--center"
+        >
+          <EuiTextColor
+            color="subdued"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--subdued"
+            >
+              <EuiIcon
+                color="subdued"
+                size="l"
+                type={[Function]}
+              >
+                <LensIconChartBar
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--large euiIcon--subdued"
+                  focusable="false"
+                  role="img"
+                  style={null}
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--large euiIcon--subdued"
+                    fill="none"
+                    focusable="false"
+                    height={22}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 30 22"
+                    width={30}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      className="lensChartIcon__subdued"
+                      d="M5 7a1 1 0 011 1v13a1 1 0 01-1 1H1a1 1 0 01-1-1V8a1 1 0 011-1h4zm16-7a1 1 0 011 1v20a1 1 0 01-1 1h-4a1 1 0 01-1-1V1a1 1 0 011-1h4z"
+                    />
+                    <path
+                      className="lensChartIcon__accent"
+                      d="M13 11a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1v-9a1 1 0 011-1h4zm16-7a1 1 0 011 1v16a1 1 0 01-1 1h-4a1 1 0 01-1-1V5a1 1 0 011-1h4z"
+                    />
+                  </svg>
+                </LensIconChartBar>
+              </EuiIcon>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <p>
+                <FormattedMessage
+                  defaultMessage="No results found"
+                  id="viz.xyVisualization.noDataLabel"
+                  values={Object {}}
+                >
+                  <span>
+                    No results found
+                  </span>
+                </FormattedMessage>
+              </p>
+            </div>
+          </EuiTextColor>
+        </div>
+      </EuiTextAlign>
+    </div>
+  </EuiText>
+</EmptyPlaceholder>
+>>>>>>> 3fc6a67e (remove unused files)
 `;
