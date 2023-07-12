@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiPage, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
 
 export interface FrameLayoutProps {
-  dataPanel: React.ReactNode;
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
@@ -17,12 +16,12 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
-    <EuiPage className="lnsFrameLayout">
-      <div className="lnsFrameLayout__pageContent">
-        <EuiPageBody className="lnsFrameLayout__pageBody" restrictWidth={false}>
+    <EuiPage className="vizFrameLayout">
+      <div className="vizFrameLayout__pageContent">
+        <EuiPageBody className="vizFrameLayout__pageBody" restrictWidth={false}>
           {props.workspacePanel}
         </EuiPageBody>
-        <EuiPageBody className="lnsFrameLayout__pageBody" restrictWidth={false}>
+        <EuiPageBody className="vizFrameLayout__pageBody" restrictWidth={false}>
           {props.configPanel}
         </EuiPageBody>
       </div>
