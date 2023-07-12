@@ -190,7 +190,7 @@ export const ConfigPanel = ({ visualizations, setCurVisId, callback }: any) => {
 
     return (
       <div className="configPanel__vizSelector-item">
-        <EuiIcon className="lnsChartSwitch__chartIcon" type={iconType} size="m" />
+        <EuiIcon className="vizChartSwitch__chartIcon" type={iconType} size="m" />
         &nbsp;&nbsp;
         <span>{label}</span>
       </div>
