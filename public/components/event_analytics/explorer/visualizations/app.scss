@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.lnsAppWrapper {
+.vizAppWrapper {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
-.lnsApp {
+.vizApp {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -21,11 +21,11 @@
   overflow: hidden;
 }
 
-.lnsApp__header {
+.vizApp__header {
   border-bottom: $euiBorderThin;
 }
 
-.lnsApp__frame {
+.vizApp__frame {
   position: relative;
   display: flex;
   flex-direction: column;
