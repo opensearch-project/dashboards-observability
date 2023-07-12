@@ -539,14 +539,14 @@ exports[`Gauge component Renders gauge component 1`] = `
     icon="visGauge"
   >
     <EuiText
-      className="lnsChart__empty"
+      className="visWorkspaceNoData"
       color="subdued"
       data-test-subj="vizWorkspace__noData"
       size="xs"
       textAlign="center"
     >
       <div
-        className="euiText euiText--extraSmall lnsChart__empty"
+        className="euiText euiText--extraSmall visWorkspaceNoData"
         data-test-subj="vizWorkspace__noData"
       >
         <EuiTextAlign
