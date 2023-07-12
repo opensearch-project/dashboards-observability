@@ -3,13 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OPENSEARCH_PANELS_API } from "../../common/constants/shared";
+import { OPENSEARCH_PANELS_API } from '../../common/constants/shared';
 
-export function OpenSearchObservabilityPlugin(
-  Client: any,
-  config: any,
-  components: any
-) {
+export function OpenSearchObservabilityPlugin(Client: any, config: any, components: any) {
   const clientAction = components.clientAction.factory;
 
   Client.prototype.observability = components.clientAction.namespaceFactory();
@@ -21,38 +17,38 @@ export function OpenSearchObservabilityPlugin(
       fmt: OPENSEARCH_PANELS_API.OBJECT,
       params: {
         objectId: {
-          type: "string",
+          type: 'string',
         },
         objectIdList: {
-          type: "string",
+          type: 'string',
         },
         objectType: {
-          type: "string",
+          type: 'string',
         },
         sortField: {
-          type: "string",
+          type: 'string',
         },
         sortOrder: {
-          type: "string",
+          type: 'string',
         },
         fromIndex: {
-          type: "number",
+          type: 'number',
         },
         maxItems: {
-          type: "number",
+          type: 'number',
         },
         name: {
-          type: "string",
+          type: 'string',
         },
         lastUpdatedTimeMs: {
-          type: "string",
+          type: 'string',
         },
         createdTimeMs: {
-          type: "string",
+          type: 'string',
         },
       },
     },
-    method: "GET",
+    method: 'GET',
   });
 
   // Get Object by Id
@@ -61,12 +57,12 @@ export function OpenSearchObservabilityPlugin(
       fmt: `${OPENSEARCH_PANELS_API.OBJECT}/<%=objectId%>`,
       req: {
         objectId: {
-          type: "string",
+          type: 'string',
           required: true,
         },
       },
     },
-    method: "GET",
+    method: 'GET',
   });
 
   // Create new Object
@@ -74,7 +70,7 @@ export function OpenSearchObservabilityPlugin(
     url: {
       fmt: OPENSEARCH_PANELS_API.OBJECT,
     },
-    method: "POST",
+    method: 'POST',
     needBody: true,
   });
 
@@ -84,12 +80,12 @@ export function OpenSearchObservabilityPlugin(
       fmt: `${OPENSEARCH_PANELS_API.OBJECT}/<%=objectId%>`,
       req: {
         objectId: {
-          type: "string",
+          type: 'string',
           required: true,
         },
       },
     },
-    method: "PUT",
+    method: 'PUT',
     needBody: true,
   });
 
@@ -99,12 +95,12 @@ export function OpenSearchObservabilityPlugin(
       fmt: `${OPENSEARCH_PANELS_API.OBJECT}/<%=objectId%>`,
       req: {
         objectId: {
-          type: "string",
+          type: 'string',
           required: true,
         },
       },
     },
-    method: "DELETE",
+    method: 'DELETE',
   });
 
   // Delete Object by Id List
@@ -113,11 +109,11 @@ export function OpenSearchObservabilityPlugin(
       fmt: OPENSEARCH_PANELS_API.OBJECT,
       params: {
         objectIdList: {
-          type: "string",
+          type: 'string',
           required: true,
         },
       },
     },
-    method: "DELETE",
+    method: 'DELETE',
   });
 }

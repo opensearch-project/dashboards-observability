@@ -13,6 +13,7 @@ export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
+export const INTEGRATIONS_BASE = '/api/integrations';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -51,6 +52,10 @@ export const observabilityPanelsID = 'observability-dashboards';
 export const observabilityPanelsTitle = 'Dashboards';
 export const observabilityPanelsPluginOrder = 5095;
 
+export const observabilityIntegrationsID = 'integrations';
+export const observabilityIntegrationsTitle = 'Integrations';
+export const observabilityIntegrationsPluginOrder = 9020;
+
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
@@ -69,6 +74,7 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
+const BASE_INTEGRATIONS_URI = '/_plugins/_integrations'; // Used later in front-end for routing
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };

@@ -469,6 +469,11 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || _.isEmpty(metaData)) {
     return <></>;
   }
+
+  if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
+    metaData.user_configs = JSON.parse(metaData.user_configs);
+  }
+
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
