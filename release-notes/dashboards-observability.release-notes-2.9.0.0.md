@@ -12,4 +12,4 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.9.0
 
 ## Refactoring
 - Replace metrics panel-separator with ResizableContainer ([#602](https://github.com/opensearch-project/dashboards-observability/pull/602))
-- Remove deprecated layout editor ([#627](https://github.com/opensearch-project/dashboards-observability/pull/627))
+- Remove deprecated layout editor ([#646](https://github.com/opensearch-project/dashboards-observability/pull/646))
