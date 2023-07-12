@@ -10,9 +10,9 @@ import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,
-  left: 'lnsToolbarButton--groupLeft',
-  center: 'lnsToolbarButton--groupCenter',
-  right: 'lnsToolbarButton--groupRight',
+  left: 'vizToolbarButton--groupLeft',
+  center: 'vizToolbarButton--groupCenter',
+  right: 'vizToolbarButton--groupRight',
 };
 
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
@@ -46,9 +46,9 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   ...rest
 }) => {
   const classes = classNames(
-    'lnsToolbarButton',
+    'vizToolbarButton',
     groupPositionToClassMap[groupPosition],
-    [`lnsToolbarButton--${fontWeight}`, `lnsToolbarButton--${size}`],
+    [`vizToolbarButton--${fontWeight}`, `vizToolbarButton--${size}`],
     className
   );
   return (
@@ -59,10 +59,10 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
-        className: 'lnsToolbarButton__content',
+        className: 'vizToolbarButton__content',
       }}
       textProps={{
-        className: 'lnsToolbarButton__text',
+        className: 'vizToolbarButton__text',
       }}
       {...rest}
       size={size}
