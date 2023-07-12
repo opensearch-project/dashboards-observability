@@ -1,5 +1,4 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
-
 exports[`Shared components Renders tool bar button component 1`] = `
 <Component
   fontWeight="bold"
