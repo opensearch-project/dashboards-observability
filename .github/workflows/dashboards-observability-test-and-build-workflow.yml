@@ -11,7 +11,7 @@ env:
 jobs:
 
   build:
-    strategy: 
+    strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -61,6 +61,11 @@ jobs:
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
           yarn test --coverage
+
+      - name: Run Stylelint
+        run: |
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn lint:style
 
       - name: Upload coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
