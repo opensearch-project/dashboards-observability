@@ -26,6 +26,11 @@ exports[`Histogram component Renders histogram component 1`] = `
           "fromApp": false,
         },
         "defaultAxes": Object {},
+        "explorer": Object {
+          "explorerData": Object {
+            "jsonData": Array [],
+          },
+        },
         "indexFields": Object {
           "availableFields": Array [
             Object {

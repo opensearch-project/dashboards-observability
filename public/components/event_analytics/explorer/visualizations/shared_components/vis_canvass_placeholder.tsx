@@ -10,7 +10,7 @@ import './empty_placeholder.scss';
 export const VisCanvassPlaceholder = (props: { message: string; icon: string }) => (
   <>
     <EuiText
-      className="lnsChart__empty"
+      className="vizChart__empty"
       textAlign="center"
       color="subdued"
       size="xs"

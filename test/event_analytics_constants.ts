@@ -522,6 +522,11 @@ export const VALUE_OPTIONS = {
 
 export const TEST_VISUALIZATIONS_DATA = {
   data: {
+    explorer: {
+      explorerData: {
+        jsonData: []
+      }
+    },
     appData: { fromApp: false },
     defaultAxes: {},
     indexFields: EXPLORER_FIELDS,
