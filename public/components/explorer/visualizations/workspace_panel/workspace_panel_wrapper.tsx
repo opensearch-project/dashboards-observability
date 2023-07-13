@@ -42,7 +42,7 @@ export function WorkspacePanelWrapper({
         </EuiFlexItem>
         <EuiFlexItem grow={3}/>
       </EuiFlexGroup>
-      <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+      <EuiPageContentBody className="vizWorkspacePanelWrapper__pageContentBody">
         {children}
       </EuiPageContentBody>
     </>

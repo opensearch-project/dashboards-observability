@@ -17,9 +17,9 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
-    <EuiPage className="lnsFrameLayout">
-      <div className="lnsFrameLayout__pageContent">
-        <EuiPageBody className="lnsFrameLayout__pageBody" restrictWidth={false}>
+    <EuiPage className="vizFrameLayout">
+      <div className="vizFrameLayout__pageContent">
+        <EuiPageBody className="vizFrameLayout__pageBody" restrictWidth={false}>
           {props.workspacePanel}
         </EuiPageBody>
       </div>
