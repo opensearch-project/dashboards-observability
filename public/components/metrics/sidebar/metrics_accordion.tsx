@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiTitle, OuiFacetButton, OuiIcon, OuiToken } from '@elastic/eui';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {

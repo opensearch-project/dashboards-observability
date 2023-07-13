@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
+// import './index.scss';
 import {
   EuiButtonIcon,
   EuiGlobalToastList,
@@ -33,6 +33,7 @@ import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/m
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import { observabilityLogsID } from '../../../common/constants/shared';
+import { SelectedPanel } from './sidebar/selected_panel';
 
 interface MetricsProps {
   http: CoreStart['http'];
@@ -200,37 +201,37 @@ export const Home = ({
                         </EuiResizablePanel>
                         <EuiResizableButton />
 
-                        <EuiResizablePanel
-                          mode="main"
-                          initialSize={100}
-                          minSize="50px"
-                          scrollable={false}
-                        >
-                          <EuiPanel>
-                            {selectedMetrics.length > 0 ? (
-                              <MetricsGrid
-                                http={http}
-                                chrome={chrome}
-                                panelVisualizations={panelVisualizations}
-                                setPanelVisualizations={setPanelVisualizations}
-                                editMode={editMode}
-                                pplService={pplService}
-                                startTime={startTime}
-                                endTime={endTime}
-                                moveToEvents={onEditClick}
-                                onRefresh={onRefresh}
-                                editActionType={editActionType}
-                                setEditActionType={setEditActionType}
-                                spanParam={spanValue + resolutionValue}
-                              />
-                            ) : (
-                              <EmptyMetricsView />
-                            )}
-                          </EuiPanel>
-                        </EuiResizablePanel>
-                      </>
-                    )}
-                  </EuiResizableContainer>
+                          <EuiResizablePanel
+                            mode="main"
+                            initialSize={100}
+                            minSize="50px"
+                            scrollable={false}
+                          >
+                            <EuiPanel>
+                              {selectedMetrics.length > 0 ? (
+                                <MetricsGrid
+                                  http={http}
+                                  chrome={chrome}
+                                  panelVisualizations={panelVisualizations}
+                                  setPanelVisualizations={setPanelVisualizations}
+                                  editMode={editMode}
+                                  pplService={pplService}
+                                  startTime={startTime}
+                                  endTime={endTime}
+                                  moveToEvents={onEditClick}
+                                  onRefresh={onRefresh}
+                                  editActionType={editActionType}
+                                  setEditActionType={setEditActionType}
+                                  spanParam={spanValue + resolutionValue}
+                                />
+                              ) : (
+                                <EmptyMetricsView />
+                              )}
+                            </EuiPanel>
+                          </EuiResizablePanel>
+                        </>
+                      )}
+                    </EuiResizableContainer>
                 </EuiPageBody>
               </EuiPage>
             </div>

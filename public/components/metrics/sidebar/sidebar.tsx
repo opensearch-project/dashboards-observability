@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './sidebar.scss';
+// import './sidebar.scss';
 
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';

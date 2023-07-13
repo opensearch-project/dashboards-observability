@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
+// import './index.scss';
 
 import { i18n } from '@osd/i18n';
 import {
