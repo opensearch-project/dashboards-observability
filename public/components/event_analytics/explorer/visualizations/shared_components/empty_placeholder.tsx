@@ -11,7 +11,7 @@ import './empty_placeholder.scss';
 export const EmptyPlaceholder = (props: { icon: string }) => (
   <>
     <EuiText
-      className="lnsChart__empty"
+      className="vizChart__empty"
       textAlign="center"
       color="subdued"
       size="xs"
