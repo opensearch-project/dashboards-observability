@@ -1,0 +1,18 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import 'home/home';
+@import 'explorer/log_explorer';
+@import 'explorer/explorer';
+@import 'explorer/sidebar/sidebar';
+@import 'explorer/events_views/data_grid';
+@import 'explorer/events_views/docView';
+@import 'explorer/visualizations/config_panel/config_panel';
+@import 'explorer/visualizations/config_panel/config_panes/config_controls/data_configurations_panel';
+@import 'explorer/visualizations/visualizations';
+@import 'explorer/visualizations/shared_components/empty_placeholder';
+@import 'explorer/visualizations/shared_components/plotly_viz_editor/plotly_editor';
+@import 'explorer/visualizations/shared_components/plotly_viz_editor/plotly_vis';
+@import 'explorer/visualizations/workspace_panel/workspace_panel';
