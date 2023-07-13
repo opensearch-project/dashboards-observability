@@ -6,11 +6,11 @@ exports[`Shared components Renders tool bar button component 1`] = `
   onClick={[MockFunction]}
 >
   <EuiButton
-    className="lnsToolbarButton lnsToolbarButton--bold lnsToolbarButton--s"
+    className="vizToolbarButton vizToolbarButton--bold vizToolbarButton--s"
     color="text"
     contentProps={
       Object {
-        "className": "lnsToolbarButton__content",
+        "className": "vizToolbarButton__content",
       }
     }
     data-test-subj=""
@@ -20,17 +20,16 @@ exports[`Shared components Renders tool bar button component 1`] = `
     size="s"
     textProps={
       Object {
-        "className": "lnsToolbarButton__text",
+        "className": "vizToolbarButton__text",
       }
     }
   >
     <EuiButtonDisplay
-      baseClassName="euiButton"
-      className="lnsToolbarButton lnsToolbarButton--bold lnsToolbarButton--s"
+      className="vizToolbarButton vizToolbarButton--bold vizToolbarButton--s"
       color="text"
       contentProps={
         Object {
-          "className": "lnsToolbarButton__content",
+          "className": "vizToolbarButton__content",
         }
       }
       data-test-subj=""
@@ -43,52 +42,46 @@ exports[`Shared components Renders tool bar button component 1`] = `
       size="s"
       textProps={
         Object {
-          "className": "lnsToolbarButton__text",
+          "className": "vizToolbarButton__text",
         }
       }
       type="button"
     >
       <button
-        className="euiButton euiButton--text euiButton--small lnsToolbarButton lnsToolbarButton--bold lnsToolbarButton--s"
+        className="euiButton euiButton--text euiButton--small vizToolbarButton vizToolbarButton--bold vizToolbarButton--s"
         data-test-subj=""
         disabled={false}
         onClick={[MockFunction]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
         type="button"
       >
         <EuiButtonContent
-          className="euiButton__content lnsToolbarButton__content"
+          className="euiButton__content vizToolbarButton__content"
           iconSide="right"
           iconType="arrowDown"
           textProps={
             Object {
-              "className": "euiButton__text lnsToolbarButton__text",
+              "className": "euiButton__text vizToolbarButton__text",
             }
           }
         >
           <span
-            className="euiButtonContent euiButtonContent--iconRight euiButton__content lnsToolbarButton__content"
+            className="euiButtonContent euiButtonContent--iconRight euiButton__content vizToolbarButton__content"
           >
             <EuiIcon
               className="euiButtonContent__icon"
-              color="inherit"
               size="m"
               type="arrowDown"
             >
               <EuiIconEmpty
                 aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonContent__icon"
                 focusable="false"
                 role="img"
                 style={null}
               >
                 <svg
                   aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonContent__icon"
                   focusable="false"
                   height={16}
                   role="img"
@@ -100,7 +93,7 @@ exports[`Shared components Renders tool bar button component 1`] = `
               </EuiIconEmpty>
             </EuiIcon>
             <span
-              className="euiButton__text lnsToolbarButton__text"
+              className="euiButton__text vizToolbarButton__text"
             >
               <WrappedComponent>
                 <div>
