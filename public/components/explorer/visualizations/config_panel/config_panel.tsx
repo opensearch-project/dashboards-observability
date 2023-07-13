@@ -41,7 +41,7 @@ function LayerPanels(props: any) {
       panelItems
     } = props;
     return (
-      <EuiForm className="lnsConfigPanel">
+      <EuiForm className="vizConfigPanel">
         { panelItems.map((item) => {
           return (
             <section

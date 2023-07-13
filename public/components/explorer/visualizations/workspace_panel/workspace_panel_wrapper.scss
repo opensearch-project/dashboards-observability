@@ -5,7 +5,7 @@
 
 @import '../mixins';
 
-.lnsWorkspacePanelWrapper {
+.vizWorkspacePanelWrapper {
   @include euiScrollBar;
   overflow: hidden;
   margin-bottom: $euiSize;
@@ -14,16 +14,16 @@
   position: relative; // For positioning the dnd overlay
   min-height: 50vh;
 
-  .lnsWorkspacePanelWrapper__pageContentHeader {
+  .vizWorkspacePanelWrapper__pageContentHeader {
     @include euiTitle('xs');
     padding: $euiSizeM;
   }
 
-  .lnsWorkspacePanelWrapper__pageContentHeader--unsaved {
+  .vizWorkspacePanelWrapper__pageContentHeader--unsaved {
     color: $euiTextSubduedColor;
   }
 
-  .lnsWorkspacePanelWrapper__pageContentBody {
+  .vizWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
     flex-grow: 1;
     display: flex;
@@ -41,22 +41,22 @@
   }
 }
 
-.lnsWorkspacePanel__dragDrop {
+.vizWorkspacePanel__dragDrop {
   // Disable the coloring of the DnD for this element as we'll
   // Color the whole panel instead
   background-color: transparent !important; // sass-lint:disable-line no-important
   border: none !important; // sass-lint:disable-line no-important
 }
 
-.lnsExpressionRenderer {
-  .lnsDragDrop-isDropTarget & {
+.vizExpressionRenderer {
+  .vizDragDrop-isDropTarget & {
     transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
     filter: blur($euiSizeXS);
     opacity: .25;
   }
 }
 
-.lnsWorkspacePanel__emptyContent {
+.vizWorkspacePanel__emptyContent {
   position: absolute;
   left: 0;
   right: 0;
@@ -67,9 +67,9 @@
   align-items: center;
   transition: background-color $euiAnimSpeedFast ease-in-out;
 
-  .lnsDragDrop-isDropTarget & {
-    @include lnsDroppable;
-    @include lnsDroppableActive;
+  .vizDragDrop-isDropTarget & {
+    @include vizDroppable;
+    @include vizDroppableActive;
 
     p {
       transition: filter $euiAnimSpeedFast ease-in-out;
@@ -77,24 +77,24 @@
     }
   }
 
-  .lnsDragDrop-isActiveDropTarget & {
-    @include lnsDroppableActiveHover;
+  .vizDragDrop-isActiveDropTarget & {
+    @include vizDroppableActiveHover;
 
-    .lnsDropIllustration__hand {
-      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
+    .vizDropIllustration__hand {
+      animation: vizWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
   }
 }
 
-.lnsWorkspacePanelWrapper__toolbar {
+.vizWorkspacePanelWrapper__toolbar {
   margin-bottom: 0;
 }
 
-.lnsDropIllustration__adjustFill {
+.vizDropIllustration__adjustFill {
   fill: $euiColorFullShade;
 }
 
-.lnsWorkspacePanel__dropIllustration {
+.vizWorkspacePanel__dropIllustration {
   overflow: visible; // Shows arrow animation when it gets out of bounds
   margin-top: $euiSizeL;
   margin-bottom: $euiSizeXXL;
@@ -107,11 +107,11 @@
     drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
 }
 
-.lnsDropIllustration__hand {
-  animation: lnsWorkspacePanel__illustrationPulseArrow 5s ease-in-out 0s infinite normal forwards;
+.vizDropIllustration__hand {
+  animation: vizWorkspacePanel__illustrationPulseArrow 5s ease-in-out 0s infinite normal forwards;
 }
 
-@keyframes lnsWorkspacePanel__illustrationPulseArrow {
+@keyframes vizWorkspacePanel__illustrationPulseArrow {
   0% { transform: translateY(0%); }
   65% { transform: translateY(0%); }
   72% { transform: translateY(10%); }
@@ -120,7 +120,7 @@
   95% { transform: translateY(0); }
 }
 
-@keyframes lnsWorkspacePanel__illustrationPulseContinuous {
+@keyframes vizWorkspacePanel__illustrationPulseContinuous {
   0% { transform: translateY(10%); }
   25% { transform: translateY(15%); }
   50% { transform: translateY(10%); }
