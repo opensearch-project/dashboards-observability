@@ -531,14 +531,14 @@ exports[`Heatmap component Renders heatmap component 1`] = `
     message="Invalid data, heatmap can only have exact 2 dimensions and 1 series"
   >
     <EuiText
-      className="lnsChart__empty"
+      className="vizChart__empty"
       color="subdued"
       data-test-subj="vizWorkspace__noData"
       size="xs"
       textAlign="center"
     >
       <div
-        className="euiText euiText--extraSmall lnsChart__empty"
+        className="euiText euiText--extraSmall vizChart__empty"
         data-test-subj="vizWorkspace__noData"
       >
         <EuiTextAlign
