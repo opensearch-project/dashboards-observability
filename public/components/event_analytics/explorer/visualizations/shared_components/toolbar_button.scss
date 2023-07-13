@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.lnsToolbarButton {
+.vizToolbarButton {
   line-height: $euiButtonHeight; // Keeps alignment of text and chart icon
   background-color: $euiColorEmptyShade;
 
@@ -20,11 +20,11 @@
     pointer-events: initial;
   }
 
-  .lnsToolbarButton__text > svg {
+  .vizToolbarButton__text > svg {
     margin-top: -1px; // Just some weird alignment issue when icon is the child not the `iconType`
   }
 
-  .lnsToolbarButton__text:empty {
+  .vizToolbarButton__text:empty {
     margin: 0;
   }
 
@@ -32,34 +32,34 @@
   &[class*='fullWidth'] {
     text-align: left;
 
-    .lnsToolbarButton__content {
+    .vizToolbarButton__content {
       justify-content: space-between;
     }
   }
 
 }
 
-.lnsToolbarButton--groupLeft {
+.vizToolbarButton--groupLeft {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.lnsToolbarButton--groupCenter {
+.vizToolbarButton--groupCenter {
   border-radius: 0;
   border-left: none;
 }
 
-.lnsToolbarButton--groupRight {
+.vizToolbarButton--groupRight {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: none;
 }
 
-.lnsToolbarButton--bold {
+.vizToolbarButton--bold {
   font-weight: $euiFontWeightBold;
 }
 
-.lnsToolbarButton--s {
+.vizToolbarButton--s {
   box-shadow: none !important; // sass-lint:disable-line no-important
   font-size: $euiFontSizeS;
 }
