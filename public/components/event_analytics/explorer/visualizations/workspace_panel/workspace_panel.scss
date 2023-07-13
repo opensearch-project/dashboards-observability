@@ -10,9 +10,11 @@
 .ws__workspace_visPanel {
   grid-gap: 12px;
   padding: 12px;
+
   .workspace_visPanel {
     height: 40px;
     width: 140px;
+
     .ws__workspace_visPanelFlexitem {
       display: block;
     }
@@ -20,7 +22,7 @@
 }
 
 #vis__mainContent .ws__central--canvas {
-  border-right: 1px solid #D3DAE6;
+  border-right: 1px solid #d3dae6;
 }
 
 .explorer-dark #vis__mainContent .ws__central--canvas {

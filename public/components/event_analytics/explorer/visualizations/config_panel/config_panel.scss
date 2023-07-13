@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-//
 // LAYOUT
-//
 
 $vis-editor-sidebar-min-width: 350px;
 
@@ -20,11 +18,13 @@ $vis-editor-sidebar-min-width: 350px;
 
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
+
   max-width: 100%;
 }
 
 .visEditorSidebar__config {
   @include euiYScrollWithShadows;
+
   padding: $euiSizeS;
   overflow-y: auto;
   height: calc(100vh - 398px);
@@ -34,9 +34,7 @@ $vis-editor-sidebar-min-width: 350px;
   display: none;
 }
 
-//
 // NAVIGATION
-//
 
 .visEditorSidebar__titleContainer {
   padding: $euiSizeS $euiSizeXL $euiSizeS $euiSizeS; // Extra padding on the right for the collapse button
@@ -52,9 +50,7 @@ $vis-editor-sidebar-min-width: 350px;
   flex-grow: 0;
 }
 
-//
 // SECTIONS
-//
 
 .visEditorSidebar__section {
   background-color: $euiColorEmptyShade;
@@ -76,9 +72,7 @@ $vis-editor-sidebar-min-width: 350px;
   margin-bottom: $euiSizeM;
 }
 
-//
 // FORMS
-//
 
 .visEditorSidebar__formRow {
   display: flex;
@@ -123,20 +117,22 @@ $vis-editor-sidebar-min-width: 350px;
   max-height: 250px;
 }
 
-.euiComboBoxOptionsList__rowWrap>div {
+.euiComboBoxOptionsList__rowWrap > div {
   height: 250px !important;
 }
 
 .cp__rightContainer {
   display: grid;
-  
-  .cp__rightHeader, .cp__rightSettings {
+
+  .cp__rightHeader,
+  .cp__rightSettings {
     padding: 8px;
     background-color: transparent;
   }
 
   .cp__rightHeader {
-    border-bottom: 1px solid #D3DAE6;
+    border-bottom: 1px solid #d3dae6;
+
     .euiBadge {
       background: transparent;
       border: none;
@@ -181,7 +177,7 @@ $vis-editor-sidebar-min-width: 350px;
   display: block;
 }
 
-.panel_title:first-letter {
+.panel_title::first-letter {
   text-transform: uppercase;
 }
 
@@ -191,7 +187,8 @@ $vis-editor-sidebar-min-width: 350px;
 
 // dark mode
 .explorer-dark {
-  .panel_section, .cp__rightHeader {
+  .panel_section,
+  .cp__rightHeader {
     border-bottom: 1px solid $border-color-on-dark;
   }
 }

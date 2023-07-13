@@ -19,7 +19,8 @@
 }
 
 .dscIndexPattern__triggerButton {
-  @include euiTitle('xs');
+  @include euiTitle("xs");
+
   line-height: $euiSizeXXL;
 }
 
@@ -39,7 +40,7 @@
 
 .dscFieldChooser__toggle {
   color: $euiColorMediumShade;
-  margin-left: $euiSizeS  !important;
+  margin-left: $euiSizeS !important;
 }
 
 /**
@@ -48,11 +49,13 @@
  */
 .dscSidebarItem__action {
   opacity: 0;
+
   /* 1 */
   transition: none;
 
   &:focus {
     opacity: 1;
+
     /* 2 */
   }
 
@@ -106,7 +109,8 @@
 }
 
 #vis__mainContent {
-  .explorer__insights, .explorer__configPanel-markdown {
+  .explorer__insights,
+  .explorer__configPanel-markdown {
     .explorerFieldSelector,
     .explorer__vizDataConfig {
       padding: $euiSizeS;
