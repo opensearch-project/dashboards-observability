@@ -13,6 +13,7 @@ import {
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../../src/core/server/http/router';
+import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
 
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
@@ -53,8 +54,7 @@ const getAdaptor = (
   context: RequestHandlerContext,
   _request: OpenSearchDashboardsRequest
 ): IntegrationsAdaptor => {
-  // Stub
-  return {} as IntegrationsAdaptor;
+  return new IntegrationsKibanaBackend(context.core.savedObjects.client);
 };
 
 export function registerIntegrationsRoute(router: IRouter) {
