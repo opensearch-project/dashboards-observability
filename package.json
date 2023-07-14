@@ -9,7 +9,17 @@
     "test": "../../node_modules/.bin/jest --config ./test/jest.config.js",
     "cypress:run": "TZ=America/Los_Angeles cypress run",
     "cypress:open": "TZ=America/Los_Angeles cypress open",
-    "plugin_helpers": "node ../../scripts/plugin_helpers"
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "prepare": "husky install",
+    "lint:es": "node ../../scripts/eslint",
+    "lint": "yarn lint:es",
+    "cypress:parallel": "cypress-parallel -s cypress:run -t 2 -d .cypress/integration"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "yarn lint --fix",
+      "git add"
+    ]
   },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.4.1",
@@ -22,6 +32,8 @@
     "ajv": "^8.11.0",
     "antlr4": "4.8.0",
     "antlr4ts": "^0.5.0-alpha.4",
+    "cypress-multi-reporters": "^1.6.3",
+    "cypress-parallel": "^0.13.0",
     "mime": "^3.0.0",
     "performance-now": "^2.1.0",
     "plotly.js-dist": "^2.2.0",
