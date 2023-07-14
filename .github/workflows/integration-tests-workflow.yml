@@ -33,11 +33,6 @@ jobs:
           distribution: 'corretto'
           java-version: '11'
 
-      - name: Download job scheduler artifact 
-        uses: peternied/download-file@v2
-        with:
-          url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-job-scheduler-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
-
       - name: Download observability artifact
         uses: peternied/download-file@v2
         with:
@@ -57,12 +52,6 @@ jobs:
         run: |
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
-        shell: bash
-
-      - name: Install job scheduler plugin
-        run: |
-          chmod +x ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin
-          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/opensearch-job-scheduler-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
         shell: bash
 
       - name: Install observability plugin
