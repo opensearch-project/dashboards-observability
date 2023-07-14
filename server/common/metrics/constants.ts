@@ -21,6 +21,7 @@ export const COMPONENTS = {
   notebooks: [...commonRequests, 'run_sql_query', 'run_ppl_query', 'fetch_visualization'],
   trace_analytics: commonRequests,
   metrics_analytics: commonRequests,
+  integrations: commonRequests,
 } as const;
 
 export const GLOBAL_BASIC_COUNTER: CounterType = (() => {
