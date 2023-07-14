@@ -7,7 +7,9 @@ export {
   getIndexPatternFromRawQuery,
   preprocessQuery,
   buildQuery,
+  buildRawQuery,
   composeFinalQuery,
   removeBacktick,
 } from './query_utils';
-export { uiSettingsService } from './settings_service';
+
+export * from './core_services';

@@ -191,10 +191,7 @@ export const handleJaegerDashboardRequest = async (
       return map;
     })
     .catch((error) => {
-      console.log("error here")
-      console.error(error)
-      
-      setToast('hello')
+      console.error(error);
     });
 
   await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode, true, setShowTimeoutToast)

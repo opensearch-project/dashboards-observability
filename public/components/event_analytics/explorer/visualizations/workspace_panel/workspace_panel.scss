@@ -7,13 +7,13 @@
   background-color: transparent;
 }
 
-.ws__visCanvas {
+.ws__workspace_visPanel {
   grid-gap: 12px;
   padding: 12px;
-  .ws__visCanvasControl {
+  .workspace_visPanel {
     height: 40px;
     width: 140px;
-    .ws__visCanvasFlexitem {
+    .ws__workspace_visPanelFlexitem {
       display: block;
     }
   }

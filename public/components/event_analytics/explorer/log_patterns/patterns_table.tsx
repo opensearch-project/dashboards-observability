@@ -11,19 +11,17 @@ import {
   EuiText,
   SortDirection,
 } from '@elastic/eui';
-import { PatternTableData } from 'common/types/explorer';
+import { IQuery, PatternTableData } from 'common/types/explorer';
 import { round } from 'lodash';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { FILTERED_PATTERN } from '../../../../../common/constants/explorer';
 import { PPL_DOCUMENTATION_URL } from '../../../../../common/constants/shared';
-import { selectPatterns } from '../../redux/slices/patterns_slice';
 
 interface PatternsTableProps {
   tableData: PatternTableData[];
-  onPatternSelection: any;
+  onPatternSelection: (pattern: string) => void;
   tabId: string;
-  query: any;
+  query: IQuery;
   isPatternLoading: boolean;
 }
 

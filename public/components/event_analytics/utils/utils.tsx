@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import dateMath from '@elastic/datemath';
 import { uniqueId, isEmpty } from 'lodash';
 import moment from 'moment';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { HttpStart } from '../../../../../../src/core/public';
 import {
   CUSTOM_LABEL,
@@ -22,6 +22,7 @@ import {
   GetTooltipHoverInfoType,
   IExplorerFields,
   IField,
+  IQuery,
 } from '../../../../common/types/explorer';
 import PPLService from '../../../services/requests/ppl';
 import { DocViewRow, IDocType } from '../explorer/events_views';
@@ -39,7 +40,7 @@ export const getTrs = (
   explorerFields: IField[],
   limit: number,
   setLimit: React.Dispatch<React.SetStateAction<number>>,
-  PAGE_SIZE: number,
+  pageSize: number,
   timeStampField: any,
   explorerFieldsFull: IExplorerFields,
   pplService: PPLService,
@@ -65,10 +66,10 @@ export const getTrs = (
   if (prevTrs.length >= docs.length) return prevTrs;
 
   // reset limit if no previous table rows
-  if (prevTrs.length === 0 && limit !== PAGE_SIZE) setLimit(PAGE_SIZE);
+  if (prevTrs.length === 0 && limit !== pageSize) setLimit(pageSize);
   const trs = prevTrs.slice();
 
-  const upperLimit = Math.min(trs.length === 0 ? PAGE_SIZE : limit, docs.length);
+  const upperLimit = Math.min(trs.length === 0 ? pageSize : limit, docs.length);
   const tempRefs = rowRefs;
   for (let i = trs.length; i < upperLimit; i++) {
     const docId = uniqueId('doc_view');
@@ -228,7 +229,7 @@ export const fetchSurroundingData = async (
   await pplService
     .fetch({ query: finalQuery, format: 'jdbc' })
     .then((res) => {
-      const resuleData = typeOfDocs == 'new' ? res.jsonData.reverse() : res.jsonData;
+      const resuleData = typeOfDocs === 'new' ? res.jsonData.reverse() : res.jsonData;
       resultCount = resuleData.length;
       setEventsData(createTds(resuleData, selectedCols, getTds));
     })
@@ -407,7 +408,7 @@ export const getDefaultVisConfig = (statsToken: statsChunk) => {
 
 const getSpanValue = (groupByToken: GroupByChunk) => {
   const timeUnitValue = TIME_INTERVAL_OPTIONS.find(
-    (time_unit) => time_unit.value === groupByToken?.span?.span_expression.time_unit
+    (timeUnit) => timeUnit.value === groupByToken?.span?.span_expression.time_unit
   )?.text;
   return !isEmpty(groupByToken?.span)
     ? {
@@ -428,4 +429,33 @@ const getSpanValue = (groupByToken: GroupByChunk) => {
         interval: groupByToken?.span?.span_expression?.literal_value,
       }
     : undefined;
+};
+
+/**
+ * Use startTime and endTime as date range if both exists, else use selectDatarange
+ * in query state, if this is also empty then use default 15mins as default date range
+ * @param startTime
+ * @param endTime
+ * @param queryState
+ * @returns [startTime, endTime]
+ */
+export const getDateRange = (
+  startTime: string | undefined,
+  endTime: string | undefined,
+  queryState: IQuery
+) => {
+  if (startTime && endTime) return [startTime, endTime];
+  const { selectedDateRange } = queryState;
+  if (!isEmpty(selectedDateRange)) return [selectedDateRange[0], selectedDateRange[1]];
+  return ['now-15m', 'now'];
+};
+
+export const getContentTabTitle = (tabID: string, tabTitle: string) => {
+  return (
+    <>
+      <EuiText data-test-subj={`${tabID}Tab`} size="s" textAlign="left" color="default">
+        <span className="tab-title">{tabTitle}</span>
+      </EuiText>
+    </>
+  );
 };

@@ -17,7 +17,47 @@ exports[`Traces component renders empty traces page 1`] = `
   }
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -44,6 +84,10 @@ exports[`Traces component renders empty traces page 1`] = `
           },
         ],
       },
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   dataPrepperIndicesExist={true}
@@ -64,13 +108,11 @@ exports[`Traces component renders empty traces page 1`] = `
     ]
   }
   page="traces"
-  parentBreadcrumbs={
-    Array [
-      Object {
-        "href": "test#/",
-        "text": "test",
-      },
-    ]
+  parentBreadcrumb={
+    Object {
+      "href": "test#/",
+      "text": "test",
+    }
   }
   query=""
   setEndTime={[MockFunction]}
@@ -241,7 +283,47 @@ exports[`Traces component renders empty traces page 1`] = `
     }
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -268,6 +350,10 @@ exports[`Traces component renders empty traces page 1`] = `
             },
           ],
         },
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     dataPrepperIndicesExist={true}
@@ -288,13 +374,11 @@ exports[`Traces component renders empty traces page 1`] = `
       ]
     }
     page="traces"
-    parentBreadcrumbs={
-      Array [
-        Object {
-          "href": "test#/",
-          "text": "test",
-        },
-      ]
+    parentBreadcrumb={
+      Object {
+        "href": "test#/",
+        "text": "test",
+      }
     }
     query=""
     setEndTime={[MockFunction]}
@@ -980,6 +1064,7 @@ exports[`Traces component renders empty traces page 1`] = `
                       />
                     }
                     closePopover={[Function]}
+                    data-test-subj="global-filter-button"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -989,6 +1074,7 @@ exports[`Traces component renders empty traces page 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
                       withTitle={true}
                     >
                       <div
@@ -1061,6 +1147,7 @@ exports[`Traces component renders empty traces page 1`] = `
                       </EuiButtonEmpty>
                     }
                     closePopover={[Function]}
+                    data-test-subj="addfilter"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -1070,6 +1157,7 @@ exports[`Traces component renders empty traces page 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorDownLeft"
+                      data-test-subj="addfilter"
                       withTitle={true}
                     >
                       <div
@@ -1286,15 +1374,52 @@ exports[`Traces component renders jaeger traces page 1`] = `
   }
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
             Array [
-              Object {
-                "href": "test#/",
-                "text": "test",
-              },
+              undefined,
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -1313,6 +1438,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
           },
         ],
       },
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   dataPrepperIndicesExist={false}
@@ -1516,15 +1645,52 @@ exports[`Traces component renders jaeger traces page 1`] = `
     }
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
               Array [
-                Object {
-                  "href": "test#/",
-                  "text": "test",
-                },
+                undefined,
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
@@ -1543,6 +1709,10 @@ exports[`Traces component renders jaeger traces page 1`] = `
             },
           ],
         },
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     dataPrepperIndicesExist={false}
@@ -2274,6 +2444,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                       />
                     }
                     closePopover={[Function]}
+                    data-test-subj="global-filter-button"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -2283,6 +2454,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
                       withTitle={true}
                     >
                       <div
@@ -2360,6 +2532,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                       </EuiButtonEmpty>
                     }
                     closePopover={[Function]}
+                    data-test-subj="addfilter"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -2369,6 +2542,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorDownLeft"
+                      data-test-subj="addfilter"
                       withTitle={true}
                     >
                       <div
@@ -2586,15 +2760,52 @@ exports[`Traces component renders traces page 1`] = `
   }
   chrome={
     Object {
+      "addApplicationClass": [MockFunction],
+      "docTitle": Object {
+        "change": [MockFunction],
+        "reset": [MockFunction],
+      },
+      "getApplicationClasses$": [MockFunction],
+      "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
+      "getBreadcrumbs$": [MockFunction],
+      "getCustomNavLink$": [MockFunction],
+      "getHeaderComponent": [MockFunction],
+      "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
+      "getIsVisible$": [MockFunction],
+      "navControls": Object {
+        "getCenter$": [MockFunction],
+        "getLeft$": [MockFunction],
+        "getRight$": [MockFunction],
+        "registerCenter": [MockFunction],
+        "registerLeft": [MockFunction],
+        "registerRight": [MockFunction],
+      },
+      "navLinks": Object {
+        "enableForcedAppSwitcherNavigation": [MockFunction],
+        "get": [MockFunction],
+        "getAll": [MockFunction],
+        "getForceAppSwitcherNavigation$": [MockFunction],
+        "getNavLinks$": [MockFunction],
+        "has": [MockFunction],
+        "showOnly": [MockFunction],
+        "update": [MockFunction],
+      },
+      "recentlyAccessed": Object {
+        "add": [MockFunction],
+        "get": [MockFunction],
+        "get$": [MockFunction],
+      },
+      "removeApplicationClass": [MockFunction],
+      "setAppTitle": [MockFunction],
+      "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
             Array [
-              Object {
-                "href": "test#/",
-                "text": "test",
-              },
+              undefined,
               Object {
                 "href": "#/trace_analytics/home",
                 "text": "Trace analytics",
@@ -2613,6 +2824,10 @@ exports[`Traces component renders traces page 1`] = `
           },
         ],
       },
+      "setCustomNavLink": [MockFunction],
+      "setHelpExtension": [MockFunction],
+      "setHelpSupportUrl": [MockFunction],
+      "setIsVisible": [MockFunction],
     }
   }
   dataPrepperIndicesExist={true}
@@ -2815,15 +3030,52 @@ exports[`Traces component renders traces page 1`] = `
     }
     chrome={
       Object {
+        "addApplicationClass": [MockFunction],
+        "docTitle": Object {
+          "change": [MockFunction],
+          "reset": [MockFunction],
+        },
+        "getApplicationClasses$": [MockFunction],
+        "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
+        "getBreadcrumbs$": [MockFunction],
+        "getCustomNavLink$": [MockFunction],
+        "getHeaderComponent": [MockFunction],
+        "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
+        "getIsVisible$": [MockFunction],
+        "navControls": Object {
+          "getCenter$": [MockFunction],
+          "getLeft$": [MockFunction],
+          "getRight$": [MockFunction],
+          "registerCenter": [MockFunction],
+          "registerLeft": [MockFunction],
+          "registerRight": [MockFunction],
+        },
+        "navLinks": Object {
+          "enableForcedAppSwitcherNavigation": [MockFunction],
+          "get": [MockFunction],
+          "getAll": [MockFunction],
+          "getForceAppSwitcherNavigation$": [MockFunction],
+          "getNavLinks$": [MockFunction],
+          "has": [MockFunction],
+          "showOnly": [MockFunction],
+          "update": [MockFunction],
+        },
+        "recentlyAccessed": Object {
+          "add": [MockFunction],
+          "get": [MockFunction],
+          "get$": [MockFunction],
+        },
+        "removeApplicationClass": [MockFunction],
+        "setAppTitle": [MockFunction],
+        "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
               Array [
-                Object {
-                  "href": "test#/",
-                  "text": "test",
-                },
+                undefined,
                 Object {
                   "href": "#/trace_analytics/home",
                   "text": "Trace analytics",
@@ -2842,6 +3094,10 @@ exports[`Traces component renders traces page 1`] = `
             },
           ],
         },
+        "setCustomNavLink": [MockFunction],
+        "setHelpExtension": [MockFunction],
+        "setHelpSupportUrl": [MockFunction],
+        "setIsVisible": [MockFunction],
       }
     }
     dataPrepperIndicesExist={true}
@@ -3572,6 +3828,7 @@ exports[`Traces component renders traces page 1`] = `
                       />
                     }
                     closePopover={[Function]}
+                    data-test-subj="global-filter-button"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -3581,6 +3838,7 @@ exports[`Traces component renders traces page 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorRightUp"
+                      data-test-subj="global-filter-button"
                       withTitle={true}
                     >
                       <div
@@ -3658,6 +3916,7 @@ exports[`Traces component renders traces page 1`] = `
                       </EuiButtonEmpty>
                     }
                     closePopover={[Function]}
+                    data-test-subj="addfilter"
                     display="inlineBlock"
                     hasArrow={true}
                     isOpen={false}
@@ -3667,6 +3926,7 @@ exports[`Traces component renders traces page 1`] = `
                   >
                     <div
                       className="euiPopover euiPopover--anchorDownLeft"
+                      data-test-subj="addfilter"
                       withTitle={true}
                     >
                       <div

@@ -13,6 +13,7 @@ export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
+export const INTEGRATIONS_BASE = '/api/integrations';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -23,9 +24,37 @@ export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
 
-export const observabilityID = 'observability-dashboards';
+export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
-export const observabilityPluginOrder = 6000;
+export const observabilityPluginOrder = 1500;
+
+export const observabilityApplicationsID = 'observability-applications';
+export const observabilityApplicationsTitle = 'Applications';
+export const observabilityApplicationsPluginOrder = 5090;
+
+export const observabilityLogsID = 'observability-logs';
+export const observabilityLogsTitle = 'Logs';
+export const observabilityLogsPluginOrder = 5091;
+
+export const observabilityMetricsID = 'observability-metrics';
+export const observabilityMetricsTitle = 'Metrics';
+export const observabilityMetricsPluginOrder = 5092;
+
+export const observabilityTracesID = 'observability-traces';
+export const observabilityTracesTitle = 'Traces';
+export const observabilityTracesPluginOrder = 5093;
+
+export const observabilityNotebookID = 'observability-notebooks';
+export const observabilityNotebookTitle = 'Notebooks';
+export const observabilityNotebookPluginOrder = 5094;
+
+export const observabilityPanelsID = 'observability-dashboards';
+export const observabilityPanelsTitle = 'Dashboards';
+export const observabilityPanelsPluginOrder = 5095;
+
+export const observabilityIntegrationsID = 'integrations';
+export const observabilityIntegrationsTitle = 'Integrations';
+export const observabilityIntegrationsPluginOrder = 9020;
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
@@ -45,6 +74,7 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
+const BASE_INTEGRATIONS_URI = '/_plugins/_integrations'; // Used later in front-end for routing
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };
@@ -160,8 +190,8 @@ export interface DefaultChartStylesProps {
 export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
   DefaultModeLine: 'lines',
   Interpolation: 'spline',
-  LineWidth: 2,
-  FillOpacity: 70,
+  LineWidth: 0,
+  FillOpacity: 100,
   MarkerSize: 5,
   ShowLegend: 'show',
   LegendPosition: 'v',
@@ -192,3 +222,8 @@ export const PLOT_MARGIN = {
 };
 
 export const WAITING_TIME_ON_USER_ACTIONS = 300;
+
+export const VISUALIZATION_ERROR = {
+  NO_DATA: 'No data found.',
+  INVALID_DATA: 'Invalid visualization data',
+};

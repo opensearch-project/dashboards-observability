@@ -33,14 +33,19 @@ import SavedObjects from '../../public/services/saved_objects/event_analytics/sa
 import TimestampUtils from '../../public/services/timestamp/timestamp';
 import PPLService from '../../public/services/requests/ppl';
 import DSLService from '../../public/services/requests/dsl';
-import { SavedObjectsStart } from '../../../../src/core/public/saved_objects';
+import {
+  SavedObjectAttributes,
+  SavedObjectsStart,
+} from '../../../../src/core/public/saved_objects';
+import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
+
 export interface IQueryTab {
   id: string;
   name: React.ReactNode | string;
   content: React.ReactNode;
 }
 
-export interface IField {
+export interface IField extends SavedObjectAttributes {
   name: string;
   type: string;
   label?: string;
@@ -151,7 +156,7 @@ export interface SavedQuery {
   selected_timestamp: IField;
 }
 
-export interface SavedVisualization {
+export interface SavedVisualization extends SavedObjectAttributes {
   description: string;
   name: string;
   query: string;
@@ -159,23 +164,10 @@ export interface SavedVisualization {
   selected_fields: { text: string; tokens: [] };
   selected_timestamp: IField;
   type: string;
+  sub_type?: 'metric' | 'visualization'; // exists if sub type is metric
+  user_configs?: string;
+  units_of_measure?: string;
   application_id?: string;
-}
-
-export interface SavedQueryRes {
-  createdTimeMs: number;
-  lastUpdatedTimeMs: number;
-  objectId: string;
-  savedQuery: SavedQuery;
-  tenant: string;
-}
-
-export interface SavedVizRes {
-  createdTimeMs: number;
-  lastUpdatedTimeMs: number;
-  objectId: string;
-  savedVisualization: SavedVisualization;
-  tenant: string;
 }
 
 export interface ExplorerDataType {
@@ -317,6 +309,7 @@ export interface ConfigList {
   [AGGREGATIONS]?: ConfigListEntry[];
   [BREAKDOWNS]?: ConfigListEntry[] | HistogramConfigList[];
   span?: DimensionSpan;
+  isVertical?: boolean;
 }
 
 export interface Breadcrumbs {
@@ -326,7 +319,7 @@ export interface Breadcrumbs {
 
 export interface EventAnalyticsProps {
   chrome: CoreSetup;
-  parentBreadcrumbs: Breadcrumbs[];
+  parentBreadcrumbs: ChromeBreadcrumb[];
   pplService: any;
   dslService: any;
   savedObjects: SavedObjectsStart;
@@ -334,6 +327,7 @@ export interface EventAnalyticsProps {
   http: HttpStart;
   notifications: NotificationsStart;
   queryManager: QueryManager;
+  setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
 export interface DataConfigPanelProps {
@@ -383,4 +377,9 @@ export interface VisualizationState {
   visData: any;
   visConfMetadata: ConfigList;
   visMeta: VisMeta;
+}
+
+export interface VisSpecificMetaData {
+  x_coordinate: string;
+  y_coordinate: string;
 }

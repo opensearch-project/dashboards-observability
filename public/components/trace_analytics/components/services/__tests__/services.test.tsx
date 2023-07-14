@@ -39,7 +39,7 @@ describe('Services component', () => {
       <Services
         http={core.http}
         chrome={core.chrome}
-        parentBreadcrumbs={[{ text: 'test', href: 'test#/' }]}
+        parentBreadcrumb={{ text: 'test', href: 'test#/' }}
         childBreadcrumbs={serviceBreadcrumbs}
         nameColumnAction={nameColumnAction}
         traceColumnAction={traceColumnAction}
@@ -53,7 +53,7 @@ describe('Services component', () => {
         endTime="now"
         setEndTime={setEndTime}
         page="services"
-        mode='data_prepper'
+        mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
       />
@@ -99,7 +99,7 @@ describe('Services component', () => {
         endTime="now"
         setEndTime={setEndTime}
         page="services"
-        mode='data_prepper'
+        mode="data_prepper"
         dataPrepperIndicesExist={true}
         modes={modes}
       />
@@ -145,7 +145,7 @@ describe('Services component', () => {
         endTime="now"
         setEndTime={setEndTime}
         page="services"
-        mode='jaeger'
+        mode="jaeger"
         dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         modes={modes}

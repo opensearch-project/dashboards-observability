@@ -1,13 +1,14 @@
 {
   "baseUrl": "http://localhost:5601",
   "video": true,
-  "chromeWebSecurity": false,
+  "chromeWebSecurity": true,
   "fixturesFolder": ".cypress/fixtures",
   "integrationFolder": ".cypress/integration",
   "pluginsFile": ".cypress/plugins/index.js",
   "screenshotsFolder": ".cypress/screenshots",
   "supportFile": ".cypress/support/index.js",
   "videosFolder": ".cypress/videos",
+  "downloadsFolder": ".cypress/downloads",
   "viewportWidth": 2000,
   "viewportHeight": 1320,
   "requestTimeout": 60000,
@@ -18,5 +19,8 @@
     "opensearch": "localhost:9200",
     "opensearchDashboards": "localhost:5601",
     "security_enabled": true
+  },
+  "cypress-watch-and-reload": {
+    "watch": ["common/**", "public/**", "server/**"]
   }
 }

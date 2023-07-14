@@ -20,9 +20,15 @@ import PPLService from '../../../../public/services/requests/ppl';
 import DSLService from '../../../../public/services/requests/dsl';
 import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
 import { HttpResponse } from '../../../../../../src/core/public';
+import { applyMiddleware, createStore } from 'redux';
+import { rootReducer } from '../../../framework/redux/reducers';
+import thunk from 'redux-thunk';
+import { Provider } from 'react-redux';
 
 describe('Panels View Component', () => {
   configure({ adapter: new Adapter() });
+
+  const store = createStore(rootReducer, applyMiddleware(thunk));
 
   it('renders panel view container without visualizations', async () => {
     httpClientMock.get = jest.fn(() =>
@@ -47,24 +53,26 @@ describe('Panels View Component', () => {
     };
 
     const wrapper = mount(
-      <CustomPanelView
-        panelId={panelId}
-        http={http}
-        pplService={pplService}
-        dslService={dslService}
-        chrome={core.chrome}
-        parentBreadcrumbs={parentBreadcrumbs}
-        renameCustomPanel={renameCustomPanel}
-        cloneCustomPanel={cloneCustomPanel}
-        deleteCustomPanel={deleteCustomPanel}
-        setToast={setToast}
-        onEditClick={onEditClick}
-        startTime={start}
-        endTime={end}
-        setStartTime={setStart}
-        setEndTime={setEnd}
-        page="operationalPanels"
-      />
+      <Provider store={store}>
+        <CustomPanelView
+          panelId={panelId}
+          http={http}
+          pplService={pplService}
+          dslService={dslService}
+          chrome={core.chrome}
+          parentBreadcrumbs={parentBreadcrumbs}
+          renameCustomPanel={renameCustomPanel}
+          cloneCustomPanel={cloneCustomPanel}
+          deleteCustomPanel={deleteCustomPanel}
+          setToast={setToast}
+          onEditClick={onEditClick}
+          startTime={start}
+          endTime={end}
+          setStartTime={setStart}
+          setEndTime={setEnd}
+          page="operationalPanels"
+        />
+      </Provider>
     );
     wrapper.update();
 
@@ -106,24 +114,26 @@ describe('Panels View Component', () => {
     };
 
     const wrapper = mount(
-      <CustomPanelView
-        panelId={panelId}
-        http={http}
-        pplService={pplService}
-        dslService={dslService}
-        chrome={core.chrome}
-        parentBreadcrumbs={parentBreadcrumbs}
-        renameCustomPanel={renameCustomPanel}
-        cloneCustomPanel={cloneCustomPanel}
-        deleteCustomPanel={deleteCustomPanel}
-        setToast={setToast}
-        onEditClick={onEditClick}
-        startTime={start}
-        endTime={end}
-        setStartTime={setStart}
-        setEndTime={setEnd}
-        page="operationalPanels"
-      />
+      <Provider store={store}>
+        <CustomPanelView
+          panelId={panelId}
+          http={http}
+          pplService={pplService}
+          dslService={dslService}
+          chrome={core.chrome}
+          parentBreadcrumbs={parentBreadcrumbs}
+          renameCustomPanel={renameCustomPanel}
+          cloneCustomPanel={cloneCustomPanel}
+          deleteCustomPanel={deleteCustomPanel}
+          setToast={setToast}
+          onEditClick={onEditClick}
+          startTime={start}
+          endTime={end}
+          setStartTime={setStart}
+          setEndTime={setEnd}
+          page="operationalPanels"
+        />
+      </Provider>
     );
     wrapper.update();
 

@@ -64,7 +64,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       ),
       getListItem(
         'Connected services',
-        fields.connected_services
+        fields.connected_services && fields.connected_services.length
           ? fields.connected_services.reduce((prev: string, curr: string) => {
               return [prev, ', ', curr];
             })
@@ -118,7 +118,15 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
   }, [serviceName, fields, serviceMap, DSL, serviceMapIdSelected]);
 
   useEffect(() => {
-    const serviceDSL = filtersToDsl(mode, filters, query, processTimeStamp(startTime, mode), processTimeStamp(endTime, mode), 'app', appConfigs);
+    const serviceDSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      'app',
+      appConfigs
+    );
     handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
     handleServiceMapRequest(http, serviceDSL, mode, setServiceMap, serviceName);
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);

@@ -69,7 +69,7 @@ export function ServicesTable(props: ServicesTableProps) {
           align: 'left',
           sortable: true,
           render: (item: any) => (
-            <EuiLink onClick={() => nameColumnAction(item)}>
+            <EuiLink data-test-subj="service-link" onClick={() => nameColumnAction(item)}>
               {item.length < 24 ? item : <div title={item}>{_.truncate(item, { length: 24 })}</div>}
             </EuiLink>
           ),
@@ -97,24 +97,36 @@ export function ServicesTable(props: ServicesTableProps) {
           truncateText: true,
           render: (item: any) => (item === 0 || item ? <EuiI18nNumber value={item} /> : '-'),
         },
-        ... mode === 'data_prepper' ? [{
-          field: 'number_of_connected_services',
-          name: 'No. of connected services',
-          align: 'right',
-          sortable: true,
-          truncateText: true,
-          width: '80px',
-          render: (item: any) => (item === 0 || item ? item : '-'),
-        }] : [],
-        ... mode === 'data_prepper' ? [{
-          field: 'connected_services',
-          name: 'Connected services',
-          align: 'left',
-          sortable: true,
-          truncateText: true,
-          render: (item: any) =>
-            item ? <EuiText size="s">{_.truncate(item.join(', '), { length: 50 })}</EuiText> : '-',
-        }] : [],
+        ...(mode === 'data_prepper'
+          ? [
+              {
+                field: 'number_of_connected_services',
+                name: 'No. of connected services',
+                align: 'right',
+                sortable: true,
+                truncateText: true,
+                width: '80px',
+                render: (item: any) => (item === 0 || item ? item : '-'),
+              },
+            ]
+          : []),
+        ...(mode === 'data_prepper'
+          ? [
+              {
+                field: 'connected_services',
+                name: 'Connected services',
+                align: 'left',
+                sortable: true,
+                truncateText: true,
+                render: (item: any) =>
+                  item ? (
+                    <EuiText size="s">{_.truncate(item.join(', '), { length: 50 })}</EuiText>
+                  ) : (
+                    '-'
+                  ),
+              },
+            ]
+          : []),
         {
           field: 'traces',
           name: 'Traces',
@@ -128,7 +140,7 @@ export function ServicesTable(props: ServicesTableProps) {
                   onClick={() => {
                     setRedirect(true);
                     addFilter({
-                      field: mode === 'jaeger' ? 'process.serviceName': 'serviceName',
+                      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
                       operator: 'is',
                       value: row.name,
                       inverted: false,
@@ -157,9 +169,12 @@ export function ServicesTable(props: ServicesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!((mode === 'data_prepper' && dataPrepperIndicesExist) || mode === 'jaeger' && jaegerIndicesExist) ? (
-          <MissingConfigurationMessage mode={mode}/>
-        ) : ( items?.length > 0 ? (
+        {!(
+          (mode === 'data_prepper' && dataPrepperIndicesExist) ||
+          (mode === 'jaeger' && jaegerIndicesExist)
+        ) ? (
+          <MissingConfigurationMessage mode={mode} />
+        ) : items?.length > 0 ? (
           <EuiInMemoryTable
             tableLayout="auto"
             items={items}
@@ -178,7 +193,7 @@ export function ServicesTable(props: ServicesTableProps) {
           />
         ) : (
           <NoMatchMessage size="xl" />
-        ))}
+        )}
       </EuiPanel>
     </>
   );

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`No result component Renders No result component 1`] = `
-<NoResults>
+<Component>
   <I18nProvider>
     <IntlProvider
       defaultLocale="en"
@@ -208,5 +208,5 @@ exports[`No result component Renders No result component 1`] = `
       </PseudoLocaleWrapper>
     </IntlProvider>
   </I18nProvider>
-</NoResults>
+</Component>
 `;

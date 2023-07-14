@@ -12,7 +12,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
     }
   }
 >
-  <Sidebar
+  <Component
     http={[MockFunction]}
     pplService={
       PPLService {
@@ -111,7 +111,8 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
           <section
             className="sidebarHeight"
           >
-            <MetricsAccordion
+            <Component
+              dataTestSubj="metricsListItems_recentlyCreated"
               handleClick={[Function]}
               headerName="Recently Created Metrics"
               metricsList={Array []}
@@ -214,7 +215,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   </div>
                 </div>
               </EuiAccordion>
-            </MetricsAccordion>
+            </Component>
             <EuiSpacer
               size="s"
             >
@@ -222,7 +223,8 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
             </EuiSpacer>
-            <MetricsAccordion
+            <Component
+              dataTestSubj="metricsListItems_selectedMetrics"
               handleClick={[Function]}
               headerName="Selected Metrics"
               metricsList={Array []}
@@ -325,7 +327,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   </div>
                 </div>
               </EuiAccordion>
-            </MetricsAccordion>
+            </Component>
             <EuiSpacer
               size="s"
             >
@@ -333,7 +335,8 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                 className="euiSpacer euiSpacer--s"
               />
             </EuiSpacer>
-            <MetricsAccordion
+            <Component
+              dataTestSubj="metricsListItems_availableMetrics"
               handleClick={[Function]}
               headerName="Available Metrics"
               metricsList={Array []}
@@ -436,11 +439,11 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   </div>
                 </div>
               </EuiAccordion>
-            </MetricsAccordion>
+            </Component>
           </section>
         </PseudoLocaleWrapper>
       </IntlProvider>
     </I18nProvider>
-  </Sidebar>
+  </Component>
 </Provider>
 `;

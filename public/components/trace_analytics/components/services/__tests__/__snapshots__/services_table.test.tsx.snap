@@ -1101,11 +1101,13 @@ exports[`Services table component renders jaeger services table 1`] = `
                               >
                                 <EuiLink
                                   className=""
+                                  data-test-subj="service-link"
                                   key=".0"
                                   onClick={[Function]}
                                 >
                                   <button
                                     className="euiLink euiLink--primary"
+                                    data-test-subj="service-link"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
@@ -2679,11 +2681,13 @@ exports[`Services table component renders services table 1`] = `
                               >
                                 <EuiLink
                                   className=""
+                                  data-test-subj="service-link"
                                   key=".0"
                                   onClick={[Function]}
                                 >
                                   <button
                                     className="euiLink euiLink--primary"
+                                    data-test-subj="service-link"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"

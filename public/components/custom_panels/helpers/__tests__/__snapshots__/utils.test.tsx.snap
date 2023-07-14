@@ -2,7 +2,7 @@
 
 exports[`Utils helper functions renders displayVisualization function 1`] = `
 <div>
-  <Visualization
+  <Component
     visualizations={
       Object {
         "data": Object {
@@ -72,16 +72,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               "size": 4,
               "status": 200,
             },
-            "explorerFields": Array [
-              Object {
-                "name": "avg(FlightDelayMin)",
-                "type": "double",
-              },
-              Object {
-                "name": "Carrier",
-                "type": "keyword",
-              },
-            ],
+            "explorerFields": undefined,
           },
           "indexFields": Object {},
           "query": Object {
@@ -385,7 +376,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 2,
+                        "defaultState": 0,
                         "eleType": "slider",
                         "mapTo": "lineWidth",
                         "name": "Line width",
@@ -395,7 +386,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 70,
+                        "defaultState": 100,
                         "eleType": "slider",
                         "mapTo": "fillOpacity",
                         "name": "Fill opacity",
@@ -415,16 +406,15 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               },
             ],
           },
-          "fillopacity": 70,
+          "fillopacity": 100,
           "fulllabel": "Vertical bar",
           "groupwidth": 0.7,
-          "icon": [Function],
           "icontype": "visBarVerticalStacked",
           "id": "bar",
           "label": "Vertical bar",
           "labelangle": 0,
           "legendposition": "v",
-          "linewidth": 2,
+          "linewidth": 0,
           "mode": "group",
           "name": "bar",
           "orientation": "v",
@@ -460,7 +450,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
       }
     }
   >
-    <VisualizationChart
+    <Component
       visualizations={
         Object {
           "data": Object {
@@ -530,16 +520,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 "size": 4,
                 "status": 200,
               },
-              "explorerFields": Array [
-                Object {
-                  "name": "avg(FlightDelayMin)",
-                  "type": "double",
-                },
-                Object {
-                  "name": "Carrier",
-                  "type": "keyword",
-                },
-              ],
+              "explorerFields": undefined,
             },
             "indexFields": Object {},
             "query": Object {
@@ -843,7 +824,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 2,
+                          "defaultState": 0,
                           "eleType": "slider",
                           "mapTo": "lineWidth",
                           "name": "Line width",
@@ -853,7 +834,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 70,
+                          "defaultState": 100,
                           "eleType": "slider",
                           "mapTo": "fillOpacity",
                           "name": "Fill opacity",
@@ -873,16 +854,15 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 },
               ],
             },
-            "fillopacity": 70,
+            "fillopacity": 100,
             "fulllabel": "Vertical bar",
             "groupwidth": 0.7,
-            "icon": [Function],
             "icontype": "visBarVerticalStacked",
             "id": "bar",
             "label": "Vertical bar",
             "labelangle": 0,
             "legendposition": "v",
-            "linewidth": 2,
+            "linewidth": 0,
             "mode": "group",
             "name": "bar",
             "orientation": "v",
@@ -918,7 +898,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
         }
       }
     >
-      <Bar
+      <Component
         config={
           Object {
             "displaylogo": false,
@@ -995,16 +975,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                   "size": 4,
                   "status": 200,
                 },
-                "explorerFields": Array [
-                  Object {
-                    "name": "avg(FlightDelayMin)",
-                    "type": "double",
-                  },
-                  Object {
-                    "name": "Carrier",
-                    "type": "keyword",
-                  },
-                ],
+                "explorerFields": undefined,
               },
               "indexFields": Object {},
               "query": Object {
@@ -1308,7 +1279,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -1318,7 +1289,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -1338,16 +1309,15 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                   },
                 ],
               },
-              "fillopacity": 70,
+              "fillopacity": 100,
               "fulllabel": "Vertical bar",
               "groupwidth": 0.7,
-              "icon": [Function],
               "icontype": "visBarVerticalStacked",
               "id": "bar",
               "label": "Vertical bar",
               "labelangle": 0,
               "legendposition": "v",
-              "linewidth": 2,
+              "linewidth": 0,
               "mode": "group",
               "name": "bar",
               "orientation": "v",
@@ -1395,10 +1365,10 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               Object {
                 "hoverinfo": "all",
                 "marker": Object {
-                  "color": "rgba(60,161,199,0.35)",
+                  "color": "rgba(60,161,199,0.5)",
                   "line": Object {
                     "color": "#3CA1C7",
-                    "width": 2,
+                    "width": 0,
                   },
                 },
                 "name": "delays",
@@ -1485,10 +1455,10 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 Object {
                   "hoverinfo": "all",
                   "marker": Object {
-                    "color": "rgba(60,161,199,0.35)",
+                    "color": "rgba(60,161,199,0.5)",
                     "line": Object {
                       "color": "#3CA1C7",
-                      "width": 2,
+                      "width": 0,
                     },
                   },
                   "name": "delays",
@@ -1583,15 +1553,15 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
             />
           </PlotlyComponent>
         </Plt>
-      </Bar>
-    </VisualizationChart>
-  </Visualization>
+      </Component>
+    </Component>
+  </Component>
 </div>
 `;
 
 exports[`Utils helper functions renders displayVisualization function 2`] = `
 <div>
-  <Visualization
+  <Component
     visualizations={
       Object {
         "data": Object {
@@ -1665,16 +1635,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               "size": 4,
               "status": 200,
             },
-            "explorerFields": Array [
-              Object {
-                "name": "avg(FlightDelayMin)",
-                "type": "double",
-              },
-              Object {
-                "name": "Carrier",
-                "type": "keyword",
-              },
-            ],
+            "explorerFields": undefined,
           },
           "indexFields": Object {},
           "query": Object {
@@ -1961,7 +1922,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 2,
+                        "defaultState": 0,
                         "eleType": "slider",
                         "mapTo": "lineWidth",
                         "name": "Line width",
@@ -1971,7 +1932,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 70,
+                        "defaultState": 100,
                         "eleType": "slider",
                         "mapTo": "fillOpacity",
                         "name": "Fill opacity",
@@ -2051,7 +2012,6 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
             ],
           },
           "fulllabel": "Time series",
-          "icon": [Function],
           "icontype": "visLine",
           "id": "line",
           "label": "Time series",
@@ -2117,7 +2077,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
       }
     }
   >
-    <VisualizationChart
+    <Component
       visualizations={
         Object {
           "data": Object {
@@ -2191,16 +2151,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 "size": 4,
                 "status": 200,
               },
-              "explorerFields": Array [
-                Object {
-                  "name": "avg(FlightDelayMin)",
-                  "type": "double",
-                },
-                Object {
-                  "name": "Carrier",
-                  "type": "keyword",
-                },
-              ],
+              "explorerFields": undefined,
             },
             "indexFields": Object {},
             "query": Object {
@@ -2487,7 +2438,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 2,
+                          "defaultState": 0,
                           "eleType": "slider",
                           "mapTo": "lineWidth",
                           "name": "Line width",
@@ -2497,7 +2448,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 70,
+                          "defaultState": 100,
                           "eleType": "slider",
                           "mapTo": "fillOpacity",
                           "name": "Fill opacity",
@@ -2577,7 +2528,6 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               ],
             },
             "fulllabel": "Time series",
-            "icon": [Function],
             "icontype": "visLine",
             "id": "line",
             "label": "Time series",
@@ -2643,7 +2593,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
         }
       }
     >
-      <Line
+      <Component
         config={
           Object {
             "barmode": "line",
@@ -2731,16 +2681,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                   "size": 4,
                   "status": 200,
                 },
-                "explorerFields": Array [
-                  Object {
-                    "name": "avg(FlightDelayMin)",
-                    "type": "double",
-                  },
-                  Object {
-                    "name": "Carrier",
-                    "type": "keyword",
-                  },
-                ],
+                "explorerFields": undefined,
               },
               "indexFields": Object {},
               "query": Object {
@@ -3027,7 +2968,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -3037,7 +2978,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -3117,7 +3058,6 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 ],
               },
               "fulllabel": "Time series",
-              "icon": [Function],
               "icontype": "visLine",
               "id": "line",
               "label": "Time series",
@@ -3201,18 +3141,18 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
             Array [
               Object {
                 "fill": "tozeroy",
-                "fillcolor": "rgba(60,161,199,0.35)",
+                "fillcolor": "rgba(60,161,199,0.5)",
                 "hoverinfo": "all",
                 "line": Object {
                   "color": "#3CA1C7",
                   "shape": "spline",
-                  "width": 2,
+                  "width": 0,
                 },
                 "marker": Object {
-                  "color": "rgba(60,161,199,0.35)",
+                  "color": "rgba(60,161,199,0.5)",
                   "line": Object {
                     "color": "#3CA1C7",
-                    "width": 2,
+                    "width": 0,
                   },
                   "size": 5,
                 },
@@ -3288,18 +3228,18 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               Array [
                 Object {
                   "fill": "tozeroy",
-                  "fillcolor": "rgba(60,161,199,0.35)",
+                  "fillcolor": "rgba(60,161,199,0.5)",
                   "hoverinfo": "all",
                   "line": Object {
                     "color": "#3CA1C7",
                     "shape": "spline",
-                    "width": 2,
+                    "width": 0,
                   },
                   "marker": Object {
-                    "color": "rgba(60,161,199,0.35)",
+                    "color": "rgba(60,161,199,0.5)",
                     "line": Object {
                       "color": "#3CA1C7",
-                      "width": 2,
+                      "width": 0,
                     },
                     "size": 5,
                   },
@@ -3378,15 +3318,15 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
             />
           </PlotlyComponent>
         </Plt>
-      </Line>
-    </VisualizationChart>
-  </Visualization>
+      </Component>
+    </Component>
+  </Component>
 </div>
 `;
 
 exports[`Utils helper functions renders displayVisualization function 3`] = `
 <div>
-  <Visualization
+  <Component
     visualizations={
       Object {
         "data": Object {
@@ -3456,16 +3396,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               "size": 4,
               "status": 200,
             },
-            "explorerFields": Array [
-              Object {
-                "name": "avg(FlightDelayMin)",
-                "type": "double",
-              },
-              Object {
-                "name": "Carrier",
-                "type": "keyword",
-              },
-            ],
+            "explorerFields": undefined,
           },
           "indexFields": Object {},
           "query": Object {
@@ -3769,7 +3700,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 2,
+                        "defaultState": 0,
                         "eleType": "slider",
                         "mapTo": "lineWidth",
                         "name": "Line width",
@@ -3779,7 +3710,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 70,
+                        "defaultState": 100,
                         "eleType": "slider",
                         "mapTo": "fillOpacity",
                         "name": "Fill opacity",
@@ -3799,16 +3730,15 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               },
             ],
           },
-          "fillopacity": 70,
+          "fillopacity": 100,
           "fulllabel": "Horizontal bar",
           "groupwidth": 0.7,
-          "icon": [Function],
           "icontype": "visBarHorizontalStacked",
           "id": "horizontal_bar",
           "label": "Horizontal bar",
           "labelangle": 0,
           "legendposition": "v",
-          "linewidth": 2,
+          "linewidth": 0,
           "mode": "group",
           "name": "horizontal_bar",
           "orientation": "h",
@@ -3844,7 +3774,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
       }
     }
   >
-    <VisualizationChart
+    <Component
       visualizations={
         Object {
           "data": Object {
@@ -3914,16 +3844,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 "size": 4,
                 "status": 200,
               },
-              "explorerFields": Array [
-                Object {
-                  "name": "avg(FlightDelayMin)",
-                  "type": "double",
-                },
-                Object {
-                  "name": "Carrier",
-                  "type": "keyword",
-                },
-              ],
+              "explorerFields": undefined,
             },
             "indexFields": Object {},
             "query": Object {
@@ -4227,7 +4148,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 2,
+                          "defaultState": 0,
                           "eleType": "slider",
                           "mapTo": "lineWidth",
                           "name": "Line width",
@@ -4237,7 +4158,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 70,
+                          "defaultState": 100,
                           "eleType": "slider",
                           "mapTo": "fillOpacity",
                           "name": "Fill opacity",
@@ -4257,16 +4178,15 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 },
               ],
             },
-            "fillopacity": 70,
+            "fillopacity": 100,
             "fulllabel": "Horizontal bar",
             "groupwidth": 0.7,
-            "icon": [Function],
             "icontype": "visBarHorizontalStacked",
             "id": "horizontal_bar",
             "label": "Horizontal bar",
             "labelangle": 0,
             "legendposition": "v",
-            "linewidth": 2,
+            "linewidth": 0,
             "mode": "group",
             "name": "horizontal_bar",
             "orientation": "h",
@@ -4302,7 +4222,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
         }
       }
     >
-      <Bar
+      <Component
         config={
           Object {
             "displaylogo": false,
@@ -4379,16 +4299,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                   "size": 4,
                   "status": 200,
                 },
-                "explorerFields": Array [
-                  Object {
-                    "name": "avg(FlightDelayMin)",
-                    "type": "double",
-                  },
-                  Object {
-                    "name": "Carrier",
-                    "type": "keyword",
-                  },
-                ],
+                "explorerFields": undefined,
               },
               "indexFields": Object {},
               "query": Object {
@@ -4692,7 +4603,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 2,
+                            "defaultState": 0,
                             "eleType": "slider",
                             "mapTo": "lineWidth",
                             "name": "Line width",
@@ -4702,7 +4613,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 70,
+                            "defaultState": 100,
                             "eleType": "slider",
                             "mapTo": "fillOpacity",
                             "name": "Fill opacity",
@@ -4722,16 +4633,15 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                   },
                 ],
               },
-              "fillopacity": 70,
+              "fillopacity": 100,
               "fulllabel": "Horizontal bar",
               "groupwidth": 0.7,
-              "icon": [Function],
               "icontype": "visBarHorizontalStacked",
               "id": "horizontal_bar",
               "label": "Horizontal bar",
               "labelangle": 0,
               "legendposition": "v",
-              "linewidth": 2,
+              "linewidth": 0,
               "mode": "group",
               "name": "horizontal_bar",
               "orientation": "h",
@@ -4779,10 +4689,10 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               Object {
                 "hoverinfo": "all",
                 "marker": Object {
-                  "color": "rgba(60,161,199,0.35)",
+                  "color": "rgba(60,161,199,0.5)",
                   "line": Object {
                     "color": "#3CA1C7",
-                    "width": 2,
+                    "width": 0,
                   },
                 },
                 "name": "avg(machine.ram)",
@@ -4869,10 +4779,10 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 Object {
                   "hoverinfo": "all",
                   "marker": Object {
-                    "color": "rgba(60,161,199,0.35)",
+                    "color": "rgba(60,161,199,0.5)",
                     "line": Object {
                       "color": "#3CA1C7",
-                      "width": 2,
+                      "width": 0,
                     },
                   },
                   "name": "avg(machine.ram)",
@@ -4967,9 +4877,9 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
             />
           </PlotlyComponent>
         </Plt>
-      </Bar>
-    </VisualizationChart>
-  </Visualization>
+      </Component>
+    </Component>
+  </Component>
 </div>
 `;
 

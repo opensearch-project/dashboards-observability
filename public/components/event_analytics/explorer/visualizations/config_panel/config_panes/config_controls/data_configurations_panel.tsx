@@ -47,7 +47,6 @@ import {
 import { TabContext, useRenderVisualization } from '../../../../../hooks';
 import { DataConfigItemClickPanel } from '../config_controls/data_config_item_click_panel';
 import { DataConfigPanelFields } from '../config_controls/data_config_panel_fields';
-import { ButtonGroupItem } from './config_button_group';
 import { composeFinalQuery } from '../../../../../../../../common/utils';
 
 const initialDimensionEntry = {
@@ -282,13 +281,12 @@ export const DataConfigPanelItem = ({
         ...configList,
       },
     });
-    console.log('newQueryString: ', newQueryString);
     handleQueryChange(newQueryString);
     getVisualizations({
-      queryState: nextQueryState[FINAL_QUERY],
-      callback: (res) => {
+      query: nextQueryState[FINAL_QUERY],
+      successCallback: (res) => {
         updateVisUIState({
-          visData: res,
+          visData: { ...res },
           queryState: nextQueryState,
           visConfMetadata: {
             ...configList,
@@ -298,6 +296,7 @@ export const DataConfigPanelItem = ({
           },
         });
       },
+      errorCallback: (err) => {},
     });
   }, [configList, query, visualizations]);
 
@@ -387,19 +386,6 @@ export const DataConfigPanelItem = ({
               )}
               {/* Show input fields for dimensions */}
               {!isAggregations && getCommonDimensionsField(selectedObj, name)}
-              {isPositionButtonVisible(name) && (
-                <EuiFormRow label="Side">
-                  <ButtonGroupItem
-                    legend="Side"
-                    groupOptions={[
-                      { id: 'left', label: 'Left' },
-                      { id: 'right', label: 'Right' },
-                    ]}
-                    idSelected={selectedObj.side || 'right'}
-                    handleButtonChange={(id: string) => updateList(id, 'side')}
-                  />
-                </EuiFormRow>
-              )}
             </EuiPanel>
             <EuiSpacer size="s" />
           </div>

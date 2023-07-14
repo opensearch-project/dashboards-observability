@@ -3,61 +3,65 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, ReactElement, useRef, useEffect } from 'react';
-import { useDispatch, batch, useSelector } from 'react-redux';
-import { uniqueId } from 'lodash';
-import { useHistory } from 'react-router-dom';
 import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiPageContent,
-  EuiSpacer,
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiOverlayMask,
+  EuiHorizontalRule,
   EuiLink,
+  EuiOverlayMask,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiPopover,
+  EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
+  EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { DeleteModal } from '../../common/helpers/delete_modal';
-import { Search } from '../../common/search/search';
+import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import { batch, connect, useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { HttpStart } from '../../../../../../src/core/public';
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import {
-  RAW_QUERY,
-  TAB_ID_TXT_PFX,
-  SELECTED_DATE_RANGE,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  TAB_CREATED_TYPE,
   NEW_TAB,
+  RAW_QUERY,
   REDIRECT_TAB,
+  SELECTED_DATE_RANGE,
+  TAB_CREATED_TYPE,
+  TAB_ID_TXT_PFX,
 } from '../../../../common/constants/explorer';
 import {
-  OBSERVABILITY_BASE,
   EVENT_ANALYTICS,
+  OBSERVABILITY_BASE,
   SAVED_OBJECTS,
 } from '../../../../common/constants/shared';
-import { EmptyTabParams, SavedQueryRes, SavedVizRes } from '../../../../common/types/explorer';
-import { HttpStart } from '../../../../../../src/core/public';
+import {
+  EmptyTabParams,
+  ExplorerData as IExplorerData,
+  IQuery,
+} from '../../../../common/types/explorer';
 import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
-import { addTab, selectQueryTabs } from '../redux/slices/query_tab_slice';
-import { init as initFields } from '../redux/slices/field_slice';
-import { init as initQuery, changeQuery } from '../redux/slices/query_slice';
-import { init as initQueryResult, selectQueryResult } from '../redux/slices/query_result_slice';
-import { init as initPatterns } from '../redux/slices/patterns_slice';
-import { SavedQueryTable } from './saved_objects_table';
-import { selectQueries } from '../redux/slices/query_slice';
-import { setSelectedQueryTab } from '../redux/slices/query_tab_slice';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
+import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { ObservabilitySavedObject } from '../../../services/saved_objects/saved_object_client/types';
 import { getSampleDataModal } from '../../common/helpers/add_sample_modal';
-import { parseGetSuggestions, onItemSelect } from '../../common/search/autocomplete_logic';
+import { DeleteModal } from '../../common/helpers/delete_modal';
+import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
+import { Search } from '../../common/search/search';
+import { init as initFields } from '../redux/slices/field_slice';
+import { init as initPatterns } from '../redux/slices/patterns_slice';
+import { init as initQueryResult, selectQueryResult } from '../redux/slices/query_result_slice';
+import { changeQuery, init as initQuery, selectQueries } from '../redux/slices/query_slice';
+import { addTab, selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
+import { SavedQueryTable } from './saved_objects_table';
 
 interface IHomeProps {
   pplService: any;
@@ -71,23 +75,25 @@ interface IHomeProps {
   ) => void;
   getExistingEmptyTab: (params: EmptyTabParams) => string;
   http: HttpStart;
+  queries: IQuery;
+  explorerData: IExplorerData;
+  tabsState: any;
 }
 
-export const Home = (props: IHomeProps) => {
-  const { pplService, dslService, savedObjects, setToast, getExistingEmptyTab, http } = props;
+const EventAnalyticsHome = (props: IHomeProps) => {
+  const {
+    pplService,
+    dslService,
+    savedObjects,
+    setToast,
+    getExistingEmptyTab,
+    http,
+    queries,
+    explorerData,
+    tabsState,
+  } = props;
   const history = useHistory();
   const dispatch = useDispatch();
-
-  const queries = useSelector(selectQueries);
-  const explorerData = useSelector(selectQueryResult);
-  const tabIds = useSelector(selectQueryTabs).queryTabIds;
-  const queryRef = useRef();
-  const tabIdsRef = useRef();
-  const explorerDataRef = useRef();
-  queryRef.current = queries;
-  tabIdsRef.current = tabIds;
-  explorerDataRef.current = explorerData;
-
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDateRange, setSelectedDateRange] = useState<string[]>(['now-15m', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
@@ -108,13 +114,13 @@ export const Home = (props: IHomeProps) => {
   };
 
   const fetchHistories = async () => {
-    const res = await savedObjects.fetchSavedObjects({
+    const observabilityObjects = await SavedObjectsActions.getBulk({
       objectType: ['savedQuery', 'savedVisualization'],
       sortOrder: 'desc',
       fromIndex: 0,
     });
-    const nonAppObjects = res.observabilityObjectList.filter(
-      (object: SavedQueryRes | SavedVizRes) =>
+    const nonAppObjects = observabilityObjects.observabilityObjectList.filter(
+      (object: ObservabilitySavedObject) =>
         (object.savedVisualization && !object.savedVisualization.application_id) ||
         object.savedQuery
     );
@@ -122,10 +128,9 @@ export const Home = (props: IHomeProps) => {
   };
 
   const deleteHistoryList = async () => {
-    const objectIdsToDelete = selectedHistories.map((history) => history.data.objectId);
-    await savedObjects
-      .deleteSavedObjectsList({ objectIdList: objectIdsToDelete })
-      .then(async (res) => {
+    const objectIdsToDelete = selectedHistories.map((hstry) => hstry.data.objectId);
+    await SavedObjectsActions.deleteBulk({ objectIdList: objectIdsToDelete })
+      .then(async () => {
         setSavedHistories((staleHistories) => {
           return staleHistories.filter((his) => {
             return !objectIdsToDelete.includes(his.objectId);
@@ -143,7 +148,7 @@ export const Home = (props: IHomeProps) => {
 
   const addNewTab = async () => {
     // get a new tabId
-    const tabId = uniqueId(TAB_ID_TXT_PFX);
+    const tabId = htmlIdGenerator(TAB_ID_TXT_PFX)();
 
     // create a new tab
     await batch(() => {
@@ -179,9 +184,9 @@ export const Home = (props: IHomeProps) => {
 
   const handleQuerySearch = async () => {
     const emptyTabId = getExistingEmptyTab({
-      tabIds: tabIdsRef.current,
-      queries: queryRef.current,
-      explorerData: explorerDataRef.current,
+      tabIds: tabsState.queryTabIds,
+      queries,
+      explorerData,
     });
     const newTabId = emptyTabId ? emptyTabId : await addNewTab();
 
@@ -189,7 +194,7 @@ export const Home = (props: IHomeProps) => {
     await dispatchInitialData(newTabId);
 
     // redirect to explorer
-    history.push('/event_analytics/explorer');
+    history.push('/explorer');
   };
 
   const handleQueryChange = async (query: string) => setSearchQuery(query);
@@ -198,9 +203,9 @@ export const Home = (props: IHomeProps) => {
 
   const handleHistoryClick = async (objectId: string) => {
     const emptyTabId = getExistingEmptyTab({
-      tabIds: tabIdsRef.current,
-      queries: queryRef.current,
-      explorerData: explorerDataRef.current,
+      tabIds: tabsState.queryTabIds,
+      queries,
+      explorerData,
     });
     const newTabId = emptyTabId ? emptyTabId : await addNewTab();
     batch(() => {
@@ -215,7 +220,7 @@ export const Home = (props: IHomeProps) => {
       dispatch(setSelectedQueryTab({ tabId: newTabId }));
     });
     // redirect to explorer
-    history.push(`/event_analytics/explorer/${objectId}`);
+    history.push(`/explorer/${objectId}`);
   };
 
   const addSampledata = async () => {
@@ -266,8 +271,10 @@ export const Home = (props: IHomeProps) => {
             }),
           });
 
-          const res = await savedObjects.fetchSavedObjects({
-            objectIdList: [...resp?.savedVizIds, ...resp?.savedQueryIds] || [],
+          // wait for sample data to flush to index
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          const res = await SavedObjectsActions.getBulk({
             objectType: ['savedQuery', 'savedVisualization'],
             sortOrder: 'desc',
             fromIndex: 0,
@@ -279,7 +286,6 @@ export const Home = (props: IHomeProps) => {
       setToast(`Sample events added successfully.`);
     } catch (error: any) {
       setToast(`Cannot add sample events data, error: ${error}`, 'danger');
-      console.error(error.body.message);
     } finally {
       setIsTableLoading(false);
     }
@@ -325,7 +331,7 @@ export const Home = (props: IHomeProps) => {
       key="redirect"
       onClick={() => {
         setIsActionsPopoverOpen(false);
-        history.push(`/event_analytics/explorer`);
+        history.push(`/explorer`);
       }}
       data-test-subj="eventHomeAction__explorer"
     >
@@ -350,7 +356,7 @@ export const Home = (props: IHomeProps) => {
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle data-test-subj="eventHomePageTitle" size="l">
-                <h1>Event analytics</h1>
+                <h1>Logs</h1>
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
@@ -358,7 +364,7 @@ export const Home = (props: IHomeProps) => {
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <Search
-                  query={queryRef.current![RAW_QUERY]}
+                  query={queries[RAW_QUERY]}
                   tempQuery={searchQuery}
                   handleQueryChange={handleQueryChange}
                   handleQuerySearch={handleQuerySearch}
@@ -447,7 +453,7 @@ export const Home = (props: IHomeProps) => {
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           fullWidth={false}
-                          onClick={() => history.push(`/event_analytics/explorer`)}
+                          onClick={() => history.push(`/explorer`)}
                           data-test-subj="actionEventExplorer"
                         >
                           Event Explorer
@@ -475,3 +481,13 @@ export const Home = (props: IHomeProps) => {
     </>
   );
 };
+
+const mapStateToProps = (state) => {
+  return {
+    queries: selectQueries(state),
+    explorerData: selectQueryResult(state),
+    tabsState: selectQueryTabs(state),
+  };
+};
+
+export const Home = connect(mapStateToProps)(EventAnalyticsHome);

@@ -25,6 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import _ from 'lodash';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import {
@@ -34,7 +35,6 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
-import _ from 'lodash';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -95,7 +95,6 @@ export const VisualizationContainer = ({
   spanParam,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [disablePopover, setDisablePopover] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
   const [visualizationType, setVisualizationType] = useState('');
   const [visualizationMetaData, setVisualizationMetaData] = useState();
@@ -166,7 +165,7 @@ export const VisualizationContainer = ({
     <EuiContextMenuItem
       data-test-subj="editVizContextMenuItem"
       key="Edit"
-      disabled={disablePopover}
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         onEditClick(savedVisualizationId);
@@ -176,7 +175,8 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="Replace"
-      disabled={disablePopover}
+      data-test-subj="replaceVizContextMenuItem"
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         showFlyout(true, visualizationId);
@@ -186,7 +186,8 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="Duplicate"
-      disabled={disablePopover}
+      data-test-subj="duplicateVizContextMenuItem"
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         cloneVisualization(visualizationTitle, savedVisualizationId);
@@ -196,11 +197,11 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  let showModelPanel = [
+  const showModelPanel = [
     <EuiContextMenuItem
       data-test-subj="showCatalogPPLQuery"
       key="view_query"
-      disabled={disablePopover}
+      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         showModal('catalogModal');
@@ -286,10 +287,6 @@ export const VisualizationContainer = ({
     loadVisaulization();
   }, [onRefresh]);
 
-  useEffect(() => {
-    editMode ? setDisablePopover(true) : setDisablePopover(false);
-  }, [editMode]);
-
   return (
     <>
       <EuiPanel
@@ -306,13 +303,14 @@ export const VisualizationContainer = ({
             >
               <EuiText grow={false} className="panels-title-text">
                 <EuiToolTip delay="long" position="top" content={visualizationTitle}>
-                  <h5>{visualizationTitle}</h5>
+                  <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
-              {disablePopover ? (
+              {editMode ? (
                 <EuiIcon
+                  data-test-subj="removeVisualizationButton"
                   type="crossInACircleFilled"
                   onClick={() => {
                     removeVisualization(visualizationId);
@@ -331,7 +329,10 @@ export const VisualizationContainer = ({
                   closePopover={closeActionsMenu}
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel items={popoverPanel} />
+                  <EuiContextMenuPanel
+                    items={popoverPanel}
+                    data-test-subj="panelViz__popoverPanel"
+                  />
                 </EuiPopover>
               )}
             </EuiFlexItem>
