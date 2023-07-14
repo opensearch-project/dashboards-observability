@@ -14,7 +14,6 @@ describe('Testing traces table empty state', () => {
         win.sessionStorage.clear();
       },
     });
-    cy.wait(delay * 3);
   });
 
   it('Renders empty state', () => {
@@ -69,7 +68,7 @@ describe('Testing trace view', () => {
     setTimeFilter();
     cy.get('input[type="search"]').focus().type(`${TRACE_ID}`);
     cy.get('.euiButton__text').contains('Refresh').click();
-    cy.wait(delay);
+    cy.get('.euiTableRow').should('have.length.lessThan', 3);//Replaces wait
     cy.get('[data-test-subj="trace-link"]').eq(0).click();
   });
 
@@ -86,33 +85,27 @@ describe('Testing trace view', () => {
 
   it('Has working breadcrumbs', () => {
     cy.get(`.euiBreadcrumb[href="#/traces/${TRACE_ID}"]`).click();
-    cy.wait(delay);
     cy.get('h2.euiTitle').contains(TRACE_ID).should('exist');
     cy.get('.euiBreadcrumb[href="#/traces"]').click();
-    cy.wait(delay);
     cy.get('.euiTitle').contains('Traces').should('exist');
     cy.get('.euiBreadcrumb[href="#/"]').click();
-    cy.wait(delay);
     cy.get('.euiTitle').contains('Dashboard').should('exist');
     cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
-    cy.wait(delay);
-    cy.get('.euiTitle').contains('Event analytics').should('exist');
+    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
   it('Renders data grid, flyout and filters', () => {
     cy.get('.euiButton__text[title="Span list"]').click({ force: true });
     cy.contains('2 columns hidden').should('exist');
 
-    cy.wait(delay);
     cy.get('.euiLink').contains(SPAN_ID).trigger('mouseover', { force: true });
     cy.get('button[data-datagrid-interactable="true"]').eq(0).click({ force: true });
     cy.get('button[data-datagrid-interactable="true"]').eq(0).click({ force: true }); // first click doesn't go through eui data grid
-    cy.wait(delay);
+
     cy.contains('Span detail').should('exist');
     cy.contains('Span attributes').should('exist');
     cy.get('.euiTextColor').contains('Span ID').trigger('mouseover');
     cy.get('.euiButtonIcon[aria-label="span-flyout-filter-icon"').click({ force: true });
-    cy.wait(delay);
 
     cy.get('.euiBadge__text').contains('spanId: ').should('exist');
     cy.contains('Spans (1)').should('exist');
@@ -146,7 +139,6 @@ describe('Testing traces table', () => {
     cy.contains('client_create_order').should('exist');
     cy.get('path[style*="rgb(116, 146, 231)"]').should('exist');
     cy.go('back');
-    cy.wait(delay);
     cy.get('.euiButtonEmpty__text').contains('Rows per page').click();
     cy.get('.euiContextMenuItem__text').contains('15 rows').click();
     let expected_row_count=15;

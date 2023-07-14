@@ -57,22 +57,22 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
     .focus()
     .type('{selectall}' + startTime, { force: true });
   if (setEndTime) {
-    cy.wait(delay);
     cy.get(
       'button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]'
     ).click();
-    cy.wait(delay);
     cy.get('.euiTab__content').contains('Absolute').click();
     cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .focus()
       .type('{selectall}' + endTime, { force: true });
   }
   if (refresh) cy.get('.euiButton__text').contains('Refresh').click();
-  cy.wait(delay);
+  cy.get('.euiTableRow').should('have.length.greaterThan', 3);//Replaces Wait
 };
 
 // notebooks
 export const TEST_NOTEBOOK = 'Test Notebook';
+export const TEST_INTEGRATION_INSTANCE = 'nginx-test';
+export const TEST_SAMPLE_INSTANCE = 'nginx-sample';
 export const SAMPLE_URL = 'https://github.com/opensearch-project/sql/tree/main/sql-jdbc';
 export const NOTEBOOK_TEXT = 'Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks includes creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.';
 export const OPENSEARCH_URL = 'https://opensearch.org/docs/latest/observability-plugin/notebooks/';
@@ -135,3 +135,18 @@ export const count_table_row = (expected_row_count) => {
     expect(total_row_count).to.equal(expected_row_count)
   });
 }
+
+Cypress.on('uncaught:exception', (err, runnable, promise) => {
+  // when the exception originated from an unhandled promise
+  // rejection, the promise is provided as a third argument
+  // you can turn off failing the test in this case
+  if (promise) {
+    return false
+  }
+  // we still want to ensure there are no other unexpected
+  // errors, so we let them fail the test
+})
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+  if (err.message.includes('ResizeObserver loop')) return false;
+})

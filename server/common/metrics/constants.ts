@@ -23,6 +23,7 @@ export const COMPONENTS = {
   integrations: commonRequests,
 } as const;
 
+
 export const GLOBAL_BASIC_COUNTER: CounterType = (() => {
   const counter = {} as CounterType;
   Object.entries(COMPONENTS).forEach(([component, requests]) => {

@@ -3,29 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useContext } from 'react';
-import { useDispatch, connect } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import React, { useContext, useEffect, useState } from 'react';
+import { connect, useDispatch } from 'react-redux';
 import {
   FILTERED_PATTERN,
   PATTERN_REGEX,
-  RAW_QUERY,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
+  RAW_QUERY,
 } from '../../../../../common/constants/explorer';
-import { PatternsHeader } from './patterns_header';
-import { PatternsTable } from './patterns_table';
-import { selectPatterns } from '../../redux/slices/patterns_slice';
+import { PatternTableData, Query as IQuery } from '../../../../../common/types/explorer';
 import { TabContext, useFetchPatterns } from '../../hooks';
+import { selectPatterns } from '../../redux/slices/patterns_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
 import { formatError } from '../../utils';
-import { Query as IQuery, PatternTableData } from '../../../../../common/types/explorer';
+import { PatternsHeader } from './patterns_header';
+import { PatternsTable } from './patterns_table';
 
 export interface LogPatternProps {
   selectedIntervalUnit: {
     text: string;
     value: string;
   };
-  setTempQuery: () => string;
   handleTimeRangePickerRefresh: (flag: boolean) => {};
   patterns: PatternTableData[];
   query: IQuery;
@@ -33,7 +32,6 @@ export interface LogPatternProps {
 
 const EventPatterns = ({
   selectedIntervalUnit,
-  setTempQuery,
   handleTimeRangePickerRefresh,
   patterns,
   query,
@@ -41,7 +39,7 @@ const EventPatterns = ({
   const dispatch = useDispatch();
   const { tabId, pplService, notifications } = useContext<any>(TabContext);
   const patternsData = patterns[tabId];
-  const [viewLogPatterns, setViewLogPatterns] = useState(false);
+  const [viewLogPatterns, setViewLogPatterns] = useState(true);
   const [isPatternConfigPopoverOpen, setIsPatternConfigPopoverOpen] = useState(false);
   const [patternRegexInput, setPatternRegexInput] = useState(PPL_DEFAULT_PATTERN_REGEX_FILETER);
   const { isEventsLoading: isPatternLoading, getPatterns } = useFetchPatterns({
@@ -49,11 +47,18 @@ const EventPatterns = ({
     requestParams: { tabId },
   });
 
+  // refresh patterns on opening page
+  useEffect(() => {
+    getPatterns(selectedIntervalUnit?.value?.replace(/^auto_/, '') || 'y');
+  }, []);
+
   const onPatternSelection = async (pattern: string) => {
     if (query[FILTERED_PATTERN] === pattern) {
       return;
     }
-    dispatch(
+    // await here allows react to render update properly and display it.
+    // it forces the query to be changed before running it, without await the visual wont update.
+    await dispatch(
       changeQuery({
         tabId,
         query: {
@@ -61,9 +66,16 @@ const EventPatterns = ({
         },
       })
     );
-    // workaround to refresh callback and trigger fetch data
-    await setTempQuery(query[RAW_QUERY]);
-    await handleTimeRangePickerRefresh(true);
+    handleTimeRangePickerRefresh(true);
+    // after rendering the patterns visual, we want the pattern to be reset for future searches
+    await dispatch(
+      changeQuery({
+        tabId,
+        query: {
+          [FILTERED_PATTERN]: '',
+        },
+      })
+    );
   };
 
   const showToastError = (errorMsg: string) => {
@@ -99,16 +111,14 @@ const EventPatterns = ({
         gutterSize="xs"
       >
         <EuiFlexItem grow={false}>
-          {viewLogPatterns && (
-            <PatternsHeader
-              patternsData={patternsData}
-              patternRegexInput={patternRegexInput}
-              setPatternRegexInput={setPatternRegexInput}
-              onPatternApply={handlePatternApply}
-              isPatternConfigPopoverOpen={isPatternConfigPopoverOpen}
-              setIsPatternConfigPopoverOpen={setIsPatternConfigPopoverOpen}
-            />
-          )}
+          <PatternsHeader
+            patternsData={patternsData}
+            patternRegexInput={patternRegexInput}
+            setPatternRegexInput={setPatternRegexInput}
+            onPatternApply={handlePatternApply}
+            isPatternConfigPopoverOpen={isPatternConfigPopoverOpen}
+            setIsPatternConfigPopoverOpen={setIsPatternConfigPopoverOpen}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>

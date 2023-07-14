@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Available Integration Table View Test Renders nginx integration table view using dummy data 1`] = `
+<EuiPanel
+  data-test-subj="nginx-details"
+>
+  <div
+    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    data-test-subj="nginx-details"
+  >
+    <PanelTitle
+      title="Details"
+    >
+      <EuiText
+        size="m"
+      >
+        <div
+          className="euiText euiText--medium"
+        >
+          <span
+            className="panel-title"
+          >
+            Details
+          </span>
+        </div>
+      </EuiText>
+    </PanelTitle>
+    <EuiSpacer>
+      <div
+        className="euiSpacer euiSpacer--l"
+      />
+    </EuiSpacer>
+    <EuiText>
+      <div
+        className="euiText euiText--medium"
+      >
+        Nginx HTTP server collector
+      </div>
+    </EuiText>
+  </div>
+</EuiPanel>
+`;

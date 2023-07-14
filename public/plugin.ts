@@ -11,6 +11,7 @@ import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
 } from '../../../src/core/public';
 import { CREATE_TAB_PARAM, CREATE_TAB_PARAM_KEY, TAB_CHART_ID } from '../common/constants/explorer';
@@ -34,6 +35,10 @@ import {
   observabilityLogsID,
   observabilityLogsTitle,
   observabilityLogsPluginOrder,
+  observabilityIntegrationsID,
+  observabilityIntegrationsTitle,
+  observabilityIntegrationsPluginOrder,
+  observabilityPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -45,16 +50,9 @@ import {
 } from '../common/utils';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
-// import { uiSettingsService } from '../common/utils';
-// import { QueryManager } from '../common/query_manager';
-import { DashboardSetup } from '../../../src/plugins/dashboard/public';
 import { SavedObject } from '../../../src/core/public';
 import { coreRefs } from './framework/core_refs';
 
-// export class ObservabilityPlugin implements Plugin<ObservabilitySetup, ObservabilityStart> {
-//   constructor(private initializerContext: PluginInitializerContext) {}
-
-//   public setup(core: CoreSetup, { dashboard }: { dashboard: DashboardSetup }): {} {
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -68,7 +66,6 @@ import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from './services/timestamp/timestamp';
-import { observabilityID } from '../common/constants/shared';
 import {
   AppPluginStartDependencies,
   ObservabilitySetup,
@@ -102,10 +99,6 @@ export class ObservabilityPlugin
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
 
-    // // redirect legacy notebooks URL to current URL under observability
-    // if (window.location.pathname.includes('application_analytics')) {
-    //   window.location.assign(convertLegacyAppAnalyticsUrl(window.location));
-    // }
     const BASE_URL = core.http.basePath.prepend('/app/observability-dashboards#');
     setupDeps.dashboard.registerDashboardProvider({
       appId: 'observability-panel',
@@ -124,7 +117,7 @@ export class ObservabilityPlugin
         label: i18n.translate('core.ui.observabilityNavList.label', {
           defaultMessage: 'Observability',
         }),
-        order: 1500,
+        order: observabilityPluginOrder,
       },
     });
 
@@ -196,6 +189,14 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('dashboards'),
     });
 
+    core.application.register({
+      id: observabilityIntegrationsID,
+      title: observabilityIntegrationsTitle,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: observabilityIntegrationsPluginOrder,
+      mount: appMountWithStartPage('integrations'),
+    });
+
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
@@ -240,6 +241,7 @@ export class ObservabilityPlugin
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
+    coreRefs.toasts = core.notifications.toasts;
 
     return {};
   }
