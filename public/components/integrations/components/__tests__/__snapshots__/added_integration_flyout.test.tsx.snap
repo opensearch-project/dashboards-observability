@@ -1,0 +1,2029 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Add Integration Flyout Test Renders add integration flyout with dummy integration name 1`] = `
+<AddIntegrationFlyout
+  integrationName="test"
+  onClose={[Function]}
+  onCreate={[Function]}
+>
+  <EuiFlyout
+    data-test-subj="addIntegrationFlyout"
+    onClose={[Function]}
+    size="s"
+  >
+    <OuiWindowEvent
+      event="keydown"
+      handler={[Function]}
+    />
+    <EuiOverlayMask
+      headerZindexLocation="below"
+      onClick={[Function]}
+    >
+      <Portal
+        containerInfo={
+          <div
+            class="euiOverlayMask euiOverlayMask--belowHeader"
+          >
+            <div
+              aria-hidden="true"
+              data-aria-hidden="true"
+              data-focus-guard="true"
+              style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+              tabindex="0"
+            />
+            <div
+              data-focus-lock-disabled="false"
+            >
+              <div
+                class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                data-test-subj="addIntegrationFlyout"
+                role="dialog"
+                tabindex="-1"
+              >
+                <button
+                  aria-label="Close this dialog"
+                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                  data-test-subj="euiFlyoutCloseButton"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+                <div
+                  class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                >
+                  <h2
+                    class="euiTitle euiTitle--medium"
+                    data-test-subj="addIntegrationFlyoutTitle"
+                  >
+                    Add Integration
+                  </h2>
+                </div>
+                <div
+                  class="euiFlyoutBody"
+                >
+                  <div
+                    class="euiFlyoutBody__overflow"
+                    tabindex="0"
+                  >
+                    <div
+                      class="euiFlyoutBody__overflowContent"
+                    >
+                      <form
+                        class="euiForm"
+                      >
+                        <div>
+                          <div
+                            class="euiFormRow"
+                            id="random_html_id-row"
+                          >
+                            <div
+                              class="euiFormRow__labelWrapper"
+                            >
+                              <label
+                                aria-invalid="false"
+                                class="euiFormLabel euiFormRow__label"
+                                for="random_html_id"
+                              >
+                                Index name or wildcard pattern
+                              </label>
+                               
+                              <div
+                                class="euiText euiText--extraSmall"
+                              >
+                                <a
+                                  class="euiLink euiLink--primary"
+                                  href="https://opensearch.org/docs/latest/integrations/index"
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  Learn More
+                                  <svg
+                                    aria-hidden="true"
+                                    aria-label="External link"
+                                    class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                  <span
+                                    class="euiScreenReaderOnly"
+                                  >
+                                    (opens in a new tab or window)
+                                  </span>
+                                </a>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFormRow__fieldWrapper"
+                            >
+                              <div
+                                class="euiFormControlLayout euiFormControlLayout--group"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-describedby="random_html_id-help-0"
+                                    class="euiFieldText euiFieldText--inGroup"
+                                    data-test-subj="data-source-name"
+                                    id="random_html_id"
+                                    name="first"
+                                    type="text"
+                                    value=""
+                                  />
+                                </div>
+                                <button
+                                  class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                  data-test-subj="validateIndex"
+                                  disabled=""
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Validate
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                class="euiFormHelpText euiFormRow__text"
+                                id="random_html_id-help-0"
+                              >
+                                Input an index name or wildcard pattern that your integration will query.
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFormRow"
+                            id="random_html_id-row"
+                          >
+                            <div
+                              class="euiFormRow__labelWrapper"
+                            >
+                              <label
+                                class="euiFormLabel euiFormRow__label"
+                                for="random_html_id"
+                              >
+                                Name
+                              </label>
+                            </div>
+                            <div
+                              class="euiFormRow__fieldWrapper"
+                            >
+                              <div
+                                class="euiFormControlLayout"
+                              >
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-describedby="random_html_id-help-0"
+                                    class="euiFieldText"
+                                    data-test-subj="new-instance-name"
+                                    id="random_html_id"
+                                    name="first"
+                                    type="text"
+                                    value="test"
+                                  />
+                                </div>
+                              </div>
+                              <div
+                                class="euiFormHelpText euiFormRow__text"
+                                id="random_html_id-help-0"
+                              >
+                                This will be used to label the newly added integration.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlyoutFooter"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <button
+                        class="euiButton euiButton--danger"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            class="euiButton__text"
+                          >
+                            Cancel
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <button
+                        class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                        data-click-metric-element="integrations.create_from_setup"
+                        data-test-subj="createInstanceButton"
+                        disabled=""
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            class="euiButton__text"
+                          >
+                            Add Integration
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              aria-hidden="true"
+              data-aria-hidden="true"
+              data-focus-guard="true"
+              style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+              tabindex="0"
+            />
+          </div>
+        }
+      >
+        <EuiFocusTrap
+          clickOutsideDisables={false}
+          disabled={false}
+          noIsolation={true}
+          returnFocus={true}
+          scrollLock={false}
+        >
+          <ForwardRef
+            enabled={true}
+            noIsolation={true}
+            onClickOutside={[Function]}
+            returnFocus={true}
+            scrollLock={false}
+          >
+            <ForwardRef
+              enabled={true}
+              noIsolation={true}
+              onClickOutside={[Function]}
+              returnFocus={true}
+              scrollLock={false}
+              sideCar={[Function]}
+            >
+              <ForwardRef(FocusLockUI)
+                as={
+                  Object {
+                    "$$typeof": Symbol(react.forward_ref),
+                    "classNames": Object {
+                      "fullWidth": "width-before-scroll-bar",
+                      "zeroRight": "right-scroll-bar-position",
+                    },
+                    "defaultProps": Object {
+                      "enabled": true,
+                      "inert": false,
+                      "removeScrollBar": true,
+                    },
+                    "render": [Function],
+                  }
+                }
+                autoFocus={true}
+                crossFrame={true}
+                disabled={false}
+                lockProps={
+                  Object {
+                    "allowPinchZoom": undefined,
+                    "as": undefined,
+                    "enabled": false,
+                    "inert": undefined,
+                    "onMouseDown": [Function],
+                    "onTouchStart": [Function],
+                    "shards": undefined,
+                    "sideCar": [Function],
+                    "style": undefined,
+                  }
+                }
+                noFocusGuards={false}
+                onActivation={[Function]}
+                onDeactivation={[Function]}
+                persistentFocus={false}
+                returnFocus={true}
+                sideCar={[Function]}
+              >
+                <div
+                  data-focus-guard={true}
+                  key="guard-first"
+                  style={
+                    Object {
+                      "height": "0px",
+                      "left": "1px",
+                      "overflow": "hidden",
+                      "padding": 0,
+                      "position": "fixed",
+                      "top": "1px",
+                      "width": "1px",
+                    }
+                  }
+                  tabIndex={0}
+                />
+                <RequireSideCar
+                  autoFocus={true}
+                  crossFrame={true}
+                  disabled={false}
+                  id={Object {}}
+                  observed={
+                    <div
+                      data-focus-lock-disabled="false"
+                    >
+                      <div
+                        class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                        data-test-subj="addIntegrationFlyout"
+                        role="dialog"
+                        tabindex="-1"
+                      >
+                        <button
+                          aria-label="Close this dialog"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                          data-test-subj="euiFlyoutCloseButton"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <div
+                          class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                        >
+                          <h2
+                            class="euiTitle euiTitle--medium"
+                            data-test-subj="addIntegrationFlyoutTitle"
+                          >
+                            Add Integration
+                          </h2>
+                        </div>
+                        <div
+                          class="euiFlyoutBody"
+                        >
+                          <div
+                            class="euiFlyoutBody__overflow"
+                            tabindex="0"
+                          >
+                            <div
+                              class="euiFlyoutBody__overflowContent"
+                            >
+                              <form
+                                class="euiForm"
+                              >
+                                <div>
+                                  <div
+                                    class="euiFormRow"
+                                    id="random_html_id-row"
+                                  >
+                                    <div
+                                      class="euiFormRow__labelWrapper"
+                                    >
+                                      <label
+                                        aria-invalid="false"
+                                        class="euiFormLabel euiFormRow__label"
+                                        for="random_html_id"
+                                      >
+                                        Index name or wildcard pattern
+                                      </label>
+                                       
+                                      <div
+                                        class="euiText euiText--extraSmall"
+                                      >
+                                        <a
+                                          class="euiLink euiLink--primary"
+                                          href="https://opensearch.org/docs/latest/integrations/index"
+                                          rel="noopener noreferrer"
+                                          target="_blank"
+                                        >
+                                          Learn More
+                                          <svg
+                                            aria-hidden="true"
+                                            aria-label="External link"
+                                            class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                            focusable="false"
+                                            height="16"
+                                            role="img"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                          <span
+                                            class="euiScreenReaderOnly"
+                                          >
+                                            (opens in a new tab or window)
+                                          </span>
+                                        </a>
+                                      </div>
+                                    </div>
+                                    <div
+                                      class="euiFormRow__fieldWrapper"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout euiFormControlLayout--group"
+                                      >
+                                        <div
+                                          class="euiFormControlLayout__childrenWrapper"
+                                        >
+                                          <input
+                                            aria-describedby="random_html_id-help-0"
+                                            class="euiFieldText euiFieldText--inGroup"
+                                            data-test-subj="data-source-name"
+                                            id="random_html_id"
+                                            name="first"
+                                            type="text"
+                                            value=""
+                                          />
+                                        </div>
+                                        <button
+                                          class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                          data-test-subj="validateIndex"
+                                          disabled=""
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButton__content"
+                                          >
+                                            <span
+                                              class="euiButton__text"
+                                            >
+                                              Validate
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </div>
+                                      <div
+                                        class="euiFormHelpText euiFormRow__text"
+                                        id="random_html_id-help-0"
+                                      >
+                                        Input an index name or wildcard pattern that your integration will query.
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="euiFormRow"
+                                    id="random_html_id-row"
+                                  >
+                                    <div
+                                      class="euiFormRow__labelWrapper"
+                                    >
+                                      <label
+                                        class="euiFormLabel euiFormRow__label"
+                                        for="random_html_id"
+                                      >
+                                        Name
+                                      </label>
+                                    </div>
+                                    <div
+                                      class="euiFormRow__fieldWrapper"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout"
+                                      >
+                                        <div
+                                          class="euiFormControlLayout__childrenWrapper"
+                                        >
+                                          <input
+                                            aria-describedby="random_html_id-help-0"
+                                            class="euiFieldText"
+                                            data-test-subj="new-instance-name"
+                                            id="random_html_id"
+                                            name="first"
+                                            type="text"
+                                            value="test"
+                                          />
+                                        </div>
+                                      </div>
+                                      <div
+                                        class="euiFormHelpText euiFormRow__text"
+                                        id="random_html_id-help-0"
+                                      >
+                                        This will be used to label the newly added integration.
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlyoutFooter"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          >
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <button
+                                class="euiButton euiButton--danger"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <button
+                                class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                data-click-metric-element="integrations.create_from_setup"
+                                data-test-subj="createInstanceButton"
+                                disabled=""
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text"
+                                  >
+                                    Add Integration
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  onActivation={[Function]}
+                  onDeactivation={[Function]}
+                  persistentFocus={false}
+                  returnFocus={[Function]}
+                  shards={Array []}
+                  sideCar={
+                    Object {
+                      "assignMedium": [Function],
+                      "assignSyncMedium": [Function],
+                      "options": Object {
+                        "async": true,
+                        "ssr": false,
+                      },
+                      "read": [Function],
+                      "useMedium": [Function],
+                    }
+                  }
+                >
+                  <SideCar
+                    autoFocus={true}
+                    crossFrame={true}
+                    disabled={false}
+                    id={Object {}}
+                    observed={
+                      <div
+                        data-focus-lock-disabled="false"
+                      >
+                        <div
+                          class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                          data-test-subj="addIntegrationFlyout"
+                          role="dialog"
+                          tabindex="-1"
+                        >
+                          <button
+                            aria-label="Close this dialog"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                            data-test-subj="euiFlyoutCloseButton"
+                            type="button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            />
+                          </button>
+                          <div
+                            class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                          >
+                            <h2
+                              class="euiTitle euiTitle--medium"
+                              data-test-subj="addIntegrationFlyoutTitle"
+                            >
+                              Add Integration
+                            </h2>
+                          </div>
+                          <div
+                            class="euiFlyoutBody"
+                          >
+                            <div
+                              class="euiFlyoutBody__overflow"
+                              tabindex="0"
+                            >
+                              <div
+                                class="euiFlyoutBody__overflowContent"
+                              >
+                                <form
+                                  class="euiForm"
+                                >
+                                  <div>
+                                    <div
+                                      class="euiFormRow"
+                                      id="random_html_id-row"
+                                    >
+                                      <div
+                                        class="euiFormRow__labelWrapper"
+                                      >
+                                        <label
+                                          aria-invalid="false"
+                                          class="euiFormLabel euiFormRow__label"
+                                          for="random_html_id"
+                                        >
+                                          Index name or wildcard pattern
+                                        </label>
+                                         
+                                        <div
+                                          class="euiText euiText--extraSmall"
+                                        >
+                                          <a
+                                            class="euiLink euiLink--primary"
+                                            href="https://opensearch.org/docs/latest/integrations/index"
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                          >
+                                            Learn More
+                                            <svg
+                                              aria-hidden="true"
+                                              aria-label="External link"
+                                              class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                              focusable="false"
+                                              height="16"
+                                              role="img"
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                            <span
+                                              class="euiScreenReaderOnly"
+                                            >
+                                              (opens in a new tab or window)
+                                            </span>
+                                          </a>
+                                        </div>
+                                      </div>
+                                      <div
+                                        class="euiFormRow__fieldWrapper"
+                                      >
+                                        <div
+                                          class="euiFormControlLayout euiFormControlLayout--group"
+                                        >
+                                          <div
+                                            class="euiFormControlLayout__childrenWrapper"
+                                          >
+                                            <input
+                                              aria-describedby="random_html_id-help-0"
+                                              class="euiFieldText euiFieldText--inGroup"
+                                              data-test-subj="data-source-name"
+                                              id="random_html_id"
+                                              name="first"
+                                              type="text"
+                                              value=""
+                                            />
+                                          </div>
+                                          <button
+                                            class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                            data-test-subj="validateIndex"
+                                            disabled=""
+                                            type="button"
+                                          >
+                                            <span
+                                              class="euiButtonContent euiButton__content"
+                                            >
+                                              <span
+                                                class="euiButton__text"
+                                              >
+                                                Validate
+                                              </span>
+                                            </span>
+                                          </button>
+                                        </div>
+                                        <div
+                                          class="euiFormHelpText euiFormRow__text"
+                                          id="random_html_id-help-0"
+                                        >
+                                          Input an index name or wildcard pattern that your integration will query.
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div
+                                      class="euiFormRow"
+                                      id="random_html_id-row"
+                                    >
+                                      <div
+                                        class="euiFormRow__labelWrapper"
+                                      >
+                                        <label
+                                          class="euiFormLabel euiFormRow__label"
+                                          for="random_html_id"
+                                        >
+                                          Name
+                                        </label>
+                                      </div>
+                                      <div
+                                        class="euiFormRow__fieldWrapper"
+                                      >
+                                        <div
+                                          class="euiFormControlLayout"
+                                        >
+                                          <div
+                                            class="euiFormControlLayout__childrenWrapper"
+                                          >
+                                            <input
+                                              aria-describedby="random_html_id-help-0"
+                                              class="euiFieldText"
+                                              data-test-subj="new-instance-name"
+                                              id="random_html_id"
+                                              name="first"
+                                              type="text"
+                                              value="test"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiFormHelpText euiFormRow__text"
+                                          id="random_html_id-help-0"
+                                        >
+                                          This will be used to label the newly added integration.
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlyoutFooter"
+                          >
+                            <div
+                              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            >
+                              <div
+                                class="euiFlexItem"
+                              >
+                                <button
+                                  class="euiButton euiButton--danger"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Cancel
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                class="euiFlexItem"
+                              >
+                                <button
+                                  class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                  data-click-metric-element="integrations.create_from_setup"
+                                  data-test-subj="createInstanceButton"
+                                  disabled=""
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Add Integration
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    onActivation={[Function]}
+                    onDeactivation={[Function]}
+                    persistentFocus={false}
+                    returnFocus={[Function]}
+                    shards={Array []}
+                    sideCar={
+                      Object {
+                        "assignMedium": [Function],
+                        "assignSyncMedium": [Function],
+                        "options": Object {
+                          "async": true,
+                          "ssr": false,
+                        },
+                        "read": [Function],
+                        "useMedium": [Function],
+                      }
+                    }
+                  >
+                    <SideEffect(FocusWatcher)
+                      autoFocus={true}
+                      crossFrame={true}
+                      disabled={false}
+                      id={Object {}}
+                      observed={
+                        <div
+                          data-focus-lock-disabled="false"
+                        >
+                          <div
+                            class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                            data-test-subj="addIntegrationFlyout"
+                            role="dialog"
+                            tabindex="-1"
+                          >
+                            <button
+                              aria-label="Close this dialog"
+                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                              data-test-subj="euiFlyoutCloseButton"
+                              type="button"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                focusable="false"
+                                height="16"
+                                role="img"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </button>
+                            <div
+                              class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                            >
+                              <h2
+                                class="euiTitle euiTitle--medium"
+                                data-test-subj="addIntegrationFlyoutTitle"
+                              >
+                                Add Integration
+                              </h2>
+                            </div>
+                            <div
+                              class="euiFlyoutBody"
+                            >
+                              <div
+                                class="euiFlyoutBody__overflow"
+                                tabindex="0"
+                              >
+                                <div
+                                  class="euiFlyoutBody__overflowContent"
+                                >
+                                  <form
+                                    class="euiForm"
+                                  >
+                                    <div>
+                                      <div
+                                        class="euiFormRow"
+                                        id="random_html_id-row"
+                                      >
+                                        <div
+                                          class="euiFormRow__labelWrapper"
+                                        >
+                                          <label
+                                            aria-invalid="false"
+                                            class="euiFormLabel euiFormRow__label"
+                                            for="random_html_id"
+                                          >
+                                            Index name or wildcard pattern
+                                          </label>
+                                           
+                                          <div
+                                            class="euiText euiText--extraSmall"
+                                          >
+                                            <a
+                                              class="euiLink euiLink--primary"
+                                              href="https://opensearch.org/docs/latest/integrations/index"
+                                              rel="noopener noreferrer"
+                                              target="_blank"
+                                            >
+                                              Learn More
+                                              <svg
+                                                aria-hidden="true"
+                                                aria-label="External link"
+                                                class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                focusable="false"
+                                                height="16"
+                                                role="img"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                              <span
+                                                class="euiScreenReaderOnly"
+                                              >
+                                                (opens in a new tab or window)
+                                              </span>
+                                            </a>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiFormRow__fieldWrapper"
+                                        >
+                                          <div
+                                            class="euiFormControlLayout euiFormControlLayout--group"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout__childrenWrapper"
+                                            >
+                                              <input
+                                                aria-describedby="random_html_id-help-0"
+                                                class="euiFieldText euiFieldText--inGroup"
+                                                data-test-subj="data-source-name"
+                                                id="random_html_id"
+                                                name="first"
+                                                type="text"
+                                                value=""
+                                              />
+                                            </div>
+                                            <button
+                                              class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                              data-test-subj="validateIndex"
+                                              disabled=""
+                                              type="button"
+                                            >
+                                              <span
+                                                class="euiButtonContent euiButton__content"
+                                              >
+                                                <span
+                                                  class="euiButton__text"
+                                                >
+                                                  Validate
+                                                </span>
+                                              </span>
+                                            </button>
+                                          </div>
+                                          <div
+                                            class="euiFormHelpText euiFormRow__text"
+                                            id="random_html_id-help-0"
+                                          >
+                                            Input an index name or wildcard pattern that your integration will query.
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div
+                                        class="euiFormRow"
+                                        id="random_html_id-row"
+                                      >
+                                        <div
+                                          class="euiFormRow__labelWrapper"
+                                        >
+                                          <label
+                                            class="euiFormLabel euiFormRow__label"
+                                            for="random_html_id"
+                                          >
+                                            Name
+                                          </label>
+                                        </div>
+                                        <div
+                                          class="euiFormRow__fieldWrapper"
+                                        >
+                                          <div
+                                            class="euiFormControlLayout"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout__childrenWrapper"
+                                            >
+                                              <input
+                                                aria-describedby="random_html_id-help-0"
+                                                class="euiFieldText"
+                                                data-test-subj="new-instance-name"
+                                                id="random_html_id"
+                                                name="first"
+                                                type="text"
+                                                value="test"
+                                              />
+                                            </div>
+                                          </div>
+                                          <div
+                                            class="euiFormHelpText euiFormRow__text"
+                                            id="random_html_id-help-0"
+                                          >
+                                            This will be used to label the newly added integration.
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlyoutFooter"
+                            >
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <div
+                                  class="euiFlexItem"
+                                >
+                                  <button
+                                    class="euiButton euiButton--danger"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Cancel
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div
+                                  class="euiFlexItem"
+                                >
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                    data-click-metric-element="integrations.create_from_setup"
+                                    data-test-subj="createInstanceButton"
+                                    disabled=""
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Add Integration
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                      onActivation={[Function]}
+                      onDeactivation={[Function]}
+                      persistentFocus={false}
+                      returnFocus={[Function]}
+                      shards={Array []}
+                    >
+                      <FocusWatcher
+                        autoFocus={true}
+                        crossFrame={true}
+                        disabled={false}
+                        id={Object {}}
+                        observed={
+                          <div
+                            data-focus-lock-disabled="false"
+                          >
+                            <div
+                              class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                              data-test-subj="addIntegrationFlyout"
+                              role="dialog"
+                              tabindex="-1"
+                            >
+                              <button
+                                aria-label="Close this dialog"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                                data-test-subj="euiFlyoutCloseButton"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                />
+                              </button>
+                              <div
+                                class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                              >
+                                <h2
+                                  class="euiTitle euiTitle--medium"
+                                  data-test-subj="addIntegrationFlyoutTitle"
+                                >
+                                  Add Integration
+                                </h2>
+                              </div>
+                              <div
+                                class="euiFlyoutBody"
+                              >
+                                <div
+                                  class="euiFlyoutBody__overflow"
+                                  tabindex="0"
+                                >
+                                  <div
+                                    class="euiFlyoutBody__overflowContent"
+                                  >
+                                    <form
+                                      class="euiForm"
+                                    >
+                                      <div>
+                                        <div
+                                          class="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            class="euiFormRow__labelWrapper"
+                                          >
+                                            <label
+                                              aria-invalid="false"
+                                              class="euiFormLabel euiFormRow__label"
+                                              for="random_html_id"
+                                            >
+                                              Index name or wildcard pattern
+                                            </label>
+                                             
+                                            <div
+                                              class="euiText euiText--extraSmall"
+                                            >
+                                              <a
+                                                class="euiLink euiLink--primary"
+                                                href="https://opensearch.org/docs/latest/integrations/index"
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                              >
+                                                Learn More
+                                                <svg
+                                                  aria-hidden="true"
+                                                  aria-label="External link"
+                                                  class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                  focusable="false"
+                                                  height="16"
+                                                  role="img"
+                                                  viewBox="0 0 16 16"
+                                                  width="16"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                />
+                                                <span
+                                                  class="euiScreenReaderOnly"
+                                                >
+                                                  (opens in a new tab or window)
+                                                </span>
+                                              </a>
+                                            </div>
+                                          </div>
+                                          <div
+                                            class="euiFormRow__fieldWrapper"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout euiFormControlLayout--group"
+                                            >
+                                              <div
+                                                class="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <input
+                                                  aria-describedby="random_html_id-help-0"
+                                                  class="euiFieldText euiFieldText--inGroup"
+                                                  data-test-subj="data-source-name"
+                                                  id="random_html_id"
+                                                  name="first"
+                                                  type="text"
+                                                  value=""
+                                                />
+                                              </div>
+                                              <button
+                                                class="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                                data-test-subj="validateIndex"
+                                                disabled=""
+                                                type="button"
+                                              >
+                                                <span
+                                                  class="euiButtonContent euiButton__content"
+                                                >
+                                                  <span
+                                                    class="euiButton__text"
+                                                  >
+                                                    Validate
+                                                  </span>
+                                                </span>
+                                              </button>
+                                            </div>
+                                            <div
+                                              class="euiFormHelpText euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                            >
+                                              Input an index name or wildcard pattern that your integration will query.
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            class="euiFormRow__labelWrapper"
+                                          >
+                                            <label
+                                              class="euiFormLabel euiFormRow__label"
+                                              for="random_html_id"
+                                            >
+                                              Name
+                                            </label>
+                                          </div>
+                                          <div
+                                            class="euiFormRow__fieldWrapper"
+                                          >
+                                            <div
+                                              class="euiFormControlLayout"
+                                            >
+                                              <div
+                                                class="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <input
+                                                  aria-describedby="random_html_id-help-0"
+                                                  class="euiFieldText"
+                                                  data-test-subj="new-instance-name"
+                                                  id="random_html_id"
+                                                  name="first"
+                                                  type="text"
+                                                  value="test"
+                                                />
+                                              </div>
+                                            </div>
+                                            <div
+                                              class="euiFormHelpText euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                            >
+                                              This will be used to label the newly added integration.
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlyoutFooter"
+                              >
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                >
+                                  <div
+                                    class="euiFlexItem"
+                                  >
+                                    <button
+                                      class="euiButton euiButton--danger"
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButton__content"
+                                      >
+                                        <span
+                                          class="euiButton__text"
+                                        >
+                                          Cancel
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem"
+                                  >
+                                    <button
+                                      class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                      data-click-metric-element="integrations.create_from_setup"
+                                      data-test-subj="createInstanceButton"
+                                      disabled=""
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButton__content"
+                                      >
+                                        <span
+                                          class="euiButton__text"
+                                        >
+                                          Add Integration
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                        onActivation={[Function]}
+                        onDeactivation={[Function]}
+                        persistentFocus={false}
+                        returnFocus={[Function]}
+                        shards={Array []}
+                      />
+                    </SideEffect(FocusWatcher)>
+                  </SideCar>
+                </RequireSideCar>
+                <ForwardRef
+                  data-focus-lock-disabled={false}
+                  enabled={false}
+                  inert={false}
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onMouseDown={[Function]}
+                  onTouchStart={[Function]}
+                  removeScrollBar={true}
+                  sideCar={[Function]}
+                >
+                  <div
+                    data-focus-lock-disabled={false}
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseDown={[Function]}
+                    onScrollCapture={[Function]}
+                    onTouchMoveCapture={[Function]}
+                    onTouchStart={[Function]}
+                    onWheelCapture={[Function]}
+                  >
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
+                    >
+                      <div
+                        className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                        data-test-subj="addIntegrationFlyout"
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
+                        role="dialog"
+                        tabIndex={-1}
+                      >
+                        <EuiI18n
+                          default="Close this dialog"
+                          token="euiFlyout.closeAriaLabel"
+                        >
+                          <EuiButtonIcon
+                            aria-label="Close this dialog"
+                            className="euiFlyout__closeButton euiFlyout__closeButton--inside"
+                            color="text"
+                            data-test-subj="euiFlyoutCloseButton"
+                            display="empty"
+                            iconType="cross"
+                            onClick={[Function]}
+                          >
+                            <button
+                              aria-label="Close this dialog"
+                              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                              data-test-subj="euiFlyoutCloseButton"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="cross"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiI18n>
+                        <EuiFlyoutHeader
+                          hasBorder={true}
+                        >
+                          <div
+                            className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                          >
+                            <EuiTitle
+                              data-test-subj="addIntegrationFlyoutTitle"
+                            >
+                              <h2
+                                className="euiTitle euiTitle--medium"
+                                data-test-subj="addIntegrationFlyoutTitle"
+                              >
+                                Add Integration
+                              </h2>
+                            </EuiTitle>
+                          </div>
+                        </EuiFlyoutHeader>
+                        <EuiFlyoutBody>
+                          <div
+                            className="euiFlyoutBody"
+                          >
+                            <div
+                              className="euiFlyoutBody__overflow"
+                              tabIndex={0}
+                            >
+                              <div
+                                className="euiFlyoutBody__overflowContent"
+                              >
+                                <EuiForm
+                                  component="form"
+                                >
+                                  <form
+                                    className="euiForm"
+                                  >
+                                    <div>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        error={Array []}
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText="Input an index name or wildcard pattern that your integration will query."
+                                        isInvalid={false}
+                                        label="Index name or wildcard pattern"
+                                        labelAppend={
+                                          <EuiText
+                                            size="xs"
+                                          >
+                                            <EuiLink
+                                              external={true}
+                                              href="https://opensearch.org/docs/latest/integrations/index"
+                                              target="_blank"
+                                            >
+                                              Learn More
+                                            </EuiLink>
+                                          </EuiText>
+                                        }
+                                        labelType="label"
+                                      >
+                                        <div
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            className="euiFormRow__labelWrapper"
+                                          >
+                                            <EuiFormLabel
+                                              aria-invalid={false}
+                                              className="euiFormRow__label"
+                                              htmlFor="random_html_id"
+                                              isFocused={false}
+                                              isInvalid={false}
+                                              type="label"
+                                            >
+                                              <label
+                                                aria-invalid={false}
+                                                className="euiFormLabel euiFormRow__label"
+                                                htmlFor="random_html_id"
+                                              >
+                                                Index name or wildcard pattern
+                                              </label>
+                                            </EuiFormLabel>
+                                             
+                                            <EuiText
+                                              size="xs"
+                                            >
+                                              <div
+                                                className="euiText euiText--extraSmall"
+                                              >
+                                                <EuiLink
+                                                  external={true}
+                                                  href="https://opensearch.org/docs/latest/integrations/index"
+                                                  target="_blank"
+                                                >
+                                                  <a
+                                                    className="euiLink euiLink--primary"
+                                                    href="https://opensearch.org/docs/latest/integrations/index"
+                                                    rel="noopener noreferrer"
+                                                    target="_blank"
+                                                  >
+                                                    Learn More
+                                                    <EuiIcon
+                                                      aria-label="External link"
+                                                      className="euiLink__externalIcon"
+                                                      size="s"
+                                                      type="popout"
+                                                    >
+                                                      <EuiIconEmpty
+                                                        aria-hidden={true}
+                                                        aria-label="External link"
+                                                        className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          aria-label="External link"
+                                                          className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </EuiIconEmpty>
+                                                    </EuiIcon>
+                                                    <EuiScreenReaderOnly>
+                                                      <span
+                                                        className="euiScreenReaderOnly"
+                                                      >
+                                                        <EuiI18n
+                                                          default="(opens in a new tab or window)"
+                                                          token="euiLink.newTarget.screenReaderOnlyText"
+                                                        >
+                                                          (opens in a new tab or window)
+                                                        </EuiI18n>
+                                                      </span>
+                                                    </EuiScreenReaderOnly>
+                                                  </a>
+                                                </EuiLink>
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
+                                          >
+                                            <EuiFieldText
+                                              append={
+                                                <EuiButton
+                                                  data-test-subj="validateIndex"
+                                                  disabled={true}
+                                                  onClick={[Function]}
+                                                >
+                                                  Validate
+                                                </EuiButton>
+                                              }
+                                              aria-describedby="random_html_id-help-0"
+                                              data-test-subj="data-source-name"
+                                              id="random_html_id"
+                                              isInvalid={false}
+                                              name="first"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value=""
+                                            >
+                                              <EuiFormControlLayout
+                                                append={
+                                                  <EuiButton
+                                                    data-test-subj="validateIndex"
+                                                    disabled={true}
+                                                    onClick={[Function]}
+                                                  >
+                                                    Validate
+                                                  </EuiButton>
+                                                }
+                                                fullWidth={false}
+                                                inputId="random_html_id"
+                                              >
+                                                <div
+                                                  className="euiFormControlLayout euiFormControlLayout--group"
+                                                >
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl
+                                                      isInvalid={false}
+                                                    >
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText euiFieldText--inGroup"
+                                                        data-test-subj="data-source-name"
+                                                        id="random_html_id"
+                                                        name="first"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value=""
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
+                                                  <EuiButton
+                                                    className="euiFormControlLayout__append"
+                                                    data-test-subj="validateIndex"
+                                                    disabled={true}
+                                                    key="0/.0"
+                                                    onClick={[Function]}
+                                                  >
+                                                    <EuiButtonDisplay
+                                                      baseClassName="euiButton"
+                                                      className="euiFormControlLayout__append"
+                                                      data-test-subj="validateIndex"
+                                                      disabled={true}
+                                                      element="button"
+                                                      isDisabled={true}
+                                                      onClick={[Function]}
+                                                      type="button"
+                                                    >
+                                                      <button
+                                                        className="euiButton euiButton--primary euiButton-isDisabled euiFormControlLayout__append"
+                                                        data-test-subj="validateIndex"
+                                                        disabled={true}
+                                                        onClick={[Function]}
+                                                        style={
+                                                          Object {
+                                                            "minWidth": undefined,
+                                                          }
+                                                        }
+                                                        type="button"
+                                                      >
+                                                        <EuiButtonContent
+                                                          className="euiButton__content"
+                                                          iconSide="left"
+                                                          textProps={
+                                                            Object {
+                                                              "className": "euiButton__text",
+                                                            }
+                                                          }
+                                                        >
+                                                          <span
+                                                            className="euiButtonContent euiButton__content"
+                                                          >
+                                                            <span
+                                                              className="euiButton__text"
+                                                            >
+                                                              Validate
+                                                            </span>
+                                                          </span>
+                                                        </EuiButtonContent>
+                                                      </button>
+                                                    </EuiButtonDisplay>
+                                                  </EuiButton>
+                                                </div>
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                              key="Input an index name or wildcard pattern that your integration will query."
+                                            >
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                Input an index name or wildcard pattern that your integration will query.
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
+                                        </div>
+                                      </EuiFormRow>
+                                      <EuiFormRow
+                                        describedByIds={Array []}
+                                        display="row"
+                                        fullWidth={false}
+                                        hasChildLabel={true}
+                                        hasEmptyLabelSpace={false}
+                                        helpText="This will be used to label the newly added integration."
+                                        label="Name"
+                                        labelType="label"
+                                      >
+                                        <div
+                                          className="euiFormRow"
+                                          id="random_html_id-row"
+                                        >
+                                          <div
+                                            className="euiFormRow__labelWrapper"
+                                          >
+                                            <EuiFormLabel
+                                              className="euiFormRow__label"
+                                              htmlFor="random_html_id"
+                                              isFocused={false}
+                                              type="label"
+                                            >
+                                              <label
+                                                className="euiFormLabel euiFormRow__label"
+                                                htmlFor="random_html_id"
+                                              >
+                                                Name
+                                              </label>
+                                            </EuiFormLabel>
+                                          </div>
+                                          <div
+                                            className="euiFormRow__fieldWrapper"
+                                          >
+                                            <EuiFieldText
+                                              aria-describedby="random_html_id-help-0"
+                                              data-test-subj="new-instance-name"
+                                              id="random_html_id"
+                                              name="first"
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onFocus={[Function]}
+                                              value="test"
+                                            >
+                                              <EuiFormControlLayout
+                                                fullWidth={false}
+                                                inputId="random_html_id"
+                                              >
+                                                <div
+                                                  className="euiFormControlLayout"
+                                                >
+                                                  <div
+                                                    className="euiFormControlLayout__childrenWrapper"
+                                                  >
+                                                    <EuiValidatableControl>
+                                                      <input
+                                                        aria-describedby="random_html_id-help-0"
+                                                        className="euiFieldText"
+                                                        data-test-subj="new-instance-name"
+                                                        id="random_html_id"
+                                                        name="first"
+                                                        onBlur={[Function]}
+                                                        onChange={[Function]}
+                                                        onFocus={[Function]}
+                                                        type="text"
+                                                        value="test"
+                                                      />
+                                                    </EuiValidatableControl>
+                                                    <EuiFormControlLayoutIcons />
+                                                  </div>
+                                                </div>
+                                              </EuiFormControlLayout>
+                                            </EuiFieldText>
+                                            <EuiFormHelpText
+                                              className="euiFormRow__text"
+                                              id="random_html_id-help-0"
+                                              key="This will be used to label the newly added integration."
+                                            >
+                                              <div
+                                                className="euiFormHelpText euiFormRow__text"
+                                                id="random_html_id-help-0"
+                                              >
+                                                This will be used to label the newly added integration.
+                                              </div>
+                                            </EuiFormHelpText>
+                                          </div>
+                                        </div>
+                                      </EuiFormRow>
+                                    </div>
+                                  </form>
+                                </EuiForm>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFlyoutBody>
+                        <EuiFlyoutFooter>
+                          <div
+                            className="euiFlyoutFooter"
+                          >
+                            <EuiFlexGroup>
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <EuiFlexItem>
+                                  <div
+                                    className="euiFlexItem"
+                                  >
+                                    <EuiButton
+                                      color="danger"
+                                      onClick={[Function]}
+                                    >
+                                      <EuiButtonDisplay
+                                        baseClassName="euiButton"
+                                        color="danger"
+                                        disabled={false}
+                                        element="button"
+                                        isDisabled={false}
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <button
+                                          className="euiButton euiButton--danger"
+                                          disabled={false}
+                                          onClick={[Function]}
+                                          style={
+                                            Object {
+                                              "minWidth": undefined,
+                                            }
+                                          }
+                                          type="button"
+                                        >
+                                          <EuiButtonContent
+                                            className="euiButton__content"
+                                            iconSide="left"
+                                            textProps={
+                                              Object {
+                                                "className": "euiButton__text",
+                                              }
+                                            }
+                                          >
+                                            <span
+                                              className="euiButtonContent euiButton__content"
+                                            >
+                                              <span
+                                                className="euiButton__text"
+                                              >
+                                                Cancel
+                                              </span>
+                                            </span>
+                                          </EuiButtonContent>
+                                        </button>
+                                      </EuiButtonDisplay>
+                                    </EuiButton>
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <div
+                                    className="euiFlexItem"
+                                  >
+                                    <EuiButton
+                                      data-click-metric-element="integrations.create_from_setup"
+                                      data-test-subj="createInstanceButton"
+                                      disabled={true}
+                                      fill={true}
+                                      onClick={[Function]}
+                                    >
+                                      <EuiButtonDisplay
+                                        baseClassName="euiButton"
+                                        data-click-metric-element="integrations.create_from_setup"
+                                        data-test-subj="createInstanceButton"
+                                        disabled={true}
+                                        element="button"
+                                        fill={true}
+                                        isDisabled={true}
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <button
+                                          className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                          data-click-metric-element="integrations.create_from_setup"
+                                          data-test-subj="createInstanceButton"
+                                          disabled={true}
+                                          onClick={[Function]}
+                                          style={
+                                            Object {
+                                              "minWidth": undefined,
+                                            }
+                                          }
+                                          type="button"
+                                        >
+                                          <EuiButtonContent
+                                            className="euiButton__content"
+                                            iconSide="left"
+                                            textProps={
+                                              Object {
+                                                "className": "euiButton__text",
+                                              }
+                                            }
+                                          >
+                                            <span
+                                              className="euiButtonContent euiButton__content"
+                                            >
+                                              <span
+                                                className="euiButton__text"
+                                              >
+                                                Add Integration
+                                              </span>
+                                            </span>
+                                          </EuiButtonContent>
+                                        </button>
+                                      </EuiButtonDisplay>
+                                    </EuiButton>
+                                  </div>
+                                </EuiFlexItem>
+                              </div>
+                            </EuiFlexGroup>
+                          </div>
+                        </EuiFlyoutFooter>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </div>
+                </ForwardRef>
+                <div
+                  data-focus-guard={true}
+                  style={
+                    Object {
+                      "height": "0px",
+                      "left": "1px",
+                      "overflow": "hidden",
+                      "padding": 0,
+                      "position": "fixed",
+                      "top": "1px",
+                      "width": "1px",
+                    }
+                  }
+                  tabIndex={0}
+                />
+              </ForwardRef(FocusLockUI)>
+              <RequireSideCar
+                noIsolation={true}
+                onClickOutside={[Function]}
+                setLockProps={[Function]}
+                sideCar={
+                  Object {
+                    "assignMedium": [Function],
+                    "assignSyncMedium": [Function],
+                    "options": Object {
+                      "async": true,
+                      "ssr": false,
+                    },
+                    "read": [Function],
+                    "useMedium": [Function],
+                  }
+                }
+              >
+                <SideCar
+                  noIsolation={true}
+                  onClickOutside={[Function]}
+                  setLockProps={[Function]}
+                  sideCar={
+                    Object {
+                      "assignMedium": [Function],
+                      "assignSyncMedium": [Function],
+                      "options": Object {
+                        "async": true,
+                        "ssr": false,
+                      },
+                      "read": [Function],
+                      "useMedium": [Function],
+                    }
+                  }
+                >
+                  <Effect
+                    noIsolation={true}
+                    onClickOutside={[Function]}
+                    setLockProps={[Function]}
+                  >
+                    <Component>
+                      <Sheet
+                        styles="
+ [data-focus-on-hidden] {
+   pointer-events: none !important;
+ }
+"
+                      />
+                    </Component>
+                  </Effect>
+                </SideCar>
+              </RequireSideCar>
+            </ForwardRef>
+          </ForwardRef>
+        </EuiFocusTrap>
+      </Portal>
+    </EuiOverlayMask>
+  </EuiFlyout>
+</AddIntegrationFlyout>
+`;
