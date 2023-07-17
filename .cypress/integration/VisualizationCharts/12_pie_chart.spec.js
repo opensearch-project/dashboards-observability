@@ -10,6 +10,7 @@ import {
   landOnEventVisualizations,
   saveVisualizationAndVerify,
   deleteVisualization,
+  aggregationValues,
 } from '../../utils/event_analytics/constants';
 
 const renderPieChart = () => {
@@ -19,17 +20,14 @@ const renderPieChart = () => {
   cy.get('[data-test-subj="comboBoxOptionsList "] button span').contains('Pie').click({ force: true });
 };
 
-const aggregationValues = [
-  'count',
-  'sum',
-  'avg',
-  'max',
-  'min',
-  'var_samp',
-  'var_pop',
-  'stddev_samp',
-  'stddev_pop',
-];
+describe('Adding sample data and visualization', () => {
+  it('Adds sample flights data for visualizations to use', () => {
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .contains(/(Add|View) data/)
+      .click();
+  });
+});
 
 describe('Render Pie chart and verify default behavior', () => {
   beforeEach(() => {

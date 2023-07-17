@@ -28,6 +28,15 @@ const renderTimeSeriesChart = () => {
   cy.get('[data-test-subj="comboBoxOptionsList "] button span').contains('Time series').click({ force: true });
 };
 
+describe('Adding sample data for visualizations', () => {
+  it('Adds sample flights data for visualizations to use', () => {
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('div[data-test-subj="sampleDataSetCardlogs"]')
+      .contains(/(Add|View) data/)
+      .click();
+  });
+});
+
 describe('Render Time series chart and verify default behaviour ', () => {
   beforeEach(() => {
     renderTimeSeriesChart();
@@ -83,7 +92,6 @@ describe('Render Time series chart for data configuration panel', () => {
   });
 
   it('Render Time series chart and verify data config panel no result found if metric is missing', () => {
-    cy.wait(delay);
     cy.get('[data-test-subj="viz-config-delete-btn"]').eq(3).click();
     cy.get('[data-test-subj="viz-config-delete-btn"]').eq(2).click();
     cy.get('.euiButton__text').contains('Update chart').click();

@@ -54,23 +54,23 @@ export const TEST_QUERIES = [
   },
 ];
 
+export const aggregationValues = [
+  'count',
+  'sum',
+  'avg',
+  'max',
+  'min',
+  'var_samp',
+  'var_pop',
+  'stddev_samp',
+  'stddev_pop',
+];
+
 export const TESTING_PANEL = 'Mock Testing Panels';
 export const SAVE_QUERY1 = 'Mock Flight Events Overview';
 export const SAVE_QUERY2 = 'Mock Flight count by destination';
 export const SAVE_QUERY3 = 'Mock Flight count by destination save to panel';
 export const SAVE_QUERY4 = 'Mock Flight peek';
-
-export const aggregationValues = [
-  'COUNT',
-  'SUM',
-  'AVERAGE',
-  'MAX',
-  'MIN',
-  'VAR_SAMP',
-  'VAR_POP',
-  'STDDEV_SAMP',
-  'STDDEV_POP',
-];
 
 export const querySearch = (query, rangeSelected) => {
   cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: COMMAND_TIMEOUT_LONG })
@@ -112,19 +112,15 @@ const vis_name_sub_string = Math.floor(Math.random() * 100);
 export const saveVisualizationAndVerify = () => {
   cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
   cy.get('[data-test-subj="eventExplorer__querySaveComboBox"]').click();
-  cy.get('.euiComboBoxOptionsList__rowWrap .euiFilterSelectItem').eq(0).click();
-  cy.get(
-    '.euiPopover__panel .euiFormControlLayoutIcons [data-test-subj="comboBoxToggleListButton"]'
-  )
+  cy.get('.euiPopover__panel .euiFormControlLayoutIcons [data-test-subj="comboBoxToggleListButton"]')
     .eq(0)
-    .click();
-  
+    .click({ force: true });
   cy.get('.euiPopover__panel input')
     .eq(1)
     .type(`Test visualization` + vis_name_sub_string, { force: true });
-  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
+  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click({ force: true });
   cy.wait(delay);
-  cy.get('.euiHeaderBreadcrumbs a').eq(1).click();
+  cy.get('.euiHeaderBreadcrumbs a').eq(1).click({ force: true });
   cy.get('.euiFlexGroup .euiFormControlLayout__childrenWrapper input')
     .eq(0)
     .type(`Test visualization` + vis_name_sub_string)
