@@ -11,16 +11,19 @@ export const INTERVAL = 60;
 export const CAPACITY = (WINDOW / INTERVAL) * 2;
 export const MILLIS_MULTIPLIER = 1000;
 
-export const COMPONENTS = [
-  'application_analytics',
-  'operational_panels',
-  'event_analytics',
-  'notebooks',
-  'trace_analytics',
-  'metrics_analytics',
-  'integrations',
-] as const;
-export const REQUESTS = ['create', 'get', 'update', 'delete'] as const;
+const commonRequests = ['create', 'get', 'update', 'delete', 'add_samples'] as const;
+
+// object of each component and its specific requests
+export const COMPONENTS = {
+  application_analytics: commonRequests,
+  operational_panels: [...commonRequests, 'fetch_visualization'],
+  event_analytics: commonRequests,
+  notebooks: [...commonRequests, 'run_sql_query', 'run_ppl_query', 'fetch_visualization'],
+  trace_analytics: commonRequests,
+  metrics_analytics: commonRequests,
+  integrations: commonRequests,
+} as const;
+
 
 export const GLOBAL_BASIC_COUNTER: CounterType = (() => {
   const counter = {} as CounterType;
