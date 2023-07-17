@@ -330,7 +330,7 @@ describe('Viewing application', () => {
 
   it('Saves visualization #1 to panel', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
-    cy.get('[data-test-subj="addVisualizationButton"]').last().click();
+    cy.get('[data-test-subj="addVisualizationButton"]').first().click();
     cy.get('[id="explorerPlotComponent"]').should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
     cy.get('.aa-List').find('.aa-Item').should('have.length', 11);
@@ -357,8 +357,7 @@ describe('Viewing application', () => {
 
     cy.wait(delay);
     cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.focused().type('{downArrow}');
-    cy.focused().type('{downArrow}');
+    cy.get('[data-test-subj="comboBoxOptionsList "] button span').contains('Time series').click({ force: true });
     cy.focused().type('{enter}');
 
     cy.get('[data-test-subj="addAvailabilityButton"]').click();
@@ -376,7 +375,6 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
-    cy.wait(delay*5);
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[id="explorerPlotComponent"]').should('exist');
     cy.get('[class="lines"]').should('exist');
@@ -397,10 +395,7 @@ describe('Viewing application', () => {
     cy.get('.euiTab[id="availability-panel"]').click();
     cy.wait(delay);
     cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.focused().type('{downArrow}');
-    cy.focused().type('{downArrow}');
-    cy.focused().type('{enter}');
-    
+    cy.get('[data-test-subj="comboBoxOptionsList "] button span').contains('Time series').click({ force: true });
     cy.get('[data-test-subj="addAvailabilityButton"]').click();
     cy.get('[data-test-subj="euiColorPickerAnchor"]').click();
     cy.get('[aria-label="Select #9170B8 as the color"]').click();
