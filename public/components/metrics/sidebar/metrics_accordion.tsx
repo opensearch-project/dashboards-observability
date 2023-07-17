@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { I18nProvider } from '@osd/i18n/react';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {
@@ -18,24 +19,35 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
   const { metricsList, headerName, handleClick, dataTestSubj } = props;
 
   return (
-    <EuiAccordion
-      initialIsOpen
-      id={`${headerName}Selector`}
-      buttonContent={
-        <EuiTitle size="xxxs">
-          <span>{headerName}</span>
-        </EuiTitle>
-      }
-      paddingSize="none"
-    >
-      <ul className="metricsList">
-        {metricsList.slice(0, 100).map((metric: any) => (
-          <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>
-            <MetricName metric={metric} handleClick={handleClick} />
-          </li>
-        ))}
-      </ul>
-      {metricsList.length > 100 && <p>Use search bar for searching through all metrics.</p>}
-    </EuiAccordion>
+    <I18nProvider>
+      <section className="sidebar-list">
+        <div className="sidebar-list">
+          <EuiAccordion
+            initialIsOpen
+            id={`${headerName}Selector`}
+            buttonContent={
+              <EuiTitle size="xxxs">
+                <span>{headerName}</span>
+              </EuiTitle>
+            }
+            paddingSize="none"
+          >
+            <ul className="dscSidebarList dscFieldList--selected">
+              {metricsList.slice(0, 100).map((metric: any) => (
+                <li
+                  key={metric.id}
+                  data-attr-field={metric.id}
+                  className="dscSidebar__item"
+                  data-test-subj={dataTestSubj}
+                >
+                  <MetricName metric={metric} handleClick={handleClick} />
+                </li>
+              ))}
+            </ul>
+            {metricsList.length > 100 && <p>Use search bar for searching through all metrics.</p>}
+          </EuiAccordion>
+        </div>
+      </section>
+    </I18nProvider>
   );
 };

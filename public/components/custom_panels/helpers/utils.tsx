@@ -10,6 +10,7 @@ import _, { isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
+import { integer } from '@opensearch-project/opensearch/api/types';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   PPL_DATE_FORMAT,
@@ -30,6 +31,7 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
+import { resolutionOptions } from '../../../../common/constants/metrics';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -145,9 +147,11 @@ const pplServiceRequestor = async (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
+  console.log('finalQuery: ', finalQuery);
   await pplService
     .fetch({ query: finalQuery, format: 'jdbc' })
     .then((res) => {
+      console.log('res: ', res);
       if (res === undefined)
         setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
       setVisualizationData(res);
@@ -290,7 +294,9 @@ const createCatalogVisualizationMetaData = (
   visualizationQuery: string,
   visualizationType: string,
   visualizationTimeField: string,
-  dimensions: []
+  dimensions: [],
+  // series: [],
+  span: {}
 ) => {
   return {
     name: catalogSource,
@@ -313,7 +319,36 @@ const createCatalogVisualizationMetaData = (
     user_configs: {
       dataConfig: {
         breakdowns: dimensions,
+        series: {
+          aggregation: 'avg',
+          customLabel: '',
+          label: '@value',
+        },
+        span,
       },
+    },
+  };
+};
+
+const creatSpanValue = (spanParam: integer, spanResolution: string) => {
+  let unitValue;
+  for (const resolutionOption in resolutionOptions) {
+    if (resolutionOptions[resolutionOption].value === spanResolution) {
+      unitValue = resolutionOptions[resolutionOption].text;
+      console.log('unitValue: ', unitValue);
+    }
+  }
+  return {
+    interval: spanParam,
+    time_field: {
+      label: 'timestamp',
+      name: 'timestamp',
+      type: 'timestamp',
+    },
+    unit: {
+      label: unitValue,
+      text: unitValue,
+      value: spanResolution[0].toUpperCase(),
     },
   };
 };
@@ -326,43 +361,51 @@ export const renderCatalogVisualization = async (
   startTime: string,
   endTime: string,
   filterQuery: string,
-  spanParam: string | undefined,
   setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
   setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
   setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
+  spanParam?: integer,
   spanResolution?: string,
-  dimensions?: any[]
+  dimensions?: any[],
+  series?: any[]
 ) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
-  let visualizationQuery = `source = ${catalogSource} | stats avg(@value) by span(${visualizationTimeField},1h)`;
+  let visualizationQuery = `source = ${catalogSource} | stats avg(@value) by span(${visualizationTimeField},1h), instance, job`;
 
   if (spanParam !== undefined) {
     visualizationQuery = updateQuerySpanInterval(
       visualizationQuery,
       visualizationTimeField,
-      spanParam
+      spanParam + spanResolution
     );
   }
-  console.log('dimensions lols: ', dimensions);
+  console.log('spanParam: ', spanParam);
+  console.log('visualizationTimeField: ', visualizationTimeField);
+  const spanData = creatSpanValue(spanParam, spanResolution);
+
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
     visualizationQuery,
     visualizationType,
     visualizationTimeField,
-    dimensions
+    dimensions,
+    spanData
   );
+  console.log('visualizationMetaData: ', visualizationMetaData);
+
   setVisualizationTitle(catalogSource);
   setVisualizationType(visualizationType);
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
-
+  console.log('here beofre getQueryResponse');
+  console.log('visualization Query: ', visualizationQuery);
   getQueryResponse(
     pplService,
     visualizationQuery,
@@ -398,6 +441,7 @@ const rejectRecentRange = (rangeList, toReject) => {
 export const parseSavedVisualizations = (
   visualization: ObservabilitySavedVisualization
 ): SavedVisualizationType => {
+  console.log('parseSavedVisualizations: ', visualization);
   return {
     id: visualization.objectId,
     name: visualization.savedVisualization.name,
@@ -482,27 +526,30 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   }
 
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
-  console.log('dataConfig: ', dataConfig);
+  // console.log('dataConfig in panles utils: ', dataConfig);
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
+  // console.log('hasBreakdowns in panles utils: ', hasBreakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
   };
   let finalDimensions = [...(realTimeParsedStats.dimensions || [])];
   const breakdowns = [...(dataConfig.breakdowns || [])];
-
+  // console.log('breakdowns: ', breakdowns);
   // filter out breakdowns from dimnesions
   if (hasBreakdowns) {
     finalDimensions = _.differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
       _.isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
     );
   }
-
+  // console.log('finalDimensions: ', finalDimensions);
   const finalDataConfig = {
     ...dataConfig,
     ...realTimeParsedStats,
     dimensions: finalDimensions,
     breakdowns,
   };
+
+  // console.log('finalDataConfig: ', finalDataConfig);
 
   const mixedUserConfigs = {
     availabilityConfig: {
@@ -515,7 +562,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
       ...(metaData.user_configs?.layoutConfig || {}),
     },
   };
-
+  console.log('mixedUserConfigs: ', mixedUserConfigs);
   return (
     <Visualization
       visualizations={getVizContainerProps({

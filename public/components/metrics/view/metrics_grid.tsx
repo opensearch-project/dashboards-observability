@@ -9,6 +9,7 @@ import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
+import { integer } from '@opensearch-project/opensearch/api/types';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import { MetricType } from '../../../../common/types/metrics';
@@ -34,7 +35,8 @@ interface MetricsGridProps {
   onRefresh: boolean;
   editActionType: string;
   setEditActionType: React.Dispatch<React.SetStateAction<string>>;
-  spanParam: string;
+  spanParam: integer;
+  resolutionValue: string;
 }
 
 export const MetricsGrid = ({
@@ -51,6 +53,7 @@ export const MetricsGrid = ({
   editActionType,
   setEditActionType,
   spanParam,
+  resolutionValue,
 }: MetricsGridProps) => {
   // Redux tools
   const dispatch = useDispatch();
@@ -91,6 +94,7 @@ export const MetricsGrid = ({
           panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
         }
         spanParam={spanParam}
+        resolutionValue={resolutionValue}
         metricsPanel={true}
       />
     ));

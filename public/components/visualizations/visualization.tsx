@@ -26,6 +26,8 @@ export const Visualization = ({
       vis = {},
     }: IVisualizationContainerProps = vs;
 
+    console.log('vis: ', vs);
+
     // Markdown, it does not depend on if there is data
     if (vis.id === VIS_CHART_TYPES.Text) return [true, ''];
 

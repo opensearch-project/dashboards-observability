@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './sidebar.scss';
+// import './sidebar.scss';
 
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
@@ -53,7 +53,7 @@ export const Sidebar = (props: ISidebarProps) => {
 
   return (
     <I18nProvider>
-      <section className="sidebarHeight">
+      <section className="sidebar-list">
         <MetricsAccordion
           metricsList={recentlyCreatedMetrics}
           headerName="Recently Created Metrics"

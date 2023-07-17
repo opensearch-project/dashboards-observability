@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
+import { integer } from '@opensearch-project/opensearch/api/types';
 import {
   getVisualization,
   pplServiceRequestor,
@@ -77,7 +78,8 @@ interface Props {
   showFlyout?: (isReplacement?: boolean | undefined, replaceVizId?: string | undefined) => void;
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
-  spanParam?: string;
+  spanParam?: integer;
+  resolutionValue?: string;
   metricsPanel?: boolean;
 }
 
@@ -98,6 +100,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   spanParam,
+  resolutionValue,
   metricsPanel,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -238,9 +241,9 @@ export const VisualizationContainer = ({
         );
         console.log('catalogData', catalogData);
         const attributes = catalogData.data.COLUMN_NAME.reduce(
-          (acc: Array<{ label: string }>, column: string) => {
+          (acc: Array<{ label: string; name: string }>, column: string) => {
             if (!column.includes('@')) {
-              acc.push({ label: column });
+              acc.push({ label: column, name: column });
             }
             console.log('acc', acc);
             return acc;
@@ -264,11 +267,12 @@ export const VisualizationContainer = ({
     }
   };
 
-  useEffect(() => {
-    console.log('blah blah dimensions: ', dimensions);
-  }, [dimensions]);
+  // useEffect(() => {
+  //   console.log('blah blah dimensions: ', dimensions);
+  // }, [dimensions]);
 
   const loadVisaulization = async () => {
+    console.log('blah blah dimensions: ', dimensions);
     if (catalogVisualization)
       await renderCatalogVisualization(
         http,
@@ -277,13 +281,14 @@ export const VisualizationContainer = ({
         fromTime,
         toTime,
         pplFilterValue,
-        spanParam,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
+        spanParam,
+        resolutionValue,
         dimensions
       );
     else
@@ -339,8 +344,8 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-    console.log('dimensions in useEffect', dimensions);
-    console.log('typeof dimensions: ', typeof dimensions);
+    // console.log('dimensions in useEffect', dimensions);
+    // console.log('typeof dimensions: ', typeof dimensions);
   }, [onRefresh, dimensions]);
 
   return (
