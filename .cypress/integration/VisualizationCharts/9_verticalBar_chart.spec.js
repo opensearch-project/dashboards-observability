@@ -7,9 +7,12 @@
 import {
     delay,
     TEST_QUERIES,
+} from '../../utils/event_analytics/constants';
+
+import {
     querySearch,
     landOnEventVisualizations,
-} from '../../utils/event_analytics/constants';
+} from '../../utils/event_analytics/helpers';
 
 const numberOfWindow = 6;
 const labelSize = 20;

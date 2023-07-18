@@ -7,9 +7,12 @@
 import {
   delay,
   TEST_QUERIES,
+} from '../../utils/event_analytics/constants';
+
+import {
   querySearch,
   landOnEventVisualizations,
-} from '../../utils/event_analytics/constants';
+} from '../../utils/event_analytics/helpers';
 
 const numberOfWindow = 6;
 const labelSize = 20;
@@ -105,6 +108,7 @@ describe('Render horizontal bar chart for data configuration panel', () => {
     cy.get('[data-test-subj="comboBoxOptionsList "]').contains('host').click();
     cy.get('[data-test-subj="panelCloseBtn"]').click({ force: true });
     cy.get('.euiButton__text').contains('Update chart').click().then(() => {
+      cy.wait(delay);//not updating correctly without
       cy.get('.main-svg').contains('Invalid visualization data').should('not.exist');
     });
   });

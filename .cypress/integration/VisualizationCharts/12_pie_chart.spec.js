@@ -6,12 +6,15 @@
 /// <reference types="cypress" />
 import {
   TEST_QUERIES,
+  aggregationValues,
+} from '../../utils/event_analytics/constants';
+
+import {
   querySearch,
   landOnEventVisualizations,
   saveVisualizationAndVerify,
   deleteVisualization,
-  aggregationValues,
-} from '../../utils/event_analytics/constants';
+} from '../../utils/event_analytics/helpers';
 
 const renderPieChart = () => {
   landOnEventVisualizations();
