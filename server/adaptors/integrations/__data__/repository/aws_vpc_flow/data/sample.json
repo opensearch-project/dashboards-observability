@@ -1,0 +1,59 @@
+[
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 530679726453 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "443273586136"
+      },
+      "platform": "aws_vpc",
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/530679726453/vpcflowlogs/us-east-2/2023/01/28/530679726453_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "530679726453",
+        "interface-id" : "eni-0e250409d410e1290",
+        "srcaddr" : "162.142.125.177",
+        "dstaddr" : "10.0.0.200",
+        "srcport" : "38471",
+        "dstport" : "12313",
+        "protocol" : "6",
+        "packets" : "1",
+        "bytes" : "44",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "ACCEPT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "162.142.125.177",
+        "port": "38471",
+        "packets": "1",
+        "bytes" : "44"
+      },
+      "destination": {
+        "address": "10.0.0.200",
+        "port": "12313"
+      }
+    }
+  }
+]
