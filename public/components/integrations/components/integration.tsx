@@ -48,23 +48,36 @@ export function Integration(props: AvailableIntegrationProps) {
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
     if (componentName !== integration.type) {
-      return http
-        .post(
-          `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-          {
-            body: JSON.stringify(payload),
-          }
-        )
+      return fetch(
+        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
+        {
+          method: 'POST',
+          headers: [
+            ['osd-xsrf', 'true'],
+            ['Content-Type', 'application/json'],
+          ],
+          body: JSON.stringify(payload),
+        }
+      )
+        .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
           return err;
         });
     } else {
       payload.index_patterns = [dataSourceName];
-      return http
-        .post(`/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`, {
+      return fetch(
+        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
+        {
+          method: 'POST',
+          headers: [
+            ['osd-xsrf', 'true'],
+            ['Content-Type', 'application/json'],
+          ],
           body: JSON.stringify(payload),
-        })
+        }
+      )
+        .then((response) => response.json())
         .catch((err: any) => {
           console.error(err);
           return err;
@@ -207,10 +220,14 @@ export function Integration(props: AvailableIntegrationProps) {
       data.sampleData
         .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
         .join('\n') + '\n';
-    http
-      .post(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, {
-        body: requestBody,
-      })
+    fetch(http.basePath.prepend(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`), {
+      method: 'POST',
+      body: requestBody,
+      headers: [
+        ['osd-xsrf', 'true'],
+        ['Content-Type', 'application/json; charset=utf-8'],
+      ],
+    })
       .catch((err) => {
         console.error(err);
         setToast('Failed to load sample data', 'danger');
