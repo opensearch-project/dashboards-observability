@@ -29,22 +29,15 @@ export const MetricName = (props: IMetricNameProps) => {
       title={metric.name}
       onClick={() => handleClick(metric)}
     >
-      <OuiFieldText value={metric.name} prepend={['m']} compressed={false} readOnly={true} />
+      <EuiToken
+        className="tokenMargin"
+        title={title}
+        iconType={token}
+        fill="light"
+        color="euiColorVis1"
+        shape="square"
+      />{' '}
+      {name(metric.name)}
     </EuiButtonEmpty>
-    //   <EuiButtonEmpty
-    //     className="eui-textTruncate"
-    //     title={metric.name}
-    //     onClick={() => handleClick(metric)}
-    //   >
-    //     <EuiToken
-    //       className="tokenMargin"
-    //       title={title}
-    //       iconType={token}
-    //       fill="light"
-    //       color="euiColorVis1"
-    //       shape="square"
-    //     />{' '}
-    //     {name(metric.name)}
-    //   </EuiButtonEmpty>
   );
 };

@@ -24,3 +24,5 @@ export const resolutionOptions = [
 
 export const DEFAULT_METRIC_HEIGHT = 2;
 export const DEFAULT_METRIC_WIDTH = 12;
+
+export const AGGREGATION_OPTIONS = [{ label: 'avg' }, { label: 'sum' }, { label: 'count' }];
