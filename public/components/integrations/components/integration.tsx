@@ -49,7 +49,9 @@ export function Integration(props: AvailableIntegrationProps) {
     const version = payload.template.mappings._meta.version;
     if (componentName !== integration.type) {
       return fetch(
-        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
+        http.basePath.prepend(
+          `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`
+        ),
         {
           method: 'POST',
           headers: [
@@ -67,7 +69,9 @@ export function Integration(props: AvailableIntegrationProps) {
     } else {
       payload.index_patterns = [dataSourceName];
       return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
+        http.basePath.prepend(
+          `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`
+        ),
         {
           method: 'POST',
           headers: [
