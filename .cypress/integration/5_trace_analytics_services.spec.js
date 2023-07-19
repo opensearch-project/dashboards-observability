@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row } from '../utils/constants';
+import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../utils/constants';
 import { suppressResizeObserverIssue } from '../utils/constants';
 
 suppressResizeObserverIssue();//needs to be in file once
@@ -236,10 +236,10 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     setTimeFilter();
   });
 
-  it.only('Renders the spans table and click on first span to verify details', () => {
+  it('Renders the spans table and click on first span to verify details', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     verify_traces_spans_data_grid_cols_exists();
-    cy.contains('277a5934acf55dcf').click();
+    cy.contains(AUTH_SERVICE_SPAN_ID).click();
     cy.get('[data-test-subj="spanDetailFlyout"] .euiTitle.euiTitle--medium').contains('Span detail').should('exist');
     cy.get('.euiFlyoutBody .panel-title').contains('Overview').should('exist');
     cy.get('.euiTextColor.euiTextColor--subdued').contains('Span ID').should('exist');
