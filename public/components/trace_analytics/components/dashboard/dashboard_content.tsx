@@ -55,7 +55,6 @@ export function DashboardContent(props: DashboardProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
-    // setToast,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -209,13 +208,6 @@ export function DashboardContent(props: DashboardProps) {
       serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
         (must: any) => must?.term?.serviceName == null
       );
-      // handleServiceMapRequest(
-      //   http,
-      //   serviceMapDSL,
-      //   mode,
-      //   setServiceMap,
-      //   currService || filteredService
-      // );
     }
 
     handleDashboardThroughputPltRequest(
@@ -329,7 +321,7 @@ export function DashboardContent(props: DashboardProps) {
               <EuiSpacer />
               <EuiFlexGroup alignItems="baseline">
                 <EuiFlexItem>
-                  <EuiFlexGroup direction="row">
+                  <EuiFlexGroup direction="column">
                     <EuiFlexItem>
                       <ErrorRatePlt
                         items={errorRatePltItems}

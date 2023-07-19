@@ -17,12 +17,6 @@ export interface ServicesProps extends TraceAnalyticsComponentDeps {
   traceColumnAction: any;
   page: 'services' | 'app';
   toasts: Toast[];
-  setToast?: (
-    title: string,
-    color?: string,
-    text?: React.ReactChild | undefined,
-    side?: string | undefined
-  ) => void;
 }
 
 export function Services(props: ServicesProps) {

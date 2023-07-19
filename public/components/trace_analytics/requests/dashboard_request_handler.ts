@@ -105,7 +105,7 @@ export const handleDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getDashboardQuery(), mode)
+  await handleDslRequest(http, DSL, getDashboardQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {

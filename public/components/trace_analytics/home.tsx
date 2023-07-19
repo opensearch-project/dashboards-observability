@@ -175,21 +175,6 @@ export const Home = (props: HomeProps) => {
         toastLifeTimeMs={6000}
       />
       <HashRouter>
-        {/* <Route
-          exact
-          path={['/']}
-          render={(routerProps) => (
-            <TraceSideBar>
-              <Dashboard
-                page="dashboard"
-                childBreadcrumbs={dashboardBreadcrumbs}
-                {...commonProps}
-                setToast={setToast}
-                toasts={toasts}
-              />
-            </TraceSideBar>
-          )}
-        /> */}
         <Route
           exact
           path="/traces"
@@ -226,7 +211,6 @@ export const Home = (props: HomeProps) => {
                 childBreadcrumbs={serviceBreadcrumbs}
                 nameColumnAction={nameColumnAction}
                 traceColumnAction={traceColumnAction}
-                setToast={setToast}
                 toasts={toasts}
                 {...commonProps}
               />
