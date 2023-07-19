@@ -18,14 +18,35 @@
                 "account-id": {
                   "type": "keyword"
                 },
+                "region": {
+                  "type": "keyword"
+                },
+                "az-id": {
+                  "type": "keyword"
+                },
+                "vpc-id": {
+                  "type": "keyword"
+                },
+                "subnet-id": {
+                  "type": "keyword"
+                },
+                "tcp-flags": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
                 "interface-id": {
                   "type": "keyword"
                 },
+                "instance-id": {
+                  "type": "keyword"
+                },
                 "srcaddr": {
-                  "type": "ip"
+                  "type": "keyword"
                 },
                 "dstaddr": {
-                  "type": "ip"
+                  "type": "keyword"
                 },
                 "srcport": {
                   "type": "long"
@@ -34,6 +55,9 @@
                   "type": "long"
                 },
                 "protocol": {
+                  "type": "keyword"
+                },
+                "protocol-code": {
                   "type": "keyword"
                 },
                 "packets": {
@@ -50,10 +74,34 @@
                   "type": "date",
                   "format": "epoch_second"
                 },
+                "flow-direction": {
+                  "type": "keyword"
+                },
+                "pkt-src-aws-service": {
+                  "type": "keyword"
+                },
+                "pkt-srcaddr": {
+                  "type": "keyword"
+                },
+                "pkt-dst-aws-service": {
+                  "type": "keyword"
+                },
+                "pkt-dstaddr": {
+                  "type": "keyword"
+                },
+                "traffic-path": {
+                  "type": "keyword"
+                },
                 "action": {
                   "type": "keyword"
                 },
                 "log-status": {
+                  "type": "keyword"
+                },
+                "sublocation-id": {
+                  "type": "keyword"
+                },
+                "sublocation-type": {
                   "type": "keyword"
                 }
               }
