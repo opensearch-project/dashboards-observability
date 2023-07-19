@@ -204,14 +204,17 @@ describe('Setting availability', () => {
     cy.wait(delay);//needed for page to create correctly
     cy.get('[data-test-subj="createAndSetButton"]').click({ force: true });
     cy.get('.euiTableRow').should('have.length.lessThan', 1);
+    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiBreadcrumb[href="#/"]').click();
     cy.get('[data-test-subj="setAvailabilityHomePageLink"]').first().click();
+    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiTab-isSelected[id="app-analytics-log"]').should('exist', { timeout: timeoutDelay });
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('contain.value', availability_default);
     cy.get('[id="explorerPlotComponent"]').should('exist');
     cy.get('.euiTab-isSelected[id="availability-panel"]').should('exist');
     cy.get('.euiBreadcrumb[href="#/"]').click();
     cy.get(`[data-test-subj="${nameThree}ApplicationLink"]`).click();
+    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('[data-test-subj="setAvailabilityConfigLink"]').click();
     cy.get('.euiTab-isSelected[id="app-analytics-log"]').should('exist', { timeout: timeoutDelay });
@@ -223,12 +226,13 @@ describe('Setting availability', () => {
 
 describe('Viewing application', () => {
   beforeEach(() => {
-    moveToApplication(nameThree);
+    moveToApplication(nameOne);
   });
 
   it('Has working breadcrumbs', () => {
     cy.wait(delay);//List not loading without
-    cy.get('.euiBreadcrumb').contains(nameThree).click();
+    cy.get('.euiBreadcrumb').contains(nameOne).click();
+    cy.get('[data-test-subj="applicationTitle"]').should('contain', nameOne);
     cy.get('.euiBreadcrumb[href="#/"]').click();
     cy.get('[data-test-subj="applicationHomePageTitle"]').should('contain', 'Applications');
     cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();

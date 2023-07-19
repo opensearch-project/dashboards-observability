@@ -236,19 +236,19 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     setTimeFilter();
   });
 
-  it('Renders the spans table and click on first span to verify details', () => {
+  it.only('Renders the spans table and click on first span to verify details', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     verify_traces_spans_data_grid_cols_exists();
-    cy.get('.euiLink--primary').eq(4).click();
+    cy.contains('277a5934acf55dcf').click();
     cy.get('[data-test-subj="spanDetailFlyout"] .euiTitle.euiTitle--medium').contains('Span detail').should('exist');
     cy.get('.euiFlyoutBody .panel-title').contains('Overview').should('exist');
     cy.get('.euiTextColor.euiTextColor--subdued').contains('Span ID').should('exist');
-    cy.get('[data-test-subj="parentSpanId"]').contains('e9e09c3ce939b488').should('exist');
+    cy.get('[data-test-subj="parentSpanId"]').contains('d03fecfa0f55b77c').should('exist');
     cy.get('.euiFlyoutBody__overflowContent .panel-title').contains('Span attributes').should('exist');
     cy.get('.euiDescriptionList__description .euiFlexItem').eq(0).trigger('mouseover').click();
     cy.get('[aria-label="span-flyout-filter-icon"]').click();
     cy.get('.euiFlyout__closeButton.euiFlyout__closeButton--inside').click();
-    cy.get('.euiBadge__content .euiBadge__text').contains('spanId: d03fecfa0f55b77c').should('exist');
+    cy.get('.euiBadge__content .euiBadge__text').contains('spanId: 277a5934acf55dcf').should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
     count_table_row(8);

@@ -1887,6 +1887,7 @@ exports[`Services component renders empty services page 1`] = `
         <EuiAccordion
           arrowDisplay="left"
           buttonContent="Trace Groups"
+          data-test-subj="trace-groups-service-operation-accordian"
           forceState="closed"
           id="accordion1"
           initialIsOpen={false}
@@ -1897,6 +1898,7 @@ exports[`Services component renders empty services page 1`] = `
         >
           <div
             className="euiAccordion"
+            data-test-subj="trace-groups-service-operation-accordian"
             onToggle={[Function]}
           >
             <div
@@ -3373,6 +3375,7 @@ exports[`Services component renders jaeger services page 1`] = `
         <EuiAccordion
           arrowDisplay="left"
           buttonContent="Service and Operations"
+          data-test-subj="trace-groups-service-operation-accordian"
           forceState="closed"
           id="accordion1"
           initialIsOpen={false}
@@ -3383,6 +3386,7 @@ exports[`Services component renders jaeger services page 1`] = `
         >
           <div
             className="euiAccordion"
+            data-test-subj="trace-groups-service-operation-accordian"
             onToggle={[Function]}
           >
             <div
@@ -5387,6 +5391,7 @@ exports[`Services component renders services page 1`] = `
         <EuiAccordion
           arrowDisplay="left"
           buttonContent="Trace Groups"
+          data-test-subj="trace-groups-service-operation-accordian"
           forceState="closed"
           id="accordion1"
           initialIsOpen={false}
@@ -5397,6 +5402,7 @@ exports[`Services component renders services page 1`] = `
         >
           <div
             className="euiAccordion"
+            data-test-subj="trace-groups-service-operation-accordian"
             onToggle={[Function]}
           >
             <div
