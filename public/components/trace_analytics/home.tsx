@@ -101,17 +101,6 @@ export const Home = (props: HomeProps) => {
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
-  const dashboardBreadcrumbs = [
-    {
-      text: 'Trace analytics',
-      href: '#/',
-    },
-    {
-      text: 'Dashboard',
-      href: '#/',
-    },
-  ];
-
   const serviceBreadcrumbs = [
     {
       text: 'Trace analytics',
