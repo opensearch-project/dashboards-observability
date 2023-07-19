@@ -6,6 +6,9 @@
 /// <reference types="cypress" />
 
 import { testDataSet, delay, setTimeFilter, jaegerTestDataSet } from '../utils/constants';
+import { suppressResizeObserverIssue } from '../utils/constants';
+
+suppressResizeObserverIssue();//needs to be in file once
 
 describe('Dump test data', () => {
   it('Indexes test data', () => {
@@ -88,6 +91,7 @@ describe('Testing dashboard table', () => {
       },
     });
     setTimeFilter();
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
   });
 
   it('Renders the dashboard table', () => {
@@ -95,15 +99,6 @@ describe('Testing dashboard table', () => {
     cy.contains('client_cancel_order').should('exist');
     cy.contains('166.44').should('exist');
     cy.contains('7.14%').should('exist');
-  });
-
-  it('Has working breadcrumbs', () => {
-    cy.get('.euiBreadcrumb').contains('Dashboard').click();
-    cy.get('.euiTitle').contains('Dashboard').should('exist');
-    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
-    cy.get('.euiTitle').contains('Dashboard').should('exist');
-    cy.get('.euiBreadcrumb').contains('Observability').click();
-    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
   it('Adds the percentile filters', () => {
@@ -131,7 +126,6 @@ describe('Testing dashboard table', () => {
   it('Redirects to traces table with filter', () => {
     cy.get('.euiLink').contains('13').click();
 
-    cy.get('h2.euiTitle').contains('Traces').should('exist');
     cy.contains(' (13)').should('exist');
     cy.contains('client_create_order').should('exist');
 

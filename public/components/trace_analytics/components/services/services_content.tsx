@@ -135,8 +135,8 @@ export function ServicesContent(props: ServicesProps) {
   };
 
   const dashboardContent = () => {
-    return  <DashboardContent {...props} />
-  }
+    return <DashboardContent {...props} />;
+  };
 
   return (
     <>
@@ -183,9 +183,10 @@ export function ServicesContent(props: ServicesProps) {
       <EuiPanel>
         <EuiAccordion
           id="accordion1"
-          buttonContent={mode === 'data_prepper' ? "Trace Groups" : "Service and Operations"}
+          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
           forceState={trigger}
           onToggle={onToggle}
+          data-test-subj="trace-groups-service-operation-accordian"
         >
           <EuiSpacer size="m" />
           {trigger === 'open' && dashboardContent()}
