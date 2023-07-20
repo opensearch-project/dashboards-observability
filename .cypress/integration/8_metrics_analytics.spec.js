@@ -13,8 +13,10 @@ import {
   TESTING_PANEL,
 } from '../utils/metrics_constants';
 import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
-import { clearQuerySearchBoxText } from '../utils/event_analytics/helpers';
-import { landOnPanels } from '../utils/event_analytics/constants';
+import {
+  landOnPanels,
+  clearQuerySearchBoxText,
+} from '../utils/event_analytics/helpers';
 
 const moveToMetricsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-metrics#/`);
