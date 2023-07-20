@@ -321,7 +321,7 @@ export function DashboardContent(props: DashboardProps) {
               <EuiSpacer />
               <EuiFlexGroup alignItems="baseline">
                 <EuiFlexItem>
-                  <EuiFlexGroup direction="column">
+                  <EuiFlexGroup direction="row">
                     <EuiFlexItem>
                       <ErrorRatePlt
                         items={errorRatePltItems}
