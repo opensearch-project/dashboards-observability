@@ -3,41 +3,53 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiButtonEmpty, EuiToken, OuiButtonIcon, OuiFieldText, OuiToolTip } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiFacetButton, EuiIcon } from '@elastic/eui';
 
 interface IMetricNameProps {
   metric: any;
   handleClick: (props: any) => void;
+  showDeleteIcon: boolean;
 }
 
 export const MetricName = (props: IMetricNameProps) => {
-  const { metric, handleClick } = props;
+  const { metric, handleClick, showDeleteIcon } = props;
 
-  const title = metric.catalog === 'CUSTOM_METRICS' ? 'OpenSearch' : 'Prometheus';
-  const token =
-    metric.catalog === 'CUSTOM_METRICS'
-      ? '/ui/default_branding/opensearch_mark_default_mode.svg'
-      : 'tokenProperty';
+  const icons = {
+    empty: <EuiIcon type="empty" />,
+    danger: <EuiIcon type="trash" color="danger" />,
+    primary: <EuiIcon type="plusInCircleFilled" color="primary" />,
+  };
+
+  const [iconDisplay, setIconDisplay] = useState(false);
+  const [icon, setIcon] = useState(icons.empty);
+
+  const setIconFromButtonState = (buttonState: string) => {
+    return setIcon(icons[buttonState]);
+  };
+
+  useEffect(() => {
+    console.log({ iconDisplay, icon });
+  }, [iconDisplay, icon]);
+
+  useEffect(() => {
+    const iconState = !iconDisplay ? 'empty' : showDeleteIcon ? 'danger' : 'primary';
+    setIconFromButtonState(iconState);
+  }, [iconDisplay]);
+
   const name = (metricName: string) => {
     return metric.catalog === 'CUSTOM_METRICS' ? metricName : metricName.split('.')[1];
   };
 
   return (
-    <EuiButtonEmpty
-      className="eui-textTruncate"
-      title={metric.name}
+    <EuiFacetButton
+      icon={icon}
+      quantity={2}
       onClick={() => handleClick(metric)}
+      onMouseOver={() => setIconDisplay(true)}
+      onMouseOut={() => setIconDisplay(false)}
     >
-      <EuiToken
-        className="tokenMargin"
-        title={title}
-        iconType={token}
-        fill="light"
-        color="euiColorVis1"
-        shape="square"
-      />{' '}
-      {name(metric.name)}
-    </EuiButtonEmpty>
+      {metric.name}
+    </EuiFacetButton>
   );
 };

@@ -31,12 +31,7 @@ import { getSavedObjectsClient } from '../../../services/saved_objects/saved_obj
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import {
-  allAvailableMetricsSelector,
-  metricsLayoutSelector,
-  selectMetric,
-} from '../redux/slices/metrics_slice';
-import { SearchBar } from '../sidebar/search_bar';
+import { metricsLayoutSelector } from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
 
@@ -57,9 +52,7 @@ interface TopMenuProps {
   spanValue: number;
   setSpanValue: React.Dispatch<React.SetStateAction<number>>;
   resolutionSelectId: string;
-  savedObjects: SavedObjects;
   setToast: (title: string, color?: string, text?: any, side?: string) => void;
-  setSearch: any;
 }
 
 export const TopMenu = ({
@@ -79,14 +72,10 @@ export const TopMenu = ({
   spanValue,
   setSpanValue,
   resolutionSelectId,
-  savedObjects,
   setToast,
-  setSearch,
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
-  const allAvailableMetrics = useSelector(allAvailableMetricsSelector);
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
   const metricsLayout = useSelector(metricsLayoutSelector);
   const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
 
@@ -232,9 +221,6 @@ export const TopMenu = ({
   return (
     <>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={10}>
-          <SearchBar setSearch={setSearch} />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div className="resolutionSelect">
             <EuiFieldText

@@ -5,12 +5,12 @@
 
 import './index.scss';
 import {
-  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiGlobalToastList,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiResizableContainer,
   htmlIdGenerator,
   OnTimeChangeProps,
   ShortDate,
@@ -33,6 +33,7 @@ import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/m
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import { observabilityLogsID } from '../../../common/constants/shared';
+import { SelectedPanel } from './sidebar/selected_panel';
 
 interface MetricsProps {
   http: CoreStart['http'];
@@ -44,14 +45,7 @@ interface MetricsProps {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const Home = ({
-  http,
-  chrome,
-  parentBreadcrumb,
-  renderProps,
-  pplService,
-  savedObjects,
-}: MetricsProps) => {
+export const Home = ({ chrome, parentBreadcrumb, savedObjects }: MetricsProps) => {
   // Redux tools
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const metricsLayout = useSelector(metricsLayoutSelector);
@@ -71,7 +65,6 @@ export const Home = ({
   const resolutionSelectId = htmlIdGenerator('resolutionSelect')();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
-  const [search, setSearch] = useState<boolean>(false);
 
   // Side bar constants
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
@@ -168,7 +161,6 @@ export const Home = ({
               <EuiPage>
                 <EuiPageBody component="div">
                   <TopMenu
-                    http={http}
                     IsTopPanelDisabled={IsTopPanelDisabled}
                     startTime={startTime}
                     endTime={endTime}
@@ -184,53 +176,37 @@ export const Home = ({
                     spanValue={spanValue}
                     setSpanValue={setSpanValue}
                     resolutionSelectId={resolutionSelectId}
-                    savedObjects={savedObjects}
                     setToast={setToast}
-                    setSearch={setSearch}
                   />
-                  <EuiResizableContainer>
-                    {(EuiResizablePanel, EuiResizableButton) => (
-                      <>
-                        <EuiResizablePanel mode="collapsible" initialSize={20} minSize="20%">
-                          <Sidebar http={http} pplService={pplService} search={search} />
-                        </EuiResizablePanel>
-                        <EuiResizableButton />
-                        <EuiResizablePanel mode="collapsible" initialSize={20} minSize="20%">
-                          <EuiPanel className="mtConfig">SOME CONTENT</EuiPanel>
-                        </EuiResizablePanel>
-                        <EuiResizableButton />
-
-                        <EuiResizablePanel
-                          mode="main"
-                          initialSize={100}
-                          minSize="50px"
-                          scrollable={false}
-                        >
-                          <EuiPanel>
-                            {selectedMetrics.length > 0 ? (
-                              <MetricsGrid
-                                http={http}
-                                chrome={chrome}
-                                panelVisualizations={panelVisualizations}
-                                setPanelVisualizations={setPanelVisualizations}
-                                editMode={editMode}
-                                pplService={pplService}
-                                startTime={startTime}
-                                endTime={endTime}
-                                moveToEvents={onEditClick}
-                                onRefresh={onRefresh}
-                                editActionType={editActionType}
-                                setEditActionType={setEditActionType}
-                                spanParam={spanValue + resolutionValue}
-                              />
-                            ) : (
-                              <EmptyMetricsView />
-                            )}
-                          </EuiPanel>
-                        </EuiResizablePanel>
-                      </>
-                    )}
-                  </EuiResizableContainer>
+                  <EuiFlexGroup direction={'row'} gutterSize={'none'}>
+                    <EuiFlexItem className="obsMetric obsMetric-available" grow={false}>
+                      <Sidebar />
+                    </EuiFlexItem>
+                    <EuiFlexItem className="obsMetric obsMetric-selected" grow={false}>
+                      <SelectedPanel />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiPanel>
+                        {selectedMetrics.length > 0 ? (
+                          <MetricsGrid
+                            chrome={chrome}
+                            panelVisualizations={panelVisualizations}
+                            setPanelVisualizations={setPanelVisualizations}
+                            editMode={editMode}
+                            startTime={startTime}
+                            endTime={endTime}
+                            moveToEvents={onEditClick}
+                            onRefresh={onRefresh}
+                            editActionType={editActionType}
+                            setEditActionType={setEditActionType}
+                            spanParam={spanValue + resolutionValue}
+                          />
+                        ) : (
+                          <EmptyMetricsView />
+                        )}
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiPageBody>
               </EuiPage>
             </div>

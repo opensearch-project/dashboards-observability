@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.obsMetric > .euiPanel {
+  width: 25em;
+}
+
 .dscSidebar__container {
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -178,19 +182,19 @@
 .metricsSideBar {
   padding: $euiSizeS;
       overflow: auto;
-  
+
       &__fieldGroups {
         @include euiYScrollWithShadows;
-  
+
         overflow-y: auto;
         margin-right: -$euiSizeS;
         padding-right: $euiSizeS;
         margin-top: $euiSizeS;
       }
-  
+
       &__fieldGroup {
         margin-top: $euiSizeS;
-  
+
         &:first-child {
           margin-top: 0;
         }

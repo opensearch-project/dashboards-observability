@@ -3,78 +3,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import './sidebar.scss';
+import './sidebar.scss';
 
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { I18nProvider } from '@osd/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiPanel } from '@elastic/eui';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import {
-  availableMetricsSelector,
-  deSelectMetric,
-  selectMetric,
-  loadMetrics,
-  selectedMetricsSelector,
-  recentlyCreatedMetricsSelector,
-  searchedMetricsSelector,
-} from '../redux/slices/metrics_slice';
-import { CoreStart } from '../../../../../../src/core/public';
-import PPLService from '../../../services/requests/ppl';
-import { MetricsAccordion } from './metrics_accordion';
+import { selectMetric, loadMetrics, searchedMetricsSelector } from '../redux/slices/metrics_slice';
+import { MetricName } from './metric_name';
+import { SearchBar } from './search_bar';
 
-interface ISidebarProps {
-  http: CoreStart['http'];
-  pplService: PPLService;
-  search: boolean;
-}
-
-export const Sidebar = (props: ISidebarProps) => {
-  const { http, pplService, search } = props;
+export const Sidebar = () => {
   const dispatch = useDispatch();
 
-  const availableMetrics = useSelector(availableMetricsSelector);
-  const selectedMetrics = useSelector(selectedMetricsSelector);
-  const recentlyCreatedMetrics = useSelector(recentlyCreatedMetricsSelector);
   const searchedMetrics = useSelector(searchedMetricsSelector);
 
   useEffect(() => {
     batch(() => {
-      dispatch(loadMetrics({ http, pplService }));
+      dispatch(loadMetrics());
     });
   }, []);
 
   const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
 
-  const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
-  };
-
-  const availableMetricsDisplay = search ? searchedMetrics : availableMetrics;
-
   return (
-    <I18nProvider>
-      <section className="sidebar-list">
-        <MetricsAccordion
-          metricsList={recentlyCreatedMetrics}
-          headerName="Recently Created Metrics"
-          handleClick={handleAddMetric}
-          dataTestSubj="metricsListItems_recentlyCreated"
-        />
-        <EuiSpacer size="s" />
-        <MetricsAccordion
-          metricsList={selectedMetrics}
-          headerName="Selected Metrics"
-          handleClick={handleRemoveMetric}
-          dataTestSubj="metricsListItems_selectedMetrics"
-        />
-        <EuiSpacer size="s" />
-        <MetricsAccordion
-          metricsList={availableMetricsDisplay}
-          headerName="Available Metrics"
-          handleClick={handleAddMetric}
-          dataTestSubj="metricsListItems_availableMetrics"
-        />
-      </section>
-    </I18nProvider>
+    <EuiPanel>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <SearchBar />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFormLabel>Available metrics</EuiFormLabel>
+        </EuiFlexItem>
+        {searchedMetrics.slice(0, 100).map((metric: any) => (
+          <EuiFlexItem key={metric.id}>
+            <MetricName metric={metric} handleClick={handleAddMetric} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

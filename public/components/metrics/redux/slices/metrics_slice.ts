@@ -4,28 +4,27 @@
  */
 
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { useState } from 'react';
+import { sortBy } from 'lodash';
 import {
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
 } from '../../../../../common/constants/metrics';
 import { MetricType } from '../../../../../common/types/metrics';
-import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
+import { coreRefs } from '../../../../framework/core_refs';
 
 const initialState = {
-  pplService: PPLService,
   metrics: [],
   selected: [],
   searched: [],
   metricsLayout: [],
 };
 
-export const loadMetrics = createAsyncThunk('metrics/loadData', async (services: any) => {
-  const { http, pplService } = services;
+export const loadMetrics = createAsyncThunk('metrics/loadData', async () => {
+  const { http, pplService } = coreRefs;
   const customData = await fetchCustomMetrics(http);
   const remoteData = await fetchRemoteMetrics(pplService);
 
@@ -39,22 +38,21 @@ const fetchCustomMetrics = async (http: any) => {
   const savedMetrics = dataSet.observabilityObjectList.filter(
     (obj) => obj.savedVisualization.sub_type === 'metric'
   );
-  const normalizedData = savedMetrics.map((obj: any) => ({
+  return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
     name: obj.savedVisualization.name,
     catalog: 'CUSTOM_METRICS',
     type: obj.savedVisualization.type,
     recentlyCreated: (Date.now() - obj.createdTimeMs) / 36e5 <= 12,
   }));
-  return normalizedData;
 };
 
-const fetchRemoteMetrics = async (pplService: any) => {
+const fetchRemoteMetrics = async () => {
+  const { pplService } = coreRefs;
   const dataSet = [];
   const setDataSources = [];
   const dataSources = await pplServiceRequestor(pplService, PPL_DATASOURCES_REQUEST);
   setDataSources.push(dataSources.jsonData);
-  console.log('setDataSources: ', setDataSources);
   for (const dataSource of dataSources.jsonData) {
     const catalogData = await pplServiceRequestor(
       pplService,
@@ -127,22 +125,26 @@ export const metricSlice = createSlice({
       updateLayoutByDeSelection(state, payload);
       state.selected = state.selected.filter((id) => id !== payload.id);
     },
-    searchMetric: (state, { payload }) => {
-      state.searched = state.metrics.filter(
-        (metric: any) => metric.name.includes(payload.id) && !state.selected.includes(payload.id)
-      );
+    searchMetric: (state, { payload }: { payload: string }) => {
+      state.searched = state.metrics
+        .filter(
+          (metric: any) => metric.name.includes(payload) && !state.selected.includes(metric.id)
+        )
+        .map(({ id }) => id);
     },
+
     clearSearchedMetrics: (state, { payload }) => {
-      state.searched = [];
+      state.searched = state.metrics.map(({ id }) => id);
     },
     updateMetricsLayout: (state, { payload }) => {
       state.metricsLayout = payload;
+      state.selected = sortBy(payload, ['x', 'y']).map(({ id }) => id);
     },
   },
   extraReducers: (builder) => {
     builder.addCase(loadMetrics.fulfilled, (state, { payload }) => {
       state.metrics = payload;
-      state.searched = [];
+      state.searched = payload.map(({ id }) => id);
       filterDeletedLayoutIds(state, payload);
     });
   },
@@ -164,15 +166,12 @@ export const availableMetricsSelector = (state) =>
   );
 
 export const selectedMetricsSelector = (state) =>
-  state.metrics.metrics.filter((metric) => state.metrics.selected.includes(metric.id));
-
-export const recentlyCreatedMetricsSelector = (state) =>
-  state.metrics.metrics.filter(
-    (metric) => !state.metrics.selected.includes(metric.id) && metric.recentlyCreated
-  );
+  state.metrics.selected.map((id) => state.metrics.metrics.find((metric) => metric.id === id));
 
 export const searchedMetricsSelector = (state) =>
-  state.metrics.searched.filter((metric) => !state.metrics.selected.includes(metric.id));
+  state.metrics.metrics.filter(
+    ({ id }) => state.metrics.searched.includes(id) && !state.metrics.selected.includes(id)
+  );
 
 export const allAvailableMetricsSelector = (state) =>
   state.metrics.metrics.filter((metric) => !state.metrics.selected.includes(metric.id));
