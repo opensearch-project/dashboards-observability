@@ -5,7 +5,7 @@
             "elb":{
                 "client":{
                     "ip":"15.248.1.132",
-                    "port":"33556"
+                    "port":33556
                 },
                 "target_ip":"172.31.32.179",
                 "target_port": 80,
@@ -46,7 +46,7 @@
             "source": {
                 "address": "15.248.1.132",
                 "ip": "15.248.1.132",
-                "port": "33556",
+                "port": 33556,
                 "geo":{
                     "country_name":"United States",
                     "country_iso_code":"US"
@@ -55,7 +55,7 @@
             "destination": {
                 "address": "172.31.32.179",
                 "ip": "172.31.32.179",
-                "port": "80"
+                "port": 80
             }
         },
         "cloud": {
@@ -89,7 +89,7 @@
         "url": {
             "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
             "path": "/",
-            "port": "80",
+            "port": 80,
             "scheme": "http",
             "full": "http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/"
         },
