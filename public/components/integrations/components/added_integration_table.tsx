@@ -139,12 +139,20 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     ],
   };
 
+  const entries = integrations.map((integration) => {
+    const id = integration.id;
+    const templateName = integration.templateName;
+    const creationDate = integration.creationDate;
+    const name = integration.name;
+    return { id, templateName, creationDate, name, data: { templateName, name } };
+  });
+
   return (
     <EuiPageContent data-test-subj="addedIntegrationsArea">
-      {integrations && integrations.length > 0 ? (
+      {entries && entries.length > 0 ? (
         <EuiInMemoryTable
           loading={props.loading}
-          items={integrations}
+          items={entries}
           itemId="id"
           columns={tableColumns}
           tableLayout="auto"
