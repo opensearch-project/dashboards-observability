@@ -3,43 +3,34 @@
         "request_type": "http",
         "timestamp": "2023-06-21T21:49:46.564177Z",
         "elb": "app/sample-alb/cf9f5ec40b8480db",
-        "client_ip": "15.248.1.132",
-        "client_port": "33556",
-        "target_ip": "172.31.32.179",
-        "target_port": "80",
-        "request_processing_time": "0.000",
-        "target_processing_time": "0.001",
-        "response_processing_time": "0.000",
-        "elb_status_code": "200",
-        "target_status_code": "200",
-        "received_bytes": "521",
-        "sent_bytes": "271",
-        "request": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1",
-        "http_method": "GET",
-        "http_protocol": "http",
-        "http_host": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
-        "http_port": "80",
-        "http_path": "/",
-        "http_version": "1.1",
-        "useragent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-        "target_group_arn": "arn:aws:elasticloadbalancing:us-west-2:443273586136:targetgroup/sample-target/d34d9a810a60a6a5",
-        "trace_id": "Root=1-6493707a-062e3d077d0e7f5759a83c88",
-        "matched_rule_priority": "0",
-        "request_creation_time": "2023-06-21T21:49:46.563000Z",
-        "actions_executed": "forward",
-        "target_port_list": "172.31.32.179:80",
-        "target_status_code_list": "200",
-        "@message": "http 2023-06-21T21:49:46.564177Z app/sample-alb/cf9f5ec40b8480db 15.248.1.132:33556 172.31.32.179:80 0.000 0.001 0.000 200 200 521 271 \"GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\" - - arn:aws:elasticloadbalancing:us-west-2:443273586136:targetgroup/sample-target/d34d9a810a60a6a5 \"Root=1-6493707a-062e3d077d0e7f5759a83c88\" \"-\" \"-\" 0 2023-06-21T21:49:46.563000Z \"forward\" \"-\" \"-\" \"172.31.32.179:80\" \"200\" \"-\" \"-\"",
+        "aws":{
+            "elb":{
+                "client":{
+                    "ip":"15.248.1.132",
+                    "port":"33556"
+                },
+                "target_ip":"172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.005,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.000,
+                "elb_status_code":200,
+                "target_status_code":200,
+                "received_bytes": 521,
+                "sent_bytes":271,
+                "http":{
+                    "port":80,
+                    "version":"1.1"
+                },
+                "matched_rule_priority": "0",
+                "request_creation_time": "2023-06-21T21:49:46.563000Z"
+            }
+        },
+        "traceId": "Root=1-6493707a-062e3d077d0e7f5759a83c88",
         "@timestamp": "2023-06-21T21:49:46.564177+00:00",
-        "@log_type": "alb",
-        "@log_s3bucket": "aes-siem-443273586136-log",
-        "@log_s3key": "AWSLogs/443273586136/elasticloadbalancing/us-west-2/2023/06/21/443273586136_elasticloadbalancing_us-west-2_app.sample-alb.cf9f5ec40b8480db_20230621T2150Z_54.149.97.75_5whmheve.log.gz",
         "event": {
-            "module": "alb",
             "kind": "event",
-            "category": [
-                "web"
-            ]
+            "category":"web"
         },
         "attributes": {
             "sample": "true",
@@ -53,6 +44,22 @@
         "ecs": {
             "version": "1.10.0"
         },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": "33556",
+                "geo":{
+                    "country_name":"United States",
+                    "country_iso_code":"3166"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": "80"
+            }
+        },
         "cloud": {
             "provider": "aws",
             "account": {
@@ -60,32 +67,26 @@
             },
             "region": "us-west-2"
         },
-        "destination": {
-            "address": "172.31.32.179",
-            "ip": "172.31.32.179",
-            "port": "80"
-        },
         "http": {
             "request": {
-                "bytes": "521",
-                "method": "GET"
+                "bytes": 521,
+                "method": "GET",
+                "body":{
+                    "content":"GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                } 
             },
             "response": {
-                "bytes": "271",
-                "status_code": "200"
+                "bytes": 271,
+                "status_code": 200
             },
-            "version": "1.1"
+            "version": "1.1",
+            "user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
         },
         "related": {
             "ip": [
                 "15.248.1.132",
                 "172.31.32.179"
             ]
-        },
-        "source": {
-            "address": "15.248.1.132",
-            "ip": "15.248.1.132",
-            "port": "33556"
         },
         "url": {
             "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
