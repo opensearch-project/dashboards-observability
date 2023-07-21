@@ -78,10 +78,12 @@ describe('Tests the add nginx integration instance flow', () => {
     cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
     cy.get('[data-test-subj="createInstanceButton"]').should('be.disabled')
     cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
+    // Modifies the name of the integration
+    cy.get('[data-test-subj="new-instance-name"]').type(testInstance.substring(5));
     // validates the created sample index
     cy.get('[data-test-subj="data-source-name"]').type('ss4o_logs-nginx-sample-sample');
-    cy.get('[data-test-subj="validateIndex"]').click()
-    cy.get('[data-test-subj="new-instance-name"]').type(testInstance.substring(5));
+    cy.get('[data-test-subj="validateIndex"]').click();
+    cy.get('.euiToastHeader__title').should('contain', 'valid');
     cy.get('[data-test-subj="createInstanceButton"]').click();
     cy.get('.euiToastHeader__title').should('contain', 'successfully');
   })
