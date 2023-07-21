@@ -140,76 +140,10 @@ exports[`Added Integration Table View Test Renders added integration table view 
           items={
             Array [
               Object {
-                "assets": Array [
-                  Object {
-                    "assetId": "3fc41705-8a23-49f4-926c-2819e0d7306d",
-                    "assetType": "index-pattern",
-                    "description": "ss4o_logs-nginx-prod",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "a0415ddd-047d-4c02-8769-d14bfb70f525",
-                    "assetType": "search",
-                    "description": "[NGINX Core Logs 1.0] Nginx Access Logs",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "a17cd453-fb2f-4c24-81db-aedfc8682829",
-                    "assetType": "visualization",
-                    "description": "[NGINX Core Logs 1.0] Response codes over time",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "3e47dfed-d9ff-4c1b-b425-04ffc8ed3fa9",
-                    "assetType": "search",
-                    "description": "[NGINX Core Logs 1.0] Nginx Error Logs",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "641c2a03-eead-4900-94ee-e12d2fef8383",
-                    "assetType": "visualization",
-                    "description": "[NGINX Core Logs 1.0] Errors over time",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "ce61594d-8307-4358-9b7e-71101b3ed722",
-                    "assetType": "visualization",
-                    "description": "Data Volume",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "452bd6e3-3b50-407f-88f2-c35a29c56051",
-                    "assetType": "visualization",
-                    "description": "Top Paths",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "14a1ddab-08c1-4aba-ba3b-88bae36f7e50",
-                    "assetType": "visualization",
-                    "description": "Requests per Minute",
-                    "isDefaultAsset": false,
-                    "status": "available",
-                  },
-                  Object {
-                    "assetId": "179bad58-c840-4c6c-9fd8-1667c14bd03a",
-                    "assetType": "dashboard",
-                    "description": "[NGINX Core Logs 1.0] Overview",
-                    "isDefaultAsset": true,
-                    "status": "available",
-                  },
-                ],
                 "creationDate": "2023-06-15T16:28:36.370Z",
-                "dataSource": Object {
-                  "dataset": "nginx",
-                  "namespace": "prod",
-                  "sourceType": "logs",
+                "data": Object {
+                  "name": "nginx",
+                  "templateName": "nginx",
                 },
                 "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
                 "name": "nginx",
@@ -646,76 +580,10 @@ exports[`Added Integration Table View Test Renders added integration table view 
               items={
                 Array [
                   Object {
-                    "assets": Array [
-                      Object {
-                        "assetId": "3fc41705-8a23-49f4-926c-2819e0d7306d",
-                        "assetType": "index-pattern",
-                        "description": "ss4o_logs-nginx-prod",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "a0415ddd-047d-4c02-8769-d14bfb70f525",
-                        "assetType": "search",
-                        "description": "[NGINX Core Logs 1.0] Nginx Access Logs",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "a17cd453-fb2f-4c24-81db-aedfc8682829",
-                        "assetType": "visualization",
-                        "description": "[NGINX Core Logs 1.0] Response codes over time",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "3e47dfed-d9ff-4c1b-b425-04ffc8ed3fa9",
-                        "assetType": "search",
-                        "description": "[NGINX Core Logs 1.0] Nginx Error Logs",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "641c2a03-eead-4900-94ee-e12d2fef8383",
-                        "assetType": "visualization",
-                        "description": "[NGINX Core Logs 1.0] Errors over time",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "ce61594d-8307-4358-9b7e-71101b3ed722",
-                        "assetType": "visualization",
-                        "description": "Data Volume",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "452bd6e3-3b50-407f-88f2-c35a29c56051",
-                        "assetType": "visualization",
-                        "description": "Top Paths",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "14a1ddab-08c1-4aba-ba3b-88bae36f7e50",
-                        "assetType": "visualization",
-                        "description": "Requests per Minute",
-                        "isDefaultAsset": false,
-                        "status": "available",
-                      },
-                      Object {
-                        "assetId": "179bad58-c840-4c6c-9fd8-1667c14bd03a",
-                        "assetType": "dashboard",
-                        "description": "[NGINX Core Logs 1.0] Overview",
-                        "isDefaultAsset": true,
-                        "status": "available",
-                      },
-                    ],
                     "creationDate": "2023-06-15T16:28:36.370Z",
-                    "dataSource": Object {
-                      "dataset": "nginx",
-                      "namespace": "prod",
-                      "sourceType": "logs",
+                    "data": Object {
+                      "name": "nginx",
+                      "templateName": "nginx",
                     },
                     "id": "ad7e6e30-0b99-11ee-b27c-c9863222e9bf",
                     "name": "nginx",
