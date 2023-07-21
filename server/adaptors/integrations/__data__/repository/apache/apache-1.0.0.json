@@ -5,7 +5,7 @@
     "description": "Apache web logs collector",
     "license": "Apache-2.0",
     "type": "logs",
-    "author": "Dan Dong",
+    "author": "OpenSearch",
     "sourceUrl": "https://github.com/elastic/beats/tree/main/filebeat/module/apache/_meta/kibana/7/search",
     "statics": {
         "logo": {
