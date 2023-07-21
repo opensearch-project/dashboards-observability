@@ -156,10 +156,6 @@
                 },
                 "event": {
                     "properties": {
-                        "dataset": {
-                            "ignore_above": 256,
-                            "type": "keyword"
-                        },
                         "domain": {
                             "ignore_above": 256,
                             "type": "keyword"
