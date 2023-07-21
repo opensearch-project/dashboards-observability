@@ -52,6 +52,22 @@ describe('Basic sanity test for integrations plugin', () => {
     cy.get('[data-test-subj="fields"]').click();
     cy.get('[data-test-subj="nginx-fields"]').should('exist')
   })
+
+  it('Uses the search of assets and fields tables', () => {
+    moveToAvailableNginxIntegration();
+    cy.get('input[type="search"]').eq(0).focus().type('ss4o{enter}');
+    cy.get('.euiTableRow').should('have.length', 1);//Filters correctly to the index pattern
+    cy.get('[data-test-subj="fields"]').click();
+    cy.get('input[type="search"]').eq(0).focus().clear().type('severity.observe')
+    cy.get('.euiTableRow').should('have.length', 2);//Filters correctly to the field name
+  })
+
+  it('Uses the filter of assets table', () => {
+    moveToAvailableNginxIntegration();
+    cy.get('.euiFilterGroup').trigger('mouseover').click();
+    cy.get('.euiFilterSelectItem').contains('visualization').click();
+    cy.get('.euiTableRow').should('have.length', 4);//Filters correctly to visualization types
+  })
 });
 
 describe('Tests the add nginx integration instance flow', () => {
@@ -75,6 +91,8 @@ describe('Tests the add nginx integration instance flow', () => {
   it('Navigates to installed integrations page and verifies that nginx-test exists', () => {
     moveToAddedIntegrations();
     cy.contains(testInstance).should('exist');
+    cy.get('input[type="search"]').eq(0).focus().type(`${testInstance}{enter}`);
+    cy.get('.euiTableRow').should('have.length', 1);//Filters correctly to the test integration instance
     cy.get(`[data-test-subj="${testInstance}IntegrationLink"]`).click();
   })
 
