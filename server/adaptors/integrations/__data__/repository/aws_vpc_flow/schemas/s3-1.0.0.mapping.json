@@ -1,0 +1,40 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "s3"
+      },
+      "properties": {
+        "aws": {
+          "properties": {
+            "s3": {
+              "properties": {
+                "bucket": {
+                  "type": "keyword"
+                },
+                "key": {
+                  "type": "keyword"
+                },
+                "copy_source": {
+                  "type": "keyword"
+                },
+                "upload_id": {
+                  "type": "keyword"
+                },
+                "delete": {
+                  "type": "keyword"
+                },
+                "part_number": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
