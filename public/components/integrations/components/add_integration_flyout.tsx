@@ -173,7 +173,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     }
     const [dataSourceMappings, integrationMappings] = await Promise.all([
       fetchDataSourceMappings(targetDataSource),
-      fetchIntegrationMappings(name),
+      fetchIntegrationMappings(integrationName),
     ]);
     if (!dataSourceMappings) {
       validationErrors.push('Provided data stream could not be retrieved');
