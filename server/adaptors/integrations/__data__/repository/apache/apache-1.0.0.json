@@ -1,0 +1,53 @@
+{
+    "name": "apache",
+    "version": "1.0.1",
+    "displayName": "Apache Dashboard",
+    "description": "Apache web logs collector",
+    "license": "Apache-2.0",
+    "type": "logs",
+    "author": "Dan Dong",
+    "sourceUrl": "https://github.com/elastic/beats/tree/main/filebeat/module/apache/_meta/kibana/7/search",
+    "statics": {
+        "logo": {
+            "annotation": "Apache Logo",
+            "path": "logo.svg"
+        },
+        "gallery": [
+            {
+                "annotation": "NginX Dashboard",
+                "path": "dashboard1.png"
+            },
+            {
+                "annotation": "NginX Logo",
+                "path": "logo.svg"
+            }
+        ]
+    },
+    "components": [
+        {
+            "name": "communication",
+            "version": "1.0.0"
+        },
+        {
+            "name": "http",
+            "version": "1.0.0"
+        },
+        {
+            "name": "user_agent",
+            "version": "1.0.0"
+        },
+        {
+            "name": "logs",
+            "version": "1.0.0"
+        }
+    ],
+    "assets": {
+        "savedObjects": {
+            "name": "apache",
+            "version": "1.0.0"
+        }
+    },
+    "sampleData": {
+        "path": "sample.json"
+    }
+}
