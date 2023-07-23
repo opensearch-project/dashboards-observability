@@ -21,5 +21,4 @@ An integration is a bundle of pre-canned assets which are bundled togather in a 
 AWS VPC flow logs integration includes dashboards, visualisations, queries and index mapping
 
 ### Dashboards
-
 ![](../static/dashboard1.png)
