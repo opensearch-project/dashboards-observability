@@ -1,27 +1,27 @@
 {
-  "name": "aws_vpc_flow",
+  "name": "aws_rds",
   "version": "1.0.0",
-  "displayName": "AWS VPC Flow",
-  "description": "AWS VPC Flow log collector",
+  "displayName": "AWS RDS",
+  "description": "AWS RDS",
   "license": "Apache-2.0",
   "type": "logs",
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_vpc_flow/info",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_rds/info",
   "statics": {
     "logo": {
-      "annotation": "AWS VPC Logo",
-      "path": "logo.svg"
+      "annotation": "AWS RDS Logo",
+      "path": "aws-rds-icon.png"
     },
     "gallery": [
       {
-        "annotation": "AWS VPC Flow Log Dashboard",
-        "path": "dashboard1.png"
+        "annotation": "AWS RDS Dashboard",
+        "path": "dashboard.png"
       }
     ]
   },
   "components": [
     {
-      "name": "aws_vpc_flow",
+      "name": "aws_rds",
       "version": "1.0.0"
     },
     {
@@ -33,7 +33,7 @@
       "version": "1.0.0"
     },
     {
-      "name": "logs_vpc",
+      "name": "logs_rds",
       "version": "1.0.0"
     },
     {
@@ -43,7 +43,7 @@
   ],
   "assets": {
     "savedObjects": {
-      "name": "aws_vpc_flow",
+      "name": "aws_rds",
       "version": "1.0.0"
     }
   },
