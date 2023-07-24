@@ -466,11 +466,10 @@ export const isPPLFilterValid = (
 
 export const processMetricsData = (schema: any, dataConfig: any) => {
   console.log('schema: ', schema);
+  if (isEmpty(schema)) return {};
   if (
-    schema.length === 4 &&
-    schema.every((schemaField) =>
-      ['seriesLabels', 'value', 'timestamp', 'labels'].includes(schemaField.name)
-    )
+    schema.length === 3 &&
+    schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
   ) {
     return prepareMetricsData(schema, dataConfig);
   }
@@ -483,10 +482,10 @@ export const prepareMetricsData = (schema: any, dataConfig: any) => {
   const metricDimension = [];
 
   forEach(schema, (field) => {
-    if (field.name === 'seriesLabels')
-      metricBreakdown.push({ name: 'seriesLabels', label: 'seriesLabels' });
-    if (field.name === 'value') metricSeries.push({ name: 'value', customLabel: 'value' });
-    if (field.name === 'timestamp') metricDimension.push({ name: 'timestamp', label: 'timestamp' });
+    if (field.name === '@labels') metricBreakdown.push({ name: '@labels', label: '@labels' });
+    if (field.name === '@value') metricSeries.push({ name: '@value', customLabel: '@value' });
+    if (field.name === '@timestamp')
+      metricDimension.push({ name: '@timestamp', label: '@timestamp' });
   });
 
   return {

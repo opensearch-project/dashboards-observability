@@ -67,9 +67,9 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     if (isEmpty(query)) return;
 
-    this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
+    // this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
 
-    if (this.queryIndex === '') return; // Returns if page is refreshed
+    // if (this.queryIndex === '') return; // Returns if page is refreshed
 
     const {
       tabId,
@@ -83,31 +83,33 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     } = this.searchContext;
     const { dispatch, changeQuery } = this.storeContext;
 
-    await this.processTimestamp(query);
-    if (isEmpty(this.timestamp)) return;
+    // await this.processTimestamp(query);
+    // if (isEmpty(this.timestamp)) return;
 
-    const curStartTime = startingTime || this.query[SELECTED_DATE_RANGE][0];
-    const curEndTime = endingTime || this.query[SELECTED_DATE_RANGE][1];
+    // const curStartTime = startingTime || this.query[SELECTED_DATE_RANGE][0];
+    // const curEndTime = endingTime || this.query[SELECTED_DATE_RANGE][1];
 
     // compose final query
-    const finalQuery = composeFinalQuery(
-      this.query[RAW_QUERY],
-      curStartTime,
-      curEndTime,
-      this.timestamp,
-      isLiveTailOn,
-      appBaseQuery,
-      this.query[SELECTED_PATTERN_FIELD],
-      this.query[PATTERN_REGEX],
-      this.query[FILTERED_PATTERN]
-    );
+    // const finalQuery = composeFinalQuery(
+    //   this.query[RAW_QUERY],
+    //   curStartTime,
+    //   curEndTime,
+    //   this.timestamp,
+    //   isLiveTailOn,
+    //   appBaseQuery,
+    //   this.query[SELECTED_PATTERN_FIELD],
+    //   this.query[PATTERN_REGEX],
+    //   this.query[FILTERED_PATTERN]
+    // );
+
+    const finalQuery = this.query[RAW_QUERY];
 
     // update UI with new query state
-    await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp);
+    // await this.updateQueryState(this.query[RAW_QUERY], finalQuery, this.timestamp);
     // calculate proper time interval for count distribution
-    if (!selectedInterval.current || selectedInterval.current.text === 'Auto') {
-      findAutoInterval(curStartTime, curEndTime);
-    }
+    // if (!selectedInterval.current || selectedInterval.current.text === 'Auto') {
+    //   findAutoInterval(curStartTime, curEndTime);
+    // }
 
     // get query data
     if (isLiveTailOn) {
