@@ -2,7 +2,7 @@
 
 API: http://osd:5601/api/saved_objects/_import?overwrite=true
 
-- [Assets](rds.ndjson)
+- [Assets](aws_rds-1.0.0.ndjson)
 
 ## Asset List
 The next table details the assets
