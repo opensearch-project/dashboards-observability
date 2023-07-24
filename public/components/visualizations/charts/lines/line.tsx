@@ -37,8 +37,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
   const {
     data: {
       explorer: {
-        // explorerData: { schema, jsonData },
-        // explorerData: testData,
+        explorerData: { schema, jsonData },
       },
       userConfigs: {
         dataConfig: {
@@ -133,11 +132,11 @@ export const Line = ({ visualizations, layout, config }: any) => {
     };
     console.log(
       'processMetricsData(testData.schema, visConfig): ',
-      processMetricsData(testData.schema, visConfig)
+      processMetricsData(jsonData, visConfig)
     );
     visConfig = {
       ...visConfig,
-      ...processMetricsData(testData.schema, visConfig),
+      ...processMetricsData(schema, visConfig),
     };
     console.log('visConfig: ', visConfig);
     const traceStyles = {
