@@ -12,16 +12,14 @@
           "properties": {
             "rds": {
               "properties": {
-                "@timestamp": {
-                  "type": "alias",
-                  "path": "time"
-                },
-                "time": {
-                  "type": "date",
-                  "format": "yyyyMMdd HH:mm:ss||yyyy-MM-dd HH:mm:ss||strict_date_optional_time_nanos||epoch_millis"
-                },
                 "db-identifier": {
-                  "type": "keyword"
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
                 },
                 "sq-user": {
                   "type": "text",

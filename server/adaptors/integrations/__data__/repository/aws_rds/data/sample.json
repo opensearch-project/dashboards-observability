@@ -20,7 +20,6 @@
         "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
       },
       "rds": {
-        "time": "2023-07-17T08:14:05.000Z",
         "db-identifier": "db1",
         "sq-user": "admin",
         "sq-db-name": "testDB",
@@ -111,7 +110,6 @@
         "key": "AWSLogs/111111111112/vpcflowlogs/us-east-2/2023/01/28/111111111112_vpcflowlogs_us-east-2_fl-023c6afa025ee5a05_20230128T0940Z_3a9dfd9e.log.gz"
       },
       "rds": {
-        "time": "2023-07-18T09:15:06.000Z",
         "db-identifier": "db2",
         "sq-user": "admin2",
         "sq-db-name": "testDB2",
@@ -202,7 +200,6 @@
         "key": "AWSLogs/111111111113/vpcflowlogs/us-east-2/2023/01/28/111111111113_vpcflowlogs_us-east-2_fl-023c6afa025ee5a06_20230128T0950Z_3a9dfd9f.log.gz"
       },
       "rds": {
-        "time": "2023-07-19T10:16:07.000Z",
         "db-identifier": "db3",
         "sq-user": "admin3",
         "sq-db-name": "testDB3",

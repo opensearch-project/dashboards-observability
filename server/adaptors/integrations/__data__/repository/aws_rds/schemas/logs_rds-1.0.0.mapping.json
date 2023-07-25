@@ -5,6 +5,9 @@
   "priority": 900,
   "data_stream": {},
   "template": {
+    "aliases": {
+      "logs-aws-rds": {}
+    },
     "mappings": {
       "_meta": {
         "version": "1.0.0",
@@ -100,6 +103,11 @@
         },
         "@timestamp": {
           "type": "date"
+        },
+        "time": {
+          "type": "alias",
+          "path" : "@timestamp"
+
         },
         "observedTimestamp": {
           "type": "date"
