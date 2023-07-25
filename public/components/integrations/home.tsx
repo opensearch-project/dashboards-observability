@@ -13,6 +13,8 @@ import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
 import { AddedIntegration } from './components/added_integration';
+import { AcceleratePage } from '../flint/accelerate_page';
+import { TestPage } from '../flint/test_page';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -62,6 +64,8 @@ export const Home = (props: HomeProps) => {
               />
             )}
           />
+          <Route exact path={'/accelerate'} render={(routerProps) => <AcceleratePage />} />
+          <Route exact path={'/accelerateAsModal'} render={(routerProps) => <TestPage />} />
         </Switch>
       </HashRouter>
     </div>
