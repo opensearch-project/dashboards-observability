@@ -14,6 +14,7 @@ import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 import { Sidebar } from '../sidebar';
 import thunk from 'redux-thunk';
+import { coreRefs } from '../../../../framework/core_refs';
 
 describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
@@ -22,13 +23,18 @@ describe('Side Bar Component', () => {
   it('renders Side Bar Component', async () => {
     httpClientMock.get = jest.fn();
 
-    const http = httpClientMock;
-    const pplService = new PPLService(httpClientMock);
-    const search = false;
+    coreRefs.http = httpClientMock;
+    coreRefs.pplService = new PPLService(httpClientMock);
+    coreRefs.pplService.fetch = jest.fn(() =>
+      Promise.resolve({
+        data: { DATA_SOURCES: ['datasource1', 'datasource2'] },
+        then: () => Promise.resolve(),
+      })
+    );
 
     const wrapper = mount(
       <Provider store={store}>
-        <Sidebar http={http} pplService={pplService} search={search} />
+        <Sidebar />
       </Provider>
     );
 
