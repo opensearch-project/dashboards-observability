@@ -13,7 +13,7 @@ const MetricIcon = ({ metric }) => {
   const metricIcons = useSelector(metricIconsSelector);
   const iconMeta = metricIcons[metric.catalog];
   if (metric.catalog === OBSERVABILITY_CUSTOM_METRIC)
-    return <EuiIcon type="logoOpenSearch" size="l" />;
+    return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
   else return <EuiAvatar name={metric.catalog} size="s" type="space" {...iconMeta} />;
 };
 
