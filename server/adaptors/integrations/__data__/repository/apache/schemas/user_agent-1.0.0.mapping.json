@@ -26,6 +26,31 @@
                   "type": "keyword"
                 }
               }
+            },
+            "os": {
+              "properties": {
+                "type": {
+                  "type": "keyword"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "full": {
+                  "type": "keyword"
+                },
+                "family": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                },
+                "kernel": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         }

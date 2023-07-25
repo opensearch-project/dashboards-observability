@@ -13,11 +13,11 @@
         }
         },
         "attributes": {
-        "data_stream": {
-            "dataset": "apache.access",
-            "namespace": "production",
-            "type": "logs"
-        }
+            "data_stream": {
+                "dataset": "apache.access",
+                "namespace": "production",
+                "type": "logs"
+            }
         },
         "event": {
             "result": "success",
@@ -32,8 +32,8 @@
                 "address": "127.0.0.1",
                 "ip": "42.204.151.42",
                 "geo": {
-                    "country": "China",
-                    "country_iso_code": "CN"
+                    "country": "Australia",
+                    "country_iso_code": "AU"
                 }
             }
         },
@@ -52,9 +52,16 @@
         "@timestamp": "2023-07-21T16:52:08.000Z"
     },
     {
-        "observedTimestamp": "2023-07-21T4:23:03.000Z",
+        "observedTimestamp": "2023-07-21T04:23:03.000Z",
         "severity": {
             "text": "cgid:error"
+        },
+        "attributes": {
+            "data_stream": {
+                "dataset": "apache.error",
+                "namespace": "production",
+                "type": "logs"
+            }
         },
         "communication": {
             "source": {
@@ -63,15 +70,16 @@
             }
         },
         "event": {
-            "result": "error",
+            "result": "success",
             "category": "web",
-            "name": "error",
-            "type": "error",
+            "name": "access",
+            "type": "access",
             "domain": "apache.error",
-            "kind": "error"
+            "kind": "event"
         },
         "traceId": "d09d293a27c9a754f2bf0196b5a1c9bc",
         "spanId": "18ba0e515e42dad0",
-        "body": "[Sat Aug 12 04:05:51 2006] [notice] Apache/1.3.11 (Unix) mod_perl/1.21 configured -- resuming normal operations"
+        "body": "[Sat Aug 12 04:05:51 2006] [notice] Apache/1.3.11 (Unix) mod_perl/1.21 configured -- resuming normal operations",
+        "@timestamp": "2023-07-21T16:52:08.000Z"
     }
 ]
