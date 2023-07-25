@@ -31,3 +31,6 @@ The next table details the assets
 | `[AWS RDS] Error History`                   | visualization |          [Line]  Provides a timeline representation of the errors occurred over a certain period.          |
 | `[AWS RDS] Audoit History`                  | visualization |      [Line]  Provides a timeline representation of the audited events occurred over a certain period.      |
 | `[AWS RDS] General Search`                  |    search     |                                     The pre-canned search for AWS RDS                                      |
+
+## Dashboard
+![](../static/dashboard.png)
