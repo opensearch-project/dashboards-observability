@@ -1,4 +1,4 @@
-# AWS VPC Flow Logs Integrations
+# AWS VPC Flow Logs Integration
 
 ## What is AWS VPC Flow Logs ?
 VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC.
@@ -18,4 +18,7 @@ See additional details [here](https://docs.aws.amazon.com/vpc/latest/userguide/f
 ## What is AWS VPC FLow Logs Integration ?
 An integration is a bundle of pre-canned assets which are bundled togather in a meaningful manner.
 
-AWS VPC flow logs integration includes dashboards, visualisations, queries and index mapping
+AWS VPC flow logs integration includes dashboards, visualisations, queries and an index mapping.
+
+### Dashboards
+![](../static/dashboard1.png)

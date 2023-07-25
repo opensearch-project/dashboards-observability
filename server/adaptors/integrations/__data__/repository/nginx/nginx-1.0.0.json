@@ -7,7 +7,7 @@
     "type": "logs",
     "link": "https://www.nginx.com/",
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/observability/tree/2.x/integrations/nginx",
+    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
     "statics": {
         "logo": {
             "annotation": "NginX Logo",
@@ -41,3 +41,4 @@
         }
     }
 }
+
