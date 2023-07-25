@@ -31,7 +31,7 @@ interface AccelerateFlyoutProps {
 
 export function AccelerateFlyout(props: AccelerateFlyoutProps) {
   return (
-    <EuiFlyout data-test-subj="accelerateFlyout" onClose={props.onClose} size="s">
+    <EuiFlyout data-test-subj="accelerateFlyout" onClose={props.onClose} size="m">
       <EuiFlyoutBody>
         <AcceleratePage />
       </EuiFlyoutBody>
