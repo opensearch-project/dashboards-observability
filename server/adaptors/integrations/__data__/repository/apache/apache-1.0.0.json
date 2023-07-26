@@ -1,6 +1,6 @@
 {
     "name": "apache",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "displayName": "Apache Dashboard",
     "description": "Apache web logs collector",
     "license": "Apache-2.0",
@@ -10,16 +10,16 @@
     "statics": {
         "logo": {
             "annotation": "Apache Logo",
-            "path": "logo.svg"
+            "path": "logo.png"
         },
         "gallery": [
             {
-                "annotation": "NginX Dashboard",
+                "annotation": "Apache Dashboard",
                 "path": "dashboard1.png"
             },
             {
-                "annotation": "NginX Logo",
-                "path": "logo.svg"
+                "annotation": "Apache Logo",
+                "path": "logo.png"
             }
         ]
     },
