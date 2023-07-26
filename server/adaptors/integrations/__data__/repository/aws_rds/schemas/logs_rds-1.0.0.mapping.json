@@ -231,7 +231,7 @@
     "aws_rds",
     "cloud",
     "communication",
-    "s3"
+    "aws_s3"
   ],
   "version": 1,
   "_meta": {
