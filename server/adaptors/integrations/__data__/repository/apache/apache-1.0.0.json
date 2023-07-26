@@ -29,10 +29,6 @@
             "version": "1.0.0"
         },
         {
-            "name": "user_agent",
-            "version": "1.0.0"
-        },
-        {
             "name": "logs",
             "version": "1.0.0"
         }
