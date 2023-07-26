@@ -1,0 +1,106 @@
+[
+    {
+        "timestamp": "2023-06-21T21:49:46.564177Z",
+        "aws":{
+            "elb":{
+                "client":{
+                    "ip":"15.248.1.132",
+                    "port":33556
+                },
+                "target_ip":"172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.005,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.000,
+                "elb_status_code":200,
+                "target_status_code":200,
+                "received_bytes": 521,
+                "sent_bytes":271,
+                "http":{
+                    "port":80,
+                    "version":"1.1"
+                },
+                "matched_rule_priority": "0",
+                "request_creation_time": "2023-06-21T21:49:46.563000Z"
+            }
+        },
+        "traceId": "Root=1-6493707a-062e3d077d0e7f5759a83c88",
+        "@timestamp": "2023-06-21T21:49:46.564177+00:00",
+        "event": {
+            "kind": "event",
+            "category":"web"
+        },
+        "attributes": {
+            "sample": "true",
+            "data_stream": {
+                "type": "logs",
+                "namespace": "production",
+                "dataset": "aws_elb.access"
+            }
+        },
+        "@id": "e3fef9c3fc77734e1a23e2ba86407789",
+        "ecs": {
+            "version": "1.10.0"
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo":{
+                    "country_name":"United States",
+                    "country_iso_code":"US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "aws",
+            "account": {
+                "id": "443273586136"
+            },
+            "region": "us-west-2"
+        },
+        "http": {
+            "request": {
+                "bytes": 521,
+                "method": "GET",
+                "body":{
+                    "content":"GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                } 
+            },
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "version": "1.1",
+            "user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        },
+        "related": {
+            "ip": [
+                "15.248.1.132",
+                "172.31.32.179"
+            ]
+        },
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/",
+            "port": 80,
+            "scheme": "http",
+            "full": "http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/"
+        },
+        "user_agent": {
+            "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+            "name": "Chrome",
+            "version": "114.0.0",
+            "os.name": "Mac OS X",
+            "os.full": "Mac OS X 10.15.7",
+            "os.version": "10.15.7",
+            "device.name": "Mac"
+        }
+    }
+]
