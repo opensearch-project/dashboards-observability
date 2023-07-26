@@ -14,11 +14,11 @@
         },
         "gallery": [
             {
-                "annotation": "NginX Dashboard",
+                "annotation": "Apache Dashboard",
                 "path": "dashboard1.png"
             },
             {
-                "annotation": "NginX Logo",
+                "annotation": "Apache Logo",
                 "path": "logo.svg"
             }
         ]
