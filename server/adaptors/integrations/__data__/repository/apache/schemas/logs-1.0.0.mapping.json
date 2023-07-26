@@ -216,8 +216,7 @@
     },
     "composed_of": [
         "communication",
-        "http",
-        "user_agent"
+        "http"
     ],
     "version": 1,
     "_meta": {
