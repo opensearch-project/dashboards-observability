@@ -125,7 +125,6 @@ exports[`Saved query table component Renders saved query table 1`] = `
               aria-haspopup="listbox"
               className="euiComboBox"
               data-test-subj="eventExplorer__querySaveComboBox"
-              onFocus={[Function]}
               onKeyDown={[Function]}
               role="combobox"
             >
