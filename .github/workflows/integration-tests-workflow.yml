@@ -53,6 +53,11 @@ jobs:
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
         shell: bash
+      
+      - name: Figure out where are we
+        run: |
+          ls
+        shell: bash
 
       - name: Install observability plugin
         run: |
