@@ -53,11 +53,6 @@ jobs:
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
         shell: bash
-      
-      - name: Figure out where are we
-        run: |
-          ls
-        shell: bash
 
       - name: Install observability plugin
         run: |
@@ -118,7 +113,7 @@ jobs:
         run: |
           cd OpenSearch-Dashboards
           yarn start --no-base-path --no-watch &
-          sleep 400
+          sleep 200
 
       - name: Install Cypress
         run: |
