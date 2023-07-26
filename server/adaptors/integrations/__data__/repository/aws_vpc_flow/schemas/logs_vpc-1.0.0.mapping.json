@@ -5,6 +5,9 @@
   "priority": 900,
   "data_stream": {},
   "template": {
+    "aliases": {
+      "logs-aws-vpc": {}
+    },
     "mappings": {
       "_meta": {
         "version": "1.0.0",
