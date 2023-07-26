@@ -162,8 +162,9 @@
                 "namespace": "production",
                 "type": "logs"
             }
-            },
-        "observedTimestamp": "2023-07-25T4:23:03.000Z",
+        },
+        "observedTimestamp": "2023-07-21T16:52:08.000Z",
+        "@timestamp": "2023-07-21T16:52:08.000Z",
         "severity": {
             "text": "cgid:error"
         },
