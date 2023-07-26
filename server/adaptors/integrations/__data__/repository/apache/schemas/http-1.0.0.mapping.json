@@ -33,8 +33,52 @@
                             "ignore_above": 256
                         },
                         "user_agent": {
-                            "type": "keyword",
-                            "ignore_above": 2048
+                            "type": "object",
+                            "properties": {
+                                "original": {
+                                    "type": "keyword"
+                                },
+                                "name": {
+                                    "type": "keyword"
+                                },
+                                "version": {
+                                    "type": "keyword"
+                                },
+                                "device": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                },
+                                "os": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "keyword"
+                                        },
+                                        "platform": {
+                                            "type": "keyword"
+                                        },
+                                        "name": {
+                                            "type": "keyword"
+                                        },
+                                        "full": {
+                                            "type": "keyword"
+                                        },
+                                        "family": {
+                                            "type": "keyword"
+                                        },
+                                        "version": {
+                                            "type": "keyword"
+                                        },
+                                        "kernel": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                }
+                            }
                         },
                         "url": {
                             "type": "keyword",
