@@ -52,17 +52,20 @@
                                     "type": "long"
                                 },
                                 "geo": {
-                                    "city_name": {
-                                        "type": "keyword"
-                                    },
-                                    "country_iso_code": {
-                                        "type": "keyword"
-                                    },
-                                    "country_name": {
-                                        "type": "keyword"
-                                    },
-                                    "location": {
-                                        "type": "geo_point"
+                                    "type": "object",
+                                    "properties": {
+                                        "city_name": {
+                                            "type": "keyword"
+                                        },
+                                        "country_iso_code": {
+                                            "type": "keyword"
+                                        },
+                                        "country_name": {
+                                            "type": "keyword"
+                                        },
+                                        "location": {
+                                            "type": "geo_point"
+                                        }
                                     }
                                 }
                             }
@@ -105,17 +108,20 @@
                                     "type": "long"
                                 },
                                 "geo": {
-                                    "city_name": {
-                                        "type": "keyword"
-                                    },
-                                    "country_iso_code": {
-                                        "type": "keyword"
-                                    },
-                                    "country_name": {
-                                        "type": "keyword"
-                                    },
-                                    "location": {
-                                        "type": "geo_point"
+                                    "type": "object",
+                                    "properties": {
+                                        "city_name": {
+                                            "type": "keyword"
+                                        },
+                                        "country_iso_code": {
+                                            "type": "keyword"
+                                        },
+                                        "country_name": {
+                                            "type": "keyword"
+                                        },
+                                        "location": {
+                                            "type": "geo_point"
+                                        }
                                     }
                                 }
                             }
