@@ -1,6 +1,6 @@
 {
     "name": "apache",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "displayName": "Apache Dashboard",
     "description": "Apache web logs collector",
     "license": "Apache-2.0",
