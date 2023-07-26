@@ -10,7 +10,7 @@
     "statics": {
         "logo": {
             "annotation": "Apache Logo",
-            "path": "logo.svg"
+            "path": "logo.png"
         },
         "gallery": [
             {
@@ -19,7 +19,7 @@
             },
             {
                 "annotation": "Apache Logo",
-                "path": "logo.svg"
+                "path": "logo.png"
             }
         ]
     },
