@@ -184,7 +184,11 @@
         "communication": {
             "source": {
                 "address": "127.0.0.1",
-                "ip": "42.204.151.42"
+                "ip": "42.204.151.42",
+                "geo": {
+                    "country": "France",
+                    "country_iso_code": "FR"
+                }
             }
         },
         "event": {
