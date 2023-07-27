@@ -47,7 +47,7 @@ import { Visualization } from '../../visualizations/visualization';
 
 // Name validation 0>Name<=50
 export const isNameValid = (name: string) => {
-  return name.length >= 50 || name.length === 0 ? false : true;
+  return !(name.length >= 50 || name.length === 0);
 };
 
 // DateTime convertor to required format
@@ -132,8 +132,7 @@ const queryAccumulator = (
   )}' and ${timestampField} <= '${convertDateTime(endTime, false)}'`;
   const pplFilterQuery = panelFilterQuery === '' ? '' : ` | ${panelFilterQuery}`;
 
-  const finalQuery = indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
-  return finalQuery;
+  return indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
 };
 
 // PPL Service requestor
@@ -175,6 +174,7 @@ export const fetchVisualizationById = async (
 
   await SavedObjectsActions.get({ objectId: savedVisualizationId })
     .then((res) => {
+      console.log({ res });
       const visualization = (res.observabilityObjectList[0] as ObservabilitySavedVisualization)
         .savedVisualization;
       savedVisualization = {
@@ -241,7 +241,7 @@ export const renderSavedVisualization = async (
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  let visualization = {} as SavedVisualizationType;
+  let visualization: SavedVisualizationType = {};
   let updatedVisualizationQuery = '';
 
   visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
