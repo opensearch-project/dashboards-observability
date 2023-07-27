@@ -223,7 +223,8 @@
     }
   },
   "composed_of": [
-    "aws_s3"
+    "aws_s3",
+    "cloud"
   ],
   "version": 1,
   "_meta": {
