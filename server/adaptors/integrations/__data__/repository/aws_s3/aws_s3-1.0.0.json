@@ -27,6 +27,10 @@
         {
             "name": "logs_s3",
             "version": "1.0.0"
+        },
+        {
+            "name": "cloud",
+            "version": "1.0.0"
         }
     ],
     "assets": {
