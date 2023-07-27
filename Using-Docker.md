@@ -16,7 +16,7 @@ RUN /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install fi
 ```
 
 ## Docker imageVersion
-The docker images used by this file are all referencing the [.env](.env) environment file that contains the version and user/password fields that need to be changed to match your own system. 
+The docker images used by this file are all referencing the [.env](.env) environment file that contains the version that needed to be changed to match your own system. 
 
 ## Run the docker image build
 To build the docker image use the next command:
@@ -42,5 +42,6 @@ The dashboard service uses port `localhost:5601` for access and this was already
 ```
 
 ## Security Notice
-The default User:Password for this demo test is embedded within the  [.env](.env) environment file - pay attention not to use this configuration in a production or any environment that may contain
-confident or personal information without first changing the security definition for accessing the servers.
+There is no security plugin and authentication definitions for this development test demo - pay attention not to use this configuration in a production or any environment that may contain
+confident or personal information without first changing the security definition for accessing the servers - for production use cases please review this [link](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/)
+
