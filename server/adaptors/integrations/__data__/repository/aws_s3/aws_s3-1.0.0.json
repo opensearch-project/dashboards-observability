@@ -4,7 +4,7 @@
     "displayName": "AWS S3 ",
     "description": "AWS S3 Object Store",
     "license": "Apache-2.0",
-    "type": "logs",
+    "type": "logs_s3",
     "author": "OpenSearch",
     "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_s3/info",
     "statics": {
