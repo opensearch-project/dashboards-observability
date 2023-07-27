@@ -1,7 +1,5 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
-
-
 version: '3.9'
 x-default-logging: &logging
   driver: "json-file"
@@ -18,9 +16,9 @@ networks:
     driver: bridge
 
 services:
-  # OpenSearch store - node1
+  # OpenSearch store - node (not for production - no security - only for test purpose )
   opensearch:
-    image: opensearchstaging/opensearch:3.0.0
+    image: opensearchstaging/opensearch:${VERSION}
     container_name: opensearch
     environment:
       - cluster.name=opensearch-cluster

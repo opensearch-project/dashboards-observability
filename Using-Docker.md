@@ -6,7 +6,7 @@ First the plugin must be build using the `yarn build` command.
 
 Once this build was completed - the expected zip location of the plugin is `./build/observabilityDashboards-?.?.?.zip` where as the `?.?.?` represents the version of this dashboard plugin.
 
-> Note that the plugin version must correspond to the OpenSearch-Dashboards version - this information appears [here](opensearch_dashboards.json)
+> Note: that the plugin version must correspond to the OpenSearch-Dashboards version - this information appears [here](opensearch_dashboards.json)
 > 
 
 Once the build is completed, make sure to overide the [Dockerfile](Dockerfile) target zip file with the exact name 
@@ -24,8 +24,13 @@ To build the docker image use the next command:
 
 ## Run the docker compose
 The [docker-compose](docker-compose.yml) file represents a simple assembly of an OpenSearch cluster with two nodes and an opensearch dashboard that has the updated image with the latest changes in this plugin.
+> This is a test only docker compose that should not be used for production purpose - for such use cases please review this [link](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/)
 
+### Option 1 (All from docker)
 run `docker compose up -d` to start the services and once the service is up and running you can start testing the changes.
+
+### Option 2 (Combined Docker & Dashboard)
+run `docker compose up -d opensearch` to only run the OpenSearch engine - in this case the dashboard has to be run manualy using `yarn start --no-base-path` command in the root dashboards path `./OpenSearch-Dashboards/`
 
 > Note that the OpenSearch version also must correspond to the OpenSearch-Dashboards version
 
