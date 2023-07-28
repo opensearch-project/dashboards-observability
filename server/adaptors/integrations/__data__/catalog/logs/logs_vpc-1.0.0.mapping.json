@@ -220,10 +220,10 @@
     }
   },
   "composed_of": [
-    "aws_vpc_flow",
-    "cloud",
-    "communication",
-    "s3"
+    "aws/vpc_flow",
+    "logs/cloud",
+    "logs/communication",
+    "aws/s3"
   ],
   "version": 1,
   "_meta": {

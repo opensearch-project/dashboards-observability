@@ -220,8 +220,8 @@
     }
   },
   "composed_of": [
-    "communication",
-    "http"
+    "logs/communication",
+    "logs/http"
   ],
   "version": 1,
   "_meta": {

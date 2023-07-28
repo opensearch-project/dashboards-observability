@@ -21,15 +21,15 @@
     },
     "components": [
         {
-            "name": "communication",
+            "name": "logs/communication",
             "version": "1.0.0"
         },
         {
-            "name": "http",
+            "name": "logs/http",
             "version": "1.0.0"
         },
         {
-            "name": "logs",
+            "name": "logs/logs",
             "version": "1.0.0"
         }
     ],

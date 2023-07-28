@@ -21,23 +21,23 @@
   },
   "components": [
     {
-      "name": "aws_vpc_flow",
+      "name": "aws/vpc_flow",
       "version": "1.0.0"
     },
     {
-      "name": "cloud",
+      "name": "logs/cloud",
       "version": "1.0.0"
     },
     {
-      "name": "communication",
+      "name": "logs/communication",
       "version": "1.0.0"
     },
     {
-      "name": "logs_vpc",
+      "name": "logs/logs_vpc",
       "version": "1.0.0"
     },
     {
-      "name": "aws_s3",
+      "name": "aws/s3",
       "version": "1.0.0"
     }
   ],
