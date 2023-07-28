@@ -1,7 +1,7 @@
 [
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 170,
@@ -67,7 +67,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:45:13.427000Z"
             }
         },
@@ -78,8 +78,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 382,
@@ -145,7 +145,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T01:13:14.679000Z"
             }
         },
@@ -156,8 +156,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -223,7 +223,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T01:19:20.970000Z"
             }
         },
@@ -234,8 +234,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -301,7 +301,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T01:19:21.313000Z"
             }
         },
@@ -312,8 +312,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -379,7 +379,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T00:16:15.418000Z"
             }
         },
@@ -390,8 +390,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 170,
@@ -457,7 +457,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:02:26.996000Z"
             }
         },
@@ -468,8 +468,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -535,7 +535,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:46.563000Z"
             }
         },
@@ -546,8 +546,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 221,
@@ -613,7 +613,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:21.030000Z"
             }
         },
@@ -624,8 +624,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -691,7 +691,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:21.449000Z"
             }
         },
@@ -702,8 +702,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -769,7 +769,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:21.667000Z"
             }
         },
@@ -780,8 +780,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -847,7 +847,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:22.014000Z"
             }
         },
@@ -858,8 +858,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -925,7 +925,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:22.226000Z"
             }
         },
@@ -936,8 +936,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -1003,7 +1003,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:22.402000Z"
             }
         },
@@ -1014,8 +1014,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -1081,7 +1081,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:22.571000Z"
             }
         },
@@ -1092,8 +1092,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -1159,7 +1159,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:23.666000Z"
             }
         },
@@ -1170,8 +1170,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -1237,7 +1237,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:24.529000Z"
             }
         },
@@ -1248,8 +1248,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -1315,7 +1315,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:49:25.221000Z"
             }
         },
@@ -1326,8 +1326,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -1393,7 +1393,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:10:38.224000Z"
             }
         },
@@ -1404,8 +1404,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 828,
@@ -1471,7 +1471,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:10:38.256000Z"
             }
         },
@@ -1482,8 +1482,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -1549,7 +1549,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:10:38.389000Z"
             }
         },
@@ -1560,8 +1560,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -1627,7 +1627,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T00:21:00.211000Z"
             }
         },
@@ -1638,8 +1638,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 271,
@@ -1705,7 +1705,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T00:21:00.538000Z"
             }
         },
@@ -1716,8 +1716,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -1783,7 +1783,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T23:36:38.398000Z"
             }
         },
@@ -1794,8 +1794,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 0,
@@ -1861,7 +1861,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "-",
+                "matched_rule_priority": null,
                 "request_creation_time": "2023-06-21T23:36:38.399000Z"
             }
         },
@@ -1872,8 +1872,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 170,
@@ -1939,7 +1939,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T00:38:53.303000Z"
             }
         },
@@ -1950,8 +1950,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 783,
@@ -2017,7 +2017,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:45.626000Z"
             }
         },
@@ -2028,8 +2028,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -2095,7 +2095,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:45.652000Z"
             }
         },
@@ -2106,8 +2106,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -2173,7 +2173,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:46.958000Z"
             }
         },
@@ -2184,8 +2184,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -2251,7 +2251,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:46.980000Z"
             }
         },
@@ -2262,8 +2262,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -2329,7 +2329,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:52.790000Z"
             }
         },
@@ -2340,8 +2340,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -2407,7 +2407,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:52.817000Z"
             }
         },
@@ -2418,8 +2418,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -2485,7 +2485,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:54.995000Z"
             }
         },
@@ -2496,8 +2496,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -2563,7 +2563,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:55.016000Z"
             }
         },
@@ -2574,8 +2574,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -2641,7 +2641,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:57.703000Z"
             }
         },
@@ -2652,8 +2652,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -2719,7 +2719,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:50:57.725000Z"
             }
         },
@@ -2730,8 +2730,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 272,
@@ -2797,7 +2797,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "-",
+                "matched_rule_priority": null,
                 "request_creation_time": "2023-06-21T21:53:25.232000Z"
             }
         },
@@ -2808,8 +2808,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -2875,7 +2875,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.004000Z"
             }
         },
@@ -2886,8 +2886,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -2953,7 +2953,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.032000Z"
             }
         },
@@ -2964,8 +2964,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -3031,7 +3031,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.462000Z"
             }
         },
@@ -3042,8 +3042,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -3109,7 +3109,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.485000Z"
             }
         },
@@ -3120,8 +3120,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -3187,7 +3187,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.734000Z"
             }
         },
@@ -3198,8 +3198,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -3265,7 +3265,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.760000Z"
             }
         },
@@ -3276,8 +3276,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -3343,7 +3343,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.936000Z"
             }
         },
@@ -3354,8 +3354,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -3421,7 +3421,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:28.960000Z"
             }
         },
@@ -3432,8 +3432,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 223,
@@ -3499,7 +3499,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:29.111000Z"
             }
         },
@@ -3510,8 +3510,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -3577,7 +3577,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T21:53:29.132000Z"
             }
         },
@@ -3588,8 +3588,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 382,
@@ -3655,7 +3655,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T01:02:44.586000Z"
             }
         },
@@ -3666,8 +3666,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 272,
@@ -3733,7 +3733,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "-",
+                "matched_rule_priority": null,
                 "request_creation_time": "2023-06-21T23:20:16.597000Z"
             }
         },
@@ -3744,8 +3744,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -3811,7 +3811,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:15:40.730000Z"
             }
         },
@@ -3822,8 +3822,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 0,
@@ -3889,7 +3889,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "-",
+                "matched_rule_priority": null,
                 "request_creation_time": "2023-06-21T22:15:40.731000Z"
             }
         },
@@ -3900,8 +3900,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 170,
@@ -3967,7 +3967,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T23:19:47.448000Z"
             }
         },
@@ -3978,8 +3978,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 272,
@@ -4045,7 +4045,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "-",
+                "matched_rule_priority": null,
                 "request_creation_time": "2023-06-27T01:40:50.631000Z"
             }
         },
@@ -4056,8 +4056,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 828,
@@ -4123,7 +4123,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:10:38.220000Z"
             }
         },
@@ -4134,8 +4134,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 387,
@@ -4201,7 +4201,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:10:38.365000Z"
             }
         },
@@ -4212,8 +4212,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 215,
@@ -4279,7 +4279,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-21T22:13:56.143000Z"
             }
         },
@@ -4290,8 +4290,8 @@
         }
     },
     {
-        "observedTimestamp": "2023-07-28T10:30:10.000Z",
-        "@timestamp": "2023-07-28T10:30:10.000Z",
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
         "http": {
             "response": {
                 "bytes": 170,
@@ -4357,7 +4357,7 @@
                 },
                 "ssl_cipher": "-",
                 "ssl_protocol": "-",
-                "matched_rule_priority": "0",
+                "matched_rule_priority": 0,
                 "request_creation_time": "2023-06-27T01:07:35.848000Z"
             }
         },
