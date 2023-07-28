@@ -15,15 +15,20 @@ import { Provider } from 'react-redux';
 import { Sidebar } from '../sidebar';
 import thunk from 'redux-thunk';
 import { coreRefs } from '../../../../framework/core_refs';
+import { sampleSavedMetric } from '../../../../../test/metrics_contants';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 
 describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
 
   it('renders Side Bar Component', async () => {
+    SavedObjectsActions.getBulk = jest
+      .fn()
+      .mockResolvedValue({ observabilityObjectList: [{ savedVisualization: sampleSavedMetric }] });
+
     httpClientMock.get = jest.fn();
 
-    coreRefs.http = httpClientMock;
     coreRefs.pplService = new PPLService(httpClientMock);
     coreRefs.pplService.fetch = jest.fn(() =>
       Promise.resolve({
