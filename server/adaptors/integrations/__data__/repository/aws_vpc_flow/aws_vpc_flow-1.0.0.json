@@ -4,7 +4,7 @@
   "displayName": "AWS VPC Flow",
   "description": "AWS VPC Flow log collector",
   "license": "Apache-2.0",
-  "type": "logs",
+  "type": "logs_vpc",
   "author": "Haidong Wang",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_vpc_flow/info",
   "statics": {
@@ -21,23 +21,28 @@
   },
   "components": [
     {
-      "name": "aws/vpc_flow",
+      "catalog": "observability/logs/aws",
+      "name": "vpc_flow",
       "version": "1.0.0"
     },
     {
-      "name": "logs/cloud",
+      "catalog": "observability/logs",
+      "name": "cloud",
       "version": "1.0.0"
     },
     {
-      "name": "logs/communication",
+      "catalog": "observability/logs",
+      "name": "communication",
       "version": "1.0.0"
     },
     {
-      "name": "logs/logs_vpc",
+      "catalog": "observability/logs",
+      "name": "logs_vpc",
       "version": "1.0.0"
     },
     {
-      "name": "aws/s3",
+      "catalog": "observability/logs/aws",
+      "name": "s3",
       "version": "1.0.0"
     }
   ],

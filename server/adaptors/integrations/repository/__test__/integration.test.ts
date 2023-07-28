@@ -175,9 +175,6 @@ describe('Integration', () => {
       };
       integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
 
-      const mappingFile1 = 'component1-1.0.0.mapping.json';
-      const mappingFile2 = 'component2-2.0.0.mapping.json';
-
       jest
         .spyOn(fs, 'readFile')
         .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping1' }))
@@ -193,11 +190,11 @@ describe('Integration', () => {
       });
 
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, '../../catalog', mappingFile1),
+        path.join(integration.directory, '../../catalog/component1-1.0.0.mapping.json'),
         { encoding: 'utf-8' }
       );
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, '../../catalog', mappingFile2),
+        path.join(integration.directory, '../../catalog/component2-2.0.0.mapping.json'),
         { encoding: 'utf-8' }
       );
     });
@@ -218,6 +215,39 @@ describe('Integration', () => {
       jest.spyOn(fs, 'readFile').mockRejectedValueOnce(new Error('Could not load schema'));
 
       await expect(integration.getSchemas()).rejects.toThrowError('Could not load schema');
+    });
+
+    it('should utilize the catalog path when finding components', async () => {
+      const sampleConfig = {
+        components: [
+          { name: 'component1', version: '1.0.0', catalog: 'one/two' },
+          { name: 'component2', version: '2.0.0', catalog: 'three' },
+        ],
+      };
+      integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
+
+      jest
+        .spyOn(fs, 'readFile')
+        .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping1' }))
+        .mockResolvedValueOnce(JSON.stringify({ mapping: 'mapping2' }));
+
+      const result = await integration.getSchemas();
+
+      expect(result).toEqual({
+        mappings: {
+          component1: { mapping: 'mapping1' },
+          component2: { mapping: 'mapping2' },
+        },
+      });
+
+      expect(fs.readFile).toHaveBeenCalledWith(
+        path.join(integration.directory, '../../catalog/one/two/component1-1.0.0.mapping.json'),
+        { encoding: 'utf-8' }
+      );
+      expect(fs.readFile).toHaveBeenCalledWith(
+        path.join(integration.directory, '../../catalog/three/component2-2.0.0.mapping.json'),
+        { encoding: 'utf-8' }
+      );
     });
   });
 

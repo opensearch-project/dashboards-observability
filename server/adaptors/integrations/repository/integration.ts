@@ -289,7 +289,10 @@ export class Integration {
     };
     try {
       for (const component of config.components) {
-        const schemaFile = `${component.name}-${component.version}.mapping.json`;
+        const schemaFile = path.join(
+          component.catalog ?? '.',
+          `${component.name}-${component.version}.mapping.json`
+        );
         const rawSchema = await fs.readFile(
           path.join(this.directory, '../../catalog', schemaFile),
           {

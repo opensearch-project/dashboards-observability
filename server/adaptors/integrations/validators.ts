@@ -46,6 +46,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
         properties: {
           name: { type: 'string' },
           version: { type: 'string' },
+          catalog: { type: 'string', nullable: true },
         },
         required: ['name', 'version'],
       },
