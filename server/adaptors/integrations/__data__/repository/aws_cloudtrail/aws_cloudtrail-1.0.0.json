@@ -29,15 +29,11 @@
       "version": "1.0.0"
     },
     {
-      "name": "communication",
-      "version": "1.0.0"
-    },
-    {
       "name": "logs",
       "version": "1.0.0"
     },
     {
-      "name": "s3",
+      "name": "aws_s3",
       "version": "1.0.0"
     }
   ],
