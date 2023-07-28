@@ -10,7 +10,7 @@
     "statics": {
         "logo": {
             "annotation": "ELB Logo",
-            "path": "logo.png"
+            "path": "logo.svg"
         },
         "gallery": [
             {
