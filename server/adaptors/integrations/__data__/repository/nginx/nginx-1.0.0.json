@@ -24,7 +24,7 @@
             "catalog_dir": "observability/logs",
             "name": "communication",
             "version": "1.0.0"
-          },
+        },
         {
             "catalog_dir": "observability/logs",
             "name": "http",
