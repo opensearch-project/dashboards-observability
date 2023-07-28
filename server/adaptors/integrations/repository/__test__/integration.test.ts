@@ -193,11 +193,11 @@ describe('Integration', () => {
       });
 
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, 'schemas', mappingFile1),
+        path.join(integration.directory, '../../catalog', mappingFile1),
         { encoding: 'utf-8' }
       );
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, 'schemas', mappingFile2),
+        path.join(integration.directory, '../../catalog', mappingFile2),
         { encoding: 'utf-8' }
       );
     });

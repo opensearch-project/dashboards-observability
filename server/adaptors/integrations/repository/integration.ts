@@ -290,9 +290,12 @@ export class Integration {
     try {
       for (const component of config.components) {
         const schemaFile = `${component.name}-${component.version}.mapping.json`;
-        const rawSchema = await fs.readFile(path.join(this.directory, 'schemas', schemaFile), {
-          encoding: 'utf-8',
-        });
+        const rawSchema = await fs.readFile(
+          path.join(this.directory, '../../catalog', schemaFile),
+          {
+            encoding: 'utf-8',
+          }
+        );
         const parsedSchema = JSON.parse(rawSchema);
         result.mappings[component.name] = parsedSchema;
       }
