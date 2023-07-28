@@ -23,3 +23,6 @@ See additional details [here](https://docs.aws.amazon.com/vpc/latest/userguide/f
 An integration is a bundle of pre-canned assets which are bundled togather in a meaningful manner.
 
 AWS ELB access logs integration includes dashboards, visualisations, queries and index mapping
+
+### Dashboard
+<img width="1267" alt="dashboard1" src="https://github.com/danieldong51/dashboards-observability/assets/58446449/aaae3758-80c8-410e-b542-6ad78284425e">
