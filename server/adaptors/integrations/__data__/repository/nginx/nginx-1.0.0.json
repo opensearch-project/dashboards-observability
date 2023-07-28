@@ -21,17 +21,17 @@
     },
     "components": [
         {
-            "catalog": "observability/logs",
+            "catalog_dir": "observability/logs",
             "name": "communication",
             "version": "1.0.0"
           },
         {
-            "catalog": "observability/logs",
+            "catalog_dir": "observability/logs",
             "name": "http",
             "version": "1.0.0"
         },
         {
-            "catalog": "observability/logs",
+            "catalog_dir": "observability/logs",
             "name": "logs",
             "version": "1.0.0"
         }

@@ -21,27 +21,27 @@
   },
   "components": [
     {
-      "catalog": "observability/logs/aws",
+      "catalog_dir": "observability/logs/aws",
       "name": "vpc_flow",
       "version": "1.0.0"
     },
     {
-      "catalog": "observability/logs",
+      "catalog_dir": "observability/logs",
       "name": "cloud",
       "version": "1.0.0"
     },
     {
-      "catalog": "observability/logs",
+      "catalog_dir": "observability/logs",
       "name": "communication",
       "version": "1.0.0"
     },
     {
-      "catalog": "observability/logs",
+      "catalog_dir": "observability/logs",
       "name": "logs_vpc",
       "version": "1.0.0"
     },
     {
-      "catalog": "observability/logs/aws",
+      "catalog_dir": "observability/logs/aws",
       "name": "s3",
       "version": "1.0.0"
     }

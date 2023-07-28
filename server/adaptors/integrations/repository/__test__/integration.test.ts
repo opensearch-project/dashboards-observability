@@ -220,8 +220,8 @@ describe('Integration', () => {
     it('should utilize the catalog path when finding components', async () => {
       const sampleConfig = {
         components: [
-          { name: 'component1', version: '1.0.0', catalog: 'one/two' },
-          { name: 'component2', version: '2.0.0', catalog: 'three' },
+          { name: 'component1', version: '1.0.0', catalog_dir: 'one/two' },
+          { name: 'component2', version: '2.0.0', catalog_dir: 'three' },
         ],
       };
       integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);

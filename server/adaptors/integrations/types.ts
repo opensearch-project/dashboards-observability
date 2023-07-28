@@ -38,7 +38,7 @@ interface StaticAsset {
 interface IntegrationComponent {
   name: string;
   version: string;
-  catalog?: string;
+  catalog_dir?: string;
 }
 
 interface DisplayAsset {
