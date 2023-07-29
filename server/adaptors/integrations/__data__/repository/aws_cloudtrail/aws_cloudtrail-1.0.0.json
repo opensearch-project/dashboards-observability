@@ -44,6 +44,6 @@
     }
   },
   "sampleData": {
-    "path": "sample.json"
+    "path": "samples.json"
   }
 }

@@ -82,9 +82,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "120e2232-5d8f-4797-845d-5cae63fa2ad6",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+    }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "cloudtrail.amazonaws.com"
@@ -119,9 +118,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "49038fb9-cc61-44e2-a093-ba9e37ba090d",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+    }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:ElasticLoadBalancingDescribeHandlerSession",
@@ -160,9 +158,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+    }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "cloudtrail.amazonaws.com"
@@ -197,9 +194,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "5655d7ec-f1b6-4bec-948e-c0cc072fd7f9",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "config.amazonaws.com"
@@ -240,9 +236,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "c87280b6-b9ba-46af-849e-ddf7fa509848",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5KP6PYYL2B:LogHub-Pipe-bfe64-S3toOpenSearchStacklogSenderFnEB-tm2bztjl5WTH",
@@ -293,10 +288,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
@@ -334,9 +328,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "config.amazonaws.com"
@@ -377,9 +370,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "014a546e-de1c-4cb1-ab26-995d2a6690a1",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "config.amazonaws.com"
@@ -420,9 +412,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "00a0b0c9-b74c-44ed-b4e3-7e0cbf914fd9",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "config.amazonaws.com"
@@ -463,9 +454,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "f8001dce-ba63-4bed-8715-7e3446c6dfcf",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638481888699734314",
@@ -503,9 +493,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
@@ -544,9 +533,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5MGPHCXONO:CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
@@ -597,9 +585,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "lambda.amazonaws.com"
@@ -636,9 +623,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "1473513b-ee8b-479b-a7b4-9b547b644063",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "config.amazonaws.com"
@@ -679,9 +665,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "d92e1358-d0a5-4641-9067-c037acde13d6",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638482156450755254",
@@ -719,9 +704,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5DGNE5U7AI:c95c6bcfe9033cfff4d3d0c295caf16e",
@@ -772,9 +756,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638481533224676745",
@@ -812,9 +795,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -872,9 +854,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -932,10 +913,9 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5HYW6RMIDH:LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
         "arn": "arn:aws:sts::347283850106:assumed-role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
@@ -1024,10 +1004,9 @@
         "cipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
         "clientProvidedHostHeader": "ssm.eu-west-1.amazonaws.com"
       }
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
@@ -1084,9 +1063,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -1144,9 +1122,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
@@ -1184,10 +1161,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
@@ -1226,9 +1202,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
@@ -1268,9 +1243,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
@@ -1310,10 +1284,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
@@ -1352,10 +1325,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
@@ -1394,9 +1366,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
@@ -1436,10 +1407,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
@@ -1478,10 +1448,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
@@ -1520,10 +1489,9 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
@@ -1580,9 +1548,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -1640,10 +1607,9 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
@@ -1700,10 +1666,9 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
@@ -1760,10 +1725,9 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
-      "userIdentity": {
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
+    "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
         "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
@@ -1820,9 +1784,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -1880,9 +1843,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -1940,9 +1902,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -2000,9 +1961,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -2060,9 +2020,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -2120,9 +2079,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5LHWXI4D6J:AutoScaling",
@@ -2172,9 +2130,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5LHWXI4D6J:AutoScaling",
@@ -2216,9 +2173,8 @@
       "managementEvent": true,
       "recipientAccountId": "347283850106",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -2276,9 +2232,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "appsync.amazonaws.com"
@@ -2320,9 +2275,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "d39f1780-7857-437e-96b5-e6374dd73648",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
@@ -2380,9 +2334,8 @@
       "recipientAccountId": "347283850106",
       "vpcEndpointId": "vpce-61638908",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AWSService",
         "invokedBy": "lambda.amazonaws.com"
@@ -2419,9 +2372,8 @@
       "recipientAccountId": "347283850106",
       "sharedEventID": "58eec27e-5418-4ff7-bcfc-d79cbb8d48af",
       "eventCategory": "Management"
-    },
-    {
-      "eventVersion": "1.08",
+  }}},
+  { "aws": { "cloudtrail":{"eventVersion": "1.08",
       "userIdentity": {
         "type": "AssumedRole",
         "principalId": "AROAVBW53AN5MGPHCXONO:CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
