@@ -223,8 +223,8 @@
     }
   },
   "composed_of": [
-    "aws_cloudtrail",
     "cloud",
+    "aws_cloudtrail",
     "aws_s3"
   ],
   "version": 1,
