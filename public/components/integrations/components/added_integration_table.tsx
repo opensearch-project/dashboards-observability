@@ -27,8 +27,6 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  // const integrations = props.data.hits;
-
   const { http } = props;
 
   const { setToast } = useToast();
