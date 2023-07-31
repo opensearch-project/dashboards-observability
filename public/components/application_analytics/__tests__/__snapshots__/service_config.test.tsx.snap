@@ -386,7 +386,6 @@ exports[`Service Config component renders empty service config 1`] = `
                           aria-label="Select services and entities"
                           className="euiComboBox"
                           data-test-subj="servicesEntitiesComboBox"
-                          onFocus={[Function]}
                           onKeyDown={[Function]}
                           role="combobox"
                         >
@@ -1519,7 +1518,6 @@ exports[`Service Config component renders with one service selected 1`] = `
                           aria-label="Select services and entities"
                           className="euiComboBox"
                           data-test-subj="servicesEntitiesComboBox"
-                          onFocus={[Function]}
                           onKeyDown={[Function]}
                           role="combobox"
                         >
