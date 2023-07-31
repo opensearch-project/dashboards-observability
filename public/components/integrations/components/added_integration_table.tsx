@@ -27,7 +27,7 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  const integrations = props.data.hits;
+  // const integrations = props.data.hits;
 
   const { http } = props;
 
@@ -94,6 +94,9 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
       .then(() => {
         setToast(`${name} integration successfully deleted!`, 'success');
+        props.setData({
+          hits: props.data.hits.filter((i) => i.id !== integrationInstance),
+        });
       })
       .catch((err) => {
         setToast(`Error deleting ${name} or its assets`, 'danger');
@@ -103,7 +106,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       });
   }
 
-  const getModal = (integrationInstanceId, name) => {
+  const getModal = (integrationInstanceId: string, name: string) => {
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
@@ -139,7 +142,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     ],
   };
 
-  const entries = integrations.map((integration) => {
+  const entries = props.data.hits.map((integration) => {
     const id = integration.id;
     const templateName = integration.templateName;
     const creationDate = integration.creationDate;
