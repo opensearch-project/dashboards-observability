@@ -1,7 +1,7 @@
 export const testData = {
   schema: [
     {
-      name: 'value',
+      name: 'values',
       type: 'integer',
     },
     {
@@ -130,16 +130,16 @@ export const testData = {
 export const testData2 = {
   schema: [
     {
-      name: 'metric',
+      name: 'labels',
       type: 'struct',
     },
     {
-      name: 'values',
+      name: 'value',
       type: 'array',
     },
     {
       name: 'timestamp',
-      type: 'timestamp',
+      type: 'array',
     },
   ],
   datarows: [
@@ -178,13 +178,13 @@ export const testData2 = {
   ],
   jsonData: [
     {
-      metric: {
+      labels: {
         instance: 'localhost:8090',
         __name__: 'test_exemplar_metric_total',
         service: 'bar',
         job: 'prometheus',
       },
-      values: [7, 9, 2, 18, 19, 17],
+      value: [7, 9, 2, 18, 19, 17],
       timestamps: [
         '2023-06-01 00:00:00',
         '2023-07-01 00:00:00',
@@ -194,13 +194,13 @@ export const testData2 = {
       ],
     },
     {
-      metric: {
+      labels: {
         instance: 'localhost:8090',
         __name__: 'test_exemplar_metric_total',
         service: 'foo',
         job: 'prometheus',
       },
-      values: [13, 14, 20, 2, 13, 7],
+      value: [13, 14, 20, 2, 13, 7],
       timestamps: [
         '2023-06-01 00:00:00',
         '2023-07-01 00:00:00',

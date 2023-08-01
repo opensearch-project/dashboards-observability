@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { forEach, isEmpty } from 'lodash';
+import _, { castArray, forEach, isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
@@ -30,7 +30,7 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
-import { testData } from '../../metrics/view/test_data';
+import { testData, testData2 } from '../../metrics/view/test_data';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -59,9 +59,27 @@ export const convertDateTime = (datetime: string, isStart = true, formatted = tr
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
-
+  // console.log("returnTime: ", returnTime);
+  // var myDate = new Date(returnTime._d); // Your timezone!
+  // var myEpoch = myDate.getTime()/1000.0;
+  // console.log("testing :", myEpoch);
+  // console.log("test new date ", new Date("Tue Jul 25 2023 19:57:45").getTime()/1000.0);
+  // Tue Jul 25 2023 19:57:45
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
+};
+
+export const convertDateTimeToEpoch = (datetime: string, isStart = true, formatted = true) => {
+  let returnTime: undefined | Moment;
+  if (isStart) {
+    returnTime = dateMath.parse(datetime);
+  } else {
+    returnTime = dateMath.parse(datetime, { roundUp: true });
+  }
+
+  const myDate = new Date(returnTime._d); // Your timezone!
+  const epochTime = myDate.getTime() / 1000.0;
+  return Math.round(epochTime);
 };
 
 // Merges new layout into visualizations
@@ -145,12 +163,15 @@ const pplServiceRequestor = async (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
+  const queryFormat = 'jdbc';
+  // if (type === 'metrics') queryFormat = 'viz';
   await pplService
-    .fetch({ query: finalQuery, format: 'jdbc' })
+    .fetch({ query: finalQuery, format: queryFormat })
     .then((res) => {
       if (res === undefined)
         setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
       setVisualizationData(res);
+      console.log('response: ', res);
     })
     .catch((error: Error) => {
       const errorMessage = JSON.parse(error.body.message);
@@ -203,14 +224,19 @@ export const getQueryResponse = (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   filterQuery = '',
-  timestampField = 'timestamp'
+  timestampField = 'timestamp',
+  metricVisualization = false
 ) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
   let finalQuery = '';
   try {
-    finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
+    if (!metricVisualization) {
+      finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
+    } else {
+      finalQuery = query;
+    }
   } catch (error) {
     const errorMessage = 'Issue in building final query';
     setIsError({ errorMessage });
@@ -312,6 +338,27 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
+const updateCatalogVisualizationQuery = (
+  catalogSourceName: string,
+  catalogTableName: string,
+  aggregation: string,
+  attributes: string[],
+  startTime: string,
+  endTime: string,
+  spanParam: string | undefined
+) => {
+  // source=my_prometheus.query_range('avg by(attribue1, attribuyte2) (prometheus_requests_total)', 1686694425, 1686700130, 14)
+  const attributesArrayToString = attributes.toString();
+  const startEpochTime = convertDateTimeToEpoch(startTime);
+  const endEpochTime = convertDateTimeToEpoch(endTime, false);
+  let visualizationQuery = `source = ${catalogSourceName}.query_range('${catalogTableName}', ${startEpochTime}, ${endEpochTime}, '14')`;
+  if (attributes.length > 0) {
+    visualizationQuery = `source = ${catalogSourceName}.query_range('${aggregation} by(${attributesArrayToString}) (${catalogTableName})', ${startEpochTime}, ${endEpochTime}, '14')`;
+    // ${spanParam}
+  }
+  return visualizationQuery;
+};
+
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async (
   http: CoreStart['http'],
@@ -334,16 +381,33 @@ export const renderCatalogVisualization = async (
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
-  let visualizationQuery = `source = ${catalogSource} | stats avg(@value) by span(${visualizationTimeField},1h)`;
 
-  if (spanParam !== undefined) {
-    visualizationQuery = updateQuerySpanInterval(
-      visualizationQuery,
-      visualizationTimeField,
-      spanParam
-    );
-  }
+  const catalogSourceName = catalogSource.split('.')[0];
+  const catalogTableName = catalogSource.split('.')[1];
 
+  const defaultAggregation = 'avg'; // pass in attributes to this function
+  // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
+  const attributes: string[] = [];
+
+  const visualizationQuery = updateCatalogVisualizationQuery(
+    catalogSourceName,
+    catalogTableName,
+    defaultAggregation,
+    attributes,
+    startTime,
+    endTime,
+    spanParam
+  );
+  // let visualizationQuery = `source=${catalogSourceName}.query_range('${catalogTableName}', ${startTime}, ${endTime}, 14)`;
+  // let visualizationQuery = `source=my_prometheus.query_range('prometheus_http_requests_total', 1690312103, 1690318103, 14)`;
+
+  // if (spanParam !== undefined) {
+  //   visualizationQuery = updateQuerySpanInterval(
+  //     visualizationQuery,
+  //     visualizationTimeField,
+  //     spanParam
+  //   );
+  // }
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
     visualizationQuery,
@@ -355,17 +419,19 @@ export const renderCatalogVisualization = async (
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
 
+  console.log('visualizationType: ', visualizationType);
   getQueryResponse(
     pplService,
     visualizationQuery,
-    visualizationType,
+    'metrics',
     startTime,
     endTime,
     setVisualizationData,
     setIsLoading,
     setIsError,
     filterQuery,
-    visualizationTimeField
+    visualizationTimeField,
+    true
   );
 };
 
@@ -464,7 +530,7 @@ export const isPPLFilterValid = (
 };
 
 export const processMetricsData = (schema: any, dataConfig: any) => {
-  console.log('schema: ', schema);
+  console.log('schema processMetricsData: ', schema);
   if (isEmpty(schema)) return {};
   if (
     schema.length === 3 &&
@@ -476,15 +542,15 @@ export const processMetricsData = (schema: any, dataConfig: any) => {
 };
 
 export const prepareMetricsData = (schema: any, dataConfig: any) => {
-  const metricBreakdown = [];
-  const metricSeries = [];
-  const metricDimension = [];
+  const metricBreakdown: any[] = [];
+  const metricSeries: any[] = [];
+  const metricDimension: any[] = [];
 
   forEach(schema, (field) => {
-    if (field.name === '@labels') metricBreakdown.push({ name: '@labels', label: '@labels' });
-    if (field.name === '@value') metricSeries.push({ name: '@value', customLabel: '@value' });
     if (field.name === '@timestamp')
       metricDimension.push({ name: '@timestamp', label: '@timestamp' });
+    if (field.name === '@labels') metricBreakdown.push({ name: '@labels', customLabel: '@labels' });
+    if (field.name === '@value') metricSeries.push({ name: '@value', label: '@value' });
   });
 
   return {
@@ -500,11 +566,16 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
+<<<<<<< HEAD
 
   if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
     metaData.user_configs = JSON.parse(metaData.user_configs);
   }
 
+=======
+  // data = testData2;
+  console.log('data in displayVisualization: ', data);
+>>>>>>> 7056d4af (Working multi line viz with new sql)
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
@@ -529,6 +600,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   // add metric specific overriding
   finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
+  console.log('finalDataConfig in display vis: ', finalDataConfig);
 
   const mixedUserConfigs = {
     availabilityConfig: {
