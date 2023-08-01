@@ -5,6 +5,7 @@
     "description": "Nginx HTTP server collector",
     "license": "Apache-2.0",
     "type": "logs",
+    "catalog_dir": "observability/logs",
     "author": "OpenSearch",
     "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
     "statics": {
@@ -21,17 +22,14 @@
     },
     "components": [
         {
-            "catalog_dir": "observability/logs",
             "name": "communication",
             "version": "1.0.0"
         },
         {
-            "catalog_dir": "observability/logs",
             "name": "http",
             "version": "1.0.0"
         },
         {
-            "catalog_dir": "observability/logs",
             "name": "logs",
             "version": "1.0.0"
         }

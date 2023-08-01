@@ -289,18 +289,19 @@ export class Integration {
     };
     try {
       for (const component of config.components) {
-        const schemaFile = path.join(
-          component.catalog_dir ?? '.',
-          `${component.name}-${component.version}.mapping.json`
-        );
         const rawSchema = await fs.readFile(
-          path.join(this.directory, '../../catalog', schemaFile),
+          path.join(
+            this.directory,
+            '../../catalog',
+            config.catalog_dir ?? '.',
+            `${component.name}-${component.version}.mapping.json`
+          ),
           {
             encoding: 'utf-8',
           }
         );
         const parsedSchema = JSON.parse(rawSchema);
-        result.mappings[component.name] = parsedSchema;
+        result.mappings[component.name.split('/').pop() as string] = parsedSchema;
       }
     } catch (err: any) {
       // It's not clear that an invalid schema can be recovered from.

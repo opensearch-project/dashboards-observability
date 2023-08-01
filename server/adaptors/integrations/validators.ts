@@ -25,6 +25,7 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
     displayName: { type: 'string', nullable: true },
     license: { type: 'string' },
     type: { type: 'string' },
+    catalog_dir: { type: 'string', nullable: true },
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
     sourceUrl: { type: 'string', nullable: true },
@@ -46,7 +47,6 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
         properties: {
           name: { type: 'string' },
           version: { type: 'string' },
-          catalog_dir: { type: 'string', nullable: true },
         },
         required: ['name', 'version'],
       },

@@ -9,6 +9,7 @@ interface IntegrationTemplate {
   displayName?: string;
   license: string;
   type: string;
+  catalog_dir?: string;
   author?: string;
   description?: string;
   sourceUrl?: string;
@@ -38,7 +39,6 @@ interface StaticAsset {
 interface IntegrationComponent {
   name: string;
   version: string;
-  catalog_dir?: string;
 }
 
 interface DisplayAsset {

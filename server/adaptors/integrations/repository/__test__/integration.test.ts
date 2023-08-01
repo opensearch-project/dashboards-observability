@@ -219,9 +219,10 @@ describe('Integration', () => {
 
     it('should utilize the catalog path when finding components', async () => {
       const sampleConfig = {
+        catalog_dir: 'foo/bar',
         components: [
-          { name: 'component1', version: '1.0.0', catalog_dir: 'one/two' },
-          { name: 'component2', version: '2.0.0', catalog_dir: 'three' },
+          { name: 'component1', version: '1.0.0' },
+          { name: 'component2', version: '2.0.0' },
         ],
       };
       integration.getConfig = jest.fn().mockResolvedValue(sampleConfig);
@@ -241,11 +242,11 @@ describe('Integration', () => {
       });
 
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, '../../catalog/one/two/component1-1.0.0.mapping.json'),
+        path.join(integration.directory, '../../catalog/foo/bar/component1-1.0.0.mapping.json'),
         { encoding: 'utf-8' }
       );
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(integration.directory, '../../catalog/three/component2-2.0.0.mapping.json'),
+        path.join(integration.directory, '../../catalog/foo/bar/component2-2.0.0.mapping.json'),
         { encoding: 'utf-8' }
       );
     });
