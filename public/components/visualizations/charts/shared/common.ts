@@ -43,6 +43,7 @@ export const transformPreprocessedDataToTraces = (
   const traceMap = new Map<string, any>();
   const hasBreakdown = !isEmpty(breakdowns);
   forEach(intermediateVisData, (entry) => {
+    console.log('intermediateVisData: ', intermediateVisData);
     const traceKey = hasBreakdown ? [entry.breakdown, entry.aggName].join(',') : entry.aggName;
     const xCoordinate = visTypeMetaData.x_coordinate;
     const yCoordinate = visTypeMetaData.y_coordinate;
@@ -89,7 +90,7 @@ export const preprocessJsonData = (
     const backtickRemovedEntry = {
       ...removeBackTick(entry),
     };
-
+    console.log('series: ', series);
     forEach(series, (sr) => {
       let tabularVizData: IIntermediateMapping = {
         value: 0,

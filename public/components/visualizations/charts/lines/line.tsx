@@ -4,7 +4,8 @@
  */
 
 import { last } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import _ from 'lodash';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
   DEFAULT_CHART_STYLES,
@@ -19,6 +20,7 @@ import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualiz
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
 import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
+import { processMetricsData } from '../../../custom_panels/helpers/utils';
 
 export const Line = ({ visualizations, layout, config }: any) => {
   const {
@@ -36,7 +38,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
   const {
     data: {
       explorer: {
-        explorerData: { jsonData },
+        explorerData: { schema, jsonData, datarows },
       },
       userConfigs: {
         dataConfig: {
@@ -80,6 +82,27 @@ export const Line = ({ visualizations, layout, config }: any) => {
     (colorTheme.length > 0 &&
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
+
+  const preprocessMetricsJsonData = (json): any => {
+    const data: any[] = [];
+    // console.log('testing jsonData: ', jsonData);
+    _.forEach(json, (row) => {
+      const record: any = {};
+      // console.log('testing row: ', row['@labels']);
+      record['@labels'] = JSON.parse(row['@labels']);
+      record['@timestamp'] = JSON.parse(row['@timestamp']);
+      record['@value'] = JSON.parse(row['@value']);
+      data.push(record);
+      // console.log('dataaaa: ', data);
+    });
+    return data;
+  };
+  const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
+  useEffect(() => {
+    // console.log("preprocessJsonData: ", preprocessMetricsJsonData(jsonData));
+    // console.log('json parse: ', jsonData);
+    console.log('data rows explorer: ', datarows);
+  }, []);
 
   const addStylesToTraces = (traces, traceStyles) => {
     const {
@@ -129,6 +152,15 @@ export const Line = ({ visualizations, layout, config }: any) => {
       breakdowns,
       span,
     };
+    console.log(
+      'processMetricsData(testData.schema, visConfig): ',
+      processMetricsData(jsonData, visConfig)
+    );
+    visConfig = {
+      ...visConfig,
+      ...processMetricsData(schema, visConfig),
+    };
+    console.log('visConfig: ', visConfig);
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -142,15 +174,55 @@ export const Line = ({ visualizations, layout, config }: any) => {
       y_coordinate: 'y',
     };
 
-    return addStylesToTraces(
-      transformPreprocessedDataToTraces(
-        preprocessJsonData(jsonData, visConfig),
-        visConfig,
-        lineSpecficMetaData
-      ),
+    // return addStylesToTraces(
+    //   transformPreprocessedDataToTraces(
+    // preprocessJsonData(jsonData, visConfig),
+    //     visConfig,
+    //     lineSpecficMetaData
+    //   ),
+    //   traceStyles
+    // );
+
+    const result = addStylesToTraces(
+      formattedMetricsJson.map((trace) => {
+        return {
+          ...trace,
+          x: trace['@timestamp'],
+          y: trace['@value'],
+          name: JSON.stringify(trace['@labels']),
+        };
+      }),
       traceStyles
     );
-  }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
+    console.log('result: ', result);
+    return result;
+  }, [
+    chartStyles,
+    // jsonData,
+    formattedMetricsJson,
+    dimensions,
+    series,
+    span,
+    breakdowns,
+    panelOptions,
+    tooltipOptions,
+  ]);
+
+  const prepareAnnotations = (examplerData) => {
+    return examplerData.map((exmp) => {
+      return {
+        x: exmp.timestamp,
+        y: exmp.value,
+        xref: 'x',
+        yref: 'y',
+        text: JSON.stringify(exmp.labels),
+        showarrow: true,
+        arrowhead: 7,
+        ax: 0,
+        ay: -40,
+      };
+    });
+  };
 
   const mergedLayout = useMemo(() => {
     const axisLabelsStyle = {
@@ -162,6 +234,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
+    // const annotations = prepareAnnotations(testData.jsonData);
+    // console.log('anotations: ', annotations);
     return {
       ...layout,
       title: panelOptions.title || layoutConfig.layout?.title || '',
@@ -184,6 +258,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
       showlegend: showLegend,
       margin: PLOT_MARGIN,
+      // annotations,
     };
   }, [visualizations]);
 
@@ -238,6 +313,11 @@ export const Line = ({ visualizations, layout, config }: any) => {
     }),
     [config, layoutConfig.config]
   );
+
+  useEffect(() => {
+    console.log('lines: ', lines);
+    console.log('mergedConfigs: ', mergedConfigs);
+  }, []);
 
   return <Plt data={lines} layout={mergedLayout} config={mergedConfigs} />;
 };
