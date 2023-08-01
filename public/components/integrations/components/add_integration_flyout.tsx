@@ -132,7 +132,12 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
     targetDataSource: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     return http
-      .post(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`)
+      .post('/api/console/proxy', {
+        query: {
+          path: `${targetDataSource}/_mapping`,
+          method: 'GET',
+        },
+      })
       .then((response) => {
         // Un-nest properties by a level for caller convenience
         Object.keys(response).forEach((key) => {

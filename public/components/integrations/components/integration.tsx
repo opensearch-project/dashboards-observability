@@ -49,12 +49,13 @@ export function Integration(props: AvailableIntegrationProps) {
     const version = payload.template.mappings._meta.version;
     if (componentName !== integration.type) {
       return http
-        .post(
-          `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-          {
-            body: JSON.stringify(payload),
-          }
-        )
+        .post('/api/console/proxy', {
+          body: JSON.stringify(payload),
+          query: {
+            path: `_component_template/ss4o_${componentName}_${version}_template`,
+            method: 'POST',
+          },
+        })
         .catch((err: any) => {
           console.error(err);
           return err;
@@ -62,8 +63,12 @@ export function Integration(props: AvailableIntegrationProps) {
     } else {
       payload.index_patterns = [dataSourceName];
       return http
-        .post(`/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`, {
+        .post('/api/console/proxy', {
           body: JSON.stringify(payload),
+          query: {
+            path: `_index_template/${componentName}_${version}`,
+            method: 'POST',
+          },
         })
         .catch((err: any) => {
           console.error(err);
@@ -208,7 +213,13 @@ export function Integration(props: AvailableIntegrationProps) {
         .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
         .join('\n') + '\n';
     http
-      .post(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, { body: requestBody })
+      .post('/api/console/proxy', {
+        body: requestBody,
+        query: {
+          path: `${dataSource}/_bulk`,
+          method: 'POST',
+        },
+      })
       .catch((err) => {
         console.error(err);
         setToast('Failed to load sample data', 'danger');
