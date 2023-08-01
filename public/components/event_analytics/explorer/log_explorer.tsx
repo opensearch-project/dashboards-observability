@@ -79,19 +79,6 @@ export const LogExplorer = ({
 
   const [tabCreatedTypes, setTabCreatedTypes] = useState({});
 
-  // Append add-new-tab link to the end of the tab list, and remove it once tabs state changes
-  useEffect(() => {
-    const newLink = $(
-      '<a class="linkNewTag" data-test-subj="eventExplorer__addNewTab">+ Add new</a>'
-    ).on('click', () => {
-      addNewTab(NEW_TAB);
-    });
-    $('.queryTabs > .euiTabs').append(newLink);
-    return () => {
-      $('.queryTabs > .euiTabs .linkNewTag').remove();
-    };
-  }, [tabIds]);
-
   const handleTabClick = (selectedTab: EuiTabbedContentTab) => {
     history.replace(`/explorer/${queryRef.current![selectedTab.id][SAVED_OBJECT_ID] || ''}`);
     dispatch(setSelectedQueryTab({ tabId: selectedTab.id }));
@@ -209,6 +196,26 @@ export const LogExplorer = ({
     };
   }
 
+  function addTab(){
+    return {
+      id: htmlIdGenerator(TAB_ID_TXT_PFX)(),
+      name:(
+        <>
+          <EuiText size="s" textAlign="left" color="default">
+            <a 
+            className = "euiIcon"
+            data-test-subj="eventExplorer__addNewTab"
+            onClick={() => addNewTab(NEW_TAB)}
+            > <EuiIcon type = "plusInCircle"  ></EuiIcon> Add new</a>
+            </EuiText>
+        </>
+      ),
+      content:(
+        <></>
+      ),
+    }
+  }
+
   const memorizedTabs = useMemo(() => {
     const res = map(tabIds, (tabId) => {
       return getQueryTab({
@@ -218,8 +225,9 @@ export const LogExplorer = ({
       });
     });
 
+    res.push(addTab())
     return res;
-  }, [tabIds, tabNames, tabCreatedTypes]);
+    }, [tabIds, tabNames, tabCreatedTypes]);
 
   return (
     <>
