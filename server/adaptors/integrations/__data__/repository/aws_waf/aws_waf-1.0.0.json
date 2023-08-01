@@ -1,27 +1,27 @@
 {
-  "name": "aws_cloudtrail",
+  "name": "aws_waf",
   "version": "1.0.0",
-  "displayName": "AWS CloudTrail",
-  "description": "AWS CloudTrail log collector",
+  "displayName": "AWS waf",
+  "description": "AWS waf log collector",
   "license": "Apache-2.0",
   "type": "logs",
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudtrail/info",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_waf/info",
   "statics": {
     "logo": {
-      "annotation": "AWS CloudTrail Logo",
+      "annotation": "AWS waf Logo",
       "path": "logo.png"
     },
     "gallery": [
       {
-        "annotation": "AWS CloudTrail Log Dashboard",
+        "annotation": "AWS waf Log Dashboard",
         "path": "dashboard.png"
       }
     ]
   },
   "components": [
     {
-      "name": "aws_cloudtrail",
+      "name": "aws_waf",
       "version": "1.0.0"
     },
     {
@@ -39,7 +39,7 @@
   ],
   "assets": {
     "savedObjects": {
-      "name": "aws_cloudtrail",
+      "name": "aws_waf",
       "version": "1.0.0"
     }
   },

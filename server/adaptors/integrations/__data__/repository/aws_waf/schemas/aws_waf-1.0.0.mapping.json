@@ -1,0 +1,143 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "waf"
+      },
+      "properties": {
+        "aws": {
+          "type": "object",
+          "properties": {
+            "waf": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "formatVersion": {
+                  "type": "keyword"
+                },
+                "httpRequest": {
+                  "properties": {
+                    "args": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "clientIp": {
+                      "type": "ip"
+                    },
+                    "country": {
+                      "type": "keyword"
+                    },
+                    "headers": {
+                      "properties": {
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "text",
+                          "fields": {
+                            "keyword": {
+                              "type": "keyword",
+                              "ignore_above": 256
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "httpMethod": {
+                      "type": "keyword"
+                    },
+                    "httpVersion": {
+                      "type": "keyword"
+                    },
+                    "requestId": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "uri": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    }
+                  }
+                },
+                "httpSourceId": {
+                  "type": "keyword"
+                },
+                "httpSourceName": {
+                  "type": "keyword"
+                },
+                "labels": {
+                  "properties": {
+                    "name": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    }
+                  }
+                },
+                "ruleGroupList": {
+                  "properties": {
+                    "ruleGroupId": {
+                      "type": "keyword"
+                    },
+                    "terminatingRule": {
+                      "properties": {
+                        "action": {
+                          "type": "keyword"
+                        },
+                        "ruleId": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "terminatingRuleId": {
+                  "type": "keyword"
+                },
+                "terminatingRuleType": {
+                  "type": "keyword"
+                },
+                "webaclId": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "webaclName": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

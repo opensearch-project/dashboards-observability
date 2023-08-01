@@ -6,7 +6,7 @@
   "data_stream": {},
   "template": {
     "aliases": {
-      "logs-cloudtrail": {}
+      "logs-waf": {}
     },
     "mappings": {
       "_meta": {
@@ -224,7 +224,7 @@
   },
   "composed_of": [
     "cloud",
-    "aws_cloudtrail",
+    "aws_waf",
     "aws_s3"
   ],
   "version": 1,
