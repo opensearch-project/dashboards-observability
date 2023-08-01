@@ -131,17 +131,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const fetchDataSourceMappings = async (
     targetDataSource: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
-    return fetch(
-      http.basePath.prepend(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`),
-      {
-        method: 'POST',
-        headers: [
-          ['osd-xsrf', 'true'],
-          ['Content-Type', 'application/json'],
-        ],
-      }
-    )
-      .then((response) => response.json())
+    return http
+      .post(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`)
       .then((response) => {
         // Un-nest properties by a level for caller convenience
         Object.keys(response).forEach((key) => {
