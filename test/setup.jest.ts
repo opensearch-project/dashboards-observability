@@ -41,19 +41,6 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   },
 }));
 
-jest.mock('../public/services/saved_objects/saved_object_client/saved_objects_actions', () => {
-  return {
-    SavedObjectsActions: {
-      get: jest.fn().mockResolvedValue({
-        observabilityObjectList: [],
-      }),
-      getBulk: jest.fn().mockResolvedValue({
-        observabilityObjectList: [],
-      }),
-    },
-  };
-});
-
 jest.setTimeout(30000);
 
 setOSDHttp(coreStartMock.http);

@@ -10,6 +10,8 @@ export const PPL_DATASOURCES_REQUEST =
   'show datasources | where CONNECTOR_TYPE="PROMETHEUS" | fields DATASOURCE_NAME';
 
 // redux
+
+export const OBSERVABILITY_CUSTOM_METRIC = 'CUSTOM_METRICS';
 export const REDUX_SLICE_METRICS = 'metrics';
 
 export const resolutionOptions = [
@@ -24,3 +26,11 @@ export const resolutionOptions = [
 
 export const DEFAULT_METRIC_HEIGHT = 2;
 export const DEFAULT_METRIC_WIDTH = 12;
+
+export const AGGREGATION_OPTIONS = [
+  { label: 'avg' },
+  { label: 'sum' },
+  { label: 'count' },
+  { label: 'min' },
+  { label: 'max' },
+];
