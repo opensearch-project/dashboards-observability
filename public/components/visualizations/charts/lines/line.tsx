@@ -4,7 +4,8 @@
  */
 
 import { last } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import _ from 'lodash';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
   DEFAULT_CHART_STYLES,
@@ -20,7 +21,13 @@ import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizati
 import { Plt } from '../../plotly/plot';
 import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
 import { processMetricsData } from '../../../custom_panels/helpers/utils';
-import { testData, testData2 } from '../../../metrics/view/test_data';
+import { testData2 } from '../../../metrics/view/test_data';
+
+// send both query and exampler data through getVizContainerProps rawdata and try to get it here in data of line 40. print it and see.
+// If it doesn't work then use redux to get the data here
+// make query calls for both query and exampler data in getQueryResponse and pplServiceRequestor functions in custom panels utils.
+// testData is exampler data
+// testData2 is query data
 
 export const Line = ({ visualizations, layout, config }: any) => {
   const {
@@ -37,7 +44,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
   const {
     data: {
       explorer: {
-        explorerData: { schema, jsonData },
+        explorerData: { schema, jsonData, datarows },
       },
       userConfigs: {
         dataConfig: {
@@ -81,6 +88,27 @@ export const Line = ({ visualizations, layout, config }: any) => {
     (colorTheme.length > 0 &&
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
+
+  const preprocessMetricsJsonData = (json): any => {
+    const data: any[] = [];
+    // console.log('testing jsonData: ', jsonData);
+    _.forEach(json, (row) => {
+      const record: any = {};
+      // console.log('testing row: ', row['@labels']);
+      record['@labels'] = JSON.parse(row['@labels']);
+      record['@timestamp'] = JSON.parse(row['@timestamp']);
+      record['@value'] = JSON.parse(row['@value']);
+      data.push(record);
+      // console.log('dataaaa: ', data);
+    });
+    return data;
+  };
+  const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
+  useEffect(() => {
+    // console.log("preprocessJsonData: ", preprocessMetricsJsonData(jsonData));
+    // console.log('json parse: ', jsonData);
+    console.log('data rows explorer: ', datarows);
+  }, []);
 
   const addStylesToTraces = (traces, traceStyles) => {
     const {
@@ -130,15 +158,15 @@ export const Line = ({ visualizations, layout, config }: any) => {
       breakdowns,
       span,
     };
-    console.log(
-      'processMetricsData(testData.schema, visConfig): ',
-      processMetricsData(jsonData, visConfig)
-    );
+    // console.log(
+    //   'processMetricsData(testData.schema, visConfig): ',
+    //   processMetricsData(jsonData, visConfig)
+    // );
     visConfig = {
       ...visConfig,
       ...processMetricsData(schema, visConfig),
     };
-    console.log('visConfig: ', visConfig);
+    // console.log('visConfig: ', visConfig);
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -154,19 +182,20 @@ export const Line = ({ visualizations, layout, config }: any) => {
 
     // return addStylesToTraces(
     //   transformPreprocessedDataToTraces(
-    //     preprocessJsonData(testData.jsonData, visConfig),
+    // preprocessJsonData(jsonData, visConfig),
     //     visConfig,
     //     lineSpecficMetaData
     //   ),
     //   traceStyles
     // );
+
     const result = addStylesToTraces(
-      testData2.jsonData.map((trace) => {
+      formattedMetricsJson.map((trace) => {
         return {
           ...trace,
-          x: trace.timestamps,
-          y: trace.values,
-          name: JSON.stringify(trace.metric),
+          x: trace['@timestamp'],
+          y: trace['@value'],
+          name: JSON.stringify(trace['@labels']),
         };
       }),
       traceStyles
@@ -175,7 +204,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
     return result;
   }, [
     chartStyles,
-    testData.jsonData,
+    // jsonData,
+    formattedMetricsJson,
     dimensions,
     series,
     span,
@@ -210,8 +240,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
-    const annotations = prepareAnnotations(testData.jsonData);
-    console.log('anotations: ', annotations);
+    // const annotations = prepareAnnotations(testData.jsonData);
+    // console.log('anotations: ', annotations);
     return {
       ...layout,
       title: panelOptions.title || layoutConfig.layout?.title || '',
@@ -234,7 +264,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
       showlegend: showLegend,
       margin: PLOT_MARGIN,
-      annotations,
+      // annotations,
     };
   }, [visualizations]);
 
@@ -289,6 +319,11 @@ export const Line = ({ visualizations, layout, config }: any) => {
     }),
     [config, layoutConfig.config]
   );
+
+  useEffect(() => {
+    console.log('lines: ', lines);
+    console.log('mergedConfigs: ', mergedConfigs);
+  }, []);
 
   return <Plt data={lines} layout={mergedLayout} config={mergedConfigs} />;
 };
