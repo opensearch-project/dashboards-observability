@@ -76,7 +76,7 @@ export const MetricsExportPanel = ({
 
   useEffect(() => {
     fetchAllvisualizationsById();
-  }, [fetchAllvisualizationsById]);
+  }, []);
 
   const onNameChange = (index: number, name: string) => {
     const tempVisualizationsMetaData = [...visualizationsMetaData];
