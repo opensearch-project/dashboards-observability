@@ -39,6 +39,7 @@ const initialState = {
   metrics: [],
   selected: [],
   searched: [],
+  search: '',
   metricsLayout: [],
   dataSources: [OBSERVABILITY_CUSTOM_METRIC],
   dataSourceTitles: ['Observability Custom Metrics'],
