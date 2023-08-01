@@ -51,7 +51,6 @@ export const loadMetrics = () => async (dispatch) => {
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
 
-  console.log('loadMetrics', { remoteDataSources });
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
   dispatch(
@@ -59,9 +58,7 @@ export const loadMetrics = () => async (dispatch) => {
   );
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
-  console.log({ remoteDataRequests });
   const dataResponses = await Promise.all([customDataRequest, ...remoteDataRequests]);
-  console.log({ dataResponses: dataResponses.flat() });
   dispatch(setMetrics(dataResponses.flat()));
 };
 

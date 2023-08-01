@@ -174,7 +174,6 @@ export const fetchVisualizationById = async (
 
   await SavedObjectsActions.get({ objectId: savedVisualizationId })
     .then((res) => {
-      console.log({ res });
       const visualization = (res.observabilityObjectList[0] as ObservabilitySavedVisualization)
         .savedVisualization;
       savedVisualization = {
