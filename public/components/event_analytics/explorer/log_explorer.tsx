@@ -10,6 +10,8 @@ import {
   EuiTabbedContentTab,
   EuiText,
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 import $ from 'jquery';
 import { isEmpty, map } from 'lodash';
@@ -201,13 +203,17 @@ export const LogExplorer = ({
       id: htmlIdGenerator(TAB_ID_TXT_PFX)(),
       name:(
         <>
-          <EuiText size="s" textAlign="left" color="default">
-            <a 
-            className = "euiIcon"
+          <a
             data-test-subj="eventExplorer__addNewTab"
-            onClick={() => addNewTab(NEW_TAB)}
-            > <EuiIcon type = "plusInCircle"  ></EuiIcon> Add new</a>
-            </EuiText>
+            onClick={() => addNewTab(NEW_TAB)} >
+            <EuiIcon
+              type = "plusInCircle"
+            />
+            <div 
+              className='logs-eui-icon'>
+              Add New
+            </div>
+          </a>
         </>
       ),
       content:(
