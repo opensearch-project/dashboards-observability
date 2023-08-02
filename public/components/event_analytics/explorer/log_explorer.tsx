@@ -9,7 +9,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
-  htmlIdGenerator
+  htmlIdGenerator,
 } from '@elastic/eui';
 import $ from 'jquery';
 import { isEmpty, map } from 'lodash';
@@ -231,7 +231,7 @@ export const LogExplorer = ({
 
     res.push(addTab())
     return res;
-    }, [tabIds, tabNames, tabCreatedTypes]);
+  }, [tabIds, tabNames, tabCreatedTypes]);
 
   return (
     <>
