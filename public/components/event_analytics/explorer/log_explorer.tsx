@@ -9,9 +9,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
-  htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem
+  htmlIdGenerator
 } from '@elastic/eui';
 import $ from 'jquery';
 import { isEmpty, map } from 'lodash';
