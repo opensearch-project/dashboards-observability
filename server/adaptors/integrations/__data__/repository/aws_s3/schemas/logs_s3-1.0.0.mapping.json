@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "ss4o_logs-*-*"
+    "ss4o_logs-aws_s3-*"
   ],
   "priority": 900,
   "data_stream": {},
