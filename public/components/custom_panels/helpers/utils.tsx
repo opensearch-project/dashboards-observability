@@ -357,6 +357,14 @@ const updateCatalogVisualizationQuery = ({
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '14')`;
 };
 
+const getAttributesForCatalog = async (pplService, catalogName) => {
+  const columnSchema = await pplService.fetch({
+    query: 'describe ' + catalogName, // + ' | fields COLUMN_NAME, DATA_TYPE',
+    format: 'jdbc',
+  });
+  return columnSchema.jsonData.map((sch) => sch.COLUMN_NAME).filter((col) => col[0] !== '@');
+};
+
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
   http,
@@ -374,6 +382,7 @@ export const renderCatalogVisualization = async ({
   setIsError,
   spanResolution,
   metricMetaData,
+  setMetricMetaData,
 }: {
   http: CoreStart['http'];
   pplService: PPLService;
@@ -390,6 +399,7 @@ export const renderCatalogVisualization = async ({
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   spanResolution?: string;
   metricMetaData?: MetricType;
+  setMetricMetaData?: React.Dispatch<React.SetStateAction<MetricType>>;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);

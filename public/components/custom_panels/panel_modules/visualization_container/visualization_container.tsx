@@ -311,9 +311,12 @@ export const VisualizationContainer = ({
       );
   };
 
+  const metricVisCss = metricMetaData ? 'metricVis' : '';
+
   const memoisedVisualizationBox = useMemo(
     () => (
       <div>
+      <div className={`visualization-div ${metricVisCss}`}>
         {isLoading ? (
           <EuiLoadingChart size="xl" mono className="visualization-loading-chart" />
         ) : !_.isEmpty(isError) ? (
