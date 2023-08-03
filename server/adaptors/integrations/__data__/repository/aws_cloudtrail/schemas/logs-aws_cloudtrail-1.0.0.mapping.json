@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "ss4o_logs-*-*"
+    "ss4o_logs-aws_cloudtrail-*"
   ],
   "priority": 900,
   "data_stream": {},
