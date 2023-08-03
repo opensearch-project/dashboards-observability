@@ -357,14 +357,6 @@ const updateCatalogVisualizationQuery = ({
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '14')`;
 };
 
-const getAttributesForCatalog = async (pplService, catalogName) => {
-  const columnSchema = await pplService.fetch({
-    query: 'describe ' + catalogName, // + ' | fields COLUMN_NAME, DATA_TYPE',
-    format: 'jdbc',
-  });
-  return columnSchema.jsonData.map((sch) => sch.COLUMN_NAME).filter((col) => col[0] !== '@');
-};
-
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
   http,
@@ -381,7 +373,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading,
   setIsError,
   spanResolution,
-  queryMetaData,
+  metricMetaData,
 }: {
   http: CoreStart['http'];
   pplService: PPLService;
@@ -397,7 +389,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   spanResolution?: string;
-  queryMetaData?: MetricType;
+  metricMetaData?: MetricType;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -408,18 +400,17 @@ export const renderCatalogVisualization = async ({
   const catalogSourceName = catalogSource.split('.')[0];
   const catalogTableName = catalogSource.split('.')[1];
 
+  const defaultAggregation = 'avg';
+
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
-    aggregation: queryMetaData.aggregation,
-    attributesGroupBy: queryMetaData.attributesGroupBy,
+    aggregation: metricMetaData?.query?.aggregation || defaultAggregation,
+    attributesGroupBy: metricMetaData?.query?.attributesGroupBy || [],
     startTime,
     endTime,
     spanParam,
   });
-
-  // let visualizationQuery = `source=${catalogSourceName}.query_range('${catalogTableName}', ${startTime}, ${endTime}, 14)`;
-  // let visualizationQuery = `source=my_prometheus.query_range('prometheus_http_requests_total', 1690312103, 1690318103, 14)`;
 
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
@@ -578,7 +569,6 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-
   if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
     metaData.user_configs = JSON.parse(metaData.user_configs);
   }

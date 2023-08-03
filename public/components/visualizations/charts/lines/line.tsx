@@ -19,8 +19,12 @@ import { hexToRgb } from '../../../../components/event_analytics/utils/utils';
 import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
-import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
-import { processMetricsData } from '../../../custom_panels/helpers/utils';
+
+// send both query and exampler data through getVizContainerProps rawdata and try to get it here in data of line 40. print it and see.
+// If it doesn't work then use redux to get the data here
+// make query calls for both query and exampler data in getQueryResponse and pplServiceRequestor functions in custom panels utils.
+// testData is exampler data
+// testData2 is query data
 
 export const Line = ({ visualizations, layout, config }: any) => {
   const {
@@ -156,12 +160,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
       breakdowns,
       span,
     };
-
-    visConfig = {
-      ...visConfig,
-      ...processMetricsData(schema, visConfig),
-    };
-
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -183,30 +181,54 @@ export const Line = ({ visualizations, layout, config }: any) => {
       y_coordinate: 'y',
     };
 
-    if (checkIfMetrics(schema)) {
-      const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
-      return addStylesToTraces(
-        formattedMetricsJson?.map((trace) => {
-          return {
-            ...trace,
-            x: trace['@timestamp'],
-            y: trace['@value'],
-            name: JSON.stringify(trace['@labels']),
-          };
-        }),
-        traceStylesForMetrics
-      );
-    } else {
-      return addStylesToTraces(
-        transformPreprocessedDataToTraces(
-          preprocessJsonData(jsonData, visConfig),
-          visConfig,
-          lineSpecficMetaData
-        ),
-        traceStyles
-      );
-    }
-  }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
+    // return addStylesToTraces(
+    //   transformPreprocessedDataToTraces(
+    // preprocessJsonData(jsonData, visConfig),
+    //     visConfig,
+    //     lineSpecficMetaData
+    //   ),
+    //   traceStyles
+    // );
+
+    const result = addStylesToTraces(
+      formattedMetricsJson.map((trace) => {
+        return {
+          ...trace,
+          x: trace['@timestamp'],
+          y: trace['@value'],
+          name: JSON.stringify(trace['@labels']),
+        };
+      }),
+      traceStyles
+    );
+    return result;
+  }, [
+    chartStyles,
+    // jsonData,
+    formattedMetricsJson,
+    dimensions,
+    series,
+    span,
+    breakdowns,
+    panelOptions,
+    tooltipOptions,
+  ]);
+
+  const prepareAnnotations = (examplerData) => {
+    return examplerData.map((exmp) => {
+      return {
+        x: exmp.timestamp,
+        y: exmp.value,
+        xref: 'x',
+        yref: 'y',
+        text: JSON.stringify(exmp.labels),
+        showarrow: true,
+        arrowhead: 7,
+        ax: 0,
+        ay: -40,
+      };
+    });
+  };
 
   const mergedLayout = useMemo(() => {
     const axisLabelsStyle = {

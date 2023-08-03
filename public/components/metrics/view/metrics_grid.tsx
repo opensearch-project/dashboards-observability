@@ -80,12 +80,7 @@ export const MetricsGrid = ({
             },
           }
     );
-    console.log('setMetricMetaData', {
-      id,
-      data,
-      panelVisualization: panelVisualizations.find((p) => p.id === id),
-      updatedVisualizations,
-    });
+
     setPanelVisualizations(updatedVisualizations);
   };
 

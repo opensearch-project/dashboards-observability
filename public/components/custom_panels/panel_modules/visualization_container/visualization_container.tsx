@@ -23,7 +23,6 @@ import {
   EuiText,
   EuiToolTip,
   EuiContextMenu,
-  EuiCode,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
@@ -106,7 +105,6 @@ export const VisualizationContainer = ({
   const [visualizationType, setVisualizationType] = useState('');
   const [visualizationMetaData, setVisualizationMetaData] = useState();
   const [visualizationData, setVisualizationData] = useState<Plotly.Data[]>([]);
-  const [metricsEditPanel, setMetricsEditPanel] = useState(<></>);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState({} as VizContainerError);
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
@@ -309,7 +307,7 @@ export const VisualizationContainer = ({
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
+        setIsError,
       );
   };
 
@@ -362,6 +360,13 @@ export const VisualizationContainer = ({
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MetricsEditInline
+                visualizationData={visualizationData}
+                metricMetaData={metricMetaData}
+                updateMetricConfig={updateMetricConfig}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
               {editMode ? (
