@@ -30,7 +30,6 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
-import { testData, testData2 } from '../../metrics/view/test_data';
 import { MetricType } from '../../../../common/types/metrics';
 
 /*
@@ -72,7 +71,7 @@ export const convertDateTimeToEpoch = (datetime: string, isStart = true, formatt
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
 
-  const myDate = new Date(returnTime._d); // Your timezone!
+  const myDate = new Date(returnTime._d);
   const epochTime = myDate.getTime() / 1000.0;
   return Math.round(epochTime);
 };
@@ -158,10 +157,8 @@ const pplServiceRequestor = async (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
-  const queryFormat = 'jdbc';
-  // if (type === 'metrics') queryFormat = 'viz';
   await pplService
-    .fetch({ query: finalQuery, format: queryFormat })
+    .fetch({ query: finalQuery, format: 'jdbc' })
     .then((res) => {
       if (res === undefined)
         setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
@@ -411,9 +408,6 @@ export const renderCatalogVisualization = async ({
   const catalogSourceName = catalogSource.split('.')[0];
   const catalogTableName = catalogSource.split('.')[1];
 
-  const defaultAggregation = 'avg'; // pass in attributes to this function
-  // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
-
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
@@ -427,13 +421,6 @@ export const renderCatalogVisualization = async ({
   // let visualizationQuery = `source=${catalogSourceName}.query_range('${catalogTableName}', ${startTime}, ${endTime}, 14)`;
   // let visualizationQuery = `source=my_prometheus.query_range('prometheus_http_requests_total', 1690312103, 1690318103, 14)`;
 
-  // if (spanParam !== undefined) {
-  //   visualizationQuery = updateQuerySpanInterval(
-  //     visualizationQuery,
-  //     visualizationTimeField,
-  //     spanParam
-  //   );
-  // }
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
     visualizationQuery,
@@ -446,11 +433,10 @@ export const renderCatalogVisualization = async ({
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
 
-  console.log('getqueryResponse', visualizationQuery);
   getQueryResponse(
     pplService,
     visualizationQuery,
-    'metrics',
+    visualizationType,
     startTime,
     endTime,
     setVisualizationData,
@@ -592,6 +578,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
+
   if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
     metaData.user_configs = JSON.parse(metaData.user_configs);
   }

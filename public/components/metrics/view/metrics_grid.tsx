@@ -14,7 +14,6 @@ import { MetricType } from '../../../../common/types/metrics';
 import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
 import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
 import { mergeLayoutAndMetrics } from '../helpers/utils';
-
 import './metrics_grid.scss';
 import { coreRefs } from '../../../framework/core_refs';
 
@@ -94,11 +93,11 @@ export const MetricsGrid = ({
     const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
       <VisualizationContainer
         key={panelVisualization.id}
-        http={http}
+        http={coreRefs.http}
         editMode={editMode}
         visualizationId={panelVisualization.id}
         savedVisualizationId={panelVisualization.savedVisualizationId}
-        pplService={pplService}
+        pplService={coreRefs.pplService}
         fromTime={startTime}
         toTime={endTime}
         onRefresh={onRefresh}
