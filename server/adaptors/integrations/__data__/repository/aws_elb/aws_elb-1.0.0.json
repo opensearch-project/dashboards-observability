@@ -1,21 +1,20 @@
 {
-    "name": "nginx",
+    "name": "aws_elb",
     "version": "1.0.0",
-    "displayName": "NginX Dashboard",
-    "description": "Nginx HTTP server collector",
+    "displayName": "AWS ELB",
+    "description": "AWS Elastic Load Balancer collector",
     "license": "Apache-2.0",
     "type": "logs",
-    "link": "https://www.nginx.com/",
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
+    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_elb/info",
     "statics": {
         "logo": {
-            "annotation": "NginX Logo",
+            "annotation": "ELB Logo",
             "path": "logo.svg"
         },
         "gallery": [
             {
-                "annotation": "NginX Dashboard",
+                "annotation": "ELB Dashboard",
                 "path": "dashboard1.png"
             }
         ]
@@ -30,13 +29,25 @@
             "version": "1.0.0"
         },
         {
+            "name": "cloud",
+            "version": "1.0.0"
+        },
+        {
+            "name": "aws_elb",
+            "version": "1.0.0"
+        },
+        {
+            "name": "url",
+            "version": "1.0.0"
+        },
+        {
             "name": "logs",
             "version": "1.0.0"
         }
     ],
     "assets": {
         "savedObjects": {
-            "name": "nginx",
+            "name": "aws_elb",
             "version": "1.0.0"
         }
     },
@@ -44,4 +55,3 @@
         "path": "sample.json"
     }
 }
-
