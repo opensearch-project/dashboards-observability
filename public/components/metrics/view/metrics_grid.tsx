@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import PPLService from 'public/services/requests/ppl';
 import React, { useEffect, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
@@ -17,17 +16,16 @@ import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_sli
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
+import { coreRefs } from '../../../framework/core_refs';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MetricsGridProps {
-  http: CoreStart['http'];
   chrome: CoreStart['chrome'];
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
   editMode: boolean;
-  pplService: PPLService;
   startTime: string;
   endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
@@ -38,12 +36,10 @@ interface MetricsGridProps {
 }
 
 export const MetricsGrid = ({
-  http,
   chrome,
   panelVisualizations,
   setPanelVisualizations,
   editMode,
-  pplService,
   startTime,
   endTime,
   moveToEvents,
@@ -52,6 +48,8 @@ export const MetricsGrid = ({
   setEditActionType,
   spanParam,
 }: MetricsGridProps) => {
+  const { http, pplService } = coreRefs;
+
   // Redux tools
   const dispatch = useDispatch();
   const updateLayout = (metric: any) => dispatch(updateMetricsLayout(metric));
@@ -71,6 +69,31 @@ export const MetricsGrid = ({
     setPostEditLayout(currLayouts);
   };
 
+  const setMetricMetaData = (id) => (data) => {
+    const updatedVisualizations = panelVisualizations.map((p) =>
+      p.id !== id
+        ? p
+        : {
+            ...p,
+            query: {
+              ...p.query,
+              ...data.query,
+            },
+          }
+    );
+    console.log('setMetricMetaData', {
+      id,
+      data,
+      panelVisualization: panelVisualizations.find((p) => p.id === id),
+      updatedVisualizations,
+    });
+    setPanelVisualizations(updatedVisualizations);
+  };
+
+  useEffect(() => {
+    console.log({ gridData });
+  }, [gridData]);
+
   const loadVizComponents = () => {
     const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
       <VisualizationContainer
@@ -88,9 +111,12 @@ export const MetricsGrid = ({
         pplFilterValue=""
         removeVisualization={removeVisualization}
         catalogVisualization={
-          panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
+          panelVisualization.query.type === 'savedCustomMetric' ? undefined : true
         }
         spanParam={spanParam}
+        metricMetaData={panelVisualization}
+        setMetricMetaData={setMetricMetaData(panelVisualization.id)}
+        contextMenuId="metrics"
       />
     ));
     setGridData(gridDataComps);
@@ -124,11 +150,9 @@ export const MetricsGrid = ({
 
   // Update layout whenever user edit gets completed
   useEffect(() => {
-    if (editMode) {
-      reloadLayout();
-      loadVizComponents();
-    }
-  }, [editMode]);
+    reloadLayout();
+    loadVizComponents();
+  }, [editMode, panelVisualizations, onRefresh]);
 
   useEffect(() => {
     if (editActionType === 'cancel') {
@@ -141,26 +165,12 @@ export const MetricsGrid = ({
     }
   }, [editActionType]);
 
-  // Update layout whenever visualizations are updated
-  useEffect(() => {
-    reloadLayout();
-    loadVizComponents();
-  }, [panelVisualizations]);
-
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {
     setTimeout(function () {
       window.dispatchEvent(new Event('resize'));
     }, 300);
   }, [isLocked]);
-
-  useEffect(() => {
-    loadVizComponents();
-  }, [onRefresh]);
-
-  useEffect(() => {
-    loadVizComponents();
-  }, []);
 
   return (
     <ResponsiveGridLayout
@@ -170,9 +180,7 @@ export const MetricsGrid = ({
       cols={{ lg: 12, md: 12, sm: 12, xs: 1, xxs: 1 }}
       onLayoutChange={layoutChanged}
     >
-      {panelVisualizations.map((panelVisualization: MetricType, index) => (
-        <div key={panelVisualization.id}>{gridData[index]}</div>
-      ))}
+      {gridData}
     </ResponsiveGridLayout>
   );
 };

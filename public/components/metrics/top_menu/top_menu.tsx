@@ -167,7 +167,7 @@ export const TopMenu = ({
             spanValue + resolutionValue
           );
 
-          if (metricLayout.metricType === 'prometheusMetric') {
+          if (metricLayout.query.type === 'prometheusMetric') {
             return OSDSavedVisualizationClient.getInstance().create(updatedMetric);
           } else {
             return getSavedObjectsClient({

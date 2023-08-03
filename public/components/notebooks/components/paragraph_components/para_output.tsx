@@ -7,9 +7,9 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
 import moment from 'moment';
+import React, { useState } from 'react';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
-import React, { useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
@@ -38,7 +38,7 @@ export const ParaOutput = (props: {
 }) => {
   const createQueryColumns = (jsonColumns: any[]) => {
     let index = 0;
-    let datagridColumns = [];
+    const datagridColumns = [];
     for (index = 0; index < jsonColumns.length; ++index) {
       const datagridColumnObject = {
         id: jsonColumns[index].name,
@@ -54,7 +54,7 @@ export const ParaOutput = (props: {
     let index = 0;
     let schemaIndex = 0;
     for (index = 0; index < queryObject.datarows.length; ++index) {
-      let datarowValue = {};
+      const datarowValue = {};
       for (schemaIndex = 0; schemaIndex < queryObject.schema.length; ++schemaIndex) {
         const columnName = queryObject.schema[schemaIndex].name;
         if (typeof queryObject.datarows[index][schemaIndex] === 'object') {
@@ -154,6 +154,7 @@ export const ParaOutput = (props: {
                   onRefresh={false}
                   pplFilterValue={''}
                   usedInNotebooks={true}
+                  contextMenuId="notebook"
                 />
               </div>
             </>

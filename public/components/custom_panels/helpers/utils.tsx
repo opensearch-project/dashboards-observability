@@ -31,6 +31,7 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { testData, testData2 } from '../../metrics/view/test_data';
+import { MetricType } from '../../../../common/types/metrics';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -59,12 +60,6 @@ export const convertDateTime = (datetime: string, isStart = true, formatted = tr
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
-  // console.log("returnTime: ", returnTime);
-  // var myDate = new Date(returnTime._d); // Your timezone!
-  // var myEpoch = myDate.getTime()/1000.0;
-  // console.log("testing :", myEpoch);
-  // console.log("test new date ", new Date("Tue Jul 25 2023 19:57:45").getTime()/1000.0);
-  // Tue Jul 25 2023 19:57:45
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
 };
@@ -171,7 +166,6 @@ const pplServiceRequestor = async (
       if (res === undefined)
         setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
       setVisualizationData(res);
-      console.log('response: ', res);
     })
     .catch((error: Error) => {
       const errorMessage = JSON.parse(error.body.message);
@@ -244,7 +238,6 @@ export const getQueryResponse = (
     setIsLoading(false);
     return;
   }
-
   pplServiceRequestor(pplService, finalQuery, type, setVisualizationData, setIsLoading, setIsError);
 };
 
@@ -338,44 +331,69 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
-const updateCatalogVisualizationQuery = (
-  catalogSourceName: string,
-  catalogTableName: string,
-  aggregation: string,
-  attributes: string[],
-  startTime: string,
-  endTime: string,
-  spanParam: string | undefined
-) => {
+const updateCatalogVisualizationQuery = ({
+  catalogSourceName,
+  catalogTableName,
+  aggregation,
+  attributesGroupBy,
+  startTime,
+  endTime,
+  spanParam,
+}: {
+  catalogSourceName: string;
+  catalogTableName: string;
+  aggregation: string;
+  attributesGroupBy: string[];
+  startTime: string;
+  endTime: string;
+  spanParam: string | undefined;
+}) => {
   // source=my_prometheus.query_range('avg by(attribue1, attribuyte2) (prometheus_requests_total)', 1686694425, 1686700130, 14)
-  const attributesArrayToString = attributes.toString();
+  const attributesGroupString = attributesGroupBy.toString();
   const startEpochTime = convertDateTimeToEpoch(startTime);
   const endEpochTime = convertDateTimeToEpoch(endTime, false);
-  let visualizationQuery = `source = ${catalogSourceName}.query_range('${catalogTableName}', ${startEpochTime}, ${endEpochTime}, '14')`;
-  if (attributes.length > 0) {
-    visualizationQuery = `source = ${catalogSourceName}.query_range('${aggregation} by(${attributesArrayToString}) (${catalogTableName})', ${startEpochTime}, ${endEpochTime}, '14')`;
-    // ${spanParam}
-  }
-  return visualizationQuery;
+  const promQuery =
+    attributesGroupBy.length === 0
+      ? catalogTableName
+      : '${aggregation} by(${attributesArrayToString}) (${catalogTableName})';
+
+  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '14')`;
 };
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
-export const renderCatalogVisualization = async (
-  http: CoreStart['http'],
-  pplService: PPLService,
-  catalogSource: string,
-  startTime: string,
-  endTime: string,
-  filterQuery: string,
-  spanParam: string | undefined,
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
-  spanResolution?: string
-) => {
+export const renderCatalogVisualization = async ({
+  http,
+  pplService,
+  catalogSource,
+  startTime,
+  endTime,
+  filterQuery,
+  spanParam,
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  spanResolution,
+  metricMetaData,
+}: {
+  http: CoreStart['http'];
+  pplService: PPLService;
+  catalogSource: string;
+  startTime: string;
+  endTime: string;
+  filterQuery: string;
+  spanParam: string | undefined;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  spanResolution?: string;
+  metricMetaData?: MetricType;
+}) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
@@ -387,17 +405,17 @@ export const renderCatalogVisualization = async (
 
   const defaultAggregation = 'avg'; // pass in attributes to this function
   // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
-  const attributes: string[] = [];
 
-  const visualizationQuery = updateCatalogVisualizationQuery(
+  const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
-    defaultAggregation,
-    attributes,
+    aggregation: metricMetaData?.query?.aggregation || defaultAggregation,
+    attributesGroupBy: metricMetaData?.query?.attributesGroupBy || [],
     startTime,
     endTime,
-    spanParam
-  );
+    spanParam,
+  });
+
   // let visualizationQuery = `source=${catalogSourceName}.query_range('${catalogTableName}', ${startTime}, ${endTime}, 14)`;
   // let visualizationQuery = `source=my_prometheus.query_range('prometheus_http_requests_total', 1690312103, 1690318103, 14)`;
 
@@ -419,7 +437,6 @@ export const renderCatalogVisualization = async (
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
 
-  console.log('visualizationType: ', visualizationType);
   getQueryResponse(
     pplService,
     visualizationQuery,
@@ -530,7 +547,6 @@ export const isPPLFilterValid = (
 };
 
 export const processMetricsData = (schema: any, dataConfig: any) => {
-  console.log('schema processMetricsData: ', schema);
   if (isEmpty(schema)) return {};
   if (
     schema.length === 3 &&
@@ -566,16 +582,10 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-<<<<<<< HEAD
-
   if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
     metaData.user_configs = JSON.parse(metaData.user_configs);
   }
 
-=======
-  // data = testData2;
-  console.log('data in displayVisualization: ', data);
->>>>>>> 7056d4af (Working multi line viz with new sql)
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
@@ -600,7 +610,6 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   // add metric specific overriding
   finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
-  console.log('finalDataConfig in display vis: ', finalDataConfig);
 
   const mixedUserConfigs = {
     availabilityConfig: {

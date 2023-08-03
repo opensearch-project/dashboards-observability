@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -109,6 +108,7 @@ export const PanelGrid = (props: PanelGridProps) => {
           pplFilterValue={pplFilterValue}
           showFlyout={showFlyout}
           removeVisualization={removeVisualization}
+          contextMenuId="visualization"
         />
       )
     );

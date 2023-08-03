@@ -7,8 +7,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCodeBlock,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiContextMenu,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
@@ -35,6 +35,8 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { MetricType } from '../../../../../common/types/metrics';
+import { MetricsEditInline } from '../../../metrics/sidebar/metrics_edit_inline';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -74,6 +76,9 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   spanParam?: string;
+  metricMetaData?: MetricType;
+  setMetricMetaData?: (metricMetaData: MetricType) => void;
+  contextMenuId: 'visualization' | 'notebook' | 'metrics';
 }
 
 export const VisualizationContainer = ({
@@ -93,12 +98,17 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   spanParam,
+  metricMetaData,
+  setMetricMetaData,
+  contextMenuId,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
   const [visualizationType, setVisualizationType] = useState('');
   const [visualizationMetaData, setVisualizationMetaData] = useState();
   const [visualizationData, setVisualizationData] = useState<Plotly.Data[]>([]);
+  const [availableAttributeKeys, setAvailableAttributeKeys] = useState<string[]>([]);
+  const [metricsEditPanel, setMetricsEditPanel] = useState(<></>);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState({} as VizContainerError);
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
@@ -108,130 +118,184 @@ export const VisualizationContainer = ({
   const [modalContent, setModalContent] = useState(<></>);
 
   const closeModal = () => setIsModalVisible(false);
-  const showModal = (modalType: string) => {
-    if (modalType === 'catalogModal')
-      setModalContent(
-        <EuiModal onClose={closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <h1>{visualizationMetaData.name}</h1>
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
 
-          <EuiModalBody>
-            This PPL Query is generated in runtime from selected data source
-            <EuiSpacer />
-            <EuiCodeBlock language="html" isCopyable>
-              {visualizationMetaData.query}
-            </EuiCodeBlock>
-          </EuiModalBody>
+  function flattenPanelTree(tree, array = []) {
+    array.push(tree);
 
-          <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
-              Close
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      );
-    else
-      setModalContent(
-        <EuiModal onClose={closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <h1>{isError.errorMessage}</h1>
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+    if (tree.items) {
+      tree.items.forEach((item) => {
+        if (item.panel) {
+          flattenPanelTree(item.panel, array);
+          item.panel = item.panel.id;
+        }
+      });
+    }
 
-          <EuiModalBody>
-            Error Details
-            <EuiSpacer />
-            <EuiCodeBlock language="html" isCopyable>
-              {isError.errorDetails}
-            </EuiCodeBlock>
-          </EuiModalBody>
+    return array;
+  }
 
-          <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
-              Close
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      );
+  const showErrorModal = () => {
+    setModalContent(
+      <EuiModal onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h1>{isError.errorMessage}</h1>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          Error Details
+          <EuiSpacer />
+          <EuiCodeBlock language="html" isCopyable>
+            {isError.errorDetails}
+          </EuiCodeBlock>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButton onClick={closeModal} fill>
+            Close
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+
+    setIsModalVisible(true);
+  };
+  const showQueryModal = () => {
+    setModalContent(
+      <EuiModal onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h1>{visualizationMetaData.name}</h1>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          This PPL Query is generated in runtime from selected data source
+          <EuiSpacer />
+          <EuiCodeBlock language="html" isCopyable>
+            {visualizationMetaData.query}
+          </EuiCodeBlock>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButton onClick={closeModal} fill>
+            Close
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
 
     setIsModalVisible(true);
   };
 
-  let popoverPanel = [
-    <EuiContextMenuItem
-      data-test-subj="editVizContextMenuItem"
-      key="Edit"
-      disabled={editMode}
-      onClick={() => {
-        closeActionsMenu();
-        onEditClick(savedVisualizationId);
-      }}
-    >
-      Edit
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="Replace"
-      data-test-subj="replaceVizContextMenuItem"
-      disabled={editMode}
-      onClick={() => {
-        closeActionsMenu();
-        showFlyout(true, visualizationId);
-      }}
-    >
-      Replace
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="Duplicate"
-      data-test-subj="duplicateVizContextMenuItem"
-      disabled={editMode}
-      onClick={() => {
-        closeActionsMenu();
-        cloneVisualization(visualizationTitle, savedVisualizationId);
-      }}
-    >
-      Duplicate
-    </EuiContextMenuItem>,
-  ];
+  const menuItems = {
+    visualization: flattenPanelTree({
+      id: 0,
+      name: 'Visualization Options',
+      items: [
+        {
+          name: 'Edit',
+          disabled: editMode,
 
-  const showModelPanel = [
-    <EuiContextMenuItem
-      data-test-subj="showCatalogPPLQuery"
-      key="view_query"
-      disabled={editMode}
-      onClick={() => {
-        closeActionsMenu();
-        showModal('catalogModal');
-      }}
-    >
-      View query
-    </EuiContextMenuItem>,
-  ];
+          onClick: () => {
+            closeActionsMenu();
+            onEditClick(savedVisualizationId);
+          },
+        },
+        {
+          name: 'Replace',
+          disabled: editMode,
+          onClick: () => {
+            closeActionsMenu();
+            showFlyout(true, visualizationId);
+          },
+        },
+        {
+          name: 'Duplicate',
+          disabled: editMode,
+          onClick: () => {
+            closeActionsMenu();
+            cloneVisualization(visualizationTitle, savedVisualizationId);
+          },
+        },
+      ],
+    }),
 
-  if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
-  }
+    notebook: flattenPanelTree({
+      id: 1,
+      name: 'Notebook Options',
+      items: [
+        {
+          name: 'View Query',
+          disabled: editMode,
+          onClick: () => {
+            closeActionsMenu();
+            showQueryModal();
+          },
+        },
+      ],
+    }),
+
+    metric1: flattenPanelTree({
+      id: 0,
+      name: 'Example Panel',
+
+      items: [
+        {
+          name: 'Show full screen',
+          icon: <EuiIcon type="search" size="m" />,
+          onClick: () => {
+            closeActionsMenu();
+          },
+        },
+      ],
+    }),
+
+    metrics: flattenPanelTree({
+      id: 0,
+      name: 'Metric Options',
+      items: [
+        {
+          name: 'View Query',
+          disabled: editMode,
+          onClick: () => {
+            closeActionsMenu();
+            showQueryModal();
+          },
+        },
+        {
+          name: 'Configure Metric',
+          disabled: editMode,
+          panel: {
+            id: 2,
+            width: 200,
+            title: 'Configure Metric',
+            content: metricsEditPanel,
+          },
+        },
+      ],
+    }),
+  };
 
   const loadVisaulization = async () => {
     if (catalogVisualization)
-      await renderCatalogVisualization(
+      await renderCatalogVisualization({
         http,
         pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
+        catalogSource: savedVisualizationId,
+        startTime: fromTime,
+        endTime: toTime,
+        filterQuery: pplFilterValue,
         spanParam,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
-      );
+        setIsError,
+        metricMetaData,
+      });
     else
       await renderSavedVisualization(
         http,
@@ -246,7 +310,8 @@ export const VisualizationContainer = ({
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
+        setIsError,
+        metricMetaData
       );
   };
 
@@ -263,12 +328,7 @@ export const VisualizationContainer = ({
               <p>{isError.errorMessage}</p>
             </EuiText>
             {isError.hasOwnProperty('errorDetails') && isError.errorDetails !== '' ? (
-              <EuiButton
-                className="viz-error-btn"
-                color="danger"
-                onClick={() => showModal('errorModal')}
-                size="s"
-              >
+              <EuiButton className="viz-error-btn" color="danger" onClick={showErrorModal} size="s">
                 See error details
               </EuiButton>
             ) : (
@@ -285,7 +345,26 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh]);
+  }, [onRefresh, metricMetaData]);
+
+  useEffect(() => {
+    console.log('loadVisaulization', {
+      visualizationData,
+    });
+    const attributeKeys =
+      visualizationData?.dataRows
+        ?.map((row) => Object.keys(row[0]))
+        ?.flat()
+        ?.unique()
+        ?.map((key) => ({ label: key })) || [];
+
+    setAvailableAttributeKeys(attributeKeys);
+  }, [visualizationData]);
+
+  const updateMetricConfig = ({ aggregation }: { aggregation: string }) => {
+    console.log('updateMetricsConfig', { aggregation });
+    setMetricMetaData!({ query: { aggregation } });
+  };
 
   return (
     <>
@@ -306,6 +385,13 @@ export const VisualizationContainer = ({
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MetricsEditInline
+                visualizationData={visualizationData}
+                metricMetaData={metricMetaData}
+                updateMetricConfig={updateMetricConfig}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
               {editMode ? (
@@ -329,10 +415,7 @@ export const VisualizationContainer = ({
                   closePopover={closeActionsMenu}
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel
-                    items={popoverPanel}
-                    data-test-subj="panelViz__popoverPanel"
-                  />
+                  <EuiContextMenu panels={menuItems[contextMenuId]} initialPanelId={0} />
                 </EuiPopover>
               )}
             </EuiFlexItem>

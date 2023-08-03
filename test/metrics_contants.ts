@@ -7,7 +7,7 @@ export const sampleMetricsVisualizations = [
   {
     h: 2,
     id: 'Y4muP4QBiaYaSxpXk7r8',
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'Y4muP4QBiaYaSxpXk7r8',
     w: 12,
     x: 0,
@@ -25,7 +25,7 @@ export const sampleMetricsVisualizations = [
   {
     h: 2,
     id: 'prometheus.process_resident_memory_bytes',
-    metricType: 'prometheusMetric',
+    query: { type: 'prometheusMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'prometheus.process_resident_memory_bytes',
     w: 12,
     x: 0,
@@ -59,7 +59,7 @@ export const sampleSortedMetricsLayout = [
   {
     h: 2,
     id: 'Y4muP4QBiaYaSxpXk7r8',
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'Y4muP4QBiaYaSxpXk7r8',
     w: 12,
     x: 0,
@@ -68,7 +68,7 @@ export const sampleSortedMetricsLayout = [
   {
     h: 2,
     id: 'prometheus.process_resident_memory_bytes',
-    metricType: 'prometheusMetric',
+    query: { type: 'prometheusMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'prometheus.process_resident_memory_bytes',
     w: 12,
     x: 0,
@@ -168,7 +168,7 @@ export const samplePanelVisualizations2 = [
     y: 0,
     h: 2,
     w: 12,
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
   },
   {
     id: 'tomAP4QBiaYaSxpXALls',
@@ -177,7 +177,7 @@ export const samplePanelVisualizations2 = [
     y: 2,
     h: 2,
     w: 12,
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
   },
 ];
 

@@ -113,8 +113,14 @@ const updateLayoutBySelection = (state: any, newMetric: any) => {
     y: newDimensions.y,
     h: newDimensions.h,
     w: newDimensions.w,
-    metricType:
-      newMetric.catalog === OBSERVABILITY_CUSTOM_METRIC ? 'savedCustomMetric' : 'prometheusMetric',
+    query: {
+      type:
+        newMetric.catalog === OBSERVABILITY_CUSTOM_METRIC
+          ? 'savedCustomMetric'
+          : 'prometheusMetric',
+      aggregation: 'avg',
+      attributesGroupBy: [],
+    },
   };
   state.metricsLayout = [...state.metricsLayout, metricVisualization];
 };

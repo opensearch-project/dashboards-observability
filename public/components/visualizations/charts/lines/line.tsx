@@ -19,9 +19,6 @@ import { hexToRgb } from '../../../../components/event_analytics/utils/utils';
 import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
-import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
-import { processMetricsData } from '../../../custom_panels/helpers/utils';
-import { testData2 } from '../../../metrics/view/test_data';
 
 // send both query and exampler data through getVizContainerProps rawdata and try to get it here in data of line 40. print it and see.
 // If it doesn't work then use redux to get the data here
@@ -91,24 +88,16 @@ export const Line = ({ visualizations, layout, config }: any) => {
 
   const preprocessMetricsJsonData = (json): any => {
     const data: any[] = [];
-    // console.log('testing jsonData: ', jsonData);
     _.forEach(json, (row) => {
       const record: any = {};
-      // console.log('testing row: ', row['@labels']);
       record['@labels'] = JSON.parse(row['@labels']);
       record['@timestamp'] = JSON.parse(row['@timestamp']);
       record['@value'] = JSON.parse(row['@value']);
       data.push(record);
-      // console.log('dataaaa: ', data);
     });
     return data;
   };
   const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
-  useEffect(() => {
-    // console.log("preprocessJsonData: ", preprocessMetricsJsonData(jsonData));
-    // console.log('json parse: ', jsonData);
-    console.log('data rows explorer: ', datarows);
-  }, []);
 
   const addStylesToTraces = (traces, traceStyles) => {
     const {
@@ -152,21 +141,12 @@ export const Line = ({ visualizations, layout, config }: any) => {
   };
 
   let lines = useMemo(() => {
-    let visConfig = {
+    const visConfig = {
       dimensions,
       series,
       breakdowns,
       span,
     };
-    // console.log(
-    //   'processMetricsData(testData.schema, visConfig): ',
-    //   processMetricsData(jsonData, visConfig)
-    // );
-    visConfig = {
-      ...visConfig,
-      ...processMetricsData(schema, visConfig),
-    };
-    // console.log('visConfig: ', visConfig);
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -200,7 +180,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
       }),
       traceStyles
     );
-    console.log('result: ', result);
     return result;
   }, [
     chartStyles,
@@ -240,8 +219,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
-    // const annotations = prepareAnnotations(testData.jsonData);
-    // console.log('anotations: ', annotations);
     return {
       ...layout,
       title: panelOptions.title || layoutConfig.layout?.title || '',
@@ -319,11 +296,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
     }),
     [config, layoutConfig.config]
   );
-
-  useEffect(() => {
-    console.log('lines: ', lines);
-    console.log('mergedConfigs: ', mergedConfigs);
-  }, []);
 
   return <Plt data={lines} layout={mergedLayout} config={mergedConfigs} />;
 };

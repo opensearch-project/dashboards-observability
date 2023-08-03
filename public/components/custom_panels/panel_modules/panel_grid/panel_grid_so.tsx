@@ -105,6 +105,7 @@ export const PanelGridSO = (props: PanelGridProps) => {
           pplFilterValue={pplFilterValue}
           showFlyout={showFlyout}
           removeVisualization={removeVisualization}
+          contextMenuId="visualization"
         />
       )
     );
