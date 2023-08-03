@@ -67,7 +67,7 @@ export function Integration(props: AvailableIntegrationProps) {
     } else {
       payload.index_patterns = [dataSourceName];
       return fetch(
-        `/api/console/proxy?path=_index_template/${integration.name}_${componentName}_${version}&method=POST`,
+        `/api/console/proxy?path=_index_template/ss4o_${componentName}_${version}_${integration.name}&method=POST`,
         {
           method: 'POST',
           headers: [
