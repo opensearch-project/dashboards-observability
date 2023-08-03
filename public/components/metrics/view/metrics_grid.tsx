@@ -15,19 +15,17 @@ import { MetricType } from '../../../../common/types/metrics';
 import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
 import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
 import { mergeLayoutAndMetrics } from '../helpers/utils';
-
 import './metrics_grid.scss';
+import { coreRefs } from '../../../framework/core_refs';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MetricsGridProps {
-  http: CoreStart['http'];
   chrome: CoreStart['chrome'];
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
   editMode: boolean;
-  pplService: PPLService;
   startTime: string;
   endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
@@ -38,12 +36,10 @@ interface MetricsGridProps {
 }
 
 export const MetricsGrid = ({
-  http,
   chrome,
   panelVisualizations,
   setPanelVisualizations,
   editMode,
-  pplService,
   startTime,
   endTime,
   moveToEvents,
@@ -52,6 +48,7 @@ export const MetricsGrid = ({
   setEditActionType,
   spanParam,
 }: MetricsGridProps) => {
+  const { http, pplService } = coreRefs;
   // Redux tools
   const dispatch = useDispatch();
   const updateLayout = (metric: any) => dispatch(updateMetricsLayout(metric));
@@ -75,11 +72,11 @@ export const MetricsGrid = ({
     const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
       <VisualizationContainer
         key={panelVisualization.id}
-        http={http}
+        http={coreRefs.http}
         editMode={editMode}
         visualizationId={panelVisualization.id}
         savedVisualizationId={panelVisualization.savedVisualizationId}
-        pplService={pplService}
+        pplService={coreRefs.pplService}
         fromTime={startTime}
         toTime={endTime}
         onRefresh={onRefresh}

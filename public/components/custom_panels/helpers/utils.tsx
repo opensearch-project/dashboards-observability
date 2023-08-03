@@ -30,7 +30,6 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
-import { testData, testData2 } from '../../metrics/view/test_data';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -59,12 +58,6 @@ export const convertDateTime = (datetime: string, isStart = true, formatted = tr
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
-  // console.log("returnTime: ", returnTime);
-  // var myDate = new Date(returnTime._d); // Your timezone!
-  // var myEpoch = myDate.getTime()/1000.0;
-  // console.log("testing :", myEpoch);
-  // console.log("test new date ", new Date("Tue Jul 25 2023 19:57:45").getTime()/1000.0);
-  // Tue Jul 25 2023 19:57:45
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
 };
@@ -77,7 +70,7 @@ export const convertDateTimeToEpoch = (datetime: string, isStart = true, formatt
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
 
-  const myDate = new Date(returnTime._d); // Your timezone!
+  const myDate = new Date(returnTime._d);
   const epochTime = myDate.getTime() / 1000.0;
   return Math.round(epochTime);
 };
@@ -163,15 +156,12 @@ const pplServiceRequestor = async (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
 ) => {
-  const queryFormat = 'jdbc';
-  // if (type === 'metrics') queryFormat = 'viz';
   await pplService
-    .fetch({ query: finalQuery, format: queryFormat })
+    .fetch({ query: finalQuery, format: 'jdbc' })
     .then((res) => {
       if (res === undefined)
         setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
       setVisualizationData(res);
-      console.log('response: ', res);
     })
     .catch((error: Error) => {
       const errorMessage = JSON.parse(error.body.message);
@@ -347,14 +337,13 @@ const updateCatalogVisualizationQuery = (
   endTime: string,
   spanParam: string | undefined
 ) => {
-  // source=my_prometheus.query_range('avg by(attribue1, attribuyte2) (prometheus_requests_total)', 1686694425, 1686700130, 14)
   const attributesArrayToString = attributes.toString();
   const startEpochTime = convertDateTimeToEpoch(startTime);
   const endEpochTime = convertDateTimeToEpoch(endTime, false);
-  let visualizationQuery = `source = ${catalogSourceName}.query_range('${catalogTableName}', ${startEpochTime}, ${endEpochTime}, '14')`;
-  if (attributes.length > 0) {
-    visualizationQuery = `source = ${catalogSourceName}.query_range('${aggregation} by(${attributesArrayToString}) (${catalogTableName})', ${startEpochTime}, ${endEpochTime}, '14')`;
-    // ${spanParam}
+  let visualizationQuery = `source = ${catalogSourceName}.query_range('${catalogTableName}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
+
+  if (attributes.length > 0 && !isEmpty(aggregation)) {
+    visualizationQuery = `source = ${catalogSourceName}.query_range('${aggregation} by(${attributesArrayToString}) (${catalogTableName})', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
   }
   return visualizationQuery;
 };
@@ -385,9 +374,9 @@ export const renderCatalogVisualization = async (
   const catalogSourceName = catalogSource.split('.')[0];
   const catalogTableName = catalogSource.split('.')[1];
 
-  const defaultAggregation = 'avg'; // pass in attributes to this function
+  const defaultAggregation = 'avg'; // pass in empty string if no aggregation
   // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
-  const attributes: string[] = [];
+  const attributes: string[] = []; // pass in empty array if no attributes
 
   const visualizationQuery = updateCatalogVisualizationQuery(
     catalogSourceName,
@@ -398,16 +387,7 @@ export const renderCatalogVisualization = async (
     endTime,
     spanParam
   );
-  // let visualizationQuery = `source=${catalogSourceName}.query_range('${catalogTableName}', ${startTime}, ${endTime}, 14)`;
-  // let visualizationQuery = `source=my_prometheus.query_range('prometheus_http_requests_total', 1690312103, 1690318103, 14)`;
 
-  // if (spanParam !== undefined) {
-  //   visualizationQuery = updateQuerySpanInterval(
-  //     visualizationQuery,
-  //     visualizationTimeField,
-  //     spanParam
-  //   );
-  // }
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
     visualizationQuery,
@@ -419,11 +399,10 @@ export const renderCatalogVisualization = async (
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
 
-  console.log('visualizationType: ', visualizationType);
   getQueryResponse(
     pplService,
     visualizationQuery,
-    'metrics',
+    visualizationType,
     startTime,
     endTime,
     setVisualizationData,
@@ -530,7 +509,6 @@ export const isPPLFilterValid = (
 };
 
 export const processMetricsData = (schema: any, dataConfig: any) => {
-  console.log('schema processMetricsData: ', schema);
   if (isEmpty(schema)) return {};
   if (
     schema.length === 3 &&
@@ -566,16 +544,11 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-<<<<<<< HEAD
 
   if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
     metaData.user_configs = JSON.parse(metaData.user_configs);
   }
 
-=======
-  // data = testData2;
-  console.log('data in displayVisualization: ', data);
->>>>>>> 7056d4af (Working multi line viz with new sql)
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
@@ -600,7 +573,6 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   // add metric specific overriding
   finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
-  console.log('finalDataConfig in display vis: ', finalDataConfig);
 
   const mixedUserConfigs = {
     availabilityConfig: {
