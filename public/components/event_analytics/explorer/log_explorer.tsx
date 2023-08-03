@@ -10,6 +10,7 @@ import {
   EuiTabbedContentTab,
   EuiText,
   htmlIdGenerator,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import $ from 'jquery';
 import { isEmpty, map } from 'lodash';
@@ -34,6 +35,7 @@ import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
 import { Explorer } from './explorer';
+import { EuiButton } from '@opensearch-project/oui';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -201,17 +203,15 @@ export const LogExplorer = ({
       id: htmlIdGenerator(TAB_ID_TXT_PFX)(),
       name:(
         <>
-          <a
+          <EuiButtonEmpty
+            iconType='plusInCircle'
             data-test-subj="eventExplorer__addNewTab"
-            onClick={() => addNewTab(NEW_TAB)} >
-            <EuiIcon
-              type = "plusInCircle"
-            />
-            <div 
-              className='logs-eui-icon'>
-              Add New
-            </div>
-          </a>
+            onClick={() => addNewTab(NEW_TAB)}
+            size='xs'
+            iconSize='m'
+          >
+            Add New
+          </EuiButtonEmpty>
         </>
       ),
       content:(
