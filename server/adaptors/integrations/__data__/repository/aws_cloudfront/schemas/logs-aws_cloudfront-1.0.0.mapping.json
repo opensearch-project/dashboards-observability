@@ -6,7 +6,7 @@
   "data_stream": {},
   "template": {
     "aliases": {
-      "logs-cloudfront": {}
+      "logs-aws-cloudfront": {}
     },
     "mappings": {
       "_meta": {
