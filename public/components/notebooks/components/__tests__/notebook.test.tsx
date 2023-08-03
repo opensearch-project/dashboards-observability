@@ -12,6 +12,8 @@ import { HttpResponse } from '../../../../../../../src/core/public';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { sampleNotebook1 } from '../helpers/__tests__/sampleDefaultNotebooks';
 import { Notebook } from '../notebook';
+import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { sampleSavedVisualization } from '../../../../../test/panels_constants';
 
 jest.mock('../../../../../../../src/plugins/embeddable/public', () => ({
   ViewMode: {
@@ -76,6 +78,11 @@ describe('<Notebook /> spec', () => {
     const location = jest.fn();
     const history = jest.fn() as any;
     history.replace = jest.fn();
+
+    SavedObjectsActions.getBulk = jest.fn().mockResolvedValue({
+      observabilityObjectList: [{ savedVisualization: sampleSavedVisualization }],
+    });
+
     httpClientMock.get = jest.fn(() =>
       Promise.resolve(({
         ...sampleNotebook1,
