@@ -25,11 +25,9 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationScreenshots } from './integration_screenshots_panel';
 import { AddIntegrationFlyout } from './add_integration_flyout';
 import { useToast } from '../../../../public/components/common/toast';
-import { coreRefs } from '../../../framework/core_refs';
 
 export function Integration(props: AvailableIntegrationProps) {
-  const { integrationTemplateId, chrome } = props;
-  const http = coreRefs.http!;
+  const { http, integrationTemplateId, chrome } = props;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
