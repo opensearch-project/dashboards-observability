@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
+  EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
@@ -35,106 +36,73 @@ export const MetricsEditInline = ({
   visualizationData?: any;
   metricMetaData?: MetricType;
   updateMetricConfig: ({}: { aggregation?: string; attributesGroupBy?: string[] }) => void;
+  availableAttributes?: string[];
 }) => {
   const [aggregationIsOpen, setAggregationIsOpen] = useState(false);
   const [attributesGroupByIsOpen, setAttributesGroupByIsOpen] = useState(false);
-  const [availableAttributes, setAvailableAttributes] = useState([]);
 
-  useObservable(
-    from(visualizationData?.datarows || []).pipe(
-      mergeMap((row) => Object.keys(row[0])),
-      filter((attributeKey) => attributeKey !== '__name__'),
-      distinct((attributeKey) => attributeKey),
-      map((attributeKey) => ({ label: attributeKey, value: attributeKey })),
-      toArray()
-    ),
-    setAvailableAttributes,
-    [visualizationData]
-  );
+  const availableAttributesLabels =
+    metricMetaData?.query?.availableAttributes?.map((attribute) => ({
+      label: attribute,
+      name: attribute,
+    })) || [];
 
+  const selectedOptionsFrom = (query) => {
+    return query.attributesGroupBy.map((attribute) => ({ label: attribute, name: attribute }));
+  };
   // useEffect(() => {
   //   console.log({ availableAttributes });
   // }, [availableAttributes]);
 
-  const onChangeAggregation = (e) => {
-    updateMetricConfig({ aggregation: e.target.value });
+  const onChangeAggregation = (value) => {
+    updateMetricConfig({ aggregation: value });
     setAggregationIsOpen(false);
   };
 
-  const onChangeAttributesGroupBy = (e) => {
-    updateMetricConfig({ selectedAttributesGroupBy: e.target.value });
+  const onChangeAttributesGroupBy = (selectedAttributes) => {
+    const attributesGroupBy = selectedAttributes.map(({ label }) => label);
+    updateMetricConfig({ attributesGroupBy });
+
     setAttributesGroupByIsOpen(false);
   };
 
-  useEffect(() => {
-    console.log({ availableAttributes, metricMetaData, visualizationData });
-  }, [availableAttributes, metricMetaData, visualizationData]);
-
   const renderAggregationEditor = () => (
-    <div>
-      <EuiPopoverTitle>Aggregation</EuiPopoverTitle>
-      <EuiSelect
-        compressed
-        value={metricMetaData.query.aggregation}
-        onChange={onChangeAggregation}
-        options={AGGREGATION_OPTIONS}
-      />
-    </div>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFormRow label="AGGREGATION">
+          <EuiSelect
+            compressed
+            value={metricMetaData.query.aggregation}
+            onChange={onChangeAggregation}
+            options={AGGREGATION_OPTIONS}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const renderAttributesGroupByEditor = () => (
-    <div>
-      <EuiPopoverTitle>Group By Attributes</EuiPopoverTitle>
-      <EuiComboBox
-        compressed
-        value={metricMetaData.query.attributesGroupBy}
-        onChange={onChangeAggregation}
-        options={[{ label: 'host' }]}
-      />
-    </div>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFormRow label="ATTRIBUTES GROUP BY">
+          <EuiComboBox
+            className={'attributesGroupBy'}
+            compressed
+            selectedOptions={selectedOptionsFrom(metricMetaData.query)}
+            onChange={onChangeAttributesGroupBy}
+            options={availableAttributesLabels}
+            prepend={'ATTRIBUTES GROUP BY'}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   return (
     <div>
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="aggregation"
-            button={
-              <EuiExpression
-                description="aggregation"
-                value={metricMetaData.query.aggregation}
-                isActive={aggregationIsOpen}
-                onClick={() => setAggregationIsOpen(true)}
-              />
-            }
-            isOpen={aggregationIsOpen}
-            closePopover={() => setAggregationIsOpen(false)}
-            panelPaddingSize="s"
-            anchorPosition="downLeft"
-          >
-            {renderAggregationEditor()}
-          </EuiPopover>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="attributes"
-            button={
-              <EuiExpression
-                description="group by attributes"
-                value={'(none selected)'}
-                isActive={attributesGroupByIsOpen}
-                onClick={() => setAttributesGroupByIsOpen(true)}
-              />
-            }
-            isOpen={attributesGroupByIsOpen}
-            closePopover={() => setAttributesGroupByIsOpen(false)}
-            panelPaddingSize="s"
-            anchorPosition="downLeft"
-          >
-            {renderAttributesGroupByEditor()}
-          </EuiPopover>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderAggregationEditor()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderAttributesGroupByEditor()}</EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );

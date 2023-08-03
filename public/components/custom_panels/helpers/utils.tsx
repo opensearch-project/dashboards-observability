@@ -355,9 +355,17 @@ const updateCatalogVisualizationQuery = ({
   const promQuery =
     attributesGroupBy.length === 0
       ? catalogTableName
-      : '${aggregation} by(${attributesArrayToString}) (${catalogTableName})';
+      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
 
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '14')`;
+};
+
+const getAttributesForCatalog = async (pplService, catalogName) => {
+  const columnSchema = await pplService.fetch({
+    query: 'describe ' + catalogName, // + ' | fields COLUMN_NAME, DATA_TYPE',
+    format: 'jdbc',
+  });
+  return columnSchema.jsonData.map((sch) => sch.COLUMN_NAME).filter((col) => col[0] !== '@');
 };
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
@@ -377,6 +385,7 @@ export const renderCatalogVisualization = async ({
   setIsError,
   spanResolution,
   metricMetaData,
+  setMetricMetaData,
 }: {
   http: CoreStart['http'];
   pplService: PPLService;
@@ -393,6 +402,7 @@ export const renderCatalogVisualization = async ({
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   spanResolution?: string;
   metricMetaData?: MetricType;
+  setMetricMetaData?: React.Dispatch<React.SetStateAction<MetricType>>;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -405,6 +415,15 @@ export const renderCatalogVisualization = async ({
 
   const defaultAggregation = 'avg'; // pass in attributes to this function
   // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
+  if (metricMetaData) {
+    if (!metricMetaData.query.availableAttributes) {
+      const availableAttributes = await getAttributesForCatalog(pplService, catalogSource);
+      setMetricMetaData!({
+        ...metricMetaData,
+        query: { ...metricMetaData.query, availableAttributes },
+      });
+    }
+  }
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,

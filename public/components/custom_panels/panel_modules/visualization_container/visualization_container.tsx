@@ -77,7 +77,7 @@ interface Props {
   catalogVisualization?: boolean;
   spanParam?: string;
   metricMetaData?: MetricType;
-  setMetricMetaData?: (metricMetaData: MetricType) => void;
+  setMetricMetaData?: React.Dispatch<React.SetStateAction<MetricType>>;
   contextMenuId: 'visualization' | 'notebook' | 'metrics';
 }
 
@@ -295,6 +295,7 @@ export const VisualizationContainer = ({
         setIsLoading,
         setIsError,
         metricMetaData,
+        setMetricMetaData,
       });
     else
       await renderSavedVisualization(
@@ -315,9 +316,11 @@ export const VisualizationContainer = ({
       );
   };
 
+  const metricVisCss = metricMetaData ? 'metricVis' : '';
+
   const memoisedVisualizationBox = useMemo(
     () => (
-      <div className="visualization-div">
+      <div className={`visualization-div ${metricVisCss}`}>
         {isLoading ? (
           <EuiLoadingChart size="xl" mono className="visualization-loading-chart" />
         ) : !_.isEmpty(isError) ? (
@@ -361,9 +364,14 @@ export const VisualizationContainer = ({
     setAvailableAttributeKeys(attributeKeys);
   }, [visualizationData]);
 
-  const updateMetricConfig = ({ aggregation }: { aggregation: string }) => {
-    console.log('updateMetricsConfig', { aggregation });
-    setMetricMetaData!({ query: { aggregation } });
+  const updateMetricConfig = ({
+    aggregation,
+    attributesGroupBy,
+  }: {
+    aggregation: string;
+    attributesGroupBy: string[];
+  }) => {
+    setMetricMetaData!({ query: { aggregation, attributesGroupBy } });
   };
 
   return (
@@ -385,13 +393,6 @@ export const VisualizationContainer = ({
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <MetricsEditInline
-                visualizationData={visualizationData}
-                metricMetaData={metricMetaData}
-                updateMetricConfig={updateMetricConfig}
-              />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
               {editMode ? (
@@ -420,6 +421,11 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          <MetricsEditInline
+            visualizationData={visualizationData}
+            metricMetaData={metricMetaData}
+            updateMetricConfig={updateMetricConfig}
+          />
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>
