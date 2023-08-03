@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { last } from 'lodash';
+import { isEmpty, last } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import _ from 'lodash';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
@@ -83,26 +83,30 @@ export const Line = ({ visualizations, layout, config }: any) => {
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
 
+  const checkIfMetrics = (metricsSchema: any) => {
+    if (isEmpty(metricsSchema)) return {};
+    if (
+      metricsSchema.length === 3 &&
+      metricsSchema.every((schemaField) =>
+        ['@labels', '@value', '@timestamp'].includes(schemaField.name)
+      )
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const preprocessMetricsJsonData = (json): any => {
     const data: any[] = [];
-    // console.log('testing jsonData: ', jsonData);
     _.forEach(json, (row) => {
       const record: any = {};
-      // console.log('testing row: ', row['@labels']);
       record['@labels'] = JSON.parse(row['@labels']);
       record['@timestamp'] = JSON.parse(row['@timestamp']);
       record['@value'] = JSON.parse(row['@value']);
       data.push(record);
-      // console.log('dataaaa: ', data);
     });
     return data;
   };
-  const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
-  useEffect(() => {
-    // console.log("preprocessJsonData: ", preprocessMetricsJsonData(jsonData));
-    // console.log('json parse: ', jsonData);
-    console.log('data rows explorer: ', datarows);
-  }, []);
 
   const addStylesToTraces = (traces, traceStyles) => {
     const {
@@ -146,21 +150,18 @@ export const Line = ({ visualizations, layout, config }: any) => {
   };
 
   let lines = useMemo(() => {
-    const visConfig = {
+    let visConfig = {
       dimensions,
       series,
       breakdowns,
       span,
     };
-    console.log(
-      'processMetricsData(testData.schema, visConfig): ',
-      processMetricsData(jsonData, visConfig)
-    );
+
     visConfig = {
       ...visConfig,
       ...processMetricsData(schema, visConfig),
     };
-    console.log('visConfig: ', visConfig);
+
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -169,60 +170,43 @@ export const Line = ({ visualizations, layout, config }: any) => {
       lineWidth,
       markerSize,
     };
+    const traceStylesForMetrics = {
+      fillOpacity: 0,
+      tooltipMode,
+      tooltipText,
+      lineShape,
+      lineWidth: 3,
+      markerSize,
+    };
     const lineSpecficMetaData = {
       x_coordinate: 'x',
       y_coordinate: 'y',
     };
 
-    // return addStylesToTraces(
-    //   transformPreprocessedDataToTraces(
-    // preprocessJsonData(jsonData, visConfig),
-    //     visConfig,
-    //     lineSpecficMetaData
-    //   ),
-    //   traceStyles
-    // );
-
-    const result = addStylesToTraces(
-      formattedMetricsJson.map((trace) => {
-        return {
-          ...trace,
-          x: trace['@timestamp'],
-          y: trace['@value'],
-          name: JSON.stringify(trace['@labels']),
-        };
-      }),
-      traceStyles
-    );
-    console.log('result: ', result);
-    return result;
-  }, [
-    chartStyles,
-    // jsonData,
-    formattedMetricsJson,
-    dimensions,
-    series,
-    span,
-    breakdowns,
-    panelOptions,
-    tooltipOptions,
-  ]);
-
-  const prepareAnnotations = (examplerData) => {
-    return examplerData.map((exmp) => {
-      return {
-        x: exmp.timestamp,
-        y: exmp.value,
-        xref: 'x',
-        yref: 'y',
-        text: JSON.stringify(exmp.labels),
-        showarrow: true,
-        arrowhead: 7,
-        ax: 0,
-        ay: -40,
-      };
-    });
-  };
+    if (checkIfMetrics(schema)) {
+      const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
+      return addStylesToTraces(
+        formattedMetricsJson?.map((trace) => {
+          return {
+            ...trace,
+            x: trace['@timestamp'],
+            y: trace['@value'],
+            name: JSON.stringify(trace['@labels']),
+          };
+        }),
+        traceStylesForMetrics
+      );
+    } else {
+      return addStylesToTraces(
+        transformPreprocessedDataToTraces(
+          preprocessJsonData(jsonData, visConfig),
+          visConfig,
+          lineSpecficMetaData
+        ),
+        traceStyles
+      );
+    }
+  }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
 
   const mergedLayout = useMemo(() => {
     const axisLabelsStyle = {
@@ -234,13 +218,15 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
-    // const annotations = prepareAnnotations(testData.jsonData);
-    // console.log('anotations: ', annotations);
+    const { legend: layoutConfigLegend, ...layoutConfigGeneral } = layoutConfig;
+
     return {
       ...layout,
+      ...layoutConfigGeneral,
       title: panelOptions.title || layoutConfig.layout?.title || '',
       legend: {
         ...layout.legend,
+        ...layoutConfigLegend,
         orientation: legendPosition,
         ...(legendSize && {
           font: {

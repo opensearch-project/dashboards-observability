@@ -35,6 +35,7 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { coreRefs } from '../../../../framework/core_refs';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -217,21 +218,21 @@ export const VisualizationContainer = ({
 
   const loadVisaulization = async () => {
     if (catalogVisualization)
-      await renderCatalogVisualization(
+      await renderCatalogVisualization({
         http,
         pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
+        catalogSource: savedVisualizationId,
+        startTime: fromTime,
+        endTime: toTime,
+        filterQuery: pplFilterValue,
         spanParam,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
-      );
+        setIsError,
+      });
     else
       await renderSavedVisualization(
         http,
