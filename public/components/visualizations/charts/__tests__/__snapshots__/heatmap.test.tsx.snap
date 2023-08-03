@@ -484,7 +484,7 @@ exports[`Heatmap component Renders heatmap component 1`] = `
                       "props": Object {
                         "defaultSelections": Array [
                           Object {
-                            "id": "v",
+                            "id": "h",
                             "name": "Right",
                           },
                         ],
@@ -647,7 +647,7 @@ exports[`Heatmap component Renders heatmap component 1`] = `
         "id": "bar",
         "label": "Vertical bar",
         "labelangle": 0,
-        "legendposition": "v",
+        "legendposition": "h",
         "linewidth": 0,
         "mode": "group",
         "name": "bar",

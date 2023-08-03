@@ -14,7 +14,7 @@ import PPLService from '../../../../services/requests/ppl';
 import {
   sampleMetric,
   sampleMetricsVisualizations,
-  samplePPLResponse,
+  // samplePPLResponse,
 } from '../../../../../test/metrics_contants';
 import { createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
@@ -26,12 +26,12 @@ describe('Metrics Grid Component', () => {
   const store = createStore(rootReducer);
 
   it('renders Metrics Grid Component', async () => {
-    httpClientMock.get = jest.fn(() => Promise.resolve((sampleMetric as unknown) as HttpResponse));
-    httpClientMock.post = jest.fn(() =>
-      Promise.resolve((samplePPLResponse as unknown) as HttpResponse)
-    );
+    // httpClientMock.get = jest.fn(() => Promise.resolve((sampleMetric as unknown) as HttpResponse));
+    // httpClientMock.post = jest.fn(() =>
+    //   Promise.resolve((samplePPLResponse as unknown) as HttpResponse)
+    // );
 
-    const http = httpClientMock;
+    // const http = httpClientMock;
     const core = coreStartMock;
     const panelVisualizations = sampleMetricsVisualizations;
     const setPanelVisualizations = jest.fn();
@@ -48,12 +48,12 @@ describe('Metrics Grid Component', () => {
     const wrapper = mount(
       <Provider store={store}>
         <MetricsGrid
-          http={http}
+          // http={http}
           chrome={core.chrome}
           panelVisualizations={panelVisualizations}
           setPanelVisualizations={setPanelVisualizations}
           editMode={editMode}
-          pplService={pplService}
+          // pplService={pplService}
           startTime={startTime}
           endTime={endTime}
           moveToEvents={onEditClick}
