@@ -43,8 +43,7 @@ export function Integration(props: AvailableIntegrationProps) {
       template: { mappings: { _meta: { version: string } } };
       composed_of: string[];
       index_patterns: string[];
-    },
-    dataSourceName: string
+    }
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
     return http
@@ -88,7 +87,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
     const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
-    const error = null;
+    let error = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
       (templateName: string) => {
@@ -102,9 +101,20 @@ export function Integration(props: AvailableIntegrationProps) {
       if (key === integration.type) {
         return;
       }
-      await createComponentMapping(key, mapping as any, targetDataSource);
+      await createComponentMapping(key, mapping as any);
     });
     await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
+
+    for (const [key, mapping] of Object.entries(data.data.mappings)) {
+      const result =
+        key === integration.type
+          ? await createIndexMapping(key, mapping as any, targetDataSource)
+          : await createComponentMapping(key, mapping as any);
+
+      if (result && result.error) {
+        error = (result.error as any).reason;
+      }
+    }
 
     if (error !== null) {
       setToast('Failure creating index template', 'danger', error);
