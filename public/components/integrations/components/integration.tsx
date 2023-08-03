@@ -48,36 +48,28 @@ export function Integration(props: AvailableIntegrationProps) {
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
     if (componentName !== integration.type) {
-      return fetch(
-        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
+      return http
+        .post('/api/console/proxy', {
           body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
+          query: {
+            path: `_component_template/ss4o_${componentName}_${version}_template`,
+            method: 'POST',
+          },
+        })
         .catch((err: any) => {
           console.error(err);
           return err;
         });
     } else {
       payload.index_patterns = [dataSourceName];
-      return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
+      return http
+        .post('/api/console/proxy', {
           body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
+          query: {
+            path: `_index_template/${componentName}_${version}`,
+            method: 'POST',
+          },
+        })
         .catch((err: any) => {
           console.error(err);
           return err;
@@ -86,11 +78,7 @@ export function Integration(props: AvailableIntegrationProps) {
   };
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
-    const data = await fetch(
-      `${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`
-    ).then((response) => {
-      return response.json();
-    });
+    const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
     let error = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
@@ -147,8 +135,8 @@ export function Integration(props: AvailableIntegrationProps) {
     if (Object.keys(integration).length === 0) {
       return;
     }
-    fetch(`${INTEGRATIONS_BASE}/repository/${integration.name}/schema`)
-      .then((response) => response.json())
+    http
+      .get(`${INTEGRATIONS_BASE}/repository/${integration.name}/schema`)
       .then((parsedResponse) => {
         if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
           throw new Error('Request for schema failed: ' + parsedResponse.message);
@@ -165,8 +153,8 @@ export function Integration(props: AvailableIntegrationProps) {
     if (Object.keys(integration).length === 0) {
       return;
     }
-    fetch(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`)
-      .then((response) => response.json())
+    http
+      .get(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`)
       .then((parsedResponse) => {
         if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
           throw new Error('Request for assets failed: ' + parsedResponse.message);
@@ -224,14 +212,14 @@ export function Integration(props: AvailableIntegrationProps) {
       data.sampleData
         .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
         .join('\n') + '\n';
-    fetch(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, {
-      method: 'POST',
-      body: requestBody,
-      headers: [
-        ['osd-xsrf', 'true'],
-        ['Content-Type', 'application/json; charset=utf-8'],
-      ],
-    })
+    http
+      .post('/api/console/proxy', {
+        body: requestBody,
+        query: {
+          path: `${dataSource}/_bulk`,
+          method: 'POST',
+        },
+      })
       .catch((err) => {
         console.error(err);
         setToast('Failed to load sample data', 'danger');
@@ -298,7 +286,7 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiSpacer />
         {IntegrationDetails({ integration })}
         <EuiSpacer />
-        {IntegrationScreenshots({ integration })}
+        {IntegrationScreenshots({ integration, http })}
         <EuiSpacer />
         <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
         <EuiSpacer size="s" />
