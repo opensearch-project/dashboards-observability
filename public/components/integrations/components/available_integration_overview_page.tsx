@@ -22,7 +22,7 @@ import { AvailableIntegrationsCardView } from './available_integration_card_view
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
-import { HttpStart } from '../../../../../../src/core/public';
+import { coreRefs } from '../../../framework/core_refs';
 
 export interface AvailableIntegrationType {
   name: string;
@@ -55,11 +55,11 @@ export interface AvailableIntegrationsCardViewProps {
   query: string;
   setQuery: (input: string) => void;
   renderCateogryFilters: () => React.JSX.Element;
-  http: HttpStart;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
-  const { chrome, http } = props;
+  const { chrome } = props;
+  const http = coreRefs.http!;
 
   const [query, setQuery] = useState('');
   const [isCardView, setCardView] = useState(true);

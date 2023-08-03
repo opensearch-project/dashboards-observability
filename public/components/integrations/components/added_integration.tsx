@@ -35,9 +35,11 @@ import { INTEGRATIONS_BASE, OBSERVABILITY_BASE } from '../../../../common/consta
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { AddedIntegrationProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 export function AddedIntegration(props: AddedIntegrationProps) {
-  const { http, integrationInstanceId, chrome } = props;
+  const { integrationInstanceId, chrome } = props;
+  const http = coreRefs.http!;
 
   const { setToast } = useToast();
 

@@ -12,11 +12,11 @@ import { AddedIntegrationsTable } from './added_integration_table';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AddedIntegrationOverviewPageProps } from './integration_types';
 import { HttpStart } from '../../../../../../src/core/public';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 export interface AddedIntegrationsTableProps {
   loading: boolean;
   data: AddedIntegrationsList;
-  http: HttpStart;
 }
 
 export interface AddedIntegrationsList {
@@ -35,7 +35,8 @@ export interface AddedIntegrationType {
 }
 
 export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPageProps) {
-  const { chrome, http } = props;
+  const { chrome } = props;
+  const http = coreRefs.http!;
 
   const [data, setData] = useState<AddedIntegrationsList>({ hits: [] });
 
