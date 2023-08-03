@@ -1,14 +1,19 @@
-# Apache Integration
+# Kubernetes Integration
 
-## What is Apache ?
-Apache is an open source web server software for modern operating systems including UNIX and Windows.
+## What is Kubernetes?
 
-See additional details [here](https://httpd.apache.org/).
+Kubernetes is an open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications. It provides a robust and scalable infrastructure for running applications in a cloud-native environment.
 
-## What is Apache Integration ?
-An integration is a bundle of pre-canned assets which are bundled togather in a meaningful manner.
+See additional details [here](https://kubernetes.io/).
 
-Apache integration includes dashboards, visualisations, queries and an index mapping.
+## What is Kubernetes Integration?
+
+An integration is a collection of pre-configured assets that are bundled together to streamline monitoring and analysis.
+
+Kubernetes integration includes dashboards, visualizations, queries, and an index mapping.
 
 ### Dashboards
-![](../static/dashboard1.png)
+![Dashboard](../static/dashboard.png)
+
+
+With the Kubernetes integration, you can gain valuable insights into the health and performance of your containerized applications. The pre-configured dashboards and visualizations help you monitor key metrics, track resource utilization, and identify potential issues within your Kubernetes clusters. This integration empowers you to efficiently manage your containerized workloads, scale applications as needed, and ensure the reliability and availability of your Kubernetes environment.

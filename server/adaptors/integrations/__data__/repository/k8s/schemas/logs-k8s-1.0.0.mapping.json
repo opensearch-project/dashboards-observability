@@ -1,9 +1,12 @@
 {
     "index_patterns": [
-        "ss4o_logs-*-*"
+        "ss4o_logs-k8s-*"
     ],
     "data_stream": {},
     "template": {
+      "aliases": {
+        "logs-k8s": {}
+      },
         "mappings": {
             "_meta": {
                 "version": "1.0.0",
@@ -215,8 +218,7 @@
         }
     },
     "composed_of": [
-        "communication",
-        "http"
+        "k8s"
     ],
     "version": 1,
     "_meta": {
