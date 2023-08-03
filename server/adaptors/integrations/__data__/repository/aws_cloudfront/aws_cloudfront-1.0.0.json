@@ -33,7 +33,7 @@
       "version": "1.0.0"
     },
     {
-      "name": "logs",
+      "name": "logs-aws_cloudfront",
       "version": "1.0.0"
     }
   ],
