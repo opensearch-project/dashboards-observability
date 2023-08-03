@@ -1,0 +1,4370 @@
+[
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 170,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "HEAD",
+                "body": {
+                    "content": "HEAD http://54.188.82.156:80/Core/Skin/Login.aspx HTTP/1.1"
+                },
+                "bytes": 471
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "1.14.7.100",
+                "ip": "1.14.7.100",
+                "port": 43430,
+                "geo": {
+                    "country_name": "China",
+                    "country_iso_code": "CN"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "1.14.7.100",
+                    "port": 43430
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 471,
+                "sent_bytes": 170,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:45:13.427000Z"
+            }
+        },
+        "traceId": "Root=1-64937d79-5051b6825367dff7279a6ab7",
+        "url": {
+            "domain": "54.188.82.156",
+            "path": "/Core/Skin/Login.aspx"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 382,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://54.188.82.156:80/docker-compose.yml HTTP/1.1"
+                },
+                "bytes": 252
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; CrOS x86_64 14526.89.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.133 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Chrome OS"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "212.224.107.53",
+                "ip": "212.224.107.53",
+                "port": 50760,
+                "geo": {
+                    "country_name": "Germany",
+                    "country_iso_code": "DE"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "212.224.107.53",
+                    "port": 50760
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 252,
+                "sent_bytes": 382,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T01:13:14.679000Z"
+            }
+        },
+        "traceId": "Root=1-649a37aa-2d0007242be74a111c44e631",
+        "url": {
+            "domain": "54.188.82.156",
+            "path": "/docker-compose.yml"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://54.149.97.75:80/.env HTTP/1.1"
+                },
+                "bytes": 230
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Linux"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "135.125.246.189",
+                "ip": "135.125.246.189",
+                "port": 60186,
+                "geo": {
+                    "country_name": "France",
+                    "country_iso_code": "FR"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "135.125.246.189",
+                    "port": 60186
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 230,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T01:19:20.970000Z"
+            }
+        },
+        "traceId": "Root=1-649a3918-3d47bc5b3f3939562cc43631",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/.env"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "POST",
+                "body": {
+                    "content": "POST http://54.149.97.75:80/ HTTP/1.1"
+                },
+                "bytes": 316
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Linux"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "135.125.246.189",
+                "ip": "135.125.246.189",
+                "port": 60642,
+                "geo": {
+                    "country_name": "France",
+                    "country_iso_code": "FR"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "135.125.246.189",
+                    "port": 60642
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 316,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T01:19:21.313000Z"
+            }
+        },
+        "traceId": "Root=1-649a3919-144dd9eb215b55f058c94753",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://54.188.82.156:80/.git/config HTTP/1.1"
+                },
+                "bytes": 155
+            },
+            "user_agent": {
+                "original": "python-requests/2.28.1",
+                "name": "Python Requests",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "95.214.27.80",
+                "ip": "95.214.27.80",
+                "port": 65460,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "95.214.27.80",
+                    "port": 65460
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 155,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T00:16:15.418000Z"
+            }
+        },
+        "traceId": "Root=1-649a2a4f-2ab52d1118a5cb5a1fbd00dd",
+        "url": {
+            "domain": "54.188.82.156",
+            "path": "/.git/config"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 170,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "HEAD",
+                "body": {
+                    "content": "HEAD http://54.149.97.75:80/Core/Skin/Login.aspx HTTP/1.1"
+                },
+                "bytes": 470
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "43.154.141.71",
+                "ip": "43.154.141.71",
+                "port": 39526,
+                "geo": {
+                    "country_name": "Hong Kong",
+                    "country_iso_code": "HK"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "43.154.141.71",
+                    "port": 39526
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 470,
+                "sent_bytes": 170,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:02:26.996000Z"
+            }
+        },
+        "traceId": "Root=1-64937372-7e7c25e57b986ca76cc813f9",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/Core/Skin/Login.aspx"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 521
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 521,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:46.563000Z"
+            }
+        },
+        "traceId": "Root=1-6493707a-062e3d077d0e7f5759a83c88",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 221,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 579,
+                "sent_bytes": 221,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:21.030000Z"
+            }
+        },
+        "traceId": "Root=1-64937061-40a294a94461434e69dc73d7",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:21.449000Z"
+            }
+        },
+        "traceId": "Root=1-64937061-79a1996859288ce92d44003f",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:21.667000Z"
+            }
+        },
+        "traceId": "Root=1-64937061-05e8a706396a62621b99debb",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:22.014000Z"
+            }
+        },
+        "traceId": "Root=1-64937062-686a5a2027b24753384bafa4",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:22.226000Z"
+            }
+        },
+        "traceId": "Root=1-64937062-5ca0fd387005cdb527631d68",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:22.402000Z"
+            }
+        },
+        "traceId": "Root=1-64937062-40ce96b9439c166d6e90877b",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:22.571000Z"
+            }
+        },
+        "traceId": "Root=1-64937062-5bfc788b20198493251caebb",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:23.666000Z"
+            }
+        },
+        "traceId": "Root=1-64937063-0951fdb60649542f6e1df423",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:24.529000Z"
+            }
+        },
+        "traceId": "Root=1-64937064-5d9e75005adc9d4f5e9cc257",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 2715,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 2715
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:49:25.221000Z"
+            }
+        },
+        "traceId": "Root=1-64937065-60772b0a181805dc6800edd3",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 277
+            },
+            "user_agent": {
+                "original": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+                "name": "Slackbot-LinkExpanding",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "52.73.199.9",
+                "ip": "52.73.199.9",
+                "port": 39894,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "52.73.199.9",
+                    "port": 39894
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 277,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:10:38.224000Z"
+            }
+        },
+        "traceId": "Root=1-6493755e-43ea9b1c186d7e7c69340533",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 828,
+                "status_code": 206
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 267
+            },
+            "user_agent": {
+                "original": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+                "name": "Slackbot-LinkExpanding",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "54.224.51.171",
+                "ip": "54.224.51.171",
+                "port": 49166,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "54.224.51.171",
+                    "port": 49166
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 206,
+                "target_status_code": 206,
+                "received_bytes": 267,
+                "sent_bytes": 828,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:10:38.256000Z"
+            }
+        },
+        "traceId": "Root=1-6493755e-383d9d6435b8c33513e8ea15",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/favicon.ico HTTP/1.1"
+                },
+                "bytes": 242
+            },
+            "user_agent": {
+                "original": "Slackbot 1.0 (+https://api.slack.com/robots)",
+                "name": "Slackbot",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "3.86.48.136",
+                "ip": "3.86.48.136",
+                "port": 33698,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "3.86.48.136",
+                    "port": 33698
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 242,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:10:38.389000Z"
+            }
+        },
+        "traceId": "Root=1-6493755e-305240137716dba935ee0722",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/favicon.ico"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://54.149.97.75:80/.env HTTP/1.1"
+                },
+                "bytes": 230
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Linux"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "135.125.246.189",
+                "ip": "135.125.246.189",
+                "port": 37770,
+                "geo": {
+                    "country_name": "France",
+                    "country_iso_code": "FR"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "135.125.246.189",
+                    "port": 37770
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 230,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T00:21:00.211000Z"
+            }
+        },
+        "traceId": "Root=1-649a2b6c-2b64f3f93a14873724a6b2e9",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/.env"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 271,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "POST",
+                "body": {
+                    "content": "POST http://54.149.97.75:80/ HTTP/1.1"
+                },
+                "bytes": 316
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Linux"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "135.125.246.189",
+                "ip": "135.125.246.189",
+                "port": 38202,
+                "geo": {
+                    "country_name": "France",
+                    "country_iso_code": "FR"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "135.125.246.189",
+                    "port": 38202
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 316,
+                "sent_bytes": 271,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T00:21:00.538000Z"
+            }
+        },
+        "traceId": "Root=1-649a2b6c-13a203d2404d2b794ea078b1",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "POST",
+                "body": {
+                    "content": "POST http://54.188.82.156:80/boaform/admin/formLogin HTTP/1.1"
+                },
+                "bytes": 533
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0",
+                "name": "Firefox",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "79.124.56.98",
+                "ip": "79.124.56.98",
+                "port": 46898,
+                "geo": {
+                    "country_name": "Bulgaria",
+                    "country_iso_code": "BG"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "79.124.56.98",
+                    "port": 46898
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 533,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T23:36:38.398000Z"
+            }
+        },
+        "traceId": "Root=1-64938986-058003e73813c30977c8b9f1",
+        "url": {
+            "domain": "54.188.82.156",
+            "path": "/boaform/admin/formLogin"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 0,
+                "status_code": 400
+            },
+            "schema": "http",
+            "request": {
+                "method": null,
+                "body": {
+                    "content": "- http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80- -"
+                },
+                "bytes": 0
+            },
+            "user_agent": {
+                "original": "-",
+                "name": "Other",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "79.124.56.98",
+                "ip": "79.124.56.98",
+                "port": 46898,
+                "geo": {
+                    "country_name": "Bulgaria",
+                    "country_iso_code": "BG"
+                }
+            },
+            "destination": {
+                "address": "",
+                "ip": "",
+                "port": null
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "79.124.56.98",
+                    "port": 46898
+                },
+                "target_ip": "",
+                "target_port": null,
+                "request_processing_time": null,
+                "target_processing_time": null,
+                "response_processing_time": null,
+                "elb_status_code": 400,
+                "target_status_code": null,
+                "received_bytes": 0,
+                "sent_bytes": 0,
+                "http": {
+                    "port": 80,
+                    "version": null
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": null,
+                "request_creation_time": "2023-06-21T23:36:38.399000Z"
+            }
+        },
+        "traceId": "-",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": null
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 170,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "HEAD",
+                "body": {
+                    "content": "HEAD http://54.149.97.75:80/Core/Skin/Login.aspx HTTP/1.1"
+                },
+                "bytes": 470
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "43.154.141.71",
+                "ip": "43.154.141.71",
+                "port": 58164,
+                "geo": {
+                    "country_name": "Hong Kong",
+                    "country_iso_code": "HK"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "43.154.141.71",
+                    "port": 58164
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 470,
+                "sent_bytes": 170,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T00:38:53.303000Z"
+            }
+        },
+        "traceId": "Root=1-649a2f9d-0960c8f64de617691a98950e",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/Core/Skin/Login.aspx"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 783,
+                "status_code": 200
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 579
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.003,
+                "response_processing_time": 0.0,
+                "elb_status_code": 200,
+                "target_status_code": 200,
+                "received_bytes": 579,
+                "sent_bytes": 783,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:45.626000Z"
+            }
+        },
+        "traceId": "Root=1-649370b5-0253431f2042833a26460a7f",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:45.652000Z"
+            }
+        },
+        "traceId": "Root=1-649370b5-7038a772150016f3770a50d4",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 581
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 581,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:46.958000Z"
+            }
+        },
+        "traceId": "Root=1-649370b6-236a58f701ba34757a1af86d",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:46.980000Z"
+            }
+        },
+        "traceId": "Root=1-649370b6-2b159d6829dd1eae6b2f5c19",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 555
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 555,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:52.790000Z"
+            }
+        },
+        "traceId": "Root=1-649370bc-54228dd62baa096941578372",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:52.817000Z"
+            }
+        },
+        "traceId": "Root=1-649370bc-0dc848167afad15140784d07",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 555
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 555,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:54.995000Z"
+            }
+        },
+        "traceId": "Root=1-649370be-6d97b012401869d74a3b834e",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:55.016000Z"
+            }
+        },
+        "traceId": "Root=1-649370bf-43c26c9b5c91ce8c4be528db",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 555
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 555,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:57.703000Z"
+            }
+        },
+        "traceId": "Root=1-649370c1-6430b9e91900b7dd63abfdb8",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 33556,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 33556
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:50:57.725000Z"
+            }
+        },
+        "traceId": "Root=1-649370c1-3823d52567099a7f2c9016c5",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 272,
+                "status_code": 400
+            },
+            "schema": "http",
+            "request": {
+                "method": null,
+                "body": {
+                    "content": "- http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80- -"
+                },
+                "bytes": 0
+            },
+            "user_agent": {
+                "original": "-",
+                "name": "Other",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "45.137.206.172",
+                "ip": "45.137.206.172",
+                "port": 34396,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "",
+                "ip": "",
+                "port": null
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "45.137.206.172",
+                    "port": 34396
+                },
+                "target_ip": "",
+                "target_port": null,
+                "request_processing_time": null,
+                "target_processing_time": null,
+                "response_processing_time": null,
+                "elb_status_code": 400,
+                "target_status_code": null,
+                "received_bytes": 0,
+                "sent_bytes": 272,
+                "http": {
+                    "port": 80,
+                    "version": null
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": null,
+                "request_creation_time": "2023-06-21T21:53:25.232000Z"
+            }
+        },
+        "traceId": "-",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": null
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 581
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 581,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.004000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-1703bbd3663398a56d532757",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.032000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-00902f3646247501721d0f0b",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 581
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 581,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.462000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-0631b61b1c06fbf1223e488a",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.485000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-0e12592764512ef94953ef26",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 581
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 581,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.734000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-41563bb6495a89296514be1d",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.760000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-6dd7546671aa320379907f7a",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 581
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 581,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.936000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-6d020d7f7f6c40233e18032c",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:28.960000Z"
+            }
+        },
+        "traceId": "Root=1-64937158-4a5ac41b6bb2a2d01f665491",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 223,
+                "status_code": 304
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 581
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 304,
+                "target_status_code": 304,
+                "received_bytes": 581,
+                "sent_bytes": 223,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:29.111000Z"
+            }
+        },
+        "traceId": "Root=1-64937159-2683dd2f5fc313c23c673fa5",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/clouds.jpg HTTP/1.1"
+                },
+                "bytes": 445
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Mac OS X"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "15.248.1.132",
+                "ip": "15.248.1.132",
+                "port": 18352,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "15.248.1.132",
+                    "port": 18352
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 445,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T21:53:29.132000Z"
+            }
+        },
+        "traceId": "Root=1-64937159-46c280b6129f43b96948071a",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/clouds.jpg"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 382,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://54.188.82.156:80/.env HTTP/1.1"
+                },
+                "bytes": 236
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "31.172.80.202",
+                "ip": "31.172.80.202",
+                "port": 49728,
+                "geo": {
+                    "country_name": "Germany",
+                    "country_iso_code": "DE"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "31.172.80.202",
+                    "port": 49728
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 236,
+                "sent_bytes": 382,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T01:02:44.586000Z"
+            }
+        },
+        "traceId": "Root=1-649a3534-57a9376d7ccfa2da7869721b",
+        "url": {
+            "domain": "54.188.82.156",
+            "path": "/.env"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 272,
+                "status_code": 400
+            },
+            "schema": "http",
+            "request": {
+                "method": null,
+                "body": {
+                    "content": "- http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80- -"
+                },
+                "bytes": 0
+            },
+            "user_agent": {
+                "original": "-",
+                "name": "Other",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "162.142.125.223",
+                "ip": "162.142.125.223",
+                "port": 51092,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "",
+                "ip": "",
+                "port": null
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "162.142.125.223",
+                    "port": 51092
+                },
+                "target_ip": "",
+                "target_port": null,
+                "request_processing_time": null,
+                "target_processing_time": null,
+                "response_processing_time": null,
+                "elb_status_code": 400,
+                "target_status_code": null,
+                "received_bytes": 0,
+                "sent_bytes": 272,
+                "http": {
+                    "port": 80,
+                    "version": null
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": null,
+                "request_creation_time": "2023-06-21T23:20:16.597000Z"
+            }
+        },
+        "traceId": "-",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": null
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "POST",
+                "body": {
+                    "content": "POST http://54.149.97.75:80/boaform/admin/formLogin HTTP/1.1"
+                },
+                "bytes": 526
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0",
+                "name": "Firefox",
+                "version": ".",
+                "os": {
+                    "family": "Ubuntu"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "193.35.18.52",
+                "ip": "193.35.18.52",
+                "port": 46566,
+                "geo": {
+                    "country_name": "Netherlands",
+                    "country_iso_code": "NL"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "193.35.18.52",
+                    "port": 46566
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 526,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:15:40.730000Z"
+            }
+        },
+        "traceId": "Root=1-6493768c-78f0b50f583816db3131bbaa",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/boaform/admin/formLogin"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 0,
+                "status_code": 400
+            },
+            "schema": "http",
+            "request": {
+                "method": null,
+                "body": {
+                    "content": "- http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80- -"
+                },
+                "bytes": 0
+            },
+            "user_agent": {
+                "original": "-",
+                "name": "Other",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "193.35.18.52",
+                "ip": "193.35.18.52",
+                "port": 46566,
+                "geo": {
+                    "country_name": "Netherlands",
+                    "country_iso_code": "NL"
+                }
+            },
+            "destination": {
+                "address": "",
+                "ip": "",
+                "port": null
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "193.35.18.52",
+                    "port": 46566
+                },
+                "target_ip": "",
+                "target_port": null,
+                "request_processing_time": null,
+                "target_processing_time": null,
+                "response_processing_time": null,
+                "elb_status_code": 400,
+                "target_status_code": null,
+                "received_bytes": 0,
+                "sent_bytes": 0,
+                "http": {
+                    "port": 80,
+                    "version": null
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": null,
+                "request_creation_time": "2023-06-21T22:15:40.731000Z"
+            }
+        },
+        "traceId": "-",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": null
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 170,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "HEAD",
+                "body": {
+                    "content": "HEAD http://54.149.97.75:80/Core/Skin/Login.aspx HTTP/1.1"
+                },
+                "bytes": 470
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "43.154.141.71",
+                "ip": "43.154.141.71",
+                "port": 38868,
+                "geo": {
+                    "country_name": "Hong Kong",
+                    "country_iso_code": "HK"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "43.154.141.71",
+                    "port": 38868
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 470,
+                "sent_bytes": 170,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T23:19:47.448000Z"
+            }
+        },
+        "traceId": "Root=1-64938593-3256282f7da0efa967807a4a",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/Core/Skin/Login.aspx"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 272,
+                "status_code": 400
+            },
+            "schema": "http",
+            "request": {
+                "method": null,
+                "body": {
+                    "content": "- http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80- -"
+                },
+                "bytes": 0
+            },
+            "user_agent": {
+                "original": "-",
+                "name": "Other",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "198.235.24.93",
+                "ip": "198.235.24.93",
+                "port": 62452,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "",
+                "ip": "",
+                "port": null
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "198.235.24.93",
+                    "port": 62452
+                },
+                "target_ip": "",
+                "target_port": null,
+                "request_processing_time": null,
+                "target_processing_time": null,
+                "response_processing_time": null,
+                "elb_status_code": 400,
+                "target_status_code": null,
+                "received_bytes": 0,
+                "sent_bytes": 272,
+                "http": {
+                    "port": 80,
+                    "version": null
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": null,
+                "request_creation_time": "2023-06-27T01:40:50.631000Z"
+            }
+        },
+        "traceId": "-",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": null
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 828,
+                "status_code": 206
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/ HTTP/1.1"
+                },
+                "bytes": 267
+            },
+            "user_agent": {
+                "original": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+                "name": "Slackbot-LinkExpanding",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "44.201.184.49",
+                "ip": "44.201.184.49",
+                "port": 40064,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "44.201.184.49",
+                    "port": 40064
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 206,
+                "target_status_code": 206,
+                "received_bytes": 267,
+                "sent_bytes": 828,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:10:38.220000Z"
+            }
+        },
+        "traceId": "Root=1-6493755e-3ca8a7935bd41bde6e7df23c",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 387,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://sample-alb-351248157.us-west-2.elb.amazonaws.com:80/favicon.ico HTTP/1.1"
+                },
+                "bytes": 242
+            },
+            "user_agent": {
+                "original": "Slackbot 1.0 (+https://api.slack.com/robots)",
+                "name": "Slackbot",
+                "version": ".",
+                "os": {
+                    "family": "Other"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "54.146.175.252",
+                "ip": "54.146.175.252",
+                "port": 33818,
+                "geo": {
+                    "country_name": "United States",
+                    "country_iso_code": "US"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "54.146.175.252",
+                    "port": 33818
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 242,
+                "sent_bytes": 387,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:10:38.365000Z"
+            }
+        },
+        "traceId": "Root=1-6493755e-5ebf89d86685fc932929f452",
+        "url": {
+            "domain": "sample-alb-351248157.us-west-2.elb.amazonaws.com",
+            "path": "/favicon.ico"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 215,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "GET",
+                "body": {
+                    "content": "GET http://54.149.97.75:80/info.php HTTP/1.1"
+                },
+                "bytes": 230
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Linux"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "79.133.51.240",
+                "ip": "79.133.51.240",
+                "port": 55476,
+                "geo": {
+                    "country_name": "Germany",
+                    "country_iso_code": "DE"
+                }
+            },
+            "destination": {
+                "address": "172.31.32.179",
+                "ip": "172.31.32.179",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "79.133.51.240",
+                    "port": 55476
+                },
+                "target_ip": "172.31.32.179",
+                "target_port": 80,
+                "request_processing_time": 0.001,
+                "target_processing_time": 0.002,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 230,
+                "sent_bytes": 215,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-21T22:13:56.143000Z"
+            }
+        },
+        "traceId": "Root=1-64937624-642d3f727d9fde3c2f55e35c",
+        "url": {
+            "domain": "54.149.97.75",
+            "path": "/info.php"
+        }
+    },
+    {
+        "observedTimestamp": "2023-07-28T11:43:33.000Z",
+        "@timestamp": "2023-07-28T11:43:33.000Z",
+        "http": {
+            "response": {
+                "bytes": 170,
+                "status_code": 404
+            },
+            "schema": "http",
+            "request": {
+                "method": "HEAD",
+                "body": {
+                    "content": "HEAD http://54.188.82.156:80/Core/Skin/Login.aspx HTTP/1.1"
+                },
+                "bytes": 471
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": ".",
+                "os": {
+                    "family": "Windows"
+                }
+            }
+        },
+        "communication": {
+            "source": {
+                "address": "1.14.7.100",
+                "ip": "1.14.7.100",
+                "port": 40138,
+                "geo": {
+                    "country_name": "China",
+                    "country_iso_code": "CN"
+                }
+            },
+            "destination": {
+                "address": "172.31.21.214",
+                "ip": "172.31.21.214",
+                "port": 80
+            }
+        },
+        "cloud": {
+            "provider": "AWS",
+            "service.name": "ELB",
+            "account.id": 443273586136,
+            "region": "us-west-2"
+        },
+        "aws": {
+            "elb": {
+                "client": {
+                    "ip": "1.14.7.100",
+                    "port": 40138
+                },
+                "target_ip": "172.31.21.214",
+                "target_port": 80,
+                "request_processing_time": 0.0,
+                "target_processing_time": 0.001,
+                "response_processing_time": 0.0,
+                "elb_status_code": 404,
+                "target_status_code": 404,
+                "received_bytes": 471,
+                "sent_bytes": 170,
+                "http": {
+                    "port": 80,
+                    "version": "1.1"
+                },
+                "ssl_cipher": "-",
+                "ssl_protocol": "-",
+                "matched_rule_priority": 0,
+                "request_creation_time": "2023-06-27T01:07:35.848000Z"
+            }
+        },
+        "traceId": "Root=1-649a3657-39104fcd5ee623ba3fd12290",
+        "url": {
+            "domain": "54.188.82.156",
+            "path": "/Core/Skin/Login.aspx"
+        }
+    }
+]
