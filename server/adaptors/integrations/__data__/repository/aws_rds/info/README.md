@@ -19,6 +19,7 @@ An integration is a collection of predefined assets which are combined in a mean
 AWS RDS integration includes dashboards, visualizations, queries, and index mapping to help you manage and monitor your database services more effectively.
 
 ### Dashboards
+The Dashboard uses the index alias `logs-aws-rds` for shortening the index name - be advised.
 
 ![](../static/dashboard_rds1.png)
 
