@@ -37,7 +37,7 @@ export function Integration(props: AvailableIntegrationProps) {
   const [integrationAssets, setAssets] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const createMappings = async (
+  const createComponentMapping = async (
     componentName: string,
     payload: {
       template: { mappings: { _meta: { version: string } } };
@@ -47,39 +47,48 @@ export function Integration(props: AvailableIntegrationProps) {
     dataSourceName: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
-    if (componentName !== integration.type) {
-      return http
-        .post('/api/console/proxy', {
-          body: JSON.stringify(payload),
-          query: {
-            path: `_component_template/ss4o_${componentName}_${version}_template`,
-            method: 'POST',
-          },
-        })
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    } else {
-      payload.index_patterns = [dataSourceName];
-      return http
-        .post('/api/console/proxy', {
-          body: JSON.stringify(payload),
-          query: {
-            path: `_index_template/ss4o_${componentName}_${version}_${integration.name}`,
-            method: 'POST',
-          },
-        })
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    }
+    return http
+      .post('/api/console/proxy', {
+        body: JSON.stringify(payload),
+        query: {
+          path: `_component_template/ss4o_${componentName}_${version}_template`,
+          method: 'POST',
+        },
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return err;
+      });
+  };
+
+  const createIndexMapping = async (
+    componentName: string,
+    payload: {
+      template: { mappings: { _meta: { version: string } } };
+      composed_of: string[];
+      index_patterns: string[];
+    },
+    dataSourceName: string
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    const version = payload.template.mappings._meta.version;
+    payload.index_patterns = [dataSourceName];
+    return http
+      .post('/api/console/proxy', {
+        body: JSON.stringify(payload),
+        query: {
+          path: `_index_template/ss4o_${componentName}_${version}_${integration.name}`,
+          method: 'POST',
+        },
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return err;
+      });
   };
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
     const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
-    let error = null;
+    const error = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
       (templateName: string) => {
@@ -87,21 +96,15 @@ export function Integration(props: AvailableIntegrationProps) {
         return `ss4o_${templateName}_${version}_template`;
       }
     );
+    // Create component mappings before the index mapping
+    // The assumption is that index mapping relies on component mappings for creation
     Object.entries(mappings).forEach(async ([key, mapping]) => {
       if (key === integration.type) {
         return;
       }
-      await createMappings(key, mapping as any, targetDataSource);
+      await createComponentMapping(key, mapping as any, targetDataSource);
     });
-    await createMappings(integration.type, mappings[integration.type], targetDataSource);
-
-    for (const [key, mapping] of Object.entries(data.data.mappings)) {
-      const result = await createMappings(key, mapping as any, targetDataSource);
-
-      if (result && result.error) {
-        error = (result.error as any).reason;
-      }
-    }
+    await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
 
     if (error !== null) {
       setToast('Failure creating index template', 'danger', error);
