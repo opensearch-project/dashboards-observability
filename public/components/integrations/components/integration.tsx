@@ -31,7 +31,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
-  const [integration, setIntegration] = useState({});
+  const [integration, setIntegration] = useState({} as { name: string; type: string });
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
@@ -67,7 +67,7 @@ export function Integration(props: AvailableIntegrationProps) {
     } else {
       payload.index_patterns = [dataSourceName];
       return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
+        `/api/console/proxy?path=_index_template/${integration.name}_${componentName}_${version}&method=POST`,
         {
           method: 'POST',
           headers: [
@@ -256,7 +256,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [selectedTabId, setSelectedTabId] = useState('assets');
 
-  const onSelectedTabChanged = (id) => {
+  const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
   };
 
