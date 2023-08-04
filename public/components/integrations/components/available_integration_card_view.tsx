@@ -28,6 +28,7 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
+  const http = props.http;
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const getImage = (url?: string) => {
@@ -72,7 +73,9 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
                   icon={getImage(
-                    `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                    http.basePath.prepend(
+                      `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                    )
                   )}
                   title={i.displayName ? i.displayName : i.name}
                   description={i.description}
