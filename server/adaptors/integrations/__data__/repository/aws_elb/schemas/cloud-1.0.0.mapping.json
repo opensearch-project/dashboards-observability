@@ -38,6 +38,9 @@
                 }
               }
             },
+            "platform": {
+              "type": "keyword"
+            },
             "service": {
               "type": "object",
               "properties": {
@@ -56,6 +59,9 @@
                   "type": "keyword"
                 }
               }
+            },
+            "resource_id": {
+              "type": "keyword"
             },
             "instance": {
               "type": "object",
