@@ -1,12 +1,12 @@
 {
   "index_patterns": [
-    "ss4o_logs-aws_vpc-*"
+    "ss4o_logs-aws_rds-*"
   ],
   "priority": 900,
   "data_stream": {},
   "template": {
     "aliases": {
-      "logs-vpc": {}
+      "logs-aws-rds": {}
     },
     "mappings": {
       "_meta": {
@@ -103,6 +103,11 @@
         },
         "@timestamp": {
           "type": "date"
+        },
+        "time": {
+          "type": "alias",
+          "path" : "@timestamp"
+
         },
         "observedTimestamp": {
           "type": "date"
@@ -223,10 +228,9 @@
     }
   },
   "composed_of": [
-    "aws_vpc_flow",
-    "aws_s3",
+    "aws_rds",
     "cloud",
-    "communication"
+    "aws_s3"
   ],
   "version": 1,
   "_meta": {
