@@ -230,7 +230,6 @@
   "composed_of": [
     "aws_rds",
     "cloud",
-    "communication",
     "aws_s3"
   ],
   "version": 1,
