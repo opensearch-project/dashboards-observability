@@ -50,7 +50,7 @@ export function Integration(props: AvailableIntegrationProps) {
       .post('/api/console/proxy', {
         body: JSON.stringify(payload),
         query: {
-          path: `_component_template/ss4o_${componentName}_${version}_template`,
+          path: `_component_template/ss4o_${componentName}-${version}-template`,
           method: 'POST',
         },
       })
@@ -75,7 +75,7 @@ export function Integration(props: AvailableIntegrationProps) {
       .post('/api/console/proxy', {
         body: JSON.stringify(payload),
         query: {
-          path: `_index_template/ss4o_${componentName}_${version}_${integration.name}`,
+          path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
           method: 'POST',
         },
       })
@@ -90,9 +90,9 @@ export function Integration(props: AvailableIntegrationProps) {
     let error = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
-      (templateName: string) => {
-        const version = mappings[templateName].template.mappings._meta.version;
-        return `ss4o_${templateName}_${version}_template`;
+      (componentName: string) => {
+        const version = mappings[componentName].template.mappings._meta.version;
+        return `ss4o_${componentName}-${version}-template`;
       }
     );
     // Create component mappings before the index mapping
