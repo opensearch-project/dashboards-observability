@@ -11,7 +11,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -78,7 +78,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -145,7 +145,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -212,7 +212,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -266,8 +266,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -279,7 +278,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -346,7 +345,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -400,8 +399,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -413,7 +411,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -480,7 +478,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -534,8 +532,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -547,7 +544,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -614,7 +611,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -668,8 +665,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -681,7 +677,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -748,7 +744,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -802,8 +798,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -815,7 +810,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -882,7 +877,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -936,8 +931,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -949,7 +943,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -1016,7 +1010,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -1070,8 +1064,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -1083,7 +1076,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -1150,7 +1143,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -1204,8 +1197,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -1217,7 +1209,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -1284,7 +1276,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {
@@ -1338,8 +1330,7 @@
         "port": 38471
       }
     }
-  },
-  {
+  }, {
   "@timestamp": "2023-07-17T08:14:05.000Z",
   "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
   "event": {
@@ -1351,7 +1342,7 @@
     "data_stream": {
       "dataset": "vpc.flow_log",
       "namespace": "production",
-      "type": "logs"
+      "type": "logs_vpc"
     }
   },
   "cloud": {
@@ -1418,7 +1409,7 @@
       "data_stream": {
         "dataset": "vpc.flow_log",
         "namespace": "production",
-        "type": "logs"
+        "type": "logs_vpc"
       }
     },
     "cloud": {

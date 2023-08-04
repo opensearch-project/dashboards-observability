@@ -30,7 +30,3 @@ The next table details the assets
 | `[AWS VPC Flow Logs] Top Source AWS Services` | visualization |              [Pie] Compare parts of AWS service as flow source              |
 | `[AWS VPC Flow Logs] Top Destination AWS Services` | visualization |           [Pie] Compare parts of AWS service as flow destination            |
 | `[AWS VPC Flow Logs] General Search` |    search     |                 The pre-canned search for AWS VPC flow logs                 |
-
-## Dashboard
-
-![](../static/dashboard1.png)
