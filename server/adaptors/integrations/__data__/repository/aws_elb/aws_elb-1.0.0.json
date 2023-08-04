@@ -41,7 +41,7 @@
             "version": "1.0.0"
         },
         {
-            "name": "logs",
+            "name": "logs-elb",
             "version": "1.0.0"
         }
     ],

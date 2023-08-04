@@ -16,6 +16,7 @@ import { HttpStart } from '../../../../../../src/core/public';
 export interface AddedIntegrationsTableProps {
   loading: boolean;
   data: AddedIntegrationsList;
+  setData: React.Dispatch<React.SetStateAction<AddedIntegrationsList>>;
   http: HttpStart;
 }
 
@@ -57,7 +58,7 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
     <EuiPage>
       <EuiPageBody component="div">
         {IntegrationHeader()}
-        {AddedIntegrationsTable({ data, loading: false, http })}
+        {AddedIntegrationsTable({ data, setData, loading: false, http })}
       </EuiPageBody>
     </EuiPage>
   );
