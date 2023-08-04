@@ -31,13 +31,36 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
-  const [integration, setIntegration] = useState({});
+  const [integration, setIntegration] = useState({} as { name: string; type: string });
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const createMappings = async (
+  const createComponentMapping = async (
+    componentName: string,
+    payload: {
+      template: { mappings: { _meta: { version: string } } };
+      composed_of: string[];
+      index_patterns: string[];
+    }
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    const version = payload.template.mappings._meta.version;
+    return http
+      .post('/api/console/proxy', {
+        body: JSON.stringify(payload),
+        query: {
+          path: `_component_template/ss4o_${componentName}-${version}-template`,
+          method: 'POST',
+        },
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return err;
+      });
+  };
+
+  const createIndexMapping = async (
     componentName: string,
     payload: {
       template: { mappings: { _meta: { version: string } } };
@@ -47,42 +70,19 @@ export function Integration(props: AvailableIntegrationProps) {
     dataSourceName: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
-    if (componentName !== integration.type) {
-      return fetch(
-        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-        {
+    payload.index_patterns = [dataSourceName];
+    return http
+      .post('/api/console/proxy', {
+        body: JSON.stringify(payload),
+        query: {
+          path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
           method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    } else {
-      payload.index_patterns = [dataSourceName];
-      return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    }
+        },
+      })
+      .catch((err: any) => {
+        console.error(err);
+        return err;
+      });
   };
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
@@ -94,21 +94,26 @@ export function Integration(props: AvailableIntegrationProps) {
     let error = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
-      (templateName: string) => {
-        const version = mappings[templateName].template.mappings._meta.version;
-        return `ss4o_${templateName}_${version}_template`;
+      (componentName: string) => {
+        const version = mappings[componentName].template.mappings._meta.version;
+        return `ss4o_${componentName}-${version}-template`;
       }
     );
+    // Create component mappings before the index mapping
+    // The assumption is that index mapping relies on component mappings for creation
     Object.entries(mappings).forEach(async ([key, mapping]) => {
       if (key === integration.type) {
         return;
       }
-      await createMappings(key, mapping as any, targetDataSource);
+      await createComponentMapping(key, mapping as any);
     });
-    await createMappings(integration.type, mappings[integration.type], targetDataSource);
+    await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
 
     for (const [key, mapping] of Object.entries(data.data.mappings)) {
-      const result = await createMappings(key, mapping as any, targetDataSource);
+      const result =
+        key === integration.type
+          ? await createIndexMapping(key, mapping as any, targetDataSource)
+          : await createComponentMapping(key, mapping as any);
 
       if (result && result.error) {
         error = (result.error as any).reason;
@@ -256,7 +261,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [selectedTabId, setSelectedTabId] = useState('assets');
 
-  const onSelectedTabChanged = (id) => {
+  const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
   };
 
