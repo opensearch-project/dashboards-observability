@@ -116,6 +116,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   }
                   defaultQuery=""
                   onChange={[Function]}
+                  query=""
                 >
                   <EuiFlexGroup
                     alignItems="center"
