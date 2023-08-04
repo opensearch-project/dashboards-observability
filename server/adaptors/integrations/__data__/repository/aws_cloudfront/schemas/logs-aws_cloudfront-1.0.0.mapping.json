@@ -1,12 +1,12 @@
 {
   "index_patterns": [
-    "ss4o_logs-aws_vpc-*"
+    "ss4o_logs-aws_cloudfront-*"
   ],
   "priority": 900,
   "data_stream": {},
   "template": {
     "aliases": {
-      "logs-vpc": {}
+      "logs-aws-cloudfront": {}
     },
     "mappings": {
       "_meta": {
@@ -223,10 +223,9 @@
     }
   },
   "composed_of": [
-    "aws_vpc_flow",
     "aws_s3",
-    "cloud",
-    "communication"
+    "aws_cloudfront",
+    "cloud"
   ],
   "version": 1,
   "_meta": {
