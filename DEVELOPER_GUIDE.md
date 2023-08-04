@@ -26,7 +26,7 @@ The output file : `./build/observabilityDashboards-?.?.?.zip` (`?.?.?` stands fo
 
 ### Run Directly
 
-Cd back to `OpenSearch-Dashboards` directory and run `yarn start` (`yarn start --no-base-path`) to start OpenSearch Dashboards including this plugin. OpenSearch Dashboards will be available on `localhost:5601`.
+Cd back to `OpenSearch-Dashboards` directory and run `yarn start` to start OpenSearch Dashboards including this plugin. OpenSearch Dashboards will be available on `localhost:5601`.
 
 ### Run Docker
 
