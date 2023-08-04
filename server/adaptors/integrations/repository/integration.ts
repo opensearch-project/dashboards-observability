@@ -211,7 +211,7 @@ export class Integration {
       );
       try {
         const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
-        const asJson = '[' + ndjson.replace(/\n/g, ',') + ']';
+        const asJson = '[' + ndjson.trim().replace(/\n/g, ',') + ']';
         const parsed = JSON.parse(asJson);
         result.savedObjects = parsed;
       } catch (err: any) {
