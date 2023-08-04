@@ -1,6 +1,6 @@
 {
     "index_patterns": [
-      "ss4o_logs-elb-*"
+      "ss4o_logs-aws_elb-*"
     ],
     "data_stream": {},
     "template": {
