@@ -1,9 +1,12 @@
 {
     "index_patterns": [
-        "ss4o_logs-*-*"
+        "ss4o_logs-apache-*"
     ],
     "data_stream": {},
     "template": {
+        "aliases": {
+            "logs-apache": {}
+        },
         "mappings": {
             "_meta": {
                 "version": "1.0.0",
