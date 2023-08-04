@@ -1,10 +1,13 @@
 {
   "index_patterns": [
-    "ss4o_logs-*-*"
+    "ss4o_logs-aws_rds-*"
   ],
   "priority": 900,
   "data_stream": {},
   "template": {
+    "aliases": {
+      "logs-aws-rds": {}
+    },
     "mappings": {
       "_meta": {
         "version": "1.0.0",
@@ -100,6 +103,11 @@
         },
         "@timestamp": {
           "type": "date"
+        },
+        "time": {
+          "type": "alias",
+          "path" : "@timestamp"
+
         },
         "observedTimestamp": {
           "type": "date"
@@ -220,8 +228,9 @@
     }
   },
   "composed_of": [
-    "communication",
-    "http"
+    "aws_rds",
+    "cloud",
+    "aws_s3"
   ],
   "version": 1,
   "_meta": {

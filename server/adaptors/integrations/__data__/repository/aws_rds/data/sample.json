@@ -1,0 +1,272 @@
+[
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "rds_log",
+      "domain": "aws.rds"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "aws.rds",
+        "namespace": "production",
+        "type": "logs"
+      }
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "rds": {
+        "db-identifier": "db1",
+        "sq-user": "admin",
+        "sq-db-name": "testDB",
+        "sq-host-name": "host1",
+        "sq-ip": "192.0.2.0",
+        "sq-id": "sq123",
+        "sq-duration": 1.23,
+        "sq-lock-wait": 0.12,
+        "sq-rows-sent": 100,
+        "sq-rows-examined": 500,
+        "sq-table-name": "table1",
+        "sq-timestamp": "2023-07-22T11:22:33Z",
+        "sq-query": "SELECT * FROM table1",
+        "err-thread": "thread1",
+        "err-label": "error1",
+        "err-code": "err123",
+        "err-sub-system": "sub1",
+        "err-detail": "Error detail message",
+        "general-id": "gen123",
+        "general-action": "insert",
+        "general-query": "INSERT INTO table1 VALUES ('value1', 'value2')",
+        "audit-ip": "192.0.2.1",
+        "audit-user": "auditUser",
+        "audit-host-name": "host2",
+        "audit-connection-id": "conn123",
+        "audit-query-id": "query123",
+        "audit-operation": "SELECT",
+        "audit-db-name": "auditDB",
+        "audit-query": "SELECT * FROM auditDB",
+        "audit-retcode": "ret123",
+        "deadlock-thread-id-1": "thread2",
+        "deadlock-os-thread-handle-1": "osThread1",
+        "deadlock-query-id-1": "dq1",
+        "deadlock-ip-1": "192.0.2.2",
+        "deadlock-user-1": "user2",
+        "deadlock-action-1": "select",
+        "deadlock-query-1": "SELECT * FROM table2 WHERE column1 = 'value3'",
+        "deadlock-thread-id-2": "thread3",
+        "deadlock-os-thread-handle-2": "osThread2",
+        "deadlock-query-id-2": "dq2",
+        "deadlock-ip-2": "192.0.2.3",
+        "deadlock-user-2": "user3",
+        "deadlock-action-2": "update",
+        "deadlock-query-2": "UPDATE table2 SET column1 = 'value4' WHERE column1 = 'value3'",
+        "log-detail": "Log detail message"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_rds"
+    },
+    "communication": {
+      "source": {
+        "address": "162.142.125.177",
+        "port": 38471,
+        "packets": 1,
+        "bytes": 44
+      },
+      "destination": {
+        "address": "10.0.0.200",
+        "port": 12313
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-18T09:15:06.000Z",
+    "body": "3 111111111112 eni-0e250409d410e1291 162.142.125.178 10.0.0.201 38472 12314 6 2 45 1674898497 1674898508 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "rds_log",
+      "domain": "aws.rds"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "aws.rds",
+        "namespace": "production",
+        "type": "logs"
+      }
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c3",
+        "key": "AWSLogs/111111111112/vpcflowlogs/us-east-2/2023/01/28/111111111112_vpcflowlogs_us-east-2_fl-023c6afa025ee5a05_20230128T0940Z_3a9dfd9e.log.gz"
+      },
+      "rds": {
+        "db-identifier": "db2",
+        "sq-user": "admin2",
+        "sq-db-name": "testDB2",
+        "sq-host-name": "host2",
+        "sq-ip": "192.0.2.1",
+        "sq-id": "sq124",
+        "sq-duration": 1.24,
+        "sq-lock-wait": 0.13,
+        "sq-rows-sent": 101,
+        "sq-rows-examined": 501,
+        "sq-table-name": "table2",
+        "sq-timestamp": "2023-07-22T12:23:34Z",
+        "sq-query": "SELECT * FROM table2",
+        "err-thread": "thread2",
+        "err-label": "error2",
+        "err-code": "err124",
+        "err-sub-system": "sub2",
+        "err-detail": "Error detail message 2",
+        "general-id": "gen124",
+        "general-action": "update",
+        "general-query": "UPDATE table2 SET column1 = 'value3', column2 = 'value4'",
+        "audit-ip": "192.0.2.2",
+        "audit-user": "auditUser2",
+        "audit-host-name": "host3",
+        "audit-connection-id": "conn124",
+        "audit-query-id": "query124",
+        "audit-operation": "UPDATE",
+        "audit-db-name": "auditDB2",
+        "audit-query": "UPDATE auditDB2 SET column1 = 'value5'",
+        "audit-retcode": "ret124",
+        "deadlock-thread-id-1": "thread3",
+        "deadlock-os-thread-handle-1": "osThread2",
+        "deadlock-query-id-1": "dq2",
+        "deadlock-ip-1": "192.0.2.3",
+        "deadlock-user-1": "user3",
+        "deadlock-action-1": "update",
+        "deadlock-query-1": "UPDATE table3 SET column1 = 'value6' WHERE column1 = 'value5'",
+        "deadlock-thread-id-2": "thread4",
+        "deadlock-os-thread-handle-2": "osThread3",
+        "deadlock-query-id-2": "dq3",
+        "deadlock-ip-2": "192.0.2.4",
+        "deadlock-user-2": "user4",
+        "deadlock-action-2": "insert",
+        "deadlock-query-2": "INSERT INTO table4 VALUES ('value7', 'value8')",
+        "log-detail": "Log detail message 2"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111112"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743528",
+      "platform": "aws_rds"
+    },
+    "communication": {
+      "source": {
+        "address": "162.142.125.178",
+        "port": 38472,
+        "packets": 2,
+        "bytes": 45
+      },
+      "destination": {
+        "address": "10.0.0.201",
+        "port": 12314
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-19T10:16:07.000Z",
+    "body": "4 111111111113 eni-0e250409d410e1292 162.142.125.179 10.0.0.202 38473 12315 6 3 46 1674898498 1674898509 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "rds_log",
+      "domain": "aws.rds"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "aws.rds",
+        "namespace": "production",
+        "type": "logs"
+      }
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c4",
+        "key": "AWSLogs/111111111113/vpcflowlogs/us-east-2/2023/01/28/111111111113_vpcflowlogs_us-east-2_fl-023c6afa025ee5a06_20230128T0950Z_3a9dfd9f.log.gz"
+      },
+      "rds": {
+        "db-identifier": "db3",
+        "sq-user": "admin3",
+        "sq-db-name": "testDB3",
+        "sq-host-name": "host3",
+        "sq-ip": "192.0.2.2",
+        "sq-id": "sq125",
+        "sq-duration": 1.25,
+        "sq-lock-wait": 0.14,
+        "sq-rows-sent": 102,
+        "sq-rows-examined": 502,
+        "sq-table-name": "table3",
+        "sq-timestamp": "2023-07-22T13:24:35Z",
+        "sq-query": "SELECT * FROM table3",
+        "err-thread": "thread3",
+        "err-label": "error3",
+        "err-code": "err125",
+        "err-sub-system": "sub3",
+        "err-detail": "Error detail message 3",
+        "general-id": "gen125",
+        "general-action": "delete",
+        "general-query": "DELETE FROM table3 WHERE column1 = 'value9'",
+        "audit-ip": "192.0.2.3",
+        "audit-user": "auditUser3",
+        "audit-host-name": "host4",
+        "audit-connection-id": "conn125",
+        "audit-query-id": "query125",
+        "audit-operation": "DELETE",
+        "audit-db-name": "auditDB3",
+        "audit-query": "DELETE FROM auditDB3 WHERE column1 = 'value10'",
+        "audit-retcode": "ret125",
+        "deadlock-thread-id-1": "thread4",
+        "deadlock-os-thread-handle-1": "osThread3",
+        "deadlock-query-id-1": "dq3",
+        "deadlock-ip-1": "192.0.2.4",
+        "deadlock-user-1": "user4",
+        "deadlock-action-1": "delete",
+        "deadlock-query-1": "DELETE FROM table4 WHERE column1 = 'value11'",
+        "deadlock-thread-id-2": "thread5",
+        "deadlock-os-thread-handle-2": "osThread4",
+        "deadlock-query-id-2": "dq4",
+        "deadlock-ip-2": "192.0.2.5",
+        "deadlock-user-2": "user5",
+        "deadlock-action-2": "select",
+        "deadlock-query-2": "SELECT * FROM table5",
+        "log-detail": "Log detail message 3"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111113"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743529",
+      "platform": "aws_rds"
+    },
+    "communication": {
+      "source": {
+        "address": "162.142.125.179",
+        "port": 38473,
+        "packets": 3,
+        "bytes": 46
+      },
+      "destination": {
+        "address": "10.0.0.202",
+        "port": 12315
+      }
+    }
+  }
+]
