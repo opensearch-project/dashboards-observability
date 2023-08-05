@@ -47,7 +47,7 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
           <div
             className="euiTextColor euiTextColor--subdued"
           >
-            View or add available integrations to use pre-canned assets immediately in your OpenSearch setup.
+            View integrations with preconfigured assets immediately within your OpenSearch setup.
              
             <EuiLink
               external={true}
