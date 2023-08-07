@@ -54,10 +54,7 @@ export function Integration(props: AvailableIntegrationProps) {
           method: 'POST',
         },
       })
-      .catch((err: any) => {
-        console.error(err);
-        return err;
-      });
+      .catch((err: any) => Promise.reject(err));
   };
 
   const createIndexMapping = async (
@@ -79,10 +76,7 @@ export function Integration(props: AvailableIntegrationProps) {
           method: 'POST',
         },
       })
-      .catch((err: any) => {
-        console.error(err);
-        return err;
-      });
+      .catch((err: any) => Promise.reject(err));
   };
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
@@ -95,25 +89,28 @@ export function Integration(props: AvailableIntegrationProps) {
         return `ss4o_${componentName}-${version}-template`;
       }
     );
-    // Create component mappings before the index mapping
-    // The assumption is that index mapping relies on component mappings for creation
-    Object.entries(mappings).forEach(async ([key, mapping]) => {
-      if (key === integration.type) {
-        return;
-      }
-      await createComponentMapping(key, mapping as any);
-    });
-    await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
 
-    for (const [key, mapping] of Object.entries(data.data.mappings)) {
-      const result =
-        key === integration.type
-          ? await createIndexMapping(key, mapping as any, targetDataSource)
-          : await createComponentMapping(key, mapping as any);
-
-      if (result && result.error) {
-        error = (result.error as any).reason;
-      }
+    try {
+      // Create component mappings before the index mapping
+      // The assumption is that index mapping relies on component mappings for creation
+      await Promise.all(
+        Object.entries(mappings).map(([key, mapping]) => {
+          if (key === integration.type) {
+            return Promise.resolve();
+          }
+          return createComponentMapping(key, mapping as any);
+        })
+      );
+      // In order to see our changes, we need to manually provoke a refresh
+      await http.post('/api/console/proxy', {
+        query: {
+          path: '_refresh',
+          method: 'GET',
+        },
+      });
+      await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
+    } catch (err: any) {
+      error = err;
     }
 
     if (error !== null) {
