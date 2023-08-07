@@ -262,16 +262,6 @@ export const VisualizationContainer = ({
             showQueryModal();
           },
         },
-        {
-          name: 'Configure Metric',
-          disabled: editMode,
-          panel: {
-            id: 2,
-            width: 200,
-            title: 'Configure Metric',
-            content: metricsEditPanel,
-          },
-        },
       ],
     }),
   };
@@ -308,7 +298,7 @@ export const VisualizationContainer = ({
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError,
+        setIsError
       );
   };
 
@@ -361,13 +351,6 @@ export const VisualizationContainer = ({
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <MetricsEditInline
-                visualizationData={visualizationData}
-                metricMetaData={metricMetaData}
-                updateMetricConfig={updateMetricConfig}
-              />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="visualization-action-button">
               {editMode ? (
