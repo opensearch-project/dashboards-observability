@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiComboBox,
   EuiExpression,
+  EuiFormControlLayout,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -17,8 +18,10 @@ import {
 } from '@elastic/eui';
 import { from } from 'rxjs';
 import { distinct, filter, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { useDispatch, useSelector } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
 import { AGGREGATION_OPTIONS } from '../../../../common/constants/metrics';
+import { metricQuerySelector, updateMetricQuery } from '../redux/slices/metrics_slice';
 
 const useObservable = (observable, observer, deps) => {
   // useEffect with empty deps will call this only once
@@ -28,82 +31,72 @@ const useObservable = (observable, observer, deps) => {
   }, deps);
 };
 
-export const MetricsEditInline = ({
-  visualizationData,
-  metricMetaData,
-  updateMetricConfig,
-}: {
-  visualizationData?: any;
-  metricMetaData?: MetricType;
-  updateMetricConfig: ({}: { aggregation?: string; attributesGroupBy?: string[] }) => void;
-  availableAttributes?: string[];
-}) => {
+export const MetricsEditInline = ({ visualizationId }: { visualizationId: string }) => {
   const [aggregationIsOpen, setAggregationIsOpen] = useState(false);
   const [attributesGroupByIsOpen, setAttributesGroupByIsOpen] = useState(false);
 
-  const availableAttributesLabels =
-    metricMetaData?.query?.availableAttributes?.map((attribute) => ({
-      label: attribute,
-      name: attribute,
-    })) || [];
+  const dispatch = useDispatch();
 
-  const selectedOptionsFrom = (query) => {
-    return query.attributesGroupBy.map((attribute) => ({ label: attribute, name: attribute }));
-  };
-  // useEffect(() => {
-  //   console.log({ availableAttributes });
-  // }, [availableAttributes]);
+  const query = useSelector(metricQuerySelector(visualizationId));
+  useEffect(() => {
+    console.log({ visualizationId, query });
+  }, [query, visualizationId]);
 
-  const onChangeAggregation = (value) => {
-    updateMetricConfig({ aggregation: value });
+  const availableAttributesLabels = query.availableAttributes.map((attribute) => ({
+    label: attribute,
+    name: attribute,
+  }));
+
+  const onChangeAggregation = (e) => {
+    dispatch(updateMetricQuery(visualizationId, { aggregation: e.target.value }));
     setAggregationIsOpen(false);
   };
 
-  const onChangeAttributesGroupBy = (selectedAttributes) => {
+  const onChangeAttributesGroupBy = async (selectedAttributes) => {
+    console.log('onChangeAttributes', selectedAttributes);
     const attributesGroupBy = selectedAttributes.map(({ label }) => label);
-    updateMetricConfig({ attributesGroupBy });
+    dispatch(updateMetricQuery(visualizationId, { attributesGroupBy }));
 
     setAttributesGroupByIsOpen(false);
   };
 
   const renderAggregationEditor = () => (
     <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow label="AGGREGATION">
-          <EuiSelect
-            compressed
-            value={metricMetaData.query.aggregation}
-            onChange={onChangeAggregation}
-            options={AGGREGATION_OPTIONS}
-          />
-        </EuiFormRow>
+      <EuiFlexItem id="aggregation__field">
+        <EuiSelect
+          compressed
+          value={query.aggregation}
+          onChange={onChangeAggregation}
+          options={AGGREGATION_OPTIONS}
+          prepend="AGGREGATION"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   const renderAttributesGroupByEditor = () => (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow label="ATTRIBUTES GROUP BY">
-          <EuiComboBox
-            className={'attributesGroupBy'}
-            compressed
-            selectedOptions={selectedOptionsFrom(metricMetaData.query)}
-            onChange={onChangeAttributesGroupBy}
-            options={availableAttributesLabels}
-            prepend={'ATTRIBUTES GROUP BY'}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormControlLayout
+      readOnly
+      compressed
+      fullWidth
+      prepend={<EuiFormLabel htmlFor="attributeGroupBy">ATTRIBUTES GROUP BY</EuiFormLabel>}
+    >
+      <EuiComboBox
+        className={'attributesGroupBy'}
+        compressed
+        fullWidth
+        selectedOptions={query.attributesGroupBy.map((label) => ({ label, value: label }))}
+        onChange={onChangeAttributesGroupBy}
+        options={availableAttributesLabels}
+        prepend={'ATTRIBUTES GROUP BY'}
+      />
+    </EuiFormControlLayout>
   );
 
   return (
-    <div>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>{renderAggregationEditor()}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{renderAttributesGroupByEditor()}</EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup id="metricsEditInline">
+      <EuiFlexItem grow={false}>{renderAggregationEditor()}</EuiFlexItem>
+      <EuiFlexItem>{renderAttributesGroupByEditor()}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

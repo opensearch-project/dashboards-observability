@@ -27,18 +27,34 @@
   font-size: 0.8rem;
 }
 
-.visualization-div {
-  width: 100%;
-  height: 90%;
-  overflow: auto;
-  text-align: center;
+.metricVis {
+  #metricsEditInline {
+    /* for ... reasons (?), margin here causes
+       other rules to activate... providing
+       a more-correct display.
+     */
+    margin: 0 0px;
+  }
+
+  #explorerPlotComponent {
+    height: calc(100% - 15px) !important;
+  }
+
+  #aggregation__field {
+    .euiFormLabel {
+      width: 130px
+    }
+  }
+  .main-svg {
+    margin-top: -10px;
+    height: calc(100% - 60px);
+  }
+
+  .queryDisplay {
+    font-size: 12px;
+
+  }
 }
-
-.visualization-div.metricVis {
-  height: calc(100% - 85px) !important;
-
-}
-
 
 %center-div {
   top: 50%;

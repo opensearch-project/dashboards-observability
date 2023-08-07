@@ -15,6 +15,7 @@ import {
   selectMetric,
   loadMetrics,
   selectedMetricsSelector,
+  addSelectedMetric,
 } from '../redux/slices/metrics_slice';
 import { CoreStart } from '../../../../../../src/core/public';
 import PPLService from '../../../services/requests/ppl';
@@ -33,7 +34,7 @@ export const Sidebar = () => {
     });
   }, [dispatch]);
 
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
+  const handleAddMetric = (metric: any) => dispatch(addSelectedMetric(metric));
 
   const handleRemoveMetric = (metric: any) => {
     dispatch(deSelectMetric(metric));

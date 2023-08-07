@@ -384,8 +384,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading,
   setIsError,
   spanResolution,
-  metricMetaData,
-  setMetricMetaData,
+  queryMetaData,
 }: {
   http: CoreStart['http'];
   pplService: PPLService;
@@ -401,8 +400,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   spanResolution?: string;
-  metricMetaData?: MetricType;
-  setMetricMetaData?: React.Dispatch<React.SetStateAction<MetricType>>;
+  queryMetaData?: MetricType;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -415,21 +413,12 @@ export const renderCatalogVisualization = async ({
 
   const defaultAggregation = 'avg'; // pass in attributes to this function
   // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
-  if (metricMetaData) {
-    if (!metricMetaData.query.availableAttributes) {
-      const availableAttributes = await getAttributesForCatalog(pplService, catalogSource);
-      setMetricMetaData!({
-        ...metricMetaData,
-        query: { ...metricMetaData.query, availableAttributes },
-      });
-    }
-  }
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
-    aggregation: metricMetaData?.query?.aggregation || defaultAggregation,
-    attributesGroupBy: metricMetaData?.query?.attributesGroupBy || [],
+    aggregation: queryMetaData.aggregation,
+    attributesGroupBy: queryMetaData.attributesGroupBy,
     startTime,
     endTime,
     spanParam,
@@ -451,11 +440,13 @@ export const renderCatalogVisualization = async ({
     visualizationType,
     visualizationTimeField
   );
+
   setVisualizationTitle(catalogSource);
   setVisualizationType(visualizationType);
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
 
+  console.log('getqueryResponse', visualizationQuery);
   getQueryResponse(
     pplService,
     visualizationQuery,

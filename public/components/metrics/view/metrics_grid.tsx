@@ -90,10 +90,6 @@ export const MetricsGrid = ({
     setPanelVisualizations(updatedVisualizations);
   };
 
-  useEffect(() => {
-    console.log({ gridData });
-  }, [gridData]);
-
   const loadVizComponents = () => {
     const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
       <VisualizationContainer
@@ -114,8 +110,6 @@ export const MetricsGrid = ({
           panelVisualization.query.type === 'savedCustomMetric' ? undefined : true
         }
         spanParam={spanParam}
-        metricMetaData={panelVisualization}
-        setMetricMetaData={setMetricMetaData(panelVisualization.id)}
         contextMenuId="metrics"
       />
     ));

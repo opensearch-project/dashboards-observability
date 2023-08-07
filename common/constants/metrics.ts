@@ -24,7 +24,7 @@ export const resolutionOptions = [
   { value: 'y', text: 'years' },
 ];
 
-export const DEFAULT_METRIC_HEIGHT = 2;
+export const DEFAULT_METRIC_HEIGHT = 3;
 export const DEFAULT_METRIC_WIDTH = 12;
 
 export const AGGREGATION_OPTIONS = [

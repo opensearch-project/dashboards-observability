@@ -23,9 +23,11 @@ import {
   EuiText,
   EuiToolTip,
   EuiContextMenu,
+  EuiCode,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
+import { useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import {
@@ -37,6 +39,7 @@ import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { MetricType } from '../../../../../common/types/metrics';
 import { MetricsEditInline } from '../../../metrics/sidebar/metrics_edit_inline';
+import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -76,8 +79,6 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   spanParam?: string;
-  metricMetaData?: MetricType;
-  setMetricMetaData?: React.Dispatch<React.SetStateAction<MetricType>>;
   contextMenuId: 'visualization' | 'notebook' | 'metrics';
 }
 
@@ -98,8 +99,6 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   spanParam,
-  metricMetaData,
-  setMetricMetaData,
   contextMenuId,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -107,7 +106,6 @@ export const VisualizationContainer = ({
   const [visualizationType, setVisualizationType] = useState('');
   const [visualizationMetaData, setVisualizationMetaData] = useState();
   const [visualizationData, setVisualizationData] = useState<Plotly.Data[]>([]);
-  const [availableAttributeKeys, setAvailableAttributeKeys] = useState<string[]>([]);
   const [metricsEditPanel, setMetricsEditPanel] = useState(<></>);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState({} as VizContainerError);
@@ -117,6 +115,7 @@ export const VisualizationContainer = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
 
+  const queryMetaData = useSelector(metricQuerySelector(visualizationId));
   const closeModal = () => setIsModalVisible(false);
 
   function flattenPanelTree(tree, array = []) {
@@ -294,8 +293,7 @@ export const VisualizationContainer = ({
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
-        metricMetaData,
-        setMetricMetaData,
+        queryMetaData,
       });
     else
       await renderSavedVisualization(
@@ -311,16 +309,13 @@ export const VisualizationContainer = ({
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError,
-        metricMetaData
+        setIsError
       );
   };
 
-  const metricVisCss = metricMetaData ? 'metricVis' : '';
-
   const memoisedVisualizationBox = useMemo(
     () => (
-      <div className={`visualization-div ${metricVisCss}`}>
+      <div>
         {isLoading ? (
           <EuiLoadingChart size="xl" mono className="visualization-loading-chart" />
         ) : !_.isEmpty(isError) ? (
@@ -348,46 +343,20 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh, metricMetaData]);
+  }, [onRefresh, queryMetaData]);
 
-  useEffect(() => {
-    console.log('loadVisaulization', {
-      visualizationData,
-    });
-    const attributeKeys =
-      visualizationData?.dataRows
-        ?.map((row) => Object.keys(row[0]))
-        ?.flat()
-        ?.unique()
-        ?.map((key) => ({ label: key })) || [];
-
-    setAvailableAttributeKeys(attributeKeys);
-  }, [visualizationData]);
-
-  const updateMetricConfig = ({
-    aggregation,
-    attributesGroupBy,
-  }: {
-    aggregation: string;
-    attributesGroupBy: string[];
-  }) => {
-    setMetricMetaData!({ query: { aggregation, attributesGroupBy } });
-  };
+  const metricVisCss = catalogVisualization ? 'metricVis' : '';
 
   return (
     <>
       <EuiPanel
         data-test-subj={`${visualizationTitle}VisualizationPanel`}
-        className="panel-full-width"
+        className={`panel-full-width visualization-div ${metricVisCss}`}
         grow={false}
       >
         <div className={editMode ? 'mouseGrabber' : ''}>
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem
-              style={{
-                width: '35%',
-              }}
-            >
+            <EuiFlexItem grow={false}>
               <EuiText grow={false} className="panels-title-text">
                 <EuiToolTip delay="long" position="top" content={visualizationTitle}>
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
@@ -421,11 +390,7 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-          <MetricsEditInline
-            visualizationData={visualizationData}
-            metricMetaData={metricMetaData}
-            updateMetricConfig={updateMetricConfig}
-          />
+          {catalogVisualization && <MetricsEditInline visualizationId={visualizationId} />}
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>
