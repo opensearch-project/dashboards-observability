@@ -75,14 +75,22 @@ export const MetricsEditInline = ({ visualizationId }: { visualizationId: string
   );
 
   const renderAttributesGroupByEditor = () => (
-    <div>
-      <EuiPopoverTitle>Group By Attributes</EuiPopoverTitle>
+    <EuiFormControlLayout
+      readOnly
+      compressed
+      fullWidth
+      prepend={<EuiFormLabel htmlFor="attributeGroupBy">ATTRIBUTES GROUP BY</EuiFormLabel>}
+    >
       <EuiComboBox
+        className={'attributesGroupBy'}
         compressed
-        onChange={onChangeAggregation}
-        options={[{ label: 'host' }]}
+        fullWidth
+        selectedOptions={query.attributesGroupBy.map((label) => ({ label, value: label }))}
+        onChange={onChangeAttributesGroupBy}
+        options={availableAttributesLabels}
+        prepend={'ATTRIBUTES GROUP BY'}
       />
-    </div>
+    </EuiFormControlLayout>
   );
 
   return (
