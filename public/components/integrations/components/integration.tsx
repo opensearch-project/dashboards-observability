@@ -81,7 +81,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
     const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
-    let error = null;
+    let error: string | null = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
       (componentName: string) => {
@@ -110,7 +110,7 @@ export function Integration(props: AvailableIntegrationProps) {
       });
       await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
     } catch (err: any) {
-      error = err;
+      error = err.message;
     }
 
     if (error !== null) {
