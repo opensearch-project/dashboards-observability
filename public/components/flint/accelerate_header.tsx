@@ -34,7 +34,6 @@ export function AccelerateHeader() {
           Learn more
         </EuiLink>
       </EuiText>
-      <EuiSpacer size="l" />
     </div>
   );
 }
