@@ -19,6 +19,7 @@ import { hexToRgb } from '../../../../components/event_analytics/utils/utils';
 import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
+import { preprocessJsonData, transformPreprocessedDataToTraces } from '../shared/common';
 
 // send both query and exampler data through getVizContainerProps rawdata and try to get it here in data of line 40. print it and see.
 // If it doesn't work then use redux to get the data here
@@ -86,22 +87,22 @@ export const Line = ({ visualizations, layout, config }: any) => {
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
 
-  const checkIfMetrics = (metricsSchema: any) => {
-    if (isEmpty(metricsSchema)) return {};
+  const isMetricQuery = () => {
+    if (isEmpty(schema)) return {};
     if (
-      metricsSchema.length === 3 &&
-      metricsSchema.every((schemaField) =>
-        ['@labels', '@value', '@timestamp'].includes(schemaField.name)
-      )
+      schema.length === 3 &&
+      schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
     ) {
       return true;
     }
     return false;
   };
 
-  const preprocessMetricsJsonData = (json): any => {
+  const preprocessMetricsJsonData = (): any => {
+    if (!isMetricQuery()) return [];
+
     const data: any[] = [];
-    _.forEach(json, (row) => {
+    _.forEach(jsonData, (row) => {
       const record: any = {};
       record['@labels'] = JSON.parse(row['@labels']);
       record['@timestamp'] = JSON.parse(row['@timestamp']);
@@ -110,7 +111,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
     });
     return data;
   };
-  const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
+  const formattedMetricsJson = preprocessMetricsJsonData();
 
   const addStylesToTraces = (traces, traceStyles) => {
     const {
@@ -181,27 +182,22 @@ export const Line = ({ visualizations, layout, config }: any) => {
       y_coordinate: 'y',
     };
 
-    // return addStylesToTraces(
-    //   transformPreprocessedDataToTraces(
-    // preprocessJsonData(jsonData, visConfig),
-    //     visConfig,
-    //     lineSpecficMetaData
-    //   ),
-    //   traceStyles
-    // );
+    const traceData = isMetricQuery()
+      ? formattedMetricsJson.map((trace) => {
+          return {
+            ...trace,
+            x: trace['@timestamp'],
+            y: trace['@value'],
+            name: JSON.stringify(trace['@labels']),
+          };
+        })
+      : transformPreprocessedDataToTraces(
+          preprocessJsonData(jsonData, visConfig),
+          visConfig,
+          lineSpecficMetaData
+        );
 
-    const result = addStylesToTraces(
-      formattedMetricsJson.map((trace) => {
-        return {
-          ...trace,
-          x: trace['@timestamp'],
-          y: trace['@value'],
-          name: JSON.stringify(trace['@labels']),
-        };
-      }),
-      traceStyles
-    );
-    return result;
+    return addStylesToTraces(traceData, traceStyles);
   }, [
     chartStyles,
     // jsonData,

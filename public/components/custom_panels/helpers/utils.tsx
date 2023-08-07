@@ -432,7 +432,6 @@ export const renderCatalogVisualization = async ({
 
   setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
 
-  console.log('getqueryResponse', visualizationQuery);
   getQueryResponse(
     pplService,
     visualizationQuery,
@@ -548,12 +547,12 @@ export const processMetricsData = (schema: any, dataConfig: any) => {
     schema.length === 3 &&
     schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
   ) {
-    return prepareMetricsData(schema, dataConfig);
+    return prepareMetricsData(schema);
   }
   return {};
 };
 
-export const prepareMetricsData = (schema: any, dataConfig: any) => {
+export const prepareMetricsData = (schema: any) => {
   const metricBreakdown: any[] = [];
   const metricSeries: any[] = [];
   const metricDimension: any[] = [];
