@@ -63,8 +63,7 @@ export function IntegrationHeader() {
       </EuiPageHeader>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        View or add available integrations to use pre-canned assets immediately in your OpenSearch
-        setup.{' '}
+        View integrations with preconfigured assets immediately within your OpenSearch setup.{' '}
         <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
