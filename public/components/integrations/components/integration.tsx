@@ -220,7 +220,7 @@ export function Integration(props: AvailableIntegrationProps) {
       .post('/api/console/proxy', {
         body: requestBody,
         query: {
-          path: `${dataSource}/_bulk`,
+          path: `${dataSource}/_bulk?refresh=wait_for`,
           method: 'POST',
         },
       })
