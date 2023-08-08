@@ -1,0 +1,206 @@
+[
+    {
+        "observedTimestamp": "2023-07-21T16:52:08.000Z",
+        "http": {
+            "response": {
+                "status_code": 406,
+                "bytes": 6141
+            },
+            "url": "/strategize",
+            "flavor": "1.1",
+            "request": {
+                "method": "GET"
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": "114.0.0",
+                "os": {
+                    "name": "Mac OS X",
+                    "full": "Mac OS X 10.15.7",
+                    "version": "10.15.7",
+                    "device": {
+                        "name": "Mac"
+                    }
+                }
+            }
+        },
+        "attributes": {
+        "data_stream": {
+            "dataset": "apache.access",
+            "namespace": "production",
+            "type": "logs"
+        }
+        },
+        "event": {
+            "result": "success",
+            "category": "web",
+            "name": "access",
+            "type": "access",
+            "domain": "apache.access",
+            "kind": "event"
+        },
+        "communication": {
+            "source": {
+                "address": "127.0.0.1",
+                "ip": "42.204.151.42",
+                "geo": {
+                    "country": "China",
+                    "country_iso_code": "CN"
+                }
+            }
+        },
+        "body": "15.248.1.132 - - [21/Jun/2023:21:35:24 +0000] \"GET / HTTP/1.1\" 403 45 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\"",
+        "traceId": "d09d293a27c9a754f2bf0196b5a1c9bc",
+        "spanId": "18ba0e515e42dad0",
+        "@timestamp": "2023-07-21T16:52:08.000Z"
+    },
+    {
+        "observedTimestamp": "2023-07-21T16:52:08.000Z",
+        "http": {
+            "response": {
+                "status_code": 406,
+                "bytes": 6141
+            },
+            "url": "/strategize",
+            "flavor": "1.1",
+            "request": {
+                "method": "GET"
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": "114.0.0",
+                "os": {
+                    "name": "Mac OS X",
+                    "full": "Mac OS X 10.15.7",
+                    "version": "10.15.7",
+                    "device": {
+                        "name": "Mac"
+                    }
+                }
+            }
+        },
+        "attributes": {
+        "data_stream": {
+            "dataset": "apache.access",
+            "namespace": "production",
+            "type": "logs"
+        }
+        },
+        "event": {
+            "result": "success",
+            "category": "web",
+            "name": "access",
+            "type": "access",
+            "domain": "apache.access",
+            "kind": "event"
+        },
+        "communication": {
+            "source": {
+                "address": "127.0.0.1",
+                "ip": "42.204.151.42",
+                "geo": {
+                    "country": "China",
+                    "country_iso_code": "CN"
+                }
+            }
+        },
+        
+        "body": "15.248.1.132 - - [21/Jun/2023:21:35:24 +0000] \"GET / HTTP/1.1\" 403 45 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\"",
+        "traceId": "d09d293a27c9a754f2bf0196b5a1c9bc",
+        "spanId": "18ba0e515e42dad0",
+        "@timestamp": "2023-07-21T16:52:08.000Z"
+    },
+    {
+        "observedTimestamp": "2023-07-25:52:08.000Z",
+        "http": {
+            "response": {
+                "status_code": 400,
+                "bytes": 6141
+            },
+            "url": "/strategize",
+            "flavor": "1.1",
+            "request": {
+                "method": "GET"
+            },
+            "user_agent": {
+                "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                "name": "Chrome",
+                "version": "114.0.0",
+                "os": {
+                    "name": "Mac OS X",
+                    "full": "Mac OS X 10.15.7",
+                    "version": "10.15.7",
+                    "device": {
+                        "name": "Mac"
+                    }
+                }
+            }
+        },
+        "attributes": {
+            "data_stream": {
+                "dataset": "apache.access",
+                "namespace": "production",
+                "type": "logs"
+            }
+        },
+        "event": {
+            "result": "success",
+            "category": "web",
+            "name": "access",
+            "type": "access",
+            "domain": "apache.access",
+            "kind": "event"
+        },
+        "communication": {
+            "source": {
+                "address": "127.0.0.1",
+                "ip": "42.204.151.42",
+                "geo": {
+                    "country": "United States",
+                    "country_iso_code": "US"
+                }
+            }
+        },
+        "body": "15.248.1.132 - - [21/Jun/2023:21:35:24 +0000] \"GET / HTTP/1.1\" 403 45 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\"",
+        "traceId": "d09d293a27c9a754f2bf0196b5a1c9bc",
+        "spanId": "18ba0e515e42dad0",
+        "@timestamp": "2023-07-21T16:52:08.000Z"
+    },
+    {
+        "attributes": {
+            "data_stream": {
+                "dataset": "apache.error",
+                "namespace": "production",
+                "type": "logs"
+            }
+        },
+        "observedTimestamp": "2023-07-21T16:52:08.000Z",
+        "@timestamp": "2023-07-21T16:52:08.000Z",
+        "severity": {
+            "text": "cgid:error"
+        },
+        "communication": {
+            "source": {
+                "address": "127.0.0.1",
+                "ip": "42.204.151.42",
+                "geo": {
+                    "country": "France",
+                    "country_iso_code": "FR"
+                }
+            }
+        },
+        "event": {
+            "result": "error",
+            "category": "web",
+            "name": "error",
+            "type": "error",
+            "domain": "apache.error",
+            "kind": "error"
+        },
+        "traceId": "d09d293a27c9a754f2bf0196b5a1c9bc",
+        "spanId": "18ba0e515e42dad0",
+        "body": "[Sat Aug 12 04:05:51 2006] [notice] Apache/1.3.11 (Unix) mod_perl/1.21 configured -- resuming normal operations"
+    }
+]
