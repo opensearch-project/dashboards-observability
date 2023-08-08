@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { VisualizationChart } from './visualization_chart';
-import { VisCanvassPlaceholder } from '../event_analytics/explorer/visualizations/shared_components';
+import { VisWorkspaceDefault } from '../event_analytics/explorer/visualizations/shared_components';
 import { IVisualizationContainerProps } from '../../../common/types/explorer';
 import { VIS_CHART_TYPES, VISUALIZATION_ERROR } from '../../../common/constants/shared';
 import { AGGREGATIONS, GROUPBY } from '../../../common/constants/explorer';
@@ -44,7 +44,7 @@ export const Visualization = ({
       {isValid ? (
         <VisualizationChart visualizations={visualizations} />
       ) : (
-        <VisCanvassPlaceholder message={erroInfo} icon={visualizations?.vis?.icontype} />
+        <VisWorkspaceDefault message={erroInfo} icon={visualizations?.vis?.icontype} />
       )}
     </>
   );

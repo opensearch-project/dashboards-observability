@@ -7,6 +7,7 @@ export {
   getIndexPatternFromRawQuery,
   preprocessQuery,
   buildQuery,
+  buildRawQuery,
   composeFinalQuery,
   removeBacktick,
 } from './query_utils';

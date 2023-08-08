@@ -173,14 +173,17 @@ export const VisaulizationFlyoutSO = ({
     if (!isInputValid()) return;
 
     if (isFlyoutReplacement) {
-      dispatch(replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle));
+      dispatch(
+        replaceVizInPanel(panel, replaceVisualizationId, selectValue, newVisualizationTitle)
+      );
     } else {
-        const visualizationsWithNewPanel = addVisualizationPanel({
-          savedVisualizationId: selectValue,
-          onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
-          onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`
-        });
+      const visualizationsWithNewPanel = addVisualizationPanel({
+        savedVisualizationId: selectValue,
+        onSuccess: `Visualization ${newVisualizationTitle} successfully added!`,
+        onFailure: `Error in adding ${newVisualizationTitle} visualization to the panel`,
+      });
     }
+    setToast(`Visualization ${newVisualizationTitle} successfully added!`);
     closeFlyout();
   };
 

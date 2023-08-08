@@ -20,15 +20,21 @@ export const SAMPLE_VISUALIZATIONS_NAMES = [
 ];
 
 export const PPL_VISUALIZATIONS = [
-  'source = opensearch_dashboards_sample_data_flights | stats count() by Dest',
+  'source = opensearch_dashboards_sample_data_flights | stats count(Dest) by Dest',
   'source = opensearch_dashboards_sample_data_flights | stats avg(FlightDelayMin) by Carrier',
-  'source = opensearch_dashboards_sample_data_flights | stats max( DistanceKilometers ) by DestCityName',
+  'source = opensearch_dashboards_sample_data_flights | stats max( DistanceKilometers ) by Dest',
 ];
 
 export const PPL_VISUALIZATIONS_NAMES = [
   'Flight count by destination',
   'Average flight delay minutes',
   'Max distance by destination city',
+];
+
+export const PPL_VISUALIZATION_CONFIGS = [
+  '{"dataConfig":{"series":[{"customLabel":"","label":"Dest","name":"Dest","aggregation":"count"}],"dimensions":[{"label":"Dest","name":"Dest"}],"breakdowns":[]}}',
+  '{"dataConfig":{"series":[{"customLabel":"","label":"FlightDelayMin","name":"FlightDelayMin","aggregation":"avg"}],"dimensions":[{"label":"Dest","name":"Dest"}],"breakdowns":[]}}',
+  '{"dataConfig":{"series":[{"label":"DistanceKilometers","name":"DistanceKilometers","aggregation":"max","customLabel":""}],"dimensions":[{"label":"Dest","name":"Dest"}]}}',
 ];
 
 export const NEW_VISUALIZATION_NAME = 'Flight count by destination airport';

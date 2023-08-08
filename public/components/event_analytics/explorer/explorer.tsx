@@ -74,6 +74,7 @@ import {
 } from '../../../../common/types/explorer';
 import {
   buildQuery,
+  buildRawQuery,
   getIndexPatternFromRawQuery,
   uiSettingsService,
 } from '../../../../common/utils';
@@ -260,9 +261,6 @@ export const Explorer = ({
 
   const fetchData = async (startingTime?: string, endingTime?: string) => {
     const curQuery: IQuery = queryRef.current!;
-    const rawQueryStr = (curQuery![RAW_QUERY] as string).includes(appBaseQuery)
-      ? curQuery![RAW_QUERY]
-      : buildQuery(appBasedRef.current, curQuery![RAW_QUERY]);
     new PPLDataFetcher(
       { ...curQuery },
       { batch, dispatch, changeQuery, changeVizConfig },
@@ -349,7 +347,6 @@ export const Explorer = ({
   }, [appBasedRef.current]);
 
   useEffect(() => {
-    if (queryRef.current!.isLoaded) return;
     let objectId;
     if (queryRef.current![TAB_CREATED_TYPE] === NEW_TAB || appLogEvents) {
       objectId = queryRef.current!.savedObjectId || '';
@@ -359,7 +356,7 @@ export const Explorer = ({
     if (objectId) {
       updateTabData(objectId);
     } else {
-      fetchData();
+      fetchData(startTime, endTime);
     }
     if (
       routerContext &&
@@ -560,7 +557,6 @@ export const Explorer = ({
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
-                      setTempQuery={setTempQuery}
                       handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
                     />
                   </>
@@ -731,7 +727,7 @@ export const Explorer = ({
       if (availability !== true) {
         await updateQueryInStore(tempQuery);
       }
-      await fetchData();
+      await fetchData(startTime, endTime);
     },
     [tempQuery, query]
   );
@@ -744,7 +740,7 @@ export const Explorer = ({
     savingTitle: string
   ) => {
     return {
-      query: queryState[RAW_QUERY],
+      query: buildRawQuery(query, appBaseQuery),
       fields: fields[SELECTED_FIELDS],
       dateRange: queryState[SELECTED_DATE_RANGE],
       name: savingTitle,

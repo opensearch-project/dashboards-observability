@@ -9,6 +9,7 @@ import {
   EuiGlobalToastList,
   EuiPage,
   EuiPageBody,
+  EuiResizableContainer,
   htmlIdGenerator,
   OnTimeChangeProps,
   ShortDate,
@@ -187,47 +188,39 @@ export const Home = ({
                     setSearch={setSearch}
                   />
                   <div className="dscAppContainer">
-                    <div
-                      className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
-                    >
-                      <div className="">
-                        {!isSidebarClosed && (
-                          <Sidebar http={http} pplService={pplService} search={search} />
-                        )}
-                        <EuiButtonIcon
-                          iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                          iconSize="m"
-                          size="s"
-                          onClick={() => onSideBarClick()}
-                          data-test-subj="collapseSideBarButton"
-                          aria-controls="discover-sidebar"
-                          aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                          aria-label="Toggle sidebar"
-                          className="dscCollapsibleSidebar__collapseButton"
-                        />
-                      </div>
-                    </div>
-                    <div className={`dscWrapper ${mainSectionClassName}`}>
-                      {selectedMetrics.length > 0 ? (
-                        <MetricsGrid
-                          http={http}
-                          chrome={chrome}
-                          panelVisualizations={panelVisualizations}
-                          setPanelVisualizations={setPanelVisualizations}
-                          editMode={editMode}
-                          pplService={pplService}
-                          startTime={startTime}
-                          endTime={endTime}
-                          moveToEvents={onEditClick}
-                          onRefresh={onRefresh}
-                          editActionType={editActionType}
-                          setEditActionType={setEditActionType}
-                          spanParam={spanValue + resolutionValue}
-                        />
-                      ) : (
-                        <EmptyMetricsView />
+                    <EuiResizableContainer>
+                      {(EuiResizablePanel, EuiResizableButton) => (
+                        <>
+                          <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
+                            <Sidebar http={http} pplService={pplService} search={search} />
+                          </EuiResizablePanel>
+
+                          <EuiResizableButton />
+
+                          <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
+                            {selectedMetrics.length > 0 ? (
+                              <MetricsGrid
+                                http={http}
+                                chrome={chrome}
+                                panelVisualizations={panelVisualizations}
+                                setPanelVisualizations={setPanelVisualizations}
+                                editMode={editMode}
+                                pplService={pplService}
+                                startTime={startTime}
+                                endTime={endTime}
+                                moveToEvents={onEditClick}
+                                onRefresh={onRefresh}
+                                editActionType={editActionType}
+                                setEditActionType={setEditActionType}
+                                spanParam={spanValue + resolutionValue}
+                              />
+                            ) : (
+                              <EmptyMetricsView />
+                            )}
+                          </EuiResizablePanel>
+                        </>
                       )}
-                    </div>
+                    </EuiResizableContainer>
                   </div>
                 </EuiPageBody>
               </EuiPage>
