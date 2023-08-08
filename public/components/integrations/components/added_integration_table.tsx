@@ -117,7 +117,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     setIsModalVisible(true);
   };
 
-  const integTemplateNames = [...new Set(integrations.map((i) => i.templateName))].sort();
+  const integTemplateNames = [...new Set(props.data.hits.map((i) => i.templateName))].sort();
 
   const search = {
     box: {
