@@ -163,7 +163,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
           <div className="ouiFilterSelect__items">
             {items.map((item, index) => (
               <EuiFilterSelectItem
-                checked={item.checked ? 'on' : 'off'}
+                checked={item.checked ? 'on' : undefined}
                 key={index}
                 onClick={() => updateItem(index)}
               >
