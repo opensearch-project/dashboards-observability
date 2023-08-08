@@ -1,0 +1,761 @@
+[
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "078d85edf7268fb4814b1b4fc9f4c64adfde218b6b489a38ecf1b269f14f3c7a centralizedlogging-webconsoleuis3bucket22191f5e-t9bxwwr3d7k [31/Jan/2023:09:25:20 +0000] 35.89.52.162 arn:aws:sts::347283850106:assumed-role/CentralizedLogging-CustomCDKBucketDeployment8693BB-1X4DVR38SF7ZY/CentralizedLogging-CustomCDKBucketDeployment8693BB-kU6BAxSswmfp HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.70 Python/3.9.13 Linux/4.14.255-296-236.539.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.69\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "production",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "cloudfront-centralizedlogging-webconsoleuis3bucket22191f5e-t9bxwwr3d7k",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront":   {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 675,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "Y5rIQOuGsI2vJN4hR3qLB55Cn4aoogvzPEnHhm5-0NiTtWDfTU5-vw==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 536,
+        "time-taken": 0.623,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.623,
+        "x-edge-detailed-result-type": "Miss"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-18T09:15:07.000Z",
+    "body": "084e71aee5e48296d6b4e0fead4f55abcddb2cf9b6c9923f4c276b7f12f5f1a7 alternativebucket-webconsoleuis3bucket44281g5f-t8cxzzr3d8k [31/Jan/2023:10:35:30 +0000] 36.99.53.163 arn:aws:sts::347283850107:assumed-role/AlternativeBucket-CustomCDKBucketDeployment8693BB-1X4DVR38SF8ZZ/AlternativeBucket-CustomCDKBucketDeployment8693BB-lU6BBySswmfr HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 201 - 322 - 30 29 \"-\" \"aws-cli/1.25.71 Python/3.9.14 Linux/4.14.255-296-236.540.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.70\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "development",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "222222222222"
+      },
+      "region": "ap-southeast-1",
+      "resource_id": "cloudfront-alternativebucket-webconsoleuis3bucket44281g5f-t8cxzzr3d8k",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront":  {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 675,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/static/css/main.3c74189a.css",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "IPGkM0N8_4AU6ok71zDa4twWLigSM7Ib33IwRsBHm1hDSmIvWoNjBA==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 118,
+        "time-taken": 0.656,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.656,
+        "x-edge-detailed-result-type": "Miss"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-19T10:16:09.000Z",
+    "body": "094f61afd5f582a7d7c5f1gfbad5g66bcded3df9c6a9934f5c367c7g13g6g2b8 testbucket-webconsoleuis3bucket55291h5g-t7dyxxr3d9k [31/Jan/2023:11:45:40 +0000] 37.109.54.164 arn:aws:sts::347283850108:assumed-role/TestBucket-CustomCDKBucketDeployment8693BB-1X4DVR38SF9ZZ/TestBucket-CustomCDKBucketDeployment8693BB-mU6BBzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 202 - 322 - 30 29 \"-\" \"aws-cli/1.25.72 Python/3.9.15 Linux/4.14.255-296-236.541.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.71\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "testing",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "333333333333"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-testbucket-webconsoleuis3bucket55291h5g-t7dyxxr3d9k",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront":   {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 677,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/manifest.json",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "5sXuyCQs0mSgb2mN-KUcHW6z6LDQd12JBT0eE5E6RSJxwUZsxzT-kg==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 410,
+        "time-taken": 0.582,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.582,
+        "x-edge-detailed-result-type": "Miss"
+
+
+
+
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-21T12:18:14.000Z",
+    "body": "123d94egf8769gh4825b1c4hc9j5k67lmdfe328l7b589b39mcf2c389p24g4d8r backupbucket-webconsoleuis3bucket44691j6h-t5ezzzr4d1k [31/Jan/2023:13:55:60 +0000] 39.119.56.166 arn:aws:sts::347283850110:assumed-role/BackupBucket-CustomCDKBucketDeployment8693BB-1X4DVR38SF9AA/BackupBucket-CustomCDKBucketDeployment8693BB-nU6CCzSswmft HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 204 - 322 - 30 29 \"-\" \"aws-cli/1.25.74 Python/3.9.17 Linux/4.14.255-296-236.543.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.73\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "backup",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "555555555555"
+      },
+      "region": "eu-west-1",
+      "resource_id": "cloudfront-backupbucket-webconsoleuis3bucket44691j6h-t5ezzzr4d1k",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront":{
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 501279,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/static/js/main.1fce72cf.js",
+        "sc-status": 200,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "zdHQDWHvw3LXHsJ9il4jbrYX4XVaRejgVdcnuSNq4WmocHqM4wATkw==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 70,
+        "time-taken": 1.606,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.840,
+        "x-edge-detailed-result-type": "Miss",
+        "sc-content-type": "application/javascript"
+
+
+
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-23T16:22:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront":   {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 675,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/locales/en/home.json",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "v=v1.3.0",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "5FtX3W-8LR38cf05aTommPpuDAteiyix_LSSXF6T8bPJWa7eyKASpQ==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 87,
+        "time-taken": 0.588,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.588,
+        "x-edge-detailed-result-type": "Miss"
+
+
+
+
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-22T10:22:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront":    {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 675,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/locales/en/ekslog.json",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "v=v1.3.0",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "S4LYsYHTPEFsp2XCNcKGKtOyBYnoZObnkCXszEz_llNN1W9fN3Cskg==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 78,
+        "time-taken": 0.592,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.592,
+        "x-edge-detailed-result-type": "Miss"
+
+
+
+
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-20T00:00:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 674,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/locales/en/cluster.json",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "v=v1.3.0",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "hVdTDiAs15WMiKmFOe-Wq0VmAiEU5QulF_qhbY4rPxOP0HbwpVcpFA==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 78,
+        "time-taken": 0.592,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.592,
+        "x-edge-detailed-result-type": "Miss"
+
+
+
+
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-24T08:00:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 677,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/locales/en/servicelog.json",
+        "sc-status": 304,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "v=v1.3.0",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "hrLzG-wJDS3HffJNotXAkXtbQDQz1hy-PLG8YDLJnzv1KUFwIFG6pg==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 103,
+        "time-taken": 0.594,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.594,
+        "x-edge-detailed-result-type": "Miss"
+
+
+
+
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-10T11:00:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "@timestamp": "2023-02-22T03:22:41",
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 703,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/locales/en-US/home.json",
+        "sc-status": 200,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "v=v1.3.0",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Error",
+        "x-edge-request-id": "Bh9Z-n6bzLqlzwHGFHflVMnpjlsOC34oxMELel058PF36cTNvoCEig==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 51,
+        "time-taken": 1.167,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Error",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 1.167,
+        "x-edge-detailed-result-type": "Error"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-25T02:00:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 703,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/locales/en-US/info.json",
+        "sc-status": 200,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "v=v1.3.0",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Error",
+        "x-edge-request-id": "Qse_oGkdO2t-QWOXmo4BzPH-Tz-Tb2Y9e5xTekFQNxMOK5uMMHapWA==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 51,
+        "time-taken": 0.284,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Error",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.284,
+        "x-edge-detailed-result-type": "Error"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-15T00:00:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 162423,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/static/media/elbArch.dbcdcea16ace81a05c28.png",
+        "sc-status": 200,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "T2z6641ScR1RQwziiZT9s8zqrlo7YD3iaLg5WVowGzs1NkcTPdrnog==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 56,
+        "time-taken": 1.050,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.648,
+        "x-edge-detailed-result-type": "Miss",
+        "sc-content-type": "image/png",
+        "sc-content-len": 161498
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-14T02:00:33.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 161053,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/static/media/wafArch.9cdccd95c4eb308461a2.png",
+        "sc-status": 200,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "WxSdG2R6oqaVNJQkue2oCkI6nU3ZXKb04KZQDgb7ZFUkX-RmAv59XA==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 57,
+        "time-taken": 1.074,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.669,
+        "x-edge-detailed-result-type": "Miss",
+        "sc-content-type": "image/png",
+        "sc-content-len": 160127
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-12T03:00:42.000Z",
+    "body": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p [31/Jan/2023:15:35:45 +0000] 48.129.58.168 arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs HQ37919R28X8MPJV REST.GET.BUCKET - \"GET /?list-type=2&prefix=&encoding-type=url HTTP/1.1\" 200 - 322 - 30 29 \"-\" \"aws-cli/1.25.75 Python/3.9.18 Linux/4.14.255-296-236.546.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 botocore/1.27.75\" - ",
+    "event": {
+      "result": "ACCEPT",
+      "name": "s3_log",
+      "domain": "cloudfront.log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudfront.log",
+        "namespace": "analytics",
+        "type": "logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "999999999999"
+      },
+      "region": "us-east-1",
+      "resource_id": "cloudfront-dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
+      "platform": "aws_s3"
+    },
+    "aws": {
+      "cloudfront": {
+        "x-edge-location": "HKG62-C2",
+        "sc-bytes": 150993,
+        "c-ip": "13.248.48.9",
+        "cs-method": "GET",
+        "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-uri-stem": "/static/media/rdsArch.aa17197fc8ed28ace19f.png",
+        "sc-status": 200,
+        "cs-referer": "-",
+        "cs-user-agent": "Mozilla/5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/110.0.0.0%20Safari/537.36",
+        "cs-uri-query": "-",
+        "cs-cookie": "-",
+        "x-edge-result-type": "Miss",
+        "x-edge-request-id": "yLiCzSmstFWGLeb9NjslBLkBOpN6stNwWakqN4wKZNHAm9VTFzE2zw==",
+        "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
+        "cs-protocol": "https",
+        "cs-bytes": 56,
+        "time-taken": 1.030,
+        "x-forwarded-for": "-",
+        "ssl-protocol": "TLSv1.3",
+        "ssl-cipher": "TLS_AES_128_GCM_SHA256",
+        "x-edge-response-result-type": "Miss",
+        "cs-protocol-version": "HTTP/2.0",
+        "fle-status": "-",
+        "fle-encrypted-fields": "-",
+        "c-port": "12812",
+        "time-to-first-byte": 0.626,
+        "x-edge-detailed-result-type": "Miss",
+        "sc-content-type": "image/png",
+        "sc-content-len": 150075
+      }
+    }
+  }
+]

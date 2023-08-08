@@ -1,9 +1,12 @@
 {
     "index_patterns": [
-      "ss4o_logs-*-*"
+      "ss4o_logs-aws_elb-*"
     ],
     "data_stream": {},
     "template": {
+      "aliases": {
+        "logs-elb": {}
+      },
       "mappings": {
         "_meta": {
           "version": "1.0.0",
