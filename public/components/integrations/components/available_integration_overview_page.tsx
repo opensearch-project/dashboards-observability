@@ -22,6 +22,7 @@ import { AvailableIntegrationsCardView } from './available_integration_card_view
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
+import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationType {
   name: string;
@@ -54,6 +55,7 @@ export interface AvailableIntegrationsCardViewProps {
   query: string;
   setQuery: (input: string) => void;
   renderCateogryFilters: () => React.JSX.Element;
+  http: HttpStart;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
@@ -190,6 +192,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               query,
               setQuery,
               renderCateogryFilters,
+              http,
             })
           : AvailableIntegrationsTable({
               loading: false,
