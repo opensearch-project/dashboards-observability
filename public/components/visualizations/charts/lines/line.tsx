@@ -182,49 +182,29 @@ export const Line = ({ visualizations, layout, config }: any) => {
       y_coordinate: 'y',
     };
 
-    const traceData = isMetricQuery()
-      ? formattedMetricsJson.map((trace) => {
+    if (isMetricQuery()) {
+      return addStylesToTraces(
+        formattedMetricsJson?.map((trace) => {
           return {
             ...trace,
             x: trace['@timestamp'],
             y: trace['@value'],
             name: JSON.stringify(trace['@labels']),
           };
-        })
-      : transformPreprocessedDataToTraces(
+        }),
+        traceStylesForMetrics
+      );
+    } else {
+      return addStylesToTraces(
+        transformPreprocessedDataToTraces(
           preprocessJsonData(jsonData, visConfig),
           visConfig,
           lineSpecficMetaData
-        );
-
-    return addStylesToTraces(traceData, traceStyles);
-  }, [
-    chartStyles,
-    // jsonData,
-    formattedMetricsJson,
-    dimensions,
-    series,
-    span,
-    breakdowns,
-    panelOptions,
-    tooltipOptions,
-  ]);
-
-  const prepareAnnotations = (examplerData) => {
-    return examplerData.map((exmp) => {
-      return {
-        x: exmp.timestamp,
-        y: exmp.value,
-        xref: 'x',
-        yref: 'y',
-        text: JSON.stringify(exmp.labels),
-        showarrow: true,
-        arrowhead: 7,
-        ax: 0,
-        ay: -40,
-      };
-    });
-  };
+        ),
+        traceStyles
+      );
+    }
+  }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
 
   const mergedLayout = useMemo(() => {
     const axisLabelsStyle = {
