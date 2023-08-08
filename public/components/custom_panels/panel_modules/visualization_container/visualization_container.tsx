@@ -40,6 +40,7 @@ import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { MetricType } from '../../../../../common/types/metrics';
 import { MetricsEditInline } from '../../../metrics/sidebar/metrics_edit_inline';
 import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
+import { MetricsEditPanel } from '../../../metrics/sidebar/metrics_edit_panel';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -187,6 +188,8 @@ export const VisualizationContainer = ({
     setIsModalVisible(true);
   };
 
+  const ThisMetricsEditPanel = () => <MetricsEditPanel visualizationId={visualizationId} />;
+
   const menuItems = {
     visualization: flattenPanelTree({
       id: 0,
@@ -260,6 +263,16 @@ export const VisualizationContainer = ({
           onClick: () => {
             closeActionsMenu();
             showQueryModal();
+          },
+        },
+        {
+          name: 'Configure Metric',
+          disabled: editMode,
+          panel: {
+            id: 2,
+            width: 200,
+            title: 'Configure Metric',
+            content: <ThisMetricsEditPanel />,
           },
         },
       ],
@@ -336,6 +349,7 @@ export const VisualizationContainer = ({
 
   const metricVisCss = catalogVisualization ? 'metricVis' : '';
 
+  console.log('VisualizatinContainer render');
   return (
     <>
       <EuiPanel
@@ -379,7 +393,6 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-          {catalogVisualization && <MetricsEditInline visualizationId={visualizationId} />}
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>

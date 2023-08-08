@@ -36,23 +36,9 @@
     margin: 0 0px;
   }
 
-  #explorerPlotComponent {
-    height: calc(100% - 15px) !important;
-  }
-
-  #aggregation__field {
-    .euiFormLabel {
-      width: 130px
-    }
-  }
   .main-svg {
     margin-top: -10px;
-    height: calc(100% - 60px);
-  }
-
-  .queryDisplay {
-    font-size: 12px;
-
+    //height: calc(100% - 60px);
   }
 }
 
