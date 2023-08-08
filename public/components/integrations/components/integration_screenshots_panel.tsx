@@ -10,6 +10,7 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function IntegrationScreenshots(props: any) {
   const config = props.integration;
+  const http = props.http;
   let screenshots;
   if (config.statics.gallery) {
     screenshots = config.statics.gallery;
@@ -23,7 +24,9 @@ export function IntegrationScreenshots(props: any) {
           return (
             <EuiFlexItem key={screenshot.path} grow={false}>
               <EuiImage
-                src={`${INTEGRATIONS_BASE}/repository/${config.name}/static/${screenshot.path}`}
+                src={http.basePath.prepend(
+                  `${INTEGRATIONS_BASE}/repository/${config.name}/static/${screenshot.path}`
+                )}
                 alt={screenshot.annotation ? screenshot.annotation : ''}
                 allowFullScreen={true}
                 size={300}

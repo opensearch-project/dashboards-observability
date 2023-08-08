@@ -91,7 +91,7 @@ export const doPropertyValidation = (
 };
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName, integrationType } = props;
+  const { onClose, onCreate, integrationName, integrationType, http } = props;
 
   const [isDataSourceValid, setDataSourceValid] = useState<null | false | true>(null);
 
@@ -131,11 +131,13 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const fetchDataSourceMappings = async (
     targetDataSource: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
-    return fetch(`/api/console/proxy?path=${targetDataSource}/_mapping&method=GET`, {
-      method: 'POST',
-      headers: [['osd-xsrf', 'true']],
-    })
-      .then((response) => response.json())
+    return http
+      .post('/api/console/proxy', {
+        query: {
+          path: `${targetDataSource}/_mapping`,
+          method: 'GET',
+        },
+      })
       .then((response) => {
         // Un-nest properties by a level for caller convenience
         Object.keys(response).forEach((key) => {
@@ -152,8 +154,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const fetchIntegrationMappings = async (
     targetName: string
   ): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
-    return fetch(`/api/integrations/repository/${targetName}/schema`)
-      .then((response) => response.json())
+    return http
+      .get(`/api/integrations/repository/${targetName}/schema`)
       .then((response) => {
         if (response.statusCode && response.statusCode !== 200) {
           throw new Error('Failed to retrieve Integration schema', { cause: response });
