@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiGlobalToastList,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPage,
@@ -14,8 +13,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import React, { ReactChild, useEffect, useState } from 'react';
-import { last } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
