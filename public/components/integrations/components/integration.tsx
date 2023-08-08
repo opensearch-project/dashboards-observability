@@ -46,15 +46,13 @@ export function Integration(props: AvailableIntegrationProps) {
     }
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
-    return http
-      .post('/api/console/proxy', {
-        body: JSON.stringify(payload),
-        query: {
-          path: `_component_template/ss4o_${componentName}-${version}-template`,
-          method: 'POST',
-        },
-      })
-      .catch((err: any) => Promise.reject(err));
+    return http.post('/api/console/proxy', {
+      body: JSON.stringify(payload),
+      query: {
+        path: `_component_template/ss4o_${componentName}-${version}-template`,
+        method: 'POST',
+      },
+    });
   };
 
   const createIndexMapping = async (
@@ -68,15 +66,13 @@ export function Integration(props: AvailableIntegrationProps) {
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
     payload.index_patterns = [dataSourceName];
-    return http
-      .post('/api/console/proxy', {
-        body: JSON.stringify(payload),
-        query: {
-          path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
-          method: 'POST',
-        },
-      })
-      .catch((err: any) => Promise.reject(err));
+    return http.post('/api/console/proxy', {
+      body: JSON.stringify(payload),
+      query: {
+        path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
+        method: 'POST',
+      },
+    });
   };
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
