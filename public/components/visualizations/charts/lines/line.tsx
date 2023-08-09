@@ -19,13 +19,8 @@ import { hexToRgb } from '../../../../components/event_analytics/utils/utils';
 import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_availability';
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
-import { preprocessJsonData, transformPreprocessedDataToTraces } from '../shared/common';
-
-// send both query and exampler data through getVizContainerProps rawdata and try to get it here in data of line 40. print it and see.
-// If it doesn't work then use redux to get the data here
-// make query calls for both query and exampler data in getQueryResponse and pplServiceRequestor functions in custom panels utils.
-// testData is exampler data
-// testData2 is query data
+import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
+import { processMetricsData } from '../../../custom_panels/helpers/utils';
 
 export const Line = ({ visualizations, layout, config }: any) => {
   const {
@@ -87,22 +82,22 @@ export const Line = ({ visualizations, layout, config }: any) => {
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
 
-  const isMetricQuery = () => {
-    if (isEmpty(schema)) return {};
+  const checkIfMetrics = (metricsSchema: any) => {
+    if (isEmpty(metricsSchema)) return {};
     if (
-      schema.length === 3 &&
-      schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
+      metricsSchema.length === 3 &&
+      metricsSchema.every((schemaField) =>
+        ['@labels', '@value', '@timestamp'].includes(schemaField.name)
+      )
     ) {
       return true;
     }
     return false;
   };
 
-  const preprocessMetricsJsonData = (): any => {
-    if (!isMetricQuery()) return [];
-
+  const preprocessMetricsJsonData = (json): any => {
     const data: any[] = [];
-    _.forEach(jsonData, (row) => {
+    _.forEach(json, (row) => {
       const record: any = {};
       record['@labels'] = JSON.parse(row['@labels']);
       record['@timestamp'] = JSON.parse(row['@timestamp']);
@@ -111,7 +106,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
     });
     return data;
   };
-  const formattedMetricsJson = preprocessMetricsJsonData();
 
   const addStylesToTraces = (traces, traceStyles) => {
     const {
@@ -155,12 +149,18 @@ export const Line = ({ visualizations, layout, config }: any) => {
   };
 
   let lines = useMemo(() => {
-    const visConfig = {
+    let visConfig = {
       dimensions,
       series,
       breakdowns,
       span,
     };
+
+    visConfig = {
+      ...visConfig,
+      ...processMetricsData(schema, visConfig),
+    };
+
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -182,7 +182,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
       y_coordinate: 'y',
     };
 
-    if (isMetricQuery()) {
+    if (checkIfMetrics(schema)) {
+      const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
       return addStylesToTraces(
         formattedMetricsJson?.map((trace) => {
           return {
@@ -216,11 +217,15 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
+    const { legend: layoutConfigLegend, ...layoutConfigGeneral } = layoutConfig;
+
     return {
       ...layout,
+      ...layoutConfigGeneral,
       title: panelOptions.title || layoutConfig.layout?.title || '',
       legend: {
         ...layout.legend,
+        ...layoutConfigLegend,
         orientation: legendPosition,
         ...(legendSize && {
           font: {

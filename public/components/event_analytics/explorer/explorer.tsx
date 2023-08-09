@@ -262,7 +262,7 @@ export const Explorer = ({
 
   const fetchData = async (startingTime?: string, endingTime?: string) => {
     const curQuery: IQuery = queryRef.current!;
-    console.log('fetchData', { defaultConfig: getDefaultVisConfig() });
+    console.log('fetchData', curQuery);
     new PPLDataFetcher(
       { ...curQuery },
       { batch, dispatch, changeQuery, changeVizConfig },

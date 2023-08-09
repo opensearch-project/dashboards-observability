@@ -195,6 +195,7 @@ const getAvailableAttributes = (id) => async (dispatch, getState) => {
   const { pplService } = coreRefs;
   const { setToast } = useToast();
 
+  console.log('getAvailableAttributes');
   try {
     const columnSchema = await pplService.fetch({
       query: 'describe ' + id + ' | fields COLUMN_NAME',
@@ -219,6 +220,7 @@ const getAvailableAttributes = (id) => async (dispatch, getState) => {
 };
 
 export const addSelectedMetric = (metric: MetricType) => async (dispatch) => {
+  console.log('addSelectedMetric');
   await dispatch(selectMetric(metric));
   if (metric.catalog !== OBSERVABILITY_CUSTOM_METRIC)
     await dispatch(getAvailableAttributes(metric.id));
@@ -259,7 +261,11 @@ export const metricIconsSelector = (state) => state.metrics.dataSourceIcons;
 export const metricsLayoutSelector = (state) => state.metrics.metricsLayout;
 
 export const metricQuerySelector = (id) => (state) =>
-  state.metrics.metricsLayout.find((layout) => layout.id === id)?.query;
+  state.metrics.metricsLayout.find((layout) => layout.id === id)?.query || {
+    aggregation: '',
+    attributesGroupBy: [],
+    availableAttributes: [],
+  };
 
 export const dataSourcesSelector = (state) => state.metrics.dataSources;
 

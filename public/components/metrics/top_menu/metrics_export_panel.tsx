@@ -66,7 +66,7 @@ export const MetricsExportPanel = ({
   const fetchAllvisualizationsById = async () => {
     const tempVisualizationsMetaData = await Promise.all(
       sortedMetricsLayout.map(async (metricLayout) => {
-        return metricLayout.query.type === 'savedCustomMetric'
+        return metricLayout.metricType === 'savedCustomMetric'
           ? await fetchVisualizationById(http, metricLayout.id, setErrorResponse)
           : createPrometheusMetricById(metricLayout.id);
       })

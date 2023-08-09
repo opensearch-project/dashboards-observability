@@ -111,6 +111,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     //   findAutoInterval(curStartTime, curEndTime);
     // }
 
+    console.log('PPLDataFetcher', { finalQuery, queryIndex: this.queryIndex, query: this.query });
     // get query data
     if (isLiveTailOn) {
       getLiveTail(finalQuery, getErrorHandler('Error fetching events'));

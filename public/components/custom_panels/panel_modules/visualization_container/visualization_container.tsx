@@ -7,7 +7,9 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCodeBlock,
-  EuiExpression,
+  EuiContextMenu,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,8 +24,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiContextMenu,
-  EuiCode,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
@@ -317,7 +317,7 @@ export const VisualizationContainer = ({
 
   const memoisedVisualizationBox = useMemo(
     () => (
-      <div>
+      <div className="visualization-div">
         {isLoading ? (
           <EuiLoadingChart size="xl" mono className="visualization-loading-chart" />
         ) : !_.isEmpty(isError) ? (
@@ -354,12 +354,16 @@ export const VisualizationContainer = ({
     <>
       <EuiPanel
         data-test-subj={`${visualizationTitle}VisualizationPanel`}
-        className={`panel-full-width visualization-div ${metricVisCss}`}
+        className={`panel-full-width ${metricVisCss}`}
         grow={false}
       >
         <div className={editMode ? 'mouseGrabber' : ''}>
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              style={{
+                width: '35%',
+              }}
+            >
               <EuiText grow={false} className="panels-title-text">
                 <EuiToolTip delay="long" position="top" content={visualizationTitle}>
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
@@ -393,6 +397,7 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          {catalogVisualization && <MetricsEditInline visualizationId={visualizationId} />}
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>

@@ -357,14 +357,6 @@ const updateCatalogVisualizationQuery = ({
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '14')`;
 };
 
-const getAttributesForCatalog = async (pplService, catalogName) => {
-  const columnSchema = await pplService.fetch({
-    query: 'describe ' + catalogName, // + ' | fields COLUMN_NAME, DATA_TYPE',
-    format: 'jdbc',
-  });
-  return columnSchema.jsonData.map((sch) => sch.COLUMN_NAME).filter((col) => col[0] !== '@');
-};
-
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
   http,
@@ -427,6 +419,12 @@ export const renderCatalogVisualization = async ({
     visualizationTimeField
   );
 
+  visualizationMetaData.layout_config = {
+    height: 390,
+    margin: { t: 5 },
+    legend: { yanchor: 'top', y: -0.4 },
+  };
+
   setVisualizationTitle(catalogSource);
   setVisualizationType(visualizationType);
 
@@ -476,9 +474,7 @@ export const parseSavedVisualizations = (
     timeField: visualization.savedVisualization.selected_timestamp.name,
     selected_date_range: visualization.savedVisualization.selected_date_range,
     selected_fields: visualization.savedVisualization.selected_fields,
-    user_configs: visualization.savedVisualization.user_configs
-      ? JSON.parse(visualization.savedVisualization.user_configs)
-      : {},
+    user_configs: visualization.savedVisualization.user_configs || {},
     sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
       ? visualization.savedVisualization.sub_type
       : '',
@@ -547,12 +543,12 @@ export const processMetricsData = (schema: any, dataConfig: any) => {
     schema.length === 3 &&
     schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
   ) {
-    return prepareMetricsData(schema);
+    return prepareMetricsData(schema, dataConfig);
   }
   return {};
 };
 
-export const prepareMetricsData = (schema: any) => {
+export const prepareMetricsData = (schema: any, dataConfig: any) => {
   const metricBreakdown: any[] = [];
   const metricSeries: any[] = [];
   const metricDimension: any[] = [];
@@ -576,9 +572,6 @@ export const prepareMetricsData = (schema: any) => {
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
-  }
-  if (metaData.user_configs !== undefined && metaData.user_configs !== '') {
-    metaData.user_configs = JSON.parse(metaData.user_configs);
   }
 
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
