@@ -2,6 +2,10 @@
 
 The following queries are used for the k8s dashboard:
 
+> Replace mapping `event.module` with `event.domain`
+> Replace mapping `event.dataset` with `event.category` 
+> Replace query `metricset.name` with `event.category` 
+
  - Deployment names Graph:
    - Filter: `event.module:kubernetes AND metricset.name:state_deployment` 
    - Query: `kubernetes.deployment.name` 
