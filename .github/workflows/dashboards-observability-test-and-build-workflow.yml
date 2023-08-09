@@ -60,7 +60,7 @@ jobs:
       - name: Test all dashboards-observability modules
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn test --coverage
+          yarn test --coverage --maxWorkers=100%
 
       - name: Upload coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
