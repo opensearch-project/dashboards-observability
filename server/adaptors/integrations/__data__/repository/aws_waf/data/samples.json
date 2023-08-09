@@ -19,13 +19,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -65,7 +65,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -137,13 +137,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -183,7 +183,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -255,13 +255,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -301,7 +301,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -373,13 +373,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -419,7 +419,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -491,13 +491,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -537,7 +537,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -609,13 +609,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -655,7 +655,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -727,13 +727,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -773,7 +773,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -853,13 +853,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -899,7 +899,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -971,13 +971,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1017,7 +1017,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1089,13 +1089,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1135,7 +1135,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1207,13 +1207,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1253,7 +1253,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1325,13 +1325,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1371,7 +1371,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1443,13 +1443,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1489,7 +1489,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1561,13 +1561,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1607,7 +1607,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1679,13 +1679,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1725,7 +1725,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1797,13 +1797,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1843,7 +1843,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -1915,13 +1915,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -1961,7 +1961,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2033,13 +2033,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2079,7 +2079,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2151,13 +2151,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2197,7 +2197,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2269,13 +2269,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2315,7 +2315,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2387,13 +2387,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2433,7 +2433,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2505,13 +2505,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2551,7 +2551,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2623,13 +2623,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2669,7 +2669,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2741,13 +2741,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2787,7 +2787,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2859,13 +2859,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -2905,7 +2905,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -2977,13 +2977,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3023,7 +3023,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -3095,13 +3095,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3141,7 +3141,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -3213,13 +3213,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3259,7 +3259,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -3331,13 +3331,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3377,7 +3377,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -3449,13 +3449,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3495,7 +3495,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "cache-control",
@@ -3587,13 +3587,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3633,7 +3633,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "cache-control",
@@ -3725,13 +3725,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3771,7 +3771,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "cache-control",
@@ -3863,13 +3863,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -3909,7 +3909,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "cache-control",
@@ -4001,13 +4001,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -4047,7 +4047,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -4119,13 +4119,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -4165,7 +4165,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -4237,13 +4237,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -4283,7 +4283,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -4355,13 +4355,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -4401,7 +4401,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "sec-ch-ua",
@@ -4473,13 +4473,13 @@
         "id": "111111111111"
       },
       "region": "ap-southeast-2",
-      "resource_id": "vpc-0d4d4e82b7d743527",
+      "resource_id": "vpc-0d4d4e*2b*d74*527",
       "platform": "aws_vpc"
     },
     "aws": {
       "waf": {
         "formatVersion": 1,
-        "webaclId": "arn:aws:wafv2:us-east-1:347283850106:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
+        "webaclId": "arn:aws:wafv2:us-east-1:345678901234:global/webacl/test-cf/ba65eb35-e5d8-4be5-b016-129a338a48b1",
         "terminatingRuleId": "Default_Action",
         "terminatingRuleType": "REGULAR",
         "action": "ALLOW",
@@ -4519,7 +4519,7 @@
           "headers": [
             {
               "name": "host",
-              "value": "d2wusnbjo8x1w7.cloudfront.net"
+              "value": "d2wu*nbj*8x1w7.cloudfront.net"
             },
             {
               "name": "cache-control",
