@@ -5,14 +5,12 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "s3"
+        "component": "aws_s3"
       },
       "properties": {
         "aws": {
-          "type" : "object",
           "properties": {
             "s3": {
-              "type" : "object",
               "properties": {
                 "bucket_owner": {
                   "type": "keyword"
