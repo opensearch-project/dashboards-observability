@@ -354,7 +354,7 @@ const updateCatalogVisualizationQuery = ({
       ? catalogTableName
       : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
 
-  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '14')`;
+  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
 };
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
