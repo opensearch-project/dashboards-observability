@@ -22,6 +22,7 @@ import {
   EuiLink,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiComboBox,
 } from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { AccelerateHeader } from './accelerate_header';
@@ -30,12 +31,32 @@ import { OPENSEARCH_DOCUMENTATION_URL } from '../../../common/constants/integrat
 
 interface AccelerateProps {
   isFlyout: boolean | undefined;
+  pplService: any;
 }
 
 export function Accelerate(props: AccelerateProps) {
-  const isFlyout = props.isFlyout;
+  const { pplService } = props;
   const [useCase, setUseCase] = useState('queryAcceleration');
   const [accelerationMethod, setAccelerationMethod] = useState('coveredIndex');
+  const [query, setQuery] = useState('');
+  const [dataSources, setDataSources] = useState([]);
+  const [selectedOptions, setSelected] = useState([]);
+
+  const onChange = (selectedOption) => {
+    setSelected(selectedOption);
+  };
+
+  useEffect(() => {
+    pplService
+      .fetch({ query: "show datasources | where CONNECTOR_TYPE = 'SPARK'", format: 'jdbc' })
+      .then((data) =>
+        setDataSources(
+          data.jsonData.map((x: any) => {
+            return { label: x.DATASOURCE_NAME };
+          })
+        )
+      );
+  }, []);
 
   const useCaseGroup = () => {
     return (
@@ -107,53 +128,6 @@ export function Accelerate(props: AccelerateProps) {
     );
   };
 
-  if (isFlyout) {
-    return (
-      <>
-      <EuiFlyoutHeader hasBorder>
-        <AccelerateHeader />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-      <AccelerateCallout/>
-      <EuiSpacer/>
-        <EuiTitle size="s" data-test-subj="accelerate-header">
-          <h2>Select use case</h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          Select the acceleration option that best suites your use case.{' '}
-          <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
-            Learn more
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer />
-        {useCaseGroup()}
-        <EuiSpacer />
-        {/* <EuiTitle size="s" data-test-subj="accelerate-header">
-              <h2>Data source selection</h2>
-              </EuiTitle>
-              <EuiText size="s" color="subdued">
-         Select the acceleration option that best suites your use case.{' '}
-          <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
-            Learn more
-          </EuiLink>
-        </EuiText> */}
-        <EuiTitle size="s" data-test-subj="accelerate-header">
-          <h2>Acceleration Method</h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          OpenSearch provides multiple ways to accelerate data. Select the best indexing option
-          based on your needs{' '}
-          <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
-            Learn more
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer />
-        {accelerationMethodGroup()}
-      </EuiFlyoutBody>
-      </>
-    )
-  }
-
   return (
     <EuiPage>
       <EuiPageBody>
@@ -193,6 +167,14 @@ export function Accelerate(props: AccelerateProps) {
         </EuiText>
         <EuiSpacer />
         {accelerationMethodGroup()}
+        <EuiSpacer />
+        <EuiComboBox
+          placeholder="Select DataSource"
+          singleSelection={{ asPlainText: true }}
+          options={dataSources}
+          selectedOptions={selectedOptions}
+          onChange={onChange}
+        />
       </EuiPageBody>
     </EuiPage>
   );

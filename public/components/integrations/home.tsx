@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
+import PPLService from 'public/services/requests/ppl';
 import { Integration } from './components/integration';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
@@ -20,14 +21,16 @@ export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
 interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   parentBreadcrumbs: ChromeBreadcrumb[];
+  pplService: any;
 }
 
 export const Home = (props: HomeProps) => {
-  const { http, chrome } = props;
+  const { http, chrome, pplService } = props;
 
   const commonProps = {
     http,
     chrome,
+    pplService,
   };
 
   return (
@@ -64,8 +67,16 @@ export const Home = (props: HomeProps) => {
               />
             )}
           />
-          <Route exact path={'/accelerate'} render={(routerProps) => <Accelerate />} />
-          <Route exact path={'/accelerateAsModal'} render={(routerProps) => <TestPage />} />
+          <Route
+            exact
+            path={'/accelerate'}
+            render={(routerProps) => <Accelerate {...commonProps} />}
+          />
+          <Route
+            exact
+            path={'/accelerateAsModal'}
+            render={(routerProps) => <TestPage {...commonProps} />}
+          />
         </Switch>
       </HashRouter>
     </div>

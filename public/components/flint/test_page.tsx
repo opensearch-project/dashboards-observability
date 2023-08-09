@@ -23,6 +23,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
+import httpClientMock from 'test/__mocks__/httpClientMock';
 import { AccelerateHeader } from './accelerate_header';
 import { AccelerateCallout } from './accelerate_callout';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../common/constants/integrations';
@@ -33,9 +34,15 @@ export function TestPage(props: any) {
 
   return (
     <EuiPage>
-      <EuiButton onClick={() => setIsFlyoutVisible(true)}>Click Me</EuiButton>
+      <EuiButton
+        onClick={() => {
+          setIsFlyoutVisible(true);
+        }}
+      >
+        Click Me
+      </EuiButton>
 
-      {isFlyoutVisible && <AccelerateFlyout onClose={() => setIsFlyoutVisible(false)} />}
+      {isFlyoutVisible && <AccelerateFlyout onClose={() => setIsFlyoutVisible(false)} {...props} />}
     </EuiPage>
   );
 }
