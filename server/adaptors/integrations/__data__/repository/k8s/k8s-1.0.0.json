@@ -21,11 +21,15 @@
     },
     "components": [
         {
-            "name": "communication",
+            "name": "k8s",
             "version": "1.0.0"
         },
         {
-            "name": "http",
+            "name": "cloud",
+            "version": "1.0.0"
+        },
+        {
+            "name": "container",
             "version": "1.0.0"
         },
         {

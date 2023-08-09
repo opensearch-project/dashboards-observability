@@ -17,6 +17,14 @@
       "duration": 62659666,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -37,6 +45,14 @@
       "duration": 62737120,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -57,6 +73,14 @@
       "duration": 62777363,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -77,6 +101,14 @@
       "duration": 62782051,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -97,6 +129,14 @@
       "duration": 62787154,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -117,6 +157,14 @@
       "duration": 62823612,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -137,6 +185,14 @@
       "duration": 62891452,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -157,6 +213,14 @@
       "duration": 62955664,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -177,6 +241,14 @@
       "duration": 62986675,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -197,6 +269,14 @@
       "duration": 63023831,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -217,6 +297,14 @@
       "duration": 63072009,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -237,6 +325,14 @@
       "duration": 63143310,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -257,6 +353,14 @@
       "duration": 63206635,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -277,6 +381,14 @@
       "duration": 63212194,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -297,6 +409,14 @@
       "duration": 63216515,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -317,6 +437,14 @@
       "duration": 63274849,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -337,6 +465,14 @@
       "duration": 63279413,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -357,6 +493,14 @@
       "duration": 63306465,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -377,6 +521,14 @@
       "duration": 63351108,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -397,6 +549,14 @@
       "duration": 63358097,
       "module": "kubernetes",
       "category": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -442,6 +602,14 @@
       "duration": 70109660,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -476,6 +644,14 @@
       "duration": 70112252,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -502,6 +678,14 @@
       "duration": 70177492,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -536,6 +720,14 @@
       "duration": 70215247,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -571,6 +763,14 @@
       "duration": 70256990,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -613,6 +813,14 @@
       "duration": 70297397,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -639,6 +847,14 @@
       "duration": 70341918,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -665,6 +881,14 @@
       "duration": 70344129,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -714,6 +938,14 @@
       "duration": 70347195,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -745,6 +977,14 @@
       "duration": 70423725,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -779,6 +1019,14 @@
       "duration": 70425644,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -821,6 +1069,14 @@
       "duration": 70452349,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -855,6 +1111,14 @@
       "duration": 70454657,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -889,6 +1153,14 @@
       "duration": 70486014,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -923,6 +1195,14 @@
       "duration": 70498831,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -957,6 +1237,14 @@
       "duration": 70503382,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -991,6 +1279,14 @@
       "duration": 70560678,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1017,6 +1313,14 @@
       "duration": 70563898,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1051,6 +1355,14 @@
       "duration": 70566618,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1096,6 +1408,14 @@
       "duration": 70604755,
       "module": "kubernetes",
       "category": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1188,6 +1508,14 @@
       "duration": 32121077,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1280,6 +1608,14 @@
       "duration": 32130296,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1372,6 +1708,14 @@
       "duration": 32285801,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1464,6 +1808,14 @@
       "duration": 39578002,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1556,6 +1908,14 @@
       "duration": 39596213,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1648,6 +2008,14 @@
       "duration": 39604819,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1740,6 +2108,14 @@
       "duration": 34395346,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1832,6 +2208,14 @@
       "duration": 34403890,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -1924,6 +2308,14 @@
       "duration": 34408303,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2016,6 +2408,14 @@
       "duration": 38763760,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2108,6 +2508,14 @@
       "duration": 38774992,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2200,6 +2608,14 @@
       "duration": 38777992,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2292,6 +2708,14 @@
       "duration": 29824861,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2384,6 +2808,14 @@
       "duration": 29830240,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2476,6 +2908,14 @@
       "duration": 29832627,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2568,6 +3008,14 @@
       "duration": 41407313,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2660,6 +3108,14 @@
       "duration": 41419688,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2752,6 +3208,14 @@
       "duration": 41423626,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2844,6 +3308,14 @@
       "duration": 32101346,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2936,6 +3408,14 @@
       "duration": 32117712,
       "module": "kubernetes",
       "category": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T20:00:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2959,6 +3439,14 @@
       "duration": 49768382,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -2982,6 +3470,14 @@
       "duration": 49810677,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3005,6 +3501,14 @@
       "duration": 49814400,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3028,6 +3532,14 @@
       "duration": 49858205,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3051,6 +3563,14 @@
       "duration": 49862205,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3074,6 +3594,14 @@
       "duration": 49864163,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3097,6 +3625,14 @@
       "duration": 49889580,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3120,6 +3656,14 @@
       "duration": 49891739,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3143,6 +3687,14 @@
       "duration": 49895729,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3166,6 +3718,14 @@
       "duration": 49921305,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3189,6 +3749,14 @@
       "duration": 49923658,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3212,6 +3780,14 @@
       "duration": 49925568,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3235,6 +3811,14 @@
       "duration": 49948194,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3258,6 +3842,14 @@
       "duration": 49951595,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3286,6 +3878,14 @@
       "duration": 49954543,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3309,6 +3909,14 @@
       "duration": 49978219,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3332,6 +3940,14 @@
       "duration": 49991232,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3360,6 +3976,14 @@
       "duration": 49995379,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3389,6 +4013,14 @@
       "duration": 50039743,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   },
   {
@@ -3412,6 +4044,14 @@
       "duration": 50043945,
       "module": "kubernetes",
       "category": "kubernetes.pod"
+    },
+    "@timestamp": "2023-07-24T19:42:50.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.pod",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
     }
   }
 ]

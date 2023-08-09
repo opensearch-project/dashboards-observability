@@ -218,7 +218,9 @@
         }
     },
     "composed_of": [
-        "k8s"
+        "k8s",
+        "container",
+        "cloud"
     ],
     "version": 1,
     "_meta": {
