@@ -26,12 +26,48 @@ The Kubernetes Attributes Processor automatically discovers Kubernetes pods, ext
 
 The following attributes are added by default:
 
-- k8s.namespace.name
-- k8s.pod.name
-- k8s.pod.uid
-- k8s.pod.start_time
-- k8s.deployment.name
-- k8s.node.name
+**Cluster**
+- `k8s.cluster.name`
+- `k8s.cluster.uid`
+
+**Namespace**
+- `k8s.namespace.name`
+
+**Pod**
+- `k8s.pod.name`
+- `k8s.pod.uid`
+- `k8s.pod.start_time`
+- `k8s.deployment.name`
+
+**Node** 
+- `k8s.node.name`
+- `k8s.node.uid`
+
+**Container** 
+- `k8s.container.name`
+- `k8s.container.restart_count`
+
+**ReplicaSet** 
+- `k8s.replicaset.name`
+- `k8s.replicaset.uid`
+
+**Deployment** 
+- `k8s.deployment.name`
+- `k8s.deployment.uid`
+
+**StatefulSet** 
+- `k8s.statefulset.name`
+- `k8s.statefulset.uid`
+
+**DaemonSet** 
+- `k8s.daemon.name`
+- `k8s.daemon.uid`
+
+**DaemonSet** 
+- `k8s.job.name`
+- `k8s.job.uid`
+
+> All these fields are represented in the k8s-1.0.0.mapping schema and are aliased with the existing ECS based fields
 
 ### Important Components for Kubernetes
 

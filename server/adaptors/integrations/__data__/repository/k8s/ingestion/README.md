@@ -23,7 +23,7 @@ This Fluent Bit deployment in Kubernetes is instrumental in gathering, processin
 It can be integrated with various log analytics tools and used for monitoring the behavior of the cluster, facilitating prompt insights and responses to system events. Make sure to tailor the configuration to match your specific requirements and infrastructure.
 
 
-### OTEL Pipeline References 
+### References 
 - [K8s Filter Plugin](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes) 
 
 **Kubernetes filter performs the following operations:**

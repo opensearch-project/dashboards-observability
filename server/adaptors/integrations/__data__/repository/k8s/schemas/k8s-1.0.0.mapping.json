@@ -9,6 +9,7 @@
       },
       "properties": {
         "kubernetes": {
+          "type": "object",
           "properties": {
             "annotations": {
               "type": "object"
@@ -2151,6 +2152,130 @@
                 "name": {
                   "type": "keyword",
                   "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "k8s": {
+              "properties": {
+                "namespace": {
+                  "properties": {
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.namespace"
+                    }
+                  }
+                },
+                "cluster": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "node": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.node.name"
+                    }
+                  }
+                },
+                "pod": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.pod.name"
+                    }
+                  }
+                },
+                "container": {
+                  "properties": {
+                    "restart_count": {
+                      "type": "long"
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.container.name"
+                    }
+                  }
+                },
+                "replicaset": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.replicaset.name"
+                    }
+                  }
+                },
+                "deployment": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.deployment.name"
+                    }
+                  }
+                },
+                "statefulset": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.statefulset.name"
+                    }
+                  }
+                },
+                "daemonset": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "job": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
                 }
               }
             }
