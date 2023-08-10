@@ -55,7 +55,7 @@ jobs:
             data
             node_modules
             target
-          key: ${{ runner.os }}-bootstrap-${{ hashFiles('yarn.lock', 'package.json') }}
+          key: ${{ runner.os }}-bootstrap-${{ hashFiles('*/yarn.lock', '*/package.json') }}
 
       - name: OSD Bootstrap
         run: |
