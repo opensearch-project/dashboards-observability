@@ -14,6 +14,8 @@ jobs:
     strategy: 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+      # Since Windows is inconsistent, we want to let other OSes run on a fail
+      fail-fast: false
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -51,11 +53,12 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-
       - name: Plugin Bootstrap
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn osd bootstrap
+          yarn cache clean
+          yarn config set network-timeout 1000000 -g
+          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |
