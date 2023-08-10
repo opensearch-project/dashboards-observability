@@ -3,10 +3,15 @@
 The following queries are used for the k8s dashboard:
 
 > Replace mapping `event.module` with `event.domain`
-> Replace mapping `event.dataset` with `event.category` 
-> Replace query `metricset.name` with `event.category` 
-
- - Deployment names Graph:
+> Replace query `metricset.name` with `event.dataset` 
+> Replace query fields
+>      `state_deployment` -> kubernetes.deployment
+>      `state_node` -> kubernetes.node
+>      `container` -> kubernetes.container
+>      `pod` -> kubernetes.pod
+> 
+ 
+- Deployment names Graph:
    - Filter: `event.module:kubernetes AND metricset.name:state_deployment` 
    - Query: `kubernetes.deployment.name` 
  - Available pods per deployment (done per deployment aggregation)
