@@ -1,20 +1,20 @@
 {
     "name": "k8s",
     "version": "1.0.0",
-    "displayName": "k8s Dashboard",
-    "description": "k8s web logs collector",
-    "license": "k8s-2.0",
+    "displayName": "Kubernetes Dashboard",
+    "description": "Kubernetes web logs collector",
+    "license": "Apache-2.0",
     "type": "logs-k8s",
     "author": "OpenSearch",
     "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/k8s/info",
     "statics": {
         "logo": {
-            "annotation": "k8s Logo",
+            "annotation": "Kubernetes Logo",
             "path": "logo.png"
         },
         "gallery": [
             {
-                "annotation": "k8s Dashboard",
+                "annotation": "Kubernetes Dashboard",
                 "path": "dashboard.png"
             }
         ]

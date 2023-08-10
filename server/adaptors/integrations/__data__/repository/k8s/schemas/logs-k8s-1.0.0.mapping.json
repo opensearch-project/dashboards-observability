@@ -159,6 +159,13 @@
                 },
                 "event": {
                     "properties": {
+                        "dataset": {
+                          "ignore_above": 128,
+                          "type": "keyword"
+                        },
+                        "duration": {
+                            "type": "long"
+                        },
                         "domain": {
                             "ignore_above": 256,
                             "type": "keyword"
