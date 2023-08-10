@@ -5,7 +5,7 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "s3"
+        "component": "aws_s3"
       },
       "properties": {
         "aws": {
