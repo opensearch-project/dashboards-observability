@@ -116,6 +116,7 @@ export const VisualizationContainer = ({
   const [modalContent, setModalContent] = useState(<></>);
 
   const queryMetaData = useSelector(metricQuerySelector(visualizationId));
+  console.log('queryMetaData: ', queryMetaData);
   const closeModal = () => setIsModalVisible(false);
 
   function flattenPanelTree(tree, array = []) {
@@ -132,6 +133,10 @@ export const VisualizationContainer = ({
 
     return array;
   }
+
+  useEffect(() => {
+    console.log('contextMenuId: ', contextMenuId);
+  }, []);
 
   const showErrorModal = () => {
     setModalContent(
@@ -345,11 +350,14 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh, queryMetaData]);
+  }, [onRefresh]);
+
+  useEffect(() => {
+    if (catalogVisualization) loadVisaulization();
+  }, [queryMetaData]);
 
   const metricVisCss = catalogVisualization ? 'metricVis' : '';
 
-  console.log('VisualizatinContainer render');
   return (
     <>
       <EuiPanel
