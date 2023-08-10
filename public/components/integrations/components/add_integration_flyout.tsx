@@ -234,7 +234,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                   setDataSourceValid(validationResult);
                 }}
                 disabled={dataSource.length === 0}
-                fill
               >
                 Validate
               </EuiButton>
