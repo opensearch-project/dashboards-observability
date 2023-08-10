@@ -84,7 +84,8 @@ export const Line = ({ visualizations, layout, config }: any) => {
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
 
   const checkIfMetrics = (metricsSchema: any) => {
-    if (isEmpty(metricsSchema)) return {};
+    if (isEmpty(metricsSchema)) return false;
+
     if (
       metricsSchema.length === 3 &&
       metricsSchema.every((schemaField) =>
