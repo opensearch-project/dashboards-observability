@@ -52,10 +52,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            data
-            node_modules
-            target
-          key: ${{ runner.os }}-bootstrap-${{ hashFiles('yarn.lock', 'package.json') }}
+            OpenSearch-Dashboards/data
+            OpenSearch-Dashboards/node_modules
+            OpenSearch-Dashboards/target
+          key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/package.json') }}
 
       - name: OSD Bootstrap
         run: |
