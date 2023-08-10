@@ -90,7 +90,6 @@ export const preprocessJsonData = (
     const backtickRemovedEntry = {
       ...removeBackTick(entry),
     };
-    console.log('series: ', series);
     forEach(series, (sr) => {
       let tabularVizData: IIntermediateMapping = {
         value: 0,

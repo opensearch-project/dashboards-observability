@@ -38,7 +38,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
   const {
     data: {
       explorer: {
-        explorerData: { schema, jsonData, datarows },
+        explorerData: { schema, jsonData },
       },
       userConfigs: {
         dataConfig: {
@@ -245,7 +245,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
       showlegend: showLegend,
       margin: PLOT_MARGIN,
-      // annotations,
     };
   }, [visualizations]);
 
@@ -300,11 +299,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
     }),
     [config, layoutConfig.config]
   );
-
-  useEffect(() => {
-    console.log('lines: ', lines);
-    console.log('mergedConfigs: ', mergedConfigs);
-  }, []);
 
   return <Plt data={lines} layout={mergedLayout} config={mergedConfigs} />;
 };
