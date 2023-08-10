@@ -47,7 +47,6 @@ jobs:
 
       - run: node -v
       - run: yarn -v
-      - run: cd OpenSearch-Dashboards
 
       - name: Cache OpenSearch Dashboards Bootstrap Results
         uses: actions/cache@v3
@@ -60,24 +59,23 @@ jobs:
 
       - name: OSD Bootstrap
         run: |
-          ls
+          cd OpenSearch-Dashboards
           yarn config set network-timeout 1000000 -g
           yarn osd bootstrap --skip-opensearch-dashboards-plugins || yarn osd bootstrap --skip-opensearch-dashboards-plugins
 
       - name: Checkout Dashboards Observability
         uses: actions/checkout@v2
         with:
-          path: plugins/dashboards-observability
-
-      - run: cd plugins/dashboards-observability
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Plugin Bootstrap
         run: |
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
           yarn osd bootstrap || yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |
-          cd plugins/dashboards-observability
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
           yarn test --coverage --maxWorkers=100%
 
       - name: Upload coverage
