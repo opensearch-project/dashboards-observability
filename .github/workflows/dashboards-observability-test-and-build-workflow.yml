@@ -60,6 +60,7 @@ jobs:
             **/node_modules
             **/target
           key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/plugins/dashboards-observability/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-bootstrap-
 
       - name: Plugin Bootstrap
         run: |
