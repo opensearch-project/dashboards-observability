@@ -217,13 +217,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             </EuiText>
           }
         >
-          <EuiFieldText
-            data-test-subj="data-source-name"
-            name="first"
-            onChange={(e) => onDatasourceChange(e)}
-            value={dataSource}
-            isInvalid={isDataSourceValid === false}
-            append={
+          <EuiFlexGroup>
+            <EuiFlexItem grow={10}>
+              <EuiFieldText
+                data-test-subj="data-source-name"
+                name="first"
+                onChange={(e) => onDatasourceChange(e)}
+                value={dataSource}
+                isInvalid={isDataSourceValid === false}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
               <EuiButton
                 data-test-subj="validateIndex"
                 onClick={async () => {
@@ -237,8 +241,8 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               >
                 Validate
               </EuiButton>
-            }
-          />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow label="Name" helpText="This will be used to label the newly added integration.">
           <EuiFieldText
