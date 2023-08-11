@@ -53,13 +53,13 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-      - name: Cache OpenSearch Dashboards Bootstrap Results
+      - name: Load Plugin Bootstrap cache
         uses: actions/cache@v3
         with:
           path: |
             **/node_modules
             **/target
-          key: ${{ runner.os }}-bootstrap-${{ hashFiles('**/yarn.lock', '**/package.json') }}
+          key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/plugins/dashboards-observability/yarn.lock') }}
 
       - name: Plugin Bootstrap
         run: |
