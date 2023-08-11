@@ -48,30 +48,24 @@ jobs:
       - run: node -v
       - run: yarn -v
 
+      - name: Checkout Dashboards Observability
+        uses: actions/checkout@v2
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
+
       - name: Cache OpenSearch Dashboards Bootstrap Results
         uses: actions/cache@v3
         with:
           path: |
-            OpenSearch-Dashboards/data
-            OpenSearch-Dashboards/node_modules
-            OpenSearch-Dashboards/target
-          key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/package.json') }}
+            **/node_modules
+            **/target
+          key: ${{ runner.os }}-bootstrap-${{ hashFiles('**/yarn.lock', '**/package.json') }}
 
       - name: OSD Bootstrap
         run: |
           cd OpenSearch-Dashboards
           yarn config set network-timeout 1000000 -g
           yarn osd bootstrap --skip-opensearch-dashboards-plugins || yarn osd bootstrap --skip-opensearch-dashboards-plugins
-
-      - name: Checkout Dashboards Observability
-        uses: actions/checkout@v2
-        with:
-          path: OpenSearch-Dashboards/plugins/dashboards-observability
-
-      - name: Plugin Bootstrap
-        run: |
-          cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |
