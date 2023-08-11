@@ -23,16 +23,15 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiComboBox,
+  EuiCodeBlock,
+  EuiCodeEditor,
+  EuiButton,
 } from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { AccelerateHeader } from './accelerate_header';
 import { AccelerateCallout } from './accelerate_callout';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../common/constants/integrations';
-
-interface AccelerateProps {
-  isFlyout: boolean | undefined;
-  pplService: any;
-}
+import { AccelerateProps } from './accelerate_types';
 
 export function Accelerate(props: AccelerateProps) {
   const { pplService } = props;
@@ -41,6 +40,7 @@ export function Accelerate(props: AccelerateProps) {
   const [query, setQuery] = useState('');
   const [dataSources, setDataSources] = useState([]);
   const [selectedOptions, setSelected] = useState([]);
+  const [result, setResult] = useState('');
 
   const onChange = (selectedOption) => {
     setSelected(selectedOption);
@@ -57,6 +57,13 @@ export function Accelerate(props: AccelerateProps) {
         )
       );
   }, []);
+
+  const sendAccelerationQuery = () => {
+    const dataSource = selectedOptions[0].label;
+    pplService
+      .fetch({ query: `source = ${dataSource}.sql(\' ${query}\')`, format: 'jdbc' })
+      .then((data) => setResult(JSON.stringify(data)));
+  };
 
   const useCaseGroup = () => {
     return (
@@ -131,8 +138,8 @@ export function Accelerate(props: AccelerateProps) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <AccelerateHeader />
-        <AccelerateCallout />
+        <AccelerateHeader {...props} />
+        <AccelerateCallout {...props} />
         <EuiSpacer />
         <EuiTitle size="s" data-test-subj="accelerate-header">
           <h2>Select use case</h2>
@@ -175,6 +182,14 @@ export function Accelerate(props: AccelerateProps) {
           selectedOptions={selectedOptions}
           onChange={onChange}
         />
+        <EuiSpacer />
+        <EuiCodeEditor value={query} onChange={setQuery} />
+        <EuiSpacer />
+        {result}
+
+        <EuiButton onClick={sendAccelerationQuery} disabled={!query || !selectedOptions}>
+          Accelerate
+        </EuiButton>
       </EuiPageBody>
     </EuiPage>
   );

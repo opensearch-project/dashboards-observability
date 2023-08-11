@@ -16,6 +16,8 @@ import { AddedIntegrationOverviewPage } from './components/added_integration_ove
 import { AddedIntegration } from './components/added_integration';
 import { Accelerate } from '../flint/accelerate_page';
 import { TestPage } from '../flint/test_page';
+import { DataSource } from '../flint/datasource';
+import { Table } from '../flint/table';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -73,9 +75,32 @@ export const Home = (props: HomeProps) => {
             render={(routerProps) => <Accelerate {...commonProps} />}
           />
           <Route
-            exact
+            exacts
             path={'/accelerateAsModal'}
             render={(routerProps) => <TestPage {...commonProps} />}
+          />
+          {/* needs to go before the Datasource*/}
+          <Route
+            exact
+            path={'/accelerate/:id/:table'}
+            render={(routerProps) => (
+              <Table
+                {...commonProps}
+                dataSource={decodeURIComponent(routerProps.match.params.id)}
+                table={decodeURIComponent(routerProps.match.params.table)}
+              />
+            )}
+          />
+
+          <Route
+            exact
+            path={'/accelerate/:id+'}
+            render={(routerProps) => (
+              <DataSource
+                {...commonProps}
+                dataSource={decodeURIComponent(routerProps.match.params.id)}
+              />
+            )}
           />
         </Switch>
       </HashRouter>
