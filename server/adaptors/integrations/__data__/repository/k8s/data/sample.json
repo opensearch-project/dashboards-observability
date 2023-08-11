@@ -1,0 +1,4835 @@
+[
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 32121077,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 32130296,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-62.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-62.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 32285801,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 39578002,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 39596213,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-62.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-62.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 39604819,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 34395346,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 34403890,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-62.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-62.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 34408303,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 37378781,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-62.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-62.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 37395055,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 37399957,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 41680053,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 41697038,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-62.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-62.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 41701949,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 38799399,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 38805143,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-62.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-62.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 38807723,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-0-253.ec2.internal"
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1a",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1a"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1a",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 31792103424
+          },
+          "capacity": {
+            "bytes": 32833339392
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-0-253.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 41176924,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "node": {
+        "_domain": {
+          "labels": {
+            "kubernetes": {
+              "io/arch": "amd64",
+              "io/os": "linux",
+              "io/hostname": "ip-10-0-1-107.ec2.internal"
+            },
+            "node": {
+              "kubernetes": {
+                "io/instance-type": "m5.2xlarge"
+              }
+            },
+            "topology": {
+              "kubernetes": {
+                "io/zone": "us-east-1b",
+                "io/region": "us-east-1"
+              },
+              "ebs": {
+                "csi": {
+                  "aws": {
+                    "com/zone": "us-east-1b"
+                  }
+                }
+              }
+            },
+            "k8s": {
+              "io/cloud-provider-aws": "22771173a877370a23796c9759ec12cf"
+            },
+            "eks": {
+              "amazonaws": {
+                "com/capacityType": "ON_DEMAND",
+                "com/nodegroup-image": "ami-06c9b6a12f5bd0a96",
+                "com/nodegroup": "playground-observability"
+              }
+            },
+            "failure-domain": {
+              "beta": {
+                "kubernetes": {
+                  "io/zone": "us-east-1b",
+                  "io/region": "us-east-1"
+                }
+              }
+            },
+            "beta": {
+              "kubernetes": {
+                "io/arch": "amd64",
+                "io/os": "linux",
+                "io/instance-type": "m5.2xlarge"
+              }
+            }
+          }
+        },
+        "memory": {
+          "allocatable": {
+            "bytes": 32144420864
+          },
+          "capacity": {
+            "bytes": 33185656832
+          }
+        },
+        "pod": {
+          "allocatable": {
+            "total": 58
+          },
+          "capacity": {
+            "total": 58
+          }
+        },
+        "name": "ip-10-0-1-107.ec2.internal",
+        "cpu": {
+          "allocatable": {
+            "cores": 7.91
+          },
+          "capacity": {
+            "cores": 8
+          }
+        },
+        "status": {
+          "ready": "true",
+          "unschedulable": false
+        }
+      }
+    },
+    "event": {
+      "duration": 41185746,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.node"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.node",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "jaeger-agent"
+      }
+    },
+    "event": {
+      "duration": 44305569,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-checkoutservice"
+      }
+    },
+    "event": {
+      "duration": 44318865,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "metrics-server"
+      }
+    },
+    "event": {
+      "duration": 44321565,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "logstash",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "logstash-deployment"
+      }
+    },
+    "event": {
+      "duration": 44366876,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 2,
+          "unavailable": 0,
+          "available": 2,
+          "updated": 2
+        },
+        "name": "ebs-csi-controller"
+      }
+    },
+    "event": {
+      "duration": 44369244,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-loadgenerator"
+      }
+    },
+    "event": {
+      "duration": 44371283,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 2,
+          "unavailable": 0,
+          "available": 2,
+          "updated": 2
+        },
+        "name": "aws-load-balancer-controller"
+      }
+    },
+    "event": {
+      "duration": 44391882,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-emailservice"
+      }
+    },
+    "event": {
+      "duration": 44395238,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-accountingservice"
+      }
+    },
+    "event": {
+      "duration": 44397268,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-ffspostgres"
+      }
+    },
+    "event": {
+      "duration": 44417515,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "default",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "langchain"
+      }
+    },
+    "event": {
+      "duration": 44419548,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "default",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "jaeger-agent"
+      }
+    },
+    "event": {
+      "duration": 44421849,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-featureflagservice"
+      }
+    },
+    "event": {
+      "duration": 44443165,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "jaeger"
+      }
+    },
+    "event": {
+      "duration": 44445153,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 2,
+          "unavailable": 0,
+          "available": 2,
+          "updated": 2
+        },
+        "name": "coredns"
+      }
+    },
+    "event": {
+      "duration": 44446989,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-redis"
+      }
+    },
+    "event": {
+      "duration": 44470444,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "default",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "data-prepper"
+      }
+    },
+    "event": {
+      "duration": 44472410,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-frontend"
+      }
+    },
+    "event": {
+      "duration": 44474346,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-cartservice"
+      }
+    },
+    "event": {
+      "duration": 44493728,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-currencyservice"
+      }
+    },
+    "event": {
+      "duration": 44495707,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-accountingservice",
+        "memory": {
+          "request": {
+            "bytes": 20971520
+          },
+          "usage": {
+            "bytes": 20971520
+          },
+          "limit": {
+            "bytes": 20971520
+          }
+        },
+        "name": "accountingservice",
+        "id": "containerd://44278f999d015af7ab0f0a65394dec0f78a8b12b58d3d7712b02d99212460473",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-accountingservice-59668979bc-xprrw"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 69908658,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-emailservice",
+        "memory": {
+          "usage": {
+            "bytes": 104857600
+          },
+          "request": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 104857600
+          }
+        },
+        "name": "emailservice",
+        "id": "containerd://8389347773f5b54e54c505f79e7b4ebb82ab01b10e5404b1af483f54db2e5682",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 129
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-emailservice-7654879b-rd6nn"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 69912518,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T20:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "usage": {
+            "bytes": 20971520
+          },
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://c8ced8774e570c002329ed8796bb25cb311d22c88cf056ded9ba789b30ab1ab4",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 69981567,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-recommendationservice",
+        "memory": {
+          "usage": {
+            "bytes": 524288000
+          },
+          "request": {
+            "bytes": 524288000
+          },
+          "limit": {
+            "bytes": 524288000
+          }
+        },
+        "name": "recommendationservice",
+        "id": "containerd://c233d6baed9ffcd7cc3b2228f83d5d9cbfa61dca94cf728e5b955957e72d5bce",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-recommendationservice-748d97d5b7-lf2xr"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 69983602,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "usage": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://1162d2c6bc58ce994a27e75443b0f9b8df78a0cb9cb9010bae7c8a9d015ee0a5",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "ef6e0cfb-9ad3-4699-b273-cef6a09553ba",
+        "name": "ebs-csi-node-4cf4d"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 69985627,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T20:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.io/otel/opentelemetry-collector-contrib:0.75.0",
+        "memory": {
+          "usage": {
+            "bytes": 131072000
+          },
+          "request": {
+            "bytes": 131072000
+          },
+          "limit": {
+            "bytes": 131072000
+          }
+        },
+        "name": "opentelemetry-collector",
+        "cpu": {
+          "request": {
+            "cores": 0.256
+          },
+          "limit": {
+            "cores": 0.256
+          }
+        },
+        "id": "containerd://3db8c7c58c0002034c1a516885b33c7dcab4442dd687b7ecf63c28fb990dee40",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 15
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-otelcol-78c9df8478-l957d"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70025208,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.io/opensearchproject/opensearch:2.8.0",
+        "memory": {
+          "request": {
+            "bytes": 12884901888
+          },
+          "usage": {
+            "bytes": 128801888
+          }
+        },
+        "name": "opensearch",
+        "cpu": {
+          "request": {
+            "cores": 1
+          }
+        },
+        "id": "containerd://7bd729ae8a368abcf0aaa9ae5063e48e37915dd57f3ee41294e488cc7a5fb4cd",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "3b6dc9a9-aae4-4772-834f-0f7f8459c0b1",
+        "name": "opensearch-cluster-leader-0"
+      },
+      "namespace": "default",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "opensearch",
+            "io/component": "opensearch-cluster-leader",
+            "io/name": "opensearch",
+            "io/version": "2.6.0",
+            "io/managed-by": "Helm"
+          }
+        },
+        "controller-revision-hash": "opensearch-cluster-leader-65fcd84bbf",
+        "statefulset": {
+          "kubernetes": {
+            "io/pod-name": "opensearch-cluster-leader-0"
+          }
+        },
+        "helm": {
+          "sh/chart": "opensearch-2.11.4"
+        }
+      }
+    },
+    "event": {
+      "duration": 70027314,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-quoteservice",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "usage": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 41943040
+          }
+        },
+        "name": "quoteservice",
+        "id": "containerd://d1ea28ba00206c8361686429fd0810f265872f324a2e8ada12cc0df87dc12901",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-quoteservice-9467f9c67-x5c5m"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70030857,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-22T22:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-loadgenerator",
+        "memory": {
+          "request": {
+            "bytes": 125829120
+          },
+          "usage": {
+            "bytes": 125829120
+          },
+          "limit": {
+            "bytes": 125829120
+          }
+        },
+        "name": "loadgenerator",
+        "id": "containerd://16655ff17d25d160d96515765a5a89bf31cabcf1bc6807046510f6ad044e8548",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 18
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-loadgenerator-7b96dddb88-jnkc6"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70073822,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/coredns:v1.8.7-eksbuild.3",
+        "memory": {
+          "request": {
+            "bytes": 73400320
+          },
+          "usage": {
+            "bytes": 73400320
+          },
+          "limit": {
+            "bytes": 178257920
+          }
+        },
+        "name": "coredns",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://e8b210a2088679b6ba75fbc27cbb8107ebb7ea9f3d1ada941251e1138ce3884e",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "2b7e092c-de0e-4251-af4f-c8da5b630869",
+        "name": "coredns-79989457d9-v59b8"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "pod-template-hash": "79989457d9",
+        "eks": {
+          "amazonaws": {
+            "com/component": "coredns"
+          }
+        },
+        "k8s-app": "kube-dns"
+      }
+    },
+    "event": {
+      "duration": 70089631,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-22T20:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-productcatalogservice",
+        "memory": {
+          "request": {
+            "bytes": 20971520
+          },
+          "usage": {
+            "bytes": 20971520
+          },
+          "limit": {
+            "bytes": 20971520
+          }
+        },
+        "name": "productcatalogservice",
+        "id": "containerd://123b9452ee5ba869fd4c68a7c38e692333f8755903da2891006ceffe07ce664c",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-productcatalogservice-7f8666fc8-kbp44"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70202138,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-node-driver-registrar:v2.6.2-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "usage": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "node-driver-registrar",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://1820135ab3420f9e3f52330634a7bff529609f0e40ce84b60837badd41b463a4",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "5829a136-d5e7-47f9-92cb-c58a4ba3c34a",
+        "name": "ebs-csi-node-q4mm6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70205789,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T19:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-provisioner:v3.3.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "usage": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-provisioner",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://6a2f26e1656de2dae1da7486214cedafd0e25e664917b4f2277509a55569f862",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70252204,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.elastic.co/beats/metricbeat-oss:7.3.1",
+        "memory": {
+          "request": {
+            "bytes": 104857600
+          },
+          "usage": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metricbeat",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://16d63eb3ba8c02cbc7e36887cfbe2569963c6c660cb26c71366e56edb3ca964b",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "c6900681-12e3-4d07-b974-96865561f701",
+        "name": "metricbeat-gc6m5"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "9cf85bbf4",
+        "pod-template-generation": "1",
+        "k8s-app": "metricbeat"
+      }
+    },
+    "event": {
+      "duration": 70254865,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T22:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-paymentservice",
+        "memory": {
+          "request": {
+            "bytes": 125829120
+          },
+          "usage": {
+            "bytes": 125829120
+          },
+          "limit": {
+            "bytes": 125829120
+          }
+        },
+        "name": "paymentservice",
+        "id": "containerd://a7c006d4b2a28f7b225f0520efb1798296c93f602d9e213a5d80ef4d30529382",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-paymentservice-7dcd5bcbb5-9vbbt"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70257222,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-node-driver-registrar:v2.6.2-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "usage": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "node-driver-registrar",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7c71c4670755922260cfbf2dcf394066455df09424eeab0b33221459a11ff222",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "da392f5d-5035-489d-8de6-74fa6b5c31c9",
+        "name": "ebs-csi-node-2s5wf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70295533,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-21T20:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.elastic.co/beats/metricbeat-oss:7.3.1",
+        "memory": {
+          "usage": {
+            "bytes": 104857600
+          },
+          "request": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metricbeat",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://4b827e4b2820646b19ccc456e545f6195e33b1cb08c8fc1e4321b07eaa782215",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "88953be9-ee1e-41c0-a08e-3eba2c4545ac",
+        "name": "metricbeat-54mjf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "9cf85bbf4",
+        "pod-template-generation": "1",
+        "k8s-app": "metricbeat"
+      }
+    },
+    "event": {
+      "duration": 70298046,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "ghcr.io/open-telemetry/demo:1.4.0-frauddetectionservice",
+        "memory": {
+          "request": {
+            "bytes": 209715200
+          },
+          "usage": {
+            "bytes": 209715200
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "frauddetectionservice",
+        "id": "containerd://33c247d008adca74bb71fd12191e503a9564ffc2a0825ae7dc00e3cfd7ca6d3f",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-frauddetectionservice-f6dbdfd8c-t4kcm"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70300352,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T22:22:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-snapshotter:v6.1.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "usage": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-snapshotter",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://3db1c485a677cd7c61f9aff4e23abc0fdcf995ecfb154d2c03fc8e57f58179aa",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "8a2dbcab-04a0-4e61-b094-cdc6bd4589d0",
+        "name": "ebs-csi-controller-5b7f6c8b85-h27jd"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70348802,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/livenessprobe:v2.8.0-eks-1-25-latest",
+        "memory": {
+          "usage": {
+            "bytes": 41943040
+          },
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "liveness-probe",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7231a4a787c9aab11d8c5a70005c7aaf8e42a57218a5eb920d34a3f7866d7a0d",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "8a2dbcab-04a0-4e61-b094-cdc6bd4589d0",
+        "name": "ebs-csi-controller-5b7f6c8b85-h27jd"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70376974,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/kube-proxy:v1.24.7-minimal-eksbuild.2",
+        "name": "kube-proxy",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://f163fdbf0d4016e6d6fcbc5549cffebf8ca4c034e281f5aaf49dd6caa2afc867",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0dbbb0c3-3a16-40b2-91b4-5e1a7714293d",
+        "name": "kube-proxy-8nmp6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "5795b88684",
+        "pod-template-generation": "1",
+        "k8s-app": "kube-proxy"
+      }
+    },
+    "event": {
+      "duration": 69905933,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.11.4-eksbuild.1",
+        "name": "aws-node",
+        "cpu": {
+          "request": {
+            "cores": 0.025
+          }
+        },
+        "id": "containerd://2c970452b041f7476f00b2e36029837bcaebbc1bb80575769a755b7e4939829e",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "d7953b0a-02d8-4941-b66a-41180fcdbc2e",
+        "name": "aws-node-4nfll"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "aws-vpc-cni",
+            "io/name": "aws-node"
+          }
+        },
+        "controller-revision-hash": "6cc8dbb89d",
+        "pod-template-generation": "1",
+        "k8s-app": "aws-node"
+      }
+    },
+    "event": {
+      "duration": 69953818,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T01:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://c8ced8774e570c002329ed8796bb25cb311d22c88cf056ded9ba789b30ab1ab4",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 69981567,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T02:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://1162d2c6bc58ce994a27e75443b0f9b8df78a0cb9cb9010bae7c8a9d015ee0a5",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "ef6e0cfb-9ad3-4699-b273-cef6a09553ba",
+        "name": "ebs-csi-node-4cf4d"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 69985627,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.io/otel/opentelemetry-collector-contrib:0.75.0",
+        "memory": {
+          "request": {
+            "bytes": 131072000
+          },
+          "limit": {
+            "bytes": 131072000
+          }
+        },
+        "name": "opentelemetry-collector",
+        "cpu": {
+          "request": {
+            "cores": 0.256
+          },
+          "limit": {
+            "cores": 0.256
+          }
+        },
+        "id": "containerd://3db8c7c58c0002034c1a516885b33c7dcab4442dd687b7ecf63c28fb990dee40",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 15
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-otelcol-78c9df8478-l957d"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70025208,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T08:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.io/opensearchproject/opensearch:2.8.0",
+        "memory": {
+          "request": {
+            "bytes": 12884901888
+          }
+        },
+        "name": "opensearch",
+        "cpu": {
+          "request": {
+            "cores": 1
+          }
+        },
+        "id": "containerd://7bd729ae8a368abcf0aaa9ae5063e48e37915dd57f3ee41294e488cc7a5fb4cd",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "3b6dc9a9-aae4-4772-834f-0f7f8459c0b1",
+        "name": "opensearch-cluster-leader-0"
+      },
+      "namespace": "default",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "opensearch",
+            "io/component": "opensearch-cluster-leader",
+            "io/name": "opensearch",
+            "io/version": "2.6.0",
+            "io/managed-by": "Helm"
+          }
+        },
+        "controller-revision-hash": "opensearch-cluster-leader-65fcd84bbf",
+        "statefulset": {
+          "kubernetes": {
+            "io/pod-name": "opensearch-cluster-leader-0"
+          }
+        },
+        "helm": {
+          "sh/chart": "opensearch-2.11.4"
+        }
+      }
+    },
+    "event": {
+      "duration": 70027314,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/coredns:v1.8.7-eksbuild.3",
+        "memory": {
+          "request": {
+            "bytes": 73400320
+          },
+          "limit": {
+            "bytes": 178257920
+          }
+        },
+        "name": "coredns",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://e8b210a2088679b6ba75fbc27cbb8107ebb7ea9f3d1ada941251e1138ce3884e",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "2b7e092c-de0e-4251-af4f-c8da5b630869",
+        "name": "coredns-79989457d9-v59b8"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "pod-template-hash": "79989457d9",
+        "eks": {
+          "amazonaws": {
+            "com/component": "coredns"
+          }
+        },
+        "k8s-app": "kube-dns"
+      }
+    },
+    "event": {
+      "duration": 70089631,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T05:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.11.4-eksbuild.1",
+        "name": "aws-node",
+        "cpu": {
+          "request": {
+            "cores": 0.025
+          }
+        },
+        "id": "containerd://37d8b94ab34b11832cda800ee724a16cf4740e210b003ae6215f961e599b40ac",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "e2e35438-0e8c-4632-80d3-9b20ac5abad8",
+        "name": "aws-node-n46pw"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "aws-vpc-cni",
+            "io/name": "aws-node"
+          }
+        },
+        "controller-revision-hash": "6cc8dbb89d",
+        "pod-template-generation": "1",
+        "k8s-app": "aws-node"
+      }
+    },
+    "event": {
+      "duration": 70092857,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/kube-proxy:v1.24.7-minimal-eksbuild.2",
+        "name": "kube-proxy",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://6f345a8bab999eb86c4360be306bdefc785780ec4e29ebc72e84c41b1b5ef6e2",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "28ce8b99-3c7b-44a8-a163-feff47fbf600",
+        "name": "kube-proxy-wnvrv"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "5795b88684",
+        "pod-template-generation": "1",
+        "k8s-app": "kube-proxy"
+      }
+    },
+    "event": {
+      "duration": 70146837,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T06:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-node-driver-registrar:v2.6.2-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "node-driver-registrar",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://1820135ab3420f9e3f52330634a7bff529609f0e40ce84b60837badd41b463a4",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "5829a136-d5e7-47f9-92cb-c58a4ba3c34a",
+        "name": "ebs-csi-node-q4mm6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70205789,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T02:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-provisioner:v3.3.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-provisioner",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://6a2f26e1656de2dae1da7486214cedafd0e25e664917b4f2277509a55569f862",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70252204,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T11:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.elastic.co/beats/metricbeat-oss:7.3.1",
+        "memory": {
+          "request": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metricbeat",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://16d63eb3ba8c02cbc7e36887cfbe2569963c6c660cb26c71366e56edb3ca964b",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "c6900681-12e3-4d07-b974-96865561f701",
+        "name": "metricbeat-gc6m5"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "9cf85bbf4",
+        "pod-template-generation": "1",
+        "k8s-app": "metricbeat"
+      }
+    },
+    "event": {
+      "duration": 70254865,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-node-driver-registrar:v2.6.2-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "node-driver-registrar",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7c71c4670755922260cfbf2dcf394066455df09424eeab0b33221459a11ff222",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "da392f5d-5035-489d-8de6-74fa6b5c31c9",
+        "name": "ebs-csi-node-2s5wf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70295533,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.elastic.co/beats/metricbeat-oss:7.3.1",
+        "memory": {
+          "request": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metricbeat",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://4b827e4b2820646b19ccc456e545f6195e33b1cb08c8fc1e4321b07eaa782215",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "88953be9-ee1e-41c0-a08e-3eba2c4545ac",
+        "name": "metricbeat-54mjf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "9cf85bbf4",
+        "pod-template-generation": "1",
+        "k8s-app": "metricbeat"
+      }
+    },
+    "event": {
+      "duration": 70298046,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T04:09:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-snapshotter:v6.1.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-snapshotter",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://3db1c485a677cd7c61f9aff4e23abc0fdcf995ecfb154d2c03fc8e57f58179aa",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "8a2dbcab-04a0-4e61-b094-cdc6bd4589d0",
+        "name": "ebs-csi-controller-5b7f6c8b85-h27jd"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70348802,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T10:53:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/livenessprobe:v2.8.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "liveness-probe",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7231a4a787c9aab11d8c5a70005c7aaf8e42a57218a5eb920d34a3f7866d7a0d",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "8a2dbcab-04a0-4e61-b094-cdc6bd4589d0",
+        "name": "ebs-csi-controller-5b7f6c8b85-h27jd"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70376974,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T03:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7d585cda8ad6ec372b49a2cb4d956e992dbc72a37e12b45760d8caa699da88b8",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "da392f5d-5035-489d-8de6-74fa6b5c31c9",
+        "name": "ebs-csi-node-2s5wf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70384450,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T10:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-attacher:v4.0.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-attacher",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://25982c97d991e241cc7647ecea3f58c8e957096e9f389f921d9bc9cc87171006",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70435988,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/livenessprobe:v2.8.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "liveness-probe",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://342f5713722df91ae371e61942b46267a21d7c8439074976236292f2adc8752f",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "5829a136-d5e7-47f9-92cb-c58a4ba3c34a",
+        "name": "ebs-csi-node-q4mm6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70443736,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T01:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "k8s.gcr.io/metrics-server/metrics-server:v0.6.2",
+        "memory": {
+          "request": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metrics-server",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://0c486c46da5d9c45578a381b3ce629f44b7eae3bc96247a591fbee6fc18a3e6f",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "621887e4-8c1e-4b61-a34e-56067e61f766",
+        "name": "metrics-server-679799879f-9vkg2"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "pod-template-hash": "679799879f",
+        "k8s-app": "metrics-server"
+      }
+    },
+    "event": {
+      "duration": 70471081,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T08:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  }
+]
+
