@@ -9,6 +9,7 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
@@ -93,7 +94,9 @@ export function IntegrationFields(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-fields`}>
-      <PanelTitle title={'Fields'} />
+      <EuiTitle>
+        <h2>Fields</h2>
+      </EuiTitle>
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
