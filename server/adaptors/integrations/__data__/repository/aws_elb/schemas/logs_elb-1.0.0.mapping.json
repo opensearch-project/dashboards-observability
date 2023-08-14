@@ -13,15 +13,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
-        "labels": [
-          "log",
-          "aws",
-          "communication",
-          "http",
-          "cloud",
-          "elb",
-          "url"
-        ],
+        "labels": ["log", "aws", "communication", "http", "cloud", "elb", "url"],
         "correlations": [
           {
             "field": "spanId",
