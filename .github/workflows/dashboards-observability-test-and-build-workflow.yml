@@ -53,13 +53,16 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-      - name: Load Plugin Bootstrap cache
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
-            **/node_modules
-          key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/plugins/dashboards-observability/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-bootstrap-
+            ${{ env.YARN_CACHE_LOCATION }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/plugins/dashboards-observability/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
 
       - name: Plugin Bootstrap
         uses: nick-fields/retry@v2
