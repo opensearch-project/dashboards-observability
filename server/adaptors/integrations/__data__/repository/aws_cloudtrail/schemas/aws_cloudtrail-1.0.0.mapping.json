@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "aws_cloudtrail"
+        "component": "aws_cloudtrail",
+        "labels": ["aws","cloudtrail"]
       },
       "properties": {
         "aws": {

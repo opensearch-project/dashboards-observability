@@ -14,6 +14,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
+        "labels": ["log","aws","s3","cloud","rds"],
         "correlations": [
           {
             "field": "spanId",
@@ -232,22 +233,6 @@
     "cloud",
     "aws_s3"
   ],
-  "version": 1,
-  "_meta": {
-    "description": "Simple Schema For Observability",
-    "catalog": "observability",
-    "type": "logs",
-    "correlations": [
-      {
-        "field": "spanId",
-        "foreign-schema": "traces",
-        "foreign-field": "spanId"
-      },
-      {
-        "field": "traceId",
-        "foreign-schema": "traces",
-        "foreign-field": "traceId"
-      }
-    ]
-  }
+  "version": 1
+
 }

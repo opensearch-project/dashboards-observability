@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "cloud"
+        "component": "cloud",
+        "labels": ["cloud"]
       },
       "properties": {
         "cloud": {
