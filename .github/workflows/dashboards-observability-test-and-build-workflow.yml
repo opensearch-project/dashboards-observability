@@ -69,7 +69,7 @@ jobs:
         with:
           timeout_minutes: 15
           max_attempts: 3
-          command: yarn osd bootstrap
+          command: cd OpenSearch-Dashboards && yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |
