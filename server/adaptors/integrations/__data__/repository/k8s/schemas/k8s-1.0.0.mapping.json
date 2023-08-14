@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "k8s"
+        "component": "k8s",
+        "labels": ["k8s"]
       },
       "properties": {
         "kubernetes": {

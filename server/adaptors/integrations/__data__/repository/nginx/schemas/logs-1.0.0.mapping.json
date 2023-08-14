@@ -228,6 +228,7 @@
     "description": "Simple Schema For Observability",
     "catalog": "observability",
     "type": "logs",
+    "labels": ["log","http","communication"],
     "correlations": [
       {
         "field": "spanId",

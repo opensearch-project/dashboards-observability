@@ -232,6 +232,7 @@
     "description": "Simple Schema For Observability",
     "catalog": "observability",
     "type": "logs",
+    "labels": ["log","aws","s3","cloud","waf"],
     "correlations": [
       {
         "field": "spanId",
