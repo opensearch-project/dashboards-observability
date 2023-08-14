@@ -9,10 +9,10 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationFields(props: any) {
   const config = props.integration;
@@ -93,7 +93,9 @@ export function IntegrationFields(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-fields`}>
-      <PanelTitle title={'Fields'} />
+      <EuiTitle>
+        <h2>Fields</h2>
+      </EuiTitle>
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
