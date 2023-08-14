@@ -52,28 +52,25 @@ export const isNameValid = (name: string) => {
 };
 
 // DateTime convertor to required format
-export const convertDateTime = (datetime: string, isStart = true, formatted = true) => {
+export const convertDateTime = (
+  datetime: string,
+  isStart = true,
+  formatted = true,
+  isMetrics: boolean = false
+) => {
   let returnTime: undefined | Moment;
   if (isStart) {
     returnTime = dateMath.parse(datetime);
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
+  }
+  if (isMetrics) {
+    const myDate = new Date(returnTime._d); // Your timezone!
+    const epochTime = myDate.getTime() / 1000.0;
+    return Math.round(epochTime);
   }
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
-};
-
-export const convertDateTimeToEpoch = (datetime: string, isStart = true, formatted = true) => {
-  let returnTime: undefined | Moment;
-  if (isStart) {
-    returnTime = dateMath.parse(datetime);
-  } else {
-    returnTime = dateMath.parse(datetime, { roundUp: true });
-  }
-
-  const myDate = new Date(returnTime._d); // Your timezone!
-  const epochTime = myDate.getTime() / 1000.0;
-  return Math.round(epochTime);
 };
 
 // Merges new layout into visualizations
@@ -347,8 +344,8 @@ const updateCatalogVisualizationQuery = ({
   spanParam: string | undefined;
 }) => {
   const attributesGroupString = attributesGroupBy.toString();
-  const startEpochTime = convertDateTimeToEpoch(startTime);
-  const endEpochTime = convertDateTimeToEpoch(endTime, false);
+  const startEpochTime = convertDateTime(startTime, true, false, true);
+  const endEpochTime = convertDateTime(endTime, false, false, true);
   const promQuery =
     attributesGroupBy.length === 0
       ? catalogTableName

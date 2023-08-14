@@ -59,11 +59,9 @@ import { coreRefs } from '../../../../framework/core_refs';
  */
 
 interface Props {
-  http: CoreStart['http'];
   editMode: boolean;
   visualizationId: string;
   savedVisualizationId: string;
-  pplService: PPLService;
   fromTime: string;
   toTime: string;
   onRefresh: boolean;
@@ -78,11 +76,9 @@ interface Props {
 }
 
 export const VisualizationContainer = ({
-  http,
   editMode,
   visualizationId,
   savedVisualizationId,
-  pplService,
   fromTime,
   toTime,
   onRefresh,
@@ -104,6 +100,7 @@ export const VisualizationContainer = ({
   const [isError, setIsError] = useState({} as VizContainerError);
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
+  const { http, pplService } = coreRefs;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
