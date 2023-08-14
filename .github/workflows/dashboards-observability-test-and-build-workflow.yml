@@ -54,13 +54,9 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v3
