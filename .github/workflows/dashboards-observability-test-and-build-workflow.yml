@@ -58,15 +58,15 @@ jobs:
         with:
           path: |
             **/node_modules
-            **/target
           key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/plugins/dashboards-observability/yarn.lock') }}
           restore-keys: ${{ runner.os }}-bootstrap-
 
       - name: Plugin Bootstrap
-        run: |
-          cd OpenSearch-Dashboards
-          yarn config set network-timeout 1000000 -g
-          yarn osd bootstrap || yarn osd bootstrap
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 15
+          max_attempts: 3
+          command: yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |
