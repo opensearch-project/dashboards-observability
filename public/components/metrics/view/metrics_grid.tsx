@@ -17,6 +17,7 @@ import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_sli
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
+import { coreRefs } from '../../../framework/core_refs';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -38,12 +39,10 @@ interface MetricsGridProps {
 }
 
 export const MetricsGrid = ({
-  http,
   chrome,
   panelVisualizations,
   setPanelVisualizations,
   editMode,
-  pplService,
   startTime,
   endTime,
   moveToEvents,
@@ -58,6 +57,8 @@ export const MetricsGrid = ({
   const handleRemoveMetric = (metric: any) => {
     dispatch(deSelectMetric(metric));
   };
+
+  const { http, pplService } = coreRefs;
 
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
   const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);

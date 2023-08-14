@@ -346,7 +346,6 @@ const updateCatalogVisualizationQuery = ({
   endTime: string;
   spanParam: string | undefined;
 }) => {
-  // source=my_prometheus.query_range('avg by(attribue1, attribuyte2) (prometheus_requests_total)', 1686694425, 1686700130, 14)
   const attributesGroupString = attributesGroupBy.toString();
   const startEpochTime = convertDateTimeToEpoch(startTime);
   const endEpochTime = convertDateTimeToEpoch(endTime, false);
@@ -402,7 +401,6 @@ export const renderCatalogVisualization = async ({
   const catalogTableName = catalogSource.split('.')[1];
 
   const defaultAggregation = 'avg'; // pass in attributes to this function
-  // const attributes: string[] = ['instance', 'job']; // pass in attributes to this function
   const attributes: string[] = [];
 
   const visualizationQuery = updateCatalogVisualizationQuery({
