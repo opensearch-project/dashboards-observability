@@ -6,16 +6,12 @@
 import {
   EuiButton,
   EuiFlexGroup,
-  EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
-  EuiText,
   EuiPageContentHeaderSection,
-  EuiBadge,
-  EuiBadgeGroup,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -69,43 +65,6 @@ export function IntegrationOverview(props: any) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageContentHeaderSection>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiText>
-              <h4>Version</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiText size="m">{config.version}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <h4>Category</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiBadgeGroup>
-              {config.components.map((cateogry) => {
-                return <EuiBadge>{cateogry.name}</EuiBadge>;
-              })}
-            </EuiBadgeGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <h4>Contributer</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiLink href={config.sourceUrl} external={true} target="blank">
-              {config.author}
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <h4>License</h4>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiText size="m">{config.license}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageHeader>
   );
