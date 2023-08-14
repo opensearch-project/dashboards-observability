@@ -1,0 +1,562 @@
+[
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "jaeger-agent"
+      }
+    },
+    "event": {
+      "duration": 44305569,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-checkoutservice"
+      }
+    },
+    "event": {
+      "duration": 44318865,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "metrics-server"
+      }
+    },
+    "event": {
+      "duration": 44321565,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "logstash",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "logstash-deployment"
+      }
+    },
+    "event": {
+      "duration": 44366876,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 2,
+          "unavailable": 0,
+          "available": 2,
+          "updated": 2
+        },
+        "name": "ebs-csi-controller"
+      }
+    },
+    "event": {
+      "duration": 44369244,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-loadgenerator"
+      }
+    },
+    "event": {
+      "duration": 44371283,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 2,
+          "unavailable": 0,
+          "available": 2,
+          "updated": 2
+        },
+        "name": "aws-load-balancer-controller"
+      }
+    },
+    "event": {
+      "duration": 44391882,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-emailservice"
+      }
+    },
+    "event": {
+      "duration": 44395238,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-accountingservice"
+      }
+    },
+    "event": {
+      "duration": 44397268,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-ffspostgres"
+      }
+    },
+    "event": {
+      "duration": 44417515,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "default",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "langchain"
+      }
+    },
+    "event": {
+      "duration": 44419548,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "default",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "jaeger-agent"
+      }
+    },
+    "event": {
+      "duration": 44421849,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-featureflagservice"
+      }
+    },
+    "event": {
+      "duration": 44443165,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "jaeger"
+      }
+    },
+    "event": {
+      "duration": 44445153,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "kube-system",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 2,
+          "unavailable": 0,
+          "available": 2,
+          "updated": 2
+        },
+        "name": "coredns"
+      }
+    },
+    "event": {
+      "duration": 44446989,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-redis"
+      }
+    },
+    "event": {
+      "duration": 44470444,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "default",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "data-prepper"
+      }
+    },
+    "event": {
+      "duration": 44472410,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-frontend"
+      }
+    },
+    "event": {
+      "duration": 44474346,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-cartservice"
+      }
+    },
+    "event": {
+      "duration": 44493728,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "namespace": "otel-demo",
+      "deployment": {
+        "paused": false,
+        "replicas": {
+          "desired": 1,
+          "unavailable": 0,
+          "available": 1,
+          "updated": 1
+        },
+        "name": "opentelemetry-demo-currencyservice"
+      }
+    },
+    "event": {
+      "duration": 44495707,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.deployment"
+    },
+    "@timestamp": "2023-07-24T23:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.deployment",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  }
+]
