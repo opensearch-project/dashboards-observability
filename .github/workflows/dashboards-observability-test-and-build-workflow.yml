@@ -44,6 +44,7 @@ jobs:
           YARN_VERSION=$(node -p "require('./OpenSearch-Dashboards/package.json').engines.yarn")
           echo "Installing yarn@$YARN_VERSION"
           npm i -g yarn@$YARN_VERSION
+          yarn config set network-timeout 1000000 -g
 
       - run: node -v
       - run: yarn -v
@@ -74,7 +75,7 @@ jobs:
         with:
           timeout_minutes: 15
           max_attempts: 2
-          command:
+          command: |
             cd OpenSearch-Dashboards
             yarn osd bootstrap
 
