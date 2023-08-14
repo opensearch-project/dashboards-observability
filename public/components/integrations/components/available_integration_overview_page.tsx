@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { INTEGRATION_CATEOGRY_OPTIONS } from '../../../../common/constants/integrations';
 import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
+import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationType {
   name: string;
@@ -55,6 +55,7 @@ export interface AvailableIntegrationsCardViewProps {
   query: string;
   setQuery: (input: string) => void;
   renderCateogryFilters: () => React.JSX.Element;
+  http: HttpStart;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {
@@ -75,32 +76,18 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     setIsPopoverOpen(false);
   };
 
-  const [items, setItems] = useState(
-    INTEGRATION_CATEOGRY_OPTIONS.map((x) => {
-      return { name: x };
-    })
-  );
+  const [items, setItems] = useState([] as Array<{ name: string; checked: boolean }>);
 
-  function updateItem(index) {
+  function updateItem(index: number) {
     if (!items[index]) {
       return;
     }
-
     const newItems = [...items];
-
-    switch (newItems[index].checked) {
-      case 'on':
-        newItems[index].checked = undefined;
-        break;
-
-      default:
-        newItems[index].checked = 'on';
-    }
-
+    newItems[index].checked = !items[index].checked;
     setItems(newItems);
   }
 
-  const helper = items.filter((item) => item.checked === 'on').map((x) => x.name);
+  const helper = items.filter((item) => item.checked).map((x) => x.name);
 
   const button = (
     <EuiFilterButton
@@ -108,8 +95,8 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={items.length}
-      hasActiveFilters={!!items.find((item) => item.checked === 'on')}
-      numActiveFilters={items.filter((item) => item.checked === 'on').length}
+      hasActiveFilters={!!items.find((item) => item.checked)}
+      numActiveFilters={items.filter((item) => item.checked).length}
     >
       Categories
     </EuiFilterButton>
@@ -126,7 +113,20 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => setData(exists.data));
+    http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
+      setData(exists.data);
+
+      let newItems = exists.data.hits
+        .flatMap((hit: { components: Array<{ name: string }> }) => hit.components)
+        .map((component: { name: string }) => component.name);
+      newItems = [...new Set(newItems)].sort().map((newItem) => {
+        return {
+          name: newItem,
+          checked: false,
+        };
+      });
+      setItems(newItems);
+    });
   }
 
   async function addIntegrationRequest(name: string) {
@@ -163,7 +163,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
           <div className="ouiFilterSelect__items">
             {items.map((item, index) => (
               <EuiFilterSelectItem
-                checked={item.checked}
+                checked={item.checked ? 'on' : undefined}
                 key={index}
                 onClick={() => updateItem(index)}
               >
@@ -192,6 +192,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               query,
               setQuery,
               renderCateogryFilters,
+              http,
             })
           : AvailableIntegrationsTable({
               loading: false,

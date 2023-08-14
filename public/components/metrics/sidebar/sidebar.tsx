@@ -15,33 +15,23 @@ import {
   selectMetric,
   loadMetrics,
   selectedMetricsSelector,
-  recentlyCreatedMetricsSelector,
-  searchedMetricsSelector,
 } from '../redux/slices/metrics_slice';
 import { CoreStart } from '../../../../../../src/core/public';
 import PPLService from '../../../services/requests/ppl';
 import { MetricsAccordion } from './metrics_accordion';
+import { SearchBar } from './search_bar';
 
-interface ISidebarProps {
-  http: CoreStart['http'];
-  pplService: PPLService;
-  search: boolean;
-}
-
-export const Sidebar = (props: ISidebarProps) => {
-  const { http, pplService, search } = props;
+export const Sidebar = () => {
   const dispatch = useDispatch();
 
   const availableMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
-  const recentlyCreatedMetrics = useSelector(recentlyCreatedMetricsSelector);
-  const searchedMetrics = useSelector(searchedMetricsSelector);
 
   useEffect(() => {
     batch(() => {
-      dispatch(loadMetrics({ http, pplService }));
+      dispatch(loadMetrics());
     });
-  }, []);
+  }, [dispatch]);
 
   const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
 
@@ -49,18 +39,12 @@ export const Sidebar = (props: ISidebarProps) => {
     dispatch(deSelectMetric(metric));
   };
 
-  const availableMetricsDisplay = search ? searchedMetrics : availableMetrics;
-
   return (
     <I18nProvider>
       <section className="sidebarHeight">
-        <MetricsAccordion
-          metricsList={recentlyCreatedMetrics}
-          headerName="Recently Created Metrics"
-          handleClick={handleAddMetric}
-          dataTestSubj="metricsListItems_recentlyCreated"
-        />
+        <SearchBar />
         <EuiSpacer size="s" />
+
         <MetricsAccordion
           metricsList={selectedMetrics}
           headerName="Selected Metrics"
@@ -69,7 +53,7 @@ export const Sidebar = (props: ISidebarProps) => {
         />
         <EuiSpacer size="s" />
         <MetricsAccordion
-          metricsList={availableMetricsDisplay}
+          metricsList={availableMetrics}
           headerName="Available Metrics"
           handleClick={handleAddMetric}
           dataTestSubj="metricsListItems_availableMetrics"

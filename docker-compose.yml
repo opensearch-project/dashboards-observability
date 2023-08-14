@@ -1,7 +1,5 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
-
-
 version: '3.9'
 x-default-logging: &logging
   driver: "json-file"
@@ -10,8 +8,7 @@ x-default-logging: &logging
     max-file: "2"
 
 volumes:
-  opensearch-data1:
-  opensearch-data2:
+  opensearch-data:
 
 networks:
   default:
@@ -19,55 +16,38 @@ networks:
     driver: bridge
 
 services:
-  # OpenSearch store - node1
-  opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
-    image: opensearchproject/opensearch:${VERSION} # Specifying the latest available image - modify if you want a specific version
-    container_name: opensearch-node1
-    environment:
-      - cluster.name=opensearch-cluster # Name the cluster
-      - node.name=opensearch-node1 # Name the node that will run in this container
-      - discovery.seed_hosts=opensearch-node1,opensearch-node2 # Nodes to look for when discovering the cluster
-      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2 # Nodes eligible to serve as cluster manager
-      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
-    ulimits:
-      memlock:
-        soft: -1 # Set memlock to unlimited (no soft or hard limit)
-        hard: -1
-      nofile:
-        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
-        hard: 65536
-    volumes:
-      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
-    healthcheck:
-      test: ["CMD", "curl", "-f", "https://opensearch-node1:9200/_cluster/health?wait_for_status=yellow", "-ku ${USER}:${PASSWORD}"]
-      interval: 5s
-      timeout: 25s
-      retries: 4
-    ports:
-      - "9200:9200"
-      - "9600:9600"
-
-  # OpenSearch store - node2
-  opensearch-node2:
-    image: opensearchproject/opensearch:${VERSION} # This should be the same image used for opensearch-node1 to avoid issues
-    container_name: opensearch-node2
+  # OpenSearch store - node (not for production - no security - only for test purpose )
+  opensearch:
+    image: opensearchstaging/opensearch:${VERSION}
+    container_name: opensearch
     environment:
       - cluster.name=opensearch-cluster
-      - node.name=opensearch-node2
-      - discovery.seed_hosts=opensearch-node1,opensearch-node2
-      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
+      - node.name=opensearch
+      - discovery.seed_hosts=opensearch
+      - cluster.initial_cluster_manager_nodes=opensearch
       - bootstrap.memory_lock=true
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
     ulimits:
       memlock:
         soft: -1
         hard: -1
       nofile:
-        soft: 65536
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
         hard: 65536
     volumes:
-      - opensearch-data2:/usr/share/opensearch/data
+      - opensearch-data:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+    ports:
+      - 9200:9200
+      - 9600:9600
+    expose:
+      - "9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
 
   # OpenSearch store - dashboard
   opensearch-dashboards:
@@ -83,8 +63,7 @@ services:
     expose:
       - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
     environment:
-      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
     depends_on:
-      - opensearch-node1
-      - opensearch-node2
+      - opensearch
 

@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiGlobalToastList,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPage,
@@ -14,8 +13,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import React, { ReactChild, useEffect, useState } from 'react';
-import { last } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationDetails } from './integration_details_panel';
 import { IntegrationFields } from './integration_fields_panel';
@@ -31,13 +29,31 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
-  const [integration, setIntegration] = useState({});
+  const [integration, setIntegration] = useState({} as { name: string; type: string });
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const createMappings = async (
+  const createComponentMapping = async (
+    componentName: string,
+    payload: {
+      template: { mappings: { _meta: { version: string } } };
+      composed_of: string[];
+      index_patterns: string[];
+    }
+  ): Promise<{ [key: string]: { properties: any } } | null> => {
+    const version = payload.template.mappings._meta.version;
+    return http.post('/api/console/proxy', {
+      body: JSON.stringify(payload),
+      query: {
+        path: `_component_template/ss4o_${componentName}-${version}-template`,
+        method: 'POST',
+      },
+    });
+  };
+
+  const createIndexMapping = async (
     componentName: string,
     payload: {
       template: { mappings: { _meta: { version: string } } };
@@ -47,72 +63,48 @@ export function Integration(props: AvailableIntegrationProps) {
     dataSourceName: string
   ): Promise<{ [key: string]: { properties: any } } | null> => {
     const version = payload.template.mappings._meta.version;
-    if (componentName !== integration.type) {
-      return fetch(
-        `/api/console/proxy?path=_component_template/ss4o_${componentName}_${version}_template&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    } else {
-      payload.index_patterns = [dataSourceName];
-      return fetch(
-        `/api/console/proxy?path=_index_template/${componentName}_${version}&method=POST`,
-        {
-          method: 'POST',
-          headers: [
-            ['osd-xsrf', 'true'],
-            ['Content-Type', 'application/json'],
-          ],
-          body: JSON.stringify(payload),
-        }
-      )
-        .then((response) => response.json())
-        .catch((err: any) => {
-          console.error(err);
-          return err;
-        });
-    }
+    payload.index_patterns = [dataSourceName];
+    return http.post('/api/console/proxy', {
+      body: JSON.stringify(payload),
+      query: {
+        path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
+        method: 'POST',
+      },
+    });
   };
 
   const createDataSourceMappings = async (targetDataSource: string): Promise<any> => {
-    const data = await fetch(
-      `${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`
-    ).then((response) => {
-      return response.json();
-    });
-    let error = null;
+    const data = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}/schema`);
+    let error: string | null = null;
     const mappings = data.data.mappings;
     mappings[integration.type].composed_of = mappings[integration.type].composed_of.map(
-      (templateName: string) => {
-        const version = mappings[templateName].template.mappings._meta.version;
-        return `ss4o_${templateName}_${version}_template`;
+      (componentName: string) => {
+        const version = mappings[componentName].template.mappings._meta.version;
+        return `ss4o_${componentName}-${version}-template`;
       }
     );
-    Object.entries(mappings).forEach(async ([key, mapping]) => {
-      if (key === integration.type) {
-        return;
-      }
-      await createMappings(key, mapping as any, targetDataSource);
-    });
-    await createMappings(integration.type, mappings[integration.type], targetDataSource);
 
-    for (const [key, mapping] of Object.entries(data.data.mappings)) {
-      const result = await createMappings(key, mapping as any, targetDataSource);
-
-      if (result && result.error) {
-        error = (result.error as any).reason;
-      }
+    try {
+      // Create component mappings before the index mapping
+      // The assumption is that index mapping relies on component mappings for creation
+      await Promise.all(
+        Object.entries(mappings).map(([key, mapping]) => {
+          if (key === integration.type) {
+            return Promise.resolve();
+          }
+          return createComponentMapping(key, mapping as any);
+        })
+      );
+      // In order to see our changes, we need to manually provoke a refresh
+      await http.post('/api/console/proxy', {
+        query: {
+          path: '_refresh',
+          method: 'GET',
+        },
+      });
+      await createIndexMapping(integration.type, mappings[integration.type], targetDataSource);
+    } catch (err: any) {
+      error = err.message;
     }
 
     if (error !== null) {
@@ -147,8 +139,8 @@ export function Integration(props: AvailableIntegrationProps) {
     if (Object.keys(integration).length === 0) {
       return;
     }
-    fetch(`${INTEGRATIONS_BASE}/repository/${integration.name}/schema`)
-      .then((response) => response.json())
+    http
+      .get(`${INTEGRATIONS_BASE}/repository/${integration.name}/schema`)
       .then((parsedResponse) => {
         if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
           throw new Error('Request for schema failed: ' + parsedResponse.message);
@@ -165,8 +157,8 @@ export function Integration(props: AvailableIntegrationProps) {
     if (Object.keys(integration).length === 0) {
       return;
     }
-    fetch(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`)
-      .then((response) => response.json())
+    http
+      .get(`${INTEGRATIONS_BASE}/repository/${integration.name}/assets`)
       .then((parsedResponse) => {
         if (parsedResponse.statusCode && parsedResponse.statusCode !== 200) {
           throw new Error('Request for assets failed: ' + parsedResponse.message);
@@ -224,14 +216,14 @@ export function Integration(props: AvailableIntegrationProps) {
       data.sampleData
         .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
         .join('\n') + '\n';
-    fetch(`/api/console/proxy?path=${dataSource}/_bulk&method=POST`, {
-      method: 'POST',
-      body: requestBody,
-      headers: [
-        ['osd-xsrf', 'true'],
-        ['Content-Type', 'application/json; charset=utf-8'],
-      ],
-    })
+    http
+      .post('/api/console/proxy', {
+        body: requestBody,
+        query: {
+          path: `${dataSource}/_bulk?refresh=wait_for`,
+          method: 'POST',
+        },
+      })
       .catch((err) => {
         console.error(err);
         setToast('Failed to load sample data', 'danger');
@@ -256,7 +248,7 @@ export function Integration(props: AvailableIntegrationProps) {
 
   const [selectedTabId, setSelectedTabId] = useState('assets');
 
-  const onSelectedTabChanged = (id) => {
+  const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
   };
 
@@ -298,7 +290,7 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiSpacer />
         {IntegrationDetails({ integration })}
         <EuiSpacer />
-        {IntegrationScreenshots({ integration })}
+        {IntegrationScreenshots({ integration, http })}
         <EuiSpacer />
         <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
         <EuiSpacer size="s" />

@@ -1,21 +1,20 @@
 {
-    "name": "nginx",
-    "version": "1.0.1",
-    "displayName": "NginX Dashboard",
-    "description": "Nginx HTTP server collector",
+    "name": "apache",
+    "version": "1.0.0",
+    "displayName": "Apache Dashboard",
+    "description": "Apache web logs collector",
     "license": "Apache-2.0",
-    "type": "logs",
-    "link": "https://www.nginx.com/",
+    "type": "logs_apache",
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
+    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/apache/info",
     "statics": {
         "logo": {
-            "annotation": "NginX Logo",
-            "path": "logo.svg"
+            "annotation": "Apache Logo",
+            "path": "logo.png"
         },
         "gallery": [
             {
-                "annotation": "NginX Dashboard",
+                "annotation": "Apache Dashboard",
                 "path": "dashboard1.png"
             }
         ]
@@ -30,14 +29,14 @@
             "version": "1.0.0"
         },
         {
-            "name": "logs",
+            "name": "logs_apache",
             "version": "1.0.0"
         }
     ],
     "assets": {
         "savedObjects": {
-            "name": "nginx",
-            "version": "1.0.1"
+            "name": "apache",
+            "version": "1.0.0"
         }
     },
     "sampleData": {

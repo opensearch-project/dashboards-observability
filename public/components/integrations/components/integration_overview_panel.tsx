@@ -44,6 +44,19 @@ export function IntegrationOverview(props: any) {
               <EuiButton
                 size="m"
                 onClick={() => {
+                  props.setUpSample();
+                }}
+                disabled={props.loading}
+                data-test-subj="try-it-button"
+                data-click-metric-element="integrations.create_from_try_it"
+              >
+                Try It
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="m"
+                onClick={() => {
                   props.showFlyout(config.name);
                 }}
                 fill
@@ -52,20 +65,6 @@ export function IntegrationOverview(props: any) {
                 data-click-metric-element="integrations.set_up"
               >
                 Set Up
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="m"
-                onClick={() => {
-                  props.setUpSample();
-                }}
-                fill
-                disabled={props.loading}
-                data-test-subj="try-it-button"
-                data-click-metric-element="integrations.create_from_try_it"
-              >
-                Try It
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
