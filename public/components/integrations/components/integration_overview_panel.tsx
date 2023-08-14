@@ -6,16 +6,12 @@
 import {
   EuiButton,
   EuiFlexGroup,
-  EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
-  EuiText,
   EuiPageContentHeaderSection,
-  EuiBadge,
-  EuiBadgeGroup,
 } from '@elastic/eui';
 import React from 'react';
 

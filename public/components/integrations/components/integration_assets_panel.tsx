@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 
 export function IntegrationAssets(props: any) {

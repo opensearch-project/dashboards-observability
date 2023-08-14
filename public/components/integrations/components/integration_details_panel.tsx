@@ -15,7 +15,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationDetails(props: any) {
   const config = props.integration;

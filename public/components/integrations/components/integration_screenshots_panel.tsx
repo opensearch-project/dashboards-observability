@@ -5,7 +5,6 @@
 
 import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiImage, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function IntegrationScreenshots(props: any) {
