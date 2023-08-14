@@ -9,10 +9,10 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 
 export function IntegrationAssets(props: any) {
@@ -76,7 +76,9 @@ export function IntegrationAssets(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-assets`}>
-      <PanelTitle title={'Assets'} />
+      <EuiTitle>
+        <h2>Assets</h2>
+      </EuiTitle>
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
