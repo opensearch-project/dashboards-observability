@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiImage } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiImage, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export function IntegrationScreenshots(props: any) {
@@ -18,7 +17,10 @@ export function IntegrationScreenshots(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-screenshots`}>
-      <PanelTitle title={'Screenshots'} />
+      <EuiTitle>
+        <h2>Screenshots</h2>
+      </EuiTitle>
+      <EuiSpacer />
       <EuiFlexGroup gutterSize="l" alignItems="flexStart">
         {screenshots?.map((screenshot: { path: string; annotation?: string }) => {
           return (
