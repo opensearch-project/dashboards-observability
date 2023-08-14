@@ -1,0 +1,1156 @@
+[
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/kube-proxy:v1.24.7-minimal-eksbuild.2",
+        "name": "kube-proxy",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://f163fdbf0d4016e6d6fcbc5549cffebf8ca4c034e281f5aaf49dd6caa2afc867",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0dbbb0c3-3a16-40b2-91b4-5e1a7714293d",
+        "name": "kube-proxy-8nmp6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "5795b88684",
+        "pod-template-generation": "1",
+        "k8s-app": "kube-proxy"
+      }
+    },
+    "event": {
+      "duration": 69905933,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.11.4-eksbuild.1",
+        "name": "aws-node",
+        "cpu": {
+          "request": {
+            "cores": 0.025
+          }
+        },
+        "id": "containerd://2c970452b041f7476f00b2e36029837bcaebbc1bb80575769a755b7e4939829e",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "d7953b0a-02d8-4941-b66a-41180fcdbc2e",
+        "name": "aws-node-4nfll"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "aws-vpc-cni",
+            "io/name": "aws-node"
+          }
+        },
+        "controller-revision-hash": "6cc8dbb89d",
+        "pod-template-generation": "1",
+        "k8s-app": "aws-node"
+      }
+    },
+    "event": {
+      "duration": 69953818,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T01:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://c8ced8774e570c002329ed8796bb25cb311d22c88cf056ded9ba789b30ab1ab4",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 69981567,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T02:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://1162d2c6bc58ce994a27e75443b0f9b8df78a0cb9cb9010bae7c8a9d015ee0a5",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "ef6e0cfb-9ad3-4699-b273-cef6a09553ba",
+        "name": "ebs-csi-node-4cf4d"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 69985627,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.io/otel/opentelemetry-collector-contrib:0.75.0",
+        "memory": {
+          "request": {
+            "bytes": 131072000
+          },
+          "limit": {
+            "bytes": 131072000
+          }
+        },
+        "name": "opentelemetry-collector",
+        "cpu": {
+          "request": {
+            "cores": 0.256
+          },
+          "limit": {
+            "cores": 0.256
+          }
+        },
+        "id": "containerd://3db8c7c58c0002034c1a516885b33c7dcab4442dd687b7ecf63c28fb990dee40",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 15
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "name": "opentelemetry-demo-otelcol-78c9df8478-l957d"
+      },
+      "namespace": "otel-demo"
+    },
+    "event": {
+      "duration": 70025208,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T08:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.io/opensearchproject/opensearch:2.8.0",
+        "memory": {
+          "request": {
+            "bytes": 12884901888
+          }
+        },
+        "name": "opensearch",
+        "cpu": {
+          "request": {
+            "cores": 1
+          }
+        },
+        "id": "containerd://7bd729ae8a368abcf0aaa9ae5063e48e37915dd57f3ee41294e488cc7a5fb4cd",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "3b6dc9a9-aae4-4772-834f-0f7f8459c0b1",
+        "name": "opensearch-cluster-leader-0"
+      },
+      "namespace": "default",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "opensearch",
+            "io/component": "opensearch-cluster-leader",
+            "io/name": "opensearch",
+            "io/version": "2.6.0",
+            "io/managed-by": "Helm"
+          }
+        },
+        "controller-revision-hash": "opensearch-cluster-leader-65fcd84bbf",
+        "statefulset": {
+          "kubernetes": {
+            "io/pod-name": "opensearch-cluster-leader-0"
+          }
+        },
+        "helm": {
+          "sh/chart": "opensearch-2.11.4"
+        }
+      }
+    },
+    "event": {
+      "duration": 70027314,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/coredns:v1.8.7-eksbuild.3",
+        "memory": {
+          "request": {
+            "bytes": 73400320
+          },
+          "limit": {
+            "bytes": 178257920
+          }
+        },
+        "name": "coredns",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://e8b210a2088679b6ba75fbc27cbb8107ebb7ea9f3d1ada941251e1138ce3884e",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "2b7e092c-de0e-4251-af4f-c8da5b630869",
+        "name": "coredns-79989457d9-v59b8"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "pod-template-hash": "79989457d9",
+        "eks": {
+          "amazonaws": {
+            "com/component": "coredns"
+          }
+        },
+        "k8s-app": "kube-dns"
+      }
+    },
+    "event": {
+      "duration": 70089631,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T05:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.11.4-eksbuild.1",
+        "name": "aws-node",
+        "cpu": {
+          "request": {
+            "cores": 0.025
+          }
+        },
+        "id": "containerd://37d8b94ab34b11832cda800ee724a16cf4740e210b003ae6215f961e599b40ac",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "e2e35438-0e8c-4632-80d3-9b20ac5abad8",
+        "name": "aws-node-n46pw"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/instance": "aws-vpc-cni",
+            "io/name": "aws-node"
+          }
+        },
+        "controller-revision-hash": "6cc8dbb89d",
+        "pod-template-generation": "1",
+        "k8s-app": "aws-node"
+      }
+    },
+    "event": {
+      "duration": 70092857,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/kube-proxy:v1.24.7-minimal-eksbuild.2",
+        "name": "kube-proxy",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://6f345a8bab999eb86c4360be306bdefc785780ec4e29ebc72e84c41b1b5ef6e2",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "28ce8b99-3c7b-44a8-a163-feff47fbf600",
+        "name": "kube-proxy-wnvrv"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "5795b88684",
+        "pod-template-generation": "1",
+        "k8s-app": "kube-proxy"
+      }
+    },
+    "event": {
+      "duration": 70146837,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T06:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-node-driver-registrar:v2.6.2-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "node-driver-registrar",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://1820135ab3420f9e3f52330634a7bff529609f0e40ce84b60837badd41b463a4",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "5829a136-d5e7-47f9-92cb-c58a4ba3c34a",
+        "name": "ebs-csi-node-q4mm6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70205789,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T02:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-provisioner:v3.3.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-provisioner",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://6a2f26e1656de2dae1da7486214cedafd0e25e664917b4f2277509a55569f862",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70252204,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T11:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.elastic.co/beats/metricbeat-oss:7.3.1",
+        "memory": {
+          "request": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metricbeat",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://16d63eb3ba8c02cbc7e36887cfbe2569963c6c660cb26c71366e56edb3ca964b",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "c6900681-12e3-4d07-b974-96865561f701",
+        "name": "metricbeat-gc6m5"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "9cf85bbf4",
+        "pod-template-generation": "1",
+        "k8s-app": "metricbeat"
+      }
+    },
+    "event": {
+      "duration": 70254865,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-node-driver-registrar:v2.6.2-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "node-driver-registrar",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7c71c4670755922260cfbf2dcf394066455df09424eeab0b33221459a11ff222",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "da392f5d-5035-489d-8de6-74fa6b5c31c9",
+        "name": "ebs-csi-node-2s5wf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70295533,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "docker.elastic.co/beats/metricbeat-oss:7.3.1",
+        "memory": {
+          "request": {
+            "bytes": 104857600
+          },
+          "limit": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metricbeat",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://4b827e4b2820646b19ccc456e545f6195e33b1cb08c8fc1e4321b07eaa782215",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "88953be9-ee1e-41c0-a08e-3eba2c4545ac",
+        "name": "metricbeat-54mjf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "controller-revision-hash": "9cf85bbf4",
+        "pod-template-generation": "1",
+        "k8s-app": "metricbeat"
+      }
+    },
+    "event": {
+      "duration": 70298046,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T04:09:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-snapshotter:v6.1.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-snapshotter",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://3db1c485a677cd7c61f9aff4e23abc0fdcf995ecfb154d2c03fc8e57f58179aa",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "8a2dbcab-04a0-4e61-b094-cdc6bd4589d0",
+        "name": "ebs-csi-controller-5b7f6c8b85-h27jd"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70348802,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T10:53:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/livenessprobe:v2.8.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "liveness-probe",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7231a4a787c9aab11d8c5a70005c7aaf8e42a57218a5eb920d34a3f7866d7a0d",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "8a2dbcab-04a0-4e61-b094-cdc6bd4589d0",
+        "name": "ebs-csi-controller-5b7f6c8b85-h27jd"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70376974,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T03:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/aws-ebs-csi-driver:v1.15.0",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "ebs-plugin",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://7d585cda8ad6ec372b49a2cb4d956e992dbc72a37e12b45760d8caa699da88b8",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-107.ec2.internal"
+      },
+      "pod": {
+        "uid": "da392f5d-5035-489d-8de6-74fa6b5c31c9",
+        "name": "ebs-csi-node-2s5wf"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70384450,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-23T10:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/csi-attacher:v4.0.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "csi-attacher",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://25982c97d991e241cc7647ecea3f58c8e957096e9f389f921d9bc9cc87171006",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "0b12421e-5acd-46fb-bc65-e175af0c7b1f",
+        "name": "ebs-csi-controller-5b7f6c8b85-ws57q"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-controller"
+        },
+        "pod-template-hash": "5b7f6c8b85"
+      }
+    },
+    "event": {
+      "duration": 70435988,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T00:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "602401143452.dkr.ecr.us-east-1.amazonaws.com/eks/livenessprobe:v2.8.0-eks-1-25-latest",
+        "memory": {
+          "request": {
+            "bytes": 41943040
+          },
+          "limit": {
+            "bytes": 268435456
+          }
+        },
+        "name": "liveness-probe",
+        "cpu": {
+          "request": {
+            "cores": 0.01
+          },
+          "limit": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://342f5713722df91ae371e61942b46267a21d7c8439074976236292f2adc8752f",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-0-253.ec2.internal"
+      },
+      "pod": {
+        "uid": "5829a136-d5e7-47f9-92cb-c58a4ba3c34a",
+        "name": "ebs-csi-node-q4mm6"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "csi-driver",
+            "io/name": "aws-ebs-csi-driver",
+            "io/version": "1.15.0",
+            "io/managed-by": "EKS"
+          },
+          "value": "ebs-csi-node"
+        },
+        "controller-revision-hash": "548657c66",
+        "pod-template-generation": "1"
+      }
+    },
+    "event": {
+      "duration": 70443736,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T01:59:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  },
+  {
+    "kubernetes": {
+      "container": {
+        "image": "k8s.gcr.io/metrics-server/metrics-server:v0.6.2",
+        "memory": {
+          "request": {
+            "bytes": 209715200
+          }
+        },
+        "name": "metrics-server",
+        "cpu": {
+          "request": {
+            "cores": 0.1
+          }
+        },
+        "id": "containerd://0c486c46da5d9c45578a381b3ce629f44b7eae3bc96247a591fbee6fc18a3e6f",
+        "status": {
+          "phase": "running",
+          "ready": true,
+          "restarts": 0
+        }
+      },
+      "node": {
+        "name": "ip-10-0-1-62.ec2.internal"
+      },
+      "pod": {
+        "uid": "621887e4-8c1e-4b61-a34e-56067e61f766",
+        "name": "metrics-server-679799879f-9vkg2"
+      },
+      "namespace": "kube-system",
+      "labels": {
+        "pod-template-hash": "679799879f",
+        "k8s-app": "metrics-server"
+      }
+    },
+    "event": {
+      "duration": 70471081,
+      "domain": "kubernetes",
+      "dataset": "kubernetes.container"
+    },
+    "@timestamp": "2023-07-24T08:00:52.121Z",
+    "attributes": {
+      "data_stream": {
+        "dataset": "kubernetes.container",
+        "namespace": "production",
+        "type": "kubernetes"
+      }
+    }
+  }
+]
