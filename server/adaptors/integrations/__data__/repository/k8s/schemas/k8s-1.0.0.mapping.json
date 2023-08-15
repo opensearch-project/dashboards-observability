@@ -593,9 +593,7 @@
                 "message": {
                   "type": "keyword",
                   "ignore_above": 256,
-                  "copy_to": [
-                    "message"
-                  ]
+                  "copy_to": ["message"]
                 },
                 "metadata": {
                   "properties": {

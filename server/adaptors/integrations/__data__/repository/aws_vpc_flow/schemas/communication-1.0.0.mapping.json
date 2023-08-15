@@ -6,9 +6,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "communication",
-        "labels": [
-          "communication"
-        ]
+        "labels": ["communication"]
       },
       "properties": {
         "communication": {

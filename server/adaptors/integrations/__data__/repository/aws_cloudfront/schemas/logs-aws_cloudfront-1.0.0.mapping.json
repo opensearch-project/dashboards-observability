@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-aws_cloudfront-*"
-  ],
+  "index_patterns": ["ss4o_logs-aws_cloudfront-*"],
   "priority": 900,
   "data_stream": {},
   "template": {
@@ -14,7 +12,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
-        "labels": ["log","aws","s3","cloud","cloudfront"],
+        "labels": ["log", "aws", "s3", "cloud", "cloudfront"],
         "correlations": [
           {
             "field": "spanId",
@@ -223,10 +221,6 @@
       }
     }
   },
-  "composed_of": [
-    "aws_s3",
-    "aws_cloudfront",
-    "cloud"
-  ],
+  "composed_of": ["aws_s3", "aws_cloudfront", "cloud"],
   "version": 1
 }

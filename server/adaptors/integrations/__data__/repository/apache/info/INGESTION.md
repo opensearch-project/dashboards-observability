@@ -1,10 +1,13 @@
 # Ingestion Pipeline
-To set up an ingestion pipeline, I used Docker to run Fluent-bit and an Apache fake log generator, along with an instance of OpenSearch. 
+
+To set up an ingestion pipeline, I used Docker to run Fluent-bit and an Apache fake log generator, along with an instance of OpenSearch.
 
 ## FluentBit and OpenSearch Setup
+
 First, create a `docker-compose.yml` instance like [this](https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml). This will pull FluentBit and OpenSearch Docker images and run them in `opensearch-net` Docker network.
 
 Next, use an Apache log generator to generate sample logs. I used `mingrammer/flog` in my `docker-compose.yml` file:
+
 ```
   apache:
     image: mingrammer/flog
@@ -23,6 +26,7 @@ Next, use an Apache log generator to generate sample logs. I used `mingrammer/fl
 ```
 
 Then, create a `fluent-bit.conf` as follows:
+
 ```
 [SERVICE]
     Parsers_File parsers.conf
@@ -51,9 +55,11 @@ Then, create a `fluent-bit.conf` as follows:
     Index ss4o_logs-apache-prod-sample
     Suppress_Type_Name On
 ```
+
 This creates a Fluent-Bit pipeline that forwards your generated apache logs through a parser to OpenSearch.
 
 Create a `parsers.conf` file as follows:
+
 ```
 [PARSER]
     Name   apache
@@ -66,6 +72,7 @@ Create a `parsers.conf` file as follows:
 You can also use a [GeoIP2 Filter](https://docs.fluentbit.io/manual/pipeline/filters/geoip2-filter) to enrich the data with geolocation data.
 
 Finally, I used a `otel-converter.lua` script to convert the parsed data into schema-compliant data:
+
 ```lua
 local hexCharset = "0123456789abcdef"
 local function randHex(length)
@@ -96,7 +103,7 @@ function convert_to_otel(tag, timestamp, record)
     if tag=="apache.access" then
         record.remote=record.host
     end
-    
+
     local data = {
         traceId=randHex(32),
         spanId=randHex(16),
