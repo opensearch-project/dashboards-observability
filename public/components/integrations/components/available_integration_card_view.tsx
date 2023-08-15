@@ -54,7 +54,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     },
   ];
 
-  const onChangeIcons = (optionId) => {
+  const onChangeIcons = (optionId: string) => {
     setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
@@ -82,7 +82,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
                   onClick={() => (window.location.hash = `#/available/${i.name}`)}
-                  footer={badges(i.components)}
+                  footer={badges(i.labels ?? [])}
                 />
               </EuiFlexItem>
             );
