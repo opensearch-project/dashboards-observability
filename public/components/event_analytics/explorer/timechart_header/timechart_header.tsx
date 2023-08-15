@@ -9,6 +9,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 
+// TODO: move this function into some common library for other observability datetime uses
 function reformatDate(inputDate: string) {
   return moment(inputDate).format('MMM D, YYYY @ HH:mm:ss.SSS')
 }
