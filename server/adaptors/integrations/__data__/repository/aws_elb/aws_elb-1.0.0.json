@@ -5,6 +5,15 @@
     "description": "AWS Elastic Load Balancer collector",
     "license": "Apache-2.0",
     "type": "logs_elb",
+    "labels": [
+      "log",
+      "aws",
+      "communication",
+      "http",
+      "cloud",
+      "elb",
+      "url"
+    ],
     "author": "OpenSearch",
     "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_elb/info",
     "statics": {
