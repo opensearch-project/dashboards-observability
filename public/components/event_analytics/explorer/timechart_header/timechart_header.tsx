@@ -7,6 +7,11 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText, EuiSelect } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import moment from 'moment';
+
+function reformatDate(inputDate: string) {
+  return moment(inputDate).format('MMM D, YYYY @ HH:mm:ss.SSS')
+}
 
 export interface TimechartHeaderProps {
   /**
@@ -59,7 +64,7 @@ export function TimechartHeader({
             })}
             delay="long"
           >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s">{timeSpan[0]} - {timeSpan[timeSpan.length-1]}</EuiText>
+            <EuiText data-test-subj="discoverIntervalDateRange" size="s">{reformatDate(timeSpan[0])} - {reformatDate(timeSpan[timeSpan.length-1])}</EuiText>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
