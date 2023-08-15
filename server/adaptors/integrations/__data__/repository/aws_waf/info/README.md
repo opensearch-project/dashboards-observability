@@ -22,6 +22,7 @@ An integration is a set of pre-configured assets bundled together to facilitate 
 AWS WAF log integration includes dashboards, visualizations, queries, and an index mapping.
 
 ### Dashboards
+
 The Dashboard uses the index alias `logs-waf` for shortening the index name - be advised.
 
 ![Dashboard](../static/dashboard.png)

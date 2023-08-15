@@ -6,7 +6,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "aws_cloudfront",
-        "labels": ["aws","cloudfront"]
+        "labels": ["aws", "cloudfront"]
       },
       "properties": {
         "aws": {
