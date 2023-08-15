@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-aws_vpc-*"
-  ],
+  "index_patterns": ["ss4o_logs-aws_vpc-*"],
   "priority": 900,
   "data_stream": {},
   "template": {
@@ -14,7 +12,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
-        "labels": ["log","aws","s3","cloud","communication","vpc"],
+        "labels": ["log", "aws", "s3", "cloud", "communication", "vpc"],
         "correlations": [
           {
             "field": "spanId",
@@ -223,11 +221,6 @@
       }
     }
   },
-  "composed_of": [
-    "aws_vpc_flow",
-    "aws_s3",
-    "cloud",
-    "communication"
-  ],
+  "composed_of": ["aws_vpc_flow", "aws_s3", "cloud", "communication"],
   "version": 1
 }

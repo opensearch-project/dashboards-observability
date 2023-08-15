@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-*-*"
-  ],
+  "index_patterns": ["ss4o_logs-*-*"],
   "priority": 900,
   "data_stream": {},
   "template": {
@@ -11,7 +9,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
-        "labels": ["log","http","communication"],
+        "labels": ["log", "http", "communication"],
         "correlations": [
           {
             "field": "spanId",
@@ -220,9 +218,6 @@
       }
     }
   },
-  "composed_of": [
-    "communication",
-    "http"
-  ],
+  "composed_of": ["communication", "http"],
   "version": 1
 }
