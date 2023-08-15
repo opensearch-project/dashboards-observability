@@ -9,7 +9,7 @@ interface IntegrationTemplate {
   displayName?: string;
   license: string;
   type: string;
-  labels: string[];
+  labels?: string[];
   author?: string;
   description?: string;
   sourceUrl?: string;

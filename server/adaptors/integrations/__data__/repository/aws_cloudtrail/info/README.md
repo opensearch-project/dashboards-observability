@@ -24,6 +24,7 @@ An integration is a set of pre-configured assets which are bundled together in a
 AWS CloudTrail log integration includes dashboards, visualizations, queries, and an index mapping.
 
 ### Dashboards
-The Dashboard uses the index alias `logs-cloudtrail` for shortening the index name - be advised. 
+
+The Dashboard uses the index alias `logs-cloudtrail` for shortening the index name - be advised.
 
 ![Dashboard](../static/dashboard.png)

@@ -6,7 +6,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "aws_vpc_flow",
-        "labels": ["aws","vpc"]
+        "labels": ["aws", "vpc"]
       },
       "properties": {
         "aws": {

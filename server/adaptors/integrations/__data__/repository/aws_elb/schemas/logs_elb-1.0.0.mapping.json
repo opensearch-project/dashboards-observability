@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-aws_elb-*"
-  ],
+  "index_patterns": ["ss4o_logs-aws_elb-*"],
   "data_stream": {},
   "template": {
     "aliases": {
@@ -222,12 +220,6 @@
       }
     }
   },
-  "composed_of": [
-    "communication",
-    "http",
-    "cloud",
-    "aws_elb",
-    "url"
-  ],
+  "composed_of": ["communication", "http", "cloud", "aws_elb", "url"],
   "version": 1
 }
