@@ -155,9 +155,12 @@ export const {
 export const metricsStateSelector = (state) => state.metrics;
 
 export const availableMetricsSelector = (state) =>
-  state.metrics.metrics.filter(
-    (metric) => !state.metrics.selected.includes(metric.id) && !metric.recentlyCreated
-  );
+  state.metrics.metrics
+    .filter((metric) => !state.metrics.selected.includes(metric.id))
+    .filter(
+      (metric) =>
+        state.metrics.search === '' || metric.name.match(new RegExp(state.metrics.search, 'i'))
+    );
 
 export const selectedMetricsSelector = (state) =>
   state.metrics.metrics.filter((metric) => state.metrics.selected.includes(metric.id));
