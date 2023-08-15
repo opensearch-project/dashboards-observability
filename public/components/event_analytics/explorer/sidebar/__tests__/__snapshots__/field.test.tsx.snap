@@ -34,7 +34,7 @@ exports[`Field component Renders a sidebar field 1`] = `
               <React.Fragment>
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  className="explorerSidebarItem__action"
+                  className="dscSidebarItem__action"
                   color="text"
                   data-test-subj="eventExplorer__overrideDefaultPattern"
                   iconType="inputOutput"
@@ -61,7 +61,7 @@ exports[`Field component Renders a sidebar field 1`] = `
               <React.Fragment>
                 <EuiButtonIcon
                   aria-label="Remove agent from table"
-                  className="explorerSidebarItem__action"
+                  className="dscSidebarItem__action"
                   color="danger"
                   data-test-subj="fieldToggle-agent"
                   iconType="cross"
@@ -95,7 +95,7 @@ exports[`Field component Renders a sidebar field 1`] = `
     hasArrow={true}
     isOpen={false}
     ownFocus={true}
-    panelClassName="explorerSidebarItem__fieldPopoverPanel"
+    panelClassName="dscSidebarItem__fieldPopoverPanel"
     panelPaddingSize="m"
   >
     <div
@@ -118,7 +118,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 <React.Fragment>
                   <EuiButtonIcon
                     aria-labelledby="override_pattern"
-                    className="explorerSidebarItem__action"
+                    className="dscSidebarItem__action"
                     color="text"
                     data-test-subj="eventExplorer__overrideDefaultPattern"
                     iconType="inputOutput"
@@ -145,7 +145,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 <React.Fragment>
                   <EuiButtonIcon
                     aria-label="Remove agent from table"
-                    className="explorerSidebarItem__action"
+                    className="dscSidebarItem__action"
                     color="danger"
                     data-test-subj="fieldToggle-agent"
                     iconType="cross"
@@ -260,7 +260,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 >
                   <EuiButtonIcon
                     aria-labelledby="override_pattern"
-                    className="explorerSidebarItem__action"
+                    className="dscSidebarItem__action"
                     color="text"
                     data-test-subj="eventExplorer__overrideDefaultPattern"
                     iconType="inputOutput"
@@ -269,7 +269,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                   >
                     <button
                       aria-labelledby="override_pattern"
-                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
+                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
                       data-test-subj="eventExplorer__overrideDefaultPattern"
                       disabled={false}
                       onClick={[Function]}
@@ -332,7 +332,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 >
                   <EuiButtonIcon
                     aria-label="Remove agent from table"
-                    className="explorerSidebarItem__action"
+                    className="dscSidebarItem__action"
                     color="danger"
                     data-test-subj="fieldToggle-agent"
                     iconType="cross"
@@ -340,7 +340,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                   >
                     <button
                       aria-label="Remove agent from table"
-                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
+                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
                       data-test-subj="fieldToggle-agent"
                       disabled={false}
                       onClick={[Function]}
