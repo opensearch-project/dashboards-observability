@@ -141,7 +141,7 @@ export const Sidebar = (props: ISidebarProps) => {
                   paddingSize="xs"
                 >
                   <ul
-                    className="dscSidebarList dscFieldList--selected"
+                    className="dscSidebarList explorerFieldList--selected"
                     aria-labelledby="queried_fields"
                     data-test-subj={`fieldList-selected`}
                   >
@@ -185,7 +185,7 @@ export const Sidebar = (props: ISidebarProps) => {
                 paddingSize="xs"
               >
                 <ul
-                  className="dscSidebarList dscFieldList--selected"
+                  className="dscSidebarList explorerFieldList--selected"
                   aria-labelledby="selected_fields"
                   data-test-subj={`fieldList-selected`}
                 >
@@ -230,7 +230,7 @@ export const Sidebar = (props: ISidebarProps) => {
                 paddingSize="xs"
               >
                 <ul
-                  className={`dscFieldList dscFieldList--unpopular ${
+                  className={`explorerFieldList explorerFieldList--unpopular ${
                     !showFields ? 'hidden-sm hidden-xs' : ''
                   }`}
                   aria-labelledby="available_fields"
