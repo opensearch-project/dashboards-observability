@@ -108,7 +108,6 @@ export const Sidebar = (props: ISidebarProps) => {
     },
     [explorerFields, tabId]
   );
-  console.log('sidebar ',isOverridingPattern)
 
   return (
     <I18nProvider>
@@ -153,7 +152,7 @@ export const Sidebar = (props: ISidebarProps) => {
                           <li
                             key={`field${field.name}`}
                             data-attr-field={field.name}
-                            className="dscSidebar__item"
+                            className="dscSidebar__item sidebar_content"
                           >
                             <Field
                               query={query}
@@ -200,7 +199,7 @@ export const Sidebar = (props: ISidebarProps) => {
                         <li
                           key={`field${field.name}`}
                           data-attr-field={field.name}
-                          className="dscSidebar__item"
+                            className="dscSidebar__item sidebar_content"
                         >
                           <Field
                             query={query}
@@ -248,7 +247,7 @@ export const Sidebar = (props: ISidebarProps) => {
                           <li
                             key={`field${field.name}`}
                             data-attr-field={field.name}
-                            className="dscSidebar__item"
+                            className="dscSidebar__item sidebar_content"
                           >
                             <Field
                               query={query}
