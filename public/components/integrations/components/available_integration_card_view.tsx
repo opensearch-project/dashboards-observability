@@ -9,17 +9,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSearchBar,
-  EuiButton,
   EuiFieldSearch,
-  EuiSwitch,
   EuiButtonGroup,
-  EuiBadgeGroup,
-  EuiBadge,
-  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,

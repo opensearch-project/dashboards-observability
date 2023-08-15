@@ -5,14 +5,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiGlobalToastList,
   EuiHealth,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
