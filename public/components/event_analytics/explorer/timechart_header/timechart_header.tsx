@@ -32,12 +32,17 @@ export interface TimechartHeaderProps {
    * selected interval
    */
   stateInterval?: string | undefined;
+  /**
+   * current time span being displayed on the count distribution
+   */
+  timeSpan: Array<string>;
 }
 
 export function TimechartHeader({
   options,
   onChangeInterval,
   stateInterval,
+  timeSpan
 }: TimechartHeaderProps) {
 
   const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -54,7 +59,7 @@ export function TimechartHeader({
             })}
             delay="long"
           >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s"></EuiText>
+            <EuiText data-test-subj="discoverIntervalDateRange" size="s">{timeSpan[0]} - {timeSpan[timeSpan.length-1]}</EuiText>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
