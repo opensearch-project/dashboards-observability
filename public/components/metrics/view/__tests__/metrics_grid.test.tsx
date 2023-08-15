@@ -8,35 +8,21 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { MetricsGrid } from '../metrics_grid';
-import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { coreStartMock } from '../../../../../test/__mocks__/coreMocks';
-import PPLService from '../../../../services/requests/ppl';
-import {
-  sampleMetric,
-  sampleMetricsVisualizations,
-  samplePPLResponse,
-} from '../../../../../test/metrics_contants';
+import { sampleMetric, sampleMetricsVisualizations } from '../../../../../test/metrics_contants';
 import { createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
-import { HttpResponse } from '../../../../../../../src/core/public';
 
 describe('Metrics Grid Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer);
 
   it('renders Metrics Grid Component', async () => {
-    httpClientMock.get = jest.fn(() => Promise.resolve((sampleMetric as unknown) as HttpResponse));
-    httpClientMock.post = jest.fn(() =>
-      Promise.resolve((samplePPLResponse as unknown) as HttpResponse)
-    );
-
-    const http = httpClientMock;
     const core = coreStartMock;
     const panelVisualizations = sampleMetricsVisualizations;
     const setPanelVisualizations = jest.fn();
     const editMode = false;
-    const pplService = new PPLService(httpClientMock);
     const startTime = 'now-30m';
     const endTime = 'now';
     const onEditClick = jest.fn();
@@ -48,12 +34,10 @@ describe('Metrics Grid Component', () => {
     const wrapper = mount(
       <Provider store={store}>
         <MetricsGrid
-          http={http}
           chrome={core.chrome}
           panelVisualizations={panelVisualizations}
           setPanelVisualizations={setPanelVisualizations}
           editMode={editMode}
-          pplService={pplService}
           startTime={startTime}
           endTime={endTime}
           moveToEvents={onEditClick}

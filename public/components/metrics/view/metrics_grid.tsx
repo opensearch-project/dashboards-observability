@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import PPLService from 'public/services/requests/ppl';
 import React, { useEffect, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
@@ -17,18 +16,15 @@ import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_sli
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
-import { coreRefs } from '../../../framework/core_refs';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MetricsGridProps {
-  http: CoreStart['http'];
   chrome: CoreStart['chrome'];
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
   editMode: boolean;
-  pplService: PPLService;
   startTime: string;
   endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
@@ -58,8 +54,6 @@ export const MetricsGrid = ({
     dispatch(deSelectMetric(metric));
   };
 
-  const { http, pplService } = coreRefs;
-
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
   const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
   const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
@@ -76,11 +70,9 @@ export const MetricsGrid = ({
     const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
       <VisualizationContainer
         key={panelVisualization.id}
-        http={http}
         editMode={editMode}
         visualizationId={panelVisualization.id}
         savedVisualizationId={panelVisualization.savedVisualizationId}
-        pplService={pplService}
         fromTime={startTime}
         toTime={endTime}
         onRefresh={onRefresh}

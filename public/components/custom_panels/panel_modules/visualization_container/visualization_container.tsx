@@ -26,8 +26,6 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
-import { CoreStart } from '../../../../../../../src/core/public';
-import PPLService from '../../../../services/requests/ppl';
 import {
   displayVisualization,
   renderCatalogVisualization,
