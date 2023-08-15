@@ -6,7 +6,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "s3",
-        "labels": ["aws","s3"]
+        "labels": ["aws", "s3"]
       },
       "properties": {
         "aws": {

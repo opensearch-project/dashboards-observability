@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-k8s-*"
-  ],
+  "index_patterns": ["ss4o_logs-k8s-*"],
   "data_stream": {},
   "template": {
     "aliases": {
@@ -224,22 +222,13 @@
       }
     }
   },
-  "composed_of": [
-    "k8s",
-    "container",
-    "cloud"
-  ],
+  "composed_of": ["k8s", "container", "cloud"],
   "version": 1,
   "_meta": {
     "description": "Simple Schema For Observability",
     "catalog": "observability",
     "type": "logs",
-    "labels": [
-      "log",
-      "k8s",
-      "cloud",
-      "container"
-    ],
+    "labels": ["log", "k8s", "cloud", "container"],
     "correlations": [
       {
         "field": "spanId",

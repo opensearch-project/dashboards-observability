@@ -13,6 +13,7 @@ An integration is a bundle of pre-canned assets which are brought together in a 
 AWS CloudFront integration includes dashboards, visualizations, queries, and an index mapping.
 
 ### Dashboards
+
 The Dashboard uses the index alias `logs-aws-cloudfront` for shortening the index name - be advised.
 
 ![AWS CloudFront Dashboard](../static/dashboard.png)

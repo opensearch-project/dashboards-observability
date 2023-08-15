@@ -13,8 +13,7 @@ An integration is a bundle of pre-canned assets which are brought together in a 
 AWS S3 integration includes dashboards, visualizations, queries, and an index mapping.
 
 ### Dashboards
+
 The Dashboard uses the index alias `logs-aws-s3` for shortening the index name - be advised.
 
 ![AWS S3 Dashboard](../static/dashboard_s3.png)
-
-
