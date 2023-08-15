@@ -642,7 +642,7 @@ export const Explorer = ({
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
-    isOverridingPattern,
+    isOverridingPattern
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
