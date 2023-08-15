@@ -185,7 +185,10 @@ export const {
 export const availableMetricsSelector = (state) =>
   state.metrics.metrics
     .filter((metric) => !state.metrics.selected.includes(metric.id))
-    .filter((metric) => state.metrics.search === '' || metric.name.includes(state.metrics.search));
+    .filter(
+      (metric) =>
+        state.metrics.search === '' || metric.name.match(new RegExp(state.metrics.search, 'i'))
+    );
 
 export const selectedMetricsSelector = (state) =>
   state.metrics.selected.map((id) => state.metrics.metrics.find((metric) => metric.id === id));
