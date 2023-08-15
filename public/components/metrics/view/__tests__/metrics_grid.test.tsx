@@ -13,13 +13,16 @@ import { sampleMetric, sampleMetricsVisualizations } from '../../../../../test/m
 import { createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
+import PPLService from '../../../../services/requests/ppl';
+import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
+import { coreRefs } from '../../../../framework/core_refs';
 
 describe('Metrics Grid Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer);
+  const core = coreStartMock;
 
   it('renders Metrics Grid Component', async () => {
-    const core = coreStartMock;
     const panelVisualizations = sampleMetricsVisualizations;
     const setPanelVisualizations = jest.fn();
     const editMode = false;
@@ -30,6 +33,21 @@ describe('Metrics Grid Component', () => {
     const editActionType = 'save';
     const spanParam = '1h';
     const setEditActionType = jest.fn();
+
+    coreRefs.pplService = new PPLService(httpClientMock);
+    coreRefs.pplService.fetch = jest.fn(() =>
+      Promise.resolve({
+        data: {
+          datarows: [],
+          schema: [
+            { name: '@timestamp', type: 'timestamp' },
+            { name: '@value', type: 'number' },
+            { name: '@labels', type: 'string' },
+          ],
+        },
+        then: () => Promise.resolve(),
+      })
+    );
 
     const wrapper = mount(
       <Provider store={store}>
