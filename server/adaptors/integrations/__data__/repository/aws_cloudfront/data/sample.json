@@ -24,7 +24,7 @@
       "platform": "aws_s3"
     },
     "aws": {
-      "cloudfront": {
+      "cloudfront":   {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
         "c-ip": "67.183.58.10",
@@ -80,7 +80,7 @@
       "platform": "aws_s3"
     },
     "aws": {
-      "cloudfront": {
+      "cloudfront":  {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
         "c-ip": "67.183.58.10",
@@ -136,7 +136,7 @@
       "platform": "aws_s3"
     },
     "aws": {
-      "cloudfront": {
+      "cloudfront":   {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 677,
         "c-ip": "67.183.58.10",
@@ -164,6 +164,10 @@
         "c-port": "12812",
         "time-to-first-byte": 0.582,
         "x-edge-detailed-result-type": "Miss"
+
+
+
+
       }
     }
   },
@@ -192,7 +196,7 @@
       "platform": "aws_s3"
     },
     "aws": {
-      "cloudfront": {
+      "cloudfront":{
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 501279,
         "c-ip": "67.183.58.10",
@@ -218,9 +222,12 @@
         "fle-status": "-",
         "fle-encrypted-fields": "-",
         "c-port": "12812",
-        "time-to-first-byte": 0.84,
+        "time-to-first-byte": 0.840,
         "x-edge-detailed-result-type": "Miss",
         "sc-content-type": "application/javascript"
+
+
+
       }
     }
   },
@@ -249,7 +256,7 @@
       "platform": "aws_s3"
     },
     "aws": {
-      "cloudfront": {
+      "cloudfront":   {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
         "c-ip": "67.183.58.10",
@@ -277,6 +284,10 @@
         "c-port": "12812",
         "time-to-first-byte": 0.588,
         "x-edge-detailed-result-type": "Miss"
+
+
+
+
       }
     }
   },
@@ -305,7 +316,7 @@
       "platform": "aws_s3"
     },
     "aws": {
-      "cloudfront": {
+      "cloudfront":    {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
         "c-ip": "67.183.58.10",
@@ -333,6 +344,10 @@
         "c-port": "12812",
         "time-to-first-byte": 0.592,
         "x-edge-detailed-result-type": "Miss"
+
+
+
+
       }
     }
   },
@@ -389,6 +404,10 @@
         "c-port": "12812",
         "time-to-first-byte": 0.592,
         "x-edge-detailed-result-type": "Miss"
+
+
+
+
       }
     }
   },
@@ -445,6 +464,10 @@
         "c-port": "12812",
         "time-to-first-byte": 0.594,
         "x-edge-detailed-result-type": "Miss"
+
+
+
+
       }
     }
   },
@@ -603,7 +626,7 @@
         "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-protocol": "https",
         "cs-bytes": 56,
-        "time-taken": 1.05,
+        "time-taken": 1.050,
         "x-forwarded-for": "-",
         "ssl-protocol": "TLSv1.3",
         "ssl-cipher": "TLS_AES_128_GCM_SHA256",
@@ -719,7 +742,7 @@
         "x-host-header": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-protocol": "https",
         "cs-bytes": 56,
-        "time-taken": 1.03,
+        "time-taken": 1.030,
         "x-forwarded-for": "-",
         "ssl-protocol": "TLSv1.3",
         "ssl-cipher": "TLS_AES_128_GCM_SHA256",
