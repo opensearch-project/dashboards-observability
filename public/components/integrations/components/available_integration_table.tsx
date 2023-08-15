@@ -66,7 +66,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       name: 'Description',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
+      render: (_value, record) => (
         <EuiText data-test-subj={`${record.name}IntegrationDescription`}>
           {_.truncate(record.description, { length: 100 })}
         </EuiText>
@@ -77,7 +77,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       name: 'Categories',
       sortable: true,
       truncateText: true,
-      render: (value, record) => badges(record.components),
+      render: (_value, record) => badges(record.labels ?? []),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
