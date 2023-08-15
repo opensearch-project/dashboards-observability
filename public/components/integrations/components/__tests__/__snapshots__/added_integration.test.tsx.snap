@@ -227,11 +227,10 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                                 data-test-subj="deleteInstanceButton"
                                 iconType="trash"
                                 onClick={[Function]}
-                                size="l"
                               >
                                 <button
                                   aria-label="Delete"
-                                  className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty"
+                                  className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                   data-test-subj="deleteInstanceButton"
                                   disabled={false}
                                   onClick={[Function]}
