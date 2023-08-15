@@ -522,37 +522,31 @@ export const Explorer = ({
               <div className="dscResults">
                 {countDistribution?.data && !isLiveTailOnRef.current && (
                   <>
-                    <EuiFlexGroup justifyContent="center" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <HitsCounter
-                          hits={reduce(
-                            countDistribution.data['count()'],
-                            (sum, n) => {
-                              return sum + n;
-                            },
-                            0
-                          )}
-                          showResetButton={false}
-                          onResetQuery={() => {}}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <TimechartHeader
-                          dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
-                          options={timeIntervalOptions}
-                          onChangeInterval={(selectedIntrv) => {
-                            const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                              (item) => item.value === selectedIntrv
-                            );
-                            const intrv = selectedIntrv.replace(/^auto_/, '');
-                            getCountVisualizations(intrv);
-                            selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                            getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                          }}
-                          stateInterval={selectedIntervalRef.current?.value}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <HitsCounter
+                      hits={reduce(
+                        countDistribution.data['count()'],
+                        (sum, n) => {
+                          return sum + n;
+                        },
+                        0
+                      )}
+                      showResetButton={false}
+                      onResetQuery={() => {}}
+                    />
+                    <TimechartHeader
+                      dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
+                      options={timeIntervalOptions}
+                      onChangeInterval={(selectedIntrv) => {
+                        const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                          (item) => item.value === selectedIntrv
+                        );
+                        const intrv = selectedIntrv.replace(/^auto_/, '');
+                        getCountVisualizations(intrv);
+                        selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                        getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                      }}
+                      stateInterval={selectedIntervalRef.current?.value}
+                    />
                     <CountDistribution countDistribution={countDistribution} />
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
