@@ -772,7 +772,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         >
                           <ul
                             aria-labelledby="queried_fields"
-                            className="dscSidebarList dscFieldList--selected"
+                            className="dscSidebarList explorerFieldList--selected"
                             data-test-subj="fieldList-selected"
                           >
                             <li
@@ -827,7 +827,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Remove double_per_ip_bytes from table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="ghost"
                                                 data-test-subj="fieldToggle-double_per_ip_bytes"
                                                 display="fill"
@@ -862,7 +862,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -900,7 +900,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Remove double_per_ip_bytes from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-double_per_ip_bytes"
                                                   display="fill"
@@ -1041,7 +1041,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Remove double_per_ip_bytes from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-double_per_ip_bytes"
                                                   display="fill"
@@ -1050,7 +1050,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Remove double_per_ip_bytes from table"
-                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-double_per_ip_bytes"
                                                     disabled={true}
                                                     type="button"
@@ -1146,7 +1146,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Remove host from table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="ghost"
                                                 data-test-subj="fieldToggle-host"
                                                 display="fill"
@@ -1181,7 +1181,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -1219,7 +1219,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Remove host from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-host"
                                                   display="fill"
@@ -1360,7 +1360,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Remove host from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-host"
                                                   display="fill"
@@ -1369,7 +1369,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Remove host from table"
-                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-host"
                                                     disabled={true}
                                                     type="button"
@@ -1465,7 +1465,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Remove ip_count from table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="ghost"
                                                 data-test-subj="fieldToggle-ip_count"
                                                 display="fill"
@@ -1500,7 +1500,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -1538,7 +1538,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Remove ip_count from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-ip_count"
                                                   display="fill"
@@ -1679,7 +1679,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Remove ip_count from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-ip_count"
                                                   display="fill"
@@ -1688,7 +1688,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Remove ip_count from table"
-                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-ip_count"
                                                     disabled={true}
                                                     type="button"
@@ -1784,7 +1784,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Remove per_ip_bytes from table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="ghost"
                                                 data-test-subj="fieldToggle-per_ip_bytes"
                                                 display="fill"
@@ -1819,7 +1819,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -1857,7 +1857,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Remove per_ip_bytes from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-per_ip_bytes"
                                                   display="fill"
@@ -1998,7 +1998,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Remove per_ip_bytes from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-per_ip_bytes"
                                                   display="fill"
@@ -2007,7 +2007,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Remove per_ip_bytes from table"
-                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-per_ip_bytes"
                                                     disabled={true}
                                                     type="button"
@@ -2103,7 +2103,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Remove resp_code from table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="ghost"
                                                 data-test-subj="fieldToggle-resp_code"
                                                 display="fill"
@@ -2138,7 +2138,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -2176,7 +2176,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Remove resp_code from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-resp_code"
                                                   display="fill"
@@ -2317,7 +2317,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Remove resp_code from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-resp_code"
                                                   display="fill"
@@ -2326,7 +2326,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Remove resp_code from table"
-                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-resp_code"
                                                     disabled={true}
                                                     type="button"
@@ -2422,7 +2422,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Remove sum_bytes from table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="ghost"
                                                 data-test-subj="fieldToggle-sum_bytes"
                                                 display="fill"
@@ -2457,7 +2457,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -2495,7 +2495,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Remove sum_bytes from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-sum_bytes"
                                                   display="fill"
@@ -2636,7 +2636,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Remove sum_bytes from table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="ghost"
                                                   data-test-subj="fieldToggle-sum_bytes"
                                                   display="fill"
@@ -2645,7 +2645,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Remove sum_bytes from table"
-                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--fill euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-sum_bytes"
                                                     disabled={true}
                                                     type="button"
@@ -2794,7 +2794,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         >
                           <ul
                             aria-labelledby="selected_fields"
-                            className="dscSidebarList dscFieldList--selected"
+                            className="dscSidebarList explorerFieldList--selected"
                             data-test-subj="fieldList-selected"
                           />
                         </div>
@@ -2901,7 +2901,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         >
                           <ul
                             aria-labelledby="available_fields"
-                            className="dscFieldList dscFieldList--unpopular hidden-sm hidden-xs"
+                            className="explorerFieldList explorerFieldList--unpopular hidden-sm hidden-xs"
                             data-test-subj="fieldList-unpopular"
                           >
                             <li
@@ -2941,7 +2941,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -2968,7 +2968,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add agent to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-agent"
                                                 iconType="plusInCircleFilled"
@@ -3002,7 +3002,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -3025,7 +3025,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -3052,7 +3052,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add agent to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-agent"
                                                   iconType="plusInCircleFilled"
@@ -3167,7 +3167,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -3176,7 +3176,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -3239,7 +3239,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add agent to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-agent"
                                                   iconType="plusInCircleFilled"
@@ -3247,7 +3247,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add agent to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-agent"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -3344,7 +3344,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add bytes to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-bytes"
                                                 iconType="plusInCircleFilled"
@@ -3378,7 +3378,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -3416,7 +3416,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add bytes to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-bytes"
                                                   iconType="plusInCircleFilled"
@@ -3556,7 +3556,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add bytes to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-bytes"
                                                   iconType="plusInCircleFilled"
@@ -3564,7 +3564,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add bytes to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-bytes"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -3661,7 +3661,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add clientip to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-clientip"
                                                 iconType="plusInCircleFilled"
@@ -3695,7 +3695,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -3733,7 +3733,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add clientip to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-clientip"
                                                   iconType="plusInCircleFilled"
@@ -3873,7 +3873,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add clientip to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-clientip"
                                                   iconType="plusInCircleFilled"
@@ -3881,7 +3881,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add clientip to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-clientip"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -3978,7 +3978,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add event to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-event"
                                                 iconType="plusInCircleFilled"
@@ -4012,7 +4012,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -4050,7 +4050,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add event to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-event"
                                                   iconType="plusInCircleFilled"
@@ -4190,7 +4190,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add event to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-event"
                                                   iconType="plusInCircleFilled"
@@ -4198,7 +4198,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add event to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-event"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -4280,7 +4280,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -4307,7 +4307,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add extension to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-extension"
                                                 iconType="plusInCircleFilled"
@@ -4341,7 +4341,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -4364,7 +4364,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -4391,7 +4391,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add extension to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-extension"
                                                   iconType="plusInCircleFilled"
@@ -4506,7 +4506,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -4515,7 +4515,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -4578,7 +4578,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add extension to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-extension"
                                                   iconType="plusInCircleFilled"
@@ -4586,7 +4586,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add extension to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-extension"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -4683,7 +4683,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add geo to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-geo"
                                                 iconType="plusInCircleFilled"
@@ -4717,7 +4717,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -4755,7 +4755,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add geo to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-geo"
                                                   iconType="plusInCircleFilled"
@@ -4895,7 +4895,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add geo to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-geo"
                                                   iconType="plusInCircleFilled"
@@ -4903,7 +4903,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add geo to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-geo"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -4985,7 +4985,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -5012,7 +5012,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add host to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-host"
                                                 iconType="plusInCircleFilled"
@@ -5046,7 +5046,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -5069,7 +5069,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -5096,7 +5096,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add host to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-host"
                                                   iconType="plusInCircleFilled"
@@ -5211,7 +5211,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -5220,7 +5220,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -5283,7 +5283,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add host to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-host"
                                                   iconType="plusInCircleFilled"
@@ -5291,7 +5291,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add host to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-host"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -5373,7 +5373,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -5400,7 +5400,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add index to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-index"
                                                 iconType="plusInCircleFilled"
@@ -5434,7 +5434,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -5457,7 +5457,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -5484,7 +5484,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add index to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-index"
                                                   iconType="plusInCircleFilled"
@@ -5599,7 +5599,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -5608,7 +5608,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -5671,7 +5671,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add index to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-index"
                                                   iconType="plusInCircleFilled"
@@ -5679,7 +5679,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add index to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-index"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -5776,7 +5776,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add ip to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-ip"
                                                 iconType="plusInCircleFilled"
@@ -5810,7 +5810,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -5848,7 +5848,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add ip to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-ip"
                                                   iconType="plusInCircleFilled"
@@ -5988,7 +5988,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add ip to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-ip"
                                                   iconType="plusInCircleFilled"
@@ -5996,7 +5996,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add ip to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-ip"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -6093,7 +6093,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add machine to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-machine"
                                                 iconType="plusInCircleFilled"
@@ -6127,7 +6127,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -6165,7 +6165,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add machine to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-machine"
                                                   iconType="plusInCircleFilled"
@@ -6305,7 +6305,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add machine to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-machine"
                                                   iconType="plusInCircleFilled"
@@ -6313,7 +6313,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add machine to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-machine"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -6410,7 +6410,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add memory to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-memory"
                                                 iconType="plusInCircleFilled"
@@ -6444,7 +6444,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -6482,7 +6482,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add memory to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-memory"
                                                   iconType="plusInCircleFilled"
@@ -6622,7 +6622,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add memory to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-memory"
                                                   iconType="plusInCircleFilled"
@@ -6630,7 +6630,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add memory to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-memory"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -6712,7 +6712,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -6739,7 +6739,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add message to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-message"
                                                 iconType="plusInCircleFilled"
@@ -6773,7 +6773,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -6796,7 +6796,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -6823,7 +6823,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add message to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-message"
                                                   iconType="plusInCircleFilled"
@@ -6938,7 +6938,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -6947,7 +6947,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -7010,7 +7010,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add message to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-message"
                                                   iconType="plusInCircleFilled"
@@ -7018,7 +7018,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add message to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-message"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -7115,7 +7115,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add phpmemory to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-phpmemory"
                                                 iconType="plusInCircleFilled"
@@ -7149,7 +7149,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -7187,7 +7187,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add phpmemory to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-phpmemory"
                                                   iconType="plusInCircleFilled"
@@ -7327,7 +7327,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add phpmemory to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-phpmemory"
                                                   iconType="plusInCircleFilled"
@@ -7335,7 +7335,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add phpmemory to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-phpmemory"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -7417,7 +7417,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -7444,7 +7444,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add referer to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-referer"
                                                 iconType="plusInCircleFilled"
@@ -7478,7 +7478,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -7501,7 +7501,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -7528,7 +7528,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add referer to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-referer"
                                                   iconType="plusInCircleFilled"
@@ -7643,7 +7643,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -7652,7 +7652,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -7715,7 +7715,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add referer to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-referer"
                                                   iconType="plusInCircleFilled"
@@ -7723,7 +7723,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add referer to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-referer"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -7805,7 +7805,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -7832,7 +7832,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add request to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-request"
                                                 iconType="plusInCircleFilled"
@@ -7866,7 +7866,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -7889,7 +7889,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -7916,7 +7916,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add request to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-request"
                                                   iconType="plusInCircleFilled"
@@ -8031,7 +8031,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -8040,7 +8040,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -8103,7 +8103,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add request to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-request"
                                                   iconType="plusInCircleFilled"
@@ -8111,7 +8111,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add request to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-request"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -8193,7 +8193,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -8220,7 +8220,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add response to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-response"
                                                 iconType="plusInCircleFilled"
@@ -8254,7 +8254,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -8277,7 +8277,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -8304,7 +8304,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add response to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-response"
                                                   iconType="plusInCircleFilled"
@@ -8419,7 +8419,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -8428,7 +8428,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -8491,7 +8491,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add response to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-response"
                                                   iconType="plusInCircleFilled"
@@ -8499,7 +8499,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add response to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-response"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -8581,7 +8581,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -8608,7 +8608,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add tags to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-tags"
                                                 iconType="plusInCircleFilled"
@@ -8642,7 +8642,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -8665,7 +8665,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -8692,7 +8692,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add tags to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-tags"
                                                   iconType="plusInCircleFilled"
@@ -8807,7 +8807,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -8816,7 +8816,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -8879,7 +8879,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add tags to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-tags"
                                                   iconType="plusInCircleFilled"
@@ -8887,7 +8887,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add tags to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-tags"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -8990,7 +8990,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add timestamp to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-timestamp"
                                                 iconType="plusInCircleFilled"
@@ -9024,7 +9024,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -9068,7 +9068,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add timestamp to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-timestamp"
                                                   iconType="plusInCircleFilled"
@@ -9219,7 +9219,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add timestamp to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-timestamp"
                                                   iconType="plusInCircleFilled"
@@ -9227,7 +9227,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add timestamp to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-timestamp"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -9309,7 +9309,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_pattern"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultPattern"
                                                 iconType="inputOutput"
@@ -9336,7 +9336,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add url to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-url"
                                                 iconType="plusInCircleFilled"
@@ -9370,7 +9370,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -9393,7 +9393,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -9420,7 +9420,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add url to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-url"
                                                   iconType="plusInCircleFilled"
@@ -9535,7 +9535,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_pattern"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultPattern"
                                                   iconType="inputOutput"
@@ -9544,7 +9544,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_pattern"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultPattern"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -9607,7 +9607,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add url to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-url"
                                                   iconType="plusInCircleFilled"
@@ -9615,7 +9615,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add url to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-url"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -9705,7 +9705,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-labelledby="override_timestamp"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="text"
                                                 data-test-subj="eventExplorer__overrideDefaultTimestamp"
                                                 iconType="inputOutput"
@@ -9724,7 +9724,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <React.Fragment>
                                               <EuiButtonIcon
                                                 aria-label="Add utc_time to table"
-                                                className="dscSidebarItem__action"
+                                                className="explorerSidebarItem__action"
                                                 color="primary"
                                                 data-test-subj="fieldToggle-utc_time"
                                                 iconType="plusInCircleFilled"
@@ -9758,7 +9758,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   hasArrow={true}
                                   isOpen={false}
                                   ownFocus={true}
-                                  panelClassName="dscSidebarItem__fieldPopoverPanel"
+                                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
                                   panelPaddingSize="m"
                                 >
                                   <div
@@ -9789,7 +9789,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_timestamp"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultTimestamp"
                                                   iconType="inputOutput"
@@ -9808,7 +9808,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               <React.Fragment>
                                                 <EuiButtonIcon
                                                   aria-label="Add utc_time to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-utc_time"
                                                   iconType="plusInCircleFilled"
@@ -9936,7 +9936,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-labelledby="override_timestamp"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="text"
                                                   data-test-subj="eventExplorer__overrideDefaultTimestamp"
                                                   iconType="inputOutput"
@@ -9945,7 +9945,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-labelledby="override_timestamp"
-                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                                                     data-test-subj="eventExplorer__overrideDefaultTimestamp"
                                                     disabled={false}
                                                     onClick={[Function]}
@@ -9995,7 +9995,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                               >
                                                 <EuiButtonIcon
                                                   aria-label="Add utc_time to table"
-                                                  className="dscSidebarItem__action"
+                                                  className="explorerSidebarItem__action"
                                                   color="primary"
                                                   data-test-subj="fieldToggle-utc_time"
                                                   iconType="plusInCircleFilled"
@@ -10003,7 +10003,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                 >
                                                   <button
                                                     aria-label="Add utc_time to table"
-                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                                                     data-test-subj="fieldToggle-utc_time"
                                                     disabled={false}
                                                     onClick={[Function]}
