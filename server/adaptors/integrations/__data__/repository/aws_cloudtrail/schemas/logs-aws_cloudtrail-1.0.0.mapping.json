@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-aws_cloudtrail-*"
-  ],
+  "index_patterns": ["ss4o_logs-aws_cloudtrail-*"],
   "priority": 900,
   "data_stream": {},
   "template": {
@@ -14,6 +12,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
+        "labels": ["log", "aws", "s3", "cloud", "cloudtrail"],
         "correlations": [
           {
             "field": "spanId",
@@ -222,27 +221,6 @@
       }
     }
   },
-  "composed_of": [
-    "cloud",
-    "aws_cloudtrail",
-    "aws_s3"
-  ],
-  "version": 1,
-  "_meta": {
-    "description": "Simple Schema For Observability",
-    "catalog": "observability",
-    "type": "logs",
-    "correlations": [
-      {
-        "field": "spanId",
-        "foreign-schema": "traces",
-        "foreign-field": "spanId"
-      },
-      {
-        "field": "traceId",
-        "foreign-schema": "traces",
-        "foreign-field": "traceId"
-      }
-    ]
-  }
+  "composed_of": ["cloud", "aws_cloudtrail", "aws_s3"],
+  "version": 1
 }

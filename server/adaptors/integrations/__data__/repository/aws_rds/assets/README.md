@@ -5,10 +5,11 @@ API: http://osd:5601/api/saved_objects/_import?overwrite=true
 - [Assets](aws_rds-1.0.0.ndjson)
 
 ## Asset List
+
 The next table details the assets
 
 | Name                                        |     Type      |                                                Description                                                 |
-|---------------------------------------------|:-------------:|:----------------------------------------------------------------------------------------------------------:|
+| ------------------------------------------- | :-----------: | :--------------------------------------------------------------------------------------------------------: |
 | `ss4o_logs_rds-*-*`                         | index-pattern |                                             The Index Pattern                                              |
 | `AWS RDS Log Event Overview`                |   dashboard   |                                    The pre-canned dashboard for AWS RDS                                    |
 | `[AWS RDS] Filters`                         | visualization |                      [Controls] Interactive controls for easy dashboard manipulation                       |
@@ -24,13 +25,14 @@ The next table details the assets
 | `[AWS RDS] Top Slow Query`                  | visualization |                             [Table] Top 10 source showing the slowest queries                              |
 | `[AWS RDS] Lock`                            | visualization |              [Table] A visualization showing the number of active locks in your RDS instance               |
 | `[AWS RDS] Total Deadlock Queries`          | visualization |            [Table] Represents the total count of deadlock scenarios encountered in the database            |
-| `[AWS RDS] Deadlock History`                | visualization |                 [Table]      Provides a timeline showing occurrences of deadlock scenarios                 |
-| `[AWS RDS] Error Data`                      | visualization |              [Table]  Represents data related to various errors occurred in your RDS instance              |
+| `[AWS RDS] Deadlock History`                | visualization |                   [Table] Provides a timeline showing occurrences of deadlock scenarios                    |
+| `[AWS RDS] Error Data`                      | visualization |              [Table] Represents data related to various errors occurred in your RDS instance               |
 | `[AWS RDS] Audit Data`                      | visualization |             [Table] overview of audit logs, showing actions that have been tracked for review              |
 | `[AWS RDS] Total Error Logs`                | visualization |            [Line] Displays the total count of error logs recorded within a specific time frame             |
-| `[AWS RDS] Error History`                   | visualization |          [Line]  Provides a timeline representation of the errors occurred over a certain period.          |
-| `[AWS RDS] Audoit History`                  | visualization |      [Line]  Provides a timeline representation of the audited events occurred over a certain period.      |
+| `[AWS RDS] Error History`                   | visualization |          [Line] Provides a timeline representation of the errors occurred over a certain period.           |
+| `[AWS RDS] Audoit History`                  | visualization |      [Line] Provides a timeline representation of the audited events occurred over a certain period.       |
 | `[AWS RDS] General Search`                  |    search     |                                     The pre-canned search for AWS RDS                                      |
 
 ## Dashboard
+
 ![](../static/dashboard.png)

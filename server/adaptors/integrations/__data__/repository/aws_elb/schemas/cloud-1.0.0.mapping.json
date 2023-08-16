@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "cloud"
+        "component": "cloud",
+        "labels": ["cloud"]
       },
       "properties": {
         "cloud": {
@@ -38,6 +39,9 @@
                 }
               }
             },
+            "platform": {
+              "type": "keyword"
+            },
             "service": {
               "type": "object",
               "properties": {
@@ -56,6 +60,9 @@
                   "type": "keyword"
                 }
               }
+            },
+            "resource_id": {
+              "type": "keyword"
             },
             "instance": {
               "type": "object",

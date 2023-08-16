@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "aws_elb"
+        "component": "aws_elb",
+        "labels": ["aws", "elb"]
       },
       "properties": {
         "aws": {

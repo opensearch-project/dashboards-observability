@@ -6,24 +6,24 @@
 import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-export const badges = (categories) => {
-  if (categories.length <= 3) {
+export const badges = (labels: string[]) => {
+  if (labels.length <= 3) {
     return (
       <EuiBadgeGroup>
-        {categories.map((cateogry) => {
-          return <EuiBadge>{cateogry.name}</EuiBadge>;
+        {labels.map((label) => {
+          return <EuiBadge>{label}</EuiBadge>;
         })}
       </EuiBadgeGroup>
     );
   } else {
-    const tooltip = `+${categories.length - 2} more`;
+    const tooltip = `+${labels.length - 2} more`;
     return (
       <EuiBadgeGroup>
-        <EuiBadge>{categories[0].name}</EuiBadge>
-        <EuiBadge>{categories[1].name}</EuiBadge>
+        <EuiBadge>{labels[0]}</EuiBadge>
+        <EuiBadge>{labels[1]}</EuiBadge>
         <EuiBadge>
           <EuiToolTip
-            content={categories.slice(2).map((item, index) => (index ? ', ' : '') + item.name)}
+            content={labels.slice(2).map((item: string, index: number) => (index ? ', ' : '') + item)}
           >
             <h4>{tooltip}</h4>
           </EuiToolTip>

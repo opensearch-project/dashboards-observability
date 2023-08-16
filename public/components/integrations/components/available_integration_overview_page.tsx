@@ -25,6 +25,7 @@ import { useToast } from '../../../../public/components/common/toast';
 import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationType {
+  labels?: string[];
   name: string;
   description: string;
   assetUrl?: string | undefined;
@@ -117,8 +118,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
       setData(exists.data);
 
       let newItems = exists.data.hits
-        .flatMap((hit: { components: Array<{ name: string }> }) => hit.components)
-        .map((component: { name: string }) => component.name);
+        .flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
       newItems = [...new Set(newItems)].sort().map((newItem) => {
         return {
           name: newItem,
