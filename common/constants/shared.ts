@@ -203,7 +203,7 @@ export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
   FillOpacity: 100,
   MarkerSize: 5,
   ShowLegend: 'show',
-  LegendPosition: 'v',
+  LegendPosition: 'h',
   LabelAngle: 0,
   DefaultSortSectors: 'largest_to_smallest',
   DefaultModeScatter: 'markers',

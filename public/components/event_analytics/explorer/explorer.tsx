@@ -118,6 +118,7 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
+import { processMetricsData } from '../../custom_panels/helpers/utils';
 
 export const Explorer = ({
   pplService,
@@ -627,17 +628,22 @@ export const Explorer = ({
     isOverridingPattern,
   ]);
 
+  const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
+    ? { ...userVizConfigs[curVisId] }
+    : {
+        dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
+      };
+
   const visualizations: IVisualizationContainerProps = useMemo(() => {
     return getVizContainerProps({
       vizId: curVisId,
       rawVizData: explorerVisualizations,
       query,
       indexFields: explorerFields,
-      userConfigs: !isEmpty(userVizConfigs[curVisId])
-        ? { ...userVizConfigs[curVisId] }
-        : {
-            dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
-          },
+      userConfigs: {
+        ...visualizationSettings,
+        ...processMetricsData(explorerData.schema, visualizationSettings),
+      },
       appData: { fromApp: appLogEvents },
       explorer: { explorerData, explorerFields, query, http, pplService },
     });

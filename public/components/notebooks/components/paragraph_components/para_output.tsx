@@ -70,44 +70,45 @@ export const ParaOutput = (props: {
     return data;
   };
 
-  const QueryOutput = ({ typeOut, val }: { typeOut: string; val: string }) => {
-    const inputQuery = para.inp.substring(4, para.inp.length);
-    const queryObject = JSON.parse(val);
-    const columns = createQueryColumns(queryObject.schema);
-    const data = getQueryOutputData(queryObject);
-    const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
-    if (queryObject.hasOwnProperty('error')) {
-      return <EuiCodeBlock>{val}</EuiCodeBlock>;
-    } else {
-      return (
-        <div>
-          <EuiText className="wrapAll">
-            <b>{inputQuery}</b>
-          </EuiText>
-          <EuiSpacer />
-          <QueryDataGridMemo
-            rowCount={queryObject.datarows.length}
-            queryColumns={columns}
-            visibleColumns={visibleColumns}
-            setVisibleColumns={setVisibleColumns}
-            dataValues={data}
-          />
-        </div>
-      );
-    }
-  };
-
-  const OutputBody = ({ typeOut, val }: { typeOut: string; val: string }) => {
+  const OutputBody = ({ key, typeOut, val }: { key: string; typeOut: string; val: string }) => {
     /* Returns a component to render paragraph outputs using the para.typeOut property
      * Currently supports HTML, TABLE, IMG
      * TODO: add table rendering
      */
     const dateFormat = uiSettingsService.get('dateFormat');
 
+    const [visibleColumns, setVisibleColumns] = useState<Array<{ id: any; displayAsText: any }>>(
+      []
+    );
+
     if (typeOut !== undefined) {
       switch (typeOut) {
         case 'QUERY':
-          return <QueryOutput typeOut={typeOut} val={val} />;
+          const inputQuery = para.inp.substring(4, para.inp.length);
+          const queryObject = JSON.parse(val);
+          if (queryObject.hasOwnProperty('error')) {
+            return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
+          } else {
+            const columns = createQueryColumns(queryObject.schema);
+            setVisibleColumns(columns);
+            const data = getQueryOutputData(queryObject);
+            return (
+              <div>
+                <EuiText key={'query-input-key'}>
+                  <b>{inputQuery}</b>
+                </EuiText>
+                <EuiSpacer />
+                <QueryDataGridMemo
+                  key={key}
+                  rowCount={queryObject.datarows.length}
+                  queryColumns={columns}
+                  visibleColumns={visibleColumns}
+                  setVisibleColumns={setVisibleColumns}
+                  dataValues={data}
+                />
+              </div>
+            );
+          }
         case 'MARKDOWN':
           return (
             <EuiText className="wrapAll markdown-output-text">
@@ -153,6 +154,7 @@ export const ParaOutput = (props: {
                   onRefresh={false}
                   pplFilterValue={''}
                   usedInNotebooks={true}
+                  contextMenuId="notebook"
                 />
               </div>
             </>

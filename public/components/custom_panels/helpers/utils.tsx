@@ -397,14 +397,13 @@ export const renderCatalogVisualization = async ({
   const catalogSourceName = catalogSource.split('.')[0];
   const catalogTableName = catalogSource.split('.')[1];
 
-  const defaultAggregation = 'avg'; // pass in attributes to this function
-  const attributes: string[] = [];
+  const defaultAggregation = 'avg';
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
-    aggregation: defaultAggregation,
-    attributesGroupBy: attributes,
+    aggregation: queryMetaData.aggregation,
+    attributesGroupBy: queryMetaData.attributesGroupBy,
     startTime,
     endTime,
     spanParam,

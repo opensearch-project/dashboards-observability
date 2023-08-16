@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
+import { useSelector } from 'react-redux';
 import {
   displayVisualization,
   renderCatalogVisualization,
@@ -33,6 +34,8 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { MetricsEditInline } from '../../../metrics/sidebar/metrics_edit_inline';
+import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
 
 /*
@@ -71,6 +74,7 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   spanParam?: string;
+  contextMenuId: 'visualization' | 'notebook' | 'metrics';
 }
 
 export const VisualizationContainer = ({
@@ -88,6 +92,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   spanParam,
+  contextMenuId,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -103,6 +108,7 @@ export const VisualizationContainer = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
 
+  const queryMetaData = useSelector(metricQuerySelector(visualizationId));
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {
     if (modalType === 'catalogModal')
@@ -227,6 +233,7 @@ export const VisualizationContainer = ({
         setVisualizationMetaData,
         setIsLoading,
         setIsError,
+        queryMetaData,
       });
     else
       await renderSavedVisualization(
@@ -283,11 +290,17 @@ export const VisualizationContainer = ({
     loadVisaulization();
   }, [onRefresh]);
 
+  useEffect(() => {
+    if (catalogVisualization) loadVisaulization();
+  }, [queryMetaData]);
+
+  const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
+
   return (
     <>
       <EuiPanel
         data-test-subj={`${visualizationTitle}VisualizationPanel`}
-        className="panel-full-width"
+        className={`panel-full-width ${metricVisCssClassName}`}
         grow={false}
       >
         <div className={editMode ? 'mouseGrabber' : ''}>
@@ -333,6 +346,7 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          {catalogVisualization && <MetricsEditInline visualizationId={visualizationId} />}
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>

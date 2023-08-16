@@ -17,10 +17,12 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
+import { useToast } from '../../../common/toast';
 
 export interface IconAttributes {
   color: string;
 }
+
 const coloredIconsFrom = (dataSources: string[]): { [dataSource: string]: IconAttributes } => {
   const colorCycle = ouiPaletteColorBlindBehindText({ sortBy: 'natural' });
   const keyedIcons = dataSources.map((dataSource, index) => {
@@ -113,8 +115,16 @@ const updateLayoutBySelection = (state: any, newMetric: any) => {
     y: newDimensions.y,
     h: newDimensions.h,
     w: newDimensions.w,
-    metricType:
-      newMetric.catalog === OBSERVABILITY_CUSTOM_METRIC ? 'savedCustomMetric' : 'prometheusMetric',
+    query: {
+      type:
+        newMetric.catalog === OBSERVABILITY_CUSTOM_METRIC
+          ? 'savedCustomMetric'
+          : 'prometheusMetric',
+      catalog: newMetric.id,
+      aggregation: 'avg',
+      attributesGroupBy: [],
+      availableAttributes: [],
+    },
   };
   state.metricsLayout = [...state.metricsLayout, metricVisualization];
 };
@@ -159,6 +169,14 @@ export const metricSlice = createSlice({
       state.metricsLayout = payload;
       state.selected = sortBy(payload, ['x', 'y']).map(({ id }) => id);
     },
+    setMetricSelectedAttributes: (state, { payload }) => {
+      const { visualizationId, attributesGroupBy } = payload;
+      const metric: MetricType = state.metricsLayout.find(
+        (layout) => layout.id === visualizationId
+      );
+      metric.query.attributesGroupBy = attributesGroupBy;
+    },
+
     setDataSources: (state, { payload }) => {
       state.dataSources = [OBSERVABILITY_CUSTOM_METRIC, ...payload];
     },
@@ -180,7 +198,61 @@ export const {
   setDataSources,
   setDataSourceTitles,
   setDataSourceIcons,
+  setMetricSelectedAttributes,
 } = metricSlice.actions;
+
+const getAvailableAttributes = (id) => async (dispatch, getState) => {
+  const { pplService } = coreRefs;
+  const { setToast } = useToast();
+
+  try {
+    const columnSchema = await pplService.fetch({
+      query: 'describe ' + id + ' | fields COLUMN_NAME',
+      format: 'jdbc',
+    });
+    const columns = columnSchema.jsonData
+      .map((sch) => sch.COLUMN_NAME)
+      .filter((col) => col[0] !== '@');
+
+    const state = getState();
+    const updatedLayout = state.metrics.metricsLayout.map((metricLayout) =>
+      metricLayout.id === id
+        ? { ...metricLayout, query: { ...metricLayout.query, availableAttributes: columns } }
+        : metricLayout
+    );
+
+    dispatch(updateMetricsLayout(updatedLayout));
+  } catch (e) {
+    setToast(`An error occurred retrieving attributes for metric ${id} `, 'danger');
+    console.error(`An error occurred retrieving attributes for metric ${id} `, e);
+  }
+};
+
+export const addSelectedMetric = (metric: MetricType) => async (dispatch) => {
+  await dispatch(selectMetric(metric));
+  if (metric.catalog !== OBSERVABILITY_CUSTOM_METRIC)
+    await dispatch(getAvailableAttributes(metric.id));
+};
+
+export const updateMetricQuery = (visualizationId, { aggregation, attributesGroupBy }) => (
+  dispatch,
+  getState
+) => {
+  const state = getState();
+  const updatedLayout = state.metrics.metricsLayout.map((metricLayout) =>
+    metricLayout.id === visualizationId
+      ? {
+          ...metricLayout,
+          query: {
+            ...metricLayout.query,
+            aggregation: aggregation || metricLayout.query.aggregation,
+            attributesGroupBy: attributesGroupBy || metricLayout.query.attributesGroupBy,
+          },
+        }
+      : metricLayout
+  );
+  dispatch(updateMetricsLayout(updatedLayout));
+};
 
 export const availableMetricsSelector = (state) =>
   state.metrics.metrics
@@ -198,6 +270,13 @@ export const searchSelector = (state) => state.metrics.search;
 export const metricIconsSelector = (state) => state.metrics.dataSourceIcons;
 
 export const metricsLayoutSelector = (state) => state.metrics.metricsLayout;
+
+export const metricQuerySelector = (id) => (state) =>
+  state.metrics.metricsLayout.find((layout) => layout.id === id)?.query || {
+    aggregation: '',
+    attributesGroupBy: [],
+    availableAttributes: [],
+  };
 
 export const dataSourcesSelector = (state) => state.metrics.dataSources;
 

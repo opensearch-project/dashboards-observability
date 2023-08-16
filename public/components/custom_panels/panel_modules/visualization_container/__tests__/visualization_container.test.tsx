@@ -58,6 +58,7 @@ describe('Visualization Container Component', () => {
         showFlyout={showFlyout}
         removeVisualization={removeVisualization}
         onEditClick={onEditClick}
+        contextMenuId="visualization"
       />
     );
     wrapper.update();
