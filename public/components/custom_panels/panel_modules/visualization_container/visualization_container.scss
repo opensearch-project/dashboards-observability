@@ -34,6 +34,43 @@
   text-align: center;
 }
 
+.metricVis {
+  #metricsEditInline {
+    /* for ... reasons (?), margin here causes
+       other rules to activate... providing
+       a more-correct display.
+     */
+    margin: 0 0px;
+  }
+
+
+    #aggregation__field {
+      .euiFormLabel {
+        width: 130px
+      }
+    }
+
+  //  #explorerPlotComponent {
+  //    //overflow: hidden;
+  //  }
+  //
+    .svg-container {
+      //height: 425px !important;
+      margin-top: -25px !important;
+    }
+
+  //  .main-svg {
+  //    //margin-top: -10px;
+  //    //height: calc(100% - 10px);
+  //  }
+  //
+
+  .main-svg {
+    margin-top: -10px;
+    //height: calc(100% - 60px);
+  }
+}
+
 %center-div {
   top: 50%;
   left: 50%;

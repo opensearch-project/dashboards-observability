@@ -115,6 +115,7 @@ import { NoResults } from './no_results';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
+import { processMetricsData } from '../../custom_panels/helpers/utils';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
@@ -608,17 +609,22 @@ export const Explorer = ({
     isQueryRunning,
   ]);
 
+  const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
+    ? { ...userVizConfigs[curVisId] }
+    : {
+        dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
+      };
+
   const visualizations: IVisualizationContainerProps = useMemo(() => {
     return getVizContainerProps({
       vizId: curVisId,
       rawVizData: explorerVisualizations,
       query,
       indexFields: explorerFields,
-      userConfigs: !isEmpty(userVizConfigs[curVisId])
-        ? { ...userVizConfigs[curVisId] }
-        : {
-            dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
-          },
+      userConfigs: {
+        ...visualizationSettings,
+        ...processMetricsData(explorerData.schema, visualizationSettings),
+      },
       appData: { fromApp: appLogEvents },
       explorer: { explorerData, explorerFields, query, http, pplService },
     });

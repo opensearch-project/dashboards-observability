@@ -24,13 +24,13 @@ export const resolutionOptions = [
   { value: 'y', text: 'years' },
 ];
 
-export const DEFAULT_METRIC_HEIGHT = 2;
+export const DEFAULT_METRIC_HEIGHT = 3;
 export const DEFAULT_METRIC_WIDTH = 12;
 
 export const AGGREGATION_OPTIONS = [
-  { label: 'avg' },
-  { label: 'sum' },
-  { label: 'count' },
-  { label: 'min' },
-  { label: 'max' },
+  { value: 'avg', text: 'avg()' },
+  { value: 'sum', text: 'sum()' },
+  { value: 'count', text: 'count()' },
+  { value: 'min', text: 'min()' },
+  { value: 'max', text: 'max()' },
 ];

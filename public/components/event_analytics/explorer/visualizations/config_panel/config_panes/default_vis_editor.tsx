@@ -20,7 +20,7 @@ export const VizDataPanel = ({ visualizations, onConfigChange, vizState = {}, ta
   const dynamicContent = tabProps.sections.map((section) => {
     const Editor = section.editor;
     return (
-      <EuiFormRow fullWidth>
+      <EuiFormRow key={section.id} fullWidth>
         <Editor
           visualizations={visualizations}
           schemas={section.schemas}

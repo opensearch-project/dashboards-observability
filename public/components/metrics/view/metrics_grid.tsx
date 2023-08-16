@@ -16,6 +16,7 @@ import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_sli
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
+import { coreRefs } from '../../../framework/core_refs';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -47,6 +48,7 @@ export const MetricsGrid = ({
   setEditActionType,
   spanParam,
 }: MetricsGridProps) => {
+  const { http, pplService } = coreRefs;
   // Redux tools
   const dispatch = useDispatch();
   const updateLayout = (metric: any) => dispatch(updateMetricsLayout(metric));
@@ -84,6 +86,7 @@ export const MetricsGrid = ({
           panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
         }
         spanParam={spanParam}
+        contextMenuId="metrics"
       />
     ));
     setGridData(gridDataComps);
@@ -121,7 +124,7 @@ export const MetricsGrid = ({
       reloadLayout();
       loadVizComponents();
     }
-  }, [editMode]);
+  }, [editMode, reloadLayout, loadVizComponents]);
 
   useEffect(() => {
     if (editActionType === 'cancel') {
@@ -132,13 +135,20 @@ export const MetricsGrid = ({
       updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
       setEditActionType('');
     }
-  }, [editActionType]);
+  }, [
+    editActionType,
+    handleRemoveMetric,
+    postEditLayout,
+    removeMetricsList,
+    panelVisualizations,
+    setEditActionType,
+  ]);
 
   // Update layout whenever visualizations are updated
   useEffect(() => {
     reloadLayout();
     loadVizComponents();
-  }, [panelVisualizations]);
+  }, [panelVisualizations, reloadLayout, loadVizComponents]);
 
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {

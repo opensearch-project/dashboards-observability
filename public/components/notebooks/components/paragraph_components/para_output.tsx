@@ -7,9 +7,9 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
 import moment from 'moment';
+import React, { useState } from 'react';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
-import React, { useState } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
@@ -38,7 +38,7 @@ export const ParaOutput = (props: {
 }) => {
   const createQueryColumns = (jsonColumns: any[]) => {
     let index = 0;
-    let datagridColumns = [];
+    const datagridColumns = [];
     for (index = 0; index < jsonColumns.length; ++index) {
       const datagridColumnObject = {
         id: jsonColumns[index].name,
@@ -54,7 +54,7 @@ export const ParaOutput = (props: {
     let index = 0;
     let schemaIndex = 0;
     for (index = 0; index < queryObject.datarows.length; ++index) {
-      let datarowValue = {};
+      const datarowValue = {};
       for (schemaIndex = 0; schemaIndex < queryObject.schema.length; ++schemaIndex) {
         const columnName = queryObject.schema[schemaIndex].name;
         if (typeof queryObject.datarows[index][schemaIndex] === 'object') {
@@ -70,12 +70,16 @@ export const ParaOutput = (props: {
     return data;
   };
 
-  const outputBody = (key: string, typeOut: string, val: string) => {
+  const OutputBody = ({ key, typeOut, val }: { key: string; typeOut: string; val: string }) => {
     /* Returns a component to render paragraph outputs using the para.typeOut property
      * Currently supports HTML, TABLE, IMG
      * TODO: add table rendering
      */
     const dateFormat = uiSettingsService.get('dateFormat');
+
+    const [visibleColumns, setVisibleColumns] = useState<Array<{ id: any; displayAsText: any }>>(
+      []
+    );
 
     if (typeOut !== undefined) {
       switch (typeOut) {
@@ -86,8 +90,8 @@ export const ParaOutput = (props: {
             return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
           } else {
             const columns = createQueryColumns(queryObject.schema);
+            setVisibleColumns(columns);
             const data = getQueryOutputData(queryObject);
-            const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
             return (
               <div>
                 <EuiText key={'query-input-key'}>
@@ -107,7 +111,7 @@ export const ParaOutput = (props: {
           }
         case 'MARKDOWN':
           return (
-            <EuiText key={key} className="markdown-output-text">
+            <EuiText className="wrapAll markdown-output-text">
               <MarkdownRender source={val} />
             </EuiText>
           );
@@ -121,11 +125,7 @@ export const ParaOutput = (props: {
               <EuiText size="s" style={{ marginLeft: 9 }}>
                 {`${from} - ${to}`}
               </EuiText>
-              <DashboardContainerByValueRenderer
-                key={key}
-                input={visInput}
-                onInputUpdated={setVisInput}
-              />
+              <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
             </>
           );
         case 'OBSERVABILITY_VISUALIZATION':
@@ -154,23 +154,24 @@ export const ParaOutput = (props: {
                   onRefresh={false}
                   pplFilterValue={''}
                   usedInNotebooks={true}
+                  contextMenuId="notebook"
                 />
               </div>
             </>
           );
         case 'HTML':
           return (
-            <EuiText key={key}>
+            <EuiText>
               {/* eslint-disable-next-line react/jsx-pascal-case */}
               <Media.HTML data={val} />
             </EuiText>
           );
         case 'TABLE':
-          return <pre key={key}>{val}</pre>;
+          return <pre>{val}</pre>;
         case 'IMG':
-          return <img alt="" src={'data:image/gif;base64,' + val} key={key} />;
+          return <img alt="" src={'data:image/gif;base64,' + val} />;
         default:
-          return <pre key={key}>{val}</pre>;
+          return <pre>{val}</pre>;
       }
     } else {
       console.log('output not supported', typeOut);
@@ -183,7 +184,13 @@ export const ParaOutput = (props: {
   return !para.isOutputHidden ? (
     <>
       {para.typeOut.map((typeOut: string, tIdx: number) => {
-        return outputBody(para.uniqueId + '_paraOutputBody', typeOut, para.out[tIdx]);
+        return (
+          <OutputBody
+            key={para.uniqueId + '_paraOutputBody_' + tIdx}
+            typeOut={typeOut}
+            val={para.out[tIdx]}
+          />
+        );
       })}
     </>
   ) : null;
