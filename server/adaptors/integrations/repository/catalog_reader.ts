@@ -6,5 +6,6 @@
 interface CatalogReader {
   readFile: (filename: string) => Promise<string>;
   readDir: (filename: string) => Promise<string[]>;
-  isDir: (filename: string) => Promise<boolean>;
+  isIntegration: (filename: string) => Promise<boolean>;
+  isRepository: (filename: string) => Promise<boolean>;
 }
