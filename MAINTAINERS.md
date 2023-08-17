@@ -20,6 +20,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Peng Huo          | [penghuo](https://github.com/penghuo)             | Amazon      |
 | Sean Kao          | [seankao-az](https://github.com/seankao-az)       | Amazon      |
 | Adam Tackett      | [TackAdam](https://github.com/TackAdam)           | Amazon      |
+| Dan Dong          | [danieldong51](https://github.com/danieldong51)   | Amazon      |
 | Anirudha Jadhav   | [anirudha](https://github.com/anirudha)           | Amazon      |
 
 ## Emeritus Maintainers
