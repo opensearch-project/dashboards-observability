@@ -18,6 +18,7 @@ import { Accelerate } from '../flint/accelerate_page';
 import { TestPage } from '../flint/test_page';
 import { DataSource } from '../flint/datasource';
 import { Table } from '../flint/table';
+import { Configure } from '../flint/configure_datasource';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -101,6 +102,12 @@ export const Home = (props: HomeProps) => {
                 dataSource={decodeURIComponent(routerProps.match.params.id)}
               />
             )}
+          />
+
+          <Route
+            exact
+            path={'/configure'}
+            render={(routerProps) => <Configure {...commonProps} />}
           />
         </Switch>
       </HashRouter>
