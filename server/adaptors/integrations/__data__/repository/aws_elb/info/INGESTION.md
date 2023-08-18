@@ -1,15 +1,16 @@
 # Sample Ingestion Pipeline
-This is a brief overview of a sample ingestion pipeline for the AWS ELB integration. 
+
+This is a brief overview of a sample ingestion pipeline for the AWS ELB integration.
 
 ## List of Components
+
 - An OpenSearch domain running through Docker
 - A FluentBit agent running through Docker
 - An ELB instance generating logs (not covered in this sample)
 
 ### OpenSearch and FluentBit Setup
 
-1. Look at [docker-compose.yaml]([docker-compose.yaml](https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml)https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml) to create FluentBit and OpenSearch Docker images and run them in the `opensearch-net` Docker network.
-   
+1. Look at [docker-compose.yaml](<[docker-compose.yaml](https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml)https://github.com/opensearch-project/data-prepper/blob/93d06db5cad280e2e4c53e12dfb47c7cbaa7b364/examples/log-ingestion/docker-compose.yaml>) to create FluentBit and OpenSearch Docker images and run them in the `opensearch-net` Docker network.
 2. Create the FluentBit as follows:
 
 ```
@@ -39,6 +40,7 @@ This is a brief overview of a sample ingestion pipeline for the AWS ELB integrat
     Index ss4o_logs-aws_elb-prod-sample
     Suppress_Type_Name On
 ```
+
 You would set INPUT as however you are ingesting your AWS ELB logs, more info [here](https://docs.fluentbit.io/manual/pipeline/inputs).
 
 3. Create your `parsers.conf` as follows:

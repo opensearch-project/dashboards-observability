@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-k8s-*"
-  ],
+  "index_patterns": ["ss4o_logs-k8s-*"],
   "data_stream": {},
   "template": {
     "aliases": {

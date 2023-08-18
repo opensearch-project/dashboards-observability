@@ -5,7 +5,7 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component" : "container",
+        "component": "container",
         "labels": ["container"]
       },
       "properties": {

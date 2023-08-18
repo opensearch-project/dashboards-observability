@@ -1536,9 +1536,7 @@
           "instanceIds": [],
           "documentName": "AWS-RunShellScript",
           "parameters": {
-            "commands": [
-              "curl -s http://127.0.0.1:2022/api/v1/health"
-            ]
+            "commands": ["curl -s http://127.0.0.1:2022/api/v1/health"]
           },
           "interactive": false
         },
@@ -1550,9 +1548,7 @@
             "comment": "",
             "expiresAfter": "Dec 3, 2021 12:11:27 AM",
             "parameters": {
-              "commands": [
-                "curl -s http://127.0.0.1:2022/api/v1/health"
-              ]
+              "commands": ["curl -s http://127.0.0.1:2022/api/v1/health"]
             },
             "instanceIds": [],
             "targets": [],

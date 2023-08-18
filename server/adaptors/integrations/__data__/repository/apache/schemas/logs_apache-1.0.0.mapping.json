@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-apache-*"
-  ],
+  "index_patterns": ["ss4o_logs-apache-*"],
   "data_stream": {},
   "template": {
     "aliases": {

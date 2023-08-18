@@ -6,7 +6,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "aws_elb",
-        "labels": ["aws","elb"]
+        "labels": ["aws", "elb"]
       },
       "properties": {
         "aws": {

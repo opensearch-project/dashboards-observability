@@ -43,8 +43,8 @@ export function IntegrationDetails(props: any) {
           </EuiText>
           <EuiSpacer size="m" />
           <EuiBadgeGroup>
-            {config.components.map((cateogry) => {
-              return <EuiBadge>{cateogry.name}</EuiBadge>;
+            {config.labels?.map((label: string) => {
+              return <EuiBadge>{label}</EuiBadge>;
             })}
           </EuiBadgeGroup>
         </EuiFlexItem>
