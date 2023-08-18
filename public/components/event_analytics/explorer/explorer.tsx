@@ -546,7 +546,11 @@ export const Explorer = ({
                         getPatterns(intrv, getErrorHandler('Error fetching patterns'));
                       }}
                       stateInterval={selectedIntervalRef.current?.value}
-                      timeSpan={(Object.entries(countDistribution.data).find(([key]) => key.slice(0,4) === "span")|| [])[1]}
+                      timeSpan={
+                        (Object.entries(countDistribution.data).find(
+                          ([key]) => key.slice(0, 4) === 'span'
+                        ) || [])[1] as string[] | undefined
+                      }
                     />
                     <CountDistribution countDistribution={countDistribution} />
                     <EuiHorizontalRule margin="xs" />

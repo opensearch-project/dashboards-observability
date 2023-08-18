@@ -11,7 +11,7 @@ import moment from 'moment';
 
 // TODO: move this function into some common library for other observability datetime uses
 function reformatDate(inputDate: string) {
-  return moment(inputDate).format('MMM D, YYYY @ HH:mm:ss.SSS')
+  return moment(inputDate).format('MMM D, YYYY @ HH:mm:ss.SSS');
 }
 
 export interface TimechartHeaderProps {
@@ -41,16 +41,15 @@ export interface TimechartHeaderProps {
   /**
    * current time span being displayed on the count distribution
    */
-  timeSpan: Array<string>;
+  timeSpan: string[] | undefined;
 }
 
 export function TimechartHeader({
   options,
   onChangeInterval,
   stateInterval,
-  timeSpan
+  timeSpan,
 }: TimechartHeaderProps) {
-
   const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChangeInterval(e.target.value);
   };
@@ -65,7 +64,11 @@ export function TimechartHeader({
             })}
             delay="long"
           >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s">{reformatDate(timeSpan[0])} - {reformatDate(timeSpan[timeSpan.length-1])}</EuiText>
+            {/* ?. is optional chaining and ?? is nullish coalescing */}
+            <EuiText data-test-subj="discoverIntervalDateRange" size="s">
+              {reformatDate(timeSpan?.[0] ?? 'now')} -{' '}
+              {reformatDate(timeSpan?.[timeSpan.length - 1] ?? 'now')}
+            </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
