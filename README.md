@@ -107,7 +107,6 @@ Dashboards offer a solution for a few selected use cases, and are great tools if
 ### Integrations
 Integration is a new type of logical component that allows high level composition of multiple Dashboards / Applications / Queries and more. Integrations can be used to bring together all the metrics and logs from the infrastructure and gain insight into the unified system as a whole.
 
-<video src='https://github.com/opensearch-project/dashboards-observability/assets/48943349/8c918fce-35b8-4824-ae2d-6881aad7b9a2' width=180/>
 ---
 
 Integration usually consist of the following assets:
@@ -161,3 +160,8 @@ This project is licensed under the [Apache v2.0 License](LICENSE).
 ## Copyright
 
 Copyright OpenSearch Contributors. See [NOTICE](NOTICE) for details.
+
+## Screenshots
+
+<video src='https://github.com/opensearch-project/dashboards-observability/assets/48943349/8c918fce-35b8-4824-ae2d-6881aad7b9a2' width=180/>
+
