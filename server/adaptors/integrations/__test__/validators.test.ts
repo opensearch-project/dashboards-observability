@@ -55,6 +55,11 @@ describe('validateTemplate', () => {
     expect(validateTemplate(sample2, true)).toBe(false);
     expect(logValidationErrorsMock).toBeCalledTimes(2);
   });
+
+  it("Doesn't crash if given a non-object", () => {
+    // May happen in some user-provided JSON parsing scenarios.
+    expect(validateTemplate([] as any, true)).toBe(false);
+  });
 });
 
 describe('validateInstance', () => {
@@ -75,5 +80,10 @@ describe('validateInstance', () => {
 
     expect(validateInstance(sample1, true)).toBe(false);
     expect(logValidationErrorsMock).toBeCalled();
+  });
+
+  it("Doesn't crash if given a non-object", () => {
+    // May happen in some user-provided JSON parsing scenarios.
+    expect(validateInstance([] as any, true)).toBe(false);
   });
 });

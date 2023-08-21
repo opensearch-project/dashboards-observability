@@ -116,7 +116,7 @@ export const validateTemplate = (data: { name?: unknown }, logErrors?: true): bo
   if (!templateValidator(data)) {
     if (logErrors) {
       console.error(
-        `The integration '${data.name ?? 'config'}' is invalid:`,
+        `The integration config '${data.name ?? data}' is invalid:`,
         ajv.errorsText(templateValidator.errors)
       );
     }
@@ -136,7 +136,7 @@ export const validateInstance = (data: { name?: unknown }, logErrors?: true): bo
   if (!instanceValidator(data)) {
     if (logErrors) {
       console.error(
-        `The integration '${data.name ?? 'instance'} is invalid:`,
+        `The integration instance '${data.name ?? data}' is invalid:`,
         ajv.errorsText(instanceValidator.errors)
       );
     }
