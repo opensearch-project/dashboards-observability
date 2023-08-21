@@ -107,5 +107,40 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
   required: ['name', 'templateName', 'dataSource', 'creationDate', 'assets'],
 };
 
-export const templateValidator = ajv.compile(templateSchema);
-export const instanceValidator = ajv.compile(instanceSchema);
+const templateValidator = ajv.compile(templateSchema);
+const instanceValidator = ajv.compile(instanceSchema);
+
+// AJV validators use side effects for errors, so we provide a more conventional wrapper.
+// The wrapper optionally handles error logging with the `logErrors` parameter.
+export const validateTemplate = (data: { name?: unknown }, logErrors?: true): boolean => {
+  if (!templateValidator(data)) {
+    if (logErrors) {
+      console.error(
+        `The integration '${data.name ?? 'config'}' is invalid:`,
+        ajv.errorsText(templateValidator.errors)
+      );
+    }
+    return false;
+  }
+  // We assume an invariant that the type of an integration is connected with its component.
+  if (data.components.findIndex((x) => x.name === data.type) < 0) {
+    if (logErrors) {
+      console.error(`The integration type '${data.type}' must be included as a component`);
+    }
+    return false;
+  }
+  return true;
+};
+
+export const validateInstance = (data: { name?: unknown }, logErrors?: true): boolean => {
+  if (!instanceValidator(data)) {
+    if (logErrors) {
+      console.error(
+        `The integration '${data.name ?? 'instance'} is invalid:`,
+        ajv.errorsText(instanceValidator.errors)
+      );
+    }
+    return false;
+  }
+  return true;
+};

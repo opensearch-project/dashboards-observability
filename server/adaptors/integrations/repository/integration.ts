@@ -6,7 +6,7 @@
 import * as fs from 'fs/promises';
 import path from 'path';
 import { ValidateFunction } from 'ajv';
-import { templateValidator } from '../validators';
+import { validateTemplate } from '../validators';
 
 /**
  * Helper function to compare version numbers.
@@ -47,18 +47,6 @@ async function isDirectory(dirPath: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-/**
- * Helper function to log validation errors.
- * Relies on the `ajv` package for validation error logs..
- *
- * @param integration The name of the component that failed validation.
- * @param validator A failing ajv validator.
- */
-function logValidationErrors(integration: string, validator: ValidateFunction<any>) {
-  const errors = validator.errors?.map((e) => e.message);
-  console.error(`Validation errors in ${integration}`, errors);
 }
 
 /**
@@ -165,12 +153,7 @@ export class Integration {
       const config = await fs.readFile(configPath, { encoding: 'utf-8' });
       const possibleTemplate = JSON.parse(config);
 
-      if (!templateValidator(possibleTemplate)) {
-        logValidationErrors(configFile, templateValidator);
-        return null;
-      }
-
-      return possibleTemplate;
+      return validateTemplate(possibleTemplate, true) ? possibleTemplate : null;
     } catch (err: any) {
       if (err instanceof SyntaxError) {
         console.error(`Syntax errors in ${configFile}`, err);
