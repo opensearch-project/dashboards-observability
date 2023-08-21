@@ -5,7 +5,6 @@
 
 import * as fs from 'fs/promises';
 import path from 'path';
-import { ValidateFunction } from 'ajv';
 import { validateTemplate } from '../validators';
 
 /**
