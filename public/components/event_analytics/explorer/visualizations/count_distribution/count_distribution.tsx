@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { BarOrientation, LONG_CHART_COLOR } from '../../../../../../common/constants/shared';
 import { Plt } from '../../../../visualizations/plotly/plot';
 
@@ -31,9 +32,58 @@ export const CountDistribution = ({ countDistribution }: any) => {
     },
   ];
 
+  // fill the final data with the exact right amount of empty x plot points
+  function fillWithEmpty(processedData: any) {
+    // derive a start date
+    const startDate = moment('2022-08-01 00:00:00');
+    // derive end date
+    const endDate = moment();
+    // figure out how long each interval is
+    const intervalPeriod = 'M';
+
+    // create new x and y arrays
+    const x = [];
+    const y = [];
+
+    // current x values
+    const xVals = processedData[0].x;
+    const yVals = processedData[0].y;
+    let currxIndex = 0;
+
+    // have a current date variable
+    const currentDate = startDate;
+
+    // from start -> end, iterate
+    while (currentDate < endDate) {
+      // TODO: make invariant check to see that no x value would be getting skipped over
+      // if this date already exists in the x field, continue
+      if (currentDate.isSame(xVals[currxIndex])) {
+        // TODO: add invariant checking that currxIndex is never over the max num of old values
+        x.push(xVals[currxIndex]);
+        y.push(yVals[currxIndex]);
+        currxIndex++; // advance the pointer for old x values, we've used this last value
+      } else {
+        // if we cannot find current date in old x values, add it in
+        x.push(currentDate.format('YYYY-MM-DD HH:mm:ss'));
+        y.push(0);
+      }
+
+      currentDate.add(1, intervalPeriod);
+    }
+
+    // replace x and y with the new arrays
+    console.log(x);
+    console.log(y);
+    processedData[0].x = x;
+    processedData[0].y = y;
+
+    // at the end, return the new object
+    return processedData;
+  }
+
   return (
     <Plt
-      data={finalData}
+      data={fillWithEmpty(finalData)}
       layout={{
         showlegend: true,
         margin: {
