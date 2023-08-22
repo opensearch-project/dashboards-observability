@@ -47,6 +47,9 @@ export function Plt(props: PltProps) {
       automargin: true,
     },
     yaxis: {
+      title: {
+        text: 'Count',
+      },
       showgrid: true,
       zeroline: false,
       rangemode: 'normal',
