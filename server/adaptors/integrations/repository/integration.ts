@@ -151,8 +151,12 @@ export class Integration {
     try {
       const config = await fs.readFile(configPath, { encoding: 'utf-8' });
       const possibleTemplate = JSON.parse(config);
-
-      return validateTemplate(possibleTemplate, true) ? possibleTemplate : null;
+      const template = validateTemplate(possibleTemplate);
+      if (template.ok) {
+        return template.value;
+      }
+      console.error(template.error);
+      return null;
     } catch (err: any) {
       if (err instanceof SyntaxError) {
         console.error(`Syntax errors in ${configFile}`, err);

@@ -5,6 +5,8 @@
 
 import Ajv, { JSONSchemaType } from 'ajv';
 
+export type ValidationResult<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+
 const ajv = new Ajv();
 
 const staticAsset: JSONSchemaType<StaticAsset> = {
@@ -110,37 +112,50 @@ const instanceSchema: JSONSchemaType<IntegrationInstance> = {
 const templateValidator = ajv.compile(templateSchema);
 const instanceValidator = ajv.compile(instanceSchema);
 
-// AJV validators use side effects for errors, so we provide a more conventional wrapper.
-// The wrapper optionally handles error logging with the `logErrors` parameter.
-export const validateTemplate = (data: { name?: unknown }, logErrors?: true): boolean => {
+/**
+ * Validates an integration template against a predefined schema using the AJV library.
+ * Since AJV validators use side effects for errors,
+ * this is a more conventional wrapper that simplifies calling.
+ *
+ * @param data The data to be validated as an IntegrationTemplate.
+ * @return A ValidationResult indicating whether the validation was successful or not.
+ *         If validation succeeds, returns an object with 'ok' set to true and the validated data.
+ *         If validation fails, returns an object with 'ok' set to false and an Error object describing the validation error.
+ */
+export const validateTemplate = (data: unknown): ValidationResult<IntegrationTemplate> => {
   if (!templateValidator(data)) {
-    if (logErrors) {
-      console.error(
-        `The integration config '${data.name ?? data}' is invalid:`,
-        ajv.errorsText(templateValidator.errors)
-      );
-    }
-    return false;
+    return { ok: false, error: new Error(ajv.errorsText(templateValidator.errors)) };
   }
   // We assume an invariant that the type of an integration is connected with its component.
   if (data.components.findIndex((x) => x.name === data.type) < 0) {
-    if (logErrors) {
-      console.error(`The integration type '${data.type}' must be included as a component`);
-    }
-    return false;
+    return {
+      ok: false,
+      error: new Error(`The integration type '${data.type}' must be included as a component`),
+    };
   }
-  return true;
+  return {
+    ok: true,
+    value: data,
+  };
 };
 
-export const validateInstance = (data: { name?: unknown }, logErrors?: true): boolean => {
+/**
+ * Validates an integration instance against a predefined schema using the AJV library.
+ *
+ * @param data The data to be validated as an IntegrationInstance.
+ * @return A ValidationResult indicating whether the validation was successful or not.
+ *         If validation succeeds, returns an object with 'ok' set to true and the validated data.
+ *         If validation fails, returns an object with 'ok' set to false and an Error object describing the validation error.
+ */
+export const validateInstance = (data: unknown): ValidationResult<IntegrationInstance> => {
   if (!instanceValidator(data)) {
-    if (logErrors) {
-      console.error(
-        `The integration instance '${data.name ?? data}' is invalid:`,
-        ajv.errorsText(instanceValidator.errors)
-      );
-    }
-    return false;
+    return {
+      ok: false,
+      error: new Error(ajv.errorsText(instanceValidator.errors)),
+    };
   }
-  return true;
+  return {
+    ok: true,
+    value: data,
+  };
 };

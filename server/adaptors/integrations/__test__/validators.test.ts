@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { validateTemplate, validateInstance } from '../validators';
+import { validateTemplate, validateInstance, ValidationResult } from '../validators';
 
 const validTemplate: IntegrationTemplate = {
   name: 'test',
@@ -28,62 +28,57 @@ const validInstance: IntegrationInstance = {
 };
 
 describe('validateTemplate', () => {
-  it('Returns true for a valid Integration Template', () => {
-    expect(validateTemplate(validTemplate)).toBe(true);
+  it('Returns a success value for a valid Integration Template', () => {
+    const result: ValidationResult<IntegrationTemplate> = validateTemplate(validTemplate);
+    expect(result.ok).toBe(true);
+    expect((result as any).value).toBe(validTemplate);
   });
 
-  it('Returns false if a template is missing a license', () => {
+  it('Returns a failure value if a template is missing a license', () => {
     const sample: any = structuredClone(validTemplate);
     sample.license = undefined;
-    expect(validateTemplate(sample)).toBe(false);
+
+    const result: ValidationResult<IntegrationTemplate> = validateTemplate(sample);
+
+    expect(result.ok).toBe(false);
+    expect((result as any).error).toBeInstanceOf(Error);
   });
 
-  it('Returns false if a template has an invalid type', () => {
+  it('Returns a failure if a template has an invalid type', () => {
     const sample: any = structuredClone(validTemplate);
     sample.components[0].name = 'not-logs';
-    expect(validateTemplate(sample)).toBe(false);
-  });
 
-  it('Respects logErrors', () => {
-    const logValidationErrorsMock = jest.spyOn(console, 'error');
-    const sample1: any = structuredClone(validTemplate);
-    sample1.license = undefined;
-    const sample2: any = structuredClone(validTemplate);
-    sample2.components[0].name = 'not-logs';
+    const result: ValidationResult<IntegrationTemplate> = validateTemplate(sample);
 
-    expect(validateTemplate(sample1, true)).toBe(false);
-    expect(validateTemplate(sample2, true)).toBe(false);
-    expect(logValidationErrorsMock).toBeCalledTimes(2);
+    expect(result.ok).toBe(false);
+    expect((result as any).error).toBeInstanceOf(Error);
   });
 
   it("Doesn't crash if given a non-object", () => {
     // May happen in some user-provided JSON parsing scenarios.
-    expect(validateTemplate([] as any, true)).toBe(false);
+    expect(validateTemplate([] as any).ok).toBe(false);
   });
 });
 
 describe('validateInstance', () => {
   it('Returns true for a valid Integration Instance', () => {
-    expect(validateInstance(validInstance)).toBe(true);
+    const result: ValidationResult<IntegrationInstance> = validateInstance(validInstance);
+    expect(result.ok).toBe(true);
+    expect((result as any).value).toBe(validInstance);
   });
 
   it('Returns false if an instance is missing a template', () => {
     const sample: any = structuredClone(validInstance);
     sample.templateName = undefined;
-    expect(validateInstance(sample)).toBe(false);
-  });
 
-  it('Respects logErrors', () => {
-    const logValidationErrorsMock = jest.spyOn(console, 'error');
-    const sample1: any = structuredClone(validInstance);
-    sample1.templateName = undefined;
+    const result: ValidationResult<IntegrationInstance> = validateInstance(sample);
 
-    expect(validateInstance(sample1, true)).toBe(false);
-    expect(logValidationErrorsMock).toBeCalled();
+    expect(result.ok).toBe(false);
+    expect((result as any).error).toBeInstanceOf(Error);
   });
 
   it("Doesn't crash if given a non-object", () => {
     // May happen in some user-provided JSON parsing scenarios.
-    expect(validateInstance([] as any, true)).toBe(false);
+    expect(validateInstance([] as any).ok).toBe(false);
   });
 });
