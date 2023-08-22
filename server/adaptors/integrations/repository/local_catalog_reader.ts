@@ -19,16 +19,17 @@ export class LocalCatalogReader implements CatalogReader {
   }
 
   // Use before any call to `fs`
-  _prepare(filename: string): string {
-    return path.join(this.directory, sanitize(filename));
+  // Sanitizes filenames by default, manually prepend directories with a prefix if necessary
+  _prepare(filename: string, prefix?: string): string {
+    return path.join(this.directory, prefix ?? '.', sanitize(filename));
   }
 
-  async readFile(filename: string): Promise<string> {
-    return await fs.readFile(this._prepare(filename), { encoding: 'utf-8' });
+  async readFile(filename: string, type?: IntegrationPart): Promise<string> {
+    return await fs.readFile(this._prepare(filename, type), { encoding: 'utf-8' });
   }
 
-  async readFileRaw(filename: string): Promise<Buffer> {
-    return await fs.readFile(this._prepare(filename));
+  async readFileRaw(filename: string, type?: IntegrationPart): Promise<Buffer> {
+    return await fs.readFile(this._prepare(filename, type));
   }
 
   async readDir(dirname: string): Promise<string[]> {

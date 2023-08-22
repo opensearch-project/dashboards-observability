@@ -109,7 +109,7 @@ export class Integration {
    * @returns The config if a valid config matching the version is present, otherwise null.
    */
   async getConfig(version?: string): Promise<Result<IntegrationTemplate>> {
-    if (!this.reader.isDirectory(this.directory)) {
+    if (!(await this.reader.isDirectory(this.directory))) {
       return { ok: false, error: new Error(`${this.directory} is not a valid directory`) };
     }
 
@@ -163,12 +163,9 @@ export class Integration {
 
     const resultValue: { savedObjects?: object[] } = {};
     if (config.assets.savedObjects) {
-      const sobjPath = path.join(
-        'assets',
-        `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`
-      );
+      const sobjPath = `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`;
       try {
-        const ndjson = await this.reader.readFile(sobjPath);
+        const ndjson = await this.reader.readFile(sobjPath, 'assets');
         const asJson = '[' + ndjson.trim().replace(/\n/g, ',') + ']';
         const parsed = JSON.parse(asJson);
         resultValue.savedObjects = parsed;
@@ -202,9 +199,8 @@ export class Integration {
 
     const resultValue: { sampleData: object[] | null } = { sampleData: null };
     if (config.sampleData) {
-      const sobjPath = path.join('data', config.sampleData?.path);
       try {
-        const jsonContent = await this.reader.readFile(sobjPath);
+        const jsonContent = await this.reader.readFile(config.sampleData.path, 'data');
         const parsed = JSON.parse(jsonContent) as object[];
         for (const value of parsed) {
           if (!('@timestamp' in value)) {
@@ -256,7 +252,7 @@ export class Integration {
     try {
       for (const component of config.components) {
         const schemaFile = `${component.name}-${component.version}.mapping.json`;
-        const rawSchema = await this.reader.readFile(path.join('schemas', schemaFile));
+        const rawSchema = await this.reader.readFile(schemaFile, 'schemas');
         const parsedSchema = JSON.parse(rawSchema);
         resultValue.mappings[component.name] = parsedSchema;
       }
@@ -273,9 +269,8 @@ export class Integration {
    * @returns A buffer with the static's data if present, otherwise null.
    */
   async getStatic(staticPath: string): Promise<Result<Buffer>> {
-    const fullStaticPath = path.join('static', staticPath);
     try {
-      const buffer = await this.reader.readFileRaw(fullStaticPath);
+      const buffer = await this.reader.readFileRaw(staticPath, 'static');
       return { ok: true, value: buffer };
     } catch (err: any) {
       return { ok: false, error: err };
