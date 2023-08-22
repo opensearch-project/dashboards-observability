@@ -20,14 +20,11 @@ describe('Repository', () => {
 
   describe('getIntegrationList', () => {
     it('should return an array of Integration instances', async () => {
-      // Mock fs.readdir to return a list of folders
       jest.spyOn(fs, 'readdir').mockResolvedValue((['folder1', 'folder2'] as unknown) as Dirent[]);
-
-      // Mock fs.lstat to return a directory status
       jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
-
-      // Mock Integration check method to always return true
-      jest.spyOn(Integration.prototype, 'check').mockResolvedValue(true);
+      jest
+        .spyOn(Integration.prototype, 'getConfig')
+        .mockResolvedValue({ ok: true, value: {} as any });
 
       const integrations = await repository.getIntegrationList();
 
@@ -48,7 +45,9 @@ describe('Repository', () => {
         }
       });
 
-      jest.spyOn(Integration.prototype, 'check').mockResolvedValue(true);
+      jest
+        .spyOn(Integration.prototype, 'getConfig')
+        .mockResolvedValue({ ok: true, value: {} as any });
 
       const integrations = await repository.getIntegrationList();
 
@@ -67,15 +66,20 @@ describe('Repository', () => {
 
   describe('getIntegration', () => {
     it('should return an Integration instance if it exists and passes the check', async () => {
-      jest.spyOn(Integration.prototype, 'check').mockResolvedValue(true);
+      jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
+      jest
+        .spyOn(Integration.prototype, 'getConfig')
+        .mockResolvedValue({ ok: true, value: {} as any });
 
       const integration = await repository.getIntegration('integrationName');
 
       expect(integration).toBeInstanceOf(Integration);
     });
 
-    it('should return null if the integration does not exist or fails the check', async () => {
-      jest.spyOn(Integration.prototype, 'check').mockResolvedValue(false);
+    it('should return null if the integration does not exist or fails checks', async () => {
+      jest
+        .spyOn(Integration.prototype, 'getConfig')
+        .mockResolvedValue({ ok: false, error: new Error() });
 
       const integration = await repository.getIntegration('invalidIntegration');
 
