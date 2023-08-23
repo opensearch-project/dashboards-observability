@@ -192,7 +192,7 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return Promise.resolve(data.value);
   };
 
-  getSchemas = async (templateName: string): Promise<any> => {
+  getSchemas = async (templateName: string): Promise<{ mappings: { [key: string]: unknown } }> => {
     const integration = await this.repository.getIntegration(templateName);
     if (integration === null) {
       return Promise.reject({
@@ -200,7 +200,11 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         statusCode: 404,
       });
     }
-    return Promise.resolve(integration.getSchemas());
+    const result = await integration.getSchemas();
+    if (result.ok) {
+      return result.value;
+    }
+    return Promise.reject(result.error);
   };
 
   getAssets = async (templateName: string): Promise<{ savedObjects?: any }> => {
