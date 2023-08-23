@@ -548,12 +548,8 @@ export const Explorer = ({
                         getPatterns(intrv, getErrorHandler('Error fetching patterns'));
                       }}
                       stateInterval={selectedIntervalRef.current?.value}
-                      timeSpan={
-                        // change this here to count distribution start and end finder
-                        (Object.entries(countDistribution.data).find(
-                          ([key]) => key.slice(0, 4) === 'span'
-                        ) || [])[1] as string[] | undefined
-                      }
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
                     />
                     <CountDistribution
                       countDistribution={countDistribution}
