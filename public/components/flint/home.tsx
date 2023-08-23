@@ -6,20 +6,22 @@
 import React from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { TraceAnalyticsCoreDeps } from '../trace_analytics/home';
-import { ChromeBreadcrumb } from '../../../../../src/core/public';
+import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
 import { Accelerate } from '../flint/components/accelerate_page';
 import { TestPage } from '../flint/components/test_page';
 import { DataSource } from '../flint/components/datasource';
 import { Table } from '../flint/components/table';
 import { Configure } from '../flint/components/configure_datasource';
 import { Datasources } from '../flint/components/datasources';
-import { AddedIntegrationsTable } from './components/manage_datasource_table';
+import { AddedIntegrationsTable, ManageDatasourcesTable } from './components/manage_datasource_table';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
-interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
-  parentBreadcrumbs: ChromeBreadcrumb[];
+export interface HomeProps extends RouteComponentProps, AppAnalyticsCoreDeps {
   pplService: any;
+  parentBreadcrumb: ChromeBreadcrumb;
+  http: HttpStart;
+  chrome: ChromeStart;
 }
 
 export const Home = (props: HomeProps) => {
@@ -78,7 +80,7 @@ export const Home = (props: HomeProps) => {
           <Route
             exact
             path={'/manage'}
-            render={(routerProps) => <AddedIntegrationsTable {...commonProps} />}
+            render={(routerProps) => <ManageDatasourcesTable {...commonProps} />}
           />
 
           <Route

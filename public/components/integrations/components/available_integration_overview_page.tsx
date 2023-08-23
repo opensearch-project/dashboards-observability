@@ -24,6 +24,7 @@ import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
 import { TabbedPage } from '../../common/tabbed_page/tabbed_page';
 import { IntegrationHeader } from './integration_header';
+import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationType {
   labels?: string[];
@@ -57,6 +58,7 @@ export interface AvailableIntegrationsCardViewProps {
   query: string;
   setQuery: (input: string) => void;
   renderCateogryFilters: () => React.JSX.Element;
+  http: HttpStart;
 }
 
 export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOverviewPageProps) {

@@ -29,11 +29,21 @@ import { DATASOURCES_BASE, INTEGRATIONS_BASE } from '../../../../common/constant
 import { useToast } from '../../../../public/components/common/toast';
 import { DatasourcesHeader } from './datasources_header';
 import { TabbedPage } from '../../../../public/components/common/tabbed_page/tabbed_page';
+import { RouteComponentProps } from 'react-router-dom';
+import { HttpStart } from '../../../../../../src/core/public';
+import { HomeProps } from '../home';
+import { coreRefs } from '../../../framework/core_refs';
 
-export function ManageDatasourcesTable(props: AddedIntegrationsTableProps) {
+export interface ManageDatasourcesTableProps extends HomeProps{
+}
+
+export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
   const { http, chrome } = props;
+  const {pplService} = coreRefs;
 
-  const integrations = [];
+  
+
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -46,13 +56,18 @@ export function ManageDatasourcesTable(props: AddedIntegrationsTableProps) {
   }, []);
 
   async function handleDataRequest() {
-    http.get(`${DATASOURCES_BASE}/datasources`).then((exists) => setData(exists.data));
+      pplService!
+        .fetch({ query: "show datasources", format: 'jdbc' })
+        .then((data) =>
+          setData(
+            data.jsonData.map((x: any) => {
+              return { name: x.DATASOURCE_NAME };
+            })
+          ));
   }
 
   const { setToast } = useToast();
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   const tableColumns = [
     {
@@ -148,7 +163,7 @@ export function ManageDatasourcesTable(props: AddedIntegrationsTableProps) {
         field: 'templateName',
         name: 'Type',
         multiSelect: false,
-        options: INTEGRATION_TEMPLATE_OPTIONS.map((i) => ({
+        options: [].map((i) => ({
           value: i,
           name: i,
           view: i,
@@ -157,7 +172,7 @@ export function ManageDatasourcesTable(props: AddedIntegrationsTableProps) {
     ],
   };
 
-  const entries = integrations.map((integration) => {
+  const entries = data.map((integration) => {
     const id = integration.id;
     const templateName = integration.templateName;
     const creationDate = integration.creationDate;
@@ -176,7 +191,6 @@ export function ManageDatasourcesTable(props: AddedIntegrationsTableProps) {
           header: DatasourcesHeader(),
         })}
         <EuiPageContent data-test-subj="addedIntegrationsArea">
-          {entries && entries.length > 0 ? (
             <EuiInMemoryTable
               loading={props.loading}
               items={entries}
@@ -191,23 +205,6 @@ export function ManageDatasourcesTable(props: AddedIntegrationsTableProps) {
               allowNeutralSort={false}
               isSelectable={true}
             />
-          ) : (
-            <>
-              <EuiFlexGroup direction="column" alignItems="center">
-                <EuiFlexItem grow={true}>
-                  <EuiIcon size="xxl" type="help" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <EuiText textAlign="center" data-test-subj="no-added-integrations">
-                <h2>
-                  There are currently no added integrations. Add them{' '}
-                  <EuiLink href={'#/available'}>here</EuiLink> to start using pre-canned assets!
-                </h2>
-              </EuiText>
-              <EuiSpacer size="m" />
-            </>
-          )}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
