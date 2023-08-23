@@ -11,7 +11,6 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       },
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
-      "getBrand$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
@@ -176,6 +175,69 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
         ],
       },
       "getIsVisible$": [MockFunction],
+      "logos": Object {
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
+      },
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
@@ -202,7 +264,6 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "removeApplicationClass": [MockFunction],
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
-      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
       "setCustomNavLink": [MockFunction],
       "setHelpExtension": [MockFunction],
