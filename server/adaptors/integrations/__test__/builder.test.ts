@@ -173,16 +173,6 @@ describe('IntegrationInstanceBuilder', () => {
 
       await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(errorMessage);
     });
-
-    // it('should reject with an error if getConfig returns null', async () => {
-    //   const options = {
-    //     dataSource: 'instance-datasource',
-    //     name: 'instance-name',
-    //   };
-    //   sampleIntegration.getConfig = jest.fn().mockResolvedValue(null);
-
-    //   await expect(builder.build(sampleIntegration, options)).rejects.toThrowError();
-    // });
   });
 
   describe('remapIDs', () => {
