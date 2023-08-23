@@ -552,7 +552,10 @@ export const Explorer = ({
                         ) || [])[1] as string[] | undefined
                       }
                     />
-                    <CountDistribution countDistribution={countDistribution} />
+                    <CountDistribution
+                      countDistribution={countDistribution}
+                      selectedInterval={selectedIntervalRef.current?.value}
+                    />
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
