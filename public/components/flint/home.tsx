@@ -13,7 +13,10 @@ import { DataSource } from '../flint/components/datasource';
 import { Table } from '../flint/components/table';
 import { Configure } from '../flint/components/configure_datasource';
 import { Datasources } from '../flint/components/datasources';
-import { AddedIntegrationsTable, ManageDatasourcesTable } from './components/manage_datasource_table';
+import {
+  AddedIntegrationsTable,
+  ManageDatasourcesTable,
+} from './components/manage_datasource_table';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -71,15 +74,11 @@ export const Home = (props: HomeProps) => {
             )}
           />
 
-          <Route
-            exact
-            path={['/', '/new']}
-            render={(routerProps) => <Datasources {...commonProps} />}
-          />
+          <Route exact path={'/new'} render={(routerProps) => <Datasources {...commonProps} />} />
 
           <Route
             exact
-            path={'/manage'}
+            path={['/', '/manage']}
             render={(routerProps) => <ManageDatasourcesTable {...commonProps} />}
           />
 

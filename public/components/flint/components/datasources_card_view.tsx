@@ -26,6 +26,7 @@ import {
 } from '../../integrations/components/available_integration_overview_page';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from '../../integrations/components/integration_category_badge_group';
+import { NewDatasourcesDescription } from './new_datasource_description';
 
 export function DatasourcesCardView(props: AvailableIntegrationsCardViewProps) {
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
@@ -92,6 +93,7 @@ export function DatasourcesCardView(props: AvailableIntegrationsCardViewProps) {
 
   return (
     <EuiPanel>
+      <NewDatasourcesDescription />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldSearch

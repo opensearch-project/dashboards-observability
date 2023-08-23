@@ -22,14 +22,19 @@ interface TabbedPageProps {
   header: JSX.Element;
 }
 
+interface Tab {
+  id: string;
+  name: string;
+}
+
 export function TabbedPage(props: TabbedPageProps) {
   const { tabNames, header } = props;
-  const tabs = tabNames.map((tabName: [string, string]) => {
+  const tabs: Tab[] = tabNames.map((tabName: [string, string]) => {
     return { id: tabName[0], name: tabName[1] };
   });
 
   const [selectedTabId, setSelectedTabId] = useState(
-    window.location.hash.substring(2) ? window.location.hash.substring(2) : tabs && tabs.at(-1).id
+    window.location.hash.substring(2) ? window.location.hash.substring(2) : tabs && tabs.at(0)!.id
   );
 
   const onSelectedTabChanged = (id) => {

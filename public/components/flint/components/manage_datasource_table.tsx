@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { AddedIntegrationsTableProps } from '../../integrations/components/added_integration_overview_page';
 import {
   ASSET_FILTER_OPTIONS,
@@ -29,19 +30,16 @@ import { DATASOURCES_BASE, INTEGRATIONS_BASE } from '../../../../common/constant
 import { useToast } from '../../../../public/components/common/toast';
 import { DatasourcesHeader } from './datasources_header';
 import { TabbedPage } from '../../../../public/components/common/tabbed_page/tabbed_page';
-import { RouteComponentProps } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
 import { HomeProps } from '../home';
 import { coreRefs } from '../../../framework/core_refs';
+import { DatasourcesDescription } from './manage_datasource_description';
 
-export interface ManageDatasourcesTableProps extends HomeProps{
-}
+export type ManageDatasourcesTableProps = HomeProps;
 
 export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
   const { http, chrome } = props;
-  const {pplService} = coreRefs;
-
-  
+  const { pplService } = coreRefs;
 
   const [data, setData] = useState([]);
 
@@ -56,52 +54,61 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
   }, []);
 
   async function handleDataRequest() {
-      pplService!
-        .fetch({ query: "show datasources", format: 'jdbc' })
-        .then((data) =>
-          setData(
-            data.jsonData.map((x: any) => {
-              return { name: x.DATASOURCE_NAME };
-            })
-          ));
+    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((datasources) =>
+      setData(
+        datasources.jsonData.map((x: any) => {
+          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
+        })
+      )
+    );
   }
 
   const { setToast } = useToast();
 
-
   const tableColumns = [
     {
       field: 'name',
-      name: 'Asset name',
+      name: 'Name',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink data-test-subj={`${record.name}IntegrationLink`} href={`#/installed/${record.id}`}>
+        <EuiLink
+          data-test-subj={`${record.name}DatasourceLink`}
+          href={`#/accelerate/${record.name}`}
+        >
           {_.truncate(record.name, { length: 100 })}
         </EuiLink>
       ),
     },
     {
-      field: 'source',
-      name: 'Source',
+      field: 'connectionType',
+      name: 'Connection type',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.templateName}IntegrationDescription`}
-          href={`#/available/${record.templateName}`}
-        >
-          {_.truncate(record.templateName, { length: 100 })}
-        </EuiLink>
+        <EuiText data-test-subj={`${record.templateName}DatasourceType`}>
+          {_.truncate(record.connectionType, { length: 100 })}
+        </EuiText>
       ),
     },
     {
-      field: 'dateAdded',
-      name: 'Date Added',
+      field: 'connectedTo',
+      name: 'Connected to',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}IntegrationDescription`}>
+        <EuiText data-test-subj={`${record.templateName}DatasourceConnectedTo`}>
+          {_.truncate(record.creationDate, { length: 100 })}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'connectionHealth',
+      name: 'Connection Health',
+      sortable: true,
+      truncateText: true,
+      render: (value, record) => (
+        <EuiText data-test-subj={`${record.templateName}DatasourceConnectionHealth`}>
           {_.truncate(record.creationDate, { length: 100 })}
         </EuiText>
       ),
@@ -115,43 +122,12 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
         <EuiIcon
           type={'trash'}
           onClick={() => {
-            getModal(record.id, record.templateName);
+            /* Delete Datasource*/
           }}
         />
       ),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
-
-  async function deleteAddedIntegration(integrationInstance: string, name: string) {
-    http
-      .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
-      .then(() => {
-        setToast(`${name} integration successfully deleted!`, 'success');
-      })
-      .catch((err) => {
-        setToast(`Error deleting ${name} or its assets`, 'danger');
-      })
-      .finally(() => {
-        window.location.hash = '#/installed';
-      });
-  }
-
-  const getModal = (integrationInstanceId, name) => {
-    setModalLayout(
-      <DeleteModal
-        onConfirm={() => {
-          setIsModalVisible(false);
-          deleteAddedIntegration(integrationInstanceId, name);
-        }}
-        onCancel={() => {
-          setIsModalVisible(false);
-        }}
-        title={`Delete Assets`}
-        message={`Are you sure you want to delete the selected asset(s)?`}
-      />
-    );
-    setIsModalVisible(true);
-  };
 
   const search = {
     box: {
@@ -172,12 +148,10 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
     ],
   };
 
-  const entries = data.map((integration) => {
-    const id = integration.id;
-    const templateName = integration.templateName;
-    const creationDate = integration.creationDate;
-    const name = integration.name;
-    return { id, templateName, creationDate, name, data: { templateName, name } };
+  const entries = data.map((datasource) => {
+    const name = datasource.name;
+    const connectionType = datasource.connectionType;
+    return { connectionType, name, data: { name, connectionType } };
   });
 
   return (
@@ -191,20 +165,21 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
           header: DatasourcesHeader(),
         })}
         <EuiPageContent data-test-subj="addedIntegrationsArea">
-            <EuiInMemoryTable
-              loading={props.loading}
-              items={entries}
-              itemId="id"
-              columns={tableColumns}
-              tableLayout="auto"
-              pagination={{
-                initialPageSize: 10,
-                pageSizeOptions: [5, 10, 15],
-              }}
-              search={search}
-              allowNeutralSort={false}
-              isSelectable={true}
-            />
+          <DatasourcesDescription />
+          <EuiInMemoryTable
+            loading={props.loading}
+            items={entries}
+            itemId="id"
+            columns={tableColumns}
+            tableLayout="auto"
+            pagination={{
+              initialPageSize: 10,
+              pageSizeOptions: [5, 10, 15],
+            }}
+            search={search}
+            allowNeutralSort={false}
+            isSelectable={true}
+          />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
