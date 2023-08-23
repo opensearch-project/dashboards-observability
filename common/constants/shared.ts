@@ -14,6 +14,7 @@ export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
+export const DATASOURCES_BASE = '/api/datasources';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -55,6 +56,10 @@ export const observabilityPanelsPluginOrder = 5095;
 export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
+
+export const observabilityDatasourcesID = 'datasources';
+export const observabilityDatasourcesTitle = 'Datasources';
+export const observabilityDatasourcesPluginOrder = 9030;
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';

@@ -39,6 +39,9 @@ import {
   observabilityIntegrationsTitle,
   observabilityIntegrationsPluginOrder,
   observabilityPluginOrder,
+  observabilityDatasourcesID,
+  observabilityDatasourcesTitle,
+  observabilityDatasourcesPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -195,6 +198,14 @@ export class ObservabilityPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       order: observabilityIntegrationsPluginOrder,
       mount: appMountWithStartPage('integrations'),
+    });
+
+    core.application.register({
+      id: observabilityDatasourcesID,
+      title: observabilityDatasourcesTitle,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: observabilityDatasourcesPluginOrder,
+      mount: appMountWithStartPage('datasources'),
     });
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({

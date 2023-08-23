@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../common/constants/integrations';
+import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
 import { AccelerateHeaderProps } from './accelerate_types';
 
 export function AccelerateHeader(props: AccelerateHeaderProps) {

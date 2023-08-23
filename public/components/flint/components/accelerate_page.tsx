@@ -30,7 +30,7 @@ import {
 import React, { ReactChild, useEffect, useState } from 'react';
 import { AccelerateHeader } from './accelerate_header';
 import { AccelerateCallout } from './accelerate_callout';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../common/constants/integrations';
+import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
 import { AccelerateProps } from './accelerate_types';
 
 export function Accelerate(props: AccelerateProps) {

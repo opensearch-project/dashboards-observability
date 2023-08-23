@@ -32,7 +32,7 @@ import { AccelerateCallout } from './accelerate_callout';
 import {
   ASSET_FILTER_OPTIONS,
   OPENSEARCH_DOCUMENTATION_URL,
-} from '../../../common/constants/integrations';
+} from '../../../../common/constants/integrations';
 import { AccelerateFlyout } from './accelerate_flyout';
 
 export function DataSource(props: any) {
