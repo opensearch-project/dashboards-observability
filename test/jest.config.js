@@ -32,4 +32,9 @@ module.exports = {
     '^!!raw-loader!.*': 'jest-raw-loader',
   },
   testEnvironment: 'jsdom',
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
 };
