@@ -6,7 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { RequestParams } from '@elastic/elasticsearch';
 import { IRouter } from '../../../../src/core/server';
-import DSLFacet from '../services/facets/dsl_facet';
+import { DSLFacet } from '../services/facets/dsl_facet';
 import { DSL_BASE, DSL_SEARCH, DSL_CAT, DSL_MAPPING } from '../../common/constants/shared';
 
 export function registerDslRoute({ router, facet }: { router: IRouter; facet: DSLFacet }) {

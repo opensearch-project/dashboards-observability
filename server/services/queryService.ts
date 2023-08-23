@@ -7,7 +7,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import _ from 'lodash';
 
-export default class QueryService {
+export class QueryService {
   private client: any;
   constructor(client: any) {
     this.client = client;

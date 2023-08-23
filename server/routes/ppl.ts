@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, IOpenSearchDashboardsResponse, ResponseError } from '../../../../src/core/server';
-import PPLFacet from '../services/facets/ppl_facet';
+import { PPLFacet } from '../services/facets/ppl_facet';
 import { PPL_BASE, PPL_SEARCH } from '../../common/constants/shared';
 
 export function registerPplRoute({ router, facet }: { router: IRouter; facet: PPLFacet }) {

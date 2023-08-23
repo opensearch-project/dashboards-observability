@@ -5,7 +5,7 @@
 
 import _ from 'lodash';
 
-export default class DSLFacet {
+export class DSLFacet {
   constructor(private client: any) {
     this.client = client;
   }

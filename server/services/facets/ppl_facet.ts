@@ -6,7 +6,7 @@
 import _ from 'lodash';
 import { PPLDataSource } from '../../adaptors/ppl_datasource';
 
-export default class PPLFacet {
+export class PPLFacet {
   constructor(private client: any) {
     this.client = client;
   }
