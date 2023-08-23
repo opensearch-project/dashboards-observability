@@ -5,10 +5,17 @@
 
 import React from 'react';
 import moment from 'moment';
+import datemath from '@elastic/datemath';
 import { BarOrientation, LONG_CHART_COLOR } from '../../../../../../common/constants/shared';
 import { Plt } from '../../../../visualizations/plotly/plot';
+import { DATE_PICKER_FORMAT } from '../../../../../../common/constants/explorer';
 
-export const CountDistribution = ({ countDistribution, selectedInterval }: any) => {
+export const CountDistribution = ({
+  countDistribution,
+  selectedInterval,
+  startTime,
+  endTime,
+}: any) => {
   if (
     !countDistribution ||
     !countDistribution.data ||
@@ -39,10 +46,15 @@ export const CountDistribution = ({ countDistribution, selectedInterval }: any) 
     const xVals = processedData[0].x;
     const yVals = processedData[0].y;
 
-    // TODO: derive a start date
-    const startDate = moment('2023-01-01 00:00:00');
-    // TODO: derive end date
-    const endDate = moment('2023-12-01 00:00:00');
+    // parses out datetime for start and end, then reformats
+    const startDate = datemath.parse(startTime);
+    const endDate = datemath.parse(endTime);
+    // TODO: figure out how to handle an error here - which would happen if start/endTime were
+    // to somehow be invalid for datemath.parse, but that would be a flaw in the datepicker
+    // component if that happens
+    if (startDate === undefined || endDate === undefined) {
+      return null;
+    }
 
     const intervalPeriod = selectedInterval.replace(/^auto_/, '');
 
@@ -51,11 +63,11 @@ export const CountDistribution = ({ countDistribution, selectedInterval }: any) 
     const numBuckets = endDate.diff(startDate, intervalPeriod) + 1;
 
     // populate buckets as x values in the graph
-    const buckets = [startDate.format('YYYY-MM-DD HH:mm:ss')];
+    const buckets = [startDate.format(DATE_PICKER_FORMAT)];
     const currentDate = startDate;
     for (let i = 1; i < numBuckets; i++) {
       const nextBucket = currentDate.add(1, intervalPeriod);
-      buckets.push(nextBucket.format('YYYY-MM-DD HH:mm:ss'));
+      buckets.push(nextBucket.format(DATE_PICKER_FORMAT));
     }
 
     // create y values, use old y values if they exist

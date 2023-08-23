@@ -473,6 +473,8 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const dateRange = getDateRange(startTime, endTime, query);
+
   const mainContent = useMemo(() => {
     return (
       <>
@@ -547,6 +549,7 @@ export const Explorer = ({
                       }}
                       stateInterval={selectedIntervalRef.current?.value}
                       timeSpan={
+                        // change this here to count distribution start and end finder
                         (Object.entries(countDistribution.data).find(
                           ([key]) => key.slice(0, 4) === 'span'
                         ) || [])[1] as string[] | undefined
@@ -555,6 +558,8 @@ export const Explorer = ({
                     <CountDistribution
                       countDistribution={countDistribution}
                       selectedInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
                     />
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
@@ -899,8 +904,6 @@ export const Explorer = ({
       </EuiContextMenuItem>
     );
   });
-
-  const dateRange = getDateRange(startTime, endTime, query);
 
   const handleLiveTailSearch = useCallback(
     async (startingTime: string, endingTime: string) => {
