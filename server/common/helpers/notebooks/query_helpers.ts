@@ -29,8 +29,8 @@ export const getQueryOutput = async (inputText: string, queryService: QueryServi
 
 export const formatNotRecognized = (inputText: string) => {
   return (
-    inputText.substring(0, 4) != '%sql' &&
-    inputText.substring(0, 4) != '%ppl' &&
-    inputText.substring(0, 3) != '%md'
+    inputText.substring(0, 4) !== '%sql' &&
+    inputText.substring(0, 4) !== '%ppl' &&
+    inputText.substring(0, 3) !== '%md'
   );
 };

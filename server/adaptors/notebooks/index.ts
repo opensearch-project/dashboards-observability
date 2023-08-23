@@ -10,7 +10,7 @@ import { NOTEBOOKS_SELECTED_BACKEND } from '../../../common/constants/notebooks'
 // Selects backend based on config
 let BACKEND = new DefaultBackend();
 
-if (NOTEBOOKS_SELECTED_BACKEND == 'ZEPPELIN') {
+if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
   BACKEND = new ZeppelinBackend();
 }
 
