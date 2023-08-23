@@ -46,7 +46,9 @@ export function addRequestToMetric(
 export function addRequestToMetric(
   component: ComponentType,
   request: RequestType,
-  counter: CounterNameType
+  // ESLint would prefer less definitions with union types instead of multiple definitions.
+  // Disabled one-time: if this is recurring look at configuring `ignoreDifferentlyNamedParameters=true`
+  counter: CounterNameType // eslint-disable-line @typescript-eslint/unified-signatures
 ): void;
 export function addRequestToMetric(
   component: ComponentType,

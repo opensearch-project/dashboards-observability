@@ -77,7 +77,7 @@ export class DefaultBackend implements NotebookAdaptor {
         objectId: noteId,
       });
       if (response.observabilityObjectList.length === 0) {
-        throw 'notebook id not found';
+        throw new Error('notebook id not found');
       }
       return response.observabilityObjectList[0];
     } catch (error) {
