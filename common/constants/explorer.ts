@@ -13,6 +13,9 @@ export const OPEN_TELEMETRY_LOG_CORRELATION_LINK =
   'https://opentelemetry.io/docs/reference/specification/logs/overview/#log-correlation';
 export const RAW_QUERY = 'rawQuery';
 export const FINAL_QUERY = 'finalQuery';
+export const QUERY_LANGUAGE = 'queryLanguage';
+export const QUERY_LANGUAGE_PPL = 'PPL';
+export const QUERY_LANGUAGE_PROMQL = 'PromQL';
 export const SELECTED_DATE_RANGE = 'selectedDateRange';
 export const INDEX = 'index';
 export const SELECTED_PATTERN_FIELD = 'selectedPatternField';

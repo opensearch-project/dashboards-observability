@@ -41,6 +41,8 @@ import {
   NEW_TAB,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
+  QUERY_LANGUAGE_PPL,
+  QUERY_LANGUAGE_PROMQL,
   RAW_QUERY,
   SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPE,
@@ -119,6 +121,10 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
+import { processMetricsData } from '../../custom_panels/helpers/utils';
+import { PPLQueryUtil } from '../../../../common/utils/ppl_query_util';
+import { setError } from '../../../../../../src/plugins/vis_builder/public/application/utils/state_management/metadata_slice';
+import { QueryLanguage } from '../../../../../../src/plugins/data/public/query/lib/get_default_query';
 
 export const Explorer = ({
   pplService,
@@ -197,6 +203,7 @@ export const Explorer = ({
   const [metricMeasure, setMetricMeasure] = useState('');
   const [metricChecked, setMetricChecked] = useState(false);
   const queryRef = useRef();
+  const queryUtilProcessorRef = useRef();
   const appBasedRef = useRef('');
   appBasedRef.current = appBaseQuery;
   const selectedPanelNameRef = useRef('');
@@ -259,12 +266,37 @@ export const Explorer = ({
     };
   };
 
+  const getQueryProcessor = (queryLang: string) => {
+    switch (queryLang) {
+      case QUERY_LANGUAGE_PPL:
+        return new PPLQueryUtil();
+      case QUERY_LANGUAGE_PROMQL:
+        return new PromQLQueryUtil();
+      default:
+        const message = `Query Language "${queryLang}" is not supported`;
+        getErrorHandler('Query Language Unknown')({
+          name: 'Lookup Error',
+          message,
+          body: { message },
+        });
+        return new PPLQueryUtil();
+    }
+  };
+
+  useEffect(() => {
+    const nextProcessor = getQueryProcessor(query.QueryLanguage);
+
+    queryUtilProcessorRef.current = nextProcessor;
+  }, [query.queryLanguage]);
+
   const fetchData = async (startingTime?: string, endingTime?: string) => {
     const curQuery: IQuery = queryRef.current!;
-    new PPLDataFetcher(
-      { ...curQuery },
-      { batch, dispatch, changeQuery, changeVizConfig },
-      {
+
+    new PPLDataFetcher({
+      query: { ...curQuery },
+      queryUtilProcessor: queryUtilProcessorRef.current!,
+      storeContext: { batch, dispatch, changeQuery, changeVizConfig },
+      searchContext: {
         tabId,
         findAutoInterval,
         getCountVisualizations,
@@ -280,7 +312,7 @@ export const Explorer = ({
         getDefaultVisConfig,
         getAvailableFields,
       },
-      {
+      searchParams: {
         appBaseQuery,
         query: curQuery,
         startingTime,
@@ -288,8 +320,8 @@ export const Explorer = ({
         isLiveTailOn: isLiveTailOnRef.current,
         selectedInterval: selectedIntervalRef,
       },
-      notifications
-    ).search();
+      notifications,
+    }).search();
   };
 
   const isIndexPatternChanged = (currentQuery: string, prevTabQuery: string) =>
@@ -643,6 +675,12 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
   ]);
+
+  const visualizationSettings = !isEmpty(userVizConfigs[curVisId])
+    ? { ...userVizConfigs[curVisId] }
+    : {
+        dataConfig: getDefaultVisConfig(queryManager.queryParser().parse(tempQuery).getStats()),
+      };
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
     return getVizContainerProps({

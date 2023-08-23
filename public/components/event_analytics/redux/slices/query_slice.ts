@@ -11,6 +11,8 @@ import {
   INDEX,
   PATTERN_REGEX,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
+  QUERY_LANGUAGE,
+  QUERY_LANGUAGE_PPL,
   RAW_QUERY,
   REDUX_EXPL_SLICE_QUERIES,
   SELECTED_DATE_RANGE,
@@ -22,6 +24,7 @@ import { initialTabId } from '../../../../framework/redux/store/shared_state';
 const initialQueryState = {
   [RAW_QUERY]: '',
   [FINAL_QUERY]: '',
+  [QUERY_LANGUAGE]: QUERY_LANGUAGE_PPL,
   [INDEX]: '',
   [SELECTED_PATTERN_FIELD]: '',
   [PATTERN_REGEX]: PPL_DEFAULT_PATTERN_REGEX_FILETER,
@@ -33,6 +36,7 @@ const initialQueryState = {
 const appBaseQueryState = {
   [RAW_QUERY]: '',
   [FINAL_QUERY]: '',
+  [QUERY_LANGUAGE]: QUERY_LANGUAGE_PPL,
   [INDEX]: '',
   [SELECTED_PATTERN_FIELD]: '',
   [PATTERN_REGEX]: PPL_DEFAULT_PATTERN_REGEX_FILETER,

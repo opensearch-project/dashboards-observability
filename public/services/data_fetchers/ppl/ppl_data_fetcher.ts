@@ -4,14 +4,11 @@
  */
 
 import { isEmpty } from 'lodash';
+import { QueryUtil } from 'common/utils/query_utils';
 import { IDefaultTimestampState, IQuery } from '../../../../common/types/explorer';
 import { IDataFetcher } from '../fetch_interface';
 import { DataFetcherBase } from '../fetcher_base';
-import {
-  buildRawQuery,
-  composeFinalQuery,
-  getIndexPatternFromRawQuery,
-} from '../../../../common/utils';
+import { composeFinalQuery, getIndexPatternFromRawQuery } from '../../../../common/utils';
 import {
   FILTERED_PATTERN,
   PATTERNS_REGEX,
@@ -24,17 +21,34 @@ import {
 } from '../../../../common/constants/explorer';
 import { PPL_STATS_REGEX } from '../../../../common/constants/shared';
 
+interface PPLDataFetcherOpts {
+  readonly query: IQuery;
+  readonly queryUtilProcessor: QueryUtil;
+  readonly storeContext;
+  readonly searchContext;
+  readonly searchParams;
+  readonly notifications;
+}
+
 export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
   protected queryIndex: string;
   protected timestamp!: string;
-  constructor(
-    protected readonly query: IQuery,
-    protected readonly storeContext,
-    protected readonly searchContext,
-    protected readonly searchParams,
-    protected readonly notifications
-  ) {
+
+  readonly query: IQuery;
+  readonly queryUtilProcessor: QueryUtil;
+  readonly storeContext;
+  readonly searchContext;
+  readonly searchParams;
+  readonly notifications;
+
+  constructor(options: PPLDataFetcherOpts) {
     super();
+    this.query = options.query;
+    this.queryUtilProcessor = options.queryUtilProcessor;
+    this.storeContext = options.storeContext;
+    this.searchContext = options.searchContext;
+    this.searchParams = options.searchParams;
+    this.notifications = options.notifications;
   }
 
   async setTimestamp(index: string) {
@@ -67,7 +81,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     if (isEmpty(query)) return;
 
-    this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
+    this.queryIndex = this.getIndex(this.queryUtilProcessor.buildRawQuery(query, appBaseQuery));
 
     if (this.queryIndex === '') return; // Returns if page is refreshed
 

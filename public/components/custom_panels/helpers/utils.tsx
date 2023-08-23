@@ -260,6 +260,8 @@ export const renderSavedVisualization = async (
 
   visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
 
+  console.log('renderSavedVisualization', { visualization });
+
   if (_.isEmpty(visualization)) {
     setIsLoading(false);
     return;

@@ -18,6 +18,7 @@ import {
   EuiContextMenuPanel,
   EuiToolTip,
   EuiCallOut,
+  EuiSelect,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
@@ -90,6 +91,7 @@ export const Search = (props: any) => {
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [queryLanguage, setQueryLanguage] = useState('ppl');
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
@@ -164,6 +166,19 @@ export const Search = (props: any) => {
           >
             PPL
           </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            id="queryLanguage"
+            className="query-language"
+            options={[
+              { value: 'ppl', text: 'PPL' },
+              { value: 'promql', text: 'PromQl' },
+            ]}
+            value={queryLanguage}
+            onChange={(e) => setQueryLanguage(e.target.value)}
+            aria-label="Query Language"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
