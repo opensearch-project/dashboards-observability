@@ -183,13 +183,14 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
       });
     }
     const data = await integration.getStatic(staticPath);
-    if (!data.ok) {
-      return Promise.reject({
-        message: `Asset ${staticPath} not found`,
-        statusCode: 404,
-      });
+    if (data.ok) {
+      return data.value;
     }
-    return Promise.resolve(data.value);
+    const is404 = (data.error as { code?: string }).code === 'ENOENT';
+    return Promise.reject({
+      message: data.error.message,
+      statusCode: is404 ? 404 : 500,
+    });
   };
 
   getSchemas = async (templateName: string): Promise<{ mappings: { [key: string]: unknown } }> => {
@@ -204,7 +205,11 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     if (result.ok) {
       return result.value;
     }
-    return Promise.reject(result.error);
+    const is404 = (result.error as { code?: string }).code === 'ENOENT';
+    return Promise.reject({
+      message: result.error.message,
+      statusCode: is404 ? 404 : 500,
+    });
   };
 
   getAssets = async (templateName: string): Promise<{ savedObjects?: any }> => {
