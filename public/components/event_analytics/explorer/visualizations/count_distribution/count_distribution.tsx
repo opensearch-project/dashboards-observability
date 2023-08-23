@@ -33,51 +33,47 @@ export const CountDistribution = ({ countDistribution, selectedInterval }: any) 
     },
   ];
 
-  // fill the final data with the exact right amount of empty x plot points
+  // fill the final data with the exact right amount of empty buckets
   function fillWithEmpty(processedData: any) {
-    console.log(selectedInterval.replace(/^auto_/, '')); // to delete
+    // original x and y fields
+    const xVals = processedData[0].x;
+    const yVals = processedData[0].y;
 
     // TODO: derive a start date
     const startDate = moment('2023-01-01 00:00:00');
     // TODO: derive end date
     const endDate = moment('2023-12-01 00:00:00');
 
-    // create new x and y arrays
-    const x = [];
-    const y = [];
+    const intervalPeriod = selectedInterval.replace(/^auto_/, '');
 
-    // current x values
-    const xVals = processedData[0].x;
-    const yVals = processedData[0].y;
-    let currxIndex = 0;
+    // find the number of buckets
+    // below essentially does ((end - start) / interval_period) + 1
+    const numBuckets = endDate.diff(startDate, intervalPeriod) + 1;
 
-    // have a current date variable
+    // populate buckets as x values in the graph
+    const buckets = [startDate.format('YYYY-MM-DD HH:mm:ss')];
     const currentDate = startDate;
-
-    // from start -> end, iterate
-    while (currentDate < endDate) {
-      // TODO: make invariant check to see that no x value would be getting skipped over
-      // if this date already exists in the x field, continue
-      if (currentDate.isSame(xVals[currxIndex])) {
-        // TODO: add invariant checking that currxIndex is never over the max num of old values
-        x.push(xVals[currxIndex]);
-        y.push(yVals[currxIndex]);
-        currxIndex++; // advance the pointer for old x values, we've used this last value
-      } else {
-        // if we cannot find current date in old x values, add it in
-        x.push(currentDate.format('YYYY-MM-DD HH:mm:ss'));
-        y.push(0);
-      }
-
-      // Note: moments are mutable. the below function will create a new moment. should this still be done?
-      currentDate.add(1, selectedInterval.replace(/^auto_/, ''));
+    for (let i = 1; i < numBuckets; i++) {
+      const nextBucket = currentDate.add(1, intervalPeriod);
+      buckets.push(nextBucket.format('YYYY-MM-DD HH:mm:ss'));
     }
 
-    // replace x and y with the new arrays
-    processedData[0].x = x;
-    processedData[0].y = y;
+    // create y values, use old y values if they exist
+    const values: number[] = [];
+    buckets.forEach((bucket) => {
+      const bucketIndex = xVals.findIndex((x: string) => x === bucket);
+      if (bucketIndex !== undefined) {
+        values.push(yVals[bucketIndex]);
+      } else {
+        values.push(0);
+      }
+    });
 
-    // at the end, return the new object
+    // replace old x and y values with new
+    processedData[0].x = buckets;
+    processedData[0].y = values;
+
+    // // at the end, return the new object
     return processedData;
   }
 
