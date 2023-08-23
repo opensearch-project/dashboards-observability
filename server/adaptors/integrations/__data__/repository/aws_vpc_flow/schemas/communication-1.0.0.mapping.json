@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "communication"
+        "component": "communication",
+        "labels": ["communication"]
       },
       "properties": {
         "communication": {
@@ -50,6 +51,23 @@
                 },
                 "packets": {
                   "type": "long"
+                },
+                "geo": {
+                  "type": "object",
+                  "properties": {
+                    "city_name": {
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    }
+                  }
                 }
               }
             },
@@ -90,17 +108,22 @@
                 "packets": {
                   "type": "long"
                 },
-                "geo.city_name": {
-                  "type": "keyword"
-                },
-                "geo.country_iso_code": {
-                  "type": "keyword"
-                },
-                "geo.country_name": {
-                  "type": "keyword"
-                },
-                "geo.location": {
-                  "type": "geo_point"
+                "geo": {
+                  "type": "object",
+                  "properties": {
+                    "city_name": {
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    }
+                  }
                 }
               }
             }

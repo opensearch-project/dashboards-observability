@@ -1,0 +1,50 @@
+{
+  "name": "aws_cloudtrail",
+  "version": "1.0.0",
+  "displayName": "AWS CloudTrail",
+  "description": "AWS CloudTrail log collector",
+  "license": "Apache-2.0",
+  "type": "logs-aws_cloudtrail",
+  "labels": ["log", "aws", "s3", "cloud", "cloudtrail"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudtrail/info",
+  "statics": {
+    "logo": {
+      "annotation": "AWS CloudTrail Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS CloudTrail Log Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_cloudtrail",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs-aws_cloudtrail",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": {
+    "savedObjects": {
+      "name": "aws_cloudtrail",
+      "version": "1.0.0"
+    }
+  },
+  "sampleData": {
+    "path": "samples.json"
+  }
+}

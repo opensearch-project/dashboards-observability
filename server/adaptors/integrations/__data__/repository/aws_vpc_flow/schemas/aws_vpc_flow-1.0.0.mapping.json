@@ -5,7 +5,8 @@
         "version": "1.0.0",
         "catalog": "observability",
         "type": "logs",
-        "component": "aws_vpc_flow"
+        "component": "aws_vpc_flow",
+        "labels": ["aws", "vpc"]
       },
       "properties": {
         "aws": {

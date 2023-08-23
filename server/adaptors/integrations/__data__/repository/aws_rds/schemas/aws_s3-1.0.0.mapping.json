@@ -1,0 +1,170 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "aws_s3",
+        "labels": ["aws", "s3"]
+      },
+      "properties": {
+        "aws": {
+          "properties": {
+            "s3": {
+              "properties": {
+                "bucket_owner": {
+                  "type": "keyword"
+                },
+                "bucket": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "remote_ip": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "requester": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "request_id": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "operation": {
+                  "type": "keyword"
+                },
+                "key": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "copy_source": {
+                  "type": "keyword"
+                },
+                "upload_id": {
+                  "type": "keyword"
+                },
+                "delete": {
+                  "type": "keyword"
+                },
+                "part_number": {
+                  "type": "keyword"
+                },
+                "request_uri": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "http_status": {
+                  "type": "keyword"
+                },
+                "error_code": {
+                  "type": "keyword"
+                },
+                "bytes_sent": {
+                  "type": "long"
+                },
+                "object_size": {
+                  "type": "long"
+                },
+                "total_time": {
+                  "type": "integer"
+                },
+                "turn_around_time": {
+                  "type": "integer"
+                },
+                "referrer": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "user_agent": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "version_id": {
+                  "type": "keyword"
+                },
+                "host_id": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "signature_version": {
+                  "type": "keyword"
+                },
+                "cipher_suite": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "authentication_type": {
+                  "type": "keyword"
+                },
+                "host_header": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "tls_version": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

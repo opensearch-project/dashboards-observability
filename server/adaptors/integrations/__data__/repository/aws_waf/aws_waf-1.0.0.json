@@ -1,0 +1,50 @@
+{
+  "name": "aws_waf",
+  "version": "1.0.0",
+  "displayName": "AWS waf",
+  "description": "AWS waf log collector",
+  "license": "Apache-2.0",
+  "type": "logs_waf",
+  "labels": ["log", "aws", "s3", "cloud", "waf"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_waf/info",
+  "statics": {
+    "logo": {
+      "annotation": "AWS waf Logo",
+      "path": "logo.jpg"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS waf Log Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_waf",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_waf",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": {
+    "savedObjects": {
+      "name": "aws_waf",
+      "version": "1.0.0"
+    }
+  },
+  "sampleData": {
+    "path": "samples.json"
+  }
+}

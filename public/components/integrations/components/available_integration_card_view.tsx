@@ -9,17 +9,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSearchBar,
-  EuiButton,
   EuiFieldSearch,
-  EuiSwitch,
   EuiButtonGroup,
-  EuiBadgeGroup,
-  EuiBadge,
-  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   AvailableIntegrationsCardViewProps,
   AvailableIntegrationType,
@@ -28,6 +22,7 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
+  const http = props.http;
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const getImage = (url?: string) => {
@@ -53,7 +48,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     },
   ];
 
-  const onChangeIcons = (optionId) => {
+  const onChangeIcons = (optionId: string) => {
     setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
@@ -72,14 +67,16 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
                   icon={getImage(
-                    `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                    http.basePath.prepend(
+                      `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                    )
                   )}
                   title={i.displayName ? i.displayName : i.name}
                   description={i.description}
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
                   onClick={() => (window.location.hash = `#/available/${i.name}`)}
-                  footer={badges(i.components)}
+                  footer={badges(i.labels ?? [])}
                 />
               </EuiFlexItem>
             );

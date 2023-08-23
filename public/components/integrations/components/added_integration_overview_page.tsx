@@ -17,6 +17,7 @@ import { IntegrationHeader } from './integration_header';
 export interface AddedIntegrationsTableProps {
   loading: boolean;
   data: AddedIntegrationsList;
+  setData: React.Dispatch<React.SetStateAction<AddedIntegrationsList>>;
   http: HttpStart;
 }
 
@@ -64,7 +65,7 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
           ],
           header: IntegrationHeader(),
         })}
-        {AddedIntegrationsTable({ data, loading: false, http })}
+        {AddedIntegrationsTable({ data, setData, loading: false, http })}
       </EuiPageBody>
     </EuiPage>
   );

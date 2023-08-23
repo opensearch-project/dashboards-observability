@@ -1,0 +1,2286 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "k8s",
+        "labels": ["k8s"]
+      },
+      "properties": {
+        "kubernetes": {
+          "type": "object",
+          "properties": {
+            "annotations": {
+              "type": "object"
+            },
+            "apiserver": {
+              "properties": {
+                "request": {
+                  "properties": {
+                    "client": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "count": {
+                      "type": "long"
+                    },
+                    "latency": {
+                      "properties": {
+                        "bucket": {
+                          "properties": {
+                            "*": {
+                              "type": "object"
+                            }
+                          }
+                        },
+                        "count": {
+                          "type": "long"
+                        },
+                        "sum": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "resource": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "scope": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "subresource": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "verb": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "cpu": {
+                  "properties": {
+                    "limit": {
+                      "properties": {
+                        "cores": {
+                          "type": "float"
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "request": {
+                      "properties": {
+                        "cores": {
+                          "type": "float"
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "properties": {
+                        "core": {
+                          "properties": {
+                            "ns": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "image": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "logs": {
+                  "properties": {
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "inodes": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "free": {
+                          "type": "long"
+                        },
+                        "used": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "used": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "memory": {
+                  "properties": {
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "limit": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "majorpagefaults": {
+                      "type": "long"
+                    },
+                    "pagefaults": {
+                      "type": "long"
+                    },
+                    "request": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rss": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "workingset": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "rootfs": {
+                  "properties": {
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "inodes": {
+                      "properties": {
+                        "used": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "used": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "start_time": {
+                  "type": "date"
+                },
+                "status": {
+                  "properties": {
+                    "phase": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "restarts": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "controllermanager": {
+              "properties": {
+                "client": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "code": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "handler": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "host": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "http": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "duration": {
+                          "properties": {
+                            "us": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "double"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "response": {
+                      "properties": {
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "leader": {
+                  "properties": {
+                    "is_master": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "method": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "node": {
+                  "properties": {
+                    "collector": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "eviction": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "health": {
+                          "properties": {
+                            "pct": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "unhealthy": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "process": {
+                  "properties": {
+                    "cpu": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    },
+                    "fds": {
+                      "properties": {
+                        "open": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "memory": {
+                      "properties": {
+                        "resident": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "virtual": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "started": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    }
+                  }
+                },
+                "workqueue": {
+                  "properties": {
+                    "adds": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "depth": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "longestrunning": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    },
+                    "retries": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "unfinished": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    }
+                  }
+                },
+                "zone": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "deployment": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "paused": {
+                  "type": "boolean"
+                },
+                "replicas": {
+                  "properties": {
+                    "available": {
+                      "type": "long"
+                    },
+                    "desired": {
+                      "type": "long"
+                    },
+                    "unavailable": {
+                      "type": "long"
+                    },
+                    "updated": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "involved_object": {
+                  "properties": {
+                    "api_version": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "kind": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "resource_version": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "message": {
+                  "type": "keyword",
+                  "ignore_above": 256,
+                  "copy_to": ["message"]
+                },
+                "metadata": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "namespace": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "resource_version": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "self_link": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "timestamp": {
+                      "properties": {
+                        "created": {
+                          "type": "date"
+                        }
+                      }
+                    },
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "reason": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "timestamp": {
+                  "properties": {
+                    "first_occurrence": {
+                      "type": "date"
+                    },
+                    "last_occurrence": {
+                      "type": "date"
+                    }
+                  }
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "labels": {
+              "properties": {
+                "app": {
+                  "properties": {
+                    "kubernetes": {
+                      "properties": {
+                        "io/component": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        },
+                        "io/instance": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        },
+                        "io/managed-by": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        },
+                        "io/name": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        },
+                        "io/version": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "value": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "controller-revision-hash": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "eks": {
+                  "properties": {
+                    "amazonaws": {
+                      "properties": {
+                        "com/component": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    }
+                  }
+                },
+                "helm": {
+                  "properties": {
+                    "sh/chart": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "io": {
+                  "properties": {
+                    "kompose": {
+                      "properties": {
+                        "service": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    }
+                  }
+                },
+                "k8s-app": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "pod-template-generation": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "pod-template-hash": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "statefulset": {
+                  "properties": {
+                    "kubernetes": {
+                      "properties": {
+                        "io/pod-name": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "namespace": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "node": {
+              "properties": {
+                "_module": {
+                  "properties": {
+                    "labels": {
+                      "properties": {
+                        "beta": {
+                          "properties": {
+                            "kubernetes": {
+                              "properties": {
+                                "io/arch": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                },
+                                "io/instance-type": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                },
+                                "io/os": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "eks": {
+                          "properties": {
+                            "amazonaws": {
+                              "properties": {
+                                "com/capacityType": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                },
+                                "com/nodegroup": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                },
+                                "com/nodegroup-image": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "failure-domain": {
+                          "properties": {
+                            "beta": {
+                              "properties": {
+                                "kubernetes": {
+                                  "properties": {
+                                    "io/region": {
+                                      "type": "keyword",
+                                      "ignore_above": 256
+                                    },
+                                    "io/zone": {
+                                      "type": "keyword",
+                                      "ignore_above": 256
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "k8s": {
+                          "properties": {
+                            "io/cloud-provider-aws": {
+                              "type": "keyword",
+                              "ignore_above": 256
+                            }
+                          }
+                        },
+                        "kubernetes": {
+                          "properties": {
+                            "io/arch": {
+                              "type": "keyword",
+                              "ignore_above": 256
+                            },
+                            "io/hostname": {
+                              "type": "keyword",
+                              "ignore_above": 256
+                            },
+                            "io/os": {
+                              "type": "keyword",
+                              "ignore_above": 256
+                            }
+                          }
+                        },
+                        "node": {
+                          "properties": {
+                            "kubernetes": {
+                              "properties": {
+                                "io/instance-type": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "topology": {
+                          "properties": {
+                            "ebs": {
+                              "properties": {
+                                "csi": {
+                                  "properties": {
+                                    "aws": {
+                                      "properties": {
+                                        "com/zone": {
+                                          "type": "keyword",
+                                          "ignore_above": 256
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "kubernetes": {
+                              "properties": {
+                                "io/region": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                },
+                                "io/zone": {
+                                  "type": "keyword",
+                                  "ignore_above": 256
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cpu": {
+                  "properties": {
+                    "allocatable": {
+                      "properties": {
+                        "cores": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "cores": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "properties": {
+                        "core": {
+                          "properties": {
+                            "ns": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "fs": {
+                  "properties": {
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "inodes": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "free": {
+                          "type": "long"
+                        },
+                        "used": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "used": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "memory": {
+                  "properties": {
+                    "allocatable": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "majorpagefaults": {
+                      "type": "long"
+                    },
+                    "pagefaults": {
+                      "type": "long"
+                    },
+                    "rss": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "workingset": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "network": {
+                  "properties": {
+                    "rx": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "errors": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "tx": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "errors": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "pod": {
+                  "properties": {
+                    "allocatable": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "runtime": {
+                  "properties": {
+                    "imagefs": {
+                      "properties": {
+                        "available": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "capacity": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "used": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "start_time": {
+                  "type": "date"
+                },
+                "status": {
+                  "properties": {
+                    "ready": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "unschedulable": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "pod": {
+              "properties": {
+                "cpu": {
+                  "properties": {
+                    "usage": {
+                      "properties": {
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "host_ip": {
+                  "type": "ip"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "memory": {
+                  "properties": {
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "major_page_faults": {
+                      "type": "long"
+                    },
+                    "page_faults": {
+                      "type": "long"
+                    },
+                    "rss": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "type": "scaled_float",
+                              "scaling_factor": 1000
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "working_set": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "network": {
+                  "properties": {
+                    "rx": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "errors": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "tx": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "errors": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "start_time": {
+                  "type": "date"
+                },
+                "status": {
+                  "properties": {
+                    "phase": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "ready": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "scheduled": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "uid": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "proxy": {
+              "properties": {
+                "client": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "code": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "handler": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "host": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "http": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "duration": {
+                          "properties": {
+                            "us": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "double"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "response": {
+                      "properties": {
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "method": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "process": {
+                  "properties": {
+                    "cpu": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    },
+                    "fds": {
+                      "properties": {
+                        "open": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "memory": {
+                      "properties": {
+                        "resident": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "virtual": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "started": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    }
+                  }
+                },
+                "sync": {
+                  "properties": {
+                    "networkprogramming": {
+                      "properties": {
+                        "duration": {
+                          "properties": {
+                            "us": {
+                              "properties": {
+                                "bucket": {
+                                  "properties": {
+                                    "0": {
+                                      "type": "long"
+                                    },
+                                    "250000": {
+                                      "type": "long"
+                                    },
+                                    "500000": {
+                                      "type": "long"
+                                    },
+                                    "1000000": {
+                                      "type": "long"
+                                    },
+                                    "2000000": {
+                                      "type": "long"
+                                    },
+                                    "3000000": {
+                                      "type": "long"
+                                    },
+                                    "4000000": {
+                                      "type": "long"
+                                    },
+                                    "5000000": {
+                                      "type": "long"
+                                    },
+                                    "6000000": {
+                                      "type": "long"
+                                    },
+                                    "7000000": {
+                                      "type": "long"
+                                    },
+                                    "8000000": {
+                                      "type": "long"
+                                    },
+                                    "9000000": {
+                                      "type": "long"
+                                    },
+                                    "10000000": {
+                                      "type": "long"
+                                    },
+                                    "11000000": {
+                                      "type": "long"
+                                    },
+                                    "12000000": {
+                                      "type": "long"
+                                    },
+                                    "13000000": {
+                                      "type": "long"
+                                    },
+                                    "14000000": {
+                                      "type": "long"
+                                    },
+                                    "15000000": {
+                                      "type": "long"
+                                    },
+                                    "16000000": {
+                                      "type": "long"
+                                    },
+                                    "17000000": {
+                                      "type": "long"
+                                    },
+                                    "18000000": {
+                                      "type": "long"
+                                    },
+                                    "19000000": {
+                                      "type": "long"
+                                    },
+                                    "20000000": {
+                                      "type": "long"
+                                    },
+                                    "21000000": {
+                                      "type": "long"
+                                    },
+                                    "22000000": {
+                                      "type": "long"
+                                    },
+                                    "23000000": {
+                                      "type": "long"
+                                    },
+                                    "24000000": {
+                                      "type": "long"
+                                    },
+                                    "25000000": {
+                                      "type": "long"
+                                    },
+                                    "26000000": {
+                                      "type": "long"
+                                    },
+                                    "27000000": {
+                                      "type": "long"
+                                    },
+                                    "28000000": {
+                                      "type": "long"
+                                    },
+                                    "29000000": {
+                                      "type": "long"
+                                    },
+                                    "30000000": {
+                                      "type": "long"
+                                    },
+                                    "31000000": {
+                                      "type": "long"
+                                    },
+                                    "32000000": {
+                                      "type": "long"
+                                    },
+                                    "33000000": {
+                                      "type": "long"
+                                    },
+                                    "34000000": {
+                                      "type": "long"
+                                    },
+                                    "35000000": {
+                                      "type": "long"
+                                    },
+                                    "36000000": {
+                                      "type": "long"
+                                    },
+                                    "37000000": {
+                                      "type": "long"
+                                    },
+                                    "38000000": {
+                                      "type": "long"
+                                    },
+                                    "39000000": {
+                                      "type": "long"
+                                    },
+                                    "40000000": {
+                                      "type": "long"
+                                    },
+                                    "41000000": {
+                                      "type": "long"
+                                    },
+                                    "42000000": {
+                                      "type": "long"
+                                    },
+                                    "43000000": {
+                                      "type": "long"
+                                    },
+                                    "44000000": {
+                                      "type": "long"
+                                    },
+                                    "45000000": {
+                                      "type": "long"
+                                    },
+                                    "46000000": {
+                                      "type": "long"
+                                    },
+                                    "47000000": {
+                                      "type": "long"
+                                    },
+                                    "48000000": {
+                                      "type": "long"
+                                    },
+                                    "49000000": {
+                                      "type": "long"
+                                    },
+                                    "50000000": {
+                                      "type": "long"
+                                    },
+                                    "51000000": {
+                                      "type": "long"
+                                    },
+                                    "52000000": {
+                                      "type": "long"
+                                    },
+                                    "53000000": {
+                                      "type": "long"
+                                    },
+                                    "54000000": {
+                                      "type": "long"
+                                    },
+                                    "55000000": {
+                                      "type": "long"
+                                    },
+                                    "56000000": {
+                                      "type": "long"
+                                    },
+                                    "57000000": {
+                                      "type": "long"
+                                    },
+                                    "58000000": {
+                                      "type": "long"
+                                    },
+                                    "59000000": {
+                                      "type": "long"
+                                    },
+                                    "60000000": {
+                                      "type": "long"
+                                    },
+                                    "65000000": {
+                                      "type": "long"
+                                    },
+                                    "70000000": {
+                                      "type": "long"
+                                    },
+                                    "75000000": {
+                                      "type": "long"
+                                    },
+                                    "80000000": {
+                                      "type": "long"
+                                    },
+                                    "85000000": {
+                                      "type": "long"
+                                    },
+                                    "90000000": {
+                                      "type": "long"
+                                    },
+                                    "95000000": {
+                                      "type": "long"
+                                    },
+                                    "100000000": {
+                                      "type": "long"
+                                    },
+                                    "105000000": {
+                                      "type": "long"
+                                    },
+                                    "110000000": {
+                                      "type": "long"
+                                    },
+                                    "115000000": {
+                                      "type": "long"
+                                    },
+                                    "120000000": {
+                                      "type": "long"
+                                    },
+                                    "150000000": {
+                                      "type": "long"
+                                    },
+                                    "180000000": {
+                                      "type": "long"
+                                    },
+                                    "210000000": {
+                                      "type": "long"
+                                    },
+                                    "240000000": {
+                                      "type": "long"
+                                    },
+                                    "270000000": {
+                                      "type": "long"
+                                    },
+                                    "300000000": {
+                                      "type": "long"
+                                    },
+                                    "*": {
+                                      "type": "object"
+                                    },
+                                    "+Inf": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "rules": {
+                      "properties": {
+                        "duration": {
+                          "properties": {
+                            "us": {
+                              "properties": {
+                                "bucket": {
+                                  "properties": {
+                                    "1000": {
+                                      "type": "long"
+                                    },
+                                    "2000": {
+                                      "type": "long"
+                                    },
+                                    "4000": {
+                                      "type": "long"
+                                    },
+                                    "8000": {
+                                      "type": "long"
+                                    },
+                                    "16000": {
+                                      "type": "long"
+                                    },
+                                    "32000": {
+                                      "type": "long"
+                                    },
+                                    "64000": {
+                                      "type": "long"
+                                    },
+                                    "128000": {
+                                      "type": "long"
+                                    },
+                                    "256000": {
+                                      "type": "long"
+                                    },
+                                    "512000": {
+                                      "type": "long"
+                                    },
+                                    "1024000": {
+                                      "type": "long"
+                                    },
+                                    "2048000": {
+                                      "type": "long"
+                                    },
+                                    "4096000": {
+                                      "type": "long"
+                                    },
+                                    "8192000": {
+                                      "type": "long"
+                                    },
+                                    "16384000": {
+                                      "type": "long"
+                                    },
+                                    "*": {
+                                      "type": "object"
+                                    },
+                                    "+Inf": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "replicaset": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "replicas": {
+                  "properties": {
+                    "available": {
+                      "type": "long"
+                    },
+                    "desired": {
+                      "type": "long"
+                    },
+                    "labeled": {
+                      "type": "long"
+                    },
+                    "observed": {
+                      "type": "long"
+                    },
+                    "ready": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "scheduler": {
+              "properties": {
+                "client": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "code": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "handler": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "host": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "http": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "duration": {
+                          "properties": {
+                            "us": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "double"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "response": {
+                      "properties": {
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "percentile": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "leader": {
+                  "properties": {
+                    "is_master": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "method": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "operation": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "process": {
+                  "properties": {
+                    "cpu": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    },
+                    "fds": {
+                      "properties": {
+                        "open": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "memory": {
+                      "properties": {
+                        "resident": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "virtual": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "started": {
+                      "properties": {
+                        "sec": {
+                          "type": "double"
+                        }
+                      }
+                    }
+                  }
+                },
+                "result": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "scheduling": {
+                  "properties": {
+                    "duration": {
+                      "properties": {
+                        "seconds": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            },
+                            "percentile": {
+                              "properties": {
+                                "*": {
+                                  "type": "object"
+                                }
+                              }
+                            },
+                            "sum": {
+                              "type": "double"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "e2e": {
+                      "properties": {
+                        "duration": {
+                          "properties": {
+                            "us": {
+                              "properties": {
+                                "bucket": {
+                                  "properties": {
+                                    "*": {
+                                      "type": "object"
+                                    }
+                                  }
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pod": {
+                      "properties": {
+                        "attempts": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "preemption": {
+                          "properties": {
+                            "victims": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "statefulset": {
+              "properties": {
+                "created": {
+                  "type": "long"
+                },
+                "generation": {
+                  "properties": {
+                    "desired": {
+                      "type": "long"
+                    },
+                    "observed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "replicas": {
+                  "properties": {
+                    "desired": {
+                      "type": "long"
+                    },
+                    "observed": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "system": {
+              "properties": {
+                "container": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "cpu": {
+                  "properties": {
+                    "usage": {
+                      "properties": {
+                        "core": {
+                          "properties": {
+                            "ns": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "memory": {
+                  "properties": {
+                    "majorpagefaults": {
+                      "type": "long"
+                    },
+                    "pagefaults": {
+                      "type": "long"
+                    },
+                    "rss": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "workingset": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "start_time": {
+                  "type": "date"
+                }
+              }
+            },
+            "volume": {
+              "properties": {
+                "fs": {
+                  "properties": {
+                    "available": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "capacity": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "inodes": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "free": {
+                          "type": "long"
+                        },
+                        "used": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "used": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "k8s": {
+              "properties": {
+                "namespace": {
+                  "properties": {
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.namespace"
+                    }
+                  }
+                },
+                "cluster": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "node": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.node.name"
+                    }
+                  }
+                },
+                "pod": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.pod.name"
+                    }
+                  }
+                },
+                "container": {
+                  "properties": {
+                    "restart_count": {
+                      "type": "long"
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.container.name"
+                    }
+                  }
+                },
+                "replicaset": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.replicaset.name"
+                    }
+                  }
+                },
+                "deployment": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.deployment.name"
+                    }
+                  }
+                },
+                "statefulset": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "alias",
+                      "path": "kubernetes.statefulset.name"
+                    }
+                  }
+                },
+                "daemonset": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "job": {
+                  "properties": {
+                    "uid": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

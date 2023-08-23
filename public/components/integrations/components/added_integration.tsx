@@ -5,14 +5,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiGlobalToastList,
   EuiHealth,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
@@ -64,7 +60,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
-  const badge = (status) => {
+  const badge = (status: string) => {
     switch (status) {
       case 'available':
         return <EuiHealth color="success">Active</EuiHealth>;
@@ -136,7 +132,6 @@ export function AddedIntegration(props: AddedIntegrationProps) {
                 <EuiButtonIcon
                   iconType="trash"
                   aria-label="Delete"
-                  size="l"
                   color="danger"
                   onClick={() => {
                     getModal();
@@ -173,7 +168,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
 
     const assets = data?.assets || [];
 
-    const renderAsset = (record) => {
+    const renderAsset = (record: any) => {
       switch (record.assetType) {
         case 'dashboard':
           return (
@@ -234,7 +229,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
       },
       filters: [
         {
-          type: 'field_value_selection',
+          type: 'field_value_selection' as const,
           field: 'assetType',
           name: 'Type',
           multiSelect: false,
