@@ -8,12 +8,13 @@ import moment from 'moment';
 import { BarOrientation, LONG_CHART_COLOR } from '../../../../../../common/constants/shared';
 import { Plt } from '../../../../visualizations/plotly/plot';
 
-export const CountDistribution = ({ countDistribution }: any) => {
+export const CountDistribution = ({ countDistribution, selectedInterval }: any) => {
   if (
     !countDistribution ||
     !countDistribution.data ||
     !countDistribution.metadata ||
-    !countDistribution.metadata.fields
+    !countDistribution.metadata.fields ||
+    !selectedInterval
   )
     return null;
 
@@ -34,12 +35,12 @@ export const CountDistribution = ({ countDistribution }: any) => {
 
   // fill the final data with the exact right amount of empty x plot points
   function fillWithEmpty(processedData: any) {
-    // derive a start date
-    const startDate = moment('2022-08-01 00:00:00');
-    // derive end date
-    const endDate = moment();
-    // figure out how long each interval is
-    const intervalPeriod = 'M';
+    console.log(selectedInterval.replace(/^auto_/, '')); // to delete
+
+    // TODO: derive a start date
+    const startDate = moment('2023-01-01 00:00:00');
+    // TODO: derive end date
+    const endDate = moment('2023-12-01 00:00:00');
 
     // create new x and y arrays
     const x = [];
@@ -68,12 +69,11 @@ export const CountDistribution = ({ countDistribution }: any) => {
         y.push(0);
       }
 
-      currentDate.add(1, intervalPeriod);
+      // Note: moments are mutable. the below function will create a new moment. should this still be done?
+      currentDate.add(1, selectedInterval.replace(/^auto_/, ''));
     }
 
     // replace x and y with the new arrays
-    console.log(x);
-    console.log(y);
     processedData[0].x = x;
     processedData[0].y = y;
 
