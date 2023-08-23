@@ -97,7 +97,6 @@ export class IntegrationInstanceBuilder {
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
     const config: Result<IntegrationTemplate> = await integration.getConfig();
-    console.error(config);
     if (!config.ok) {
       return Promise.reject(
         new Error('Attempted to create instance with invalid template', config.error)
