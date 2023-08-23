@@ -147,21 +147,23 @@ describe('IntegrationsKibanaBackend', () => {
   describe('getIntegrationTemplates', () => {
     it('should get integration templates by name', async () => {
       const query = { name: 'template1' };
-      const integration = { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) };
+      const integration = {
+        getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template1' } }),
+      };
       mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
 
       const result = await backend.getIntegrationTemplates(query);
 
       expect(mockRepository.getIntegration).toHaveBeenCalledWith(query.name);
       expect(integration.getConfig).toHaveBeenCalled();
-      expect(result).toEqual({ hits: [await integration.getConfig()] });
+      expect(result).toEqual({ hits: [{ name: 'template1' }] });
     });
 
     it('should get all integration templates', async () => {
       const integrationList = [
-        { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) },
-        { getConfig: jest.fn().mockResolvedValue(null) },
-        { getConfig: jest.fn().mockResolvedValue({ name: 'template2' }) },
+        { getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template1' } }) },
+        { getConfig: jest.fn().mockResolvedValue({ ok: false, error: new Error() }) },
+        { getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template2' } }) },
       ];
       mockRepository.getIntegrationList.mockResolvedValue(
         (integrationList as unknown) as Integration[]
@@ -174,7 +176,7 @@ describe('IntegrationsKibanaBackend', () => {
       expect(integrationList[1].getConfig).toHaveBeenCalled();
       expect(integrationList[2].getConfig).toHaveBeenCalled();
       expect(result).toEqual({
-        hits: [await integrationList[0].getConfig(), await integrationList[2].getConfig()],
+        hits: [{ name: 'template1' }, { name: 'template2' }],
       });
     });
   });
@@ -277,7 +279,7 @@ describe('IntegrationsKibanaBackend', () => {
       const staticPath = 'path/to/static';
       const assetData = Buffer.from('asset data');
       const integration = {
-        getStatic: jest.fn().mockResolvedValue(assetData),
+        getStatic: jest.fn().mockResolvedValue({ ok: true, value: assetData }),
       };
       mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
 

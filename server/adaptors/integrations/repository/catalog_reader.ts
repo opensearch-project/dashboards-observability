@@ -10,4 +10,5 @@ interface CatalogReader {
   readFileRaw: (filename: string, type?: IntegrationPart) => Promise<Buffer>;
   readDir: (filename: string) => Promise<string[]>;
   isDirectory: (filename: string) => Promise<boolean>;
+  join: (filename: string) => CatalogReader;
 }

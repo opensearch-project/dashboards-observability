@@ -84,7 +84,7 @@ export class Integration {
    * @returns A string with the latest version, or null if no versions are available.
    */
   async getLatestVersion(): Promise<string | null> {
-    const files = await this.reader.readDir(this.directory);
+    const files = await this.reader.readDir('');
     const versions: string[] = [];
 
     for (const file of files) {
@@ -109,7 +109,7 @@ export class Integration {
    * @returns The config if a valid config matching the version is present, otherwise null.
    */
   async getConfig(version?: string): Promise<Result<IntegrationTemplate>> {
-    if (!(await this.reader.isDirectory(this.directory))) {
+    if (!(await this.reader.isDirectory(''))) {
       return { ok: false, error: new Error(`${this.directory} is not a valid directory`) };
     }
 

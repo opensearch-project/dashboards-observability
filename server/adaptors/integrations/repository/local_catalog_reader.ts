@@ -40,4 +40,8 @@ export class LocalCatalogReader implements CatalogReader {
   async isDirectory(dirname: string): Promise<boolean> {
     return (await fs.lstat(this._prepare(dirname))).isDirectory();
   }
+
+  join(filename: string): LocalCatalogReader {
+    return new LocalCatalogReader(path.join(this.directory, filename));
+  }
 }
