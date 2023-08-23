@@ -66,7 +66,7 @@ export function addRequestToMetric(
 
   rollingCounter[component][request][counter]!++;
   if (counter === 'count') {
-    GLOBAL_BASIC_COUNTER[component][request]['total']!++;
+    GLOBAL_BASIC_COUNTER[component][request].total!++;
   }
 
   time2CountWin.set(timeKey, rollingCounter);

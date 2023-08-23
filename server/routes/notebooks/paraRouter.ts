@@ -175,7 +175,7 @@ export function registerParaRoute(router: IRouter) {
       );
       try {
         const updateNotebook: Partial<DefaultNotebooks> = {
-          paragraphs: request.body.paragraphs as Array<DefaultParagraph>,
+          paragraphs: request.body.paragraphs as DefaultParagraph[],
           dateModified: new Date().toISOString(),
         };
         const updateResponse = await BACKEND.updateNote(

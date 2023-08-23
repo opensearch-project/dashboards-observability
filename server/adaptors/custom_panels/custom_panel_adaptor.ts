@@ -142,7 +142,6 @@ export class CustomPanelsAdaptor {
     }
   };
 
-
   // Rename an existing panel
   renamePanel = async (client: ILegacyScopedClusterClient, panelId: string, panelName: string) => {
     const updatePanelBody = {
@@ -380,7 +379,7 @@ export class CustomPanelsAdaptor {
     savedVisualizationIds: string[]
   ) => {
     try {
-      let allPanelVisualizations = await this.getVisualizations(client, panelId);
+      const allPanelVisualizations = await this.getVisualizations(client, panelId);
 
       let newDimensions;
       let visualizationsList = [...allPanelVisualizations];
