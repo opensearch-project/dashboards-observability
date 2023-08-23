@@ -226,4 +226,39 @@ describe('Integration', () => {
       expect(integration.getStatic('/logo.png')).resolves.toHaveProperty('ok', false);
     });
   });
+
+  describe('getSampleData', () => {
+    it('should return sample data', async () => {
+      const sampleConfig = { sampleData: { path: 'sample.json' } };
+      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleConfig });
+      const readFileMock = jest.spyOn(fs, 'readFile').mockResolvedValue('[{"sample": true}]');
+
+      const result = await integration.getSampleData();
+
+      expect(result.ok).toBe(true);
+      expect((result as any).value.sampleData).toStrictEqual([{ sample: true }]);
+      expect(readFileMock).toBeCalledWith(path.join('sample', 'data', 'sample.json'), {
+        encoding: 'utf-8',
+      });
+    });
+
+    it("should return null if there's no sample data", async () => {
+      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: {} });
+
+      const result = await integration.getSampleData();
+
+      expect(result.ok).toBe(true);
+      expect((result as any).value.sampleData).toBeNull();
+    });
+
+    it('should catch and fail gracefully on invalid sample data', async () => {
+      const sampleConfig = { sampleData: { path: 'sample.json' } };
+      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleConfig });
+      jest.spyOn(fs, 'readFile').mockResolvedValue('[{"closingBracket": false]');
+
+      const result = await integration.getSampleData();
+
+      expect(result.ok).toBe(false);
+    });
+  });
 });
