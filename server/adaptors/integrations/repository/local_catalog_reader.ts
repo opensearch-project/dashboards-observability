@@ -14,14 +14,25 @@ import sanitize from 'sanitize-filename';
 export class LocalCatalogReader implements CatalogReader {
   directory: string;
 
+  /**
+   * Creates a new LocalCatalogReader instance.
+   *
+   * @param directory The base directory from which to read files. This is not sanitized.
+   */
   constructor(directory: string) {
     this.directory = directory;
   }
 
-  // Use before any call to `fs`
-  // Sanitizes filenames by default, manually prepend directories with a prefix if necessary
-  _prepare(filename: string, prefix?: string): string {
-    return path.join(this.directory, prefix ?? '.', sanitize(filename));
+  /**
+   * Prepares a filename for use in filesystem operations by sanitizing and joining it with the base directory.
+   * This method is intended to be used before any filesystem-related call.
+   *
+   * @param filename The name of the file to prepare.
+   * @param subdir Optional. A subdirectory to prepend to the filename. Not sanitized.
+   * @returns The prepared path for the file, including the base directory and optional prefix.
+   */
+  _prepare(filename: string, subdir?: string): string {
+    return path.join(this.directory, subdir ?? '.', sanitize(filename));
   }
 
   async readFile(filename: string, type?: IntegrationPart): Promise<string> {
