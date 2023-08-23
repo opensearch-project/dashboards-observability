@@ -46,17 +46,21 @@ export const CountDistribution = ({
     const xVals = processedData[0].x;
     const yVals = processedData[0].y;
 
+    const intervalPeriod = selectedInterval.replace(/^auto_/, '');
+
     // parses out datetime for start and end, then reformats
-    const startDate = datemath.parse(startTime);
-    const endDate = datemath.parse(endTime);
+    const startDate = datemath
+      .parse(startTime)
+      ?.startOf(intervalPeriod === 'w' ? 'isoWeek' : intervalPeriod);
+    const endDate = datemath
+      .parse(endTime)
+      ?.startOf(intervalPeriod === 'w' ? 'isoWeek' : intervalPeriod);
     // TODO: figure out how to handle an error here - which would happen if start/endTime were
     // to somehow be invalid for datemath.parse, but that would be a flaw in the datepicker
     // component if that happens
     if (startDate === undefined || endDate === undefined) {
       return null;
     }
-
-    const intervalPeriod = selectedInterval.replace(/^auto_/, '');
 
     // find the number of buckets
     // below essentially does ((end - start) / interval_period) + 1
