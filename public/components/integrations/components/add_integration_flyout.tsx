@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { HttpStart } from '../../../../../../src/core/public';
+import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 import { useToast } from '../../../../public/components/common/toast';
 
 interface IntegrationFlyoutProps {
@@ -31,48 +31,65 @@ interface IntegrationFlyoutProps {
   http: HttpStart;
 }
 
-export const doTypeValidation = (toCheck: any, required: any): boolean => {
+type ValidationResult = { ok: true } | { ok: false; errors: string[] };
+
+export const doTypeValidation = (
+  toCheck: { type?: string; properties?: object },
+  required: { type?: string; properties?: object }
+): ValidationResult => {
   if (!required.type) {
-    return true;
+    return { ok: true };
   }
   if (required.type === 'object') {
-    return Boolean(toCheck.properties);
+    if (Boolean(toCheck.properties)) {
+      return { ok: true };
+    }
+    return { ok: false, errors: ["'object' type must have properties."] };
   }
-  return required.type === toCheck.type;
+  if (required.type !== toCheck.type) {
+    return { ok: false, errors: [`Type mismatch: '${required.type}' and '${toCheck.type}'`] };
+  }
+  return { ok: true };
 };
 
 export const doNestedPropertyValidation = (
-  toCheck: { type?: string; properties?: any },
-  required: { type?: string; properties?: any }
-): boolean => {
-  if (!doTypeValidation(toCheck, required)) {
-    return false;
+  toCheck: { type?: string; properties?: { [key: string]: object } },
+  required: { type?: string; properties?: { [key: string]: object } }
+): ValidationResult => {
+  const typeCheck = doTypeValidation(toCheck, required);
+  if (!typeCheck.ok) {
+    return typeCheck;
   }
-  if (required.properties) {
-    return Object.keys(required.properties).every((property: string) => {
-      if (!toCheck.properties[property]) {
-        return false;
-      }
-      return doNestedPropertyValidation(
-        toCheck.properties[property],
-        required.properties[property]
-      );
-    });
+  for (const property of Object.keys(required.properties ?? {})) {
+    if (!Object.hasOwn(toCheck.properties ?? {}, property)) {
+      return { ok: false, errors: [`Missing field '${property}'`] };
+    }
+    // Both are safely non-null after above checks.
+    const nested = doNestedPropertyValidation(
+      toCheck.properties![property],
+      required.properties![property]
+    );
+    if (!nested.ok) {
+      return nested;
+    }
   }
-  return true;
+  return { ok: true };
 };
 
 export const doPropertyValidation = (
   rootType: string,
   dataSourceProps: { [key: string]: { properties?: any } },
   requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
-): boolean => {
+): ValidationResult => {
   // Check root object type (without dependencies)
   for (const [key, value] of Object.entries(
     requiredMappings[rootType].template.mappings.properties
   )) {
-    if (!dataSourceProps[key] || !doNestedPropertyValidation(dataSourceProps[key], value as any)) {
-      return false;
+    if (
+      !dataSourceProps[key] ||
+      !doNestedPropertyValidation(dataSourceProps[key], value as any).ok
+    ) {
+      return { ok: false, errors: [`Data source is invalid at key '${key}'`] };
     }
   }
   // Check nested dependencies
@@ -82,12 +99,104 @@ export const doPropertyValidation = (
     }
     if (
       !dataSourceProps[key] ||
-      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties)
+      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties).ok
     ) {
-      return false;
+      return { ok: false, errors: [`Data source is invalid at key '${key}'`] };
     }
   }
-  return true;
+  return { ok: true };
+};
+
+// Returns true if the data stream is a legal name.
+// Appends any additional validation errors to the provided errors array.
+const checkDataSourceName = (
+  targetDataSource: string,
+  integrationType: string
+): ValidationResult => {
+  let errors: string[] = [];
+  if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-\*]*$/))) {
+    errors = errors.concat('This is not a valid index name.');
+    return { ok: false, errors };
+  }
+  const nameValidity: boolean = Boolean(
+    targetDataSource.match(new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`))
+  );
+  if (!nameValidity) {
+    errors = errors.concat('This index does not match the suggested naming convention.');
+    return { ok: false, errors };
+  }
+  return { ok: true };
+};
+
+const fetchDataSourceMappings = async (
+  targetDataSource: string,
+  http: HttpSetup
+): Promise<{ [key: string]: { properties: any } } | null> => {
+  return http
+    .post('/api/console/proxy', {
+      query: {
+        path: `${targetDataSource}/_mapping`,
+        method: 'GET',
+      },
+    })
+    .then((response) => {
+      // Un-nest properties by a level for caller convenience
+      Object.keys(response).forEach((key) => {
+        response[key].properties = response[key].mappings.properties;
+      });
+      return response;
+    })
+    .catch((err: any) => {
+      console.error(err);
+      return null;
+    });
+};
+
+const fetchIntegrationMappings = async (
+  targetName: string,
+  http: HttpSetup
+): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
+  return http
+    .get(`/api/integrations/repository/${targetName}/schema`)
+    .then((response) => {
+      if (response.statusCode && response.statusCode !== 200) {
+        throw new Error('Failed to retrieve Integration schema', { cause: response });
+      }
+      return response.data.mappings;
+    })
+    .catch((err: any) => {
+      console.error(err);
+      return null;
+    });
+};
+
+const doExistingDataSourceValidation = async (
+  targetDataSource: string,
+  integrationName: string,
+  integrationType: string,
+  http: HttpSetup
+): Promise<string[]> => {
+  const dataSourceNameCheck = checkDataSourceName(targetDataSource, integrationType);
+  if (!dataSourceNameCheck.ok) {
+    return dataSourceNameCheck.errors;
+  }
+  const [dataSourceMappings, integrationMappings] = await Promise.all([
+    fetchDataSourceMappings(targetDataSource, http),
+    fetchIntegrationMappings(integrationName, http),
+  ]);
+  if (!dataSourceMappings) {
+    return ['Provided data stream could not be retrieved'];
+  }
+  if (!integrationMappings) {
+    return ['Failed to retrieve integration schema information'];
+  }
+  const validationResult = Object.values(dataSourceMappings).every((value) =>
+    doPropertyValidation(integrationType, value.properties, integrationMappings)
+  );
+  if (!validationResult) {
+    return ['The provided index does not match the schema'];
+  }
+  return [];
 };
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
@@ -108,93 +217,6 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
 
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
-  };
-
-  // Returns true if the data stream is a legal name.
-  // Appends any additional validation errors to the provided errors array.
-  const checkDataSourceName = (targetDataSource: string, validationErrors: string[]): boolean => {
-    if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-\*]*$/))) {
-      validationErrors.push('This is not a valid index name.');
-      setErrors(validationErrors);
-      return false;
-    }
-    const nameValidity: boolean = Boolean(
-      targetDataSource.match(new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`))
-    );
-    if (!nameValidity) {
-      validationErrors.push('This index does not match the suggested naming convention.');
-      setErrors(validationErrors);
-    }
-    return true;
-  };
-
-  const fetchDataSourceMappings = async (
-    targetDataSource: string
-  ): Promise<{ [key: string]: { properties: any } } | null> => {
-    return http
-      .post('/api/console/proxy', {
-        query: {
-          path: `${targetDataSource}/_mapping`,
-          method: 'GET',
-        },
-      })
-      .then((response) => {
-        // Un-nest properties by a level for caller convenience
-        Object.keys(response).forEach((key) => {
-          response[key].properties = response[key].mappings.properties;
-        });
-        return response;
-      })
-      .catch((err: any) => {
-        console.error(err);
-        return null;
-      });
-  };
-
-  const fetchIntegrationMappings = async (
-    targetName: string
-  ): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
-    return http
-      .get(`/api/integrations/repository/${targetName}/schema`)
-      .then((response) => {
-        if (response.statusCode && response.statusCode !== 200) {
-          throw new Error('Failed to retrieve Integration schema', { cause: response });
-        }
-        return response.data.mappings;
-      })
-      .catch((err: any) => {
-        console.error(err);
-        return null;
-      });
-  };
-
-  const doExistingDataSourceValidation = async (targetDataSource: string): Promise<boolean> => {
-    const validationErrors: string[] = [];
-    if (!checkDataSourceName(targetDataSource, validationErrors)) {
-      return false;
-    }
-    const [dataSourceMappings, integrationMappings] = await Promise.all([
-      fetchDataSourceMappings(targetDataSource),
-      fetchIntegrationMappings(integrationName),
-    ]);
-    if (!dataSourceMappings) {
-      validationErrors.push('Provided data stream could not be retrieved');
-      setErrors(validationErrors);
-      return false;
-    }
-    if (!integrationMappings) {
-      validationErrors.push('Failed to retrieve integration schema information');
-      setErrors(validationErrors);
-      return false;
-    }
-    const validationResult = Object.values(dataSourceMappings).every((value) =>
-      doPropertyValidation(integrationType, value.properties, integrationMappings)
-    );
-    if (!validationResult) {
-      validationErrors.push('The provided index does not match the schema');
-      setErrors(validationErrors);
-    }
-    return validationResult;
   };
 
   const formContent = () => {
@@ -227,11 +249,17 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               <EuiButton
                 data-test-subj="validateIndex"
                 onClick={async () => {
-                  const validationResult = await doExistingDataSourceValidation(dataSource);
-                  if (validationResult) {
+                  const validationResult = await doExistingDataSourceValidation(
+                    dataSource,
+                    integrationName,
+                    integrationType,
+                    http
+                  );
+                  setErrors(validationResult);
+                  if (validationResult.length === 0) {
                     setToast('Index name or wildcard pattern is valid', 'success');
                   }
-                  setDataSourceValid(validationResult);
+                  setDataSourceValid(validationResult.length === 0);
                 }}
                 disabled={dataSource.length === 0}
               >
