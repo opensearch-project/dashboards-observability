@@ -109,7 +109,7 @@ export const doPropertyValidation = (
 
 // Returns true if the data stream is a legal name.
 // Appends any additional validation errors to the provided errors array.
-const checkDataSourceName = (
+export const checkDataSourceName = (
   targetDataSource: string,
   integrationType: string
 ): ValidationResult => {
@@ -128,7 +128,7 @@ const checkDataSourceName = (
   return { ok: true };
 };
 
-const fetchDataSourceMappings = async (
+export const fetchDataSourceMappings = async (
   targetDataSource: string,
   http: HttpSetup
 ): Promise<{ [key: string]: { properties: any } } | null> => {
@@ -152,7 +152,7 @@ const fetchDataSourceMappings = async (
     });
 };
 
-const fetchIntegrationMappings = async (
+export const fetchIntegrationMappings = async (
   targetName: string,
   http: HttpSetup
 ): Promise<{ [key: string]: { template: { mappings: { properties?: any } } } } | null> => {
@@ -170,7 +170,7 @@ const fetchIntegrationMappings = async (
     });
 };
 
-const doExistingDataSourceValidation = async (
+export const doExistingDataSourceValidation = async (
   targetDataSource: string,
   integrationName: string,
   integrationType: string,
@@ -190,8 +190,8 @@ const doExistingDataSourceValidation = async (
   if (!integrationMappings) {
     return ['Failed to retrieve integration schema information'];
   }
-  const validationResult = Object.values(dataSourceMappings).every((value) =>
-    doPropertyValidation(integrationType, value.properties, integrationMappings)
+  const validationResult = Object.values(dataSourceMappings).every(
+    (value) => doPropertyValidation(integrationType, value.properties, integrationMappings).ok
   );
   if (!validationResult) {
     return ['The provided index does not match the schema'];
