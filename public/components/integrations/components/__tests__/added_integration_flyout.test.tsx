@@ -298,7 +298,7 @@ describe('doExistingDataSourceValidation', () => {
 
     const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
 
-    await expect(result).resolves.toHaveLength(1);
+    await expect(result).resolves.toHaveProperty('ok', false);
   });
 
   it('Catches data stream fetch errors', async () => {
@@ -311,7 +311,7 @@ describe('doExistingDataSourceValidation', () => {
 
     const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
 
-    await expect(result).resolves.toHaveLength(1);
+    await expect(result).resolves.toHaveProperty('ok', false);
   });
 
   it('Catches integration fetch errors', async () => {
@@ -324,7 +324,7 @@ describe('doExistingDataSourceValidation', () => {
 
     const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
 
-    await expect(result).resolves.toHaveLength(1);
+    await expect(result).resolves.toHaveProperty('ok', false);
   });
 
   it('Catches type validation issues', async () => {
@@ -342,7 +342,7 @@ describe('doExistingDataSourceValidation', () => {
 
     const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
 
-    await expect(result).resolves.toHaveLength(1);
+    await expect(result).resolves.toHaveProperty('ok', false);
   });
 
   it('Returns no errors if everything passes', async () => {
@@ -358,6 +358,6 @@ describe('doExistingDataSourceValidation', () => {
 
     const result = doExistingDataSourceValidation('target', 'name', 'type', mockHttp as HttpSetup);
 
-    await expect(result).resolves.toHaveLength(0);
+    await expect(result).resolves.toHaveProperty('ok', true);
   });
 });

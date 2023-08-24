@@ -175,28 +175,28 @@ export const doExistingDataSourceValidation = async (
   integrationName: string,
   integrationType: string,
   http: HttpSetup
-): Promise<string[]> => {
+): Promise<ValidationResult> => {
   const dataSourceNameCheck = checkDataSourceName(targetDataSource, integrationType);
   if (!dataSourceNameCheck.ok) {
-    return dataSourceNameCheck.errors;
+    return dataSourceNameCheck;
   }
   const [dataSourceMappings, integrationMappings] = await Promise.all([
     fetchDataSourceMappings(targetDataSource, http),
     fetchIntegrationMappings(integrationName, http),
   ]);
   if (!dataSourceMappings) {
-    return ['Provided data stream could not be retrieved'];
+    return { ok: false, errors: ['Provided data stream could not be retrieved'] };
   }
   if (!integrationMappings) {
-    return ['Failed to retrieve integration schema information'];
+    return { ok: false, errors: ['Failed to retrieve integration schema information'] };
   }
   const validationResult = Object.values(dataSourceMappings).every(
     (value) => doPropertyValidation(integrationType, value.properties, integrationMappings).ok
   );
   if (!validationResult) {
-    return ['The provided index does not match the schema'];
+    return { ok: false, errors: ['The provided index does not match the schema'] };
   }
-  return [];
+  return { ok: true };
 };
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
@@ -255,11 +255,11 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                     integrationType,
                     http
                   );
-                  setErrors(validationResult);
-                  if (validationResult.length === 0) {
+                  if (validationResult.ok) {
                     setToast('Index name or wildcard pattern is valid', 'success');
                   }
-                  setDataSourceValid(validationResult.length === 0);
+                  setDataSourceValid(validationResult.ok);
+                  setErrors(!validationResult.ok ? validationResult.errors : []);
                 }}
                 disabled={dataSource.length === 0}
               >
