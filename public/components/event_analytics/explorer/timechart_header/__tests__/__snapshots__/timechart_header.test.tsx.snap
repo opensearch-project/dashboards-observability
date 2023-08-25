@@ -157,7 +157,11 @@ exports[`Time chart header component Renders Time chart header component 1`] = `
                         data-test-subj="discoverIntervalDateRange"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        Aug 25, 2023 @ 18:20:05.160
+                         - 
+                        Aug 25, 2023 @ 18:20:05.164
+                      </div>
                     </EuiText>
                   </span>
                 </EuiToolTip>
