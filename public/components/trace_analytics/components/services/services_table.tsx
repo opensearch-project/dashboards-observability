@@ -91,7 +91,7 @@ export function ServicesTable(props: ServicesTableProps) {
         },
         {
           field: 'throughput',
-          name: 'Rate',
+          name: 'Request rate',
           align: 'right',
           sortable: true,
           truncateText: true,

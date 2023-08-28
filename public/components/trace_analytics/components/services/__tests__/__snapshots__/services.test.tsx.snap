@@ -1525,7 +1525,7 @@ exports[`Services component renders empty services page 1`] = `
                 },
                 Object {
                   "id": "throughput",
-                  "label": "Rate",
+                  "label": "Request Rate",
                 },
               ]
             }
@@ -1710,7 +1710,7 @@ exports[`Services component renders empty services page 1`] = `
                   isIconOnly={false}
                   isSelected={false}
                   key="2"
-                  label="Rate"
+                  label="Request Rate"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -1728,9 +1728,9 @@ exports[`Services component renders empty services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Rate",
+                        "data-text": "Request Rate",
                         "ref": [Function],
-                        "title": "Rate",
+                        "title": "Request Rate",
                       }
                     }
                   >
@@ -1751,9 +1751,9 @@ exports[`Services component renders empty services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Rate",
+                            "data-text": "Request Rate",
                             "ref": [Function],
-                            "title": "Rate",
+                            "title": "Request Rate",
                           }
                         }
                       >
@@ -1762,8 +1762,8 @@ exports[`Services component renders empty services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Rate"
-                            title="Rate"
+                            data-text="Request Rate"
+                            title="Request Rate"
                           >
                             <input
                               checked={false}
@@ -1775,7 +1775,7 @@ exports[`Services component renders empty services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Rate
+                            Request Rate
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -5269,7 +5269,7 @@ exports[`Services component renders services page 1`] = `
                 },
                 Object {
                   "id": "throughput",
-                  "label": "Rate",
+                  "label": "Request Rate",
                 },
               ]
             }
@@ -5454,7 +5454,7 @@ exports[`Services component renders services page 1`] = `
                   isIconOnly={false}
                   isSelected={false}
                   key="2"
-                  label="Rate"
+                  label="Request Rate"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -5472,9 +5472,9 @@ exports[`Services component renders services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Rate",
+                        "data-text": "Request Rate",
                         "ref": [Function],
-                        "title": "Rate",
+                        "title": "Request Rate",
                       }
                     }
                   >
@@ -5495,9 +5495,9 @@ exports[`Services component renders services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Rate",
+                            "data-text": "Request Rate",
                             "ref": [Function],
-                            "title": "Rate",
+                            "title": "Request Rate",
                           }
                         }
                       >
@@ -5506,8 +5506,8 @@ exports[`Services component renders services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Rate"
-                            title="Rate"
+                            data-text="Request Rate"
+                            title="Request Rate"
                           >
                             <input
                               checked={false}
@@ -5519,7 +5519,7 @@ exports[`Services component renders services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Rate
+                            Request Rate
                           </span>
                         </span>
                       </EuiButtonContent>

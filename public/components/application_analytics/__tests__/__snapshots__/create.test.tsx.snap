@@ -627,8 +627,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -638,7 +638,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -1880,8 +1880,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -1891,7 +1891,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -3072,8 +3072,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -3083,7 +3083,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -4239,8 +4239,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -4250,7 +4250,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -5499,8 +5499,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -5510,7 +5510,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -6666,8 +6666,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -6677,7 +6677,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -7841,8 +7841,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -7852,7 +7852,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -8945,8 +8945,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -8956,7 +8956,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -10123,8 +10123,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -10134,7 +10134,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -11256,8 +11256,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -11267,7 +11267,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -12480,8 +12480,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -12491,7 +12491,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -13647,8 +13647,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -13658,7 +13658,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -14839,8 +14839,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -14850,7 +14850,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -16006,8 +16006,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -16017,7 +16017,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -17236,8 +17236,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Rate"
-                                    title="Rate"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -17247,7 +17247,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Rate
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -18485,8 +18485,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Rate"
-                                  title="Rate"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -18496,7 +18496,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Rate
+                                  Request Rate
                                 </span>
                               </span>
                             </label>

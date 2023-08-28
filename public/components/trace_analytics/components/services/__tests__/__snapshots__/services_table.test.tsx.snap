@@ -401,7 +401,7 @@ exports[`Services table component renders jaeger services table 1`] = `
             Object {
               "align": "right",
               "field": "throughput",
-              "name": "Rate",
+              "name": "Request rate",
               "render": [Function],
               "sortable": true,
               "truncateText": true,
@@ -476,7 +476,7 @@ exports[`Services table component renders jaeger services table 1`] = `
               Object {
                 "align": "right",
                 "field": "throughput",
-                "name": "Rate",
+                "name": "Request rate",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -587,7 +587,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_throughput_3",
-                                  "name": "Rate",
+                                  "name": "Request rate",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -983,15 +983,15 @@ exports[`Services table component renders jaeger services table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Rate",
+                                          "innerText": "Request rate",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Rate"
+                                        title="Request rate"
                                       >
-                                        Rate
+                                        Request rate
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -1197,7 +1197,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                             key="_data_column_throughput_0_3"
                             mobileOptions={
                               Object {
-                                "header": "Rate",
+                                "header": "Request rate",
                                 "render": undefined,
                               }
                             }
@@ -1216,7 +1216,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Rate
+                                Request rate
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -1815,7 +1815,7 @@ exports[`Services table component renders services table 1`] = `
             Object {
               "align": "right",
               "field": "throughput",
-              "name": "Rate",
+              "name": "Request rate",
               "render": [Function],
               "sortable": true,
               "truncateText": true,
@@ -1912,7 +1912,7 @@ exports[`Services table component renders services table 1`] = `
               Object {
                 "align": "right",
                 "field": "throughput",
-                "name": "Rate",
+                "name": "Request rate",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -2045,7 +2045,7 @@ exports[`Services table component renders services table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_throughput_3",
-                                  "name": "Rate",
+                                  "name": "Request rate",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2446,15 +2446,15 @@ exports[`Services table component renders services table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Rate",
+                                          "innerText": "Request rate",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Rate"
+                                        title="Request rate"
                                       >
-                                        Rate
+                                        Request rate
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -2777,7 +2777,7 @@ exports[`Services table component renders services table 1`] = `
                             key="_data_column_throughput_0_3"
                             mobileOptions={
                               Object {
-                                "header": "Rate",
+                                "header": "Request rate",
                                 "render": undefined,
                               }
                             }
@@ -2796,7 +2796,7 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Rate
+                                Request rate
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"

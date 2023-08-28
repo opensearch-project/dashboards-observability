@@ -79,7 +79,7 @@ export function ServiceMap({
     },
     {
       id: 'throughput',
-      label: 'Rate',
+      label: 'Request Rate',
     },
   ];
 
