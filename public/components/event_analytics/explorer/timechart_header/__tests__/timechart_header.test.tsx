@@ -22,7 +22,6 @@ describe('Time chart header component', () => {
 
     const wrapper = mount(
       <TimechartHeader
-        dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
         onChangeInterval={onChangeInterval}
         options={TIME_INTERVAL_OPTIONS}
         stateInterval="w"

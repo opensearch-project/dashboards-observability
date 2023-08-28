@@ -473,6 +473,8 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const dateRange = getDateRange(startTime, endTime, query);
+
   const mainContent = useMemo(() => {
     return (
       <>
@@ -534,7 +536,6 @@ export const Explorer = ({
                       onResetQuery={() => {}}
                     />
                     <TimechartHeader
-                      dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
                       options={timeIntervalOptions}
                       onChangeInterval={(selectedIntrv) => {
                         const intervalOptionsIndex = timeIntervalOptions.findIndex(
@@ -893,8 +894,6 @@ export const Explorer = ({
       </EuiContextMenuItem>
     );
   });
-
-  const dateRange = getDateRange(startTime, endTime, query);
 
   const handleLiveTailSearch = useCallback(
     async (startingTime: string, endingTime: string) => {

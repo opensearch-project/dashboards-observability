@@ -9,24 +9,17 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import datemath from '@elastic/datemath';
+import {
+  DATE_DISPLAY_FORMAT,
+  DEFAULT_DATETIME_STRING,
+} from '../../../../../common/constants/explorer';
 
 // TODO: move this function into some common library for other observability datetime uses
 function reformatDate(inputDate: moment.Moment | undefined) {
-  return moment(inputDate).format('MMM D, YYYY @ HH:mm:ss.SSS');
+  return moment(inputDate).format(DATE_DISPLAY_FORMAT);
 }
 
 export interface TimechartHeaderProps {
-  /**
-   * Format of date to be displayed
-   */
-  dateFormat?: string;
-  /**
-   * Range of dates to be displayed
-   */
-  timeRange?: {
-    from: string;
-    to: string;
-  };
   /**
    * Interval Options
    */
@@ -42,8 +35,8 @@ export interface TimechartHeaderProps {
   /**
    * current time span being displayed on the count distribution
    */
-  startTime: string;
-  endTime: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export function TimechartHeader({
@@ -68,7 +61,8 @@ export function TimechartHeader({
             delay="long"
           >
             <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-              {reformatDate(datemath.parse(startTime))} - {reformatDate(datemath.parse(endTime))}
+              {reformatDate(datemath.parse(startTime ?? DEFAULT_DATETIME_STRING))} -{' '}
+              {reformatDate(datemath.parse(endTime ?? DEFAULT_DATETIME_STRING))}
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
