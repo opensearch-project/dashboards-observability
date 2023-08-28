@@ -54,7 +54,7 @@ describe('Testing services table', () => {
     cy.get('.euiTableCellContent__text[title="Name"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Average duration (ms)"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Error rate"]').should('exist');
-    cy.get('.euiTableCellContent__text[title="Rate"]').should('exist');
+    cy.get('.euiTableCellContent__text[title="Request rate"]').should('exist');
     cy.get('.euiTableCellContent__text[title="No. of connected services"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Connected services"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Traces"]').should('exist');
@@ -144,7 +144,7 @@ describe('Testing Service map', () => {
   it('Render Service map', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('[data-test-subj="latency"]').should('exist');
-    cy.get('.ytitle').contains('Latency (ms)');
+    cy.get('.ytitle').contains('Average duration (ms)');
     cy.get('[data-text = "Errors"]').click();
     cy.contains('60%');
     cy.get('[data-text = "Duration"]').click();
@@ -287,7 +287,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('Name').should('exist');
     cy.contains('Average duration (ms)').should('exist');
     cy.contains('Error rate').should('exist');
-    cy.contains('Rate').should('exist');
+    cy.contains('Request rate').should('exist');
     cy.contains('Traces').should('exist');
   });
 
