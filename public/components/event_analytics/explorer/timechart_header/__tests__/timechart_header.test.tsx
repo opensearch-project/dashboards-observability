@@ -9,6 +9,10 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { TimechartHeader } from '../timechart_header';
 import { TIME_INTERVAL_OPTIONS } from '../../../../../../common/constants/explorer';
+import {
+  EXPLORER_START_TIME,
+  EXPLORER_END_TIME,
+} from '../../../../../../test/event_analytics_constants';
 
 describe('Time chart header component', () => {
   configure({ adapter: new Adapter() });
@@ -22,8 +26,8 @@ describe('Time chart header component', () => {
         onChangeInterval={onChangeInterval}
         options={TIME_INTERVAL_OPTIONS}
         stateInterval="w"
-        startTime=""
-        endTime=""
+        startTime={EXPLORER_START_TIME}
+        endTime={EXPLORER_END_TIME}
       />
     );
 
