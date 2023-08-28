@@ -107,20 +107,26 @@ Dashboards offer a solution for a few selected use cases, and are great tools if
 ### Integrations
 Integration is a new type of logical component that allows high level composition of multiple Dashboards / Applications / Queries and more. Integrations can be used to bring together all the metrics and logs from the infrastructure and gain insight into the unified system as a whole.
 
-Integration usually consist of the following assets: 
- - data on-boarding
- - data cleaning / parsing / transformation
- - dashboard configuration / creation.
+---
+
+Integration usually consist of the following assets:
+- dashboards & visualization 
+- schema configuration (mapping & templates)
+- data on-boarding (sample data)
+
+[See Integration Documentation](https://github.com/opensearch-project/dashboards-observability/wiki/Integration-Documentation-Reference)
+
+[See Integration Tutorial](https://github.com/opensearch-project/dashboards-observability/wiki/Integration-Creation-Guide)
 
 Please See additional information [documentation](https://opensearch.org/docs/latest/integrations/index)
 
-> For Additional details regarding the Integration Spec check our [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3412#schema-support-for-observability)
+> Integration Spec [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3412#schema-support-for-observability)
 
-### Observability Correlation 
+### Observability Correlation
 In order to be able to correlate information across different signal (represented in different indices) we introduced the notion of correlation into the schema. This information is represented explicitly in both the declarative schema file and the physical mapping file.
 Using this metadata information will enable the knowledge to be projected and allow for analytic engine to produce a join query that will take advantage of these relationships.
 
-The Observability dashboard vision of [telemetry Data Correlation](https://github.com/opensearch-project/dashboards-observability/wiki/Observability-Future-Vision) 
+The Observability dashboard vision of [telemetry Data Correlation](https://github.com/opensearch-project/dashboards-observability/wiki/Observability-Future-Vision)
 
 ---
 ## WIKI Home
@@ -154,3 +160,8 @@ This project is licensed under the [Apache v2.0 License](LICENSE).
 ## Copyright
 
 Copyright OpenSearch Contributors. See [NOTICE](NOTICE) for details.
+
+## Screenshots
+
+<video src='https://github.com/opensearch-project/dashboards-observability/assets/48943349/8c918fce-35b8-4824-ae2d-6881aad7b9a2' width=180/>
+

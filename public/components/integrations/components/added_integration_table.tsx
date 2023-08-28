@@ -18,17 +18,11 @@ import {
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { AddedIntegrationsTableProps } from './added_integration_overview_page';
-import {
-  ASSET_FILTER_OPTIONS,
-  INTEGRATION_TEMPLATE_OPTIONS,
-} from '../../../../common/constants/integrations';
 import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
 
 export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
-  const integrations = props.data.hits;
-
   const { http } = props;
 
   const { setToast } = useToast();
@@ -94,6 +88,9 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       .delete(`${INTEGRATIONS_BASE}/store/${integrationInstance}`)
       .then(() => {
         setToast(`${name} integration successfully deleted!`, 'success');
+        props.setData({
+          hits: props.data.hits.filter((i) => i.id !== integrationInstance),
+        });
       })
       .catch((err) => {
         setToast(`Error deleting ${name} or its assets`, 'danger');
@@ -103,7 +100,7 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
       });
   }
 
-  const getModal = (integrationInstanceId, name) => {
+  const getModal = (integrationInstanceId: string, name: string) => {
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
@@ -120,31 +117,41 @@ export function AddedIntegrationsTable(props: AddedIntegrationsTableProps) {
     setIsModalVisible(true);
   };
 
+  const integTemplateNames = [...new Set(props.data.hits.map((i) => i.templateName))].sort();
+
   const search = {
     box: {
       incremental: true,
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'templateName',
         name: 'Type',
         multiSelect: false,
-        options: INTEGRATION_TEMPLATE_OPTIONS.map((i) => ({
-          value: i,
-          name: i,
-          view: i,
+        options: integTemplateNames.map((name) => ({
+          name,
+          value: name,
+          view: name,
         })),
       },
     ],
   };
 
+  const entries = props.data.hits.map((integration) => {
+    const id = integration.id;
+    const templateName = integration.templateName;
+    const creationDate = integration.creationDate;
+    const name = integration.name;
+    return { id, templateName, creationDate, name, data: { templateName, name } };
+  });
+
   return (
     <EuiPageContent data-test-subj="addedIntegrationsArea">
-      {integrations && integrations.length > 0 ? (
+      {entries && entries.length > 0 ? (
         <EuiInMemoryTable
           loading={props.loading}
-          items={integrations}
+          items={entries}
           itemId="id"
           columns={tableColumns}
           tableLayout="auto"

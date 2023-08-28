@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "ss4o_logs-*-*"
-  ],
+  "index_patterns": ["ss4o_logs-*-*"],
   "priority": 900,
   "data_stream": {},
   "template": {
@@ -11,6 +9,7 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
+        "labels": ["log", "http", "communication"],
         "correlations": [
           {
             "field": "spanId",
@@ -219,26 +218,6 @@
       }
     }
   },
-  "composed_of": [
-    "communication",
-    "http"
-  ],
-  "version": 1,
-  "_meta": {
-    "description": "Simple Schema For Observability",
-    "catalog": "observability",
-    "type": "logs",
-    "correlations": [
-      {
-        "field": "spanId",
-        "foreign-schema": "traces",
-        "foreign-field": "spanId"
-      },
-      {
-        "field": "traceId",
-        "foreign-schema": "traces",
-        "foreign-field": "traceId"
-      }
-    ]
-  }
+  "composed_of": ["communication", "http"],
+  "version": 1
 }

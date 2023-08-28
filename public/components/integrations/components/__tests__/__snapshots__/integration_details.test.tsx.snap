@@ -8,35 +8,208 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     data-test-subj="nginx-details"
   >
-    <PanelTitle
-      title="Details"
-    >
-      <EuiText
-        size="m"
+    <EuiTitle>
+      <h2
+        className="euiTitle euiTitle--medium"
       >
-        <div
-          className="euiText euiText--medium"
-        >
-          <span
-            className="panel-title"
-          >
-            Details
-          </span>
-        </div>
-      </EuiText>
-    </PanelTitle>
+        Details
+      </h2>
+    </EuiTitle>
     <EuiSpacer>
       <div
         className="euiSpacer euiSpacer--l"
       />
     </EuiSpacer>
-    <EuiText>
+    <EuiFlexGroup>
       <div
-        className="euiText euiText--medium"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
-        Nginx HTTP server collector
+        <EuiFlexItem>
+          <div
+            className="euiFlexItem"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                <h4>
+                  Version
+                </h4>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                1.0.1
+              </div>
+            </EuiText>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div
+            className="euiFlexItem"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                <h4>
+                  Category
+                </h4>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiBadgeGroup>
+              <div
+                className="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
+              />
+            </EuiBadgeGroup>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div
+            className="euiFlexItem"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                <h4>
+                  Contributer
+                </h4>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiLink
+              external={true}
+              href="https://github.com/"
+              target="blank"
+            >
+              <a
+                className="euiLink euiLink--primary"
+                href="https://github.com/"
+                rel="noreferrer"
+                target="blank"
+              >
+                John Doe
+                <EuiIcon
+                  aria-label="External link"
+                  className="euiLink__externalIcon"
+                  size="s"
+                  type="popout"
+                >
+                  <EuiIconEmpty
+                    aria-hidden={true}
+                    aria-label="External link"
+                    className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                    focusable="false"
+                    role="img"
+                    style={null}
+                  >
+                    <svg
+                      aria-hidden={true}
+                      aria-label="External link"
+                      className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </EuiIconEmpty>
+                </EuiIcon>
+              </a>
+            </EuiLink>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div
+            className="euiFlexItem"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                <h4>
+                  License
+                </h4>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                Apache-2.0
+              </div>
+            </EuiText>
+          </div>
+        </EuiFlexItem>
       </div>
-    </EuiText>
+    </EuiFlexGroup>
+    <EuiFlexItem>
+      <div
+        className="euiFlexItem"
+      >
+        <EuiText>
+          <div
+            className="euiText euiText--medium"
+          >
+            <h4>
+              Description
+            </h4>
+          </div>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        >
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiText
+          size="m"
+        >
+          <div
+            className="euiText euiText--medium"
+          >
+            Nginx HTTP server collector
+          </div>
+        </EuiText>
+      </div>
+    </EuiFlexItem>
   </div>
 </EuiPanel>
 `;

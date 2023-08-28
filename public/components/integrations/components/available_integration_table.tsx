@@ -5,18 +5,11 @@
 
 import {
   EuiButtonGroup,
-  EuiFieldSearch,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
@@ -44,7 +37,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
 
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('0');
 
-  const onChangeIcons = (optionId) => {
+  const onChangeIcons = (optionId: string) => {
     setToggleIconIdSelected(optionId);
     if (optionId === '0') {
       props.setCardView(false);
@@ -73,7 +66,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       name: 'Description',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
+      render: (_value, record) => (
         <EuiText data-test-subj={`${record.name}IntegrationDescription`}>
           {_.truncate(record.description, { length: 100 })}
         </EuiText>
@@ -84,7 +77,7 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
       name: 'Categories',
       sortable: true,
       truncateText: true,
-      render: (value, record) => badges(record.components),
+      render: (_value, record) => badges(record.labels ?? []),
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 

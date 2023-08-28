@@ -22,7 +22,6 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         },
         "getApplicationClasses$": [MockFunction],
         "getBadge$": [MockFunction],
-        "getBrand$": [MockFunction],
         "getBreadcrumbs$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
@@ -187,6 +186,69 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           ],
         },
         "getIsVisible$": [MockFunction],
+        "logos": Object {
+          "AnimatedMark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "Application": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "CenterMark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "Mark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "OpenSearch": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "colorScheme": "light",
+        },
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
@@ -213,7 +275,6 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         "removeApplicationClass": [MockFunction],
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
-        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction],
         "setCustomNavLink": [MockFunction],
         "setHelpExtension": [MockFunction],
@@ -224,7 +285,6 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
     editActionType="save"
     editMode={false}
     endTime="now"
-    http={[MockFunction]}
     moveToEvents={[MockFunction]}
     onRefresh={true}
     panelVisualizations={
@@ -257,12 +317,6 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "y": 4,
         },
       ]
-    }
-    pplService={
-      PPLService {
-        "fetch": [Function],
-        "http": [MockFunction],
-      }
     }
     setEditActionType={
       [MockFunction] {
@@ -680,17 +734,10 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                 <Component
                   editMode={false}
                   fromTime="now-30m"
-                  http={[MockFunction]}
                   key="Y4muP4QBiaYaSxpXk7r8"
                   onEditClick={[MockFunction]}
                   onRefresh={true}
                   pplFilterValue=""
-                  pplService={
-                    PPLService {
-                      "fetch": [Function],
-                      "http": [MockFunction],
-                    }
-                  }
                   removeVisualization={[Function]}
                   savedVisualizationId="Y4muP4QBiaYaSxpXk7r8"
                   spanParam="1h"
@@ -930,17 +977,10 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                 <Component
                   editMode={false}
                   fromTime="now-30m"
-                  http={[MockFunction]}
                   key="tomAP4QBiaYaSxpXALls"
                   onEditClick={[MockFunction]}
                   onRefresh={true}
                   pplFilterValue=""
-                  pplService={
-                    PPLService {
-                      "fetch": [Function],
-                      "http": [MockFunction],
-                    }
-                  }
                   removeVisualization={[Function]}
                   savedVisualizationId="tomAP4QBiaYaSxpXALls"
                   spanParam="1h"
@@ -1181,17 +1221,10 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   catalogVisualization={true}
                   editMode={false}
                   fromTime="now-30m"
-                  http={[MockFunction]}
                   key="prometheus.process_resident_memory_bytes"
                   onEditClick={[MockFunction]}
                   onRefresh={true}
                   pplFilterValue=""
-                  pplService={
-                    PPLService {
-                      "fetch": [Function],
-                      "http": [MockFunction],
-                    }
-                  }
                   removeVisualization={[Function]}
                   savedVisualizationId="prometheus.process_resident_memory_bytes"
                   spanParam="1h"
