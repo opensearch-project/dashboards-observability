@@ -3,6 +3,7 @@
 exports[`Time chart header component Renders Time chart header component 1`] = `
 <TimechartHeader
   dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+  endTime=""
   onChangeInterval={[MockFunction]}
   options={
     Array [
@@ -32,6 +33,7 @@ exports[`Time chart header component Renders Time chart header component 1`] = `
       },
     ]
   }
+  startTime=""
   stateInterval="w"
 >
   <I18nProvider>
@@ -158,9 +160,9 @@ exports[`Time chart header component Renders Time chart header component 1`] = `
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        Aug 28, 2023 @ 17:19:51.857
+                        Aug 28, 2023 @ 19:30:15.966
                          - 
-                        Aug 28, 2023 @ 17:19:51.861
+                        Aug 28, 2023 @ 19:30:15.969
                       </div>
                     </EuiText>
                   </span>

@@ -22,6 +22,8 @@ describe('Time chart header component', () => {
         onChangeInterval={onChangeInterval}
         options={TIME_INTERVAL_OPTIONS}
         stateInterval="w"
+        startTime=""
+        endTime=""
       />
     );
 
