@@ -159,10 +159,7 @@ exports[`Time chart header component Renders Time chart header component 1`] = `
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        Aug 28, 2023 @ 20:00:00.406
-                         -
-                         
-                        Aug 28, 2023 @ 20:00:00.408
+                        Aug 28, 2023 @ 20:00:00.406 - Aug 28, 2023 @ 20:00:00.408
                       </div>
                     </EuiText>
                   </span>
