@@ -22,6 +22,10 @@ import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
 
+const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
+
+const missingDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
+
 export function PanelTitle({ title, totalItems }: { title: string; totalItems?: number }) {
   return (
     <EuiText size="m">
@@ -52,19 +56,15 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
 }
 
 export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode }) {
+  const missingConfigurationBody =
+    props.mode === 'jaeger'
+      ? missingJaegerTracesConfigurationMessage
+      : missingDataPrepperTracesConfigurationMessage;
   return (
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
-        body={
-          <EuiText>
-            {`The indices required for trace analytics (${
-              props.mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME
-            } and ${
-              props.mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME
-            }) do not exist or you do not have permission to access them.`}
-          </EuiText>
-        }
+        body={<EuiText>{missingConfigurationBody}</EuiText>}
         actions={
           <EuiButton
             color="primary"
