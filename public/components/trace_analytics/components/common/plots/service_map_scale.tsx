@@ -23,8 +23,8 @@ export function ServiceMapScale(props: {
     const delta = ticks[1] - ticks[0];
     const title = {
       latency: 'Average duration (ms)',
-      error_rate: 'Error rate',
-      throughput: 'Request rate',
+      error_rate: 'Error rate (%)',
+      throughput: 'Request rate (spans)',
     }[props.idSelected];
     const percentInterval = 1 / Math.max(ticks.length - 1, 1);
     const percents = Array.from({ length: ticks.length - 1 }, (v, i) => percentInterval * i);

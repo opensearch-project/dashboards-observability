@@ -46,7 +46,7 @@ export function ServicesContent(props: ServicesProps) {
   } = props;
   const [tableItems, setTableItems] = useState([]);
 
-  const [trigger, setTrigger] = useState<'open' | 'closed' | undefined>('closed');
+  const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'

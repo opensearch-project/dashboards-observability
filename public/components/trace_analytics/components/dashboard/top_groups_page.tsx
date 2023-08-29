@@ -34,7 +34,7 @@ export function TopGroupsPage(props: {
     },
     {
       id: 'throughput',
-      label: 'Rate',
+      label: 'Request rate',
       'data-test-subj': 'throughput-toggle'
     },
   ];
