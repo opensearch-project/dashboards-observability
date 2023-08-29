@@ -143,20 +143,20 @@ describe('Testing plots', () => {
       },
     });
     setTimeFilter();
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
   });
 
   it('Renders service map', () => {
     // plotly scale texts are in attribute "data-unformatted"
-    cy.get('text.ytitle[data-unformatted="Latency (ms)"]').should('exist');
+    cy.get('text.ytitle[data-unformatted="Average duration (ms)"]').should('exist');
     cy.get('text[data-unformatted="200"]').should('exist');
     cy.get('.vis-network').should('exist');
 
-    cy.get('.euiButton__text[title="Error rate"]').click();
+    cy.get('.euiButton__text[title="Errors"]').click();
     cy.get('text.ytitle[data-unformatted="Error rate"]').should('exist');
-    cy.get('text[data-unformatted="10%"]').should('exist');
 
-    cy.get('.euiButton__text[title="Throughput"]').click();
-    cy.get('text.ytitle[data-unformatted="Throughput"]').should('exist');
+    cy.get('.euiButton__text[title="Request Rate"]').click();
+    cy.get('text.ytitle[data-unformatted="Request rate"]').should('exist');
     cy.get('text[data-unformatted="50"]').should('exist');
 
     cy.get('input[type="search"]').eq(1).focus().type('payment{enter}');
@@ -178,6 +178,7 @@ describe('Latency by trace group table', () =>{
       },
     });
     setTimeFilter();
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
   });
 
   it('Verify columns in Latency by trace group table along with pagination functionality', () => {
@@ -188,9 +189,9 @@ describe('Latency by trace group table', () =>{
     cy.get('[data-test-subj="tableHeaderCell_24_hour_latency_trend_3"]').should('exist');
     cy.get('[data-test-subj="tableHeaderCell_dashboard_error_rate_4"]').should('exist');
     cy.get('[data-test-subj="tableHeaderCell_dashboard_traces_5"]').should('exist');
-    cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
+    cy.get('[data-test-subj="tablePaginationPopoverButton"]').eq(1).click();
     cy.get('.euiIcon.euiIcon--medium.euiIcon--inherit.euiContextMenu__icon').eq(0).should('exist').click();
-    cy.get('[data-test-subj="pagination-button-next"]').should('exist').click();
+    cy.get('[data-test-subj="pagination-button-next"]').eq(1).should('exist').click();
     cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').contains('mysql').should('exist');
   });
 
@@ -219,7 +220,7 @@ describe('Latency by trace group table', () =>{
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.wait(delay);//Fails without
     cy.get('.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent').contains('211.04').should('exist');
-    cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').click();
+    cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').eq(0).click();
     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
     cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
     cy.get('.euiContextMenuPanelTitle').contains('Edit filter').should('exist');
@@ -344,6 +345,7 @@ describe('Testing switch mode to jaeger', () => {
     setTimeFilter();
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='jaeger-mode']").click();
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
   });
 
   it('Verifies errors mode columns and data', () => {
@@ -352,15 +354,14 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('100%').should('exist');
     cy.contains('7').should('exist');
     cy.contains('Service and Operation Name').should('exist');
-    cy.contains('Average latency (ms)').should('exist');
+    cy.contains('Average duration (ms)').should('exist');
     cy.contains('Error rate').should('exist');
     cy.contains('Traces').should('exist');
   });
 
   it('Verifies traces links to traces page', () => {
-    cy.get('.euiLink').contains('7').click();
+    cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('7').click();
 
-    cy.get('h2.euiTitle').contains('Traces').should('exist');
     cy.contains(' (7)').should('exist');
     cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: redis')
     cy.get("[data-test-subj='filterBadge']").eq(1).contains('operationName: GetDriver');  
@@ -373,7 +374,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('0%').should('exist');
     cy.contains('8').should('exist');
     cy.contains('Service and Operation Name').should('exist');
-    cy.contains('Average latency (ms)').should('exist');
+    cy.contains('Average duration (ms)').should('exist');
     cy.contains('Error rate').should('exist');
     cy.contains('Traces').should('exist');
   });

@@ -289,21 +289,6 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      <SearchBar
-        query={query}
-        filters={filters}
-        appConfigs={appConfigs}
-        setFilters={setFilters}
-        setQuery={setQuery}
-        startTime={startTime}
-        setStartTime={setStartTime}
-        endTime={endTime}
-        setEndTime={setEndTime}
-        refresh={refresh}
-        page={page}
-        mode={mode}
-      />
-      <EuiSpacer size="m" />
       {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
       (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
