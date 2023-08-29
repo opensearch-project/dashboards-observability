@@ -61,8 +61,9 @@ export function TimechartHeader({
             delay="long"
           >
             <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-              {reformatDate(datemath.parse(startTime ?? DEFAULT_DATETIME_STRING))} -{' '}
-              {reformatDate(datemath.parse(endTime ?? DEFAULT_DATETIME_STRING))}
+              {reformatDate(datemath.parse(startTime ?? DEFAULT_DATETIME_STRING)) +
+                ' - ' +
+                reformatDate(datemath.parse(endTime ?? DEFAULT_DATETIME_STRING))}
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
