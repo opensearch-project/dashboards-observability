@@ -85,7 +85,7 @@ export const SAVED_OBJECT = '/object';
 // Color Constants
 export const PLOTLY_COLOR = [
   '#3CA1C7',
-  '#54B399',
+  '#8C55A3',
   '#DB748A',
   '#F2BE4B',
   '#68CCC2',
