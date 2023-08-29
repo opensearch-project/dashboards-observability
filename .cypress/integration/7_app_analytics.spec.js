@@ -224,7 +224,7 @@ describe('Setting availability', () => {
   });
 });
 
-describe.only('Viewing application', () => {
+describe('Viewing application', () => {
   beforeEach(() => {
     moveToApplication(nameOne);
   });
