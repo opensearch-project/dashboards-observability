@@ -22,6 +22,10 @@ import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
 
+const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
+
+const missingDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
+
 export function PanelTitle({ title, totalItems }: { title: string; totalItems?: number }) {
   return (
     <EuiText size="m">
@@ -51,16 +55,16 @@ export function NoMatchMessage(props: { size: SpacerSize }) {
   );
 }
 
-export function MissingConfigurationMessage(props: {mode: TraceAnalyticsMode}) {
+export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode }) {
+  const missingConfigurationBody =
+    props.mode === 'jaeger'
+      ? missingJaegerTracesConfigurationMessage
+      : missingDataPrepperTracesConfigurationMessage;
   return (
     <>
       <EuiEmptyPrompt
         title={<h2>Trace Analytics not set up</h2>}
-        body={
-          <EuiText>
-            {`The indices required for trace analytics (${props.mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME} and ${props.mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`}
-          </EuiText>
-        }
+        body={<EuiText>{missingConfigurationBody}</EuiText>}
         actions={
           <EuiButton
             color="primary"
@@ -165,13 +169,13 @@ export function getServiceMapGraph(
     }
 
     let hover = service;
-    hover += `\n\nAverage latency: ${
+    hover += `\n\nAverage duration: ${
       map[service].latency! >= 0 ? map[service].latency + 'ms' : 'N/A'
     }`;
     hover += `\nError rate: ${
       map[service].error_rate! >= 0 ? map[service].error_rate + '%' : 'N/A'
     }`;
-    hover += `\nThroughput: ${map[service].throughput! >= 0 ? map[service].throughput : 'N/A'}`;
+    hover += `\nRequest rate: ${map[service].throughput! >= 0 ? map[service].throughput : 'N/A'}`;
     if (map[service].throughputPerMinute != null)
       hover += ` (${map[service].throughputPerMinute} per minute)`;
 
@@ -381,7 +385,7 @@ export const filtersToDsl = (
 
       let filterQuery = {};
       let field = filter.field;
-      if (field === 'latency'){
+      if (field === 'latency') {
         if (mode === 'data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
@@ -391,7 +395,7 @@ export const filtersToDsl = (
         if (mode === 'data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
-          field = 'tag.error'
+          field = 'tag.error';
         }
       }
       let value;

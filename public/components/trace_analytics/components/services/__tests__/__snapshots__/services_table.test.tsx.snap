@@ -387,7 +387,7 @@ exports[`Services table component renders jaeger services table 1`] = `
             Object {
               "align": "right",
               "field": "average_latency",
-              "name": "Average latency (ms)",
+              "name": "Average duration (ms)",
               "render": [Function],
               "sortable": true,
             },
@@ -401,7 +401,7 @@ exports[`Services table component renders jaeger services table 1`] = `
             Object {
               "align": "right",
               "field": "throughput",
-              "name": "Throughput",
+              "name": "Request rate",
               "render": [Function],
               "sortable": true,
               "truncateText": true,
@@ -462,7 +462,7 @@ exports[`Services table component renders jaeger services table 1`] = `
               Object {
                 "align": "right",
                 "field": "average_latency",
-                "name": "Average latency (ms)",
+                "name": "Average duration (ms)",
                 "render": [Function],
                 "sortable": true,
               },
@@ -476,7 +476,7 @@ exports[`Services table component renders jaeger services table 1`] = `
               Object {
                 "align": "right",
                 "field": "throughput",
-                "name": "Throughput",
+                "name": "Request rate",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -573,7 +573,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_average_latency_1",
-                                  "name": "Average latency (ms)",
+                                  "name": "Average duration (ms)",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -587,7 +587,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_throughput_3",
-                                  "name": "Throughput",
+                                  "name": "Request rate",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -867,15 +867,15 @@ exports[`Services table component renders jaeger services table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Average latency (ms)",
+                                          "innerText": "Average duration (ms)",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Average latency (ms)"
+                                        title="Average duration (ms)"
                                       >
-                                        Average latency (ms)
+                                        Average duration (ms)
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -983,15 +983,15 @@ exports[`Services table component renders jaeger services table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Throughput",
+                                          "innerText": "Request rate",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Throughput"
+                                        title="Request rate"
                                       >
-                                        Throughput
+                                        Request rate
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -1123,7 +1123,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                             key="_data_column_average_latency_0_1"
                             mobileOptions={
                               Object {
-                                "header": "Average latency (ms)",
+                                "header": "Average duration (ms)",
                                 "render": undefined,
                               }
                             }
@@ -1141,7 +1141,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Average latency (ms)
+                                Average duration (ms)
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -1197,7 +1197,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                             key="_data_column_throughput_0_3"
                             mobileOptions={
                               Object {
-                                "header": "Throughput",
+                                "header": "Request rate",
                                 "render": undefined,
                               }
                             }
@@ -1216,7 +1216,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Throughput
+                                Request rate
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -1801,7 +1801,7 @@ exports[`Services table component renders services table 1`] = `
             Object {
               "align": "right",
               "field": "average_latency",
-              "name": "Average latency (ms)",
+              "name": "Average duration (ms)",
               "render": [Function],
               "sortable": true,
             },
@@ -1815,7 +1815,7 @@ exports[`Services table component renders services table 1`] = `
             Object {
               "align": "right",
               "field": "throughput",
-              "name": "Throughput",
+              "name": "Request rate",
               "render": [Function],
               "sortable": true,
               "truncateText": true,
@@ -1898,7 +1898,7 @@ exports[`Services table component renders services table 1`] = `
               Object {
                 "align": "right",
                 "field": "average_latency",
-                "name": "Average latency (ms)",
+                "name": "Average duration (ms)",
                 "render": [Function],
                 "sortable": true,
               },
@@ -1912,7 +1912,7 @@ exports[`Services table component renders services table 1`] = `
               Object {
                 "align": "right",
                 "field": "throughput",
-                "name": "Throughput",
+                "name": "Request rate",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -2031,7 +2031,7 @@ exports[`Services table component renders services table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_average_latency_1",
-                                  "name": "Average latency (ms)",
+                                  "name": "Average duration (ms)",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2045,7 +2045,7 @@ exports[`Services table component renders services table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_throughput_3",
-                                  "name": "Throughput",
+                                  "name": "Request rate",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2330,15 +2330,15 @@ exports[`Services table component renders services table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Average latency (ms)",
+                                          "innerText": "Average duration (ms)",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Average latency (ms)"
+                                        title="Average duration (ms)"
                                       >
-                                        Average latency (ms)
+                                        Average duration (ms)
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -2446,15 +2446,15 @@ exports[`Services table component renders services table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Throughput",
+                                          "innerText": "Request rate",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Throughput"
+                                        title="Request rate"
                                       >
-                                        Throughput
+                                        Request rate
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -2703,7 +2703,7 @@ exports[`Services table component renders services table 1`] = `
                             key="_data_column_average_latency_0_1"
                             mobileOptions={
                               Object {
-                                "header": "Average latency (ms)",
+                                "header": "Average duration (ms)",
                                 "render": undefined,
                               }
                             }
@@ -2721,7 +2721,7 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Average latency (ms)
+                                Average duration (ms)
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -2777,7 +2777,7 @@ exports[`Services table component renders services table 1`] = `
                             key="_data_column_throughput_0_3"
                             mobileOptions={
                               Object {
-                                "header": "Throughput",
+                                "header": "Request rate",
                                 "render": undefined,
                               }
                             }
@@ -2796,7 +2796,7 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Throughput
+                                Request rate
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
