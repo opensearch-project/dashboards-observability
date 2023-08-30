@@ -10,6 +10,7 @@ import {
   EuiTabbedContentTab,
   EuiText,
   htmlIdGenerator,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import $ from 'jquery';
 import { isEmpty, map } from 'lodash';
@@ -34,6 +35,7 @@ import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
 import { Explorer } from './explorer';
+import { EuiButton } from '@opensearch-project/oui';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -78,19 +80,6 @@ export const LogExplorer = ({
   curSelectedTabIdRef.current = curSelectedTabId;
 
   const [tabCreatedTypes, setTabCreatedTypes] = useState({});
-
-  // Append add-new-tab link to the end of the tab list, and remove it once tabs state changes
-  useEffect(() => {
-    const newLink = $(
-      '<a class="linkNewTag" data-test-subj="eventExplorer__addNewTab">+ Add new</a>'
-    ).on('click', () => {
-      addNewTab(NEW_TAB);
-    });
-    $('.queryTabs > .euiTabs').append(newLink);
-    return () => {
-      $('.queryTabs > .euiTabs .linkNewTag').remove();
-    };
-  }, [tabIds]);
 
   const handleTabClick = (selectedTab: EuiTabbedContentTab) => {
     history.replace(`/explorer/${queryRef.current![selectedTab.id][SAVED_OBJECT_ID] || ''}`);
@@ -209,6 +198,28 @@ export const LogExplorer = ({
     };
   }
 
+  function addTab(){
+    return {
+      id: htmlIdGenerator(TAB_ID_TXT_PFX)(),
+      name:(
+        <>
+          <EuiButtonEmpty
+            iconType='plusInCircle'
+            data-test-subj="eventExplorer__addNewTab"
+            onClick={() => addNewTab(NEW_TAB)}
+            size='xs'
+            iconSize='m'
+          >
+            Add New
+          </EuiButtonEmpty>
+        </>
+      ),
+      content:(
+        <></>
+      ),
+    }
+  }
+
   const memorizedTabs = useMemo(() => {
     const res = map(tabIds, (tabId) => {
       return getQueryTab({
@@ -218,6 +229,7 @@ export const LogExplorer = ({
       });
     });
 
+    res.push(addTab())
     return res;
   }, [tabIds, tabNames, tabCreatedTypes]);
 
