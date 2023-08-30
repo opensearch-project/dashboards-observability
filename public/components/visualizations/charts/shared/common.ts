@@ -96,7 +96,9 @@ export const preprocessJsonData = (
         breakdown: '',
         aggName: '',
       };
-      const serieKey = sr[CUSTOM_LABEL] ? sr[CUSTOM_LABEL] : `${sr.aggregation}(${sr.name})`;
+      const serieKey = removeBacktick(
+        sr[CUSTOM_LABEL] ? sr[CUSTOM_LABEL] : `${sr.aggregation}(${sr.name})`
+      );
       if (!isEmpty(serieKey)) {
         const concatedXaxisLabel = [
           ...(!isEmpty(span) ? [getCompleteTimespanKey(span)] : []),
