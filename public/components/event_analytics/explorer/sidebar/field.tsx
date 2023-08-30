@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { FieldButton } from '../../../common/field_button';
 import { FieldIcon } from '../../../common/field_icon';
@@ -68,8 +69,8 @@ export const Field = (props: IFieldProps) => {
     setIsFieldDetailsOpen((staleState) => !staleState);
   };
 
-  const toggleField = (field: IField) => {
-    onToggleField(field);
+  const toggleField = (fieldd: IField) => {
+    onToggleField(fieldd);
   };
 
   const getFieldActionDOM = () => {
@@ -163,6 +164,7 @@ export const Field = (props: IFieldProps) => {
                 aria-label={selected ? removeLabelAria : addLabelAria}
               />
             )}
+            <EuiButtonIcon iconType="inspect" size="xs" />
           </>
         </EuiToolTip>
       </>
@@ -190,7 +192,7 @@ export const Field = (props: IFieldProps) => {
               title={field.name}
               className="dscSidebarField__name"
             >
-              {field.name}
+              <EuiText size="xs">{field.name}</EuiText>
             </span>
           }
           fieldAction={getFieldActionDOM()}

@@ -17,6 +17,7 @@ import {
   EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  EuiPageSideBar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
@@ -426,7 +427,7 @@ export const Explorer = ({
   });
 
   const mainSectionClassName = classNames({
-    'col-md-10': !isSidebarClosed,
+    'col-md-8': !isSidebarClosed,
     'col-md-12': isSidebarClosed,
   });
 
@@ -476,10 +477,11 @@ export const Explorer = ({
   const mainContent = useMemo(() => {
     return (
       <>
-        <div
-          className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
+        <EuiPageSideBar
+          className={`col-md-3 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
           id="discover-sidebar"
           data-test-subj="eventExplorer__sidebar"
+          sticky
         >
           {!isSidebarClosed && (
             <div className="explorerFieldSelector">
@@ -500,22 +502,7 @@ export const Explorer = ({
               />
             </div>
           )}
-          <EuiButtonIcon
-            iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-            iconSize="m"
-            size="s"
-            onClick={() => {
-              setIsSidebarClosed((staleState) => {
-                return !staleState;
-              });
-            }}
-            data-test-subj="collapseSideBarButton"
-            aria-controls="discover-sidebar"
-            aria-expanded={isSidebarClosed ? 'false' : 'true'}
-            aria-label="Toggle sidebar"
-            className="dscCollapsibleSidebar__collapseButton"
-          />
-        </div>
+        </EuiPageSideBar>
         <div className={`dscWrapper ${mainSectionClassName}`}>
           {explorerData && !isEmpty(explorerData.jsonData) ? (
             <div className="dscWrapper__content">
@@ -935,6 +922,7 @@ export const Explorer = ({
         }`}
       >
         <Search
+          className="globalQueryBar"
           key="search-component"
           query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
           tempQuery={tempQuery}
