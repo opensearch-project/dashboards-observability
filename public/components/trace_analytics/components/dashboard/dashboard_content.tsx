@@ -33,6 +33,7 @@ import { SearchBar } from '../common/search_bar';
 import { DashboardProps } from './dashboard';
 import { DashboardTable } from './dashboard_table';
 import { TopGroupsPage } from './top_groups_page';
+import { useToast } from '../../../../../public/components/common/toast';
 
 export function DashboardContent(props: DashboardProps) {
   const {
@@ -54,25 +55,21 @@ export function DashboardContent(props: DashboardProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
-    setToast,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
   const [jaegerErrorTableItems, setJaegerErrorTableItems] = useState([]);
   const [throughputPltItems, setThroughputPltItems] = useState({ items: [], fixedInterval: '1h' });
   const [errorRatePltItems, setErrorRatePltItems] = useState({ items: [], fixedInterval: '1h' });
-  const [serviceMap, setServiceMap] = useState<ServiceObject>({});
-  const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
-    'latency' | 'error_rate' | 'throughput'
-  >('latency');
   const [percentileMap, setPercentileMap] = useState<{ [traceGroup: string]: number[] }>({});
   const [filteredService, setFilteredService] = useState('');
   const [redirect, setRedirect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState(false);
+  const { setToast } = useToast();
 
   useEffect(() => {
-    if (showTimeoutToast === true && toasts.length === 0) {
+    if (showTimeoutToast === true && (!toasts || toasts.length === 0)) {
       setToast!(
         'Query took too long to execute.',
         'danger',
@@ -203,19 +200,13 @@ export function DashboardContent(props: DashboardProps) {
         tableItems,
         setTableItems,
         mode,
+        () => setShowTimeoutToast(true),
         setPercentileMap
       ).then(() => setLoading(false));
       // service map should not be filtered by service name (https://github.com/opensearch-project/observability/issues/442)
       const serviceMapDSL = _.cloneDeep(DSL);
       serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
         (must: any) => must?.term?.serviceName == null
-      );
-      handleServiceMapRequest(
-        http,
-        serviceMapDSL,
-        mode,
-        setServiceMap,
-        currService || filteredService
       );
     }
 
@@ -298,21 +289,6 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      <SearchBar
-        query={query}
-        filters={filters}
-        appConfigs={appConfigs}
-        setFilters={setFilters}
-        setQuery={setQuery}
-        startTime={startTime}
-        setStartTime={setStartTime}
-        endTime={endTime}
-        setEndTime={setEndTime}
-        refresh={refresh}
-        page={page}
-        mode={mode}
-      />
-      <EuiSpacer size="m" />
       {(mode === 'data_prepper' && dataPrepperIndicesExist) ||
       (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
@@ -329,18 +305,8 @@ export function DashboardContent(props: DashboardProps) {
               />
               <EuiSpacer />
               <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={4}>
-                  <ServiceMap
-                    addFilter={addFilter}
-                    serviceMap={serviceMap}
-                    idSelected={serviceMapIdSelected}
-                    setIdSelected={setServiceMapIdSelected}
-                    currService={filteredService}
-                    page={page}
-                  />
-                </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFlexGroup direction="column">
+                  <EuiFlexGroup direction="row">
                     <EuiFlexItem>
                       <ErrorRatePlt
                         items={errorRatePltItems}

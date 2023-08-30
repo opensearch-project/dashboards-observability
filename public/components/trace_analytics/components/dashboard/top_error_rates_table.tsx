@@ -111,7 +111,7 @@ export function ErrorRatesTable(props: {
             <>
               {/* <div style={{ marginRight: 40 }}>Average</div> */}
               <div>
-                Average latency (ms){' '}
+                Average duration (ms){' '}
                 <EuiIcon
                   size="s"
                   color="subdued"

@@ -110,7 +110,7 @@ export function TracesTable(props: TracesTableProps) {
         },
         {
           field: 'latency',
-          name: 'Latency (ms)',
+          name: 'Duration (ms)',
           align: 'right',
           sortable: true,
           truncateText: true,
