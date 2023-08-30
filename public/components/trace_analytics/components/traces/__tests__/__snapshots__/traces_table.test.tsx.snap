@@ -1847,7 +1847,7 @@ exports[`Traces table component renders traces table 1`] = `
             Object {
               "align": "right",
               "field": "latency",
-              "name": "Latency (ms)",
+              "name": "Duration (ms)",
               "sortable": true,
               "truncateText": true,
             },
@@ -1936,7 +1936,7 @@ exports[`Traces table component renders traces table 1`] = `
               Object {
                 "align": "right",
                 "field": "latency",
-                "name": "Latency (ms)",
+                "name": "Duration (ms)",
                 "sortable": true,
                 "truncateText": true,
               },
@@ -2058,7 +2058,7 @@ exports[`Traces table component renders traces table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_latency_2",
-                                  "name": "Latency (ms)",
+                                  "name": "Duration (ms)",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2405,15 +2405,15 @@ exports[`Traces table component renders traces table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Latency (ms)",
+                                          "innerText": "Duration (ms)",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Latency (ms)"
+                                        title="Duration (ms)"
                                       >
-                                        Latency (ms)
+                                        Duration (ms)
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -2806,7 +2806,7 @@ exports[`Traces table component renders traces table 1`] = `
                             key="_data_column_latency_0_2"
                             mobileOptions={
                               Object {
-                                "header": "Latency (ms)",
+                                "header": "Duration (ms)",
                                 "render": undefined,
                               }
                             }
@@ -2825,7 +2825,7 @@ exports[`Traces table component renders traces table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Latency (ms)
+                                Duration (ms)
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText"

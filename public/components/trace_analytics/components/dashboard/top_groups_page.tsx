@@ -29,12 +29,12 @@ export function TopGroupsPage(props: {
   const toggleButtons = [
     {
       id: 'error_rate',
-      label: 'Error rate',
+      label: 'Errors',
       'data-test-subj': 'errors-toggle'
     },
     {
       id: 'throughput',
-      label: 'Throughput',
+      label: 'Request rate',
       'data-test-subj': 'throughput-toggle'
     },
   ];
