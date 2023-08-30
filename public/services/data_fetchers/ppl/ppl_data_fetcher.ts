@@ -11,6 +11,7 @@ import {
   buildRawQuery,
   composeFinalQuery,
   getIndexPatternFromRawQuery,
+  removeBacktick,
 } from '../../../../common/utils';
 import {
   FILTERED_PATTERN,
@@ -67,7 +68,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
 
     if (isEmpty(query)) return;
 
-    this.queryIndex = this.getIndex(buildRawQuery(query, appBaseQuery));
+    this.queryIndex = removeBacktick(this.getIndex(buildRawQuery(query, appBaseQuery)));
 
     if (this.queryIndex === '') return; // Returns if page is refreshed
 
