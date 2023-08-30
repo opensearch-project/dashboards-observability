@@ -525,7 +525,13 @@ export const Explorer = ({
                 {countDistribution?.data && !isLiveTailOnRef.current && (
                   <>
                     <HitsCounter
-                      hits={countDistribution.data['count()'].sum()}
+                      hits={reduce(
+                        countDistribution.data['count()'],
+                        (sum, n) => {
+                          return sum + n;
+                        },
+                        0
+                      )}
                       showResetButton={false}
                       onResetQuery={() => {}}
                     />

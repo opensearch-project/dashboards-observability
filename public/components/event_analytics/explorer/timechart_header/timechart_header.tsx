@@ -14,9 +14,8 @@ import {
   DEFAULT_DATETIME_STRING,
 } from '../../../../../common/constants/explorer';
 
-// TODO: move this function into some common library for other observability datetime uses
-function reformatDate(inputDate: moment.Moment | undefined) {
-  return moment(inputDate).format(DATE_DISPLAY_FORMAT);
+function reformatDate(inputDate: string | undefined) {
+  return moment(datemath.parse(inputDate ?? DEFAULT_DATETIME_STRING)).format(DATE_DISPLAY_FORMAT);
 }
 
 export interface TimechartHeaderProps {
@@ -61,9 +60,7 @@ export function TimechartHeader({
             delay="long"
           >
             <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-              {reformatDate(datemath.parse(startTime ?? DEFAULT_DATETIME_STRING)) +
-                ' - ' +
-                reformatDate(datemath.parse(endTime ?? DEFAULT_DATETIME_STRING))}
+              {reformatDate(startTime) + ' - ' + reformatDate(endTime)}
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
