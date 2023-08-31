@@ -145,58 +145,58 @@ export const TEST_JAEGER_SPAN_RESPONSE = {
   took: 10,
   timed_out: false,
   _shards: {
-      total: 5,
-      successful: 5,
-      skipped: 0,
-      failed: 0
+    total: 5,
+    successful: 5,
+    skipped: 0,
+    failed: 0,
   },
   hits: {
-      total: {
-          value: 1,
-          relation: "eq"
+    total: {
+      value: 1,
+      relation: 'eq',
+    },
+    max_score: 4.0943446,
+    hits: [
+      {
+        _index: 'jaeger-span-2022-12-16',
+        _id: 'FQ_alIUB3s3m6OOm24MJ',
+        _score: 4.0943446,
+        _source: {
+          traceID: '00de6a9aaf045bd4',
+          spanID: '00de6a9aaf045bd4',
+          flags: 1,
+          operationName: 'HTTP GET /config',
+          references: [],
+          startTime: 1671214092597974,
+          startTimeMillis: 1671214092597,
+          duration: 40,
+          tags: [],
+          tag: {
+            component: 'net/http',
+            'http@method': 'GET',
+            'http@status_code': 200,
+            'http@url': '/config?nonse=0.8009634976926217',
+            'internal@span@format': 'proto',
+            'sampler@param': true,
+            'sampler@type': 'const',
+            'span@kind': 'server',
+          },
+          logs: [],
+          process: {
+            serviceName: 'frontend',
+            tags: [],
+            tag: {
+              'client-uuid': '40958cebd77cf9a2',
+              hostname: 'b0f1d89879ca',
+              ip: '10.18.203.1',
+              'jaeger@version': 'Go-2.30.0',
+            },
+          },
+        },
       },
-      max_score: 4.0943446,
-      hits: [
-          {
-              _index: "jaeger-span-2022-12-16",
-              _id: "FQ_alIUB3s3m6OOm24MJ",
-              _score: 4.0943446,
-              _source: {
-                  traceID: "00de6a9aaf045bd4",
-                  spanID: "00de6a9aaf045bd4",
-                  flags: 1,
-                  operationName: "HTTP GET /config",
-                  references: [],
-                  startTime: 1671214092597974,
-                  startTimeMillis: 1671214092597,
-                  duration: 40,
-                  tags: [],
-                  tag: {
-                      "component": "net/http",
-                      "http@method": "GET",
-                      "http@status_code": 200,
-                      "http@url": "/config?nonse=0.8009634976926217",
-                      "internal@span@format": "proto",
-                      "sampler@param": true,
-                      "sampler@type": "const",
-                      "span@kind": "server"
-                  },
-                  logs: [],
-                  process: {
-                      "serviceName": "frontend",
-                      "tags": [],
-                      "tag": {
-                          "client-uuid": "40958cebd77cf9a2",
-                          "hostname": "b0f1d89879ca",
-                          "ip": "10.18.203.1",
-                          "jaeger@version": "Go-2.30.0"
-                      }
-                  }
-              }
-          }
-      ]
-  }
-}
+    ],
+  },
+};
 
 export const TEST_SERVICE_MAP_GRAPH = {
   graph: {
@@ -205,7 +205,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 1,
         label: 'order',
         size: 15,
-        title: 'order\n\nAverage latency: 90.1ms\nError rate: 4.17%\nThroughput: 48',
+        title: 'order\n\nAverage duration: 90.1ms\nError rate: 4.17%\nRequest rate: 48',
         borderWidth: 0,
         color: 'rgba(158, 134, 192, 1)',
         font: {
@@ -216,7 +216,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 2,
         label: 'analytics-service',
         size: 15,
-        title: 'analytics-service\n\nAverage latency: 12.99ms\nError rate: 0%\nThroughput: 37',
+        title: 'analytics-service\n\nAverage duration: 12.99ms\nError rate: 0%\nRequest rate: 37',
         borderWidth: 0,
         color: 'rgba(210, 202, 224, 1)',
         font: {
@@ -227,7 +227,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 3,
         label: 'database',
         size: 15,
-        title: 'database\n\nAverage latency: 49.54ms\nError rate: 3.77%\nThroughput: 53',
+        title: 'database\n\nAverage duration: 49.54ms\nError rate: 3.77%\nRequest rate: 53',
         borderWidth: 0,
         color: 'rgba(187, 171, 212, 1)',
         font: {
@@ -238,7 +238,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 4,
         label: 'frontend-client',
         size: 15,
-        title: 'frontend-client\n\nAverage latency: 207.71ms\nError rate: 7.41%\nThroughput: 27',
+        title: 'frontend-client\n\nAverage duration: 207.71ms\nError rate: 7.41%\nRequest rate: 27',
         borderWidth: 0,
         color: 'rgba(78, 42, 122, 1)',
         font: {
@@ -249,7 +249,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 5,
         label: 'inventory',
         size: 15,
-        title: 'inventory\n\nAverage latency: 183.52ms\nError rate: 3.23%\nThroughput: 31',
+        title: 'inventory\n\nAverage duration: 183.52ms\nError rate: 3.23%\nRequest rate: 31',
         borderWidth: 0,
         color: 'rgba(95, 61, 138, 1)',
         font: {
@@ -260,7 +260,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 6,
         label: 'authentication',
         size: 15,
-        title: 'authentication\n\nAverage latency: 139.09ms\nError rate: 8.33%\nThroughput: 12',
+        title: 'authentication\n\nAverage duration: 139.09ms\nError rate: 8.33%\nRequest rate: 12',
         borderWidth: 0,
         color: 'rgba(125, 95, 166, 1)',
         font: {
@@ -271,7 +271,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 7,
         label: 'payment',
         size: 15,
-        title: 'payment\n\nAverage latency: 134.36ms\nError rate: 9.09%\nThroughput: 11',
+        title: 'payment\n\nAverage duration: 134.36ms\nError rate: 9.09%\nRequest rate: 11',
         borderWidth: 0,
         color: 'rgba(129, 99, 169, 1)',
         font: {
@@ -282,7 +282,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
         id: 8,
         label: 'recommendation',
         size: 15,
-        title: 'recommendation\n\nAverage latency: 176.97ms\nError rate: 6.25%\nThroughput: 16',
+        title: 'recommendation\n\nAverage duration: 176.97ms\nError rate: 6.25%\nRequest rate: 16',
         borderWidth: 0,
         color: 'rgba(100, 66, 143, 1)',
         font: {
@@ -556,4 +556,11 @@ export const TEST_SERVICE_MAP = {
     error_rate: 6.25,
     throughput: 16,
   },
+};
+
+export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {
+  return {
+    get: jest.fn().mockResolvedValue({ observabilityObjectList: get }),
+    getBulk: jest.fn().mockResolvedValue({ observabilityObjectList: getBulk }),
+  };
 };

@@ -1,0 +1,50 @@
+{
+  "name": "aws_cloudfront",
+  "version": "1.0.0",
+  "displayName": "AWS cloudfront ",
+  "description": "AWS cloudfront Object Store",
+  "license": "Apache-2.0",
+  "type": "logs-aws_cloudfront",
+  "labels": ["log", "aws", "s3", "cloud", "cloudfront"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
+  "statics": {
+    "logo": {
+      "annotation": "cloudfront Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS cloudfront Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_cloudfront",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs-aws_cloudfront",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": {
+    "savedObjects": {
+      "name": "aws_cloudfront",
+      "version": "1.0.0"
+    }
+  },
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

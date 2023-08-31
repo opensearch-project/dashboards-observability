@@ -1,0 +1,46 @@
+{
+  "name": "apache",
+  "version": "1.0.0",
+  "displayName": "Apache Dashboard",
+  "description": "Apache web logs collector",
+  "license": "Apache-2.0",
+  "type": "logs_apache",
+  "labels": ["log", "communication", "http"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/apache/info",
+  "statics": {
+    "logo": {
+      "annotation": "Apache Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "Apache Dashboard",
+        "path": "dashboard1.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "communication",
+      "version": "1.0.0"
+    },
+    {
+      "name": "http",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_apache",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": {
+    "savedObjects": {
+      "name": "apache",
+      "version": "1.0.0"
+    }
+  },
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

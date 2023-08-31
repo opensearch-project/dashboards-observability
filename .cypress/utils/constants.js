@@ -11,6 +11,7 @@ export const TRACE_ID = '8832ed6abbb2a83516461960c89af49d';
 export const SPAN_ID = 'a673bc074b438374';
 export const SERVICE_NAME = 'frontend-client';
 export const SERVICE_SPAN_ID = '7df5609a6d104736';
+export const AUTH_SERVICE_SPAN_ID = '277a5934acf55dcf';
 
 export const testDataSet = [
   {
@@ -71,6 +72,8 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
 
 // notebooks
 export const TEST_NOTEBOOK = 'Test Notebook';
+export const TEST_INTEGRATION_INSTANCE = 'nginx-test';
+export const TEST_SAMPLE_INSTANCE = 'nginx-sample';
 export const SAMPLE_URL = 'https://github.com/opensearch-project/sql/tree/main/sql-jdbc';
 export const NOTEBOOK_TEXT = 'Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks includes creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.';
 export const OPENSEARCH_URL = 'https://opensearch.org/docs/latest/observability-plugin/notebooks/';

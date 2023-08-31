@@ -7,16 +7,16 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import _ from 'lodash';
 
-export default class QueryService {
+export class QueryService {
   private client: any;
   constructor(client: any) {
     this.client = client;
-  }    
+  }
 
   describeQueryInternal = async (request: any, format: string, responseFormat: string) => {
     try {
       const queryRequest = {
-        query: request.body
+        query: request.body,
       };
       const params = {
         body: JSON.stringify(queryRequest),
@@ -34,7 +34,7 @@ export default class QueryService {
         data: {
           ok: false,
           resp: err.response,
-          body: err.body
+          body: err.body,
         },
       };
     }
@@ -42,9 +42,9 @@ export default class QueryService {
 
   describeSQLQuery = async (request: any) => {
     return this.describeQueryInternal(request, 'ppl.sqlQuery', 'json');
-  }
+  };
 
   describePPLQuery = async (request: any) => {
     return this.describeQueryInternal(request, 'ppl.pplQuery', 'json');
-  }
+  };
 }

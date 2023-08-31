@@ -5,21 +5,20 @@
 
 import './index.scss';
 import {
-  EuiButtonIcon,
   EuiGlobalToastList,
   EuiPage,
   EuiPageBody,
+  EuiResizableContainer,
   htmlIdGenerator,
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import React, { useEffect, useState } from 'react';
+import React, { ReactChild, useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
-import classNames from 'classnames';
 import { StaticContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ChromeBreadcrumb, CoreStart, Toast } from '../../../../../src/core/public';
+import { ChromeBreadcrumb, Toast } from '../../../../../src/core/public';
 import { onTimeChange } from './helpers/utils';
 import { Sidebar } from './sidebar/sidebar';
 import { EmptyMetricsView } from './view/empty_view';
@@ -33,8 +32,6 @@ import SavedObjects from '../../services/saved_objects/event_analytics/saved_obj
 import { observabilityLogsID } from '../../../common/constants/shared';
 
 interface MetricsProps {
-  http: CoreStart['http'];
-  chrome: CoreStart['chrome'];
   parentBreadcrumb: ChromeBreadcrumb;
   renderProps: RouteComponentProps<any, StaticContext, any>;
   pplService: PPLService;
@@ -42,14 +39,7 @@ interface MetricsProps {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const Home = ({
-  http,
-  chrome,
-  parentBreadcrumb,
-  renderProps,
-  pplService,
-  savedObjects,
-}: MetricsProps) => {
+export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
   // Redux tools
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const metricsLayout = useSelector(metricsLayoutSelector);
@@ -69,21 +59,17 @@ export const Home = ({
   const resolutionSelectId = htmlIdGenerator('resolutionSelect')();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
-  const [search, setSearch] = useState<boolean>(false);
-
-  // Side bar constants
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
 
   // Metrics constants
   const [panelVisualizations, setPanelVisualizations] = useState<MetricType[]>([]);
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
-    setToastRightSide(!side ? true : false);
+    setToastRightSide(!side);
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onRefreshFilters = (startTimeFilter: ShortDate, endTimeFilter: ShortDate) => {
+  const onRefreshFilters = () => {
     if (spanValue < 1) {
       setToast('Please add a valid span interval', 'danger');
       return;
@@ -100,20 +86,11 @@ export const Home = ({
       setStartTime,
       setEndTime
     );
-    onRefreshFilters(props.start, props.end);
+    onRefreshFilters();
   };
 
   const onEditClick = (savedVisualizationId: string) => {
     window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
-  };
-
-  const onSideBarClick = () => {
-    setIsSidebarClosed((staleState) => {
-      return !staleState;
-    });
-    setTimeout(function () {
-      window.dispatchEvent(new Event('resize'));
-    }, 300);
   };
 
   useEffect(() => {
@@ -124,7 +101,7 @@ export const Home = ({
         href: `#/`,
       },
     ]);
-  }, []);
+  }, [chrome, parentBreadcrumb]);
 
   useEffect(() => {
     if (!editMode) {
@@ -137,15 +114,6 @@ export const Home = ({
   useEffect(() => {
     setPanelVisualizations(metricsLayout);
   }, [metricsLayout]);
-
-  const mainSectionClassName = classNames({
-    'col-md-10': !isSidebarClosed,
-    'col-md-12': isSidebarClosed,
-  });
-
-  const sidebarClassName = classNames({
-    closed: isSidebarClosed,
-  });
 
   return (
     <>
@@ -161,12 +129,11 @@ export const Home = ({
         <Route
           exact
           path="/"
-          render={(props) => (
+          render={() => (
             <div>
               <EuiPage>
                 <EuiPageBody component="div">
                   <TopMenu
-                    http={http}
                     IsTopPanelDisabled={IsTopPanelDisabled}
                     startTime={startTime}
                     endTime={endTime}
@@ -182,52 +149,40 @@ export const Home = ({
                     spanValue={spanValue}
                     setSpanValue={setSpanValue}
                     resolutionSelectId={resolutionSelectId}
-                    savedObjects={savedObjects}
                     setToast={setToast}
-                    setSearch={setSearch}
                   />
                   <div className="dscAppContainer">
-                    <div
-                      className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
-                    >
-                      <div className="">
-                        {!isSidebarClosed && (
-                          <Sidebar http={http} pplService={pplService} search={search} />
-                        )}
-                        <EuiButtonIcon
-                          iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                          iconSize="m"
-                          size="s"
-                          onClick={() => onSideBarClick()}
-                          data-test-subj="collapseSideBarButton"
-                          aria-controls="discover-sidebar"
-                          aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                          aria-label="Toggle sidebar"
-                          className="dscCollapsibleSidebar__collapseButton"
-                        />
-                      </div>
-                    </div>
-                    <div className={`dscWrapper ${mainSectionClassName}`}>
-                      {selectedMetrics.length > 0 ? (
-                        <MetricsGrid
-                          http={http}
-                          chrome={chrome}
-                          panelVisualizations={panelVisualizations}
-                          setPanelVisualizations={setPanelVisualizations}
-                          editMode={editMode}
-                          pplService={pplService}
-                          startTime={startTime}
-                          endTime={endTime}
-                          moveToEvents={onEditClick}
-                          onRefresh={onRefresh}
-                          editActionType={editActionType}
-                          setEditActionType={setEditActionType}
-                          spanParam={spanValue + resolutionValue}
-                        />
-                      ) : (
-                        <EmptyMetricsView />
+                    <EuiResizableContainer>
+                      {(EuiResizablePanel, EuiResizableButton) => (
+                        <>
+                          <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
+                            <Sidebar />
+                          </EuiResizablePanel>
+
+                          <EuiResizableButton />
+
+                          <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
+                            {selectedMetrics.length > 0 ? (
+                              <MetricsGrid
+                                chrome={chrome}
+                                panelVisualizations={panelVisualizations}
+                                setPanelVisualizations={setPanelVisualizations}
+                                editMode={editMode}
+                                startTime={startTime}
+                                endTime={endTime}
+                                moveToEvents={onEditClick}
+                                onRefresh={onRefresh}
+                                editActionType={editActionType}
+                                setEditActionType={setEditActionType}
+                                spanParam={spanValue + resolutionValue}
+                              />
+                            ) : (
+                              <EmptyMetricsView />
+                            )}
+                          </EuiResizablePanel>
+                        </>
                       )}
-                    </div>
+                    </EuiResizableContainer>
                   </div>
                 </EuiPageBody>
               </EuiPage>

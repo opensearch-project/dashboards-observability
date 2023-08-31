@@ -578,8 +578,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -590,7 +590,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -603,8 +603,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -614,7 +614,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -627,8 +627,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -638,7 +638,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -1831,8 +1831,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -1843,7 +1843,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -1856,8 +1856,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -1867,7 +1867,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -1880,8 +1880,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -1891,7 +1891,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -3023,8 +3023,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -3035,7 +3035,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -3048,8 +3048,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -3059,7 +3059,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -3072,8 +3072,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -3083,7 +3083,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -4190,8 +4190,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -4202,7 +4202,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -4215,8 +4215,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -4226,7 +4226,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -4239,8 +4239,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -4250,7 +4250,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -5450,8 +5450,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -5462,7 +5462,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -5475,8 +5475,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -5486,7 +5486,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -5499,8 +5499,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -5510,7 +5510,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -6617,8 +6617,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -6629,7 +6629,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -6642,8 +6642,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -6653,7 +6653,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -6666,8 +6666,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -6677,7 +6677,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -7792,8 +7792,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -7804,7 +7804,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -7817,8 +7817,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -7828,7 +7828,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -7841,8 +7841,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -7852,7 +7852,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -8896,8 +8896,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -8908,7 +8908,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -8921,8 +8921,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -8932,7 +8932,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -8945,8 +8945,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -8956,7 +8956,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -10074,8 +10074,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -10086,7 +10086,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -10099,8 +10099,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -10110,7 +10110,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -10123,8 +10123,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -10134,7 +10134,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -11207,8 +11207,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -11219,7 +11219,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -11232,8 +11232,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -11243,7 +11243,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -11256,8 +11256,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -11267,7 +11267,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -12431,8 +12431,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -12443,7 +12443,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -12456,8 +12456,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -12467,7 +12467,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -12480,8 +12480,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -12491,7 +12491,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -13598,8 +13598,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -13610,7 +13610,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -13623,8 +13623,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -13634,7 +13634,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -13647,8 +13647,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -13658,7 +13658,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -14790,8 +14790,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -14802,7 +14802,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -14815,8 +14815,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -14826,7 +14826,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -14839,8 +14839,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -14850,7 +14850,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -15957,8 +15957,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -15969,7 +15969,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -15982,8 +15982,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -15993,7 +15993,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -16006,8 +16006,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -16017,7 +16017,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>
@@ -17187,8 +17187,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Latency"
-                                    title="Latency"
+                                    data-text="Duration"
+                                    title="Duration"
                                   >
                                     <input
                                       checked=""
@@ -17199,7 +17199,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Latency
+                                    Duration
                                   </span>
                                 </span>
                               </label>
@@ -17212,8 +17212,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Error rate"
-                                    title="Error rate"
+                                    data-text="Errors"
+                                    title="Errors"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -17223,7 +17223,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Error rate
+                                    Errors
                                   </span>
                                 </span>
                               </label>
@@ -17236,8 +17236,8 @@ Object {
                                 >
                                   <span
                                     class="euiButton__text euiButtonGroupButton__textShift"
-                                    data-text="Throughput"
-                                    title="Throughput"
+                                    data-text="Request Rate"
+                                    title="Request Rate"
                                   >
                                     <input
                                       class="euiScreenReaderOnly"
@@ -17247,7 +17247,7 @@ Object {
                                       type="radio"
                                       value=""
                                     />
-                                    Throughput
+                                    Request Rate
                                   </span>
                                 </span>
                               </label>
@@ -18436,8 +18436,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Latency"
-                                  title="Latency"
+                                  data-text="Duration"
+                                  title="Duration"
                                 >
                                   <input
                                     checked=""
@@ -18448,7 +18448,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Latency
+                                  Duration
                                 </span>
                               </span>
                             </label>
@@ -18461,8 +18461,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Error rate"
-                                  title="Error rate"
+                                  data-text="Errors"
+                                  title="Errors"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -18472,7 +18472,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Error rate
+                                  Errors
                                 </span>
                               </span>
                             </label>
@@ -18485,8 +18485,8 @@ Object {
                               >
                                 <span
                                   class="euiButton__text euiButtonGroupButton__textShift"
-                                  data-text="Throughput"
-                                  title="Throughput"
+                                  data-text="Request Rate"
+                                  title="Request Rate"
                                 >
                                   <input
                                     class="euiScreenReaderOnly"
@@ -18496,7 +18496,7 @@ Object {
                                     type="radio"
                                     value=""
                                   />
-                                  Throughput
+                                  Request Rate
                                 </span>
                               </span>
                             </label>

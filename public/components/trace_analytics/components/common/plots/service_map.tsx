@@ -71,26 +71,32 @@ export function ServiceMap({
   const toggleButtons = [
     {
       id: 'latency',
-      label: 'Latency',
+      label: 'Duration',
     },
     {
       id: 'error_rate',
-      label: 'Error rate',
+      label: 'Errors',
     },
     {
       id: 'throughput',
-      label: 'Throughput',
+      label: 'Request Rate',
     },
   ];
 
   const options = {
     layout: {
-      hierarchical: false,
+      // hierarchical: true,
+      hierarchical: {
+        enabled: true,
+        direction: 'UD', // UD, DU, LR, RL
+        sortMethod: 'directed', // hubsize, directed
+        shakeTowards: 'leaves', // roots, leaves
+      },
     },
     edges: {
       arrows: {
         to: {
-          enabled: false,
+          enabled: true,
         },
       },
       physics: false,
@@ -98,7 +104,6 @@ export function ServiceMap({
     nodes: {
       shape: 'dot',
       color: '#adadad',
-      borderWidth: 0,
       font: {
         size: 17,
         color: '#387ab9',

@@ -1,0 +1,46 @@
+{
+  "name": "aws_s3",
+  "version": "1.0.0",
+  "displayName": "AWS S3 ",
+  "description": "AWS S3 Object Store",
+  "license": "Apache-2.0",
+  "type": "logs_s3",
+  "labels": ["log", "aws", "s3", "cloud"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_s3/info",
+  "statics": {
+    "logo": {
+      "annotation": "S3 Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "AWS S3 Dashboard",
+        "path": "dashboard.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_s3",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": {
+    "savedObjects": {
+      "name": "aws_s3",
+      "version": "1.0.0"
+    }
+  },
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

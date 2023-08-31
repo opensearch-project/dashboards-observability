@@ -40,7 +40,7 @@ export function registerMetricsRoute(router: IRouter) {
       path: `${OBSERVABILITY_BASE}/stats`,
       validate: {
         body: schema.object({
-          element: schema.string()
+          element: schema.string(),
         }),
       },
     },

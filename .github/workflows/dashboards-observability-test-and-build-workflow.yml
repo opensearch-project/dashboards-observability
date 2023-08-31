@@ -14,6 +14,8 @@ jobs:
     strategy: 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+      # Since Windows is inconsistent, we want to let other OSes run on a fail
+      fail-fast: false
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -51,16 +53,25 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
+      - name: Load Plugin Bootstrap cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            **/target
+          key: ${{ runner.os }}-bootstrap-${{ hashFiles('OpenSearch-Dashboards/yarn.lock', 'OpenSearch-Dashboards/plugins/dashboards-observability/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-bootstrap-
 
       - name: Plugin Bootstrap
         run: |
-          cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn osd bootstrap
+          cd OpenSearch-Dashboards
+          yarn config set network-timeout 1000000 -g
+          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn test --coverage
+          yarn test --coverage --maxWorkers=100%
 
       - name: Upload coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
