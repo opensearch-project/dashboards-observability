@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import React from 'react';
 
 export function AccelerateCallout() {
   return (

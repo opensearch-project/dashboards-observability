@@ -65,7 +65,7 @@ export const Home = (props: HomeProps) => {
 
           <Route
             exact
-            path={'/accelerate/:id+'}
+            path={'/manage/:id+'}
             render={(routerProps) => (
               <DataSource
                 {...commonProps}

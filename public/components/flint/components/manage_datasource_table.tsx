@@ -9,33 +9,26 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { AddedIntegrationsTableProps } from '../../integrations/components/added_integration_overview_page';
-import {
-  ASSET_FILTER_OPTIONS,
-  INTEGRATION_TEMPLATE_OPTIONS,
-} from '../../../../common/constants/integrations';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
-import { DATASOURCES_BASE, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../../../public/components/common/toast';
 import { DatasourcesHeader } from './datasources_header';
-import { TabbedPage } from '../../../../public/components/common/tabbed_page/tabbed_page';
-import { HttpStart } from '../../../../../../src/core/public';
 import { HomeProps } from '../home';
 import { coreRefs } from '../../../framework/core_refs';
 import { DatasourcesDescription } from './manage_datasource_description';
+import sparkSvg from '../icons/spark_logo.svg';
 
 export type ManageDatasourcesTableProps = HomeProps;
+
+interface DataConnection {
+  connectionType: 'OPENSEARCH' | 'SPARK';
+  name: string;
+}
 
 export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
   const { http, chrome } = props;
@@ -63,7 +56,17 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
     );
   }
 
-  const { setToast } = useToast();
+  const icon = (record: DataConnection) => {
+    switch (record.connectionType) {
+      case 'OPENSEARCH':
+        return <EuiIcon type="logoOpenSearch" />;
+      case 'SPARK':
+        return <EuiIcon type={sparkSvg} />;
+
+      default:
+        return <></>;
+    }
+  };
 
   const tableColumns = [
     {
@@ -71,40 +74,23 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
       name: 'Name',
       sortable: true,
       truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.name}DatasourceLink`}
-          href={`#/accelerate/${record.name}`}
-        >
-          {_.truncate(record.name, { length: 100 })}
-        </EuiLink>
+      render: (value, record: DataConnection) => (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>{icon(record)}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj={`${record.name}DatasourceLink`}
+              href={`#/manage/${record.name}`}
+            >
+              {_.truncate(record.name, { length: 100 })}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
     {
-      field: 'connectionType',
-      name: 'Connection type',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}DatasourceType`}>
-          {_.truncate(record.connectionType, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'connectedTo',
-      name: 'Connected to',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}DatasourceConnectedTo`}>
-          {_.truncate(record.creationDate, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'connectionHealth',
-      name: 'Connection Health',
+      field: 'connectionStatus',
+      name: 'Connection Status',
       sortable: true,
       truncateText: true,
       render: (value, record) => (
@@ -148,7 +134,7 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
     ],
   };
 
-  const entries = data.map((datasource) => {
+  const entries = data.map((datasource: DataConnection) => {
     const name = datasource.name;
     const connectionType = datasource.connectionType;
     return { connectionType, name, data: { name, connectionType } };
@@ -157,17 +143,10 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        {TabbedPage({
-          tabNames: [
-            ['manage', 'Manage connections'],
-            ['new', 'New connection'],
-          ],
-          header: DatasourcesHeader(),
-        })}
+        {DatasourcesHeader()}
         <EuiPageContent data-test-subj="addedIntegrationsArea">
           <DatasourcesDescription />
           <EuiInMemoryTable
-            loading={props.loading}
             items={entries}
             itemId="id"
             columns={tableColumns}

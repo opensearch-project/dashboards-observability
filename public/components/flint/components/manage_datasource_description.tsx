@@ -26,7 +26,7 @@ export function DatasourcesDescription() {
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Create or manage already created data source connections.
+        Manage already created data source connections.
       </EuiText>
       <EuiHorizontalRule size="full" />
     </div>
