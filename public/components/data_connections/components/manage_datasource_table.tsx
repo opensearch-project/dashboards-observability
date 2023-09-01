@@ -17,20 +17,18 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DatasourcesHeader } from './datasources_header';
+import { DataConnectionsHeader } from './datasources_header';
 import { HomeProps } from '../home';
 import { coreRefs } from '../../../framework/core_refs';
 import { DatasourcesDescription } from './manage_datasource_description';
 import sparkSvg from '../icons/spark_logo.svg';
-
-export type ManageDatasourcesTableProps = HomeProps;
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
   name: string;
 }
 
-export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
+export function ManageDatasourcesTable(props: HomeProps) {
   const { http, chrome } = props;
   const { pplService } = coreRefs;
 
@@ -79,7 +77,7 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
           <EuiFlexItem grow={false}>{icon(record)}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
-              data-test-subj={`${record.name}DatasourceLink`}
+              data-test-subj={`${record.name}DataConnectionsLink`}
               href={`#/manage/${record.name}`}
             >
               {_.truncate(record.name, { length: 100 })}
@@ -134,17 +132,17 @@ export function ManageDatasourcesTable(props: ManageDatasourcesTableProps) {
     ],
   };
 
-  const entries = data.map((datasource: DataConnection) => {
-    const name = datasource.name;
-    const connectionType = datasource.connectionType;
+  const entries = data.map((dataconnection: DataConnection) => {
+    const name = dataconnection.name;
+    const connectionType = dataconnection.connectionType;
     return { connectionType, name, data: { name, connectionType } };
   });
 
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        {DatasourcesHeader()}
-        <EuiPageContent data-test-subj="addedIntegrationsArea">
+        <DataConnectionsHeader />
+        <EuiPageContent data-test-subj="manageDataConnectionsarea">
           <DatasourcesDescription />
           <EuiInMemoryTable
             items={entries}

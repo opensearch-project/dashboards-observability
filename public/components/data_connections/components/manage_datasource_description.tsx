@@ -3,21 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiLink,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-  EuiTitle,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-export function DatasourcesDescription() {
+export function DataConnectionsDescription() {
   return (
     <div>
       <EuiTitle size="s">

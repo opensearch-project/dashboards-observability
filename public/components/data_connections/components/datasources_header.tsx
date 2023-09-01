@@ -8,21 +8,19 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
+import React from 'react';
+import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
 
-export function DatasourcesHeader() {
+export function DataConnectionsHeader() {
   return (
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="integrations-header">
+          <EuiTitle size="l" data-test-subj="data-connections-header">
             <h1>Data connections</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
