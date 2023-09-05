@@ -11,53 +11,78 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
-  EuiLink,
-  EuiTableFieldDataColumnType,
   EuiPanel,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiAccordion,
   EuiIcon,
   EuiCard,
-  EuiHorizontalRule,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
+import { DATASOURCES_BASE } from '../../../../common/constants/shared';
+
+interface DatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  cluster: string;
+}
 
 export function DataSource(props: any) {
-  const { dataSource, pplService } = props;
-
-  const [tables, setTables] = useState([]);
+  const { dataSource, pplService, http } = props;
+  const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
+    allowedRoles: [],
+    name: '',
+    cluster: '',
+  });
 
   useEffect(() => {
-    pplService
-      .fetch({ query: `source = ${dataSource}.sql(\'SHOW TABLES\')`, format: 'jdbc' })
-      .then((data) =>
-        setTables(
-          data.jsonData.map((x: any) => {
-            return { label: x.tableName, namespace: x.namespace, isTemporary: x.isTemporary };
-          })
-        )
-      );
+    http.get(`${DATASOURCES_BASE}/${dataSource}`).then((data) =>
+      setDatasourceDetails({
+        allowedRoles: data.allowedRoles,
+        name: data.name,
+        cluster: data.properties['emr.cluster'],
+      })
+    );
   }, []);
 
-  const search = {
-    box: {
-      incremental: true,
+  const tabs = [
+    {
+      id: 'data',
+      name: 'Data',
+      disabled: false,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'assetType',
-        name: 'Type',
-        multiSelect: false,
-        options: ASSET_FILTER_OPTIONS.map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
+    {
+      id: 'access_control',
+      name: 'Access control',
+      disabled: false,
+    },
+    {
+      id: 'connection_configuration',
+      name: 'Connection configuration',
+      disabled: false,
+    },
+  ];
+
+  const [selectedTabId, setSelectedTabId] = useState('data');
+
+  const onSelectedTabChanged = (id) => {
+    setSelectedTabId(id);
+  };
+
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        disabled={tab.disabled}
+        key={index}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
   };
 
   const renderOverview = () => {
@@ -67,9 +92,17 @@ export function DataSource(props: any) {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Name</EuiText>
+                <EuiText className="overview-title">Connection title</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {props.serviceName || '-'}
+                  {datasourceDetails.name || '-'}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Access control</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {datasourceDetails.allowedRoles && datasourceDetails.allowedRoles.length
+                    ? datasourceDetails.allowedRoles
+                    : '-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -77,16 +110,16 @@ export function DataSource(props: any) {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Average latency (ms)</EuiText>
+                <EuiText className="overview-title">Connection description</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {datasourceDetails.name || '-'}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Error rate</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Throughput</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Traces</EuiText>
+                <EuiText className="overview-title">Connection status</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {datasourceDetails.cluster || '-'}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -95,8 +128,6 @@ export function DataSource(props: any) {
       </EuiPanel>
     );
   };
-
-  const overview = useMemo(() => renderOverview(), []);
 
   return (
     <EuiPage>
@@ -113,7 +144,7 @@ export function DataSource(props: any) {
           </EuiPageHeaderSection>
         </EuiPageHeader>
 
-        {overview}
+        {renderOverview()}
         <EuiSpacer />
         <EuiAccordion
           id="queryOrAccelerateAccordion"
@@ -139,6 +170,8 @@ export function DataSource(props: any) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiAccordion>
+        <EuiTabs>{renderTabs()}</EuiTabs>
+
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>

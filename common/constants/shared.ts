@@ -24,6 +24,7 @@ export const SAVED_VISUALIZATION = '/vis';
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
+export const DATASOURCES_ENDPOINT = '/_plugins/_query/_datasources';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
@@ -79,9 +80,12 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
-const BASE_INTEGRATIONS_URI = '/_plugins/_integrations'; // Used later in front-end for routing
+const BASE_DATASOURCES_URI = '/_plugins/_query/_datasources';
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
+};
+export const OPENSEARCH_DATASOURCES_API = {
+  DATASOURCE: `${BASE_DATASOURCES_URI}`,
 };
 
 // Saved Objects

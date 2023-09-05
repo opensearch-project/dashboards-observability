@@ -4,274 +4,36 @@
  */
 
 import { schema } from '@osd/config-schema';
-import * as mime from 'mime';
-import sanitize from 'sanitize-filename';
-import { IRouter, RequestHandlerContext } from '../../../../../src/core/server';
-import { DATASOURCES_BASE, INTEGRATIONS_BASE } from '../../../common/constants/shared';
-import { IntegrationsAdaptor } from '../../adaptors/integrations/integrations_adaptor';
-import {
-  OpenSearchDashboardsRequest,
-  OpenSearchDashboardsResponseFactory,
-} from '../../../../../src/core/server/http/router';
-import { IntegrationsKibanaBackend } from '../../adaptors/integrations/integrations_kibana_backend';
-
-/**
- * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
- * This is a convenience method that handles common error handling and response formatting.
- * The callback must accept a `IntegrationsAdaptor` as its first argument.
- *
- * If the callback throws an error,
- * the `OpenSearchDashboardsResponse` will be formatted using the error's `statusCode` and `message` properties.
- * Otherwise, the callback's return value will be formatted in a JSON object under the `data` field.
- *
- * @param {IntegrationsAdaptor} adaptor The adaptor instance to use for making requests.
- * @param {OpenSearchDashboardsResponseFactory} response The factory to use for creating responses.
- * @callback callback A callback that will invoke a request on a provided adaptor.
- * @returns {Promise<OpenSearchDashboardsResponse>} An `OpenSearchDashboardsResponse` with the return data from the callback.
- */
-export const handleWithCallback = async (
-  adaptor: IntegrationsAdaptor,
-  response: OpenSearchDashboardsResponseFactory,
-  callback: (a: IntegrationsAdaptor) => any
-): Promise<any> => {
-  try {
-    const data = await callback(adaptor);
-    return response.ok({
-      body: {
-        data,
-      },
-    });
-  } catch (err: any) {
-    console.error(`handleWithCallback: callback failed with error "${err.message}"`);
-    return response.custom({
-      statusCode: err.statusCode || 500,
-      body: err.message,
-    });
-  }
-};
-
-const getAdaptor = (
-  context: RequestHandlerContext,
-  _request: OpenSearchDashboardsRequest
-): IntegrationsAdaptor => {
-  return new IntegrationsKibanaBackend(context.core.savedObjects.client);
-};
+import { IRouter } from '../../../../../src/core/server';
+import { DATASOURCES_BASE } from '../../../common/constants/shared';
 
 export function registerDatasourcesRoute(router: IRouter) {
-  //   router.get(
-  //     {
-  //       path: `${DATASOURCES_BASE}/repository`,
-  //       validate: false,
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.getIntegrationTemplates()
-  //       );
-  //     }
-  //   );
-
-  //   router.post(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/store/{templateName}`,
-  //       validate: {
-  //         params: schema.object({
-  //           templateName: schema.string(),
-  //         }),
-  //         body: schema.object({
-  //           name: schema.string(),
-  //           dataSource: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) => {
-  //         return a.loadIntegrationInstance(
-  //           request.params.templateName,
-  //           request.body.name,
-  //           request.body.dataSource
-  //         );
-  //       });
-  //     }
-  //   );
-
-  //   router.get(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/repository/{name}`,
-  //       validate: {
-  //         params: schema.object({
-  //           name: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(
-  //         adaptor,
-  //         response,
-  //         async (a: IntegrationsAdaptor) =>
-  //           (
-  //             await a.getIntegrationTemplates({
-  //               name: request.params.name,
-  //             })
-  //           ).hits[0]
-  //       );
-  //     }
-  //   );
-
   router.get(
     {
-      path: `${DATASOURCES_BASE}/datasources`,
-      validate: false,
-    },
-    async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request);
-      try {
-        const requestPath = sanitize(request.params.path);
-        const result = await adaptor.getStatic(request.params.id, requestPath);
-        return response.ok({
-          headers: {
-            'Content-Type': mime.getType(request.params.path),
-          },
-          body: result,
-        });
-      } catch (err: any) {
-        return response.custom({
-          statusCode: err.statusCode ? err.statusCode : 500,
-          body: err.message,
-        });
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: `${DATASOURCES_BASE}/repository/{id}/static/{path}`,
+      path: `${DATASOURCES_BASE}/{name}`,
       validate: {
         params: schema.object({
-          id: schema.string(),
-          path: schema.string(),
+          name: schema.string(),
         }),
       },
     },
     async (context, request, response): Promise<any> => {
-      const adaptor = getAdaptor(context, request);
       try {
-        const requestPath = sanitize(request.params.path);
-        const result = await adaptor.getStatic(request.params.id, requestPath);
+        const dataSourcesresponse = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('observability.getDatasourceById', {
+            datasource: request.params.name,
+          });
         return response.ok({
-          headers: {
-            'Content-Type': mime.getType(request.params.path),
-          },
-          body: result,
+          body: dataSourcesresponse,
         });
-      } catch (err: any) {
+      } catch (error: any) {
+        console.error('Issue in fetching datasource:', error);
         return response.custom({
-          statusCode: err.statusCode ? err.statusCode : 500,
-          body: err.message,
+          statusCode: error.statusCode || 500,
+          body: error.message,
         });
       }
     }
   );
-
-  //   router.get(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/repository/{id}/schema`,
-  //       validate: {
-  //         params: schema.object({
-  //           id: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.getSchemas(request.params.id)
-  //       );
-  //     }
-  //   );
-
-  //   router.get(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/repository/{id}/assets`,
-  //       validate: {
-  //         params: schema.object({
-  //           id: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.getAssets(request.params.id)
-  //       );
-  //     }
-  //   );
-
-  //   router.get(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/repository/{id}/data`,
-  //       validate: {
-  //         params: schema.object({
-  //           id: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.getSampleData(request.params.id)
-  //       );
-  //     }
-  //   );
-
-  //   router.get(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/store`,
-  //       validate: false,
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.getIntegrationInstances({})
-  //       );
-  //     }
-  //   );
-
-  //   router.delete(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/store/{id}`,
-  //       validate: {
-  //         params: schema.object({
-  //           id: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.deleteIntegrationInstance(request.params.id)
-  //       );
-  //     }
-  //   );
-
-  //   router.get(
-  //     {
-  //       path: `${INTEGRATIONS_BASE}/store/{id}`,
-  //       validate: {
-  //         params: schema.object({
-  //           id: schema.string(),
-  //         }),
-  //       },
-  //     },
-  //     async (context, request, response): Promise<any> => {
-  //       const adaptor = getAdaptor(context, request);
-  //       return handleWithCallback(adaptor, response, async (a: IntegrationsAdaptor) =>
-  //         a.getIntegrationInstance({
-  //           id: request.params.id,
-  //         })
-  //       );
-  //     }
-  //   );
 }

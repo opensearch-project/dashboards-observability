@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OPENSEARCH_PANELS_API } from '../../common/constants/shared';
+import { OPENSEARCH_DATASOURCES_API, OPENSEARCH_PANELS_API } from '../../common/constants/shared';
 
 export function OpenSearchObservabilityPlugin(Client: any, config: any, components: any) {
   const clientAction = components.clientAction.factory;
@@ -45,6 +45,19 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
         },
         createdTimeMs: {
           type: 'string',
+        },
+      },
+    },
+    method: 'GET',
+  });
+
+  observability.getDatasourceById = clientAction({
+    url: {
+      fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}/<%=datasource%>`,
+      req: {
+        datasource: {
+          type: 'string',
+          required: true,
         },
       },
     },
