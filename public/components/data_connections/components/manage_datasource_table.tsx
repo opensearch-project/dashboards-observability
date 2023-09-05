@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './datasources_header';
 import { HomeProps } from '../home';
 import { coreRefs } from '../../../framework/core_refs';
-import { DatasourcesDescription } from './manage_datasource_description';
+import { DataConnectionsDescription } from './manage_datasource_description';
 import sparkSvg from '../icons/spark_logo.svg';
 
 interface DataConnection {
@@ -143,7 +143,7 @@ export function ManageDatasourcesTable(props: HomeProps) {
       <EuiPageBody component="div">
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
-          <DatasourcesDescription />
+          <DataConnectionsDescription />
           <EuiInMemoryTable
             items={entries}
             itemId="id"

@@ -7,12 +7,11 @@
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { IntegrationHeader } from './integration_header';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AddedIntegrationOverviewPageProps } from './integration_types';
 import { HttpStart } from '../../../../../../src/core/public';
-import { TabbedPage } from '../../../../public/components/common/tabbed_page/tabbed_page';
-import { IntegrationHeader } from './integration_header';
 
 export interface AddedIntegrationsTableProps {
   loading: boolean;
@@ -58,13 +57,7 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        {TabbedPage({
-          tabNames: [
-            ['installed', 'Installed'],
-            ['available', 'Available'],
-          ],
-          header: IntegrationHeader(),
-        })}
+        {IntegrationHeader()}
         {AddedIntegrationsTable({ data, setData, loading: false, http })}
       </EuiPageBody>
     </EuiPage>

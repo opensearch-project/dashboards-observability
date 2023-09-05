@@ -16,14 +16,12 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { INTEGRATION_CATEOGRY_OPTIONS } from '../../../../common/constants/integrations';
+import { IntegrationHeader } from './integration_header';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
 import { useToast } from '../../../../public/components/common/toast';
-import { TabbedPage } from '../../common/tabbed_page/tabbed_page';
-import { IntegrationHeader } from './integration_header';
 import { HttpStart } from '../../../../../../src/core/public';
 
 export interface AvailableIntegrationType {
@@ -119,8 +117,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
       setData(exists.data);
 
-      let newItems = exists.data.hits
-        .flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
+      let newItems = exists.data.hits.flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
       newItems = [...new Set(newItems)].sort().map((newItem) => {
         return {
           name: newItem,
@@ -181,13 +178,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   return (
     <EuiPage>
       <EuiPageBody>
-        {TabbedPage({
-          tabNames: [
-            ['installed', 'Installed'],
-            ['available', 'Available'],
-          ],
-          header: IntegrationHeader(),
-        })}
+        {IntegrationHeader()}
         {isCardView
           ? AvailableIntegrationsCardView({
               data: {

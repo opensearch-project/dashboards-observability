@@ -18,6 +18,40 @@ import React, { useEffect, useState } from 'react';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/integrations';
 
 export function IntegrationHeader() {
+  const tabs = [
+    {
+      id: 'installed',
+      name: 'Installed',
+      disabled: false,
+    },
+    {
+      id: 'available',
+      name: 'Available',
+      disabled: false,
+    },
+  ];
+
+  const [selectedTabId, setSelectedTabId] = useState(
+    window.location.hash.substring(2) ? window.location.hash.substring(2) : 'installed'
+  );
+
+  const onSelectedTabChanged = (id) => {
+    setSelectedTabId(id);
+    window.location.hash = id;
+  };
+
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        disabled={tab.disabled}
+        key={index}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  };
   return (
     <div>
       <EuiPageHeader>
@@ -35,6 +69,8 @@ export function IntegrationHeader() {
         </EuiLink>
       </EuiText>
       <EuiSpacer size="l" />
+      <EuiTabs display="condensed">{renderTabs()}</EuiTabs>
+      <EuiSpacer size="s" />
     </div>
   );
 }

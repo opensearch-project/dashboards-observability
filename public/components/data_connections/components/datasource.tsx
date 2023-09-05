@@ -3,50 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './accelerate.scss';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiGlobalToastList,
-  EuiLoadingSpinner,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiCheckableCard,
-  htmlIdGenerator,
   EuiTitle,
   EuiText,
   EuiLink,
-  EuiButton,
-  EuiInMemoryTable,
   EuiTableFieldDataColumnType,
-  EuiPageContent,
   EuiPanel,
-  EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiAccordion,
   EuiIcon,
   EuiCard,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { ReactChild, useEffect, useState } from 'react';
-import httpClientMock from 'test/__mocks__/httpClientMock';
-import { AccelerateHeader } from './accelerate_header';
-import { AccelerateCallout } from './accelerate_callout';
-import {
-  ASSET_FILTER_OPTIONS,
-  OPENSEARCH_DOCUMENTATION_URL,
-} from '../../../../common/constants/integrations';
-import { AccelerateFlyout } from './accelerate_flyout';
-import { TabbedPage } from '../../common/tabbed_page/tabbed_page';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 
 export function DataSource(props: any) {
-  // const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { dataSource, pplService } = props;
-  console.log(dataSource);
 
   const [tables, setTables] = useState([]);
 
@@ -61,45 +40,6 @@ export function DataSource(props: any) {
         )
       );
   }, []);
-
-  const tableColumns = [
-    {
-      field: 'name',
-      name: 'Table Name',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiLink
-          data-test-subj={`${record.label}IntegrationDescription`}
-          href={`#/accelerate/${dataSource}/${record.label}`}
-        >
-          {_.truncate(record.label, { length: 100 })}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'namespace',
-      name: 'Namespace',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.namespace}Namespace`}>
-          {_.truncate(record.namespace, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'isTemporary',
-      name: 'Is Temporary',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.isTemporary}temporary`}>
-          {_.truncate(record.isTemporary, { length: 100 })}
-        </EuiText>
-      ),
-    },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
 
   const search = {
     box: {
@@ -120,6 +60,44 @@ export function DataSource(props: any) {
     ],
   };
 
+  const renderOverview = () => {
+    return (
+      <EuiPanel>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Name</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {props.serviceName || '-'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Average latency (ms)</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Error rate</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Throughput</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Traces</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </EuiPanel>
+    );
+  };
+
+  const overview = useMemo(() => renderOverview(), []);
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -135,7 +113,7 @@ export function DataSource(props: any) {
           </EuiPageHeaderSection>
         </EuiPageHeader>
 
-        <EuiPanel>{dataSource}</EuiPanel>
+        {overview}
         <EuiSpacer />
         <EuiAccordion
           id="queryOrAccelerateAccordion"
@@ -162,13 +140,6 @@ export function DataSource(props: any) {
           </EuiFlexGroup>
         </EuiAccordion>
         <EuiSpacer />
-        {TabbedPage({
-          tabNames: [
-            ['manage', 'Manage connections'],
-            ['new', 'New connection'],
-          ],
-          header: <></>,
-        })}
       </EuiPageBody>
     </EuiPage>
   );
