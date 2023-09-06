@@ -20,8 +20,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
+import React, { useEffect, useState } from 'react';
 import { DATASOURCES_BASE } from '../../../../common/constants/shared';
 
 interface DatasourceDetails {
@@ -136,7 +135,7 @@ export function DataSource(props: any) {
           <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiTitle data-test-subj="eventHomePageTitle" size="l">
+                <EuiTitle data-test-subj="dataspirceTitle" size="l">
                   <h1>{dataSource}</h1>
                 </EuiTitle>
               </EuiFlexItem>

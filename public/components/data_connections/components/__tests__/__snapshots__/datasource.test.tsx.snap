@@ -24,7 +24,7 @@ exports[`Datasource Page test Renders datasource page with data 1`] = `
             >
               <h1
                 class="euiTitle euiTitle--large"
-                data-test-subj="eventHomePageTitle"
+                data-test-subj="dataspirceTitle"
               />
             </div>
           </div>
