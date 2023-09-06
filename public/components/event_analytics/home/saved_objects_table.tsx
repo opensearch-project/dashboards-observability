@@ -5,7 +5,7 @@
 
 import { Criteria, EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
-import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import { FILTER_OPTIONS, LOG_EXPLORER_BASE_PATH } from '../../../../common/constants/explorer';
 
 interface SavedQueryTableProps {
   savedHistories: any[];
@@ -66,7 +66,7 @@ export function SavedQueryTable({
       render: (item: any) => {
         return (
           <EuiLink
-            href={`observability-logs#/explorer/${item.objectId}`}
+            href={`${LOG_EXPLORER_BASE_PATH}${item.objectId}`}
             data-test-subj="eventHome__savedQueryTableName"
           >
             {item.name}
