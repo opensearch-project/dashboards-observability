@@ -11,7 +11,7 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { NOTEBOOKS_API_PREFIX, wreckOptions } from '../../../common/constants/notebooks';
-import BACKEND from '../../adaptors/notebooks';
+import { BACKEND } from '../../adaptors/notebooks';
 
 export function registerNoteRoute(router: IRouter) {
   // Fetch all the notebooks available

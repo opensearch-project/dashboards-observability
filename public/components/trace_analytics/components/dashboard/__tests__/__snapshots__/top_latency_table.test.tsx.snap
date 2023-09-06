@@ -487,7 +487,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                   position="top"
                 >
                   <span>
-                    Latency variance (ms)
+                    Duration variance (ms)
                      
                     <EuiIcon
                       className="eui-alignTop"
@@ -525,7 +525,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
               >
                 <React.Fragment>
                   <div>
-                    Average latency (ms)
+                    Average duration (ms)
                      
                     <EuiIcon
                       className="eui-alignTop"
@@ -700,7 +700,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                     position="top"
                   >
                     <span>
-                      Latency variance (ms)
+                      Duration variance (ms)
                        
                       <EuiIcon
                         className="eui-alignTop"
@@ -738,7 +738,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                 >
                   <React.Fragment>
                     <div>
-                      Average latency (ms)
+                      Average duration (ms)
                        
                       <EuiIcon
                         className="eui-alignTop"
@@ -873,7 +873,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                     position="top"
                   >
                     <span>
-                      Latency variance (ms)
+                      Duration variance (ms)
                        
                       <EuiIcon
                         className="eui-alignTop"
@@ -978,7 +978,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                       position="top"
                                     >
                                       <span>
-                                        Latency variance (ms)
+                                        Duration variance (ms)
                                          
                                         <EuiIcon
                                           className="eui-alignTop"
@@ -1014,7 +1014,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                   >
                                     <React.Fragment>
                                       <div>
-                                        Average latency (ms)
+                                        Average duration (ms)
                                          
                                         <EuiIcon
                                           className="eui-alignTop"
@@ -1384,13 +1384,13 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Latency variance (ms) 0                100            200            300            400",
+                                          "innerText": "Duration variance (ms) 0                100            200            300            400",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Latency variance (ms) 0                100            200            300            400"
+                                        title="Duration variance (ms) 0                100            200            300            400"
                                       >
                                         <EuiToolTip
                                           content={
@@ -1413,7 +1413,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                               onBlur={[Function]}
                                               onFocus={[Function]}
                                             >
-                                              Latency variance (ms)
+                                              Duration variance (ms)
                                                
                                               <EuiIcon
                                                 className="eui-alignTop"
@@ -1537,13 +1537,13 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Average latency (ms)  ",
+                                          "innerText": "Average duration (ms)  ",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Average latency (ms)  "
+                                        title="Average duration (ms)  "
                                       >
                                         <EuiToolTip
                                           content={
@@ -1563,7 +1563,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                             onMouseOver={[Function]}
                                           >
                                             <div>
-                                              Average latency (ms)
+                                              Average duration (ms)
                                                
                                               <EuiIcon
                                                 className="eui-alignTop"
@@ -1978,7 +1978,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                     position="top"
                                   >
                                     <span>
-                                      Latency variance (ms)
+                                      Duration variance (ms)
                                        
                                       <EuiIcon
                                         className="eui-alignTop"
@@ -2034,7 +2034,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                       onBlur={[Function]}
                                       onFocus={[Function]}
                                     >
-                                      Latency variance (ms)
+                                      Duration variance (ms)
                                        
                                       <EuiIcon
                                         className="eui-alignTop"
@@ -2423,7 +2423,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                 >
                                   <React.Fragment>
                                     <div>
-                                      Average latency (ms)
+                                      Average duration (ms)
                                        
                                       <EuiIcon
                                         className="eui-alignTop"
@@ -2472,7 +2472,7 @@ exports[`Latency Table component renders top error rates table with data 1`] = `
                                     onMouseOver={[Function]}
                                   >
                                     <div>
-                                      Average latency (ms)
+                                      Average duration (ms)
                                        
                                       <EuiIcon
                                         className="eui-alignTop"

@@ -253,7 +253,8 @@ describe('Viewing application', () => {
   });
 
   it('Shows latency variance in dashboards table', () => {
-    changeTimeTo24('months');
+    changeTimeTo24('years');
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
     cy.get('[data-test-subj="dashboardTable"]').first().within(($table) => {
       cy.get('.plot-container').should('have.length.at.least', 1);
     })
@@ -261,11 +262,10 @@ describe('Viewing application', () => {
 
   it('Adds filter when Trace group name is clicked', () => {
     cy.wait(delay);//List not loading without
-    cy.get('[data-test-subj="app-analytics-overviewTab"]').click();
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
     cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]').contains('client_create_order').click();
-    cy.get('.euiTableRow').should('have.length', 1, { timeout: timeoutDelay });
     cy.get('[data-test-subj="client_create_orderFilterBadge"]').should('exist');
-    cy.get('[data-test-subj="filterBadge"]').click();
+    cy.get('[data-test-subj="filterBadge"]').eq(1).click();
     cy.get('[data-test-subj="deleteFilterIcon"]').click();
     cy.get('[data-test-subj="client_create_orderFilterBadge"]').should('not.exist');
   });
@@ -276,7 +276,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="serviceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="serviceDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
-      cy.get('[data-text="Error rate"]').click();
+      cy.get('[data-text="Errors"]').click();
       cy.get('.ytitle').contains('Error rate').should('exist');
     });
     cy.get('[data-test-subj="dataGridRowCell"] button').contains('718dc32a693c8a17').click();
@@ -307,6 +307,7 @@ describe('Viewing application', () => {
   it('Opens span detail flyout when Span ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.wait(delay);
+    cy.get('input[type="search"]').focus().type(`5ff3516909562c60`);
     cy.get('[data-test-subj="dataGridRowCell"]').contains('5ff3516909562c60').click();
     cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
     cy.get('[data-test-subj="spanDetailFlyout"]').within(($flyout) => {
@@ -542,6 +543,7 @@ describe('Editing application', () => {
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameOne);
   });
 });
+
 
 describe('Application Analytics home page', () => {
   beforeEach(() => {

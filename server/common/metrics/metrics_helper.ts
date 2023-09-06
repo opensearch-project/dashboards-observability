@@ -46,7 +46,9 @@ export function addRequestToMetric(
 export function addRequestToMetric(
   component: ComponentType,
   request: RequestType,
-  counter: CounterNameType
+  // ESLint would prefer less definitions with union types instead of multiple definitions.
+  // Disabled one-time: if this is recurring look at configuring `ignoreDifferentlyNamedParameters=true`
+  counter: CounterNameType // eslint-disable-line @typescript-eslint/unified-signatures
 ): void;
 export function addRequestToMetric(
   component: ComponentType,
@@ -66,7 +68,7 @@ export function addRequestToMetric(
 
   rollingCounter[component][request][counter]!++;
   if (counter === 'count') {
-    GLOBAL_BASIC_COUNTER[component][request]['total']!++;
+    GLOBAL_BASIC_COUNTER[component][request].total!++;
   }
 
   time2CountWin.set(timeKey, rollingCounter);
