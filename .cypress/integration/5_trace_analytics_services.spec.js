@@ -5,10 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../utils/constants';
-import { suppressResizeObserverIssue } from '../utils/constants';
-
-suppressResizeObserverIssue();//needs to be in file once
+import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row } from '../utils/constants';
 
 describe('Testing services table empty state', () => {
   beforeEach(() => {
@@ -52,9 +49,9 @@ describe('Testing services table', () => {
   it('Verify columns in Services table', () => {
     cy.get('.euiFlexItem.euiFlexItem--flexGrow10 .panel-title').contains('Services').should('exist');
     cy.get('.euiTableCellContent__text[title="Name"]').should('exist');
-    cy.get('.euiTableCellContent__text[title="Average duration (ms)"]').should('exist');
+    cy.get('.euiTableCellContent__text[title="Average latency (ms)"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Error rate"]').should('exist');
-    cy.get('.euiTableCellContent__text[title="Request rate"]').should('exist');
+    cy.get('.euiTableCellContent__text[title="Throughput"]').should('exist');
     cy.get('.euiTableCellContent__text[title="No. of connected services"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Connected services"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Traces"]').should('exist');
@@ -113,7 +110,9 @@ describe('Testing service view', () => {
     cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
     cy.get('h2.euiTitle').contains(SERVICE_NAME).should('exist');
     cy.get('.euiBreadcrumb').contains('Services').click();
+    cy.get('.euiTitle').contains('Services').should('exist');
     cy.get('.euiBreadcrumb').contains('Trace analytics').click();
+    cy.get('.euiTitle').contains('Dashboard').should('exist');
     cy.get('.euiBreadcrumb').contains('Observability').click();
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
@@ -144,10 +143,10 @@ describe('Testing Service map', () => {
   it('Render Service map', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('[data-test-subj="latency"]').should('exist');
-    cy.get('.ytitle').contains('Average duration (ms)');
-    cy.get('[data-text = "Errors"]').click();
+    cy.get('.ytitle').contains('Latency (ms)');
+    cy.get('[data-text = "Error rate"]').click();
     cy.contains('60%');
-    cy.get('[data-text = "Duration"]').click();
+    cy.get('[data-text = "Throughput"]').click();
     cy.contains('100');
     cy.get('.euiText.euiText--medium').contains('Focus on').should('exist');
     cy.get('[placeholder="Service name"]').focus().type('database{enter}');
@@ -239,7 +238,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
   it('Renders the spans table and click on first span to verify details', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     verify_traces_spans_data_grid_cols_exists();
-    cy.contains(AUTH_SERVICE_SPAN_ID).click();
+    cy.get('.euiLink--primary').eq(4).click();
     cy.get('[data-test-subj="spanDetailFlyout"] .euiTitle.euiTitle--medium').contains('Span detail').should('exist');
     cy.get('.euiFlyoutBody .panel-title').contains('Overview').should('exist');
     cy.get('.euiTextColor.euiTextColor--subdued').contains('Span ID').should('exist');
@@ -285,15 +284,16 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('310.29').should('exist');
     cy.contains('0%').should('exist');
     cy.contains('Name').should('exist');
-    cy.contains('Average duration (ms)').should('exist');
+    cy.contains('Average latency (ms)').should('exist');
     cy.contains('Error rate').should('exist');
-    cy.contains('Request rate').should('exist');
+    cy.contains('Throughput').should('exist');
     cy.contains('Traces').should('exist');
   });
 
   it('Verifies traces links to traces page with filter applied', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 7);//Replaces Wait
     cy.get('.euiLink').contains('7').click();
+    cy.get('h2.euiTitle').contains('Traces').should('exist');
     cy.contains(' (7)').should('exist');
     cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: customer')
   })

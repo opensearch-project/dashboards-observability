@@ -3,27 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { suppressResizeObserverIssue } from './constants';
+
 export const delay = 1000;
 export const timeoutDelay = 30000;
-export const TYPING_DELAY = 150;
+export const TYPING_DELAY = 500;
 
 export const moveToHomePage = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/application_analytics/`);
   cy.wait(delay * 3);
   cy.get('.euiTitle').contains('Applications').should('exist');
 };
 
 export const moveToCreatePage = () => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
-  cy.get('.euiButton[href="#/create"]').eq(0).click();
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/application_analytics/`);
+  cy.get('.euiButton[href="#/application_analytics/create"]').eq(0).click();
+  suppressResizeObserverIssue();
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Create application');
 };
 
 export const moveToApplication = (name) => {
-  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-applications#/`);
-  cy.get('.euiTableRow').should('have.length.greaterThan', 0);//Replaces Wait
+  cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/application_analytics/`);
+  suppressResizeObserverIssue();
+  cy.wait(delay * 6);
   cy.get(`[data-test-subj="${name}ApplicationLink"]`).click();
-  cy.get('.euiTableRow').should('have.length.lessThan', 1);//Replaces Wait
+  cy.wait(delay);
   cy.get('[data-test-subj="applicationTitle"]').should('contain', name);
   changeTimeTo24('years');
 };
@@ -32,14 +36,17 @@ export const moveToEditPage = () => {
   moveToApplication(nameOne);
   cy.get('[data-test-subj="app-analytics-configTab"]').click();
   cy.get('[data-test-subj="editApplicationButton"]').click();
+  suppressResizeObserverIssue();
   cy.wait(delay);
   cy.get('[data-test-subj="createPageTitle"]').should('contain', 'Edit application');
 };
 
 export const changeTimeTo24 = (timeUnit) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').trigger('mouseover').click();
+  cy.wait(delay);
   cy.get('[aria-label="Time unit"]').select(timeUnit);
   cy.get('.euiButton').contains('Apply').click();
+  cy.wait(delay);
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
 };
 

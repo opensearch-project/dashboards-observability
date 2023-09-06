@@ -28,7 +28,6 @@ export const handleDashboardRequest = async (
   items,
   setItems,
   mode,
-  setShowTimeoutToast,
   setPercentileMap?
 ) => {
   // latency_variance should only be affected by timefilter
@@ -50,7 +49,7 @@ export const handleDashboardRequest = async (
     .catch((error) => console.error(error));
   if (setPercentileMap) setPercentileMap(latencyVariances);
 
-  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode, setShowTimeoutToast)
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getLatencyTrendQuery(), mode)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -105,7 +104,7 @@ export const handleDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getDashboardQuery(), mode, setShowTimeoutToast)
+  await handleDslRequest(http, DSL, getDashboardQuery(), mode)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -138,7 +137,7 @@ export const handleJaegerDashboardRequest = async (
   setShowTimeoutToast,
   setPercentileMap?
 ) => {
-  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode, setShowTimeoutToast)
+  const latencyTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerLatencyTrendQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -195,7 +194,7 @@ export const handleJaegerDashboardRequest = async (
       console.error(error);
     });
 
-  await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode, setShowTimeoutToast)
+  await handleDslRequest(http, DSL, getJaegerDashboardQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -249,7 +248,7 @@ export const handleJaegerErrorDashboardRequest = async (
   setShowTimeoutToast,
   setPercentileMap?
 ) => {
-  const errorTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerErrorTrendQuery(), mode, setShowTimeoutToast)
+  const errorTrends = await handleDslRequest(http, latencyTrendDSL, getJaegerErrorTrendQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       const map: any = {};
       response.aggregations.trace_group_name.buckets.map((bucket) => {
@@ -304,7 +303,7 @@ export const handleJaegerErrorDashboardRequest = async (
     })
     .catch((error) => console.error(error));
 
-  await handleDslRequest(http, DSL, getJaegerErrorDashboardQuery(), mode, setShowTimeoutToast)
+  await handleDslRequest(http, DSL, getJaegerErrorDashboardQuery(), mode, true, setShowTimeoutToast)
     .then((response) => {
       return Promise.all(
         response.aggregations.trace_group_name.buckets.map((bucket) => {

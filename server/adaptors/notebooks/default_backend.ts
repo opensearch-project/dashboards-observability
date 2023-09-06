@@ -77,7 +77,7 @@ export class DefaultBackend implements NotebookAdaptor {
         objectId: noteId,
       });
       if (response.observabilityObjectList.length === 0) {
-        throw new Error('notebook id not found');
+        throw 'notebook id not found';
       }
       return response.observabilityObjectList[0];
     } catch (error) {
@@ -262,7 +262,7 @@ export class DefaultBackend implements NotebookAdaptor {
     _wreckOptions: optionsType
   ) {
     try {
-      const newNoteObject = { ...noteObj };
+      let newNoteObject = { ...noteObj };
       newNoteObject.id = 'note_' + uuid();
       newNoteObject.dateCreated = new Date().toISOString();
       newNoteObject.dateModified = new Date().toISOString();
@@ -283,7 +283,7 @@ export class DefaultBackend implements NotebookAdaptor {
    *         paragraphInput -> Input to be added
    */
   updateParagraph = function (
-    paragraphs: DefaultParagraph[],
+    paragraphs: Array<DefaultParagraph>,
     paragraphId: string,
     paragraphInput: string,
     paragraphType?: string
@@ -324,7 +324,7 @@ export class DefaultBackend implements NotebookAdaptor {
         inputType: paragraphType,
         inputText: paragraphInput,
       };
-      const outputObjects: DefaultOutput[] = [
+      const outputObjects: Array<DefaultOutput> = [
         {
           outputType: paragraphType,
           result: '',
@@ -350,7 +350,7 @@ export class DefaultBackend implements NotebookAdaptor {
    * UI renders Markdown
    */
   runParagraph = async function (
-    paragraphs: DefaultParagraph[],
+    paragraphs: Array<DefaultParagraph>,
     paragraphId: string,
     client: ILegacyScopedClusterClient
   ) {
@@ -526,7 +526,7 @@ export class DefaultBackend implements NotebookAdaptor {
       const newParagraph = this.createParagraph(params.paragraphInput, params.inputType);
       paragraphs.splice(params.paragraphIndex, 0, newParagraph);
       const updateNotebook = {
-        paragraphs,
+        paragraphs: paragraphs,
         dateModified: new Date().toISOString(),
       };
       const opensearchClientResponse = await this.updateNote(client, params.noteId, updateNotebook);
@@ -586,10 +586,10 @@ export class DefaultBackend implements NotebookAdaptor {
   ) {
     try {
       const opensearchClientGetResponse = await this.getNote(client, params.noteId);
-      const updatedparagraphs: DefaultParagraph[] = [];
+      let updatedparagraphs: DefaultParagraph[] = [];
       opensearchClientGetResponse.notebook.paragraphs.map(
         (paragraph: DefaultParagraph, index: number) => {
-          const updatedParagraph = { ...paragraph };
+          let updatedParagraph = { ...paragraph };
           updatedParagraph.output = [];
           updatedparagraphs.push(updatedParagraph);
         }

@@ -4,10 +4,16 @@ So you want to contribute code to this project? Excellent! We're glad you're her
 
 ### Setup
 
-1. Git clone OpenSearch-Dashboard for the version that matches the version you want to use [OpenSearch-Dashboards](https://github.com/opensearch-project/OpenSearch-Dashboards)
-2. Change your node version to the version specified in `.node-version` inside the OpenSearch Dashboards root directory. (using [nvm](https://github.com/nvm-sh/nvm) can help for that)
-3. Change directory into `OpenSearch-Dashboards` and git Clone the [Observability-Dashboard](https://github.com/opensearch-project/dashboards-observability) into the `plugins/` directory.
-4. Run `yarn osd bootstrap` inside `OpenSearch-Dashboards`.
+1. Download OpenSearch for the version that matches the [OpenSearch Dashboards version specified in opensearch_dashboards.json](./dashboards-observability/opensearch_dashboards.json#L4) from [opensearch.org](https://opensearch.org/downloads.html).
+1. Download the OpenSearch Dashboards source code for the [version specified in opensearch_dashboards.json](./dashboards-observability/opensearch_dashboards.json#L4) you want to set up.
+1. Change your node version to the version specified in `.node-version` inside the OpenSearch Dashboards root directory.
+1. cd into `OpenSearch-Dashboards` and remove the `plugins` directory.
+1. Check out this package from version control as the `plugins/dashboards-observability` directory.
+```bash
+git clone https://github.com/opensearch-project/dashboards-observability plugins
+git checkout main
+```
+6. Run `yarn osd bootstrap` inside `OpenSearch-Dashboards`.
 
 Ultimately, your directory structure should look like this:
 
@@ -22,15 +28,11 @@ Ultimately, your directory structure should look like this:
 
 To build the plugin's distributable zip simply run `yarn build`.
 
-The output file : `./build/observabilityDashboards-?.?.?.zip` (`?.?.?` stands for the version number)
+Example output: `./build/observability*.zip`
 
-### Run Directly
+### Run
 
-Cd back to `OpenSearch-Dashboards` directory and run `yarn start` to start OpenSearch Dashboards including this plugin. OpenSearch Dashboards will be available on `localhost:5601`.
-
-### Run Docker
-
-Run `docker-compose up -d` after changing the [Dockerfile](Dockerfile) as described in this [tutorial](Using-Docker.md)
+cd back to `OpenSearch-Dashboards` directory and run `yarn start` to start OpenSearch Dashboards including this plugin. OpenSearch Dashboards will be available on `localhost:5601`.
 
 ### Submitting Changes
 

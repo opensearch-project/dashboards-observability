@@ -4,13 +4,12 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
-  handleTraceGroupsRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
@@ -19,8 +18,6 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
-import { OptionType } from '../../../../../common/types/application_analytics';
-import { DashboardContent } from '../dashboard/dashboard_content';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -45,8 +42,6 @@ export function ServicesContent(props: ServicesProps) {
     jaegerIndicesExist,
   } = props;
   const [tableItems, setTableItems] = useState([]);
-
-  const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
@@ -55,15 +50,9 @@ export function ServicesContent(props: ServicesProps) {
   const [loading, setLoading] = useState(false);
   const [filteredService, setFilteredService] = useState('');
 
-  const onToggle = (isOpen) => {
-    const newState = isOpen ? 'open' : 'closed';
-    setTrigger(newState);
-  };
-
   useEffect(() => {
     chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'services');
-
     setFilters([
       ...filters.map((filter) => ({
         ...filter,
@@ -71,7 +60,7 @@ export function ServicesContent(props: ServicesProps) {
       })),
     ]);
     setRedirect(false);
-  }, [mode]);
+  }, []);
 
   useEffect(() => {
     let newFilteredService = '';
@@ -134,10 +123,6 @@ export function ServicesContent(props: ServicesProps) {
     setFilters(newFilters);
   };
 
-  const dashboardContent = () => {
-    return <DashboardContent {...props} />;
-  };
-
   return (
     <>
       <SearchBar
@@ -179,19 +164,6 @@ export function ServicesContent(props: ServicesProps) {
       ) : (
         <div />
       )}
-      <EuiSpacer size="m" />
-      <EuiPanel>
-        <EuiAccordion
-          id="accordion1"
-          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
-          forceState={trigger}
-          onToggle={onToggle}
-          data-test-subj="trace-groups-service-operation-accordian"
-        >
-          <EuiSpacer size="m" />
-          {trigger === 'open' && dashboardContent()}
-        </EuiAccordion>
-      </EuiPanel>
     </>
   );
 }

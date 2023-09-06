@@ -29,6 +29,4 @@ export interface IntegrationsAdaptor {
   ) => Promise<{ mappings: { [key: string]: unknown }; schemas: { [key: string]: unknown } }>;
 
   getAssets: (templateName: string) => Promise<{ savedObjects?: unknown }>;
-
-  getSampleData: (templateName: string) => Promise<{ sampleData: object[] | null }>;
 }

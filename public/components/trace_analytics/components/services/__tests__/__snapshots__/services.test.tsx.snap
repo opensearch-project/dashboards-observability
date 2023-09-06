@@ -24,75 +24,13 @@ exports[`Services component renders empty services page 1`] = `
       },
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
@@ -119,6 +57,7 @@ exports[`Services component renders empty services page 1`] = `
       "removeApplicationClass": [MockFunction],
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -198,6 +137,20 @@ exports[`Services component renders empty services page 1`] = `
   startTime="now-5m"
   traceColumnAction={[Function]}
 >
+  <EuiTitle
+    size="l"
+  >
+    <h2
+      className="euiTitle euiTitle--large"
+      style={
+        Object {
+          "fontWeight": 430,
+        }
+      }
+    >
+      Services
+    </h2>
+  </EuiTitle>
   <DataSourcePicker
     modes={
       Array [
@@ -338,75 +291,13 @@ exports[`Services component renders empty services page 1`] = `
         },
         "getApplicationClasses$": [MockFunction],
         "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
         "getBreadcrumbs$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
-        "logos": Object {
-          "AnimatedMark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_spinner_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "Application": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "CenterMark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "Mark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_mark_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_mark_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "OpenSearch": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "colorScheme": "light",
-        },
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
@@ -433,6 +324,7 @@ exports[`Services component renders empty services page 1`] = `
         "removeApplicationClass": [MockFunction],
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -1517,15 +1409,15 @@ exports[`Services component renders empty services page 1`] = `
               Array [
                 Object {
                   "id": "latency",
-                  "label": "Duration",
+                  "label": "Latency",
                 },
                 Object {
                   "id": "error_rate",
-                  "label": "Errors",
+                  "label": "Error rate",
                 },
                 Object {
                   "id": "throughput",
-                  "label": "Request Rate",
+                  "label": "Throughput",
                 },
               ]
             }
@@ -1550,7 +1442,7 @@ exports[`Services component renders empty services page 1`] = `
                   isIconOnly={false}
                   isSelected={true}
                   key="0"
-                  label="Duration"
+                  label="Latency"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -1568,9 +1460,9 @@ exports[`Services component renders empty services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Duration",
+                        "data-text": "Latency",
                         "ref": [Function],
-                        "title": "Duration",
+                        "title": "Latency",
                       }
                     }
                   >
@@ -1591,9 +1483,9 @@ exports[`Services component renders empty services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Duration",
+                            "data-text": "Latency",
                             "ref": [Function],
-                            "title": "Duration",
+                            "title": "Latency",
                           }
                         }
                       >
@@ -1602,8 +1494,8 @@ exports[`Services component renders empty services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Duration"
-                            title="Duration"
+                            data-text="Latency"
+                            title="Latency"
                           >
                             <input
                               checked={true}
@@ -1615,7 +1507,7 @@ exports[`Services component renders empty services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Duration
+                            Latency
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -1630,7 +1522,7 @@ exports[`Services component renders empty services page 1`] = `
                   isIconOnly={false}
                   isSelected={false}
                   key="1"
-                  label="Errors"
+                  label="Error rate"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -1648,9 +1540,9 @@ exports[`Services component renders empty services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Errors",
+                        "data-text": "Error rate",
                         "ref": [Function],
-                        "title": "Errors",
+                        "title": "Error rate",
                       }
                     }
                   >
@@ -1671,9 +1563,9 @@ exports[`Services component renders empty services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Errors",
+                            "data-text": "Error rate",
                             "ref": [Function],
-                            "title": "Errors",
+                            "title": "Error rate",
                           }
                         }
                       >
@@ -1682,8 +1574,8 @@ exports[`Services component renders empty services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Errors"
-                            title="Errors"
+                            data-text="Error rate"
+                            title="Error rate"
                           >
                             <input
                               checked={false}
@@ -1695,7 +1587,7 @@ exports[`Services component renders empty services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Errors
+                            Error rate
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -1710,7 +1602,7 @@ exports[`Services component renders empty services page 1`] = `
                   isIconOnly={false}
                   isSelected={false}
                   key="2"
-                  label="Request Rate"
+                  label="Throughput"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -1728,9 +1620,9 @@ exports[`Services component renders empty services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Request Rate",
+                        "data-text": "Throughput",
                         "ref": [Function],
-                        "title": "Request Rate",
+                        "title": "Throughput",
                       }
                     }
                   >
@@ -1751,9 +1643,9 @@ exports[`Services component renders empty services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Request Rate",
+                            "data-text": "Throughput",
                             "ref": [Function],
-                            "title": "Request Rate",
+                            "title": "Throughput",
                           }
                         }
                       >
@@ -1762,8 +1654,8 @@ exports[`Services component renders empty services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Request Rate"
-                            title="Request Rate"
+                            data-text="Throughput"
+                            title="Throughput"
                           >
                             <input
                               checked={false}
@@ -1775,7 +1667,7 @@ exports[`Services component renders empty services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Request Rate
+                            Throughput
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -1995,110 +1887,6 @@ exports[`Services component renders empty services page 1`] = `
         </div>
       </EuiPanel>
     </ServiceMap>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiPanel>
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-      >
-        <EuiAccordion
-          arrowDisplay="left"
-          buttonContent="Trace Groups"
-          data-test-subj="trace-groups-service-operation-accordian"
-          forceState="closed"
-          id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          onToggle={[Function]}
-          paddingSize="none"
-        >
-          <div
-            className="euiAccordion"
-            data-test-subj="trace-groups-service-operation-accordian"
-            onToggle={[Function]}
-          >
-            <div
-              className="euiAccordion__triggerWrapper"
-            >
-              <button
-                aria-controls="accordion1"
-                aria-expanded={false}
-                className="euiAccordion__button"
-                id="random_html_id"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiAccordion__iconWrapper"
-                >
-                  <EuiIcon
-                    className="euiAccordion__icon"
-                    size="m"
-                    type="arrowRight"
-                  >
-                    <EuiIconEmpty
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
-                    </EuiIconEmpty>
-                  </EuiIcon>
-                </span>
-                <span
-                  className="euiIEFlexWrapFix"
-                >
-                  Trace Groups
-                </span>
-              </button>
-            </div>
-            <div
-              aria-labelledby="random_html_id"
-              className="euiAccordion__childWrapper"
-              id="accordion1"
-              role="region"
-              tabIndex={-1}
-            >
-              <EuiResizeObserver
-                onResize={[Function]}
-              >
-                <div>
-                  <div
-                    className=""
-                  >
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                  </div>
-                </div>
-              </EuiResizeObserver>
-            </div>
-          </div>
-        </EuiAccordion>
-      </div>
-    </EuiPanel>
   </ServicesContent>
 </Services>
 `;
@@ -2127,75 +1915,13 @@ exports[`Services component renders jaeger services page 1`] = `
       },
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
@@ -2222,6 +1948,7 @@ exports[`Services component renders jaeger services page 1`] = `
       "removeApplicationClass": [MockFunction],
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -2301,6 +2028,20 @@ exports[`Services component renders jaeger services page 1`] = `
   startTime="now-5m"
   traceColumnAction={[Function]}
 >
+  <EuiTitle
+    size="l"
+  >
+    <h2
+      className="euiTitle euiTitle--large"
+      style={
+        Object {
+          "fontWeight": 430,
+        }
+      }
+    >
+      Services
+    </h2>
+  </EuiTitle>
   <DataSourcePicker
     modes={
       Array [
@@ -2404,7 +2145,7 @@ exports[`Services component renders jaeger services page 1`] = `
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
                           fillRule="non-zero"
                         />
                       </svg>
@@ -2446,75 +2187,13 @@ exports[`Services component renders jaeger services page 1`] = `
         },
         "getApplicationClasses$": [MockFunction],
         "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
         "getBreadcrumbs$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
-        "logos": Object {
-          "AnimatedMark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_spinner_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "Application": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "CenterMark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "Mark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_mark_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_mark_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "OpenSearch": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "colorScheme": "light",
-        },
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
@@ -2541,6 +2220,7 @@ exports[`Services component renders jaeger services page 1`] = `
         "removeApplicationClass": [MockFunction],
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -2733,7 +2413,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.271 11.978l3.872 3.873a.502.502 0 00.708 0 .502.502 0 000-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 004.949 2.05.5.5 0 000-1 5.96 5.96 0 01-4.242-1.757 6.01 6.01 0 010-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 010 8.486.5.5 0 00.034.738z"
                                     />
                                   </svg>
                                 </EuiIconSearch>
@@ -3053,7 +2733,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                                   xmlns="http://www.w3.org/2000/svg"
                                                 >
                                                   <path
-                                                    d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                    d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
                                                     fillRule="non-zero"
                                                   />
                                                 </svg>
@@ -3084,7 +2764,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                                     xmlns="http://www.w3.org/2000/svg"
                                                   >
                                                     <path
-                                                      d="M14 4v-.994C14 2.45 13.55 2 12.994 2H11v1h-1V2H6v1H5V2H3.006C2.45 2 2 2.45 2 3.006v9.988C2 13.55 2.45 14 3.006 14h9.988C13.55 14 14 13.55 14 12.994V5H2V4h12zm-3-3h1.994C14.102 1 15 1.897 15 3.006v9.988A2.005 2.005 0 0 1 12.994 15H3.006A2.005 2.005 0 0 1 1 12.994V3.006C1 1.898 1.897 1 3.006 1H5V0h1v1h4V0h1v1zM4 7h2v1H4V7zm3 0h2v1H7V7zm3 0h2v1h-2V7zM4 9h2v1H4V9zm3 0h2v1H7V9zm3 0h2v1h-2V9zm-6 2h2v1H4v-1zm3 0h2v1H7v-1zm3 0h2v1h-2v-1z"
+                                                      d="M14 4v-.994C14 2.45 13.55 2 12.994 2H11v1h-1V2H6v1H5V2H3.006C2.45 2 2 2.45 2 3.006v9.988C2 13.55 2.45 14 3.006 14h9.988C13.55 14 14 13.55 14 12.994V5H2V4h12zm-3-3h1.994C14.102 1 15 1.897 15 3.006v9.988A2.005 2.005 0 0112.994 15H3.006A2.005 2.005 0 011 12.994V3.006C1 1.898 1.897 1 3.006 1H5V0h1v1h4V0h1v1zM4 7h2v1H4V7zm3 0h2v1H7V7zm3 0h2v1h-2V7zM4 9h2v1H4V9zm3 0h2v1H7V9zm3 0h2v1h-2V9zm-6 2h2v1H4v-1zm3 0h2v1H7v-1zm3 0h2v1h-2v-1z"
                                                       fillRule="evenodd"
                                                     />
                                                   </svg>
@@ -3217,7 +2897,7 @@ exports[`Services component renders jaeger services page 1`] = `
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                                d="M11.228 2.942a.5.5 0 11-.538.842A5 5 0 1013 8a.5.5 0 111 0 6 6 0 11-2.772-5.058zM14 1.5v3A1.5 1.5 0 0112.5 6h-3a.5.5 0 010-1h3a.5.5 0 00.5-.5v-3a.5.5 0 111 0z"
                               />
                             </svg>
                           </EuiIconRefresh>
@@ -3356,7 +3036,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M7.999 15.999a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM3.5 5h9a.5.5 0 1 1 0 1h-9a.5.5 0 0 1 0-1Zm2 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 0 1 0-1Zm2 3h1a.5.5 0 1 1 0 1h-1a.5.5 0 1 1 0-1Z"
+                                    d="M7.999 15.999a8 8 0 110-16 8 8 0 010 16zM8 15A7 7 0 108 1a7 7 0 000 14zM3.5 5h9a.5.5 0 110 1h-9a.5.5 0 010-1zm2 3h5a.5.5 0 110 1h-5a.5.5 0 010-1zm2 3h1a.5.5 0 110 1h-1a.5.5 0 110-1z"
                                     fillRule="evenodd"
                                   />
                                 </svg>
@@ -3605,115 +3285,6 @@ exports[`Services component renders jaeger services page 1`] = `
       />
     </EuiSpacer>
     <div />
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiPanel>
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-      >
-        <EuiAccordion
-          arrowDisplay="left"
-          buttonContent="Service and Operations"
-          data-test-subj="trace-groups-service-operation-accordian"
-          forceState="closed"
-          id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          onToggle={[Function]}
-          paddingSize="none"
-        >
-          <div
-            className="euiAccordion"
-            data-test-subj="trace-groups-service-operation-accordian"
-            onToggle={[Function]}
-          >
-            <div
-              className="euiAccordion__triggerWrapper"
-            >
-              <button
-                aria-controls="accordion1"
-                aria-expanded={false}
-                className="euiAccordion__button"
-                id="random_html_id"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiAccordion__iconWrapper"
-                >
-                  <EuiIcon
-                    className="euiAccordion__icon"
-                    size="m"
-                    type="arrowRight"
-                  >
-                    <EuiIconArrowRight
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiAccordion__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiAccordion__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                          fillRule="nonzero"
-                        />
-                      </svg>
-                    </EuiIconArrowRight>
-                  </EuiIcon>
-                </span>
-                <span
-                  className="euiIEFlexWrapFix"
-                >
-                  Service and Operations
-                </span>
-              </button>
-            </div>
-            <div
-              aria-labelledby="random_html_id"
-              className="euiAccordion__childWrapper"
-              id="accordion1"
-              role="region"
-              tabIndex={-1}
-            >
-              <EuiResizeObserver
-                onResize={[Function]}
-              >
-                <div>
-                  <div
-                    className=""
-                  >
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                  </div>
-                </div>
-              </EuiResizeObserver>
-            </div>
-          </div>
-        </EuiAccordion>
-      </div>
-    </EuiPanel>
   </ServicesContent>
 </Services>
 `;
@@ -3742,75 +3313,13 @@ exports[`Services component renders services page 1`] = `
       },
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
@@ -3837,6 +3346,7 @@ exports[`Services component renders services page 1`] = `
       "removeApplicationClass": [MockFunction],
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction] {
         "calls": Array [
           Array [
@@ -3915,6 +3425,20 @@ exports[`Services component renders services page 1`] = `
   startTime="now-5m"
   traceColumnAction={[Function]}
 >
+  <EuiTitle
+    size="l"
+  >
+    <h2
+      className="euiTitle euiTitle--large"
+      style={
+        Object {
+          "fontWeight": 430,
+        }
+      }
+    >
+      Services
+    </h2>
+  </EuiTitle>
   <DataSourcePicker
     modes={
       Array [
@@ -4018,7 +3542,7 @@ exports[`Services component renders services page 1`] = `
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
                           fillRule="non-zero"
                         />
                       </svg>
@@ -4060,75 +3584,13 @@ exports[`Services component renders services page 1`] = `
         },
         "getApplicationClasses$": [MockFunction],
         "getBadge$": [MockFunction],
+        "getBrand$": [MockFunction],
         "getBreadcrumbs$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
-        "logos": Object {
-          "AnimatedMark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_spinner_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "Application": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "CenterMark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "Mark": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_mark_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_mark_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "OpenSearch": Object {
-            "dark": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_on_dark.svg",
-            },
-            "light": Object {
-              "type": "default",
-              "url": "/ui/logos/opensearch_on_light.svg",
-            },
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "colorScheme": "light",
-        },
         "navControls": Object {
           "getCenter$": [MockFunction],
           "getLeft$": [MockFunction],
@@ -4155,6 +3617,7 @@ exports[`Services component renders services page 1`] = `
         "removeApplicationClass": [MockFunction],
         "setAppTitle": [MockFunction],
         "setBadge": [MockFunction],
+        "setBrand": [MockFunction],
         "setBreadcrumbs": [MockFunction] {
           "calls": Array [
             Array [
@@ -4346,7 +3809,7 @@ exports[`Services component renders services page 1`] = `
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.271 11.978l3.872 3.873a.502.502 0 00.708 0 .502.502 0 000-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 004.949 2.05.5.5 0 000-1 5.96 5.96 0 01-4.242-1.757 6.01 6.01 0 010-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 010 8.486.5.5 0 00.034.738z"
                                     />
                                   </svg>
                                 </EuiIconSearch>
@@ -4666,7 +4129,7 @@ exports[`Services component renders services page 1`] = `
                                                   xmlns="http://www.w3.org/2000/svg"
                                                 >
                                                   <path
-                                                    d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                    d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
                                                     fillRule="non-zero"
                                                   />
                                                 </svg>
@@ -4697,7 +4160,7 @@ exports[`Services component renders services page 1`] = `
                                                     xmlns="http://www.w3.org/2000/svg"
                                                   >
                                                     <path
-                                                      d="M14 4v-.994C14 2.45 13.55 2 12.994 2H11v1h-1V2H6v1H5V2H3.006C2.45 2 2 2.45 2 3.006v9.988C2 13.55 2.45 14 3.006 14h9.988C13.55 14 14 13.55 14 12.994V5H2V4h12zm-3-3h1.994C14.102 1 15 1.897 15 3.006v9.988A2.005 2.005 0 0 1 12.994 15H3.006A2.005 2.005 0 0 1 1 12.994V3.006C1 1.898 1.897 1 3.006 1H5V0h1v1h4V0h1v1zM4 7h2v1H4V7zm3 0h2v1H7V7zm3 0h2v1h-2V7zM4 9h2v1H4V9zm3 0h2v1H7V9zm3 0h2v1h-2V9zm-6 2h2v1H4v-1zm3 0h2v1H7v-1zm3 0h2v1h-2v-1z"
+                                                      d="M14 4v-.994C14 2.45 13.55 2 12.994 2H11v1h-1V2H6v1H5V2H3.006C2.45 2 2 2.45 2 3.006v9.988C2 13.55 2.45 14 3.006 14h9.988C13.55 14 14 13.55 14 12.994V5H2V4h12zm-3-3h1.994C14.102 1 15 1.897 15 3.006v9.988A2.005 2.005 0 0112.994 15H3.006A2.005 2.005 0 011 12.994V3.006C1 1.898 1.897 1 3.006 1H5V0h1v1h4V0h1v1zM4 7h2v1H4V7zm3 0h2v1H7V7zm3 0h2v1h-2V7zM4 9h2v1H4V9zm3 0h2v1H7V9zm3 0h2v1h-2V9zm-6 2h2v1H4v-1zm3 0h2v1H7v-1zm3 0h2v1h-2v-1z"
                                                       fillRule="evenodd"
                                                     />
                                                   </svg>
@@ -4830,7 +4293,7 @@ exports[`Services component renders services page 1`] = `
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                                d="M11.228 2.942a.5.5 0 11-.538.842A5 5 0 1013 8a.5.5 0 111 0 6 6 0 11-2.772-5.058zM14 1.5v3A1.5 1.5 0 0112.5 6h-3a.5.5 0 010-1h3a.5.5 0 00.5-.5v-3a.5.5 0 111 0z"
                               />
                             </svg>
                           </EuiIconRefresh>
@@ -4969,7 +4432,7 @@ exports[`Services component renders services page 1`] = `
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M7.999 15.999a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM3.5 5h9a.5.5 0 1 1 0 1h-9a.5.5 0 0 1 0-1Zm2 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 0 1 0-1Zm2 3h1a.5.5 0 1 1 0 1h-1a.5.5 0 1 1 0-1Z"
+                                    d="M7.999 15.999a8 8 0 110-16 8 8 0 010 16zM8 15A7 7 0 108 1a7 7 0 000 14zM3.5 5h9a.5.5 0 110 1h-9a.5.5 0 010-1zm2 3h5a.5.5 0 110 1h-5a.5.5 0 010-1zm2 3h1a.5.5 0 110 1h-1a.5.5 0 110-1z"
                                     fillRule="evenodd"
                                   />
                                 </svg>
@@ -5261,15 +4724,15 @@ exports[`Services component renders services page 1`] = `
               Array [
                 Object {
                   "id": "latency",
-                  "label": "Duration",
+                  "label": "Latency",
                 },
                 Object {
                   "id": "error_rate",
-                  "label": "Errors",
+                  "label": "Error rate",
                 },
                 Object {
                   "id": "throughput",
-                  "label": "Request Rate",
+                  "label": "Throughput",
                 },
               ]
             }
@@ -5294,7 +4757,7 @@ exports[`Services component renders services page 1`] = `
                   isIconOnly={false}
                   isSelected={true}
                   key="0"
-                  label="Duration"
+                  label="Latency"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -5312,9 +4775,9 @@ exports[`Services component renders services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Duration",
+                        "data-text": "Latency",
                         "ref": [Function],
-                        "title": "Duration",
+                        "title": "Latency",
                       }
                     }
                   >
@@ -5335,9 +4798,9 @@ exports[`Services component renders services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Duration",
+                            "data-text": "Latency",
                             "ref": [Function],
-                            "title": "Duration",
+                            "title": "Latency",
                           }
                         }
                       >
@@ -5346,8 +4809,8 @@ exports[`Services component renders services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Duration"
-                            title="Duration"
+                            data-text="Latency"
+                            title="Latency"
                           >
                             <input
                               checked={true}
@@ -5359,7 +4822,7 @@ exports[`Services component renders services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Duration
+                            Latency
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -5374,7 +4837,7 @@ exports[`Services component renders services page 1`] = `
                   isIconOnly={false}
                   isSelected={false}
                   key="1"
-                  label="Errors"
+                  label="Error rate"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -5392,9 +4855,9 @@ exports[`Services component renders services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Errors",
+                        "data-text": "Error rate",
                         "ref": [Function],
-                        "title": "Errors",
+                        "title": "Error rate",
                       }
                     }
                   >
@@ -5415,9 +4878,9 @@ exports[`Services component renders services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Errors",
+                            "data-text": "Error rate",
                             "ref": [Function],
-                            "title": "Errors",
+                            "title": "Error rate",
                           }
                         }
                       >
@@ -5426,8 +4889,8 @@ exports[`Services component renders services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Errors"
-                            title="Errors"
+                            data-text="Error rate"
+                            title="Error rate"
                           >
                             <input
                               checked={false}
@@ -5439,7 +4902,7 @@ exports[`Services component renders services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Errors
+                            Error rate
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -5454,7 +4917,7 @@ exports[`Services component renders services page 1`] = `
                   isIconOnly={false}
                   isSelected={false}
                   key="2"
-                  label="Request Rate"
+                  label="Throughput"
                   name="random_html_id"
                   onChange={[Function]}
                   size="s"
@@ -5472,9 +4935,9 @@ exports[`Services component renders services page 1`] = `
                     textProps={
                       Object {
                         "className": "euiButtonGroupButton__textShift",
-                        "data-text": "Request Rate",
+                        "data-text": "Throughput",
                         "ref": [Function],
-                        "title": "Request Rate",
+                        "title": "Throughput",
                       }
                     }
                   >
@@ -5495,9 +4958,9 @@ exports[`Services component renders services page 1`] = `
                         textProps={
                           Object {
                             "className": "euiButton__text euiButtonGroupButton__textShift",
-                            "data-text": "Request Rate",
+                            "data-text": "Throughput",
                             "ref": [Function],
-                            "title": "Request Rate",
+                            "title": "Throughput",
                           }
                         }
                       >
@@ -5506,8 +4969,8 @@ exports[`Services component renders services page 1`] = `
                         >
                           <span
                             className="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Request Rate"
-                            title="Request Rate"
+                            data-text="Throughput"
+                            title="Throughput"
                           >
                             <input
                               checked={false}
@@ -5519,7 +4982,7 @@ exports[`Services component renders services page 1`] = `
                               onChange={[Function]}
                               type="radio"
                             />
-                            Request Rate
+                            Throughput
                           </span>
                         </span>
                       </EuiButtonContent>
@@ -5638,7 +5101,7 @@ exports[`Services component renders services page 1`] = `
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
-                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          d="M11.271 11.978l3.872 3.873a.502.502 0 00.708 0 .502.502 0 000-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 004.949 2.05.5.5 0 000-1 5.96 5.96 0 01-4.242-1.757 6.01 6.01 0 010-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 010 8.486.5.5 0 00.034.738z"
                                         />
                                       </svg>
                                     </EuiIconSearch>
@@ -5743,115 +5206,6 @@ exports[`Services component renders services page 1`] = `
         </div>
       </EuiPanel>
     </ServiceMap>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiPanel>
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-      >
-        <EuiAccordion
-          arrowDisplay="left"
-          buttonContent="Trace Groups"
-          data-test-subj="trace-groups-service-operation-accordian"
-          forceState="closed"
-          id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          onToggle={[Function]}
-          paddingSize="none"
-        >
-          <div
-            className="euiAccordion"
-            data-test-subj="trace-groups-service-operation-accordian"
-            onToggle={[Function]}
-          >
-            <div
-              className="euiAccordion__triggerWrapper"
-            >
-              <button
-                aria-controls="accordion1"
-                aria-expanded={false}
-                className="euiAccordion__button"
-                id="random_html_id"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiAccordion__iconWrapper"
-                >
-                  <EuiIcon
-                    className="euiAccordion__icon"
-                    size="m"
-                    type="arrowRight"
-                  >
-                    <EuiIconArrowRight
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiAccordion__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiAccordion__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                          fillRule="nonzero"
-                        />
-                      </svg>
-                    </EuiIconArrowRight>
-                  </EuiIcon>
-                </span>
-                <span
-                  className="euiIEFlexWrapFix"
-                >
-                  Trace Groups
-                </span>
-              </button>
-            </div>
-            <div
-              aria-labelledby="random_html_id"
-              className="euiAccordion__childWrapper"
-              id="accordion1"
-              role="region"
-              tabIndex={-1}
-            >
-              <EuiResizeObserver
-                onResize={[Function]}
-              >
-                <div>
-                  <div
-                    className=""
-                  >
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                  </div>
-                </div>
-              </EuiResizeObserver>
-            </div>
-          </div>
-        </EuiAccordion>
-      </div>
-    </EuiPanel>
   </ServicesContent>
 </Services>
 `;

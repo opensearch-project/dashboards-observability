@@ -12,75 +12,13 @@ exports[`Service Config component renders empty service config 1`] = `
       },
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
@@ -107,6 +45,7 @@ exports[`Service Config component renders empty service config 1`] = `
       "removeApplicationClass": [MockFunction],
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
       "setCustomNavLink": [MockFunction],
       "setHelpExtension": [MockFunction],
@@ -447,6 +386,7 @@ exports[`Service Config component renders empty service config 1`] = `
                           aria-label="Select services and entities"
                           className="euiComboBox"
                           data-test-subj="servicesEntitiesComboBox"
+                          onFocus={[Function]}
                           onKeyDown={[Function]}
                           role="combobox"
                         >
@@ -686,15 +626,15 @@ exports[`Service Config component renders empty service config 1`] = `
                           Array [
                             Object {
                               "id": "latency",
-                              "label": "Duration",
+                              "label": "Latency",
                             },
                             Object {
                               "id": "error_rate",
-                              "label": "Errors",
+                              "label": "Error rate",
                             },
                             Object {
                               "id": "throughput",
-                              "label": "Request Rate",
+                              "label": "Throughput",
                             },
                           ]
                         }
@@ -719,7 +659,7 @@ exports[`Service Config component renders empty service config 1`] = `
                               isIconOnly={false}
                               isSelected={true}
                               key="0"
-                              label="Duration"
+                              label="Latency"
                               name="random_html_id"
                               onChange={[Function]}
                               size="s"
@@ -737,9 +677,9 @@ exports[`Service Config component renders empty service config 1`] = `
                                 textProps={
                                   Object {
                                     "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Duration",
+                                    "data-text": "Latency",
                                     "ref": [Function],
-                                    "title": "Duration",
+                                    "title": "Latency",
                                   }
                                 }
                               >
@@ -760,9 +700,9 @@ exports[`Service Config component renders empty service config 1`] = `
                                     textProps={
                                       Object {
                                         "className": "euiButton__text euiButtonGroupButton__textShift",
-                                        "data-text": "Duration",
+                                        "data-text": "Latency",
                                         "ref": [Function],
-                                        "title": "Duration",
+                                        "title": "Latency",
                                       }
                                     }
                                   >
@@ -771,8 +711,8 @@ exports[`Service Config component renders empty service config 1`] = `
                                     >
                                       <span
                                         className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Duration"
-                                        title="Duration"
+                                        data-text="Latency"
+                                        title="Latency"
                                       >
                                         <input
                                           checked={true}
@@ -784,7 +724,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                           onChange={[Function]}
                                           type="radio"
                                         />
-                                        Duration
+                                        Latency
                                       </span>
                                     </span>
                                   </EuiButtonContent>
@@ -799,7 +739,7 @@ exports[`Service Config component renders empty service config 1`] = `
                               isIconOnly={false}
                               isSelected={false}
                               key="1"
-                              label="Errors"
+                              label="Error rate"
                               name="random_html_id"
                               onChange={[Function]}
                               size="s"
@@ -817,9 +757,9 @@ exports[`Service Config component renders empty service config 1`] = `
                                 textProps={
                                   Object {
                                     "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Errors",
+                                    "data-text": "Error rate",
                                     "ref": [Function],
-                                    "title": "Errors",
+                                    "title": "Error rate",
                                   }
                                 }
                               >
@@ -840,9 +780,9 @@ exports[`Service Config component renders empty service config 1`] = `
                                     textProps={
                                       Object {
                                         "className": "euiButton__text euiButtonGroupButton__textShift",
-                                        "data-text": "Errors",
+                                        "data-text": "Error rate",
                                         "ref": [Function],
-                                        "title": "Errors",
+                                        "title": "Error rate",
                                       }
                                     }
                                   >
@@ -851,8 +791,8 @@ exports[`Service Config component renders empty service config 1`] = `
                                     >
                                       <span
                                         className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Errors"
-                                        title="Errors"
+                                        data-text="Error rate"
+                                        title="Error rate"
                                       >
                                         <input
                                           checked={false}
@@ -864,7 +804,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                           onChange={[Function]}
                                           type="radio"
                                         />
-                                        Errors
+                                        Error rate
                                       </span>
                                     </span>
                                   </EuiButtonContent>
@@ -879,7 +819,7 @@ exports[`Service Config component renders empty service config 1`] = `
                               isIconOnly={false}
                               isSelected={false}
                               key="2"
-                              label="Request Rate"
+                              label="Throughput"
                               name="random_html_id"
                               onChange={[Function]}
                               size="s"
@@ -897,9 +837,9 @@ exports[`Service Config component renders empty service config 1`] = `
                                 textProps={
                                   Object {
                                     "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Request Rate",
+                                    "data-text": "Throughput",
                                     "ref": [Function],
-                                    "title": "Request Rate",
+                                    "title": "Throughput",
                                   }
                                 }
                               >
@@ -920,9 +860,9 @@ exports[`Service Config component renders empty service config 1`] = `
                                     textProps={
                                       Object {
                                         "className": "euiButton__text euiButtonGroupButton__textShift",
-                                        "data-text": "Request Rate",
+                                        "data-text": "Throughput",
                                         "ref": [Function],
-                                        "title": "Request Rate",
+                                        "title": "Throughput",
                                       }
                                     }
                                   >
@@ -931,8 +871,8 @@ exports[`Service Config component renders empty service config 1`] = `
                                     >
                                       <span
                                         className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Request Rate"
-                                        title="Request Rate"
+                                        data-text="Throughput"
+                                        title="Throughput"
                                       >
                                         <input
                                           checked={false}
@@ -944,7 +884,7 @@ exports[`Service Config component renders empty service config 1`] = `
                                           onChange={[Function]}
                                           type="radio"
                                         />
-                                        Request Rate
+                                        Throughput
                                       </span>
                                     </span>
                                   </EuiButtonContent>
@@ -1186,75 +1126,13 @@ exports[`Service Config component renders with one service selected 1`] = `
       },
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
+      "getBrand$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
       "navControls": Object {
         "getCenter$": [MockFunction],
         "getLeft$": [MockFunction],
@@ -1281,6 +1159,7 @@ exports[`Service Config component renders with one service selected 1`] = `
       "removeApplicationClass": [MockFunction],
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
+      "setBrand": [MockFunction],
       "setBreadcrumbs": [MockFunction],
       "setCustomNavLink": [MockFunction],
       "setHelpExtension": [MockFunction],
@@ -1442,7 +1321,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                      d="M5.157 13.069l4.611-4.685a.546.546 0 000-.768L5.158 2.93a.552.552 0 010-.771.53.53 0 01.759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 01-.76 0 .552.552 0 010-.771z"
                       fillRule="nonzero"
                     />
                   </svg>
@@ -1640,6 +1519,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                           aria-label="Select services and entities"
                           className="euiComboBox"
                           data-test-subj="servicesEntitiesComboBox"
+                          onFocus={[Function]}
                           onKeyDown={[Function]}
                           role="combobox"
                         >
@@ -1816,7 +1696,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                                 xmlns="http://www.w3.org/2000/svg"
                                               >
                                                 <path
-                                                  d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                  d="M13.069 5.157L8.384 9.768a.546.546 0 01-.768 0L2.93 5.158a.552.552 0 00-.771 0 .53.53 0 000 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 000-.76.552.552 0 00-.771 0z"
                                                   fillRule="non-zero"
                                                 />
                                               </svg>
@@ -1884,15 +1764,15 @@ exports[`Service Config component renders with one service selected 1`] = `
                           Array [
                             Object {
                               "id": "latency",
-                              "label": "Duration",
+                              "label": "Latency",
                             },
                             Object {
                               "id": "error_rate",
-                              "label": "Errors",
+                              "label": "Error rate",
                             },
                             Object {
                               "id": "throughput",
-                              "label": "Request Rate",
+                              "label": "Throughput",
                             },
                           ]
                         }
@@ -1917,7 +1797,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                               isIconOnly={false}
                               isSelected={true}
                               key="0"
-                              label="Duration"
+                              label="Latency"
                               name="random_html_id"
                               onChange={[Function]}
                               size="s"
@@ -1935,9 +1815,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 textProps={
                                   Object {
                                     "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Duration",
+                                    "data-text": "Latency",
                                     "ref": [Function],
-                                    "title": "Duration",
+                                    "title": "Latency",
                                   }
                                 }
                               >
@@ -1958,9 +1838,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     textProps={
                                       Object {
                                         "className": "euiButton__text euiButtonGroupButton__textShift",
-                                        "data-text": "Duration",
+                                        "data-text": "Latency",
                                         "ref": [Function],
-                                        "title": "Duration",
+                                        "title": "Latency",
                                       }
                                     }
                                   >
@@ -1969,8 +1849,8 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     >
                                       <span
                                         className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Duration"
-                                        title="Duration"
+                                        data-text="Latency"
+                                        title="Latency"
                                       >
                                         <input
                                           checked={true}
@@ -1982,7 +1862,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                           onChange={[Function]}
                                           type="radio"
                                         />
-                                        Duration
+                                        Latency
                                       </span>
                                     </span>
                                   </EuiButtonContent>
@@ -1997,7 +1877,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                               isIconOnly={false}
                               isSelected={false}
                               key="1"
-                              label="Errors"
+                              label="Error rate"
                               name="random_html_id"
                               onChange={[Function]}
                               size="s"
@@ -2015,9 +1895,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 textProps={
                                   Object {
                                     "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Errors",
+                                    "data-text": "Error rate",
                                     "ref": [Function],
-                                    "title": "Errors",
+                                    "title": "Error rate",
                                   }
                                 }
                               >
@@ -2038,9 +1918,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     textProps={
                                       Object {
                                         "className": "euiButton__text euiButtonGroupButton__textShift",
-                                        "data-text": "Errors",
+                                        "data-text": "Error rate",
                                         "ref": [Function],
-                                        "title": "Errors",
+                                        "title": "Error rate",
                                       }
                                     }
                                   >
@@ -2049,8 +1929,8 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     >
                                       <span
                                         className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Errors"
-                                        title="Errors"
+                                        data-text="Error rate"
+                                        title="Error rate"
                                       >
                                         <input
                                           checked={false}
@@ -2062,7 +1942,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                           onChange={[Function]}
                                           type="radio"
                                         />
-                                        Errors
+                                        Error rate
                                       </span>
                                     </span>
                                   </EuiButtonContent>
@@ -2077,7 +1957,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                               isIconOnly={false}
                               isSelected={false}
                               key="2"
-                              label="Request Rate"
+                              label="Throughput"
                               name="random_html_id"
                               onChange={[Function]}
                               size="s"
@@ -2095,9 +1975,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                                 textProps={
                                   Object {
                                     "className": "euiButtonGroupButton__textShift",
-                                    "data-text": "Request Rate",
+                                    "data-text": "Throughput",
                                     "ref": [Function],
-                                    "title": "Request Rate",
+                                    "title": "Throughput",
                                   }
                                 }
                               >
@@ -2118,9 +1998,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     textProps={
                                       Object {
                                         "className": "euiButton__text euiButtonGroupButton__textShift",
-                                        "data-text": "Request Rate",
+                                        "data-text": "Throughput",
                                         "ref": [Function],
-                                        "title": "Request Rate",
+                                        "title": "Throughput",
                                       }
                                     }
                                   >
@@ -2129,8 +2009,8 @@ exports[`Service Config component renders with one service selected 1`] = `
                                     >
                                       <span
                                         className="euiButton__text euiButtonGroupButton__textShift"
-                                        data-text="Request Rate"
-                                        title="Request Rate"
+                                        data-text="Throughput"
+                                        title="Throughput"
                                       >
                                         <input
                                           checked={false}
@@ -2142,7 +2022,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                           onChange={[Function]}
                                           type="radio"
                                         />
-                                        Request Rate
+                                        Throughput
                                       </span>
                                     </span>
                                   </EuiButtonContent>
@@ -2261,7 +2141,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                                                     xmlns="http://www.w3.org/2000/svg"
                                                   >
                                                     <path
-                                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                                      d="M11.271 11.978l3.872 3.873a.502.502 0 00.708 0 .502.502 0 000-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 004.949 2.05.5.5 0 000-1 5.96 5.96 0 01-4.242-1.757 6.01 6.01 0 010-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 010 8.486.5.5 0 00.034.738z"
                                                     />
                                                   </svg>
                                                 </EuiIconSearch>

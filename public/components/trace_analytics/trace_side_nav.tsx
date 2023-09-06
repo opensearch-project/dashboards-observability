@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -11,17 +12,22 @@ import {
   EuiPageSideBar,
   EuiSideNav,
   EuiSideNavItemType,
+  EuiSwitch,
 } from '@elastic/eui';
 import React from 'react';
 
 export function TraceSideBar(props: { children: React.ReactNode }) {
   function setIsSelected(items: Array<EuiSideNavItemType<React.ReactNode>>, hash: string): boolean {
-    if (hash === '#/traces') {
-      items[0].items[1].isSelected = true;
+    if (hash === '#/') {
+      items[0].isSelected = true;
       return true;
     }
-    if (hash === '#/services' || hash === '#/') {
+    if (hash === '#/traces') {
       items[0].items[0].isSelected = true;
+      return true;
+    }
+    if (hash === '#/services') {
+      items[0].items[1].isSelected = true;
       return true;
     }
   }
@@ -33,14 +39,14 @@ export function TraceSideBar(props: { children: React.ReactNode }) {
       href: '#/',
       items: [
         {
-          name: 'Services',
+          name: 'Traces',
           id: 1.1,
-          href: '#/services',
+          href: '#/traces',
         },
         {
-          name: 'Traces',
+          name: 'Services',
           id: 1.2,
-          href: '#/traces',
+          href: '#/services',
         },
       ],
     },

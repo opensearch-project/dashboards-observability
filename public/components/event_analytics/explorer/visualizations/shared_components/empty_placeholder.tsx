@@ -10,7 +10,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 export const EmptyPlaceholder = (props: { icon: string }) => (
   <>
     <EuiText
-      className="visWorkspaceNoData"
+      className="lnsChart__empty"
       textAlign="center"
       color="subdued"
       size="xs"

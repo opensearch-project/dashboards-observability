@@ -18,15 +18,15 @@ exports[`Service map component renders service map 1`] = `
         Array [
           Object {
             "id": "latency",
-            "label": "Duration",
+            "label": "Latency",
           },
           Object {
             "id": "error_rate",
-            "label": "Errors",
+            "label": "Error rate",
           },
           Object {
             "id": "throughput",
-            "label": "Request Rate",
+            "label": "Throughput",
           },
         ]
       }

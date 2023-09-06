@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import PPLService from 'public/services/requests/ppl';
 import React, { useEffect, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
@@ -21,10 +22,12 @@ import './metrics_grid.scss';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MetricsGridProps {
+  http: CoreStart['http'];
   chrome: CoreStart['chrome'];
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
   editMode: boolean;
+  pplService: PPLService;
   startTime: string;
   endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
@@ -35,10 +38,12 @@ interface MetricsGridProps {
 }
 
 export const MetricsGrid = ({
+  http,
   chrome,
   panelVisualizations,
   setPanelVisualizations,
   editMode,
+  pplService,
   startTime,
   endTime,
   moveToEvents,
@@ -70,9 +75,11 @@ export const MetricsGrid = ({
     const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
       <VisualizationContainer
         key={panelVisualization.id}
+        http={http}
         editMode={editMode}
         visualizationId={panelVisualization.id}
         savedVisualizationId={panelVisualization.savedVisualizationId}
+        pplService={pplService}
         fromTime={startTime}
         toTime={endTime}
         onRefresh={onRefresh}

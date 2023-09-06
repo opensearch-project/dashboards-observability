@@ -599,6 +599,7 @@ exports[`Metrics component Renders Metrics component 1`] = `
           ],
         },
         "fulllabel": "Metrics",
+        "icon": [Function],
         "icontype": "stats",
         "id": "metrics",
         "label": "Metrics",
@@ -663,14 +664,14 @@ exports[`Metrics component Renders Metrics component 1`] = `
     icon="stats"
   >
     <EuiText
-      className="visWorkspaceNoData"
+      className="lnsChart__empty"
       color="subdued"
       data-test-subj="vizWorkspace__noData"
       size="xs"
       textAlign="center"
     >
       <div
-        className="euiText euiText--extraSmall visWorkspaceNoData"
+        className="euiText euiText--extraSmall lnsChart__empty"
         data-test-subj="vizWorkspace__noData"
       >
         <EuiTextAlign

@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
 import React, { useEffect, useState } from 'react';
+import { CoreStart } from '../../../../../../src/core/public';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -13,25 +15,23 @@ import {
   EuiFlexItem,
   EuiForm,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { CoreStart } from '../../../../../../src/core/public';
 import { createPrometheusMetricById } from '../helpers/utils';
 import { MetricType } from '../../../../common/types/metrics';
 import { fetchVisualizationById } from '../../custom_panels/helpers/utils';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchPanels,
   selectPanelList,
 } from '../../../../public/components/custom_panels/redux/panel_slice';
-import { coreRefs } from '../../../framework/core_refs';
 
 interface MetricsExportPanelProps {
   http: CoreStart['http'];
   visualizationsMetaData: any;
   setVisualizationsMetaData: React.Dispatch<any>;
   sortedMetricsLayout: MetricType[];
-  selectedPanelOptions: Array<EuiComboBoxOptionOption<unknown>> | undefined;
+  selectedPanelOptions: EuiComboBoxOptionOption<unknown>[] | undefined;
   setSelectedPanelOptions: React.Dispatch<
-    React.SetStateAction<Array<EuiComboBoxOptionOption<unknown>> | undefined>
+    React.SetStateAction<EuiComboBoxOptionOption<unknown>[] | undefined>
   >;
 }
 
@@ -43,6 +43,7 @@ interface CustomPanelOptions {
 }
 
 export const MetricsExportPanel = ({
+  http,
   visualizationsMetaData,
   setVisualizationsMetaData,
   sortedMetricsLayout,
@@ -57,14 +58,12 @@ export const MetricsExportPanel = ({
 
   const dispatch = useDispatch();
 
-  const { http } = coreRefs;
-
   useEffect(() => {
     dispatch(fetchPanels());
-  }, [dispatch]);
+  }, []);
 
   const fetchAllvisualizationsById = async () => {
-    const tempVisualizationsMetaData = await Promise.all(
+    let tempVisualizationsMetaData = await Promise.all(
       sortedMetricsLayout.map(async (metricLayout) => {
         return metricLayout.metricType === 'savedCustomMetric'
           ? await fetchVisualizationById(http, metricLayout.id, setErrorResponse)
@@ -79,7 +78,7 @@ export const MetricsExportPanel = ({
   }, []);
 
   const onNameChange = (index: number, name: string) => {
-    const tempVisualizationsMetaData = [...visualizationsMetaData];
+    let tempVisualizationsMetaData = [...visualizationsMetaData];
     tempVisualizationsMetaData[index].name = name;
     setVisualizationsMetaData(tempVisualizationsMetaData);
   };
@@ -92,8 +91,8 @@ export const MetricsExportPanel = ({
       >
         <EuiComboBox
           placeholder="Select dashboards/applications"
-          onChange={(newOptions) => {
-            setSelectedPanelOptions(newOptions);
+          onChange={(options) => {
+            setSelectedPanelOptions(options);
           }}
           selectedOptions={selectedPanelOptions}
           options={customPanels.map((option: any) => {

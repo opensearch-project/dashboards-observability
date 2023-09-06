@@ -4,20 +4,20 @@
  */
 
 export interface ISchema {
-  name: string;
-  type: string;
+  name: string,
+  type: string
 }
 
 export interface IPPLVisualizationDataSource {
   data: any;
   metadata: any;
-  jsonData?: any[];
-  size: number;
-  status: number;
+  jsonData?: Array<any>;
+  size: Number;
+  status: Number;
 }
 
 export interface IPPLEventsDataSource {
-  schema: ISchema[];
-  datarows: any[];
-  jsonData?: any[];
+  schema: Array<ISchema>;
+  datarows: Array<any>;
+  jsonData?: Array<any>;
 }

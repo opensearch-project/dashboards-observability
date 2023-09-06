@@ -76,7 +76,7 @@ export function ServicesTable(props: ServicesTableProps) {
         },
         {
           field: 'average_latency',
-          name: 'Average duration (ms)',
+          name: 'Average latency (ms)',
           align: 'right',
           sortable: true,
           render: (item: any) => (item === 0 || item ? _.round(item, 2) : '-'),
@@ -91,7 +91,7 @@ export function ServicesTable(props: ServicesTableProps) {
         },
         {
           field: 'throughput',
-          name: 'Request rate',
+          name: 'Throughput',
           align: 'right',
           sortable: true,
           truncateText: true,

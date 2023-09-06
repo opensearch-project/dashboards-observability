@@ -15,23 +15,33 @@ import {
   selectMetric,
   loadMetrics,
   selectedMetricsSelector,
+  recentlyCreatedMetricsSelector,
+  searchedMetricsSelector,
 } from '../redux/slices/metrics_slice';
 import { CoreStart } from '../../../../../../src/core/public';
 import PPLService from '../../../services/requests/ppl';
 import { MetricsAccordion } from './metrics_accordion';
-import { SearchBar } from './search_bar';
 
-export const Sidebar = () => {
+interface ISidebarProps {
+  http: CoreStart['http'];
+  pplService: PPLService;
+  search: boolean;
+}
+
+export const Sidebar = (props: ISidebarProps) => {
+  const { http, pplService, search } = props;
   const dispatch = useDispatch();
 
   const availableMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
+  const recentlyCreatedMetrics = useSelector(recentlyCreatedMetricsSelector);
+  const searchedMetrics = useSelector(searchedMetricsSelector);
 
   useEffect(() => {
     batch(() => {
-      dispatch(loadMetrics());
+      dispatch(loadMetrics({ http, pplService }));
     });
-  }, [dispatch]);
+  }, []);
 
   const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
 
@@ -39,12 +49,18 @@ export const Sidebar = () => {
     dispatch(deSelectMetric(metric));
   };
 
+  const availableMetricsDisplay = search ? searchedMetrics : availableMetrics;
+
   return (
     <I18nProvider>
       <section className="sidebarHeight">
-        <SearchBar />
+        <MetricsAccordion
+          metricsList={recentlyCreatedMetrics}
+          headerName="Recently Created Metrics"
+          handleClick={handleAddMetric}
+          dataTestSubj="metricsListItems_recentlyCreated"
+        />
         <EuiSpacer size="s" />
-
         <MetricsAccordion
           metricsList={selectedMetrics}
           headerName="Selected Metrics"
@@ -53,7 +69,7 @@ export const Sidebar = () => {
         />
         <EuiSpacer size="s" />
         <MetricsAccordion
-          metricsList={availableMetrics}
+          metricsList={availableMetricsDisplay}
           headerName="Available Metrics"
           handleClick={handleAddMetric}
           dataTestSubj="metricsListItems_availableMetrics"

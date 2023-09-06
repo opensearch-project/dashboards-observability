@@ -16,13 +16,8 @@ describe('Integration', () => {
     name: 'sample',
     version: '2.0.0',
     license: 'Apache-2.0',
-    type: 'logs',
-    components: [
-      {
-        name: 'logs',
-        version: '1.0.0',
-      },
-    ],
+    type: '',
+    components: [],
     assets: {
       savedObjects: {
         name: 'sample',
@@ -110,7 +105,7 @@ describe('Integration', () => {
       const result = await integration.getConfig(sampleIntegration.version);
 
       expect(result).toBeNull();
-      expect(logValidationErrorsMock).toHaveBeenCalled();
+      expect(logValidationErrorsMock).toHaveBeenCalledWith(expect.any(String), expect.any(Array));
     });
 
     it('should return null and log syntax errors if the config file has syntax errors', async () => {

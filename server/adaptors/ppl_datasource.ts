@@ -4,12 +4,19 @@
  */
 
 import _ from 'lodash';
-import { IPPLEventsDataSource, IPPLVisualizationDataSource } from '../common/types';
+import {
+  IPPLEventsDataSource,
+  IPPLVisualizationDataSource
+} from '../common/types';
 
 type PPLResponse = IPPLEventsDataSource & IPPLVisualizationDataSource;
 
 export class PPLDataSource {
-  constructor(private pplDataSource: PPLResponse, private dataType: string) {
+
+  constructor(
+    private pplDataSource: PPLResponse,
+    private dataType: string
+  ) {
     if (this.dataType === 'jdbc') {
       this.addSchemaRowMapping();
     } else if (this.dataType === 'viz') {
@@ -35,9 +42,9 @@ export class PPLDataSource {
      *  agent: "chrome",
      *  avg(bytes): 5648
      *  ...
-     * }]
+     * }] 
      */
-    const res = [];
+    let res = [];
     if (visData?.metadata?.fields) {
       const queriedFields = visData.metadata.fields;
       for (let i = 0; i < visData.size; i++) {
@@ -48,27 +55,29 @@ export class PPLDataSource {
         });
         res.push(entry);
       }
-      visData.jsonData = res;
+      visData['jsonData'] = res;
     }
-  };
+  }
 
   /**
    * Add 'schemaName: data' entries for UI rendering
    */
   private addSchemaRowMapping = () => {
+    
     const pplRes = this.pplDataSource;
-
+    
     const data: any[] = [];
 
     _.forEach(pplRes.datarows, (row) => {
       const record: any = {};
-
+      
       for (let i = 0; i < pplRes.schema.length; i++) {
+        
         const cur = pplRes.schema[i];
-
-        if (typeof row[i] === 'object') {
+        
+        if (typeof(row[i]) === 'object') {
           record[cur.name] = JSON.stringify(row[i]);
-        } else if (typeof row[i] === 'boolean') {
+        } else if (typeof(row[i]) === 'boolean') {
           record[cur.name] = row[i].toString();
         } else {
           record[cur.name] = row[i];
@@ -77,8 +86,8 @@ export class PPLDataSource {
 
       data.push(record);
     });
-    pplRes.jsonData = data;
+    pplRes['jsonData'] = data;
   };
 
-  public getDataSource = (): PPLResponse => this.pplDataSource;
+  public getDataSource = () : PPLResponse => this.pplDataSource;
 }

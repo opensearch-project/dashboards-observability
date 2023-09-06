@@ -6,7 +6,7 @@
 import React, { useState, useCallback, useContext } from 'react';
 import { batch, useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
-import { EuiTitle, EuiSpacer, EuiFieldSearch, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiFieldSearch, EuiAccordion } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { Field } from './field';
 import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
@@ -134,13 +134,12 @@ export const Sidebar = (props: ISidebarProps) => {
                   initialIsOpen
                   id="fieldSelector__queriedFields"
                   buttonContent={
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xxxs">
                       <span>Query fields</span>
                     </EuiTitle>
                   }
                   paddingSize="xs"
                 >
-                <EuiHorizontalRule margin ='xs' />
                   <ul
                     className="dscSidebarList dscFieldList--selected"
                     aria-labelledby="queried_fields"
@@ -152,7 +151,7 @@ export const Sidebar = (props: ISidebarProps) => {
                           <li
                             key={`field${field.name}`}
                             data-attr-field={field.name}
-                            className="dscSidebar__item sidebar_content"
+                            className="dscSidebar__item"
                           >
                             <Field
                               query={query}
@@ -179,13 +178,12 @@ export const Sidebar = (props: ISidebarProps) => {
                 initialIsOpen
                 id="fieldSelector__selectedFields"
                 buttonContent={
-                  <EuiTitle size="xxs">
+                  <EuiTitle size="xxxs">
                     <span>Selected Fields</span>
                   </EuiTitle>
                 }
                 paddingSize="xs"
               >
-                <EuiHorizontalRule margin ='xs' />
                 <ul
                   className="dscSidebarList dscFieldList--selected"
                   aria-labelledby="selected_fields"
@@ -199,7 +197,7 @@ export const Sidebar = (props: ISidebarProps) => {
                         <li
                           key={`field${field.name}`}
                           data-attr-field={field.name}
-                            className="dscSidebar__item sidebar_content"
+                          className="dscSidebar__item"
                         >
                           <Field
                             query={query}
@@ -225,13 +223,12 @@ export const Sidebar = (props: ISidebarProps) => {
                 initialIsOpen
                 id="fieldSelector__availableFields"
                 buttonContent={
-                  <EuiTitle size="xxs">
+                  <EuiTitle size="xxxs">
                     <span>Available Fields</span>
                   </EuiTitle>
                 }
                 paddingSize="xs"
               >
-                <EuiHorizontalRule margin ='xs' />
                 <ul
                   className={`dscFieldList dscFieldList--unpopular ${
                     !showFields ? 'hidden-sm hidden-xs' : ''
@@ -247,7 +244,7 @@ export const Sidebar = (props: ISidebarProps) => {
                           <li
                             key={`field${field.name}`}
                             data-attr-field={field.name}
-                            className="dscSidebar__item sidebar_content"
+                            className="dscSidebar__item"
                           >
                             <Field
                               query={query}

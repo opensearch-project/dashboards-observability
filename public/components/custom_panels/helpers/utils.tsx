@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { castArray, forEach, isEmpty } from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
@@ -30,7 +30,6 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
-import { MetricType } from '../../../../common/types/metrics';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -48,27 +47,18 @@ import { MetricType } from '../../../../common/types/metrics';
 
 // Name validation 0>Name<=50
 export const isNameValid = (name: string) => {
-  return !(name.length >= 50 || name.length === 0);
+  return name.length >= 50 || name.length === 0 ? false : true;
 };
 
 // DateTime convertor to required format
-export const convertDateTime = (
-  datetime: string,
-  isStart = true,
-  formatted = true,
-  isMetrics: boolean = false
-) => {
+export const convertDateTime = (datetime: string, isStart = true, formatted = true) => {
   let returnTime: undefined | Moment;
   if (isStart) {
     returnTime = dateMath.parse(datetime);
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
-  if (isMetrics) {
-    const myDate = new Date(returnTime._d); // Your timezone!
-    const epochTime = myDate.getTime() / 1000.0;
-    return Math.round(epochTime);
-  }
+
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
 };
@@ -142,7 +132,8 @@ const queryAccumulator = (
   )}' and ${timestampField} <= '${convertDateTime(endTime, false)}'`;
   const pplFilterQuery = panelFilterQuery === '' ? '' : ` | ${panelFilterQuery}`;
 
-  return indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
+  const finalQuery = indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
+  return finalQuery;
 };
 
 // PPL Service requestor
@@ -212,19 +203,14 @@ export const getQueryResponse = (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   filterQuery = '',
-  timestampField = 'timestamp',
-  metricVisualization = false
+  timestampField = 'timestamp'
 ) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
   let finalQuery = '';
   try {
-    if (!metricVisualization) {
-      finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
-    } else {
-      finalQuery = query;
-    }
+    finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
   } catch (error) {
     const errorMessage = 'Issue in building final query';
     setIsError({ errorMessage });
@@ -255,7 +241,7 @@ export const renderSavedVisualization = async (
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  let visualization: SavedVisualizationType = {};
+  let visualization = {} as SavedVisualizationType;
   let updatedVisualizationQuery = '';
 
   visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
@@ -326,89 +312,37 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
-const updateCatalogVisualizationQuery = ({
-  catalogSourceName,
-  catalogTableName,
-  aggregation,
-  attributesGroupBy,
-  startTime,
-  endTime,
-  spanParam,
-}: {
-  catalogSourceName: string;
-  catalogTableName: string;
-  aggregation: string;
-  attributesGroupBy: string[];
-  startTime: string;
-  endTime: string;
-  spanParam: string | undefined;
-}) => {
-  const attributesGroupString = attributesGroupBy.toString();
-  const startEpochTime = convertDateTime(startTime, true, false, true);
-  const endEpochTime = convertDateTime(endTime, false, false, true);
-  const promQuery =
-    attributesGroupBy.length === 0
-      ? catalogTableName
-      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
-
-  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
-};
-
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
-export const renderCatalogVisualization = async ({
-  http,
-  pplService,
-  catalogSource,
-  startTime,
-  endTime,
-  filterQuery,
-  spanParam,
-  setVisualizationTitle,
-  setVisualizationType,
-  setVisualizationData,
-  setVisualizationMetaData,
-  setIsLoading,
-  setIsError,
-  spanResolution,
-  queryMetaData,
-}: {
-  http: CoreStart['http'];
-  pplService: PPLService;
-  catalogSource: string;
-  startTime: string;
-  endTime: string;
-  filterQuery: string;
-  spanParam: string | undefined;
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
-  spanResolution?: string;
-  queryMetaData?: MetricType;
-}) => {
+export const renderCatalogVisualization = async (
+  http: CoreStart['http'],
+  pplService: PPLService,
+  catalogSource: string,
+  startTime: string,
+  endTime: string,
+  filterQuery: string,
+  spanParam: string | undefined,
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
+  spanResolution?: string
+) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
+  let visualizationQuery = `source = ${catalogSource} | stats avg(@value) by span(${visualizationTimeField},1h)`;
 
-  const catalogSourceName = catalogSource.split('.')[0];
-  const catalogTableName = catalogSource.split('.')[1];
-
-  const defaultAggregation = 'avg'; // pass in attributes to this function
-  const attributes: string[] = [];
-
-  const visualizationQuery = updateCatalogVisualizationQuery({
-    catalogSourceName,
-    catalogTableName,
-    aggregation: defaultAggregation,
-    attributesGroupBy: attributes,
-    startTime,
-    endTime,
-    spanParam,
-  });
+  if (spanParam !== undefined) {
+    visualizationQuery = updateQuerySpanInterval(
+      visualizationQuery,
+      visualizationTimeField,
+      spanParam
+    );
+  }
 
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
@@ -416,15 +350,6 @@ export const renderCatalogVisualization = async ({
     visualizationType,
     visualizationTimeField
   );
-
-  visualizationMetaData.user_configs = {
-    layoutConfig: {
-      height: 390,
-      margin: { t: 5 },
-      legend: { orientation: 'h', yanchor: 'top', x: 0.0, y: -0.4 },
-    },
-  };
-
   setVisualizationTitle(catalogSource);
   setVisualizationType(visualizationType);
 
@@ -440,8 +365,7 @@ export const renderCatalogVisualization = async ({
     setIsLoading,
     setIsError,
     filterQuery,
-    visualizationTimeField,
-    true
+    visualizationTimeField
   );
 };
 
@@ -474,7 +398,9 @@ export const parseSavedVisualizations = (
     timeField: visualization.savedVisualization.selected_timestamp.name,
     selected_date_range: visualization.savedVisualization.selected_date_range,
     selected_fields: visualization.savedVisualization.selected_fields,
-    user_configs: visualization.savedVisualization.user_configs || {},
+    user_configs: visualization.savedVisualization.user_configs
+      ? JSON.parse(visualization.savedVisualization.user_configs)
+      : {},
     sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
       ? visualization.savedVisualization.sub_type
       : '',
@@ -537,43 +463,11 @@ export const isPPLFilterValid = (
   return true;
 };
 
-export const processMetricsData = (schema: any, dataConfig: any) => {
-  if (isEmpty(schema)) return {};
-  if (
-    schema.length === 3 &&
-    schema.every((schemaField) => ['@labels', '@value', '@timestamp'].includes(schemaField.name))
-  ) {
-    return prepareMetricsData(schema, dataConfig);
-  }
-  return {};
-};
-
-export const prepareMetricsData = (schema: any, dataConfig: any) => {
-  const metricBreakdown: any[] = [];
-  const metricSeries: any[] = [];
-  const metricDimension: any[] = [];
-
-  forEach(schema, (field) => {
-    if (field.name === '@timestamp')
-      metricDimension.push({ name: '@timestamp', label: '@timestamp' });
-    if (field.name === '@labels') metricBreakdown.push({ name: '@labels', customLabel: '@labels' });
-    if (field.name === '@value') metricSeries.push({ name: '@value', label: '@value' });
-  });
-
-  return {
-    breakdowns: metricBreakdown,
-    series: metricSeries,
-    dimensions: metricDimension,
-    span: {},
-  };
-};
-
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-
   const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
@@ -589,15 +483,12 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     );
   }
 
-  let finalDataConfig = {
+  const finalDataConfig = {
     ...dataConfig,
     ...realTimeParsedStats,
     dimensions: finalDimensions,
     breakdowns,
   };
-
-  // add metric specific overriding
-  finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
 
   const mixedUserConfigs = {
     availabilityConfig: {

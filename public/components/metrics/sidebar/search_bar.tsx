@@ -5,17 +5,27 @@
 
 import { EuiSearchBar } from '@elastic/eui';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { debounce } from 'lodash';
-import { searchSelector, setSearch } from '../redux/slices/metrics_slice';
+import { useDispatch } from 'react-redux';
+import { clearSearchedMetrics, searchMetric } from '../redux/slices/metrics_slice';
 
-export const SearchBar = () => {
+interface ISearchBarProps {
+  setSearch: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const SearchBar = (props: ISearchBarProps) => {
+  const { setSearch } = props;
+
   const dispatch = useDispatch();
-  const searchText = useSelector(searchSelector);
 
-  const onChange = debounce(({ query }) => {
-    dispatch(setSearch(query.text));
-  }, 300);
+  const onChange = ({ query }: { query: any }) => {
+    if (query.text !== '') {
+      setSearch(true);
+      dispatch(searchMetric({ id: query.text }));
+    } else {
+      setSearch(false);
+      dispatch(clearSearchedMetrics({}));
+    }
+  };
 
   return (
     <div className="metrics-search-bar-input" data-test-subj="metricsSearch">
@@ -25,7 +35,6 @@ export const SearchBar = () => {
           incremental: true,
         }}
         defaultQuery={''}
-        query={searchText}
         onChange={onChange}
       />
     </div>

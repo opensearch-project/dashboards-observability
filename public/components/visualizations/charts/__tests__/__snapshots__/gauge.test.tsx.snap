@@ -501,6 +501,7 @@ exports[`Gauge component Renders gauge component 1`] = `
           ],
         },
         "fulllabel": "Gauge",
+        "icon": [Function],
         "icontype": "visGauge",
         "id": "gauge",
         "label": "Gauge",
@@ -539,14 +540,14 @@ exports[`Gauge component Renders gauge component 1`] = `
     icon="visGauge"
   >
     <EuiText
-      className="visWorkspaceNoData"
+      className="lnsChart__empty"
       color="subdued"
       data-test-subj="vizWorkspace__noData"
       size="xs"
       textAlign="center"
     >
       <div
-        className="euiText euiText--extraSmall visWorkspaceNoData"
+        className="euiText euiText--extraSmall lnsChart__empty"
         data-test-subj="vizWorkspace__noData"
       >
         <EuiTextAlign

@@ -284,6 +284,25 @@ export function Application(props: AppDetailProps) {
     },
   ];
 
+  const getOverview = () => {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <DashboardContent
+          {...props}
+          page="app"
+          startTime={appStartTime}
+          endTime={appEndTime}
+          setStartTime={setStartTimeForApp}
+          setEndTime={setEndTimeForApp}
+          parentBreadcrumb={parentBreadcrumbs[0]}
+          childBreadcrumbs={childBreadcrumbs}
+          toasts={toasts}
+        />
+      </>
+    );
+  };
+
   const nameColumnAction = (item: any) => openServiceFlyout(item);
   const traceColumnAction = () => switchToTrace();
 
@@ -478,6 +497,11 @@ export function Application(props: AppDetailProps) {
   }
 
   const appAnalyticsTabs = [
+    getAppAnalyticsTab({
+      tabId: TAB_OVERVIEW_ID,
+      tabTitle: TAB_OVERVIEW_TITLE,
+      getContent: () => getOverview(),
+    }),
     getAppAnalyticsTab({
       tabId: TAB_SERVICE_ID,
       tabTitle: TAB_SERVICE_TITLE,

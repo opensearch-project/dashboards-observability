@@ -135,7 +135,7 @@ export function DashboardTable(props: {
               }
             >
               <span>
-                Duration variance (ms){' '}
+                Latency variance (ms){' '}
                 <EuiIcon
                   size="s"
                   color="subdued"
@@ -216,7 +216,7 @@ export function DashboardTable(props: {
             <>
               {/* <div style={{ marginRight: 40 }}>Average</div> */}
               <div>
-                Average duration (ms){' '}
+                Average latency (ms){' '}
                 <EuiIcon
                   size="s"
                   color="subdued"
@@ -247,7 +247,7 @@ export function DashboardTable(props: {
             <>
               {/* <div style={{ marginRight: 44 }}>24-hour</div> */}
               <div>
-                24-hour duration trend{' '}
+                24-hour latency trend{' '}
                 <EuiIcon
                   size="s"
                   color="subdued"

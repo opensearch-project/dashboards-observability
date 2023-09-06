@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, last } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
-import _ from 'lodash';
+import { last } from 'lodash';
+import React, { useMemo } from 'react';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import {
   DEFAULT_CHART_STYLES,
@@ -20,7 +19,6 @@ import { AvailabilityUnitType } from '../../../event_analytics/explorer/visualiz
 import { ThresholdUnitType } from '../../../event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { Plt } from '../../plotly/plot';
 import { transformPreprocessedDataToTraces, preprocessJsonData } from '../shared/common';
-import { processMetricsData } from '../../../custom_panels/helpers/utils';
 
 export const Line = ({ visualizations, layout, config }: any) => {
   const {
@@ -38,7 +36,7 @@ export const Line = ({ visualizations, layout, config }: any) => {
   const {
     data: {
       explorer: {
-        explorerData: { schema, jsonData },
+        explorerData: { jsonData },
       },
       userConfigs: {
         dataConfig: {
@@ -83,32 +81,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
       colorTheme.find((colorSelected) => colorSelected.name.name === field)?.color) ||
     PLOTLY_COLOR[index % PLOTLY_COLOR.length];
 
-  const checkIfMetrics = (metricsSchema: any) => {
-    if (isEmpty(metricsSchema)) return false;
-
-    if (
-      metricsSchema.length === 3 &&
-      metricsSchema.every((schemaField) =>
-        ['@labels', '@value', '@timestamp'].includes(schemaField.name)
-      )
-    ) {
-      return true;
-    }
-    return false;
-  };
-
-  const preprocessMetricsJsonData = (json): any => {
-    const data: any[] = [];
-    _.forEach(json, (row) => {
-      const record: any = {};
-      record['@labels'] = JSON.parse(row['@labels']);
-      record['@timestamp'] = JSON.parse(row['@timestamp']);
-      record['@value'] = JSON.parse(row['@value']);
-      data.push(record);
-    });
-    return data;
-  };
-
   const addStylesToTraces = (traces, traceStyles) => {
     const {
       fillOpacity: opac,
@@ -151,18 +123,12 @@ export const Line = ({ visualizations, layout, config }: any) => {
   };
 
   let lines = useMemo(() => {
-    let visConfig = {
+    const visConfig = {
       dimensions,
       series,
       breakdowns,
       span,
     };
-
-    visConfig = {
-      ...visConfig,
-      ...processMetricsData(schema, visConfig),
-    };
-
     const traceStyles = {
       fillOpacity,
       tooltipMode,
@@ -171,42 +137,19 @@ export const Line = ({ visualizations, layout, config }: any) => {
       lineWidth,
       markerSize,
     };
-    const traceStylesForMetrics = {
-      fillOpacity: 0,
-      tooltipMode,
-      tooltipText,
-      lineShape,
-      lineWidth: 3,
-      markerSize,
-    };
     const lineSpecficMetaData = {
       x_coordinate: 'x',
       y_coordinate: 'y',
     };
 
-    if (checkIfMetrics(schema)) {
-      const formattedMetricsJson = preprocessMetricsJsonData(jsonData);
-      return addStylesToTraces(
-        formattedMetricsJson?.map((trace) => {
-          return {
-            ...trace,
-            x: trace['@timestamp'],
-            y: trace['@value'],
-            name: JSON.stringify(trace['@labels']),
-          };
-        }),
-        traceStylesForMetrics
-      );
-    } else {
-      return addStylesToTraces(
-        transformPreprocessedDataToTraces(
-          preprocessJsonData(jsonData, visConfig),
-          visConfig,
-          lineSpecficMetaData
-        ),
-        traceStyles
-      );
-    }
+    return addStylesToTraces(
+      transformPreprocessedDataToTraces(
+        preprocessJsonData(jsonData, visConfig),
+        visConfig,
+        lineSpecficMetaData
+      ),
+      traceStyles
+    );
   }, [chartStyles, jsonData, dimensions, series, span, breakdowns, panelOptions, tooltipOptions]);
 
   const mergedLayout = useMemo(() => {
@@ -219,15 +162,11 @@ export const Line = ({ visualizations, layout, config }: any) => {
       },
     };
 
-    const { legend: layoutConfigLegend, ...layoutConfigGeneral } = layoutConfig;
-
     return {
       ...layout,
-      ...layoutConfigGeneral,
       title: panelOptions.title || layoutConfig.layout?.title || '',
       legend: {
         ...layout.legend,
-        ...layoutConfigLegend,
         orientation: legendPosition,
         ...(legendSize && {
           font: {

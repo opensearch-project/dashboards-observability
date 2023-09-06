@@ -125,6 +125,7 @@ export function PanelsRouter(router: IRouter) {
     }
   );
 
+
   // update an existing panel
   router.post(
     {
@@ -165,6 +166,7 @@ export function PanelsRouter(router: IRouter) {
       }
     }
   );
+
 
   // rename an existing panel
   router.post(

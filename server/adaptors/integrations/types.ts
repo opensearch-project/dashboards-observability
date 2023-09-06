@@ -9,7 +9,6 @@ interface IntegrationTemplate {
   displayName?: string;
   license: string;
   type: string;
-  labels?: string[];
   author?: string;
   description?: string;
   sourceUrl?: string;
@@ -56,7 +55,11 @@ interface IntegrationTemplateQuery {
 interface IntegrationInstance {
   name: string;
   templateName: string;
-  dataSource: string;
+  dataSource: {
+    sourceType: string;
+    dataset: string;
+    namespace: string;
+  };
   creationDate: string;
   assets: AssetReference[];
 }

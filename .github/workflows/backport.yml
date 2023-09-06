@@ -7,7 +7,6 @@ on:
 
 jobs:
   backport:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,8 +22,7 @@ jobs:
           installation_id: 22958780
 
       - name: Backport
-        uses: VachaShah/backport@v2.2.0
+        uses: VachaShah/backport@v1.1.4
         with:
           github_token: ${{ steps.github_app_token.outputs.token }}
-          head_template: backport/backport-<%= number %>-to-<%= base %>
-          failure_labels: backport-failed
+          branch_name: backport/backport-${{ github.event.number }}
