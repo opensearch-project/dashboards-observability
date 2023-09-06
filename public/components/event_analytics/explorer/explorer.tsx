@@ -38,7 +38,6 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  NEW_TAB,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -52,7 +51,6 @@ import {
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
   TAB_CHART_TITLE,
-  TAB_CREATED_TYPE,
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
@@ -347,17 +345,6 @@ export const Explorer = ({
   }, [appBasedRef.current]);
 
   useEffect(() => {
-    let objectId;
-    if (queryRef.current![TAB_CREATED_TYPE] === NEW_TAB || appLogEvents) {
-      objectId = queryRef.current!.savedObjectId || '';
-    } else {
-      objectId = queryRef.current!.savedObjectId || savedObjectId;
-    }
-    if (objectId) {
-      updateTabData(objectId);
-    } else {
-      fetchData(startTime, endTime);
-    }
     if (
       routerContext &&
       routerContext.searchParams.get(CREATE_TAB_PARAM_KEY) === CREATE_TAB_PARAM[TAB_CHART_ID]
@@ -367,10 +354,8 @@ export const Explorer = ({
   }, []);
 
   useEffect(() => {
-    if (appLogEvents) {
-      if (savedObjectId) {
-        updateTabData(savedObjectId);
-      }
+    if (savedObjectId) {
+      updateTabData(savedObjectId);
     }
   }, [savedObjectId]);
 
@@ -642,7 +627,7 @@ export const Explorer = ({
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
-    isOverridingPattern
+    isOverridingPattern,
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
