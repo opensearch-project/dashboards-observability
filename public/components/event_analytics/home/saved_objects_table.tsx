@@ -17,7 +17,6 @@ interface SavedQueryTableProps {
 
 export function SavedQueryTable({
   savedHistories,
-  handleHistoryClick,
   handleSelectHistory,
   isTableLoading,
 }: SavedQueryTableProps) {
@@ -67,9 +66,7 @@ export function SavedQueryTable({
       render: (item: any) => {
         return (
           <EuiLink
-            onClick={() => {
-              handleHistoryClick(item.objectId);
-            }}
+            href={`observability-logs#/explorer/${item.objectId}`}
             data-test-subj="eventHome__savedQueryTableName"
           >
             {item.name}
