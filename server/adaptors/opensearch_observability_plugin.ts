@@ -51,19 +51,6 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
     method: 'GET',
   });
 
-  observability.getDatasourceById = clientAction({
-    url: {
-      fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}/<%=datasource%>`,
-      req: {
-        datasource: {
-          type: 'string',
-          required: true,
-        },
-      },
-    },
-    method: 'GET',
-  });
-
   // Get Object by Id
   observability.getObjectById = clientAction({
     url: {

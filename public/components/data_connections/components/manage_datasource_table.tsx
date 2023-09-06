@@ -20,6 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './datasources_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_datasource_description';
+import { DATASOURCES_BASE } from '../../../../common/constants/shared';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
@@ -42,10 +43,10 @@ export function ManageDatasourcesTable(props: HomeProps) {
   }, []);
 
   async function handleDataRequest() {
-    pplService.fetch({ query: 'show datasources', format: 'jdbc' }).then((datasources) =>
+    http.get(`${DATASOURCES_BASE}`).then((datasources) =>
       setData(
-        datasources.jsonData.map((x: any) => {
-          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
+        datasources.map((x: any) => {
+          return { name: x.name, connectionType: x.connector };
         })
       )
     );

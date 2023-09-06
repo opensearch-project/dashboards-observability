@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PPL_ENDPOINT, SQL_ENDPOINT } from '../../common/constants/shared';
+import {
+  OPENSEARCH_DATASOURCES_API,
+  PPL_ENDPOINT,
+  SQL_ENDPOINT,
+} from '../../common/constants/shared';
 
 export const PPLPlugin = function (Client, config, components) {
   const ca = components.clientAction.factory;
@@ -36,5 +40,18 @@ export const PPLPlugin = function (Client, config, components) {
     },
     needBody: true,
     method: 'POST',
+  });
+
+  ppl.datasourceQuery = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}/<%=datasource%>`,
+      req: {
+        datasource: {
+          type: 'string',
+          required: false,
+        },
+      },
+    },
+    method: 'GET',
   });
 };

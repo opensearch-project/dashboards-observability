@@ -21,8 +21,33 @@ export function registerDatasourcesRoute(router: IRouter) {
       try {
         const dataSourcesresponse = await context.observability_plugin.observabilityClient
           .asScoped(request)
-          .callAsCurrentUser('observability.getDatasourceById', {
+          .callAsCurrentUser('ppl.datasourceQuery', {
             datasource: request.params.name,
+          });
+        return response.ok({
+          body: dataSourcesresponse,
+        });
+      } catch (error: any) {
+        console.error('Issue in fetching datasource:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${DATASOURCES_BASE}`,
+      validate: false,
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const dataSourcesresponse = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('ppl.datasourceQuery', {
+            datasource: '',
           });
         return response.ok({
           body: dataSourcesresponse,

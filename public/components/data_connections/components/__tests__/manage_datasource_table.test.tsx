@@ -15,9 +15,11 @@ describe('Manage Datasource Table test', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders manage datasource table with data', async () => {
-    const http = jest.fn();
+    const http = {
+      get: jest.fn().mockResolvedValue(showDatasourceData),
+    };
     const pplService = {
-      fetch: jest.fn().mockResolvedValue(showDatasourceData),
+      fetch: jest.fn(),
     };
     const mockChrome = {
       setBreadcrumbs: jest.fn(),
