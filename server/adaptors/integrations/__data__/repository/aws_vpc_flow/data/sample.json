@@ -1,0 +1,1467 @@
+[
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "162.142.125.177",
+        "dstaddr" : "10.0.0.200",
+        "srcport" : 38471,
+        "dstport" : 12313,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 44,
+        "pkt-src-aws-service": "S3",
+        "pkt-dst-aws-service": "-",
+        "flow-direction": "ingress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "ACCEPT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "162.142.125.177",
+        "port": 38471,
+        "packets": 1,
+        "bytes" : 44
+      },
+      "destination": {
+        "address": "10.0.0.200",
+        "port": 12313
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "162.142.125.177",
+        "dstaddr" : "10.0.0.200",
+        "srcport" : 38471,
+        "dstport" : 12313,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 44,
+        "pkt-src-aws-service": "S3",
+        "pkt-dst-aws-service": "-",
+        "flow-direction": "ingress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "ACCEPT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "162.142.125.177",
+        "port": 38471,
+        "packets": 1,
+        "bytes" : 44
+      },
+      "destination": {
+        "address": "10.0.0.200",
+        "port": 12313
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }, {
+  "@timestamp": "2023-07-17T08:14:05.000Z",
+  "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+  "event": {
+    "result": "ACCEPT",
+    "name": "flow_log",
+    "domain": "vpc.flow_log"
+  },
+  "attributes": {
+    "data_stream": {
+      "dataset": "vpc.flow_log",
+      "namespace": "production",
+      "type": "logs_vpc"
+    }
+  },
+  "cloud": {
+    "provider": "aws",
+    "account": {
+      "id": "111111111111"
+    },
+    "region": "ap-southeast-2",
+    "resource_id": "vpc-0d4d4e82b7d743527",
+    "platform": "aws_vpc"
+  },
+  "aws": {
+    "s3": {
+      "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+      "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+    },
+    "vpc": {
+      "version" : "2",
+      "account-id" : "111111111111",
+      "interface-id" : "eni-0e250409d410e1290",
+      "region": "ap-southeast-2",
+      "vpc-id": "vpc-0d4d4e82b7d743527",
+      "subnet-id": "subnet-aaaaaaaa012345678",
+      "az-id": "apse2-az3",
+      "instance-id": "i-0c50d5961bcb2d47b",
+      "srcaddr" : "162.142.125.177",
+      "dstaddr" : "10.0.0.200",
+      "srcport" : 38471,
+      "dstport" : 12313,
+      "protocol" : "6",
+      "packets" : 1,
+      "bytes" : 44,
+      "pkt-src-aws-service": "S3",
+      "pkt-dst-aws-service": "-",
+      "flow-direction": "ingress",
+      "start" : "1674898496",
+      "end" : "1674898507",
+      "action" : "ACCEPT",
+      "log-status" : "OK"
+    }
+  },
+  "communication": {
+    "source": {
+      "address": "162.142.125.177",
+      "port": 38471,
+      "packets": 1,
+      "bytes" : 44
+    },
+    "destination": {
+      "address": "10.0.0.200",
+      "port": 12313
+    }
+  }
+},
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "body": "2 111111111111 eni-0e250409d410e1290 162.142.125.177 10.0.0.200 38471 12313 6 1 44 1674898496 1674898507 ACCEPT OK",
+    "event": {
+      "result": "ACCEPT",
+      "name": "flow_log",
+      "domain": "vpc.flow_log"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "vpc.flow_log",
+        "namespace": "production",
+        "type": "logs_vpc"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "s3": {
+        "bucket": "centralizedlogging-loghubloggingbucket0fa53b76-t57zyhgb8c2",
+        "key": "AWSLogs/111111111111/vpcflowlogs/us-east-2/2023/01/28/111111111111_vpcflowlogs_us-east-2_fl-023c6afa025ee5a04_20230128T0930Z_3a9dfd9d.log.gz"
+      },
+      "vpc": {
+        "version" : "2",
+        "account-id" : "111111111111",
+        "interface-id" : "eni-0e250409d410e1290",
+        "region": "ap-southeast-2",
+        "vpc-id": "vpc-0d4d4e82b7d743527",
+        "subnet-id": "subnet-aaaaaaaa012345678",
+        "az-id": "apse2-az3",
+        "instance-id": "i-0c50d5961bcb2d47b",
+        "srcaddr" : "10.0.0.200",
+        "dstaddr" : "162.142.125.177",
+        "srcport" : 12313,
+        "dstport" : 38471,
+        "protocol" : "6",
+        "packets" : 1,
+        "bytes" : 440,
+        "pkt-src-aws-service": "-",
+        "pkt-dst-aws-service": "S3",
+        "flow-direction": "egress",
+        "start" : "1674898496",
+        "end" : "1674898507",
+        "action" : "REJECT",
+        "log-status" : "OK"
+      }
+    },
+    "communication": {
+      "source": {
+        "address": "10.0.0.200",
+        "port": 12313,
+        "packets": 1,
+        "bytes" : 440
+      },
+      "destination": {
+        "address": "162.142.125.177",
+        "port": 38471
+      }
+    }
+  }
+]

@@ -83,7 +83,7 @@ export const Field = (props: IFieldProps) => {
                   Default Pattern
                 </EuiMark>
               ) : isOverridingPattern ? (
-                <EuiLoadingSpinner className="override_pattern_loading" size="m" />
+                <EuiLoadingSpinner className="override_pattern_loading" size="s" />
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
@@ -108,7 +108,7 @@ export const Field = (props: IFieldProps) => {
                   Default Timestamp
                 </EuiMark>
               ) : isOverridingTimestamp ? (
-                <EuiLoadingSpinner className="override_timestamp_loading" size="m" />
+                <EuiLoadingSpinner className="override_timestamp_loading" size="s" />
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_timestamp"
@@ -179,8 +179,8 @@ export const Field = (props: IFieldProps) => {
       panelClassName="dscSidebarItem__fieldPopoverPanel"
       button={
         <FieldButton
-          size="m"
-          className="shard__fieldSelectorField explorer__fieldSelectorField"
+          size="s"
+          className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
           isActive={isFieldDetailsOpen}
           dataTestSubj={`field-${field.name}-showDetails`}
           fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}

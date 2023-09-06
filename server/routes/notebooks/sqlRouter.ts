@@ -9,7 +9,7 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import QueryService from '../../services/queryService';
+import { QueryService } from '../../services/queryService';
 
 export function registerSqlRoute(server: IRouter, service: QueryService) {
   server.post(

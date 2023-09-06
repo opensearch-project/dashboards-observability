@@ -5,8 +5,7 @@
 
 import * as fs from 'fs/promises';
 import path from 'path';
-import { ValidateFunction } from 'ajv';
-import { templateValidator } from '../validators';
+import { validateTemplate } from '../validators';
 
 /**
  * Helper function to compare version numbers.
@@ -47,18 +46,6 @@ async function isDirectory(dirPath: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-/**
- * Helper function to log validation errors.
- * Relies on the `ajv` package for validation error logs..
- *
- * @param integration The name of the component that failed validation.
- * @param validator A failing ajv validator.
- */
-function logValidationErrors(integration: string, validator: ValidateFunction<any>) {
-  const errors = validator.errors?.map((e) => e.message);
-  console.error(`Validation errors in ${integration}`, errors);
 }
 
 /**
@@ -164,13 +151,12 @@ export class Integration {
     try {
       const config = await fs.readFile(configPath, { encoding: 'utf-8' });
       const possibleTemplate = JSON.parse(config);
-
-      if (!templateValidator(possibleTemplate)) {
-        logValidationErrors(configFile, templateValidator);
-        return null;
+      const template = validateTemplate(possibleTemplate);
+      if (template.ok) {
+        return template.value;
       }
-
-      return possibleTemplate;
+      console.error(template.error);
+      return null;
     } catch (err: any) {
       if (err instanceof SyntaxError) {
         console.error(`Syntax errors in ${configFile}`, err);
@@ -211,9 +197,53 @@ export class Integration {
       );
       try {
         const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
-        const asJson = '[' + ndjson.replace(/\n/g, ',') + ']';
+        const asJson = '[' + ndjson.trim().replace(/\n/g, ',') + ']';
         const parsed = JSON.parse(asJson);
         result.savedObjects = parsed;
+      } catch (err: any) {
+        console.error("Failed to load saved object assets, proceeding as if it's absent", err);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Retrieve sample data associated with the integration.
+   * If the version is invalid, an error is thrown.
+   * If the sample data is invalid, null will be returned
+   *
+   * @param version The version of the integration to retrieve assets for.
+   * @returns An object containing a list of sample data with adjusted timestamps.
+   */
+  async getSampleData(
+    version?: string
+  ): Promise<{
+    sampleData: object[] | null;
+  }> {
+    const config = await this.getConfig(version);
+    if (config === null) {
+      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+    }
+    const result: { sampleData: object[] | null } = { sampleData: null };
+    if (config.sampleData) {
+      const sobjPath = path.join(this.directory, 'data', config.sampleData?.path);
+      try {
+        const jsonContent = await fs.readFile(sobjPath, { encoding: 'utf-8' });
+        const parsed = JSON.parse(jsonContent) as object[];
+        for (const value of parsed) {
+          if (!('@timestamp' in value)) {
+            continue;
+          }
+          // Randomly scatter timestamps across last 10 minutes
+          // Assume for now that the ordering of events isn't important, can change to a sequence if needed
+          // Also doesn't handle fields like `observedTimestamp` if present
+          Object.assign(value, {
+            '@timestamp': new Date(
+              Date.now() - Math.floor(Math.random() * 1000 * 60 * 10)
+            ).toISOString(),
+          });
+        }
+        result.sampleData = parsed;
       } catch (err: any) {
         console.error("Failed to load saved object assets, proceeding as if it's absent", err);
       }

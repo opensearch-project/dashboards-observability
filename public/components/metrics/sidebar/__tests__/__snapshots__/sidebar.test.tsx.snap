@@ -12,16 +12,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
     }
   }
 >
-  <Component
-    http={[MockFunction]}
-    pplService={
-      PPLService {
-        "fetch": [Function],
-        "http": [MockFunction],
-      }
-    }
-    search={false}
-  >
+  <Component>
     <I18nProvider>
       <IntlProvider
         defaultLocale="en"
@@ -111,110 +102,137 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
           <section
             className="sidebarHeight"
           >
-            <Component
-              dataTestSubj="metricsListItems_recentlyCreated"
-              handleClick={[Function]}
-              headerName="Recently Created Metrics"
-              metricsList={Array []}
-            >
-              <EuiAccordion
-                arrowDisplay="left"
-                buttonContent={
-                  <EuiTitle
-                    size="xxxs"
-                  >
-                    <span>
-                      Recently Created Metrics
-                    </span>
-                  </EuiTitle>
-                }
-                id="Recently Created MetricsSelector"
-                initialIsOpen={true}
-                isLoading={false}
-                isLoadingMessage={false}
-                paddingSize="none"
+            <Component>
+              <div
+                className="metrics-search-bar-input"
+                data-test-subj="metricsSearch"
               >
-                <div
-                  className="euiAccordion euiAccordion-isOpen"
+                <EuiSearchBar
+                  box={
+                    Object {
+                      "incremental": true,
+                      "placeholder": "Search for metrics",
+                    }
+                  }
+                  defaultQuery=""
+                  onChange={[Function]}
+                  query=""
                 >
-                  <div
-                    className="euiAccordion__triggerWrapper"
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="m"
+                    wrap={true}
                   >
-                    <button
-                      aria-controls="Recently Created MetricsSelector"
-                      aria-expanded={true}
-                      className="euiAccordion__button"
-                      id="random_html_id"
-                      onClick={[Function]}
-                      type="button"
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
                     >
-                      <span
-                        className="euiAccordion__iconWrapper"
+                      <EuiFlexItem
+                        className="euiSearchBar__searchHolder"
+                        grow={true}
                       >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <EuiIconEmpty
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
-                            focusable="false"
-                            role="img"
-                            style={null}
-                          >
-                            <svg
-                              aria-hidden={true}
-                              className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
-                              focusable="false"
-                              height={16}
-                              role="img"
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </EuiIconEmpty>
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
-                      >
-                        <EuiTitle
-                          size="xxxs"
-                        >
-                          <span
-                            className="euiTitle euiTitle--xxxsmall"
-                          >
-                            Recently Created Metrics
-                          </span>
-                        </EuiTitle>
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    aria-labelledby="random_html_id"
-                    className="euiAccordion__childWrapper"
-                    id="Recently Created MetricsSelector"
-                    role="region"
-                    tabIndex={-1}
-                  >
-                    <EuiResizeObserver
-                      onResize={[Function]}
-                    >
-                      <div>
                         <div
-                          className=""
+                          className="euiFlexItem euiSearchBar__searchHolder"
                         >
-                          <ul
-                            className="metricsList"
-                          />
+                          <EuiSearchBox
+                            incremental={true}
+                            isInvalid={false}
+                            onSearch={[Function]}
+                            placeholder="Search for metrics"
+                            query=""
+                          >
+                            <EuiFieldSearch
+                              aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                              compressed={false}
+                              defaultValue=""
+                              fullWidth={true}
+                              incremental={true}
+                              inputRef={[Function]}
+                              isClearable={true}
+                              isInvalid={false}
+                              isLoading={false}
+                              onSearch={[Function]}
+                              placeholder="Search for metrics"
+                            >
+                              <EuiFormControlLayout
+                                compressed={false}
+                                fullWidth={true}
+                                icon="search"
+                                isLoading={false}
+                              >
+                                <div
+                                  className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                                >
+                                  <div
+                                    className="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <EuiValidatableControl
+                                      isInvalid={false}
+                                    >
+                                      <input
+                                        aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                                        className="euiFieldSearch euiFieldSearch--fullWidth"
+                                        defaultValue=""
+                                        onKeyUp={[Function]}
+                                        placeholder="Search for metrics"
+                                        type="search"
+                                      />
+                                    </EuiValidatableControl>
+                                    <EuiFormControlLayoutIcons
+                                      compressed={false}
+                                      icon="search"
+                                      isLoading={false}
+                                    >
+                                      <div
+                                        className="euiFormControlLayoutIcons"
+                                      >
+                                        <EuiFormControlLayoutCustomIcon
+                                          size="m"
+                                          type="search"
+                                        >
+                                          <span
+                                            className="euiFormControlLayoutCustomIcon"
+                                          >
+                                            <EuiIcon
+                                              aria-hidden="true"
+                                              className="euiFormControlLayoutCustomIcon__icon"
+                                              size="m"
+                                              type="search"
+                                            >
+                                              <EuiIconEmpty
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                focusable="false"
+                                                role="img"
+                                                style={null}
+                                              >
+                                                <svg
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                  focusable="false"
+                                                  height={16}
+                                                  role="img"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width={16}
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                />
+                                              </EuiIconEmpty>
+                                            </EuiIcon>
+                                          </span>
+                                        </EuiFormControlLayoutCustomIcon>
+                                      </div>
+                                    </EuiFormControlLayoutIcons>
+                                  </div>
+                                </div>
+                              </EuiFormControlLayout>
+                            </EuiFieldSearch>
+                          </EuiSearchBox>
                         </div>
-                      </div>
-                    </EuiResizeObserver>
-                  </div>
-                </div>
-              </EuiAccordion>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                </EuiSearchBar>
+              </div>
             </Component>
             <EuiSpacer
               size="s"
@@ -237,6 +255,10 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   >
                     <span>
                       Selected Metrics
+                       
+                      0
+                       of 
+                      0
                     </span>
                   </EuiTitle>
                 }
@@ -299,6 +321,10 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                             className="euiTitle euiTitle--xxxsmall"
                           >
                             Selected Metrics
+                             
+                            0
+                             of 
+                            0
                           </span>
                         </EuiTitle>
                       </span>
@@ -349,6 +375,10 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   >
                     <span>
                       Available Metrics
+                       
+                      0
+                       of 
+                      0
                     </span>
                   </EuiTitle>
                 }
@@ -411,6 +441,10 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                             className="euiTitle euiTitle--xxxsmall"
                           >
                             Available Metrics
+                             
+                            0
+                             of 
+                            0
                           </span>
                         </EuiTitle>
                       </span>

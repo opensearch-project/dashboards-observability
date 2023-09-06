@@ -74,6 +74,7 @@ import {
 } from '../../../../common/types/explorer';
 import {
   buildQuery,
+  buildRawQuery,
   getIndexPatternFromRawQuery,
   uiSettingsService,
 } from '../../../../common/utils';
@@ -556,7 +557,6 @@ export const Explorer = ({
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
-                      setTempQuery={setTempQuery}
                       handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
                     />
                   </>
@@ -642,6 +642,7 @@ export const Explorer = ({
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
+    isOverridingPattern
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
@@ -727,7 +728,7 @@ export const Explorer = ({
       if (availability !== true) {
         await updateQueryInStore(tempQuery);
       }
-      await fetchData();
+      await fetchData(startTime, endTime);
     },
     [tempQuery, query]
   );
@@ -740,7 +741,7 @@ export const Explorer = ({
     savingTitle: string
   ) => {
     return {
-      query: queryState[RAW_QUERY],
+      query: buildRawQuery(query, appBaseQuery),
       fields: fields[SELECTED_FIELDS],
       dateRange: queryState[SELECTED_DATE_RANGE],
       name: savingTitle,

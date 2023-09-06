@@ -1,0 +1,58 @@
+{
+  "name": "aws_elb",
+  "version": "1.0.0",
+  "displayName": "AWS ELB",
+  "description": "AWS Elastic Load Balancer collector",
+  "license": "Apache-2.0",
+  "type": "logs_elb",
+  "labels": ["log", "aws", "communication", "http", "cloud", "elb", "url"],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_elb/info",
+  "statics": {
+    "logo": {
+      "annotation": "ELB Logo",
+      "path": "logo.svg"
+    },
+    "gallery": [
+      {
+        "annotation": "ELB Dashboard",
+        "path": "dashboard1.png"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "communication",
+      "version": "1.0.0"
+    },
+    {
+      "name": "http",
+      "version": "1.0.0"
+    },
+    {
+      "name": "cloud",
+      "version": "1.0.0"
+    },
+    {
+      "name": "aws_elb",
+      "version": "1.0.0"
+    },
+    {
+      "name": "url",
+      "version": "1.0.0"
+    },
+    {
+      "name": "logs_elb",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": {
+    "savedObjects": {
+      "name": "aws_elb",
+      "version": "1.0.0"
+    }
+  },
+  "sampleData": {
+    "path": "sample.json"
+  }
+}

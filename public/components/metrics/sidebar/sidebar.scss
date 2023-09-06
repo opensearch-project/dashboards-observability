@@ -105,40 +105,47 @@
   padding: $euiSizeS;
 }
 
-#vis__mainContent {
-  .explorer__insights, .explorer__configPanel-markdown {
-    .explorerFieldSelector,
-    .explorer__vizDataConfig {
-      padding: $euiSizeS;
-      overflow: auto;
+// #vis__mainContent {
+//   .explorer__insights, .explorer__configPanel-markdown {
+//     .explorerFieldSelector,
+//     .explorer__vizDataConfig {
+//       padding: $euiSizeS;
+//       overflow: auto;
 
-      &__fieldGroups {
-        @include euiYScrollWithShadows;
+//       &__fieldGroups {
+//         @include euiYScrollWithShadows;
 
-        overflow-y: auto;
-        margin-right: -$euiSizeS;
-        padding-right: $euiSizeS;
-        margin-top: $euiSizeS;
-      }
+//         overflow-y: auto;
+//         margin-right: -$euiSizeS;
+//         padding-right: $euiSizeS;
+//         margin-top: $euiSizeS;
+//       }
 
-      &__fieldGroup {
-        margin-top: $euiSizeS;
+//       &__fieldGroup {
+//         margin-top: $euiSizeS;
 
-        &:first-child {
-          margin-top: 0;
-        }
-      }
-    }
+//         &:first-child {
+//           margin-top: 0;
+//         }
+//       }
+//     }
 
-    .explorerFieldSelector {
-      @include euiYScrollWithShadows;
-
-      .sidebar-list {
-        height: 100%;
-      }
-    }
-  }
-}
+//     // .explorerFieldSelector {
+//     //   @include euiYScrollWithShadows;
+//     //   .sidebar-list {
+//     //     height: 100%;
+//     //   }
+//     // }
+//     .metricsSideBar {
+//       @include euiYScrollWithShadows;
+//       .sidebarHeight{
+//       .sidebar-list {
+//         height: 100%;
+//       }
+//     }
+//     }
+//   }
+// }
 
 #vis__mainContent .explorer__insights {
   min-height: 0;
@@ -165,3 +172,33 @@
 .tokenMargin {
   vertical-align: middle;
 }
+
+#metrics__mainContent {
+.dscAppContainer{
+.metricsSideBar {
+  padding: $euiSizeS;
+      overflow: auto;
+
+      &__fieldGroups {
+        @include euiYScrollWithShadows;
+
+        overflow-y: auto;
+        margin-right: -$euiSizeS;
+        padding-right: $euiSizeS;
+        margin-top: $euiSizeS;
+      }
+
+      &__fieldGroup {
+        margin-top: $euiSizeS;
+
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+    }
+    .metricsSideBar {
+  @include euiYScrollWithShadows;
+  .sidebar-list {
+    height: 100%;
+  }
+}}}

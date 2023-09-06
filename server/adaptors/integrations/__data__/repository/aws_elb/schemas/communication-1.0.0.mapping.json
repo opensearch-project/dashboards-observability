@@ -1,0 +1,135 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "communication",
+        "labels": ["communication"]
+      },
+      "properties": {
+        "communication": {
+          "properties": {
+            "sock.family": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "source": {
+              "type": "object",
+              "properties": {
+                "address": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "domain": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "bytes": {
+                  "type": "long"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "mac": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "packets": {
+                  "type": "long"
+                },
+                "geo": {
+                  "type": "object",
+                  "properties": {
+                    "city_name": {
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    }
+                  }
+                }
+              }
+            },
+            "destination": {
+              "type": "object",
+              "properties": {
+                "address": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "domain": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "bytes": {
+                  "type": "long"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "mac": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "packets": {
+                  "type": "long"
+                },
+                "geo": {
+                  "type": "object",
+                  "properties": {
+                    "city_name": {
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -657,7 +657,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="M11.271 11.978l3.872 3.873a.502.502 0 00.708 0 .502.502 0 000-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 004.949 2.05.5.5 0 000-1 5.96 5.96 0 01-4.242-1.757 6.01 6.01 0 010-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 010 8.486.5.5 0 00.034.738z"
+                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
                                     />
                                   </svg>
                                 </EuiIconSearch>
@@ -685,7 +685,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                 arrowDisplay="left"
                 buttonContent={
                   <EuiTitle
-                    size="xxxs"
+                    size="xxs"
                   >
                     <span>
                       Query fields
@@ -745,10 +745,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         className="euiIEFlexWrapFix"
                       >
                         <EuiTitle
-                          size="xxxs"
+                          size="xxs"
                         >
                           <span
-                            className="euiTitle euiTitle--xxxsmall"
+                            className="euiTitle euiTitle--xxsmall"
                           >
                             Query fields
                           </span>
@@ -770,13 +770,20 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         <div
                           className="euiAccordion__padding--xs"
                         >
+                          <EuiHorizontalRule
+                            margin="xs"
+                          >
+                            <hr
+                              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+                            />
+                          </EuiHorizontalRule>
                           <ul
                             aria-labelledby="queried_fields"
                             className="dscSidebarList dscFieldList--selected"
                             data-test-subj="fieldList-selected"
                           >
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="double_per_ip_bytes"
                               key="fielddouble_per_ip_bytes"
                             >
@@ -799,7 +806,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-double_per_ip_bytes-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -854,7 +861,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -872,7 +879,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-double_per_ip_bytes-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -927,10 +934,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -1095,7 +1102,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="host"
                               key="fieldhost"
                             >
@@ -1118,7 +1125,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-host-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -1173,7 +1180,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -1191,7 +1198,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-host-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -1246,10 +1253,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -1414,7 +1421,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="ip_count"
                               key="fieldip_count"
                             >
@@ -1437,7 +1444,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-ip_count-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -1492,7 +1499,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -1510,7 +1517,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-ip_count-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -1565,10 +1572,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -1733,7 +1740,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="per_ip_bytes"
                               key="fieldper_ip_bytes"
                             >
@@ -1756,7 +1763,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-per_ip_bytes-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -1811,7 +1818,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -1829,7 +1836,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-per_ip_bytes-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -1884,10 +1891,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -2052,7 +2059,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="resp_code"
                               key="fieldresp_code"
                             >
@@ -2075,7 +2082,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-resp_code-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -2130,7 +2137,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -2148,7 +2155,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-resp_code-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -2203,10 +2210,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -2371,7 +2378,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="sum_bytes"
                               key="fieldsum_bytes"
                             >
@@ -2394,7 +2401,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-sum_bytes-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -2449,7 +2456,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -2467,7 +2474,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-sum_bytes-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -2522,10 +2529,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -2707,7 +2714,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                 arrowDisplay="left"
                 buttonContent={
                   <EuiTitle
-                    size="xxxs"
+                    size="xxs"
                   >
                     <span>
                       Selected Fields
@@ -2767,10 +2774,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         className="euiIEFlexWrapFix"
                       >
                         <EuiTitle
-                          size="xxxs"
+                          size="xxs"
                         >
                           <span
-                            className="euiTitle euiTitle--xxxsmall"
+                            className="euiTitle euiTitle--xxsmall"
                           >
                             Selected Fields
                           </span>
@@ -2792,6 +2799,13 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         <div
                           className="euiAccordion__padding--xs"
                         >
+                          <EuiHorizontalRule
+                            margin="xs"
+                          >
+                            <hr
+                              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+                            />
+                          </EuiHorizontalRule>
                           <ul
                             aria-labelledby="selected_fields"
                             className="dscSidebarList dscFieldList--selected"
@@ -2814,7 +2828,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                 arrowDisplay="left"
                 buttonContent={
                   <EuiTitle
-                    size="xxxs"
+                    size="xxs"
                   >
                     <span>
                       Available Fields
@@ -2874,10 +2888,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         className="euiIEFlexWrapFix"
                       >
                         <EuiTitle
-                          size="xxxs"
+                          size="xxs"
                         >
                           <span
-                            className="euiTitle euiTitle--xxxsmall"
+                            className="euiTitle euiTitle--xxsmall"
                           >
                             Available Fields
                           </span>
@@ -2899,13 +2913,20 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                         <div
                           className="euiAccordion__padding--xs"
                         >
+                          <EuiHorizontalRule
+                            margin="xs"
+                          >
+                            <hr
+                              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+                            />
+                          </EuiHorizontalRule>
                           <ul
                             aria-labelledby="available_fields"
                             className="dscFieldList dscFieldList--unpopular hidden-sm hidden-xs"
                             data-test-subj="fieldList-unpopular"
                           >
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="agent"
                               key="fieldagent"
                             >
@@ -2928,7 +2949,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-agent-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -2994,7 +3015,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -3012,7 +3033,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-agent-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -3078,10 +3099,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -3293,7 +3314,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="bytes"
                               key="fieldbytes"
                             >
@@ -3316,7 +3337,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-bytes-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -3370,7 +3391,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -3388,7 +3409,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-bytes-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -3442,10 +3463,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -3610,7 +3631,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="clientip"
                               key="fieldclientip"
                             >
@@ -3633,7 +3654,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-clientip-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -3687,7 +3708,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -3705,7 +3726,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-clientip-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -3759,10 +3780,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -3927,7 +3948,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="event"
                               key="fieldevent"
                             >
@@ -3950,7 +3971,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-event-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -4004,7 +4025,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -4022,7 +4043,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-event-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -4076,10 +4097,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -4244,7 +4265,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="extension"
                               key="fieldextension"
                             >
@@ -4267,7 +4288,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-extension-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -4333,7 +4354,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -4351,7 +4372,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-extension-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -4417,10 +4438,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -4632,7 +4653,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="geo"
                               key="fieldgeo"
                             >
@@ -4655,7 +4676,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-geo-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -4709,7 +4730,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -4727,7 +4748,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-geo-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -4781,10 +4802,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -4949,7 +4970,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="host"
                               key="fieldhost"
                             >
@@ -4972,7 +4993,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-host-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -5038,7 +5059,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -5056,7 +5077,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-host-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -5122,10 +5143,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -5337,7 +5358,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="index"
                               key="fieldindex"
                             >
@@ -5360,7 +5381,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-index-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -5426,7 +5447,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -5444,7 +5465,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-index-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -5510,10 +5531,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -5725,7 +5746,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="ip"
                               key="fieldip"
                             >
@@ -5748,7 +5769,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-ip-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -5802,7 +5823,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -5820,7 +5841,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-ip-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -5874,10 +5895,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -6042,7 +6063,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="machine"
                               key="fieldmachine"
                             >
@@ -6065,7 +6086,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-machine-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -6119,7 +6140,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -6137,7 +6158,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-machine-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -6191,10 +6212,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -6359,7 +6380,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="memory"
                               key="fieldmemory"
                             >
@@ -6382,7 +6403,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-memory-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -6436,7 +6457,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -6454,7 +6475,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-memory-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -6508,10 +6529,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -6676,7 +6697,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="message"
                               key="fieldmessage"
                             >
@@ -6699,7 +6720,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-message-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -6765,7 +6786,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -6783,7 +6804,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-message-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -6849,10 +6870,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -7064,7 +7085,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="phpmemory"
                               key="fieldphpmemory"
                             >
@@ -7087,7 +7108,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-phpmemory-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -7141,7 +7162,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -7159,7 +7180,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-phpmemory-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -7213,10 +7234,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -7381,7 +7402,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="referer"
                               key="fieldreferer"
                             >
@@ -7404,7 +7425,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-referer-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -7470,7 +7491,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -7488,7 +7509,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-referer-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -7554,10 +7575,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -7769,7 +7790,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="request"
                               key="fieldrequest"
                             >
@@ -7792,7 +7813,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-request-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -7858,7 +7879,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -7876,7 +7897,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-request-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -7942,10 +7963,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -8157,7 +8178,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="response"
                               key="fieldresponse"
                             >
@@ -8180,7 +8201,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-response-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -8246,7 +8267,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -8264,7 +8285,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-response-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -8330,10 +8351,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -8545,7 +8566,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="tags"
                               key="fieldtags"
                             >
@@ -8568,7 +8589,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-tags-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -8634,7 +8655,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -8652,7 +8673,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-tags-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -8718,10 +8739,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -8933,7 +8954,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="timestamp"
                               key="fieldtimestamp"
                             >
@@ -8956,7 +8977,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-timestamp-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -9016,7 +9037,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -9034,7 +9055,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-timestamp-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -9094,10 +9115,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -9273,7 +9294,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="url"
                               key="fieldurl"
                             >
@@ -9296,7 +9317,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-url-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -9362,7 +9383,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -9380,7 +9401,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-url-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -9446,10 +9467,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"
@@ -9661,7 +9682,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                               </Component>
                             </li>
                             <li
-                              className="dscSidebar__item"
+                              className="dscSidebar__item sidebar_content"
                               data-attr-field="utc_time"
                               key="fieldutc_time"
                             >
@@ -9684,7 +9705,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                   anchorPosition="rightUp"
                                   button={
                                     <FieldButton
-                                      className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                       dataTestSubj="field-utc_time-showDetails"
                                       fieldAction={
                                         <React.Fragment>
@@ -9750,7 +9771,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       }
                                       isActive={false}
                                       onClick={[Function]}
-                                      size="m"
+                                      size="s"
                                     />
                                   }
                                   closePopover={[Function]}
@@ -9768,7 +9789,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       className="euiPopover__anchor"
                                     >
                                       <FieldButton
-                                        className="shard__fieldSelectorField explorer__fieldSelectorField"
+                                        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         dataTestSubj="field-utc_time-showDetails"
                                         fieldAction={
                                           <React.Fragment>
@@ -9834,10 +9855,10 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         }
                                         isActive={false}
                                         onClick={[Function]}
-                                        size="m"
+                                        size="s"
                                       >
                                         <div
-                                          className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+                                          className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
                                         >
                                           <button
                                             className="osd-resetFocusState osdFieldButton__button"

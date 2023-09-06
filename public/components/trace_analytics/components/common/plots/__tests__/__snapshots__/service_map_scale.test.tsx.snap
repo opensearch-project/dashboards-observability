@@ -113,7 +113,7 @@ exports[`Service map scale component renders service map scale plot 1`] = `
             ],
             "title": Object {
               "standoff": 15,
-              "text": "Latency (ms)",
+              "text": "Average duration (ms)",
             },
             "zeroline": false,
           },
@@ -225,7 +225,7 @@ exports[`Service map scale component renders service map scale plot 1`] = `
               ],
               "title": Object {
                 "standoff": 15,
-                "text": "Latency (ms)",
+                "text": "Average duration (ms)",
               },
               "zeroline": false,
             },

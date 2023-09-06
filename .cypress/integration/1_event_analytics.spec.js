@@ -12,12 +12,7 @@ import {
   SAVE_QUERY2,
   SAVE_QUERY3,
   SAVE_QUERY4,
-  querySearch,
   YEAR_TO_DATE_DOM_ID,
-  landOnEventHome,
-  landOnEventExplorer,
-  landOnEventVisualizations,
-  landOnPanels,
   HOST_TEXT_1,
   HOST_TEXT_2,
   HOST_TEXT_3,
@@ -31,7 +26,15 @@ import {
   FIELD_AGENT
 } from '../utils/event_analytics/constants';
 import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
-import { clearQuerySearchBoxText } from '../utils/event_analytics/helpers';
+
+import {
+  querySearch,
+  landOnEventHome,
+  landOnEventExplorer,
+  landOnEventVisualizations,
+  landOnPanels,
+  clearQuerySearchBoxText,
+} from '../utils/event_analytics/helpers';
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for event analytics', () => {
