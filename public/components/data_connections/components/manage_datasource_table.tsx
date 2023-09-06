@@ -19,7 +19,6 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './datasources_header';
 import { HomeProps } from '../home';
-import { coreRefs } from '../../../framework/core_refs';
 import { DataConnectionsDescription } from './manage_datasource_description';
 import sparkSvg from '../icons/spark_logo.svg';
 
@@ -29,8 +28,7 @@ interface DataConnection {
 }
 
 export function ManageDatasourcesTable(props: HomeProps) {
-  const { http, chrome } = props;
-  const { pplService } = coreRefs;
+  const { http, chrome, pplService } = props;
 
   const [data, setData] = useState([]);
 
@@ -45,7 +43,7 @@ export function ManageDatasourcesTable(props: HomeProps) {
   }, []);
 
   async function handleDataRequest() {
-    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((datasources) =>
+    pplService.fetch({ query: 'show datasources', format: 'jdbc' }).then((datasources) =>
       setData(
         datasources.jsonData.map((x: any) => {
           return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };

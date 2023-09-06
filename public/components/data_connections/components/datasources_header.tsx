@@ -20,7 +20,7 @@ export function DataConnectionsHeader() {
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="data-connections-header">
+          <EuiTitle size="l" data-test-subj="datasources-header">
             <h1>Data connections</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
