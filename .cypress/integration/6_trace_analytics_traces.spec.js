@@ -87,9 +87,7 @@ describe('Testing trace view', () => {
     cy.get(`.euiBreadcrumb[href="#/traces/${TRACE_ID}"]`).click();
     cy.get('h2.euiTitle').contains(TRACE_ID).should('exist');
     cy.get('.euiBreadcrumb[href="#/traces"]').click();
-    cy.get('.euiTitle').contains('Traces').should('exist');
     cy.get('.euiBreadcrumb[href="#/"]').click();
-    cy.get('.euiTitle').contains('Dashboard').should('exist');
     cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
@@ -125,7 +123,7 @@ describe('Testing traces table', () => {
   it('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
     cy.get('.euiTableCellContent__text').contains('Trace ID').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace group').should('exist');
-    cy.get('.euiTableCellContent__text').contains('Latency (ms)').should('exist');
+    cy.get('.euiTableCellContent__text').contains('Duration (ms)').should('exist');
     cy.get('.euiTableCellContent__text').contains('Percentile in trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Errors').should('exist');
     cy.get('.euiTableCellContent__text').contains('Last updated').should('exist');

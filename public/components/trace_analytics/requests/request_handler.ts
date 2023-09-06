@@ -18,7 +18,6 @@ export async function handleDslRequest(
   DSL: any,
   bodyQuery: any,
   mode: TraceAnalyticsMode,
-  timeout?: boolean,
   setShowTimeoutToast?: () => void
 ) {
   if (DSL?.query) {
@@ -33,8 +32,8 @@ export async function handleDslRequest(
   if (!bodyQuery.index) {
     body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
   }
-  if (timeout) {
-    const id = setTimeout(() => setShowTimeoutToast!(), 30000);
+  if (setShowTimeoutToast) {
+    const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
 
     try {
       return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
@@ -45,14 +44,15 @@ export async function handleDslRequest(
     } finally {
       clearTimeout(id);
     }
-  }
+  } else {
 
-  try {
-    return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
-      body: JSON.stringify(body),
-    });
-  } catch (error_1) {
-    console.error(error_1);
+    try {
+      return await http.post(TRACE_ANALYTICS_DSL_ROUTE, {
+        body: JSON.stringify(body),
+      });
+    } catch (error_1) {
+      console.error(error_1);
+    }
   }
 }
 
