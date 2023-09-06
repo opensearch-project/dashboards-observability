@@ -20,7 +20,6 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './datasources_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_datasource_description';
-import sparkSvg from '../icons/spark_logo.svg';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
@@ -56,9 +55,6 @@ export function ManageDatasourcesTable(props: HomeProps) {
     switch (record.connectionType) {
       case 'OPENSEARCH':
         return <EuiIcon type="logoOpenSearch" />;
-      case 'SPARK':
-        return <EuiIcon type={sparkSvg} />;
-
       default:
         return <></>;
     }

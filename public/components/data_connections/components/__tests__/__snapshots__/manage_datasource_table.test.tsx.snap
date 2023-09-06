@@ -279,13 +279,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          >
-                            <img
-                              alt=""
-                              class="euiIcon euiIcon--medium"
-                              src="file-stub"
-                            />
-                          </div>
+                          />
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -361,13 +355,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          >
-                            <img
-                              alt=""
-                              class="euiIcon euiIcon--medium"
-                              src="file-stub"
-                            />
-                          </div>
+                          />
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -443,13 +431,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          >
-                            <img
-                              alt=""
-                              class="euiIcon euiIcon--medium"
-                              src="file-stub"
-                            />
-                          </div>
+                          />
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -612,13 +594,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          >
-                            <img
-                              alt=""
-                              class="euiIcon euiIcon--medium"
-                              src="file-stub"
-                            />
-                          </div>
+                          />
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
