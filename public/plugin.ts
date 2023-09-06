@@ -208,6 +208,15 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('datasources'),
     });
 
+    setupDeps.managementOverview?.register({
+      id: observabilityDatasourcesID,
+      title: observabilityDatasourcesTitle,
+      order: 9070,
+      description: i18n.translate('observability.datasourcesDescription', {
+        defaultMessage: 'Manage compatible data sources and compute with OpenSearch Dashboards.',
+      }),
+    });
+
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
