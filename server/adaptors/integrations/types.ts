@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+
 interface IntegrationTemplate {
   name: string;
   version: string;

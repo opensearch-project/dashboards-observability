@@ -21,7 +21,7 @@ describe('The local repository', () => {
         }
         // Otherwise, all directories must be integrations
         const integ = new Integration(integPath);
-        await expect(integ.check()).resolves.toBe(true);
+        expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
       })
     );
   });
@@ -29,6 +29,14 @@ describe('The local repository', () => {
   it('Should pass deep validation for all local integrations.', async () => {
     const repository: Repository = new Repository(path.join(__dirname, '../__data__/repository'));
     const integrations: Integration[] = await repository.getIntegrationList();
-    await Promise.all(integrations.map((i) => expect(i.deepCheck()).resolves.toBeTruthy()));
+    await Promise.all(
+      integrations.map(async (i) => {
+        const result = await i.deepCheck();
+        if (!result.ok) {
+          console.error(result.error);
+        }
+        expect(result.ok).toBe(true);
+      })
+    );
   });
 });

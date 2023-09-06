@@ -93,13 +93,23 @@ describe('IntegrationInstanceBuilder', () => {
         ],
       };
 
-      // Mock the implementation of the methods in the Integration class
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue(true);
-      sampleIntegration.getAssets = jest.fn().mockResolvedValue({ savedObjects: remappedAssets });
-      sampleIntegration.getConfig = jest.fn().mockResolvedValue({
+      const mockTemplate: Partial<IntegrationTemplate> = {
         name: 'integration-template',
         type: 'integration-type',
-      });
+        assets: {
+          savedObjects: {
+            name: 'assets',
+            version: '1.0.0',
+          },
+        },
+      };
+
+      // Mock the implementation of the methods in the Integration class
+      sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
+      sampleIntegration.getAssets = jest
+        .fn()
+        .mockResolvedValue({ ok: true, value: { savedObjects: remappedAssets } });
+      sampleIntegration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
 
       // Mock builder sub-methods
       const remapIDsSpy = jest.spyOn(builder, 'remapIDs');
@@ -121,22 +131,24 @@ describe('IntegrationInstanceBuilder', () => {
         dataSource: 'instance-datasource',
         name: 'instance-name',
       };
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue(false);
+      sampleIntegration.deepCheck = jest
+        .fn()
+        .mockResolvedValue({ ok: false, error: new Error('Mock error') });
 
-      await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(
-        'Integration is not valid'
-      );
+      await expect(builder.build(sampleIntegration, options)).rejects.toThrowError('Mock error');
     });
 
-    it('should reject with an error if getAssets throws an error', async () => {
+    it('should reject with an error if getAssets rejects', async () => {
       const options = {
         dataSource: 'instance-datasource',
         name: 'instance-name',
       };
 
       const errorMessage = 'Failed to get assets';
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue(true);
-      sampleIntegration.getAssets = jest.fn().mockRejectedValue(new Error(errorMessage));
+      sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: {} });
+      sampleIntegration.getAssets = jest
+        .fn()
+        .mockResolvedValue({ ok: false, error: new Error(errorMessage) });
 
       await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(errorMessage);
     });
@@ -153,21 +165,13 @@ describe('IntegrationInstanceBuilder', () => {
         },
       ];
       const errorMessage = 'Failed to post assets';
-      sampleIntegration.deepCheck = jest.fn().mockResolvedValue(true);
-      sampleIntegration.getAssets = jest.fn().mockResolvedValue({ savedObjects: remappedAssets });
+      sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: {} });
+      sampleIntegration.getAssets = jest
+        .fn()
+        .mockResolvedValue({ ok: true, value: { savedObjects: remappedAssets } });
       builder.postAssets = jest.fn().mockRejectedValue(new Error(errorMessage));
 
       await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(errorMessage);
-    });
-
-    it('should reject with an error if getConfig returns null', async () => {
-      const options = {
-        dataSource: 'instance-datasource',
-        name: 'instance-name',
-      };
-      sampleIntegration.getConfig = jest.fn().mockResolvedValue(null);
-
-      await expect(builder.build(sampleIntegration, options)).rejects.toThrowError();
     });
   });
 
@@ -264,8 +268,11 @@ describe('IntegrationInstanceBuilder', () => {
     it('should build an integration instance', async () => {
       const integration = {
         getConfig: jest.fn().mockResolvedValue({
-          name: 'integration-template',
-          type: 'integration-type',
+          ok: true,
+          value: {
+            name: 'integration-template',
+            type: 'integration-type',
+          },
         }),
       };
       const refs = [

@@ -3,31 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Integration } from './integration';
+import { LocalCatalogReader } from './local_catalog_reader';
 
 export class Repository {
+  reader: CatalogReader;
   directory: string;
 
-  constructor(directory: string) {
+  constructor(directory: string, reader?: CatalogReader) {
     this.directory = directory;
+    this.reader = reader ?? new LocalCatalogReader(directory);
   }
 
   async getIntegrationList(): Promise<Integration[]> {
     try {
-      const folders = await fs.readdir(this.directory);
-      const integrations = Promise.all(
-        folders.map(async (folder) => {
-          const integPath = path.join(this.directory, folder);
-          if (!(await fs.lstat(integPath)).isDirectory()) {
-            return null;
-          }
-          const integ = new Integration(integPath);
-          return (await integ.check()) ? integ : null;
-        })
+      // TODO in the future, we want to support traversing nested directory structures.
+      const folders = await this.reader.readDir('');
+      const integrations = await Promise.all(
+        folders.map((i) => this.getIntegration(path.basename(i)))
       );
-      return (await integrations).filter((x) => x !== null) as Integration[];
+      return integrations.filter((x) => x !== null) as Integration[];
     } catch (error) {
       console.error(`Error reading integration directories in: ${this.directory}`, error);
       return [];
@@ -35,7 +31,16 @@ export class Repository {
   }
 
   async getIntegration(name: string): Promise<Integration | null> {
-    const integ = new Integration(path.join(this.directory, name));
-    return (await integ.check()) ? integ : null;
+    if (!(await this.reader.isDirectory(name))) {
+      console.error(`Requested integration '${name}' does not exist`);
+      return null;
+    }
+    const integ = new Integration(name, this.reader.join(name));
+    const checkResult = await integ.getConfig();
+    if (!checkResult.ok) {
+      console.error(`Integration '${name}' is invalid:`, checkResult.error);
+      return null;
+    }
+    return integ;
   }
 }

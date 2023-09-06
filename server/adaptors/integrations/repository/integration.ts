@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs/promises';
 import path from 'path';
 import { validateTemplate } from '../validators';
+import { LocalCatalogReader } from './local_catalog_reader';
 
 /**
  * Helper function to compare version numbers.
@@ -34,76 +34,46 @@ function compareVersions(a: string, b: string): number {
 }
 
 /**
- * Helper function to check if the given path is a directory
- *
- * @param dirPath The directory to check.
- * @returns True if the path is a directory.
- */
-async function isDirectory(dirPath: string): Promise<boolean> {
-  try {
-    const stats = await fs.stat(dirPath);
-    return stats.isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-/**
  * The Integration class represents the data for Integration Templates.
  * It is backed by the repository file system.
  * It includes accessor methods for integration configs, as well as helpers for nested components.
  */
 export class Integration {
+  reader: CatalogReader;
   directory: string;
   name: string;
 
-  constructor(directory: string) {
+  constructor(directory: string, reader?: CatalogReader) {
     this.directory = directory;
     this.name = path.basename(directory);
+    this.reader = reader ?? new LocalCatalogReader(directory);
   }
 
   /**
-   * Check the integration for validity.
-   * This is not a deep check, but a quick check to verify that the integration is a valid directory and has a config file.
+   * Like getConfig(), but thoroughly checks all nested integration dependencies for validity.
    *
-   * @returns true if the integration is valid.
+   * @returns a Result indicating whether the integration is valid.
    */
-  async check(): Promise<boolean> {
-    if (!(await isDirectory(this.directory))) {
-      return false;
-    }
-    return (await this.getConfig()) !== null;
-  }
-
-  /**
-   * Like check(), but thoroughly checks all nested integration dependencies.
-   *
-   * @returns true if the integration is valid.
-   */
-  async deepCheck(): Promise<boolean> {
-    if (!(await this.check())) {
-      console.error('check failed');
-      return false;
+  async deepCheck(): Promise<Result<IntegrationTemplate>> {
+    const configResult = await this.getConfig();
+    if (!configResult.ok) {
+      return configResult;
     }
 
     try {
-      // An integration must have at least one mapping
       const schemas = await this.getSchemas();
-      if (Object.keys(schemas.mappings).length === 0) {
-        return false;
+      if (!schemas.ok || Object.keys(schemas.value.mappings).length === 0) {
+        return { ok: false, error: new Error('The integration has no schemas available') };
       }
-      // An integration must have at least one asset
       const assets = await this.getAssets();
-      if (Object.keys(assets).length === 0) {
-        return false;
+      if (!assets.ok || Object.keys(assets).length === 0) {
+        return { ok: false, error: new Error('An integration must have at least one asset') };
       }
     } catch (err: any) {
-      // Any loading errors are considered invalid
-      console.error('Deep check failed for exception', err);
-      return false;
+      return { ok: false, error: err };
     }
 
-    return true;
+    return configResult;
   }
 
   /**
@@ -114,7 +84,7 @@ export class Integration {
    * @returns A string with the latest version, or null if no versions are available.
    */
   async getLatestVersion(): Promise<string | null> {
-    const files = await fs.readdir(this.directory);
+    const files = await this.reader.readDir('');
     const versions: string[] = [];
 
     for (const file of files) {
@@ -138,35 +108,34 @@ export class Integration {
    * @param version The version of the config to retrieve.
    * @returns The config if a valid config matching the version is present, otherwise null.
    */
-  async getConfig(version?: string): Promise<IntegrationTemplate | null> {
+  async getConfig(version?: string): Promise<Result<IntegrationTemplate>> {
+    if (!(await this.reader.isDirectory(''))) {
+      return { ok: false, error: new Error(`${this.directory} is not a valid directory`) };
+    }
+
     const maybeVersion: string | null = version ? version : await this.getLatestVersion();
 
     if (maybeVersion === null) {
-      return null;
+      return {
+        ok: false,
+        error: new Error(`No valid config matching version ${version} is available`),
+      };
     }
 
     const configFile = `${this.name}-${maybeVersion}.json`;
-    const configPath = path.join(this.directory, configFile);
 
     try {
-      const config = await fs.readFile(configPath, { encoding: 'utf-8' });
+      const config = await this.reader.readFile(configFile);
       const possibleTemplate = JSON.parse(config);
-      const template = validateTemplate(possibleTemplate);
-      if (template.ok) {
-        return template.value;
-      }
-      console.error(template.error);
-      return null;
+      return validateTemplate(possibleTemplate);
     } catch (err: any) {
       if (err instanceof SyntaxError) {
         console.error(`Syntax errors in ${configFile}`, err);
-        return null;
       }
       if (err instanceof Error && (err as { code?: string }).code === 'ENOENT') {
         console.error(`Attempted to retrieve non-existent config ${configFile}`);
-        return null;
       }
-      throw new Error('Could not load integration', { cause: err });
+      return { ok: false, error: err };
     }
   }
 
@@ -181,30 +150,30 @@ export class Integration {
    */
   async getAssets(
     version?: string
-  ): Promise<{
-    savedObjects?: object[];
-  }> {
-    const config = await this.getConfig(version);
-    if (config === null) {
-      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+  ): Promise<
+    Result<{
+      savedObjects?: object[];
+    }>
+  > {
+    const configResult = await this.getConfig(version);
+    if (!configResult.ok) {
+      return configResult;
     }
-    const result: { savedObjects?: object[] } = {};
+    const config = configResult.value;
+
+    const resultValue: { savedObjects?: object[] } = {};
     if (config.assets.savedObjects) {
-      const sobjPath = path.join(
-        this.directory,
-        'assets',
-        `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`
-      );
+      const sobjPath = `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`;
       try {
-        const ndjson = await fs.readFile(sobjPath, { encoding: 'utf-8' });
+        const ndjson = await this.reader.readFile(sobjPath, 'assets');
         const asJson = '[' + ndjson.trim().replace(/\n/g, ',') + ']';
         const parsed = JSON.parse(asJson);
-        result.savedObjects = parsed;
+        resultValue.savedObjects = parsed;
       } catch (err: any) {
-        console.error("Failed to load saved object assets, proceeding as if it's absent", err);
+        return { ok: false, error: err };
       }
     }
-    return result;
+    return { ok: true, value: resultValue };
   }
 
   /**
@@ -217,18 +186,21 @@ export class Integration {
    */
   async getSampleData(
     version?: string
-  ): Promise<{
-    sampleData: object[] | null;
-  }> {
-    const config = await this.getConfig(version);
-    if (config === null) {
-      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+  ): Promise<
+    Result<{
+      sampleData: object[] | null;
+    }>
+  > {
+    const configResult = await this.getConfig(version);
+    if (!configResult.ok) {
+      return configResult;
     }
-    const result: { sampleData: object[] | null } = { sampleData: null };
+    const config = configResult.value;
+
+    const resultValue: { sampleData: object[] | null } = { sampleData: null };
     if (config.sampleData) {
-      const sobjPath = path.join(this.directory, 'data', config.sampleData?.path);
       try {
-        const jsonContent = await fs.readFile(sobjPath, { encoding: 'utf-8' });
+        const jsonContent = await this.reader.readFile(config.sampleData.path, 'data');
         const parsed = JSON.parse(jsonContent) as object[];
         for (const value of parsed) {
           if (!('@timestamp' in value)) {
@@ -243,12 +215,12 @@ export class Integration {
             ).toISOString(),
           });
         }
-        result.sampleData = parsed;
+        resultValue.sampleData = parsed;
       } catch (err: any) {
-        console.error("Failed to load saved object assets, proceeding as if it's absent", err);
+        return { ok: false, error: err };
       }
     }
-    return result;
+    return { ok: true, value: resultValue };
   }
 
   /**
@@ -263,32 +235,31 @@ export class Integration {
    */
   async getSchemas(
     version?: string
-  ): Promise<{
-    mappings: { [key: string]: any };
-  }> {
-    const config = await this.getConfig(version);
-    if (config === null) {
-      return Promise.reject(new Error('Attempted to get assets of invalid config'));
+  ): Promise<
+    Result<{
+      mappings: { [key: string]: any };
+    }>
+  > {
+    const configResult = await this.getConfig(version);
+    if (!configResult.ok) {
+      return configResult;
     }
-    const result: { mappings: { [key: string]: any } } = {
+    const config = configResult.value;
+
+    const resultValue: { mappings: { [key: string]: object } } = {
       mappings: {},
     };
     try {
       for (const component of config.components) {
         const schemaFile = `${component.name}-${component.version}.mapping.json`;
-        const rawSchema = await fs.readFile(path.join(this.directory, 'schemas', schemaFile), {
-          encoding: 'utf-8',
-        });
+        const rawSchema = await this.reader.readFile(schemaFile, 'schemas');
         const parsedSchema = JSON.parse(rawSchema);
-        result.mappings[component.name] = parsedSchema;
+        resultValue.mappings[component.name] = parsedSchema;
       }
     } catch (err: any) {
-      // It's not clear that an invalid schema can be recovered from.
-      // For integrations to function, we need schemas to be valid.
-      console.error('Error loading schema', err);
-      return Promise.reject(new Error('Could not load schema', { cause: err }));
+      return { ok: false, error: err };
     }
-    return result;
+    return { ok: true, value: resultValue };
   }
 
   /**
@@ -297,16 +268,12 @@ export class Integration {
    * @param staticPath The path of the static to retrieve.
    * @returns A buffer with the static's data if present, otherwise null.
    */
-  async getStatic(staticPath: string): Promise<Buffer | null> {
-    const fullStaticPath = path.join(this.directory, 'static', staticPath);
+  async getStatic(staticPath: string): Promise<Result<Buffer>> {
     try {
-      return await fs.readFile(fullStaticPath);
+      const buffer = await this.reader.readFileRaw(staticPath, 'static');
+      return { ok: true, value: buffer };
     } catch (err: any) {
-      if (err instanceof Error && (err as { code?: string }).code === 'ENOENT') {
-        console.error(`Static not found: ${staticPath}`);
-        return null;
-      }
-      throw err;
+      return { ok: false, error: err };
     }
   }
 }

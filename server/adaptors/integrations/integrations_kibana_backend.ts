@@ -53,17 +53,33 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
     return result;
   };
 
+  // Internal; use getIntegrationTemplates.
+  _getAllIntegrationTemplates = async (): Promise<IntegrationTemplateSearchResult> => {
+    const integrationList = await this.repository.getIntegrationList();
+    const configResults = await Promise.all(integrationList.map((x) => x.getConfig()));
+    const configs = configResults.filter((cfg) => cfg.ok) as Array<{ value: IntegrationTemplate }>;
+    return Promise.resolve({ hits: configs.map((cfg) => cfg.value) });
+  };
+
+  // Internal; use getIntegrationTemplates.
+  _getIntegrationTemplatesByName = async (
+    name: string
+  ): Promise<IntegrationTemplateSearchResult> => {
+    const integration = await this.repository.getIntegration(name);
+    const config = await integration?.getConfig();
+    if (!config || !config.ok) {
+      return Promise.resolve({ hits: [] });
+    }
+    return Promise.resolve({ hits: [config.value] });
+  };
+
   getIntegrationTemplates = async (
     query?: IntegrationTemplateQuery
   ): Promise<IntegrationTemplateSearchResult> => {
     if (query?.name) {
-      const integration = await this.repository.getIntegration(query.name);
-      const config = await integration?.getConfig();
-      return Promise.resolve({ hits: config ? [config] : [] });
+      return this._getIntegrationTemplatesByName(query.name);
     }
-    const integrationList = await this.repository.getIntegrationList();
-    const configList = await Promise.all(integrationList.map((x) => x.getConfig()));
-    return Promise.resolve({ hits: configList.filter((x) => x !== null) as IntegrationTemplate[] });
+    return this._getAllIntegrationTemplates();
   };
 
   getIntegrationInstances = async (
@@ -159,17 +175,6 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
   };
 
   getStatic = async (templateName: string, staticPath: string): Promise<Buffer> => {
-    const data = await (await this.repository.getIntegration(templateName))?.getStatic(staticPath);
-    if (!data) {
-      return Promise.reject({
-        message: `Asset ${staticPath} not found`,
-        statusCode: 404,
-      });
-    }
-    return Promise.resolve(data);
-  };
-
-  getSchemas = async (templateName: string): Promise<any> => {
     const integration = await this.repository.getIntegration(templateName);
     if (integration === null) {
       return Promise.reject({
@@ -177,7 +182,34 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         statusCode: 404,
       });
     }
-    return Promise.resolve(integration.getSchemas());
+    const data = await integration.getStatic(staticPath);
+    if (data.ok) {
+      return data.value;
+    }
+    const is404 = (data.error as { code?: string }).code === 'ENOENT';
+    return Promise.reject({
+      message: data.error.message,
+      statusCode: is404 ? 404 : 500,
+    });
+  };
+
+  getSchemas = async (templateName: string): Promise<{ mappings: { [key: string]: unknown } }> => {
+    const integration = await this.repository.getIntegration(templateName);
+    if (integration === null) {
+      return Promise.reject({
+        message: `Template ${templateName} not found`,
+        statusCode: 404,
+      });
+    }
+    const result = await integration.getSchemas();
+    if (result.ok) {
+      return result.value;
+    }
+    const is404 = (result.error as { code?: string }).code === 'ENOENT';
+    return Promise.reject({
+      message: result.error.message,
+      statusCode: is404 ? 404 : 500,
+    });
   };
 
   getAssets = async (templateName: string): Promise<{ savedObjects?: any }> => {
@@ -188,7 +220,15 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         statusCode: 404,
       });
     }
-    return Promise.resolve(integration.getAssets());
+    const assets = await integration.getAssets();
+    if (assets.ok) {
+      return assets.value;
+    }
+    const is404 = (assets.error as { code?: string }).code === 'ENOENT';
+    return Promise.reject({
+      message: assets.error.message,
+      statusCode: is404 ? 404 : 500,
+    });
   };
 
   getSampleData = async (templateName: string): Promise<{ sampleData: object[] | null }> => {
@@ -199,6 +239,14 @@ export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
         statusCode: 404,
       });
     }
-    return Promise.resolve(integration.getSampleData());
+    const sampleData = await integration.getSampleData();
+    if (sampleData.ok) {
+      return sampleData.value;
+    }
+    const is404 = (sampleData.error as { code?: string }).code === 'ENOENT';
+    return Promise.reject({
+      message: sampleData.error.message,
+      statusCode: is404 ? 404 : 500,
+    });
   };
 }
