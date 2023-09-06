@@ -60,7 +60,8 @@
     "minimatch": "^3.0.5",
     "debug": "^3.1.0",
     "tough-cookie": "^4.1.3",
-    "semver": "^7.5.2"
+    "semver": "^7.5.2",
+    "@cypress/request": "^3.0.0"
   },
   "eslintIgnore": [
     "common/query_manager/antlr/output/*",
