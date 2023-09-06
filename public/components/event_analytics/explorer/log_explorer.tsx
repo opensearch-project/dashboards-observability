@@ -62,8 +62,6 @@ export const LogExplorer = ({
 
   const [tabCreatedTypes, setTabCreatedTypes] = useState({});
 
-  console.log('routerContext: ', routerContext);
-
   const dispatchSavedObjectId = async () => {
     return getExistingEmptyTab({
       tabIds: tabIdsRef.current,
