@@ -2,7 +2,7 @@
 
 exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
 <div
-  class="euiText euiText--medium markdown-output-text"
+  class="euiText euiText--medium wrapAll markdown-output-text"
 >
   <div
     class="markdown-body "
@@ -27,7 +27,7 @@ exports[`<ParaOutput /> spec renders other types of outputs 1`] = `
 exports[`<ParaOutput /> spec renders query outputs 1`] = `
 <div>
   <div
-    class="euiText euiText--medium"
+    class="euiText euiText--medium wrapAll"
   >
     <b>
        select * from opensearch_dashboards_sample_data_flights limit 2
