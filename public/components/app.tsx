@@ -19,6 +19,7 @@ import { EventAnalytics } from './event_analytics';
 import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
+import { Home as DatasourcesHome } from './data_connections/home';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -44,6 +45,7 @@ const pages = {
   notebooks: NotebooksHome,
   dashboards: CustomPanelsHome,
   integrations: IntegrationsHome,
+  datasources: DatasourcesHome,
 };
 
 export const App = ({

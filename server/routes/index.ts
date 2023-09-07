@@ -21,6 +21,7 @@ import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_
 import { registerAppAnalyticsRouter } from './application_analytics/app_analytics_router';
 import { registerMetricsRoute } from './metrics/metrics_rounter';
 import { registerIntegrationsRoute } from './integrations/integrations_router';
+import { registerDatasourcesRoute } from './datasources/datasources_router';
 
 export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
   PanelsRouter(router);
@@ -42,4 +43,5 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
 
   registerMetricsRoute(router);
   registerIntegrationsRoute(router);
+  registerDatasourcesRoute(router);
 }
