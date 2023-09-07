@@ -2,7 +2,14 @@
 
 exports[`Add Integration Flyout Test Renders add integration flyout with dummy integration name 1`] = `
 <AddIntegrationFlyout
+  http={
+    Object {
+      "get": [MockFunction],
+      "post": [MockFunction],
+    }
+  }
   integrationName="test"
+  integrationType="test"
   onClose={[Function]}
   onCreate={[Function]}
 >
