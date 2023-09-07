@@ -187,15 +187,15 @@ function SetupIntegrationStepFour(
                 <EuiText>
                   Basic{': '}
                   <EuiTextColor color="subdued">
-                    Basic optimizations balancing performance and cost.
+                    Minimal optimizations balancing performance and cost.
                   </EuiTextColor>
                 </EuiText>
               ),
             },
-            {
-              id: 'advanced',
-              label: <EuiText>Advanced</EuiText>,
-            },
+            // {
+            //   id: 'advanced',
+            //   label: <EuiText>Advanced</EuiText>,
+            // },
             {
               id: 'ultra',
               label: (
@@ -239,10 +239,30 @@ function SetupBottomBar(step: number, setStep: React.Dispatch<React.SetStateActi
     <EuiBottomBar>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton iconType={'cross'} onClick={() => setStep(Math.max(step - 1, 0))}>
+          <EuiButton
+            color="danger"
+            iconType={'cross'}
+            onClick={() => {
+              // TODO evil hack because props aren't set up
+              let hash = window.location.hash;
+              hash = hash.trim();
+              hash = hash.substring(0, hash.lastIndexOf('/setup'));
+              window.location.hash = hash;
+            }}
+          >
             Cancel
           </EuiButton>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer />
+        </EuiFlexItem>
+        {step > 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType={'returnKey'} onClick={() => setStep(Math.max(step - 1, 0))}>
+              Back
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <EuiButton fill iconType={'check'} onClick={() => setStep(Math.min(step + 1, 3))}>
             {step === 3 ? 'Save' : 'Next'}
