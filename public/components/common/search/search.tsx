@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';

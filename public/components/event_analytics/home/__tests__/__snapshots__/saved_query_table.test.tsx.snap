@@ -1081,18 +1081,17 @@ exports[`Saved query table component Renders saved query table 1`] = `
                               <EuiLink
                                 className=""
                                 data-test-subj="eventHome__savedQueryTableName"
+                                href="observability-logs#/explorer/Kocoln0BYMuJGDsOwDma"
                                 key=".0"
-                                onClick={[Function]}
                               >
-                                <button
+                                <a
                                   className="euiLink euiLink--primary"
                                   data-test-subj="eventHome__savedQueryTableName"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
+                                  href="observability-logs#/explorer/Kocoln0BYMuJGDsOwDma"
+                                  rel="noreferrer"
                                 >
                                   Mock Flight count by destination save to panel
-                                </button>
+                                </a>
                               </EuiLink>
                             </div>
                           </td>
@@ -1279,18 +1278,17 @@ exports[`Saved query table component Renders saved query table 1`] = `
                               <EuiLink
                                 className=""
                                 data-test-subj="eventHome__savedQueryTableName"
+                                href="observability-logs#/explorer/KIcoln0BYMuJGDsOhDmk"
                                 key=".0"
-                                onClick={[Function]}
                               >
-                                <button
+                                <a
                                   className="euiLink euiLink--primary"
                                   data-test-subj="eventHome__savedQueryTableName"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
+                                  href="observability-logs#/explorer/KIcoln0BYMuJGDsOhDmk"
+                                  rel="noreferrer"
                                 >
                                   Mock Flight count by destination
-                                </button>
+                                </a>
                               </EuiLink>
                             </div>
                           </td>
