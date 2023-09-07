@@ -64,11 +64,11 @@ export const transformPreprocessedDataToTraces = (
   return [...traceMap.values()];
 };
 
-export const removeBackTick = (entry: any) => {
-  return {
-    ...mapKeys(entry, (val: any, key: string) => removeBacktick(key)),
-  };
-};
+// export const removeBackTick = (entry: any) => {
+//   return {
+//     ...mapKeys(entry, (val: any, key: string) => removeBacktick(key)),
+//   };
+// };
 
 /**
  * preprocess raw schema-data, key-value mapping to form an intermediate,
@@ -85,10 +85,14 @@ export const preprocessJsonData = (
   { dimensions, series, breakdowns, span }: Partial<ConfigList>
 ): IIntermediateMapping[] => {
   const seriesFlattenedEntries: IIntermediateMapping[] = [];
+  console.log(dimensions);
+  console.log(series);
+  console.log(span);
   forEach(jdbcFieldValueMapList, (entry: any) => {
-    const backtickRemovedEntry = {
-      ...removeBackTick(entry),
-    };
+    // const backtickRemovedEntry = {
+    //   ...removeBackTick(entry),
+    // };
+    console.log(entry);
     forEach(series, (sr) => {
       let tabularVizData: IIntermediateMapping = {
         value: 0,
@@ -96,32 +100,30 @@ export const preprocessJsonData = (
         breakdown: '',
         aggName: '',
       };
-      const serieKey = removeBacktick(
-        sr[CUSTOM_LABEL] ? sr[CUSTOM_LABEL] : `${sr.aggregation}(${sr.name})`
-      );
+      const serieKey = sr[CUSTOM_LABEL] ? sr[CUSTOM_LABEL] : `${sr.aggregation}(${sr.name})`;
       if (!isEmpty(serieKey)) {
         const concatedXaxisLabel = [
           ...(!isEmpty(span) ? [getCompleteTimespanKey(span)] : []),
           ...dimensions,
         ]
           .map((dimension) => {
-            return backtickRemovedEntry[removeBacktick(dimension.name)] ?? '';
+            return entry[dimension.name] ?? '';
           })
           .join(',');
         const concatedBreakdownLabel = breakdowns
-          ? breakdowns
-              .map((breakdown) => backtickRemovedEntry[removeBacktick(breakdown.name)])
-              .join(',')
+          ? breakdowns.map((breakdown) => entry[breakdown.name]).join(',')
           : '';
         tabularVizData = {
-          value: backtickRemovedEntry[serieKey],
+          value: entry[serieKey],
           x: concatedXaxisLabel,
           breakdown: concatedBreakdownLabel,
           aggName: serieKey,
         };
+        console.log(tabularVizData);
       }
       seriesFlattenedEntries.push(tabularVizData);
     });
+    console.log('----');
   });
   return seriesFlattenedEntries;
 };

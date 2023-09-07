@@ -9,7 +9,7 @@ import { SizeMe } from 'react-sizeme';
 import { Filter, Query, TimeRange } from '../../../../../src/plugins/data/common';
 import { QueryManager } from '../../../common/query_manager';
 import { IVisualizationContainerProps, SavedVisualization } from '../../../common/types/explorer';
-import { getPPLService, preprocessQuery, removeBacktick } from '../../../common/utils';
+import { getPPLService, preprocessQuery } from '../../../common/utils';
 import { getDefaultVisConfig } from '../event_analytics/utils';
 import { getVizContainerProps } from './charts/helpers';
 import { Visualization } from './visualization';
@@ -43,7 +43,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
     // filter out breakdowns from dimnesions
     if (hasBreakdowns) {
       finalDimensions = _.differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
-        _.isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
+        _.isEqual(dimn.name, brkdwn.name)
       );
     }
 

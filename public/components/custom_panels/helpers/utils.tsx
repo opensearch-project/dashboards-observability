@@ -23,7 +23,6 @@ import {
   VizContainerError,
 } from '../../../../common/types/custom_panels';
 import { SavedVisualization } from '../../../../common/types/explorer';
-import { removeBacktick } from '../../../../common/utils';
 import { getVizContainerProps } from '../../../components/visualizations/charts/helpers';
 import PPLService from '../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../services/saved_objects/saved_object_client/saved_objects_actions';
@@ -585,7 +584,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   // filter out breakdowns from dimnesions
   if (hasBreakdowns) {
     finalDimensions = _.differenceWith(finalDimensions, breakdowns, (dimn, brkdwn) =>
-      _.isEqual(removeBacktick(dimn.name), removeBacktick(brkdwn.name))
+      _.isEqual(dimn.name, brkdwn.name)
     );
   }
 

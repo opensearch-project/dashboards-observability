@@ -21,11 +21,7 @@ import { IVisualizationContainerProps } from '../../../../../common/types/explor
 import { Plt } from '../../plotly/plot';
 import { AGGREGATIONS, GROUPBY } from '../../../../../common/constants/explorer';
 import { PLOT_MARGIN } from '../../../../../common/constants/shared';
-import {
-  getCompleteTimespanKey,
-  removeBackTick,
-} from '../../../visualizations/charts/shared/common';
-import { removeBacktick } from '../../../../../common/utils';
+import { getCompleteTimespanKey } from '../../../visualizations/charts/shared/common';
 
 export const HeatMap = ({ visualizations, layout, config }: any) => {
   const {
@@ -86,21 +82,17 @@ export const HeatMap = ({ visualizations, layout, config }: any) => {
     const zKey = getPropName(zMetrics);
 
     forEach(fieldValueMapList, (entry) => {
-      const backtickRemovedEntry = removeBackTick(entry);
-      const xKey = removeBacktick(xaxisField.label);
-      const yKey = removeBacktick(yaxisField.label);
+      const xKey = xaxisField.label;
+      const yKey = yaxisField.label;
 
       // collect unique values from all values of 1st and 2nd group-by fields
       // for later composing 2 dimensional heatmap x, y axes
-      uniqueXaxisVals.add(backtickRemovedEntry[xKey]);
-      uniqueYaxisVals.add(backtickRemovedEntry[yKey]);
+      uniqueXaxisVals.add(entry[xKey]);
+      uniqueYaxisVals.add(entry[yKey]);
 
       // establish 1st,2nd -> data entry mapping for later filling in
       // corresponding aggregations to 2 dimensional heatmap zaxis
-      dmaps.set(
-        `${backtickRemovedEntry[xKey]},${backtickRemovedEntry[yKey]}`,
-        backtickRemovedEntry
-      );
+      dmaps.set(`${entry[xKey]},${entry[yKey]}`, entry);
     });
 
     const xAxis = [...uniqueXaxisVals];
