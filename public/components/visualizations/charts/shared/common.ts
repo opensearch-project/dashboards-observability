@@ -107,7 +107,12 @@ export const preprocessJsonData = (
           ...dimensions,
         ]
           .map((dimension) => {
-            return entry[dimension.name] ?? '';
+            console.log(dimension);
+            for (const [key, value] of Object.entries(entry)) {
+              if (key.replace(/span\(/i, 'span(') === dimension.name) {
+                return value ?? '';
+              }
+            }
           })
           .join(',');
         const concatedBreakdownLabel = breakdowns
