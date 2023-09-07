@@ -21,7 +21,7 @@ export function registerDatasourcesRoute(router: IRouter) {
       try {
         const dataSourcesresponse = await context.observability_plugin.observabilityClient
           .asScoped(request)
-          .callAsCurrentUser('ppl.datasourceQuery', {
+          .callAsCurrentUser('ppl.getDatasourceById', {
             datasource: request.params.name,
           });
         return response.ok({
@@ -46,14 +46,12 @@ export function registerDatasourcesRoute(router: IRouter) {
       try {
         const dataSourcesresponse = await context.observability_plugin.observabilityClient
           .asScoped(request)
-          .callAsCurrentUser('ppl.datasourceQuery', {
-            datasource: '',
-          });
+          .callAsCurrentUser('ppl.getDatasources');
         return response.ok({
           body: dataSourcesresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching datasource:', error);
+        console.error('Issue in fetching datasources:', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,

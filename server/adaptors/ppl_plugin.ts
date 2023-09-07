@@ -42,15 +42,22 @@ export const PPLPlugin = function (Client, config, components) {
     method: 'POST',
   });
 
-  ppl.datasourceQuery = ca({
+  ppl.getDatasourceById = ca({
     url: {
       fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}/<%=datasource%>`,
       req: {
         datasource: {
           type: 'string',
-          required: false,
+          required: true,
         },
       },
+    },
+    method: 'GET',
+  });
+
+  ppl.getDatasources = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}`,
     },
     method: 'GET',
   });
