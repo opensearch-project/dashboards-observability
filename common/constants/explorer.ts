@@ -7,10 +7,13 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { ThresholdUnitType } from '../../public/components/event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { VIS_CHART_TYPES } from './shared';
 
+// URLs
 export const EVENT_ANALYTICS_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/observability-plugin/event-analytics/';
 export const OPEN_TELEMETRY_LOG_CORRELATION_LINK =
   'https://opentelemetry.io/docs/reference/specification/logs/overview/#log-correlation';
+export const LOG_EXPLORER_BASE_PATH = 'observability-logs#/explorer/';
+
 export const RAW_QUERY = 'rawQuery';
 export const FINAL_QUERY = 'finalQuery';
 export const SELECTED_DATE_RANGE = 'selectedDateRange';
