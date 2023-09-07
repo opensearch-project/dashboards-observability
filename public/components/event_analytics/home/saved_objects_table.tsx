@@ -5,7 +5,7 @@
 
 import { Criteria, EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
-import { FILTER_OPTIONS } from '../../../../common/constants/explorer';
+import { FILTER_OPTIONS, LOG_EXPLORER_BASE_PATH } from '../../../../common/constants/explorer';
 
 interface SavedQueryTableProps {
   savedHistories: any[];
@@ -17,7 +17,6 @@ interface SavedQueryTableProps {
 
 export function SavedQueryTable({
   savedHistories,
-  handleHistoryClick,
   handleSelectHistory,
   isTableLoading,
 }: SavedQueryTableProps) {
@@ -67,9 +66,7 @@ export function SavedQueryTable({
       render: (item: any) => {
         return (
           <EuiLink
-            onClick={() => {
-              handleHistoryClick(item.objectId);
-            }}
+            href={`${LOG_EXPLORER_BASE_PATH}${item.objectId}`}
             data-test-subj="eventHome__savedQueryTableName"
           >
             {item.name}
