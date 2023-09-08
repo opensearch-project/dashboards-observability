@@ -17,3 +17,24 @@
 .mainContentTabs .euiResizableContainer {
   height: calc(100vh - 298px);
 }
+
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.euiPage--paddingMedium .euiPageSideBar {
+  max-width: 462px;
+  min-width: 400px;
+  padding-left: 0%;
+  padding-right:0%;
+}
+
+.deLayout {
+  height: calc(100vh - #{$osdHeaderOffset});
+
+  &__canvas {
+    height: 100%;
+  }
+}
+
+.headerIsExpanded .deLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+}
