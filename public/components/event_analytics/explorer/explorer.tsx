@@ -31,6 +31,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
 import { LogExplorerRouterContext } from '..';
 import {
   CREATE_TAB_PARAM,
@@ -510,18 +511,11 @@ export const Explorer = ({
                 {countDistribution?.data && !isLiveTailOnRef.current && (
                   <>
                     <HitsCounter
-                      hits={reduce(
-                        countDistribution.data['count()'],
-                        (sum, n) => {
-                          return sum + n;
-                        },
-                        0
-                      )}
+                      hits={_.sum(countDistribution.data['count()'])}
                       showResetButton={false}
                       onResetQuery={() => {}}
                     />
                     <TimechartHeader
-                      dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
                       options={timeIntervalOptions}
                       onChangeInterval={(selectedIntrv) => {
                         const intervalOptionsIndex = timeIntervalOptions.findIndex(
