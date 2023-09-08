@@ -76,7 +76,7 @@ import {
   SetupDependencies,
 } from './types';
 
-export const API_ENDPOINT_PERMISSIONS_INFO = '/api/v1/restapiinfo';
+const API_ENDPOINT_PERMISSIONS_INFO = '/api/v1/restapiinfo';
 
 async function hasApiPermission(core: CoreSetup): Promise<boolean | undefined> {
   try {
