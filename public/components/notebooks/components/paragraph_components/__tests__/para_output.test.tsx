@@ -71,7 +71,7 @@ describe('<ParaOutput /> spec', () => {
     const setVisInput = jest.fn();
     const utils = render(
       <ParaOutput
-        key={para.uniqueId + 'a'}
+        key={para.uniqueId}
         para={para}
         visInput={jest.fn()}
         setVisInput={setVisInput}
