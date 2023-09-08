@@ -8,12 +8,12 @@ import { isEmpty } from 'lodash';
 import {
   DATE_PICKER_FORMAT,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
-} from '../../common/constants/explorer';
+} from '../../../common/constants/explorer';
 import {
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
-} from '../../common/constants/shared';
+} from '../../../common/constants/shared';
 
 /**
  * @param literal - string literal that will be put inside single quotes in PPL command
