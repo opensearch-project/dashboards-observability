@@ -76,13 +76,26 @@ import {
   SetupDependencies,
 } from './types';
 
+export const API_ENDPOINT_PERMISSIONS_INFO = '/api/v1/restapiinfo';
+
+async function hasApiPermission(core: CoreSetup): Promise<boolean | undefined> {
+  try {
+    const permissions = await core.http.get(API_ENDPOINT_PERMISSIONS_INFO);
+    return permissions.has_api_access || false;
+  } catch (e) {
+    console.error(e);
+    // ignore exceptions and default to no security related access.
+    return false;
+  }
+}
+
 export class ObservabilityPlugin
   implements
     Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
-  public setup(
+  public async setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
-  ): ObservabilitySetup {
+  ): Promise<ObservabilitySetup> {
     uiSettingsService.init(core.uiSettings, core.notifications);
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
@@ -200,22 +213,26 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('integrations'),
     });
 
-    core.application.register({
-      id: observabilityDatasourcesID,
-      title: observabilityDatasourcesTitle,
-      category: DEFAULT_APP_CATEGORIES.management,
-      order: observabilityDatasourcesPluginOrder,
-      mount: appMountWithStartPage('datasources'),
-    });
+    const permissions = await hasApiPermission(core);
 
-    setupDeps.managementOverview?.register({
-      id: observabilityDatasourcesID,
-      title: observabilityDatasourcesTitle,
-      order: 9070,
-      description: i18n.translate('observability.datasourcesDescription', {
-        defaultMessage: 'Manage compatible data sources and compute with OpenSearch Dashboards.',
-      }),
-    });
+    if (permissions) {
+      core.application.register({
+        id: observabilityDatasourcesID,
+        title: observabilityDatasourcesTitle,
+        category: DEFAULT_APP_CATEGORIES.management,
+        order: observabilityDatasourcesPluginOrder,
+        mount: appMountWithStartPage('datasources'),
+      });
+
+      setupDeps.managementOverview?.register({
+        id: observabilityDatasourcesID,
+        title: observabilityDatasourcesTitle,
+        order: 9070,
+        description: i18n.translate('observability.datasourcesDescription', {
+          defaultMessage: 'Manage compatible data sources and compute with OpenSearch Dashboards.',
+        }),
+      });
+    }
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
