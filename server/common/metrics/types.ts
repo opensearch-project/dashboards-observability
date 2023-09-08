@@ -10,11 +10,11 @@ export type RequestType = typeof REQUESTS[number];
 export type CounterNameType = 'count' | 'system_error' | 'user_error' | 'total';
 
 // counter to track user click actions
-type ClickCounterType = {
+interface ClickCounterType {
   [element: string]: {
     [counter in CounterNameType]?: number;
   };
-};
+}
 
 // counter to track requests to OpenSearch
 type RequestCounterType = {

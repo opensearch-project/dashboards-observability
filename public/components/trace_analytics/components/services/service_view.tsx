@@ -65,7 +65,7 @@ export function ServiceView(props: ServiceViewProps) {
       props.parentBreadcrumb,
       {
         text: 'Trace analytics',
-        href: '#/home',
+        href: '#/',
       },
       {
         text: 'Services',
@@ -156,7 +156,7 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Average latency (ms)</EuiText>
+                <EuiText className="overview-title">Average duration (ms)</EuiText>
                 <EuiText size="s" className="overview-content">
                   {fields.average_latency !== undefined ? fields.average_latency : '-'}
                 </EuiText>
@@ -170,7 +170,7 @@ export function ServiceView(props: ServiceViewProps) {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Throughput</EuiText>
+                <EuiText className="overview-title">Request rate</EuiText>
                 <EuiText size="s" className="overview-content">
                   {fields.throughput !== undefined ? (
                     <EuiI18nNumber value={fields.throughput} />

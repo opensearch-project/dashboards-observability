@@ -145,7 +145,7 @@ export function LatencyTable(props: {
               }
             >
               <span>
-                Latency variance (ms){' '}
+                Duration variance (ms){' '}
                 <EuiIcon
                   size="s"
                   color="subdued"
@@ -226,7 +226,7 @@ export function LatencyTable(props: {
             <>
               {/* <div style={{ marginRight: 40 }}>Average</div> */}
               <div>
-                Average latency (ms){' '}
+                Average duration (ms){' '}
                 <EuiIcon
                   size="s"
                   color="subdued"
