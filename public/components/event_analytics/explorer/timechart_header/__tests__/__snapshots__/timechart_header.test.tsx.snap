@@ -2,7 +2,7 @@
 
 exports[`Time chart header component Renders Time chart header component 1`] = `
 <TimechartHeader
-  dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+  endTime="Aug 28, 2023 @ 20:00:00.408"
   onChangeInterval={[MockFunction]}
   options={
     Array [
@@ -32,6 +32,7 @@ exports[`Time chart header component Renders Time chart header component 1`] = `
       },
     ]
   }
+  startTime="Aug 28, 2023 @ 20:00:00.406"
   stateInterval="w"
 >
   <I18nProvider>
@@ -157,7 +158,9 @@ exports[`Time chart header component Renders Time chart header component 1`] = `
                         data-test-subj="discoverIntervalDateRange"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        Aug 28, 2023 @ 20:00:00.406 - Aug 28, 2023 @ 20:00:00.408
+                      </div>
                     </EuiText>
                   </span>
                 </EuiToolTip>

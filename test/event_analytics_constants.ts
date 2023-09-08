@@ -567,3 +567,7 @@ export const HORIZONTAL_BAR_TEST_VISUALIZATIONS_DATA = {
     type: VIS_CHART_TYPES.HorizontalBar,
   }),
 };
+
+export const EXPLORER_START_TIME = 'Aug 28, 2023 @ 20:00:00.406';
+
+export const EXPLORER_END_TIME = 'Aug 28, 2023 @ 20:00:00.408';
