@@ -92,9 +92,7 @@ export interface IExplorerFields {
 }
 
 export interface EmptyTabParams {
-  tabIds: string[] | undefined;
-  queries: any | undefined;
-  explorerData: any | undefined;
+  tabIds: string[];
 }
 
 export interface ILogExplorerProps {

@@ -1,0 +1,115 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "aws_vpc_flow",
+        "labels": ["aws", "vpc"]
+      },
+      "properties": {
+        "aws": {
+          "properties": {
+            "vpc": {
+              "properties": {
+                "version": {
+                  "type": "keyword"
+                },
+                "account-id": {
+                  "type": "keyword"
+                },
+                "region": {
+                  "type": "keyword"
+                },
+                "az-id": {
+                  "type": "keyword"
+                },
+                "vpc-id": {
+                  "type": "keyword"
+                },
+                "subnet-id": {
+                  "type": "keyword"
+                },
+                "tcp-flags": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "interface-id": {
+                  "type": "keyword"
+                },
+                "instance-id": {
+                  "type": "keyword"
+                },
+                "srcaddr": {
+                  "type": "keyword"
+                },
+                "dstaddr": {
+                  "type": "keyword"
+                },
+                "srcport": {
+                  "type": "long"
+                },
+                "dstport": {
+                  "type": "long"
+                },
+                "protocol": {
+                  "type": "keyword"
+                },
+                "protocol-code": {
+                  "type": "keyword"
+                },
+                "packets": {
+                  "type": "long"
+                },
+                "bytes": {
+                  "type": "long"
+                },
+                "start": {
+                  "type": "date",
+                  "format": "epoch_second"
+                },
+                "end": {
+                  "type": "date",
+                  "format": "epoch_second"
+                },
+                "flow-direction": {
+                  "type": "keyword"
+                },
+                "pkt-src-aws-service": {
+                  "type": "keyword"
+                },
+                "pkt-srcaddr": {
+                  "type": "keyword"
+                },
+                "pkt-dst-aws-service": {
+                  "type": "keyword"
+                },
+                "pkt-dstaddr": {
+                  "type": "keyword"
+                },
+                "traffic-path": {
+                  "type": "keyword"
+                },
+                "action": {
+                  "type": "keyword"
+                },
+                "log-status": {
+                  "type": "keyword"
+                },
+                "sublocation-id": {
+                  "type": "keyword"
+                },
+                "sublocation-type": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

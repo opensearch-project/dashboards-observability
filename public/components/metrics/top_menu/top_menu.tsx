@@ -26,22 +26,15 @@ import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_pa
 import { resolutionOptions } from '../../../../common/constants/metrics';
 import { MetricType } from '../../../../common/types/metrics';
 import { uiSettingsService } from '../../../../common/utils';
-import SavedObjects from '../../../services/saved_objects/event_analytics/saved_objects';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import {
-  allAvailableMetricsSelector,
-  metricsLayoutSelector,
-  selectMetric,
-} from '../redux/slices/metrics_slice';
-import { SearchBar } from '../sidebar/search_bar';
+import { metricsLayoutSelector } from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
 
 interface TopMenuProps {
-  http: CoreStart['http'];
   IsTopPanelDisabled: boolean;
   startTime: ShortDate;
   endTime: ShortDate;
@@ -57,13 +50,10 @@ interface TopMenuProps {
   spanValue: number;
   setSpanValue: React.Dispatch<React.SetStateAction<number>>;
   resolutionSelectId: string;
-  savedObjects: SavedObjects;
   setToast: (title: string, color?: string, text?: any, side?: string) => void;
-  setSearch: any;
 }
 
 export const TopMenu = ({
-  http,
   IsTopPanelDisabled,
   startTime,
   endTime,
@@ -79,14 +69,10 @@ export const TopMenu = ({
   spanValue,
   setSpanValue,
   resolutionSelectId,
-  savedObjects,
   setToast,
-  setSearch,
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
-  const allAvailableMetrics = useSelector(allAvailableMetricsSelector);
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
   const metricsLayout = useSelector(metricsLayoutSelector);
   const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
 
@@ -207,19 +193,8 @@ export const TopMenu = ({
       try {
         const allMetricIds = savedMetricIds.map((metric) => metric.objectId);
         const soPanels = selectedPanelOptions.filter((panel) => uuidRx.test(panel.panel.id));
-        const opsPanels = selectedPanelOptions.filter((panel) => !uuidRx.test(panel.panel.id));
 
         dispatch(addMultipleVizToPanels(soPanels, allMetricIds));
-        const savedMetricsInOpsPanels = await Promise.all(
-          opsPanels.map((panel) => {
-            return http.post(`${CUSTOM_PANELS_API_PREFIX}/visualizations/multiple`, {
-              body: JSON.stringify({
-                panelId: panel.panel.id,
-                savedVisualizationIds: allMetricIds,
-              }),
-            });
-          })
-        );
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);
@@ -231,10 +206,7 @@ export const TopMenu = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={10}>
-          <SearchBar setSearch={setSearch} />
-        </EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
         <EuiFlexItem grow={false}>
           <div className="resolutionSelect">
             <EuiFieldText
@@ -277,7 +249,6 @@ export const TopMenu = ({
             closePopover={() => setIsSavePanelOpen(false)}
           >
             <MetricsExportPanel
-              http={http}
               visualizationsMetaData={visualizationsMetaData}
               setVisualizationsMetaData={setVisualizationsMetaData}
               sortedMetricsLayout={sortedMetricsLayout}

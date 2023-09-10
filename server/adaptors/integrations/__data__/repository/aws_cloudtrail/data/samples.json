@@ -1,0 +1,3772 @@
+[
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "cloudtrail.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:24Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketAcl",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "cloudtrail.amazonaws.com",
+        "userAgent": "cloudtrail.amazonaws.com",
+        "requestParameters": {
+          "bucketName": "aws-cloudtrail-mytrail-345678901234-059ac1d5",
+          "Host": "aws-cloudtrail-mytrail-345678901234-059ac1d5.s3.eu-west-1.amazonaws.com",
+          "acl": ""
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "dNg98Ncsm0R/PygSHq0b0Qiyx2TDUq9jgC9wSxasWFiQ/hJPz1rv2RWiUWErUcWAZyJqKoxckNM=",
+          "bytesTransferredOut": 544
+        },
+        "requestID": "8RJVMXE049D1QTJ1",
+        "eventID": "8e6ffb2a-af42-47e6-9da9-8d90adbdc937",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "535103f5-cc74-4812-90dd-6861bfa00ff3",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-17T04:12:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "cloudtrail.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:24Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketAcl",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "cloudtrail.amazonaws.com",
+        "userAgent": "cloudtrail.amazonaws.com",
+        "requestParameters": {
+          "bucketName": "aws-cloudtrail-logs-345678901234-222dcf7b",
+          "Host": "aws-cloudtrail-logs-345678901234-222dcf7b.s3.eu-west-1.amazonaws.com",
+          "acl": ""
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "So+s40fACXsYF+1FhABCrXEa0aVR8gVq+opzVP6cf5QM2cFHRJXgiCinvaZwka9srXZyWHdhXpk=",
+          "bytesTransferredOut": 544
+        },
+        "requestID": "8RJPPQN6E24AE3HY",
+        "eventID": "1b37f2f5-9b80-47a0-b3df-0ae7e531e211",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "120e2232-5d8f-4797-845d-5cae63fa2ad6",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-13T01:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "cloudtrail.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:24Z",
+        "eventSource": "kms.amazonaws.com",
+        "eventName": "GenerateDataKey",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "cloudtrail.amazonaws.com",
+        "userAgent": "cloudtrail.amazonaws.com",
+        "requestParameters": {
+          "keyId": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07",
+          "encryptionContext": {
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/mytrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_MTTBopRY9S74a4oz.json.gz"
+          },
+          "keySpec": "AES_256"
+        },
+        "responseElements": null,
+        "requestID": "1c50c36c-f026-4aeb-a503-fe1233629e5a",
+        "eventID": "139bde74-a3a8-4016-be18-e72c16f0cf3b",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::KMS::Key",
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "49038fb9-cc61-44e2-a093-ba9e37ba090d",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-16T03:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:ElasticLoadBalancingDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/ElasticLoadBalancingDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5C6HNYQPO",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:25Z",
+        "eventSource": "elasticloadbalancing.amazonaws.com",
+        "eventName": "DescribeLoadBalancers",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": null,
+        "responseElements": null,
+        "requestID": "6e6d4b82-eb0e-4741-955f-f89e0708a5ad",
+        "eventID": "e60f9221-0c7a-46d5-b92d-212afd22ce31",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "apiVersion": "2012-06-01",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-12T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "cloudtrail.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:24Z",
+        "eventSource": "kms.amazonaws.com",
+        "eventName": "GenerateDataKey",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "cloudtrail.amazonaws.com",
+        "userAgent": "cloudtrail.amazonaws.com",
+        "requestParameters": {
+          "encryptionContext": {
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/testtrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_ypT1EKjIs0DWxgUy.json.gz"
+          },
+          "keyId": "arn:aws:kms:eu-west-1:345678901234:key/fcf34ed2-684c-4d2d-9dae-d173e6794772",
+          "keySpec": "AES_256"
+        },
+        "responseElements": null,
+        "requestID": "b36013b4-e873-4553-a6c2-220a8bb04f1d",
+        "eventID": "9805eabd-1d03-472f-933f-f4032e0fe9f2",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::KMS::Key",
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/fcf34ed2-684c-4d2d-9dae-d173e6794772"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "5655d7ec-f1b6-4bec-948e-c0cc072fd7f9",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-10T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleSessionName": "SNSDescribeHandlerSession"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5I34W7W7V",
+            "expiration": "Dec 2, 2021 11:11:28 PM",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF8aCWV1LXdlc3QtMSJIMEYCIQCUTC3u5lOWEbe3dKKKySCQPTrDqxiSv4fAiuxMApcMWwIhAOUD1R5yHhjg36YSpFxdCvGUfOqhUUpYOD3c8S9pZsE8KtwCCDcQAhoMMzQ3MjgzODUwMTA2Igw7T79JW/aQXeSGMf4quQIbGkCDHo29JPo4VTUAbfrBYKnV2Sp1Le3sNSWgAjD6mdamSev+kVAhGlccfPUsoEHXFjFh8o3jM7BT1I5JP7CcfCW+UWW/BLvN+p5nzhNApbg/VP1s4ghfXiHKwwK4azzoLbQXnJdHozHRkXvXreyteuCnQpUGsW4cFZTCeG14BufJC0xXmFTArg//96n6EtyNR5+VYOJm1ImKabH98gB6nlQCnBXZEIipR4lHixzsioHoP/fuBrj7POF8kHpk/8skyhaENEaDEw8uoMk1I7YTJz2nW0L/TWLVkCYIzovIEdWAiZHdHDhGGYdrbEzSvmo9iXFqH490Ss4o53KJiEfk/1deLH3glLUNWWyN6uzaj5D2KPnFe/eYWew6dRdvKn8IjJcFGXr9216uWnrDH8IOn0AI1LE3m/H3MJCJpY0GOr4Bkm1Sm/j5C/Rq07ERHPtEn+kSUvYHKKXV1+T+RP82r9JoVeIeMGcXmrSfx/8iSbHq4FoL5mZwajObY8GJH+YJvyzmw78dusgYqk3i2NUcdBMtA49oOTT/9dIrWIwSkblRK3julZdYApzvTlG00xJ7PrUgDHvMKqEUmfBhN3YDMUftcFjR29zpGmiV7U6vpQZEp2MkS3o3OHUEeDr1jSyg+EX+11w3LF71os66OyLLZcH8rHn0tk7Oadh6a9CQ+Q=="
+          },
+          "assumedRoleUser": {
+            "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession"
+          }
+        },
+        "requestID": "a10348a0-c7f4-4d5a-b596-39339966b01c",
+        "eventID": "104a2289-b51e-4d49-99ca-8bfb90c786e5",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "c87280b6-b9ba-46af-849e-ddf7fa509848",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-09T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5KP6PYYL2B:LogHub-Pipe-bfe64-S3toOpenSearchStacklogSenderFnEB-tm2bztjl5WTH",
+          "arn": "arn:aws:sts::345678901234:assumed-role/LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV/LogHub-Pipe-bfe64-S3toOpenSearchStacklogSenderFnEB-tm2bztjl5WTH",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAINP7HHMSNLIOUBQA",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5KP6PYYL2B",
+              "arn": "arn:aws:iam::345678901234:role/LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV",
+              "accountId": "345678901234",
+              "userName": "LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:55:55Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:26Z",
+        "eventSource": "kms.amazonaws.com",
+        "eventName": "Decrypt",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "encryptionAlgorithm": "SYMMETRIC_DEFAULT",
+          "encryptionContext": {
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/testtrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_ypT1EKjIs0DWxgUy.json.gz"
+          }
+        },
+        "responseElements": null,
+        "requestID": "1680225e-b40b-4a67-8475-5ca97a54d4e4",
+        "eventID": "91874e34-57fa-492e-8ed0-f605ef8c684c",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::KMS::Key",
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/fcf34ed2-684c-4d2d-9dae-d173e6794772"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-18T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
+          "accountId": "345678901234",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:29Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "ec2.amazonaws.com",
+        "eventName": "DescribeNatGateways",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "DescribeNatGatewaysRequest": ""
+        },
+        "responseElements": null,
+        "requestID": "591df254-404d-4a85-a2c9-df17c5706945",
+        "eventID": "25367e85-8135-4de4-aa45-07faf56b4024",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-19T01:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleSessionName": "EC2DescribeHandlerSession"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5DDQJXD5O",
+            "expiration": "Dec 2, 2021 11:11:28 PM",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF8aCWV1LXdlc3QtMSJHMEUCIAdVZpDdFGNNbbR3yXFMlMQ6GkwiZUKbejQbbr0VflHvAiEAxp9pIWtFWT59LU+cT2C8Rqi6KamscfSChX3ShD5ZFDYq3AIINxACGgwzNDcyODM4NTAxMDYiDKPiw8oSwqmesh87USq5AkE9J+eOyrPjT5djZzDl4sSfCu9N1pYTZSFKcwnO89Tm44cyAdUhErpDi9ArQjIad/FNlS29zLhVVQYHX8Z50qrDjUvhguOyLy4luD8puQP9cbaVWcGRq5stZqIZvc/vd9ZZ7n9lrXO8dVQkCHETulT01vqEJ9jFpusyl2LtcEMpSofYVSYLehEK6HGaPMQkvdwwCUFkoLTc6VefNmyaYFuttxAKPUm62jkSmpuwJiY5ro+WVKKMe4Q/WN5mAsdmBqggGcch38ddNV1aXxLQlTPIrE4UEW2z9b1St34BdTdapOdoSS7PkbX32rlENCkIWXPmsLF/fojhd8VXPb0JIa/Jv9b943r+k9fp5gqqeZVpP8BlZQHUDRxH0lmi9eRFs/W+Qeypxtg1pSsUH6SkoMvEiW1S5KKdgvswkImljQY6vwFJtXLV7D8Xdw/zKTHFdrvvQ2LkMe9AHHXP5z2ipaGj7WqxjLjQCBD5dULZM56PEu2D+5hRIJw9D33ZbSKnp8BYvhiWObG/vnkw3KGsTxb1cTYpQa+FGjZsASN9EroGgHBcXgfTWmINt3Gen0tKtABZ9ziKwHjQrGrsBTS+xer+eR2bvsWXNm3n2J2jPgytyPJTXTN4vQB3v8876wH821+bTuUDKsd/tiGJKqKgrROCu3MTvXHOE9paxOFHkytodw=="
+          },
+          "assumedRoleUser": {
+            "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession"
+          }
+        },
+        "requestID": "c97d3f28-a45b-40ac-9e52-b7434aadfa91",
+        "eventID": "cd69c7b4-ea2f-4b7e-b36e-ea28f28a18cf",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "014a546e-de1c-4cb1-ab26-995d2a6690a1",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-12T01:00:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:25Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleSessionName": "ElasticLoadBalancingDescribeHandlerSession"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5PRXFTYSS",
+            "expiration": "Dec 2, 2021 11:11:25 PM",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF4aCWV1LXdlc3QtMSJIMEYCIQCPG7xXBDFmo0eZQ93is0cKaB/SW0OLLir59SZVIBG/TAIhALLChCU2Vk02WdmUMfe2O1p5iL7AsN/HTCt7wz8SDJjuKu0CCDcQAhoMMzQ3MjgzODUwMTA2IgyeFeRiQSXSqC6QWt0qygJPEe4vYsdpSzbvhUdvcrHpVL1Q8t4QdFYA++62clfyX4BbosaxFa2YqMdbNBaS1dcOljE1oxix2bn2gl4/mcQFWdW8oInuGlTlYVG9utvVImR88Ptu+HA3/ItO+aMgl/v8smu+2ck81LdfE8aDh1T9opZyHZsBWRkYDADxA142P8JLOcHDfTbDs4qWVjJHCs3jI36MMbSJ4OINDnMCKsWo0FToow7DmRYSoQgR1LdW4B8I35JhEuhJd6EUZ/4seSF0o4mLSQDKT5nVxEpDQULBEiwYGebJUoz6CU18GU7RsLDUeDukWTX0n0oEP6jNeslhmGiw7k3k2mQQKs5JH4nn5RO1NoQ/V0XlhihRyFn9pOu9XqYJbEdXh+c00yyf1yK6sfcmx2VHLL1bn9wMJGlyuwOoIAAGEyQpjNsqV1UCibuOoWR4R30ZNs4wjYmljQY6vgH+Lbp+ncH6l2SC5AmAfELrkLbAzCb0+KH8rJqRd3IKUI5kDHpU1yndy1RETQJYa987CNQhLUyP88gaBeadRea0HJ8K5kEv57+0EwY0oeoszrfsOlLmHCvmilRZRbUl3rKD4gyBg4ivoiIQfP5XqywXgRzsv3IldTHctrjx1u9O8SQTLEelYAdeCc2+Ja2o7MrGDYI3IDvz9oqwca0QvpVkN08NDMIifgnYATkGo6iQHdzxC6BhPHHuwI0/Ewzb"
+          },
+          "assumedRoleUser": {
+            "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:ElasticLoadBalancingDescribeHandlerSession",
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/ElasticLoadBalancingDescribeHandlerSession"
+          }
+        },
+        "requestID": "865d2e3c-24f1-49f6-b107-690ce5dfb254",
+        "eventID": "a7f2465a-a4d0-473c-83a6-7ba01548d364",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "00a0b0c9-b74c-44ed-b4e3-7e0cbf914fd9",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-13T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleSessionName": "EC2DescribeHandlerSession"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5E2JWWGOX",
+            "expiration": "Dec 2, 2021 11:11:29 PM",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF8aCWV1LXdlc3QtMSJHMEUCIHcfe/QQDnT+fC3ImeSlOqvnPCNcOvxZbkRreRd9iY6IAiEA5QiXjj6Yg7KFxVxZ2IMUMBZcYcMqHFJZfqrW7YVMKHUq3AIINxACGgwzNDcyODM4NTAxMDYiDNBZjFPZe7kkx+tVlyq5AmD5hGlDMmLY8M9ON8kJsB0UkHcGJ+EsCQl+YaesEWidvgt5JYwMw/jXeURKRFaJz25CGG6IjSkiZ4Gpqm0nE9thMxk7ende9lsd6IqlZkBoC7grrBU9Wu+87I5C3wUhM+ph6roQ5T/Ev8RXeipO9B+eTJHn78u1c1+PmpkGRpG6Pyst8KhJBMKAixDoiBuwmrWJGHu6/5cEz5VNfKSKW8mqjK/uZPdVFtX51php7HHdAqtobd3ttznsuZsAWf9uplVopAodRzEzNobwcWgNj9Y2B8ROGBkzJwsluxTLeYn29EYPcLVhvE61FJhXkgcgvzLsrjLMzrymakqyQCz/LzjbhaOB9ti1d4JDHUJ15ZXiLeDkrT5V7i1He9B0NNfs4mKJArqAeGseKGeq2hkqfsnB/DlALS/YJbwwkYmljQY6vwHNaBaI7vMGIwa/d7AU9lceWv+D1Y/JGJdOkyrTml8DwVRkPYzXXie36NwjJ40hQKIbKJDZ/m8rr2RoInI27fSGgPl+MVYeGfV0gtoOsWua73KUNdU+Wa8Ndf+Rl0y11crqCH3oZlLPGO385WtHxDbOQwVYvJQuyxI5Bxx1GTALhTJk+hNMWxD92Bdzraa82HVj9ixyubFjje02ntmMaHcmgFrhHvBEGL6HJ0bT4C6l/JmDtBAryBhB3Z4BKZFgMw=="
+          },
+          "assumedRoleUser": {
+            "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession"
+          }
+        },
+        "requestID": "0f376fbd-06ed-4788-9c9c-ea5c0aa020b2",
+        "eventID": "cc7c5811-204b-4483-8aba-38f87e31130d",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "f8001dce-ba63-4bed-8715-7e3446c6dfcf",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-20T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638481888699734314",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638481888699734314",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5A2ZEP66K",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5NMPY4GP3I",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForAppSync"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:51:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "appsync.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "xray.amazonaws.com",
+        "eventName": "GetSamplingRules",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "appsync.amazonaws.com",
+        "userAgent": "appsync.amazonaws.com",
+        "requestParameters": null,
+        "responseElements": null,
+        "requestID": "009eb0aa-62c5-4354-96e6-22b99a42983a",
+        "eventID": "c14bdebf-495a-4aaf-8dc0-073678ad321b",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-11T10:00:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
+          "accountId": "345678901234",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "ec2.amazonaws.com",
+        "eventName": "DescribeEgressOnlyInternetGateways",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "DescribeEgressOnlyInternetGatewaysRequest": ""
+        },
+        "responseElements": null,
+        "requestID": "c75f6f99-dcdd-4e59-86dd-10369d7b3216",
+        "eventID": "94aa8445-d4e4-47d4-82fd-8caccc2156f2",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-09T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5MGPHCXONO:CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
+          "arn": "arn:aws:sts::345678901234:assumed-role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK/CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAIYLMNBUCLSGRCUEQ",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5MGPHCXONO",
+              "arn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+              "accountId": "345678901234",
+              "userName": "CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:05:42Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:26Z",
+        "eventSource": "kms.amazonaws.com",
+        "eventName": "Decrypt",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "encryptionContext": {
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/mytrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_MTTBopRY9S74a4oz.json.gz"
+          },
+          "encryptionAlgorithm": "SYMMETRIC_DEFAULT"
+        },
+        "responseElements": null,
+        "requestID": "435c9405-c5ba-46f5-a619-31685eb66418",
+        "eventID": "1462107d-7eca-4f1b-aed2-5576c2d581d9",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::KMS::Key",
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-01T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "lambda.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:17Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "lambda.amazonaws.com",
+        "userAgent": "lambda.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+          "roleSessionName": "awslambda_248_20211202221117529"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5PWNBBPHJ",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF4aCWV1LXdlc3QtMSJHMEUCIQCFKuo+zzNLkSlsnQweOVoNRb8lxYr3vJwf5V/0fm4HGQIgGOthVIfHjZmagM5Ey0NpvNM42fIamutsnWrohngMsYAqpAIINxACGgwzNDcyODM4NTAxMDYiDC1M9OU9E66I5CygyyqBAsOzarmD5l7sAOfT/KYNarESd+MVz6uyUuKCvSCnFnEeTf0JgbgDoms4+k44hWy8bTLPSHWC3FOGZDiKlJQm0bmSDTuSVS2WohULAYAMVS7YrikxSwr6hL3OAJC54lcB0aQY+DRS/wUIiPnVUhXzXcQ4Bh/dH+8Kg8LjRFHL2hWxeeMqz+xQhOjZr02GWG4rUWKbUbSLaiSXNz872wwwl1jH9n5Pqn+rllTpXF2yS0Dr2UDT2pn2hzDqMRPIbQl9bhlXor1bPE65lzDDqTuObhOtnc/JsrkkrUhk/cRa2H36LJF6df4TpnKZG7r5rGB+vKPre8paNBs6OASPjsLBC2dNMIWJpY0GOpoBKEI8k8FYGhxZ8DGiXVKtnb9SOCHSDPg5sFxq7e4jphgZ0sCpnQi9d48lz3TitGwJlEthoDhCZYb2nZYzFNfVZvmxl2HO7rAzWG7wyLvv3aIu/yDyIJJc2d3ansg1QlGqQCGBujQkUmmMMNJ4jql0TwhxSDbG7H/jXSfLhzX0cPUGTIFTkMQmd0kcj/vDHML3IeeSSQDlgWqhQg==",
+            "expiration": "Dec 3, 2021, 10:21:17 AM"
+          }
+        },
+        "requestID": "22ee1385-2d5d-4ddf-903a-b3a9ff7451fa",
+        "eventID": "84e2004a-7803-4421-aaf4-80049d925144",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "1473513b-ee8b-479b-a7b4-9b547b644063",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-19T00:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:25Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleSessionName": "AWSConfig-Describe"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5JFVRGKUN",
+            "expiration": "Dec 2, 2021 11:11:25 PM",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF4aCWV1LXdlc3QtMSJGMEQCIHZcihmh3z3og65UjaHO5F31IPJr7nI7dJMfbE7a7X96AiAM1WmIgk1Z8TIvpFq2ygAbjjLps3mOPEflIbIQZ9LHayrVAgg3EAIaDDM0NzI4Mzg1MDEwNiIM9T0JTd1kQvdhw8V/KrICQ5VqAD2K7XCM29NRAeay8WjevkpcXqsPYNY8MDLAUNKvV1kQkjqp2N6oHhjThGNXWf7SA6Wv1kKJWhUv3PY436YlHKW6yUskEovxh6OWvWQTlIFBZvZ3oFK+BS2eqvt8WjD4rjL3OIGhiTZej4cYN92bXTBtBGJuFj+EzQGFEdjt8SPH1BhiRpe1zwaM/na8vlKZ6XcXEZoWEWDAJrUOEBTmRyAGsH0PSSGbUu4Enbjkhm6y8ZtvXeU/MZ70igYxgrlsfS7ANK9abXdImnxnqMpOGnR4pCHn8nLZgqF9HBqkB/CH+bvDuMjZfjsh6/TSZOH7A+fxclUYmbelkuoaZjYfBn9e9bxMcYynMGsM7xH8PPtyatAz6/05Vx75LwASKiM0tg7SREi9fgIrD5xVzK7LMI2JpY0GOsABV7fN6eIaaa0FYj5ID/3E0RS7wlm2XIFv94Vbq2EgnvnJ7tXmEjVm1gET+YjAkS9yTJjDbLXFwxSTyXoMCoeTHmf8ucbKYX2HwiuKGpljqx5z2e/1s8NAC8KAEAn0PBosWuLuP+uyIn5LmghQ26uHuG5KXHmHuxSfeTt0ZmUgcRjlsv0vtsCZNbF3qfhgpy8LKNr/KlUWxbsJpzvaW/iBupcqzDcRqp1DpYhQwrT5SoHPKDmUB4XyC0C9OOCHBG0u"
+          },
+          "assumedRoleUser": {
+            "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe"
+          }
+        },
+        "requestID": "f7f55ba9-968a-4f9d-8c85-a46eb49c1dfd",
+        "eventID": "b7394b83-8ad5-4141-9d26-9c225f26bac3",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "d92e1358-d0a5-4641-9067-c037acde13d6",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-13T11:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638482156450755254",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638482156450755254",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DT2DFC4X",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5NMPY4GP3I",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForAppSync"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:55:56Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "appsync.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:30Z",
+        "eventSource": "xray.amazonaws.com",
+        "eventName": "GetSamplingRules",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "appsync.amazonaws.com",
+        "userAgent": "appsync.amazonaws.com",
+        "requestParameters": null,
+        "responseElements": null,
+        "requestID": "f96d3ba2-2d66-419a-9383-5d168e08d469",
+        "eventID": "2fff4ca3-0270-4024-a87d-ba2cb67925b0",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-21T05:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5DGNE5U7AI:c95c6bcfe9033cfff4d3d0c295caf16e",
+          "arn": "arn:aws:sts::345678901234:assumed-role/LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ/c95c6bcfe9033cfff4d3d0c295caf16e",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAI6XAITHH276POBAA",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5DGNE5U7AI",
+              "arn": "arn:aws:iam::345678901234:role/LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ",
+              "accountId": "345678901234",
+              "userName": "LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:45:50Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "logs.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:35Z",
+        "eventSource": "kms.amazonaws.com",
+        "eventName": "GenerateDataKey",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "logs.amazonaws.com",
+        "userAgent": "logs.amazonaws.com",
+        "requestParameters": {
+          "keyId": "alias/aws/kinesis",
+          "encryptionContext": {
+            "aws:kinesis:arn": "arn:aws:kinesis:eu-west-1:345678901234:stream/LogHub-Pipe-3a2ac-CWtoOpenSearchStackcwDataStream22A58C70-plrsK4s3GlGG"
+          },
+          "numberOfBytes": 32
+        },
+        "responseElements": null,
+        "requestID": "47e3f026-346b-47f0-aa9a-6b4666774c6d",
+        "eventID": "bf49badb-d471-4959-9124-cbc8140a9062",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::KMS::Key",
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/10a963d1-db97-4382-b1ac-43dc8bd25e1d"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-11T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638481533224676745",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638481533224676745",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5JTI2Z37S",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5NMPY4GP3I",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForAppSync"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:45:33Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "appsync.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:38Z",
+        "eventSource": "xray.amazonaws.com",
+        "eventName": "GetSamplingRules",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "appsync.amazonaws.com",
+        "userAgent": "appsync.amazonaws.com",
+        "requestParameters": null,
+        "responseElements": null,
+        "requestID": "d51f80cb-3781-44ad-afa3-0bed72b04d47",
+        "eventID": "c1c8d9e7-ca8d-4073-8a72-1ae0e5f6867b",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-12T01:04:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:39Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aiden-dev-bucket-eu-west-1",
+          "location": "",
+          "Host": "aiden-dev-bucket-eu-west-1.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "PQll1iX8iROo/BXhWQBtg7OdP7nvgtJlNhG+eJ+wtDmhfUBPI9sx71NmMnoIQTWY0XukN5+oUFw=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "CCXYWDEN4MCDJVTY",
+        "eventID": "49ddf02f-833e-4959-b094-00b2fa985a6f",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aiden-dev-bucket-eu-west-1"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-10T00:10:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:46Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "athena-test-345678901234",
+          "location": "",
+          "Host": "athena-test-345678901234.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "XretCbctKoEzHrERRsKrZ3BpKZzcp3369pHMIncBuTfeVCyBuO0gqWXdKUDzOVYs0XWYiBNLYl0=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "WGWND0SR7ZZ7SZSY",
+        "eventID": "acb46a34-899d-41df-84e5-34d2f729b020",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::athena-test-345678901234"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-03T03:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5HYW6RMIDH:LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
+          "arn": "arn:aws:sts::345678901234:assumed-role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5KXKBYXWC",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5HYW6RMIDH",
+              "arn": "arn:aws:iam::345678901234:role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY",
+              "accountId": "345678901234",
+              "userName": "LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:54:05Z",
+              "mfaAuthenticated": "false"
+            }
+          }
+        },
+        "eventTime": "2021-12-02T22:11:27Z",
+        "eventSource": "ssm.amazonaws.com",
+        "eventName": "SendCommand",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "54.73.36.57",
+        "userAgent": "Boto3/1.18.55 Python/3.9.8 Linux/4.14.246-198.474.amzn2.x86_64 exec-env/AWS_Lambda_python3.9 Botocore/1.21.55 AwsSolution/SO8025/v1.0.0",
+        "requestParameters": {
+          "instanceIds": [],
+          "documentName": "AWS-RunShellScript",
+          "parameters": {
+            "commands": ["curl -s http://127.0.0.1:2022/api/v1/health"]
+          },
+          "interactive": false
+        },
+        "responseElements": {
+          "command": {
+            "commandId": "8e3d5ca6-4cc2-46e3-b627-18d9a70fedb0",
+            "documentName": "AWS-RunShellScript",
+            "documentVersion": "$DEFAULT",
+            "comment": "",
+            "expiresAfter": "Dec 3, 2021 12:11:27 AM",
+            "parameters": {
+              "commands": ["curl -s http://127.0.0.1:2022/api/v1/health"]
+            },
+            "instanceIds": [],
+            "targets": [],
+            "requestedDateTime": "Dec 2, 2021 10:11:27 PM",
+            "status": "Pending",
+            "statusDetails": "Pending",
+            "outputS3Region": "eu-west-1",
+            "outputS3BucketName": "",
+            "outputS3KeyPrefix": "",
+            "maxConcurrency": "50",
+            "maxErrors": "0",
+            "targetCount": 0,
+            "completedCount": 0,
+            "errorCount": 0,
+            "deliveryTimedOutCount": 0,
+            "serviceRole": "",
+            "notificationConfig": {
+              "notificationArn": "",
+              "notificationEvents": [],
+              "notificationType": ""
+            },
+            "cloudWatchOutputConfig": {
+              "cloudWatchLogGroupName": "",
+              "cloudWatchOutputEnabled": false
+            },
+            "interactive": false,
+            "timeoutSeconds": 3600
+          }
+        },
+        "requestID": "c9936d92-e4ec-45e5-a0d9-9f5276065f0e",
+        "eventID": "82b7e663-15c4-41e7-a631-6dbef3ef4729",
+        "readOnly": false,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management",
+        "tlsDetails": {
+          "tlsVersion": "TLSv1.2",
+          "cipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "clientProvidedHostHeader": "ssm.eu-west-1.amazonaws.com"
+        }
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-04T04:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:48Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-analytics-immersion-day-345678901234",
+          "location": "",
+          "Host": "aws-analytics-immersion-day-345678901234.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "ZPjcMc0dDcRvfwe51SwOIJ6iUbWkwxitqwJ5rSSn7vQjNtFegUYdKzRld7RRB/lRvvzWbWQgF9k=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "QJRYXPP89ZF3BTSY",
+        "eventID": "3aefe5e4-28bd-4142-988c-084f28899583",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-analytics-immersion-day-345678901234"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-07T07:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:48Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-athena-query-results-eu-west-1-345678901234",
+          "location": "",
+          "Host": "aws-athena-query-results-eu-west-1-345678901234.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "VohwN8OUV/QqKbKju7h/ixMvx1IlxoDwV3W1EkU1Tj+QI04u9z/WU4fN4EldkMjAuupXMINOOlY=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "QJRW0RZF190KVV67",
+        "eventID": "a8f102f9-90a0-4dfd-a41c-f6d5f96e3106",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-athena-query-results-eu-west-1-345678901234"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-08T08:08:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "ListTopics",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": null,
+        "responseElements": null,
+        "requestID": "9648e71d-ccec-5021-bd07-bd3e8a3c512e",
+        "eventID": "44362cf0-d282-4961-8157-8552527aff01",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-09T09:09:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "GetTopicAttributes",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:LogHub-Alarm-d24af-AlarmTopicD01E77F9-14C8QVTFGPAVT"
+        },
+        "responseElements": null,
+        "requestID": "bc3730d6-4c22-595f-bb49-6af50af21850",
+        "eventID": "e8bdb2f9-6085-4e75-8119-bea9babee5da",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-10T10:10:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "ListTagsForResource",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:LogHub-Alarm-d24af-AlarmTopicD01E77F9-14C8QVTFGPAVT"
+        },
+        "responseElements": null,
+        "requestID": "734ee4ff-8ba6-5c6b-87bb-bedccd765d64",
+        "eventID": "9d834ea8-1159-4c66-a8bd-f98ee3b20fc7",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-11T11:11:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "GetTopicAttributes",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:aosalert"
+        },
+        "responseElements": null,
+        "requestID": "f0e55f08-27bf-5108-ab29-052b616fe007",
+        "eventID": "57fa9739-3c41-44cd-a7d4-4b0bacec7e1f",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-12T08:12:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:28Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "ListTagsForResource",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:aosalert"
+        },
+        "responseElements": null,
+        "requestID": "ef5c2cf2-2654-56a0-bf83-76d1608497af",
+        "eventID": "1a50e833-5714-4e53-ac40-58d364758d46",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-13T08:13:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "GetTopicAttributes",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:dynamodb"
+        },
+        "responseElements": null,
+        "requestID": "1e083a45-439f-5d72-8bb7-6066054f0c7d",
+        "eventID": "9534b5a0-87f2-4387-bb2d-072c9d440792",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "ListTagsForResource",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:dynamodb"
+        },
+        "responseElements": null,
+        "requestID": "522d7e3e-1055-5d2e-baf3-241d56849c21",
+        "eventID": "1025f0ea-933f-44d4-a061-ab3cd7277872",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-01T09:00:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "GetTopicAttributes",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:test"
+        },
+        "responseElements": null,
+        "requestID": "9524e443-2dd5-5094-8cbd-be606b04119b",
+        "eventID": "130022b8-0f54-46d5-a23e-c204a9405d95",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-10T00:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:28Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "config.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:29Z",
+        "eventSource": "sns.amazonaws.com",
+        "eventName": "ListTagsForResource",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "config.amazonaws.com",
+        "userAgent": "config.amazonaws.com",
+        "requestParameters": {
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:test"
+        },
+        "responseElements": null,
+        "requestID": "2faf9210-6118-5261-8b9f-c83327c9236e",
+        "eventID": "817b4334-e96d-4cd2-a62e-48b89ef0632b",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-13T09:00:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:49Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-codestar-eu-west-1-345678901234-ttt-pipe",
+          "location": "",
+          "Host": "aws-codestar-eu-west-1-345678901234-ttt-pipe.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "U2Ic6CLUmEVTRVybxggD3RcX1HEZ/+UfHaB90I/+2EVmgr8aYr5NsTwX5lwULqeInMIAPZgtPnY=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "SKQN5WAHZZXHX33Q",
+        "eventID": "992cbca9-9b10-48c3-b30d-9424e1660f52",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-codestar-eu-west-1-345678901234-ttt-pipe"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-12T01:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:49Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-cloudtrail-logs-345678901234-222dcf7b",
+          "location": "",
+          "Host": "aws-cloudtrail-logs-345678901234-222dcf7b.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "0rOQRJtW/QlzOeECmnEBexQ2jkhxEyvqyXEXjWS1UmKIAS2ntDbFs4EmFxLxflTkFNlD08ILu7w=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "SKQW09X84YDVPYG2",
+        "eventID": "b1adaa81-78ee-4ed5-943c-20b86fdcaf25",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-23T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:49Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-emr-resources-345678901234-eu-west-1",
+          "location": "",
+          "Host": "aws-emr-resources-345678901234-eu-west-1.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "eU3mf/D7Wdus2yUrFVguHjJ1DRgUJiQOkrgEm8bAmSRKSxc6G66ahoM5RZyFP/mvsl5NddzQZsw=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "SKQG7YS0Q6XYT60X",
+        "eventID": "e6a11b04-bfa3-48f0-939a-47724e5dc9d0",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-emr-resources-345678901234-eu-west-1"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-23T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:49Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-cloudtrail-mytrail-345678901234-059ac1d5",
+          "location": "",
+          "Host": "aws-cloudtrail-mytrail-345678901234-059ac1d5.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "2dwrLUy4GRjf3hVVijBjMO+rGfi2n29Q5AiXmemZCfkO8sjwiF3/ILZbq0HaBafehJ5hqghobsk=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "SKQS8AKBYGHKFZ1Z",
+        "eventID": "c66c5dcd-bdde-4a3a-911f-2eadf4bef77f",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-01T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:49Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-cloudtrail-logs-345678901234-80d2c6dc",
+          "location": "",
+          "Host": "aws-cloudtrail-logs-345678901234-80d2c6dc.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "4WZ9IIaSDDIwPc8FMZBRJlT9TaL5OTDBBTqveOZFyCcdKd1gAsr00AxrDBHaPfLKMRRjosQxPpI=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "SKQY9MDFEQXNGDWB",
+        "eventID": "bd772ba6-6000-48bc-a6b6-7cd1ae4b3aa2",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-80d2c6dc"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-13T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:50Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-lambda-12843845950",
+          "location": "",
+          "Host": "aws-lambda-12843845950.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "kac0MeC/LpQeiXDfklblUFBidNtGh5Z0I2uLXOqIqsp42zkcAk2Hpw2Zr58LIYOe+seQiUjBKho=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "KZQWJKKVB05YS0WM",
+        "eventID": "306357ab-fb96-4661-afd7-7ef92e1bef96",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-lambda-12843845950"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-11T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:50Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-lakeformation-129390405",
+          "location": "",
+          "Host": "aws-lakeformation-129390405.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "Zuwt3yDJ6v0ya438cDnKfNUok6QxEr9OG7uyMsuNF9v2tnIrcJLD5VTzGsciCcr5GNE60/Gacyk=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "KZQPN6GKTXMJ68YD",
+        "eventID": "20486240-5fc0-4318-975c-6771fbf4d0a3",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-lakeformation-129390405"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-10T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:53Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-sam-cli-managed-default-samclisourcebucket-13z2c2q3lq9gf",
+          "location": "",
+          "Host": "aws-sam-cli-managed-default-samclisourcebucket-13z2c2q3lq9gf.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "cznqhERGOHEJD5kNY4rS6tg3VSDMGJ5krr4z6LC+vgsouCapkAwSlO115HKXmhaGAUA3J1Ycm1k=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "G2VCQDS9MJ461PSC",
+        "eventID": "10e9d7bd-031e-4f23-9f70-68c3be3520e9",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-sam-cli-managed-default-samclisourcebucket-13z2c2q3lq9gf"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-09T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:53Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "cdk-hnb659fds-assets-345678901234-eu-west-1",
+          "location": "",
+          "Host": "cdk-hnb659fds-assets-345678901234-eu-west-1.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "Q/Hx/3kBvUKHLt7hBdXQHrBRfK5yO3BTgUT/g8bjlOKvfbIW51wByEBm2JuojIgX+aBlu1zgFAg=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "G2V9PP7YF2NXTP9P",
+        "eventID": "3976c07a-b5da-489e-bad3-85c800885a45",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::cdk-hnb659fds-assets-345678901234-eu-west-1"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-08T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:50Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "aws-logs-345678901234-eu-west-1",
+          "location": "",
+          "Host": "aws-logs-345678901234-eu-west-1.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "+FlNNjS6V286Tut7CPrk9m96a0vhvWFo7m/f8W0oFl+rWIDvRV/jlw11hFbIvEbC4wrfkNHGfVk=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "KZQSBQ3F2B0MN5AX",
+        "eventID": "2f718b0c-a3c3-4799-b4db-71e76d786f5e",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::aws-logs-345678901234-eu-west-1"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-07T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5LHWXI4D6J:AutoScaling",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling",
+          "accountId": "345678901234",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5LHWXI4D6J",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForAutoScaling"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:49:58Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "autoscaling.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:53Z",
+        "eventSource": "ec2.amazonaws.com",
+        "eventName": "DescribeInstanceStatus",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "autoscaling.amazonaws.com",
+        "userAgent": "autoscaling.amazonaws.com",
+        "requestParameters": {
+          "instancesSet": {
+            "items": [
+              {
+                "instanceId": "i-0b0ce43d329fca1f4"
+              },
+              {
+                "instanceId": "i-05b3592bd89e5b189"
+              }
+            ]
+          },
+          "filterSet": {},
+          "includeAllInstances": true
+        },
+        "responseElements": null,
+        "requestID": "1bc0d851-91a3-40d3-9cad-3c7ece4b04eb",
+        "eventID": "387141dd-43bf-440f-ab39-7ffc5eb90a83",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-06T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5LHWXI4D6J:AutoScaling",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5JGPGGIHJ",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5LHWXI4D6J",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForAutoScaling"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T21:49:58Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "autoscaling.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:53Z",
+        "eventSource": "elasticloadbalancing.amazonaws.com",
+        "eventName": "DescribeTargetHealth",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "autoscaling.amazonaws.com",
+        "userAgent": "autoscaling.amazonaws.com",
+        "requestParameters": {
+          "targetGroupArn": "arn:aws:elasticloadbalancing:eu-west-1:345678901234:targetgroup/LogHu-LoadB-12VYXWEUPWAXC/305585e75190679b",
+          "targets": []
+        },
+        "responseElements": null,
+        "requestID": "c17abcd8-daa0-4209-af14-d15fad4ca5be",
+        "eventID": "b3053862-7a5c-4765-9c71-f4fb5b1433d5",
+        "readOnly": true,
+        "eventType": "AwsApiCall",
+        "apiVersion": "2015-12-01",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-05T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:11:58Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "cf-templates-1u5skpqfeees8-eu-west-1",
+          "location": "",
+          "Host": "cf-templates-1u5skpqfeees8-eu-west-1.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "pyZhEd+wolkH6ZUy7ZU5nnzsIyjlnSO7zi6gA8R9GtmEl7MxWhXpbRmDntivRAWn1rUPhCIuHF8=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "7D7FR0D0TBSB4FED",
+        "eventID": "f9a7d9ec-3ffd-492a-be33-44aa9a4e825f",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::cf-templates-1u5skpqfeees8-eu-west-1"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-04T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "appsync.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:54Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "appsync.amazonaws.com",
+        "userAgent": "appsync.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+          "roleSessionName": "xray-daemon-1638483114921406273",
+          "durationSeconds": 3600
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5EZSWT2UV",
+            "expiration": "Dec 2, 2021 11:11:54 PM",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF8aCWV1LXdlc3QtMSJIMEYCIQCO+1dj39WQP0z2JDj0hqzecoT2E64FBTcQkpZCqi+OTQIhALQfa8cT5Yxj7ADfzjCpIMd9iesPIAfmDHPUtfdsIIONKuQCCDcQAhoMMzQ3MjgzODUwMTA2IgzUl2q/yh2SWvQ4xwcqwQJksUXbMI9sXaAoJMFkyGiguqVQDg9mKNOJzC7VtQdJ158Uft95OpGPLmuK9WKlDFJqYb5CwCuVaF/niAfLhM8vBYnG7JuV8ZpE/ig61lTsDmM0gNnJSebVH7rSYc4fnYpt0N/qow47sdsf/bFdDGsGpXrMnM+TX4MgPrNpXpmMkhd6kLQ1gQfWUwIW+tmQKcZHgLh11RHbHuu+sby1LLTzdB5hpR6/2h+6ILrOgwXdv9oSZorK9vmsithOpWEogdxc+VX0KqzIDCpj0JBQyUpwnP/So1DIL2/hpuCT2ianHGIgnXkidelpfuZyczj2SQu4rKwNs3WRiHbpE+7ziuj8FlYTJYLb/eO71BWq8AiBI5cfpFNnRRXt0oKW2Dh27afvk+NRe/SbcQtwNREcsYER9gIE5pSIOYrj1m+JW7KLyiswqomljQY6vgFWv3PcduHl/1qlEC7VXUAkJOXj4UoNdscNbMy4Jkcw5foN3ojAB+4DEjzI88Fy83H4iqxW0odWPTWfH0yumEqZBTF6LKJS98n7/b60CJ+KcM7FRd7+Niia4En5KdYAaFXAkyrRe+fLc5LHmexxvEiMaoyLPQNe7iI76XumzgjJsbW4ubJ2yIKbzJkZLBDuu/QtAhBTXLN33kNaVOaZAx8pP+WBcEDQykH0AyDb+1b/30uP8bzkDWEhunBurS78"
+          },
+          "assumedRoleUser": {
+            "assumedRoleId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638483114921406273",
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638483114921406273"
+          }
+        },
+        "requestID": "eb91a628-e311-4425-bd0e-f62c2e016a5b",
+        "eventID": "ad1664dc-7b3e-4983-a9b5-1fbc77c346d2",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "d39f1780-7857-437e-96b5-e6374dd73648",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-03T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAVBW53AN5GW3HPS62",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5GFCIVAFEF",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
+              "userName": "AWSServiceRoleForConfig"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:11:25Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:12:01Z",
+        "eventSource": "s3.amazonaws.com",
+        "eventName": "GetBucketLocation",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "bucketName": "config-bucket-345678901234",
+          "location": "",
+          "Host": "config-bucket-345678901234.s3.eu-west-1.amazonaws.com"
+        },
+        "responseElements": null,
+        "additionalEventData": {
+          "SignatureVersion": "SigV4",
+          "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+          "bytesTransferredIn": 0,
+          "AuthenticationMethod": "AuthHeader",
+          "x-amz-id-2": "0aIyxjqrw+4q7wSZJ4lPtHAIME142K9BJM71kt8NivdbIdjf0fAgBG4tU7c+dEJnw5Bhduyz7P0=",
+          "bytesTransferredOut": 137
+        },
+        "requestID": "79KTRM4E1FT4RXHF",
+        "eventID": "26f909a5-ae64-4d3d-9cbe-f77e5aeaead4",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::S3::Bucket",
+            "ARN": "arn:aws:s3:::config-bucket-345678901234"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "vpcEndpointId": "vpce-61638908",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-02T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AWSService",
+          "invokedBy": "lambda.amazonaws.com"
+        },
+        "eventTime": "2021-12-02T22:11:46Z",
+        "eventSource": "sts.amazonaws.com",
+        "eventName": "AssumeRole",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "lambda.amazonaws.com",
+        "userAgent": "lambda.amazonaws.com",
+        "requestParameters": {
+          "roleArn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+          "roleSessionName": "awslambda_198_20211202221146461"
+        },
+        "responseElements": {
+          "credentials": {
+            "accessKeyId": "ASIAVBW53AN5P2F5Z6HL",
+            "sessionToken": "IQoJb3JpZ2luX2VjEF8aCWV1LXdlc3QtMSJIMEYCIQDcJKtDu49cBXlJQUd9lbF5tZA8z6QzraHr1TWwtMOMkQIhAIBAF5SQRJ+u3jYX1RSGKFzOyB3m4dc8OCFCUE/83oUdKqQCCDcQAhoMMzQ3MjgzODUwMTA2IgzZ2KCtC2n1bZsZXBAqgQLEV+PjHrQJib+MaI/dsUkC/bBqUjQDzHi4e3RVQ1xN1dngPgQblMR9h5tYoSwWAN94CEiIPlwmuT40wsCeKdl6dukiLVUuVIlOShegQZWeLg/rtHmQZ7rtCvZKXNLeieuompWFi6TjEG6Dn96NjQ0ifb09c0C7UNPoMIGPfb095U4pcGmpbMbZs8/QeK2Oto4YqXpg/gjZRytyQbVn8JBW76JHY4MHtAAOOK4jpgQ+aGoRVql78oKYcZ8JP/NneYh74N6l8Hmk+rhJdvrIIkB1mTBkuFA79mNQFmW8Q4U1WL6jvYLC48LeD/+e36h06+xKwFKcktqIzNoPLJDmjbcAOzCiiaWNBjqZAebjzTOxXSV6XAAUMr0C+W+33myYiJAxGB8Rbgjogc0bWZ6M4Blj14y8ngUy0xY+MV3LAdBLk3V8fLsyp2u7+Ef0tWdbRoqIYnfvYpFs4FZE94f5bT/t2a7V2PSnXydHEymv6X0HxCnz3wq6kUeXHlH9el4ZY3RbrWs+BFdUE7kroF97Ywa9Q65KyS8U4IEolM7eMN48vP5K7w==",
+            "expiration": "Dec 3, 2021, 10:21:46 AM"
+          }
+        },
+        "requestID": "b9c11daf-8414-4fe5-8336-0bd381f230c4",
+        "eventID": "a3731201-bf60-458f-8ace-643ed7a510b4",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::IAM::Role",
+            "ARN": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "sharedEventID": "58eec27e-5418-4ff7-bcfc-d79cbb8d48af",
+        "eventCategory": "Management"
+      }
+    }
+  },
+  {
+    "@timestamp": "2023-07-01T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "cloud_trail",
+      "domain": "cloudtrail"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "cloudtrail_log",
+        "namespace": "production",
+        "type": "cloud_trail_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "cloudtrail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+          "type": "AssumedRole",
+          "principalId": "AROAVBW53AN5MGPHCXONO:CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
+          "arn": "arn:aws:sts::345678901234:assumed-role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK/CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
+          "accountId": "345678901234",
+          "accessKeyId": "ASIAJCK5XCYKUUIL4LHQ",
+          "sessionContext": {
+            "sessionIssuer": {
+              "type": "Role",
+              "principalId": "AROAVBW53AN5MGPHCXONO",
+              "arn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+              "accountId": "345678901234",
+              "userName": "CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
+            },
+            "webIdFederationData": {},
+            "attributes": {
+              "creationDate": "2021-12-02T22:05:42Z",
+              "mfaAuthenticated": "false"
+            }
+          },
+          "invokedBy": "AWS Internal"
+        },
+        "eventTime": "2021-12-02T22:12:03Z",
+        "eventSource": "kms.amazonaws.com",
+        "eventName": "Decrypt",
+        "awsRegion": "eu-west-1",
+        "sourceIPAddress": "AWS Internal",
+        "userAgent": "AWS Internal",
+        "requestParameters": {
+          "encryptionContext": {
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/mytrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_CZFG6hKgcknqRdCV.json.gz"
+          },
+          "encryptionAlgorithm": "SYMMETRIC_DEFAULT"
+        },
+        "responseElements": null,
+        "requestID": "5dbc9731-abc3-4119-a143-48d7cdf19f7f",
+        "eventID": "357d36d4-7ff6-413c-80aa-72c495b0dbe5",
+        "readOnly": true,
+        "resources": [
+          {
+            "accountId": "345678901234",
+            "type": "AWS::KMS::Key",
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
+          }
+        ],
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "recipientAccountId": "345678901234",
+        "eventCategory": "Management"
+      }
+    }
+  }
+]

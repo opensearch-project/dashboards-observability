@@ -145,6 +145,9 @@ exports[`Count distribution component Renders count distribution component with 
           "yaxis": Object {
             "rangemode": "normal",
             "showgrid": true,
+            "title": Object {
+              "text": "Count",
+            },
             "zeroline": false,
           },
         }

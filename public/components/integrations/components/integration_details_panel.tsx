@@ -3,9 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 
 export function IntegrationDetails(props: any) {
   const config = props.integration;
@@ -16,9 +25,53 @@ export function IntegrationDetails(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-details`}>
-      <PanelTitle title={'Details'} />
+      <EuiTitle>
+        <h2>Details</h2>
+      </EuiTitle>
       <EuiSpacer />
-      <EuiText>{config.description}</EuiText>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText>
+            <h4>Version</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiText size="m">{config.version}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h4>Category</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiBadgeGroup>
+            {config.labels?.map((label: string) => {
+              return <EuiBadge>{label}</EuiBadge>;
+            })}
+          </EuiBadgeGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h4>Contributer</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiLink href={config.sourceUrl} external={true} target="blank">
+            {config.author}
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h4>License</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiText size="m">{config.license}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText>
+          <h4>Description</h4>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiText size="m">{config.description}</EuiText>
+      </EuiFlexItem>
     </EuiPanel>
   );
 }

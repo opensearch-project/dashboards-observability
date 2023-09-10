@@ -5,27 +5,27 @@
 
 // Default Backend Notebook Schema
 
-export type DefaultInput = {
+export interface DefaultInput {
   inputType: string;
   inputText: string;
-};
+}
 
-export type DefaultOutput = {
+export interface DefaultOutput {
   outputType: string;
   result: string;
   execution_time: string;
-};
-export type DefaultParagraph = {
+}
+export interface DefaultParagraph {
   id: string;
   dateCreated: string;
   dateModified: string;
   input: DefaultInput;
-  output: Array<DefaultOutput>;
-};
-export type DefaultNotebooks = {
+  output: DefaultOutput[];
+}
+export interface DefaultNotebooks {
   name: string;
   dateCreated: string;
   dateModified: string;
   backend: string;
-  paragraphs: Array<DefaultParagraph>;
-};
+  paragraphs: DefaultParagraph[];
+}

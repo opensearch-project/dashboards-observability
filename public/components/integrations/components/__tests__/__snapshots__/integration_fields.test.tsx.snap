@@ -8,23 +8,13 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     data-test-subj="nginx-fields"
   >
-    <PanelTitle
-      title="Fields"
-    >
-      <EuiText
-        size="m"
+    <EuiTitle>
+      <h2
+        className="euiTitle euiTitle--medium"
       >
-        <div
-          className="euiText euiText--medium"
-        >
-          <span
-            className="panel-title"
-          >
-            Fields
-          </span>
-        </div>
-      </EuiText>
-    </PanelTitle>
+        Fields
+      </h2>
+    </EuiTitle>
     <EuiSpacer
       size="l"
     >

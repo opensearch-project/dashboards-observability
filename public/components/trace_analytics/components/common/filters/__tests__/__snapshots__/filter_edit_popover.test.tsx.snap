@@ -129,7 +129,6 @@ exports[`Filter popover component renders filter popover 1`] = `
                       aria-expanded={false}
                       aria-haspopup="listbox"
                       className="euiComboBox"
-                      onFocus={[Function]}
                       onKeyDown={[Function]}
                       role="combobox"
                     >
@@ -389,7 +388,6 @@ exports[`Filter popover component renders filter popover 1`] = `
                       aria-expanded={false}
                       aria-haspopup="listbox"
                       className="euiComboBox euiComboBox-isDisabled"
-                      onFocus={[Function]}
                       onKeyDown={[Function]}
                       role="combobox"
                     >

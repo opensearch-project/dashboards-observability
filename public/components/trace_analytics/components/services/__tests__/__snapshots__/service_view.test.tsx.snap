@@ -156,7 +156,7 @@ exports[`Service view component renders service view 1`] = `
                 <EuiText
                   className="overview-title"
                 >
-                  Average latency (ms)
+                  Average duration (ms)
                 </EuiText>
                 <EuiText
                   className="overview-content"
@@ -186,7 +186,7 @@ exports[`Service view component renders service view 1`] = `
                 <EuiText
                   className="overview-title"
                 >
-                  Throughput
+                  Request rate
                 </EuiText>
                 <EuiText
                   className="overview-content"

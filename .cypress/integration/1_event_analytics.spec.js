@@ -12,12 +12,7 @@ import {
   SAVE_QUERY2,
   SAVE_QUERY3,
   SAVE_QUERY4,
-  querySearch,
   YEAR_TO_DATE_DOM_ID,
-  landOnEventHome,
-  landOnEventExplorer,
-  landOnEventVisualizations,
-  landOnPanels,
   HOST_TEXT_1,
   HOST_TEXT_2,
   HOST_TEXT_3,
@@ -31,7 +26,15 @@ import {
   FIELD_AGENT
 } from '../utils/event_analytics/constants';
 import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
-import { clearQuerySearchBoxText } from '../utils/event_analytics/helpers';
+
+import {
+  querySearch,
+  landOnEventHome,
+  landOnEventExplorer,
+  landOnEventVisualizations,
+  landOnPanels,
+  clearQuerySearchBoxText,
+} from '../utils/event_analytics/helpers';
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for event analytics', () => {
@@ -105,7 +108,8 @@ describe('Open flyout for a data row to see details', () => {
   });
 });
 
-describe('Add/delete/switch explorer top level tabs', () => {
+// skip for now due to tab removals
+describe.skip('Add/delete/switch explorer top level tabs', () => {
   beforeEach(() => {
     landOnEventExplorer();
   });
@@ -403,7 +407,7 @@ describe('Live tail stop automatically', () => {
     landOnEventExplorer();
   });
 
-  it('Moving to other tab should stop live tail automatically', () => {
+  it.skip('Moving to other tab should stop live tail automatically', () => {
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[1].query);
     cy.get('[data-test-subj=eventLiveTail]').click();
@@ -411,7 +415,7 @@ describe('Live tail stop automatically', () => {
     cy.get('.euiToastHeader__title').contains('On').should('exist');
   });
 
-  it('Add a new tab', () => {
+  it.skip('Add a new tab', () => {
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
       .then((lists) => {
@@ -423,7 +427,7 @@ describe('Live tail stop automatically', () => {
       });
   });
 
-  it('Click to switch to another tab', () => {
+  it.skip('Click to switch to another tab', () => {
     cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).click();
@@ -438,7 +442,7 @@ describe('Live tail stop automatically', () => {
       .should('have.class', 'euiTab-isSelected');
   });
 
-  it('Close current selected tab', () => {
+  it.skip('Close current selected tab', () => {
     cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).click();

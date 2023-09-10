@@ -9,10 +9,10 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import _ from 'lodash';
-import { PanelTitle } from '../../trace_analytics/components/common/helper_functions';
 import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
 
 export function IntegrationAssets(props: any) {
@@ -45,7 +45,7 @@ export function IntegrationAssets(props: any) {
       truncateText: true,
       render: (value, record) => (
         <EuiText data-test-subj={`${record.id}IntegrationLink`}>
-          {_.truncate(record.attributes.title ? record.attributes.title : '(Unnamed)', {
+          {_.truncate(record.name, {
             length: 100,
           })}
         </EuiText>
@@ -54,7 +54,6 @@ export function IntegrationAssets(props: any) {
     {
       field: 'type',
       name: 'Type',
-      sortable: true,
       truncateText: true,
       render: (_value, record) => (
         <EuiText data-test-subj={`${record.type}IntegrationDescription`}>
@@ -64,16 +63,27 @@ export function IntegrationAssets(props: any) {
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
+  const entries = assets?.savedObjects
+    ? assets.savedObjects
+        .filter((x: any) => x.type !== undefined)
+        .map((asset: any) => {
+          const name = asset.attributes.title ? asset.attributes.title : '(Unnamed)';
+          const type = asset.type;
+          const id = asset.id;
+          return { name, type, id, data: { name, type } };
+        })
+    : [];
+
   return (
     <EuiPanel data-test-subj={`${config.name}-assets`}>
-      <PanelTitle title={'Assets'} />
+      <EuiTitle>
+        <h2>Assets</h2>
+      </EuiTitle>
       <EuiSpacer size="l" />
       <EuiInMemoryTable
         itemId="id"
         loading={false}
-        items={
-          assets?.savedObjects ? assets.savedObjects.filter((x: any) => x.type !== undefined) : []
-        }
+        items={entries}
         columns={tableColumns}
         pagination={{
           initialPageSize: 10,

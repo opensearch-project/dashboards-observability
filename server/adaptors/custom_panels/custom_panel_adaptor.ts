@@ -8,7 +8,7 @@ import { PanelType, VisualizationType } from '../../../common/types/custom_panel
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
 import { createDemoPanel } from '../../../common/constants/custom_panels';
 
-interface boxType {
+interface BoxType {
   x1: number;
   y1: number;
   x2: number;
@@ -142,7 +142,6 @@ export class CustomPanelsAdaptor {
     }
   };
 
-
   // Rename an existing panel
   renamePanel = async (client: ILegacyScopedClusterClient, panelId: string, panelName: string) => {
     const updatePanelBody = {
@@ -275,14 +274,14 @@ export class CustomPanelsAdaptor {
     }
   };
 
-  calculatOverlapArea = (bb1: boxType, bb2: boxType) => {
-    const x_left = Math.max(bb1.x1, bb2.x1);
-    const y_top = Math.max(bb1.y1, bb2.y1);
-    const x_right = Math.min(bb1.x2, bb2.x2);
-    const y_bottom = Math.min(bb1.y2, bb2.y2);
+  calculatOverlapArea = (bb1: BoxType, bb2: BoxType) => {
+    const xLeft = Math.max(bb1.x1, bb2.x1);
+    const yTop = Math.max(bb1.y1, bb2.y1);
+    const xRight = Math.min(bb1.x2, bb2.x2);
+    const yBottom = Math.min(bb1.y2, bb2.y2);
 
-    if (x_right < x_left || y_bottom < y_top) return 0;
-    return (x_right - x_left) * (y_bottom - y_top);
+    if (xRight < xLeft || yBottom < yTop) return 0;
+    return (xRight - xLeft) * (yBottom - yTop);
   };
 
   getTotalOverlapArea = (panelVisualizations: VisualizationType[]) => {
@@ -380,7 +379,7 @@ export class CustomPanelsAdaptor {
     savedVisualizationIds: string[]
   ) => {
     try {
-      let allPanelVisualizations = await this.getVisualizations(client, panelId);
+      const allPanelVisualizations = await this.getVisualizations(client, panelId);
 
       let newDimensions;
       let visualizationsList = [...allPanelVisualizations];

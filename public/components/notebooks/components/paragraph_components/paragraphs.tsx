@@ -150,9 +150,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
             className: 'OBSERVABILITY_VISUALIZATION',
           }));
       })
-      .catch((err) =>
-        console.error('Fetching observability visualization issue', err.body.message)
-      );
+      .catch((err) => console.error('Fetching observability visualization issue', err));
 
     const allVisualizations = [
       { label: 'Dashboards Visualizations', options: opt1 },
@@ -258,7 +256,6 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     <ParaOutput
       http={http}
       pplService={pplService}
-      key={para.uniqueId}
       para={para}
       visInput={visInput}
       setVisInput={setVisInput}

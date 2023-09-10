@@ -105,7 +105,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
                 aria-haspopup="listbox"
                 className="euiComboBox"
                 data-test-subj="eventExplorer__querySaveComboBox"
-                onFocus={[Function]}
                 onKeyDown={[Function]}
                 role="combobox"
               >
