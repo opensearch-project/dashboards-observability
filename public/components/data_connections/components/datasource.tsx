@@ -21,7 +21,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DATASOURCES_BASE, observabilityDatasourcesID } from '../../../../common/constants/shared';
+import { DATASOURCES_BASE } from '../../../../common/constants/shared';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -164,11 +164,7 @@ export const DataSource = (props: any) => {
                 icon={<EuiIcon size="xxl" type="bolt" />}
                 title={'Accelerate performance'}
                 description="Accelerate performance through OpenSearch indexing."
-                onClick={() =>
-                  window.location.assign(
-                    `${observabilityDatasourcesID}#/acceleration/${dataSource}`
-                  )
-                }
+                onClick={() => (window.location.hash = `/acceleration/${dataSource}`)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
