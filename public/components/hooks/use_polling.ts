@@ -78,7 +78,6 @@ export function usePolling<T>({
 
         // Handle exponential backoff if enabled
         if (enableExponentialBackoff && retries.current < maxRetries) {
-          console.log('retries.current: ', retries.current);
           retries.current += 1;
           let nextInterval = initialInterval * 2;
           nextInterval = Math.min(nextInterval, maxInterval); // Ensure we don't exceed the max interval
