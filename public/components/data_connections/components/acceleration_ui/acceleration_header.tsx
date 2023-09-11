@@ -11,23 +11,22 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
+import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/integrations';
 
-export const DataConnectionsHeader = () => {
+export const AccelerationHeader = () => {
   return (
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="datasources-header">
-            <h1>Data connections</h1>
+          <EuiTitle size="l" data-test-subj="acceleration-header">
+            <h1>Acceleration Indices</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Connect and manage compatible OpenSearch Dashboard data sources and compute.{' '}
+        Manage acceleration indices from external data connections.{' '}
         <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>

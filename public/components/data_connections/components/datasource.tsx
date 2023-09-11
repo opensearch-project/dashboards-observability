@@ -21,7 +21,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DATASOURCES_BASE } from '../../../../common/constants/shared';
+import { DATASOURCES_BASE, observabilityDatasourcesID } from '../../../../common/constants/shared';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -29,7 +29,7 @@ interface DatasourceDetails {
   cluster: string;
 }
 
-export function DataSource(props: any) {
+export const DataSource = (props: any) => {
   const { dataSource, pplService, http } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
@@ -164,7 +164,11 @@ export function DataSource(props: any) {
                 icon={<EuiIcon size="xxl" type="bolt" />}
                 title={'Accelerate performance'}
                 description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
+                onClick={() =>
+                  window.location.assign(
+                    `${observabilityDatasourcesID}#/acceleration/${dataSource}`
+                  )
+                }
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -175,4 +179,4 @@ export function DataSource(props: any) {
       </EuiPageBody>
     </EuiPage>
   );
-}
+};

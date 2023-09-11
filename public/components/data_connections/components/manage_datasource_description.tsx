@@ -7,7 +7,7 @@ import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
 
-export function DataConnectionsDescription() {
+export const DataConnectionsDescription = () => {
   return (
     <div>
       <EuiTitle size="s">
@@ -21,4 +21,4 @@ export function DataConnectionsDescription() {
       <EuiHorizontalRule size="full" />
     </div>
   );
-}
+};
