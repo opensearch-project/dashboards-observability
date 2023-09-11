@@ -27,6 +27,25 @@ import {
 import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/steps/steps';
 import React, { useState } from 'react';
 
+interface IntegrationConfig {
+  metadata: {
+    name: string;
+  };
+  dataSource: {
+    name: string;
+    description: string;
+    fileType: string;
+    tableLocation: string;
+  };
+  connection: {
+    name: string;
+  };
+  acceleration: {
+    assets: string;
+    queries: string;
+  };
+}
+
 const STEPS: EuiContainedStepProps[] = [
   { title: 'Name Integration', children: <EuiText /> },
   { title: 'Select index or data source for integration', children: <EuiText /> },
@@ -106,10 +125,8 @@ function SetupIntegrationStepThree() {
 }
 
 function SetupIntegrationStepFour(
-  selectAsset: string,
-  setSelectAsset: React.Dispatch<React.SetStateAction<string>>,
-  selectQuery: string,
-  setSelectQuery: React.Dispatch<React.SetStateAction<string>>
+  integConfig: IntegrationConfig,
+  setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
 ) {
   return (
     <EuiForm>
@@ -164,8 +181,10 @@ function SetupIntegrationStepFour(
               ),
             },
           ]}
-          idSelected={selectAsset}
-          onChange={setSelectAsset}
+          idSelected={integConfig.acceleration.assets}
+          onChange={(id) =>
+            setConfig(Object.assign({}, integConfig, { acceleration: { assets: id } }))
+          }
         />
       </EuiFormRow>
 
@@ -208,8 +227,10 @@ function SetupIntegrationStepFour(
               ),
             },
           ]}
-          idSelected={selectQuery}
-          onChange={setSelectQuery}
+          idSelected={integConfig.acceleration.queries}
+          onChange={(id) =>
+            setConfig(Object.assign({}, integConfig, { acceleration: { query: id } }))
+          }
         />
       </EuiFormRow>
     </EuiForm>
@@ -217,8 +238,24 @@ function SetupIntegrationStepFour(
 }
 
 function SetupIntegrationStep(activeStep: number) {
-  const [selectAsset, setSelectAsset] = useState('visualizations');
-  const [selectQuery, setSelectQuery] = useState('basic');
+  const [integConfig, setConfig] = useState({
+    metadata: {
+      name: 'NginX Access 2.0',
+    },
+    dataSource: {
+      name: 'ss4o_logs-nginx-*-*',
+      description: 'Integration for viewing Nginx logs in S3.',
+      fileType: 'parquet',
+      tableLocation: 'ss4o_logs-nginx-*-*',
+    },
+    connection: {
+      name: 'S3 connection name',
+    },
+    acceleration: {
+      assets: 'visualizations',
+      queries: 'basic',
+    },
+  });
 
   switch (activeStep) {
     case 0:
@@ -228,7 +265,7 @@ function SetupIntegrationStep(activeStep: number) {
     case 2:
       return SetupIntegrationStepThree();
     case 3:
-      return SetupIntegrationStepFour(selectAsset, setSelectAsset, selectQuery, setSelectQuery);
+      return SetupIntegrationStepFour(integConfig, setConfig);
     default:
       return <EuiHeader>Something went wrong...</EuiHeader>;
   }
