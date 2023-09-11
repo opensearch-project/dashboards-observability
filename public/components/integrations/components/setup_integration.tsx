@@ -28,22 +28,14 @@ import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/st
 import React, { useState } from 'react';
 
 interface IntegrationConfig {
-  metadata: {
-    name: string;
-  };
-  dataSource: {
-    name: string;
-    description: string;
-    fileType: string;
-    tableLocation: string;
-  };
-  connection: {
-    name: string;
-  };
-  acceleration: {
-    assets: string;
-    queries: string;
-  };
+  instance_name: string;
+  datasource_name: string;
+  datasource_description: string;
+  datasource_filetype: string;
+  datasourcee_location: string;
+  connection_name: string;
+  asset_accel: string;
+  query_accel: string;
 }
 
 const STEPS: EuiContainedStepProps[] = [
@@ -181,10 +173,8 @@ function SetupIntegrationStepFour(
               ),
             },
           ]}
-          idSelected={integConfig.acceleration.assets}
-          onChange={(id) =>
-            setConfig(Object.assign({}, integConfig, { acceleration: { assets: id } }))
-          }
+          idSelected={integConfig.asset_accel}
+          onChange={(id) => setConfig(Object.assign({}, integConfig, { asset_accel: id }))}
         />
       </EuiFormRow>
 
@@ -227,10 +217,8 @@ function SetupIntegrationStepFour(
               ),
             },
           ]}
-          idSelected={integConfig.acceleration.queries}
-          onChange={(id) =>
-            setConfig(Object.assign({}, integConfig, { acceleration: { query: id } }))
-          }
+          idSelected={integConfig.query_accel}
+          onChange={(id) => setConfig(Object.assign({}, integConfig, { query_accel: id }))}
         />
       </EuiFormRow>
     </EuiForm>
@@ -239,22 +227,14 @@ function SetupIntegrationStepFour(
 
 function SetupIntegrationStep(activeStep: number) {
   const [integConfig, setConfig] = useState({
-    metadata: {
-      name: 'NginX Access 2.0',
-    },
-    dataSource: {
-      name: 'ss4o_logs-nginx-*-*',
-      description: 'Integration for viewing Nginx logs in S3.',
-      fileType: 'parquet',
-      tableLocation: 'ss4o_logs-nginx-*-*',
-    },
-    connection: {
-      name: 'S3 connection name',
-    },
-    acceleration: {
-      assets: 'visualizations',
-      queries: 'basic',
-    },
+    instance_name: 'NginX Access 2.0',
+    datasource_name: 'ss4o_logs-nginx-*-*',
+    datasource_description: 'Integration for viewing Nginx logs in S3.',
+    datasource_filetype: 'parquet',
+    datasourcee_location: 'ss4o_logs-nginx-*-*',
+    connection_name: 'S3 connection name',
+    asset_accel: 'visualizations',
+    query_accel: 'basic',
   });
 
   switch (activeStep) {
