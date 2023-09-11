@@ -27,7 +27,7 @@ export const AccelerationHeader = () => {
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         Manage acceleration indices from external data connections.{' '}
-        <EuiLink external={true} href={OPENSEARCH_ACC_DOCUMENTATION_URL} target="blank">
+        <EuiLink external={true} href={OPENSEARCH_ACC_DOCUMENTATION_URL} target="_blank">
           Learn more
         </EuiLink>
       </EuiText>

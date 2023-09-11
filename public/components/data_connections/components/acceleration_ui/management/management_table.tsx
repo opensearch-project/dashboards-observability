@@ -13,18 +13,18 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 
-interface AccelrationIndicesRecordType {
+interface AccelerationIndicesRecordType {
   indexName: string;
   accelerationType: string;
 }
 
 export const ManagementTable = () => {
-  const [accelrationIndicesRecords, setAccelrationIndicesRecords] = useState<
-    AccelrationIndicesRecordType[]
+  const [accelerationIndicesRecords, setAccelerationIndicesRecords] = useState<
+    AccelerationIndicesRecordType[]
   >([]);
 
   useEffect(() => {
-    setAccelrationIndicesRecords([
+    setAccelerationIndicesRecords([
       {
         indexName: 'Sample-skipping-index',
         accelerationType: 'Skipping Index',
@@ -40,13 +40,13 @@ export const ManagementTable = () => {
     ]);
   }, []);
 
-  const tableColumns = [
+  const tableColumns: Array<EuiTableFieldDataColumnType<AccelerationIndicesRecordType>> = [
     {
       field: 'indexName',
       name: 'Index Name',
       sortable: true,
       truncateText: true,
-      render: (value, record: AccelrationIndicesRecordType) => (
+      render: (value, record: AccelerationIndicesRecordType) => (
         <EuiText>{_.truncate(record.indexName, { length: 100 })}</EuiText>
       ),
     },
@@ -73,7 +73,7 @@ export const ManagementTable = () => {
         />
       ),
     },
-  ] as Array<EuiTableFieldDataColumnType<any>>;
+  ];
 
   const search = {
     box: {
@@ -85,7 +85,7 @@ export const ManagementTable = () => {
         field: 'accelerationType',
         name: 'Type',
         multiSelect: 'or',
-        options: accelrationIndicesRecords.map((AccelerationIndexRecord) => ({
+        options: accelerationIndicesRecords.map((AccelerationIndexRecord) => ({
           value: AccelerationIndexRecord.accelerationType,
           name: AccelerationIndexRecord.accelerationType,
           view: AccelerationIndexRecord.accelerationType,
@@ -98,13 +98,13 @@ export const ManagementTable = () => {
     <>
       <EuiSpacer size="s" />
       <EuiInMemoryTable
-        items={accelrationIndicesRecords}
+        items={accelerationIndicesRecords}
         itemId="id"
         columns={tableColumns}
         tableLayout="auto"
         pagination={{
-          initialPageSize: 10,
-          pageSizeOptions: [5, 10, 15],
+          initialPageSize: 20,
+          pageSizeOptions: [10, 20, 50],
         }}
         search={search}
         allowNeutralSort={false}

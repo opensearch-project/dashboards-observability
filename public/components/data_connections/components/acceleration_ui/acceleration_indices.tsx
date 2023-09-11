@@ -30,7 +30,7 @@ export const AccelerationIndices = ({ dataSource }: AccelerationIndicesProps) =>
     <EuiPage>
       <EuiPageBody component="div">
         <AccelerationHeader />
-        <EuiPageContent data-test-subj="manageAccelerationIndices">
+        <EuiPageContent data-test-subj="manage-acceleration-indices">
           <AccelerationManagement />
         </EuiPageContent>
       </EuiPageBody>
