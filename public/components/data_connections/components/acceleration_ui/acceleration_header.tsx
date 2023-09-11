@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/integrations';
+import { OPENSEARCH_ACC_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
 
 export const AccelerationHeader = () => {
   return (
@@ -27,7 +27,7 @@ export const AccelerationHeader = () => {
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         Manage acceleration indices from external data connections.{' '}
-        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+        <EuiLink external={true} href={OPENSEARCH_ACC_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
       </EuiText>
