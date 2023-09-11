@@ -8,6 +8,7 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
 import { DataSource } from './components/datasource';
 import { ManageDatasourcesTable } from './components/manage_datasource_table';
+import { AccelerationIndices } from './components/acceleration_ui/acceleration_indices';
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
@@ -26,27 +27,32 @@ export const Home = (props: HomeProps) => {
   };
 
   return (
-    <div>
-      <HashRouter>
-        <Switch>
-          <Route
-            exact
-            path={'/manage/:id+'}
-            render={(routerProps) => (
-              <DataSource
-                {...commonProps}
-                dataSource={decodeURIComponent(routerProps.match.params.id)}
-              />
-            )}
-          />
+    <HashRouter>
+      <Switch>
+        <Route
+          exact
+          path={'/manage/:id+'}
+          render={(routerProps) => (
+            <DataSource
+              {...commonProps}
+              dataSource={decodeURIComponent(routerProps.match.params.id)}
+            />
+          )}
+        />
 
-          <Route
-            exact
-            path={['/', '/manage']}
-            render={(routerProps) => <ManageDatasourcesTable {...commonProps} />}
-          />
-        </Switch>
-      </HashRouter>
-    </div>
+        <Route
+          exact
+          path={['/', '/manage']}
+          render={(routerProps) => <ManageDatasourcesTable {...commonProps} />}
+        />
+
+        <Route
+          path={'/acceleration/:id+'}
+          render={(routerProps) => (
+            <AccelerationIndices dataSource={decodeURIComponent(routerProps.match.params.id)} />
+          )}
+        />
+      </Switch>
+    </HashRouter>
   );
 };

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Manage Datasource Description test Renders manage datasource description 1`] = `
-<DataConnectionsDescription>
+<Component>
   <div>
     <EuiTitle
       size="s"
@@ -46,5 +46,5 @@ exports[`Manage Datasource Description test Renders manage datasource descriptio
       />
     </EuiHorizontalRule>
   </div>
-</DataConnectionsDescription>
+</Component>
 `;
