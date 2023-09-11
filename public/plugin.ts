@@ -272,6 +272,7 @@ export class ObservabilityPlugin
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
+    coreRefs.chrome = core.chrome;
 
     return {};
   }
