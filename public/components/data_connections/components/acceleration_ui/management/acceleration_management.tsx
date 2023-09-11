@@ -6,15 +6,12 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPopover,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
 import { ManagementTable } from './management_table';
 import { AccelerationDataSourceSelector } from './source_selector';
 
