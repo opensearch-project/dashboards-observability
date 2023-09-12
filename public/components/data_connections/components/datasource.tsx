@@ -18,10 +18,9 @@ import {
   EuiIcon,
   EuiCard,
   EuiTab,
-  EuiTabs,
   EuiTabbedContent,
 } from '@elastic/eui';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DATASOURCES_BASE } from '../../../../common/constants/shared';
 import { AccessControlTab } from './access_control_tab';
 
