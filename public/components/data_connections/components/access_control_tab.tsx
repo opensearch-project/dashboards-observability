@@ -20,7 +20,7 @@ import {
   ACCELERATION_RESTRICT,
   QUERY_ALL,
   QUERY_RESTRICT,
-} from 'common/constants/data_connections';
+} from '../../../../common/constants/data_connections';
 import { AccessControlCallout } from './access_control_callout';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { QueryPermissionsFlexItem } from './query_permissions_flex_item';

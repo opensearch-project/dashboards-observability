@@ -37,8 +37,8 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
             <a
               class="euiLink euiLink--primary"
               href="https://opensearch.org/docs/latest/data-connections/index"
-              rel="noreferrer"
-              target="blank"
+              rel="noopener noreferrer"
+              target="_blank"
             >
               Learn more
               <svg
@@ -52,6 +52,11 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
               />
+              <span
+                class="euiScreenReaderOnly"
+              >
+                (opens in a new tab or window)
+              </span>
             </a>
           </div>
         </div>
