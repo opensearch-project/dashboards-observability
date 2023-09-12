@@ -26,6 +26,7 @@ import {
   IExplorerFields,
   IField,
   IQuery,
+  MOMENT_UNIT_OF_TIME,
 } from '../../../../common/types/explorer';
 import PPLService from '../../../services/requests/ppl';
 import { DocViewRow, IDocType } from '../explorer/events_views';
@@ -468,7 +469,7 @@ export const getContentTabTitle = (tabID: string, tabTitle: string) => {
  * values when y is non-zero.
  * @param xVals all x values being used
  * @param yVals all y values being used
- * @param selectedInterval Moment unitOfTime used to dictate how long each interval is
+ * @param intervalPeriod Moment unitOfTime used to dictate how long each interval is
  * @param startTime starting time of x values
  * @param endTime ending time of x values
  * @returns an object with buckets and values where the buckets are all of the new x values and
@@ -477,12 +478,10 @@ export const getContentTabTitle = (tabID: string, tabTitle: string) => {
 export const fillTimeDataWithEmpty = (
   xVals: string[],
   yVals: number[],
-  selectedInterval: any,
+  intervalPeriod: MOMENT_UNIT_OF_TIME,
   startTime: string,
   endTime: string
-) => {
-  const intervalPeriod = selectedInterval.replace(/^auto_/, '');
-
+): { buckets: string[]; values: number[] } => {
   // parses out datetime for start and end, then reformats
   const startDate = datemath
     .parse(startTime)

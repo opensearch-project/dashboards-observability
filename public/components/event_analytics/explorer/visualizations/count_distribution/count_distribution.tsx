@@ -47,7 +47,7 @@ export const CountDistribution = ({
     const { buckets, values } = fillTimeDataWithEmpty(
       xVals,
       yVals,
-      selectedInterval,
+      selectedInterval.replace(/^auto_/, ''),
       startTime,
       endTime
     );
