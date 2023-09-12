@@ -1,13 +1,15 @@
-/* eslint-disable no-bitwise */
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable no-bitwise */
+
 import { uniqueId, isEmpty } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import datemath from '@elastic/datemath';
 import { HttpStart } from '../../../../../../src/core/public';
 import {
   CUSTOM_LABEL,
@@ -15,6 +17,7 @@ import {
   GROUPBY,
   AGGREGATIONS,
   BREAKDOWNS,
+  DATE_PICKER_FORMAT,
 } from '../../../../common/constants/explorer';
 import { PPL_DATE_FORMAT, PPL_INDEX_REGEX } from '../../../../common/constants/shared';
 import {
@@ -458,4 +461,64 @@ export const getContentTabTitle = (tabID: string, tabTitle: string) => {
       </EuiText>
     </>
   );
+};
+
+/**
+ * Used to fill in missing empty data where x is an array of time values and there are only x
+ * values when y is non-zero.
+ * @param xVals all x values being used
+ * @param yVals all y values being used
+ * @param selectedInterval Moment unitOfTime used to dictate how long each interval is
+ * @param startTime starting time of x values
+ * @param endTime ending time of x values
+ * @returns an object with buckets and values where the buckets are all of the new x values and
+ * values are the corresponding values which include y values that are 0 for empty data
+ */
+export const fillTimeDataWithEmpty = (
+  xVals: string[],
+  yVals: number[],
+  selectedInterval: any,
+  startTime: string,
+  endTime: string
+) => {
+  const intervalPeriod = selectedInterval.replace(/^auto_/, '');
+
+  // parses out datetime for start and end, then reformats
+  const startDate = datemath
+    .parse(startTime)
+    ?.startOf(intervalPeriod === 'w' ? 'isoWeek' : intervalPeriod);
+  const endDate = datemath
+    .parse(endTime)
+    ?.startOf(intervalPeriod === 'w' ? 'isoWeek' : intervalPeriod);
+  // An error here is unlikely - and which would only happen if start/endTime were
+  // to somehow be invalid for datemath.parse, but that would be a flaw in the datepicker
+  // component if that happens
+  if (startDate === undefined || endDate === undefined) {
+    throw new Error('start/endTime invalid');
+  }
+
+  // find the number of buckets
+  // below essentially does ((end - start) / interval_period) + 1
+  const numBuckets = endDate.diff(startDate, intervalPeriod) + 1;
+
+  // populate buckets as x values in the graph
+  const buckets = [startDate.format(DATE_PICKER_FORMAT)];
+  const currentDate = startDate;
+  for (let i = 1; i < numBuckets; i++) {
+    const nextBucket = currentDate.add(1, intervalPeriod);
+    buckets.push(nextBucket.format(DATE_PICKER_FORMAT));
+  }
+
+  // create y values, use old y values if they exist
+  const values: number[] = [];
+  buckets.forEach((bucket) => {
+    const bucketIndex = xVals.findIndex((x: string) => x === bucket);
+    if (bucketIndex !== undefined) {
+      values.push(yVals[bucketIndex]);
+    } else {
+      values.push(0);
+    }
+  });
+
+  return { buckets, values };
 };
