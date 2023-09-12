@@ -8,17 +8,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiRadioGroup,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React from 'react';
-import { PermissionsFlexItem } from 'common/types/data_connections';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
+import { PermissionsFlexItem } from '../../../../common/types/data_connections';
+import {
+  OPENSEARCH_DOCUMENTATION_URL,
+  QUERY_RESTRICT,
+} from '../../../../common/constants/data_connections';
 
 export const QueryPermissionsFlexItem = (props: PermissionsFlexItem) => {
   const { roles, setSelectedRoles, selectedRoles, selectedRadio, radios, setSelectedRadio } = props;
@@ -44,7 +43,7 @@ export const QueryPermissionsFlexItem = (props: PermissionsFlexItem) => {
               children: <span>Access level</span>,
             }}
           />
-          {selectedRadio === `0` ? (
+          {selectedRadio === QUERY_RESTRICT ? (
             <div>
               <EuiSpacer size="s" />
               <EuiText>OpenSearch Roles</EuiText>

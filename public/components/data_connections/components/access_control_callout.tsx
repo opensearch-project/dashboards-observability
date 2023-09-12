@@ -3,19 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiCallOut,
-  EuiLink,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import _ from 'lodash';
-import React, { useState } from 'react';
-import { EuiPanel } from '@elastic/eui';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
+import { EuiCallOut } from '@elastic/eui';
+import React from 'react';
 
 export const AccessControlCallout = () => {
   return (

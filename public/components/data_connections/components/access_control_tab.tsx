@@ -7,29 +7,27 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiHorizontalRule,
-  htmlIdGenerator,
-  EuiRadioGroup,
-  EuiComboBox,
+  EuiBottomBar,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { render } from 'mustache';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
+import {
+  ACCELERATION_ALL,
+  ACCELERATION_RESTRICT,
+  QUERY_ALL,
+  QUERY_RESTRICT,
+} from 'common/constants/data_connections';
 import { AccessControlCallout } from './access_control_callout';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { QueryPermissionsFlexItem } from './query_permissions_flex_item';
 import { AccelerationPermissionsFlexItem } from './acceleration_permissions_flex_item';
 
 export const AccessControlTab = () => {
-  const [mode, setMode] = useState<'view' | 'edit'>('edit');
+  const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [roles, setRoles] = useState<Array<{ label: string }>>([]);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
     Array<{ label: string }>
@@ -37,8 +35,18 @@ export const AccessControlTab = () => {
   const [selectedAccelerationPermissionRoles, setSelectedAccelerationPermissionRoles] = useState<
     Array<{ label: string }>
   >([]);
-  const [queryPermissionRadioSelected, setQueryRadioIdSelected] = useState(`1`);
-  const [accelerationPermissionRadioSelected, setAccelerationRadioIdSelected] = useState(`1`);
+  const [queryPermissionRadioSelected, setQueryRadioIdSelected] = useState(`query-1`);
+  const [accelerationPermissionRadioSelected, setAccelerationRadioIdSelected] = useState(
+    `acceleration-1`
+  );
+
+  const [finalQueryPermissionsPlaceHolder, setFinalQueryPermissionsPlaceHolder] = useState<
+    Array<{ label: string }>
+  >([]);
+  const [
+    finalAccelerationPermissionsPlaceHolder,
+    setFinalAccelerationPermissionsPlaceHolder,
+  ] = useState<Array<{ label: string }>>([]);
 
   useEffect(() => {
     coreRefs.http!.get('/api/v1/configuration/roles').then((data) =>
@@ -50,23 +58,23 @@ export const AccessControlTab = () => {
     );
   }, []);
 
-  const radios = [
+  const queryRadios = [
     {
-      id: `0`,
+      id: QUERY_RESTRICT,
       label: 'Restricted - accessible by users with specific OpenSearch roles',
     },
     {
-      id: `1`,
+      id: QUERY_ALL,
       label: 'Everyone - accessible by all users on this cluster',
     },
   ];
-  const radios2 = [
+  const accelerationRadios = [
     {
-      id: `0`,
+      id: ACCELERATION_RESTRICT,
       label: 'Restricted - accessible by users with specific OpenSearch roles',
     },
     {
-      id: `1`,
+      id: ACCELERATION_ALL,
       label: 'Everyone - accessible by all users on this cluster',
     },
   ];
@@ -79,7 +87,9 @@ export const AccessControlTab = () => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Query access</EuiText>
               <EuiText size="s" className="overview-content">
-                {'-'}
+                {finalQueryPermissionsPlaceHolder.length
+                  ? `Restricted to ${finalQueryPermissionsPlaceHolder.map((role) => role.label)}`
+                  : '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -89,7 +99,11 @@ export const AccessControlTab = () => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Acceleration permissions</EuiText>
               <EuiText size="s" className="overview-content">
-                {'-'}
+                {finalAccelerationPermissionsPlaceHolder.length
+                  ? `Restricted to ${finalAccelerationPermissionsPlaceHolder.map(
+                      (role) => role.label
+                    )}`
+                  : '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -107,7 +121,7 @@ export const AccessControlTab = () => {
           setSelectedRoles={setSelectedQueryPermissionRoles}
           selectedRadio={queryPermissionRadioSelected}
           setSelectedRadio={setQueryRadioIdSelected}
-          radios={radios}
+          radios={queryRadios}
         />
         <AccelerationPermissionsFlexItem
           roles={roles}
@@ -115,10 +129,16 @@ export const AccessControlTab = () => {
           setSelectedRoles={setSelectedAccelerationPermissionRoles}
           selectedRadio={accelerationPermissionRadioSelected}
           setSelectedRadio={setAccelerationRadioIdSelected}
-          radios={radios2}
+          radios={accelerationRadios}
         />
       </EuiFlexGroup>
     );
+  };
+
+  const saveChanges = () => {
+    setFinalAccelerationPermissionsPlaceHolder(selectedAccelerationPermissionRoles);
+    setFinalQueryPermissionsPlaceHolder(selectedQueryPermissionRoles);
+    setMode('view');
   };
 
   return (
@@ -139,23 +159,47 @@ export const AccessControlTab = () => {
             <EuiButton
               data-test-subj="createButton"
               onClick={
-                mode === 'edit'
+                mode === 'view'
                   ? () => {
-                      setMode('view');
-                    }
-                  : () => {
                       setMode('edit');
                     }
+                  : () => {
+                      setMode('view');
+                    }
               }
-              fill={mode === 'edit' ? true : false}
+              fill={mode === 'view' ? true : false}
             >
-              {mode === 'edit' ? 'Edit' : 'View'}
+              {mode === 'view' ? 'Edit' : 'Cancel'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
-        {mode === 'edit' ? renderViewAccessControlDetails() : renderEditAccessControlDetails()}
+        {mode === 'view' ? renderViewAccessControlDetails() : renderEditAccessControlDetails()}
       </EuiPanel>
+      <EuiSpacer />
+      {mode === 'edit' ? (
+        <EuiBottomBar affordForDisplacement={false}>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => {
+                  setMode('view');
+                }}
+                color="ghost"
+                size="s"
+                iconType="cross"
+              >
+                Discard change(s)
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={saveChanges} size="s" iconType="check" fill>
+                Save
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      ) : null}
     </>
   );
 };
