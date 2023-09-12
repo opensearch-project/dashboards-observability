@@ -31,7 +31,7 @@ interface DatasourceDetails {
   cluster: string;
 }
 
-export function DataSource(props: any) {
+export const DataSource = (props: any) => {
   const { dataSource, pplService, http } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
@@ -169,7 +169,7 @@ export function DataSource(props: any) {
                 icon={<EuiIcon size="xxl" type="bolt" />}
                 title={'Accelerate performance'}
                 description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
+                onClick={() => (window.location.hash = `/acceleration/${dataSource}`)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -180,4 +180,4 @@ export function DataSource(props: any) {
       </EuiPageBody>
     </EuiPage>
   );
-}
+};
