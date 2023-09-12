@@ -490,12 +490,6 @@ export const fillTimeDataWithEmpty = (
   const endDate = datemath
     .parse(endTime)
     ?.startOf(intervalPeriod === 'w' ? 'isoWeek' : intervalPeriod);
-  // An error here is unlikely - and which would only happen if start/endTime were
-  // to somehow be invalid for datemath.parse, but that would be a flaw in the datepicker
-  // component if that happens
-  if (startDate === undefined || endDate === undefined) {
-    throw new Error('start/endTime invalid');
-  }
 
   // find the number of buckets
   // below essentially does ((end - start) / interval_period) + 1
@@ -513,7 +507,7 @@ export const fillTimeDataWithEmpty = (
   const values: number[] = [];
   buckets.forEach((bucket) => {
     const bucketIndex = xVals.findIndex((x: string) => x === bucket);
-    if (bucketIndex !== undefined) {
+    if (bucketIndex !== -1) {
       values.push(yVals[bucketIndex]);
     } else {
       values.push(0);
