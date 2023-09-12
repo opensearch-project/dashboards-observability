@@ -28,7 +28,7 @@ export function DataConnectionsHeader() {
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         Connect and manage compatible OpenSearch Dashboard data sources and compute.{' '}
-        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
           Learn more
         </EuiLink>
       </EuiText>

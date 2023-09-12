@@ -19,9 +19,11 @@ import {
   EuiCard,
   EuiTab,
   EuiTabs,
+  EuiTabbedContent,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { DATASOURCES_BASE } from '../../../../common/constants/shared';
+import { AccessControlTab } from './access_control_tab';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -52,16 +54,19 @@ export function DataSource(props: any) {
       id: 'data',
       name: 'Data',
       disabled: false,
+      content: <></>,
     },
     {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
+      content: <AccessControlTab />,
     },
     {
       id: 'connection_configuration',
       name: 'Connection configuration',
       disabled: false,
+      content: <></>,
     },
   ];
 
@@ -169,7 +174,7 @@ export function DataSource(props: any) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiAccordion>
-        <EuiTabs>{renderTabs()}</EuiTabs>
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
 
         <EuiSpacer />
       </EuiPageBody>
