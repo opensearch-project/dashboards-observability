@@ -25,12 +25,20 @@ import { render } from 'mustache';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
 import { AccessControlCallout } from './access_control_callout';
 import { coreRefs } from '../../../../public/framework/core_refs';
-
-const idPrefix = htmlIdGenerator()();
+import { QueryPermissionsFlexItem } from './query_permissions_flex_item';
+import { AccelerationPermissionsFlexItem } from './acceleration_permissions_flex_item';
 
 export const AccessControlTab = () => {
   const [mode, setMode] = useState<'view' | 'edit'>('edit');
   const [roles, setRoles] = useState<Array<{ label: string }>>([]);
+  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
+    Array<{ label: string }>
+  >([]);
+  const [selectedAccelerationPermissionRoles, setSelectedAccelerationPermissionRoles] = useState<
+    Array<{ label: string }>
+  >([]);
+  const [queryPermissionRadioSelected, setQueryRadioIdSelected] = useState(`1`);
+  const [accelerationPermissionRadioSelected, setAccelerationRadioIdSelected] = useState(`1`);
 
   useEffect(() => {
     coreRefs.http!.get('/api/v1/configuration/roles').then((data) =>
@@ -44,20 +52,24 @@ export const AccessControlTab = () => {
 
   const radios = [
     {
-      id: `${idPrefix}0`,
+      id: `0`,
       label: 'Restricted - accessible by users with specific OpenSearch roles',
     },
     {
-      id: `${idPrefix}1`,
+      id: `1`,
       label: 'Everyone - accessible by all users on this cluster',
     },
   ];
-
-  const [radioIdSelected, setRadioIdSelected] = useState(`${idPrefix}1`);
-
-  const onChange = (optionId) => {
-    setRadioIdSelected(optionId);
-  };
+  const radios2 = [
+    {
+      id: `0`,
+      label: 'Restricted - accessible by users with specific OpenSearch roles',
+    },
+    {
+      id: `1`,
+      label: 'Everyone - accessible by all users on this cluster',
+    },
+  ];
 
   const renderViewAccessControlDetails = () => {
     return (
@@ -88,45 +100,23 @@ export const AccessControlTab = () => {
 
   const renderEditAccessControlDetails = () => {
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem>
-              <EuiText className="overview-title">Query Permissions</EuiText>
-              <EuiText size="s" className="overview-content">
-                Control which OpenSearch roles have query permissions on this data source.{' '}
-                <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
-                  Learn more
-                </EuiLink>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiRadioGroup
-                options={radios}
-                idSelected={radioIdSelected}
-                onChange={(id) => onChange(id)}
-                name="radio group"
-                legend={{
-                  children: <span>Access level</span>,
-                }}
-              />
-              {radioIdSelected === `${idPrefix}0` ? (
-                <EuiComboBox
-                  placeholder="Select or create options"
-                  options={roles}
-                  selectedOptions={[]}
-                  onChange={onChange}
-                  onCreateOption={() => {}}
-                  isClearable={true}
-                  data-test-subj="demoComboBox"
-                  autoFocus
-                />
-              ) : (
-                <></>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column">
+        <QueryPermissionsFlexItem
+          roles={roles}
+          selectedRoles={selectedQueryPermissionRoles}
+          setSelectedRoles={setSelectedQueryPermissionRoles}
+          selectedRadio={queryPermissionRadioSelected}
+          setSelectedRadio={setQueryRadioIdSelected}
+          radios={radios}
+        />
+        <AccelerationPermissionsFlexItem
+          roles={roles}
+          selectedRoles={selectedAccelerationPermissionRoles}
+          setSelectedRoles={setSelectedAccelerationPermissionRoles}
+          selectedRadio={accelerationPermissionRadioSelected}
+          setSelectedRadio={setAccelerationRadioIdSelected}
+          radios={radios2}
+        />
       </EuiFlexGroup>
     );
   };
