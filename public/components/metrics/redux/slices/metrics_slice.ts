@@ -47,8 +47,8 @@ const initialState = {
 };
 
 export const loadMetrics = () => async (dispatch) => {
-  const { http, pplService } = coreRefs;
-  const customDataRequest = fetchCustomMetrics(http);
+  const { pplService } = coreRefs;
+  const customDataRequest = fetchCustomMetrics();
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
 
@@ -59,7 +59,9 @@ export const loadMetrics = () => async (dispatch) => {
   );
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
+  console.log('awaiting data responses');
   const dataResponses = await Promise.all([customDataRequest, ...remoteDataRequests]);
+  console.log('loadMetrics', JSON.stringify({ dataResponses }, '', 2));
   dispatch(setMetrics(dataResponses.flat()));
 };
 

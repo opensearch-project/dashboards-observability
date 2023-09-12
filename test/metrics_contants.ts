@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ObservabilitySavedVisualization } from '../public/services/saved_objects/saved_object_client/types';
+
 export const sampleMetricsVisualizations = [
   {
     h: 2,
@@ -261,53 +263,59 @@ export const samplePrometheusSampleUpdateWithSelections = {
   userConfigs: '{}',
 };
 
-export const sampleSavedMetric = {
-  id: 'tomAP4QBiaYaSxpXALls',
-  name: '[Logs] Average ram usage per day by windows os ',
-  query:
-    "source = opensearch_dashboards_sample_data_logs | where match(machine.os,'win')  |  stats avg(machine.ram) by span(timestamp,1h)",
-  type: 'line',
-  timeField: 'timestamp',
-  selected_date_range: {
-    start: 'now-1d',
-    end: 'now',
-    text: '',
-  },
-  selected_fields: {
-    text: '',
-    tokens: [],
-  },
-  user_configs: {
-    dataConfig: {
-      series: [
-        {
-          label: 'machine.ram',
-          name: 'machine.ram',
-          aggregation: 'avg',
-          customLabel: '',
+export const sampleSavedMetric: ObservabilitySavedVisualization = {
+  objectId: 'tomAP4QBiaYaSxpXALls',
+  createdTimeMs: 1626867814000,
+  lastUpdatedTimeMs: 1626867814000,
+  savedVisualization: {
+    name: '[Logs] Average ram usage per day by windows os ',
+    description: '',
+    query:
+      "source = opensearch_dashboards_sample_data_logs | where match(machine.os,'win')  |  stats avg(machine.ram) by span(timestamp,1h)",
+    type: 'line',
+    timeField: 'timestamp',
+    selected_timestamp: { name: 'timestamp', type: 'timestamp', label: 'timestamp' },
+    selected_date_range: {
+      start: 'now-1d',
+      end: 'now',
+      text: '',
+    },
+    selected_fields: {
+      text: '',
+      tokens: [],
+    },
+    sub_type: 'metric',
+    user_configs: {
+      dataConfig: {
+        series: [
+          {
+            label: 'machine.ram',
+            name: 'machine.ram',
+            aggregation: 'avg',
+            customLabel: '',
+          },
+        ],
+        dimensions: [],
+        span: {
+          time_field: [
+            {
+              name: 'timestamp',
+              type: 'timestamp',
+              label: 'timestamp',
+            },
+          ],
+          unit: [
+            {
+              text: 'Day',
+              value: 'd',
+              label: 'Day',
+            },
+          ],
+          interval: '1',
         },
-      ],
-      dimensions: [],
-      span: {
-        time_field: [
-          {
-            name: 'timestamp',
-            type: 'timestamp',
-            label: 'timestamp',
-          },
-        ],
-        unit: [
-          {
-            text: 'Day',
-            value: 'd',
-            label: 'Day',
-          },
-        ],
-        interval: '1',
       },
     },
   },
-  sub_type: 'metric',
 };
 
 export const sampleSavedMetricUpdate = {

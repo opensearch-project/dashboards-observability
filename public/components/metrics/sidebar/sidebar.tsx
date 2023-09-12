@@ -28,6 +28,10 @@ export const Sidebar = () => {
   const selectedMetrics = useSelector(selectedMetricsSelector);
 
   useEffect(() => {
+    console.log('availableMetrics', availableMetrics);
+  }, [availableMetrics]);
+
+  useEffect(() => {
     batch(() => {
       dispatch(loadMetrics());
     });
