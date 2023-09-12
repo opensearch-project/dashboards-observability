@@ -23,6 +23,10 @@ import {
   EuiTitle,
   EuiRadioGroup,
   EuiTextColor,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/steps/steps';
 import React, { useState } from 'react';
@@ -101,7 +105,66 @@ function SetupIntegrationStepTwo() {
   );
 }
 
-function SetupIntegrationStepThree() {
+function IntegrationDataModal(
+  isDataModalVisible: boolean,
+  setDataModalVisible: React.Dispatch<React.SetStateAction<boolean>>
+): React.JSX.Element | null {
+  let dataModal = null;
+  if (isDataModalVisible) {
+    dataModal = (
+      <EuiModal onClose={() => setDataModalVisible(false)}>
+        <EuiModalHeader>
+          <h2>Data Table</h2>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiBasicTable
+            items={[
+              {
+                field: 'spanId',
+                type: 'string',
+                isTimestamp: false,
+              },
+              {
+                field: 'severity.number',
+                type: 'long',
+                isTimestamp: false,
+              },
+              {
+                field: '@timestamp',
+                type: 'date',
+                isTimestamp: true,
+              },
+            ]}
+            columns={[
+              {
+                field: 'field',
+                name: 'Field Name',
+              },
+              {
+                field: 'type',
+                name: 'Field Type',
+              },
+              {
+                field: 'isTimestamp',
+                name: 'Timestamp',
+              },
+            ]}
+          />
+          <EuiSpacer />
+          <EuiButton onClick={() => setDataModalVisible(false)} size="s">
+            Close
+          </EuiButton>
+        </EuiModalBody>
+      </EuiModal>
+    );
+  }
+  return dataModal;
+}
+
+function SetupIntegrationStepThree(
+  isDataModalVisible: boolean,
+  setDataModalVisible: React.Dispatch<React.SetStateAction<boolean>>
+) {
   return (
     <EuiForm>
       <EuiTitle>
@@ -111,7 +174,8 @@ function SetupIntegrationStepThree() {
         <EuiSelect options={[{ value: 'test_s3', text: 'S3 connection name' }]} />
       </EuiFormRow>
       <EuiSpacer />
-      <EuiLink>View table</EuiLink>
+      <EuiLink onClick={() => setDataModalVisible(true)}>View table</EuiLink>
+      {IntegrationDataModal(isDataModalVisible, setDataModalVisible)}
     </EuiForm>
   );
 }
@@ -125,7 +189,7 @@ function SetupIntegrationStepFour(
       <EuiTitle>
         <h1>{STEPS[3].title}</h1>
       </EuiTitle>
-      <EuiFormRow label="Assets" helpText="Select the amount of assets you want to install">
+      <EuiFormRow label="Asset Quantity" helpText="Select the amount of assets you want to install">
         <EuiRadioGroup
           options={[
             {
@@ -178,7 +242,7 @@ function SetupIntegrationStepFour(
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Queries" helpText="Select your query acceleration option">
+      <EuiFormRow label="Query Acceleration" helpText="Select your query acceleration option">
         <EuiRadioGroup
           options={[
             {
@@ -201,10 +265,17 @@ function SetupIntegrationStepFour(
                 </EuiText>
               ),
             },
-            // {
-            //   id: 'advanced',
-            //   label: <EuiText>Advanced</EuiText>,
-            // },
+            {
+              id: 'advanced',
+              label: (
+                <EuiText>
+                  Advanced{': '}
+                  <EuiTextColor color="subdued">
+                    More intensive optimization for better performance.
+                  </EuiTextColor>
+                </EuiText>
+              ),
+            },
             {
               id: 'ultra',
               label: (
@@ -236,6 +307,7 @@ function SetupIntegrationStep(activeStep: number) {
     asset_accel: 'visualizations',
     query_accel: 'basic',
   });
+  const [isDataModalVisible, setDataModalVisible] = useState(false);
 
   switch (activeStep) {
     case 0:
@@ -243,7 +315,7 @@ function SetupIntegrationStep(activeStep: number) {
     case 1:
       return SetupIntegrationStepTwo();
     case 2:
-      return SetupIntegrationStepThree();
+      return SetupIntegrationStepThree(isDataModalVisible, setDataModalVisible);
     case 3:
       return SetupIntegrationStepFour(integConfig, setConfig);
     default:
