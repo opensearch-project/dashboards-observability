@@ -20,9 +20,7 @@ import {
 } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CoreStart } from '../../../../../../src/core/public';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
+import { useDispatch } from 'react-redux';
 import { resolutionOptions } from '../../../../common/constants/metrics';
 import { MetricType } from '../../../../common/types/metrics';
 import { uiSettingsService } from '../../../../common/utils';
@@ -30,7 +28,7 @@ import { getSavedObjectsClient } from '../../../services/saved_objects/saved_obj
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import { metricsLayoutSelector } from '../redux/slices/metrics_slice';
+import { useMetricStore, metricsLayoutSelector } from '../metrics_store';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
 
@@ -73,7 +71,7 @@ export const TopMenu = ({
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
-  const metricsLayout = useSelector(metricsLayoutSelector);
+  const metricsLayout = useMetricStore(metricsLayoutSelector);
   const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
 
   const [visualizationsMetaData, setVisualizationsMetaData] = useState<any>([]);

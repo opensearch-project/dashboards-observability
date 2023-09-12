@@ -7,14 +7,14 @@ import { EuiSearchBar } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { debounce } from 'lodash';
-import { searchSelector, setSearch } from '../redux/slices/metrics_slice';
+import { useMetricStore, searchSelector } from '../metrics_store';
 
 export const SearchBar = () => {
-  const dispatch = useDispatch();
-  const searchText = useSelector(searchSelector);
+  const searchText = useMetricStore(searchSelector);
+  const setSearch = useMetricStore((state) => state.setSearch);
 
   const onChange = debounce(({ query }) => {
-    dispatch(setSearch(query.text));
+    setSearch(query.text);
   }, 300);
 
   return (

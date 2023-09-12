@@ -5,12 +5,11 @@
 
 import React from 'react';
 import { EuiAvatar, EuiFacetButton, EuiIcon } from '@elastic/eui';
-import { useSelector } from 'react-redux';
-import { metricIconsSelector } from '../redux/slices/metrics_slice';
+import { useMetricStore, metricIconsSelector } from '../metrics_store';
 import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
 
 const MetricIcon = ({ metric }) => {
-  const metricIcons = useSelector(metricIconsSelector);
+  const metricIcons = useMetricStore(metricIconsSelector);
   const iconMeta = metricIcons[metric.catalog];
   if (metric.catalog === OBSERVABILITY_CUSTOM_METRIC)
     return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;

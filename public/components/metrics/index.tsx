@@ -17,7 +17,6 @@ import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
 import { StaticContext } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { ChromeBreadcrumb, Toast } from '../../../../../src/core/public';
 import { onTimeChange } from './helpers/utils';
 import { Sidebar } from './sidebar/sidebar';
@@ -26,7 +25,7 @@ import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
-import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
+import { useMetricStore, metricsLayoutSelector, selectedMetricsSelector } from './metrics_store';
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import { observabilityLogsID } from '../../../common/constants/shared';
@@ -41,8 +40,8 @@ interface MetricsProps {
 
 export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
   // Redux tools
-  const selectedMetrics = useSelector(selectedMetricsSelector);
-  const metricsLayout = useSelector(metricsLayoutSelector);
+  const selectedMetrics = useMetricStore(selectedMetricsSelector);
+  const metricsLayout = useMetricStore(metricsLayoutSelector);
 
   // Date picker constants
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);

@@ -163,7 +163,7 @@ export interface SavedVisualization extends SavedObjectAttributes {
   selected_timestamp: IField;
   type: string;
   sub_type?: 'metric' | 'visualization'; // exists if sub type is metric
-  user_configs?: string;
+  user_configs?: object;
   units_of_measure?: string;
   application_id?: string;
 }

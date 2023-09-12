@@ -7,13 +7,12 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
 import _ from 'lodash';
-import { useDispatch } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import { MetricType } from '../../../../common/types/metrics';
 import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
-import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
 import { mergeLayoutAndMetrics } from '../helpers/utils';
+import { useMetricStore } from '../metrics_store';
 
 import './metrics_grid.scss';
 
@@ -48,11 +47,7 @@ export const MetricsGrid = ({
   spanParam,
 }: MetricsGridProps) => {
   // Redux tools
-  const dispatch = useDispatch();
-  const updateLayout = (metric: any) => dispatch(updateMetricsLayout(metric));
-  const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
-  };
+  const { deSelectMetric, updateMetricsLayout } = useMetricStore();
 
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
   const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
@@ -128,8 +123,8 @@ export const MetricsGrid = ({
       setRemoveMetricsList([]);
     }
     if (editActionType === 'save') {
-      removeMetricsList.map((value) => handleRemoveMetric(value));
-      updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
+      removeMetricsList.map((value) => deSelectMetric(value));
+      updateMetricsLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
       setEditActionType('');
     }
   }, [editActionType]);

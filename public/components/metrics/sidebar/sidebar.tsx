@@ -8,36 +8,23 @@ import './sidebar.scss';
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
-import { batch, useDispatch, useSelector } from 'react-redux';
 import {
+  useMetricStore,
   availableMetricsSelector,
-  deSelectMetric,
-  selectMetric,
-  loadMetrics,
   selectedMetricsSelector,
-} from '../redux/slices/metrics_slice';
-import { CoreStart } from '../../../../../../src/core/public';
-import PPLService from '../../../services/requests/ppl';
+  loadMetrics,
+} from '../metrics_store';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 
 export const Sidebar = () => {
-  const dispatch = useDispatch();
-
-  const availableMetrics = useSelector(availableMetricsSelector);
-  const selectedMetrics = useSelector(selectedMetricsSelector);
+  const availableMetrics = useMetricStore(availableMetricsSelector);
+  const selectedMetrics = useMetricStore(selectedMetricsSelector);
+  const { deSelectMetric, selectMetric } = useMetricStore();
 
   useEffect(() => {
-    batch(() => {
-      dispatch(loadMetrics());
-    });
-  }, [dispatch]);
-
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
-
-  const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
-  };
+    loadMetrics();
+  }, []);
 
   return (
     <I18nProvider>
@@ -48,14 +35,14 @@ export const Sidebar = () => {
         <MetricsAccordion
           metricsList={selectedMetrics}
           headerName="Selected Metrics"
-          handleClick={handleRemoveMetric}
+          handleClick={deSelectMetric}
           dataTestSubj="metricsListItems_selectedMetrics"
         />
         <EuiSpacer size="s" />
         <MetricsAccordion
           metricsList={availableMetrics}
           headerName="Available Metrics"
-          handleClick={handleAddMetric}
+          handleClick={selectMetric}
           dataTestSubj="metricsListItems_availableMetrics"
         />
       </section>
