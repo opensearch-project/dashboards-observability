@@ -38,7 +38,7 @@ describe('Repository', () => {
 
       // Mock fs.lstat to return a mix of directories and files
       jest.spyOn(fs, 'lstat').mockImplementation(async (toLstat) => {
-        if (toLstat === path.join('path', 'to', 'directory', 'folder1')) {
+        if (toLstat.toString().startsWith(path.join('path', 'to', 'directory', 'folder1'))) {
           return { isDirectory: () => true } as Stats;
         } else {
           return { isDirectory: () => false } as Stats;

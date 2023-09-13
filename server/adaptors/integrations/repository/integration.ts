@@ -89,7 +89,10 @@ export class Integration {
     const configFile = `${this.name}-${maybeVersion}.json`;
 
     const config = await this.reader.readFile(configFile);
-    return validateTemplate(config);
+    if (!config.ok) {
+      return config;
+    }
+    return validateTemplate(config.value);
   }
 
   /**
