@@ -17,6 +17,8 @@ import {
   EuiBadge,
   EuiContextMenuPanel,
   EuiToolTip,
+  EuiCallOut,
+  EuiComboBox,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
@@ -27,6 +29,12 @@ import { uiSettingsService } from '../../../../common/utils';
 import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import { DataSourceSelectable } from '../../../../../../src/plugins/data/public';
+import { coreRefs } from '../../../framework/core_refs';
+import { SQLDataFetcher } from '../../../services/data_fetchers/sql/sql_data_fetcher';
+import { useFetchEvents } from '../../../components/event_analytics/hooks';
+import SQLService from '../../../services/requests/sql';
+import PPLService from '../../../services/requests/ppl';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -89,6 +97,13 @@ export const Search = (props: any) => {
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [queryLang, setQueryLang] = useState([{ label: 'SQL' }]);
+  const requestParams = { tabId };
+  const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
+    pplService: new SQLService(coreRefs.http),
+    requestParams,
+  });
+  const sqlDataFetcher = new SQLDataFetcher(coreRefs.http);
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
@@ -128,6 +143,25 @@ export const Search = (props: any) => {
     />
   );
 
+  const handleSourceChange = (selectedSource) => {
+    console.log('selectedSource: ', selectedSource);
+  };
+
+  const handleQueryLanguageChange = (lang) => {
+    if (lang[0].label === 'DQL') {
+      window.location.href = '/app/data-explorer/discover';
+      return;
+    }
+    setQueryLang(lang);
+  };
+
+  const onQuerySearch = (lang) => {
+    if (lang[0].label === 'DQL') return;
+    if (lang[0].label === 'PPL') return handleTimeRangePickerRefresh();
+    // SQL
+    sqlDataFetcher.search(tempQuery, getEvents);
+  };
+
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
@@ -140,6 +174,18 @@ export const Search = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
+        <EuiFlexItem key="source-selector" className="search-area">
+          <DataSourceSelectable dataSources={[]} onSourceChange={handleSourceChange} />
+        </EuiFlexItem>
+        <EuiFlexItem key="lang-selector" className="search-area">
+          <EuiComboBox
+            placeholder="No language selected yet"
+            options={[{ label: 'SQL' }, { label: 'PPL' }, { label: 'DQL' }]}
+            selectedOptions={queryLang}
+            onChange={handleQueryLanguageChange}
+            singleSelection={true}
+          />
+        </EuiFlexItem>
         <EuiFlexItem key="search-bar" className="search-area">
           <Autocomplete
             key={'autocomplete-search-bar'}
@@ -147,7 +193,10 @@ export const Search = (props: any) => {
             tempQuery={tempQuery}
             baseQuery={baseQuery}
             handleQueryChange={handleQueryChange}
-            handleQuerySearch={handleQuerySearch}
+            handleQuerySearch={() => {
+              console.log('query search...');
+              onQuerySearch(queryLang);
+            }}
             dslService={dslService}
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
@@ -176,7 +225,9 @@ export const Search = (props: any) => {
               liveStreamChecked={props.liveStreamChecked}
               onLiveStreamChange={props.onLiveStreamChange}
               handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              handleTimeRangePickerRefresh={() => {
+                onQuerySearch(queryLang);
+              }}
             />
           )}
         </EuiFlexItem>

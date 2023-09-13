@@ -387,24 +387,27 @@ export const Explorer = ({
   };
 
   const handleTimeRangePickerRefresh = async (availability?: boolean) => {
-    handleQuerySearch(availability);
-    if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
-      let currQuery = query.rawQuery;
-      const currPattern = currQuery.match(PATTERNS_EXTRACTOR_REGEX)!.groups!.pattern;
-      // Remove existing pattern selection if it exists
-      if (currQuery.match(PATTERNS_REGEX)) {
-        currQuery = currQuery.replace(PATTERNS_REGEX, '');
-      }
-      const patternSelectQuery = `${currQuery.trim()} | patterns ${currPattern}`;
-      await setTempQuery(patternSelectQuery);
-      await updateQueryInStore(patternSelectQuery);
-      // Passing in empty string will remove pattern query
-      const patternErrorHandler = getErrorHandler('Error fetching patterns');
-      getPatterns(
-        selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
-        patternErrorHandler
-      );
-    }
+    console.log(tempQuery);
+    getEvents(tempQuery);
+    // console.log();
+    // handleQuerySearch(availability);
+    // if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
+    //   let currQuery = query.rawQuery;
+    //   const currPattern = currQuery.match(PATTERNS_EXTRACTOR_REGEX)!.groups!.pattern;
+    //   // Remove existing pattern selection if it exists
+    //   if (currQuery.match(PATTERNS_REGEX)) {
+    //     currQuery = currQuery.replace(PATTERNS_REGEX, '');
+    //   }
+    //   const patternSelectQuery = `${currQuery.trim()} | patterns ${currPattern}`;
+    //   await setTempQuery(patternSelectQuery);
+    //   await updateQueryInStore(patternSelectQuery);
+    //   // Passing in empty string will remove pattern query
+    //   const patternErrorHandler = getErrorHandler('Error fetching patterns');
+    //   getPatterns(
+    //     selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
+    //     patternErrorHandler
+    //   );
+    // }
   };
 
   const sidebarClassName = classNames({
@@ -673,11 +676,11 @@ export const Explorer = ({
       name: getContentTabTitle(TAB_EVENT_ID, TAB_EVENT_TITLE),
       content: mainContent,
     },
-    {
-      id: TAB_CHART_ID,
-      name: getContentTabTitle(TAB_CHART_ID, TAB_CHART_TITLE),
-      content: explorerVis,
-    },
+    // {
+    //   id: TAB_CHART_ID,
+    //   name: getContentTabTitle(TAB_CHART_ID, TAB_CHART_TITLE),
+    //   content: explorerVis,
+    // },
   ];
 
   const handleContentTabClick = (selectedTab: IQueryTab) => setSelectedContentTab(selectedTab.id);
@@ -949,6 +952,7 @@ export const Explorer = ({
           liveTailName={liveTailNameRef.current}
           curVisId={curVisId}
           setSubType={setSubType}
+          http={http}
         />
         <EuiTabbedContent
           className="mainContentTabs"
