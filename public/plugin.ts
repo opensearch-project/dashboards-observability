@@ -4,7 +4,6 @@
  */
 
 import './index.scss';
-
 import { i18n } from '@osd/i18n';
 import {
   AppCategory,
@@ -72,6 +71,7 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { FlintDataSource } from './framework/datasources/flint_datasource';
 
 export class ObservabilityPlugin
   implements
@@ -230,6 +230,16 @@ export class ObservabilityPlugin
         },
       },
     });
+
+    const { dataSourceService, dataSourceFactory } = setupDeps.data.dataSources;
+    dataSourceFactory.registerDataSourceType('MANAGED_FLINT', FlintDataSource);
+    dataSourceService.registerDataSource(
+      dataSourceFactory.getDataSourceInstance('MANAGED_FLINT', {
+        name: 'Amazon Music US East Prod',
+        type: 'Amazon S3',
+        metadata: null,
+      })
+    );
 
     // Return methods that should be available to other plugins
     return {};
