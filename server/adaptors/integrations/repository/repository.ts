@@ -17,21 +17,20 @@ export class Repository {
   }
 
   async getIntegrationList(): Promise<Integration[]> {
-    try {
-      // TODO in the future, we want to support traversing nested directory structures.
-      const folders = await this.reader.readDir('');
-      const integrations = await Promise.all(
-        folders.map((i) => this.getIntegration(path.basename(i)))
-      );
-      return integrations.filter((x) => x !== null) as Integration[];
-    } catch (error) {
-      console.error(`Error reading integration directories in: ${this.directory}`, error);
+    // TODO in the future, we want to support traversing nested directory structures.
+    const folders = await this.reader.findIntegrations();
+    if (!folders.ok) {
+      console.error(`Error reading integration directories in: ${this.directory}`, folders.error);
       return [];
     }
+    const integrations = await Promise.all(
+      folders.value.map((i) => this.getIntegration(path.basename(i)))
+    );
+    return integrations.filter((x) => x !== null) as Integration[];
   }
 
   async getIntegration(name: string): Promise<Integration | null> {
-    if (!(await this.reader.isDirectory(name))) {
+    if ((await this.reader.getDirectoryType(name)) !== 'integration') {
       console.error(`Requested integration '${name}' does not exist`);
       return null;
     }

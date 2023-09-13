@@ -5,7 +5,48 @@
 
 import * as fs from 'fs/promises';
 import path from 'path';
-import sanitize from 'sanitize-filename';
+
+/**
+ * Helper function to compare version numbers.
+ * Assumes that the version numbers are valid, produces undefined behavior otherwise.
+ *
+ * @param a Left-hand number
+ * @param b Right-hand number
+ * @returns -1 if a > b, 1 if a < b, 0 otherwise.
+ */
+function compareVersions(a: string, b: string): number {
+  const aParts = a.split('.').map(Number.parseInt);
+  const bParts = b.split('.').map(Number.parseInt);
+
+  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+    const aValue = i < aParts.length ? aParts[i] : 0;
+    const bValue = i < bParts.length ? bParts[i] : 0;
+
+    if (aValue > bValue) {
+      return -1; // a > b
+    } else if (aValue < bValue) {
+      return 1; // a < b
+    }
+  }
+
+  return 0; // a == b
+}
+
+function tryParseNDJson(content: string): object[] | null {
+  try {
+    const objects = [];
+    for (const line of content.split('\n')) {
+      if (line.trim() === '') {
+        // Other OSD ndjson parsers skip whitespace lines
+        continue;
+      }
+      objects.push(JSON.parse(line));
+    }
+    return objects;
+  } catch (err: any) {
+    return null;
+  }
+}
 
 /**
  * A CatalogDataAdaptor that reads from the local filesystem.
@@ -23,33 +64,85 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
     this.directory = directory;
   }
 
-  /**
-   * Prepares a filename for use in filesystem operations by sanitizing and joining it with the base directory.
-   * This method is intended to be used before any filesystem-related call.
-   *
-   * @param filename The name of the file to prepare.
-   * @param subdir Optional. A subdirectory to prepend to the filename. Not sanitized.
-   * @returns The prepared path for the file, including the base directory and optional prefix.
-   */
-  _prepare(filename: string, subdir?: string): string {
-    return path.join(this.directory, subdir ?? '.', sanitize(filename));
+  async readFile(filename: string, type?: IntegrationPart): Promise<Result<object[] | object>> {
+    let content;
+    try {
+      content = await fs.readFile(path.join(this.directory, type ?? '.', filename), {
+        encoding: 'utf-8',
+      });
+    } catch (err: any) {
+      return { ok: false, error: err };
+    }
+    // First try to parse as JSON, then NDJSON, then fail.
+    try {
+      const parsed = JSON.parse(content);
+      return { ok: true, value: parsed };
+    } catch (err: any) {
+      const parsed = tryParseNDJson(content);
+      if (parsed) {
+        return { ok: true, value: parsed };
+      }
+      return {
+        ok: false,
+        error: new Error('Unable to parse file as JSON or NDJson', { cause: err }),
+      };
+    }
   }
 
-  async readFile(filename: string, type?: IntegrationPart): Promise<string> {
-    return await fs.readFile(this._prepare(filename, type), { encoding: 'utf-8' });
+  async readFileRaw(filename: string, type?: IntegrationPart): Promise<Result<Buffer>> {
+    try {
+      const buffer = await fs.readFile(path.join(this.directory, type ?? '.', filename));
+      return { ok: true, value: buffer };
+    } catch (err: any) {
+      return { ok: false, error: err };
+    }
   }
 
-  async readFileRaw(filename: string, type?: IntegrationPart): Promise<Buffer> {
-    return await fs.readFile(this._prepare(filename, type));
+  async findIntegrations(dirname: string = '.'): Promise<Result<string[]>> {
+    try {
+      const files = await fs.readdir(path.join(this.directory, dirname));
+      return { ok: true, value: files };
+    } catch (err: any) {
+      return { ok: false, error: err };
+    }
   }
 
-  async readDir(dirname: string): Promise<string[]> {
-    // TODO return empty list if not a directory
-    return await fs.readdir(this._prepare(dirname));
+  async findIntegrationVersions(dirname: string = '.'): Promise<Result<string[]>> {
+    let files;
+    const integPath = path.join(this.directory, dirname);
+    try {
+      files = await fs.readdir(integPath);
+    } catch (err: any) {
+      return { ok: false, error: err };
+    }
+    const versions: string[] = [];
+
+    for (const file of files) {
+      // TODO handle nested repositories -- assumes integrations are 1 level deep
+      if (path.extname(file) === '.json' && file.startsWith(`${path.basename(integPath)}-`)) {
+        const version = file.substring(path.basename(integPath).length + 1, file.length - 5);
+        if (!version.match(/^\d+(\.\d+)*$/)) {
+          continue;
+        }
+        versions.push(version);
+      }
+    }
+
+    versions.sort((a, b) => compareVersions(a, b));
+    return { ok: true, value: versions };
   }
 
-  async isDirectory(dirname: string): Promise<boolean> {
-    return (await fs.lstat(this._prepare(dirname))).isDirectory();
+  async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
+    const isDir = (await fs.lstat(path.join(this.directory, dirname ?? '.'))).isDirectory();
+    if (!isDir) {
+      return 'unknown';
+    }
+    // Sloppily just check for one mandatory integration directory to distinguish.
+    // Improve if we need to distinguish a repository with an integration named "schemas".
+    const hasSchemas = (
+      await fs.lstat(path.join(this.directory, dirname ?? '.', 'schemas'))
+    ).isDirectory();
+    return hasSchemas ? 'integration' : 'repository';
   }
 
   join(filename: string): FileSystemCatalogDataAdaptor {

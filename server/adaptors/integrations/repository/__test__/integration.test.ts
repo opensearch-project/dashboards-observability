@@ -7,6 +7,7 @@ import * as fs from 'fs/promises';
 import { Integration } from '../integration';
 import { Dirent, Stats } from 'fs';
 import * as path from 'path';
+import { FileSystemCatalogDataAdaptor } from '../fs_data_adaptor';
 
 jest.mock('fs/promises');
 
@@ -79,6 +80,7 @@ describe('Integration', () => {
 
     it('should return the parsed config template if it is valid', async () => {
       jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(sampleIntegration));
+      jest.spyOn(fs, 'lstat').mockResolvedValueOnce({ isDirectory: () => true } as Stats);
 
       const result = await integration.getConfig(sampleIntegration.version);
 
