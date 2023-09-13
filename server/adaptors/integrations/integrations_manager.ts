@@ -4,13 +4,13 @@
  */
 
 import path from 'path';
-import { addRequestToMetric } from '../../../server/common/metrics/metrics_helper';
+import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
 import { Repository } from './repository/repository';
 
-export class IntegrationsKibanaBackend implements IntegrationsAdaptor {
+export class IntegrationsManager implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
   instanceBuilder: IntegrationInstanceBuilder;
   repository: Repository;

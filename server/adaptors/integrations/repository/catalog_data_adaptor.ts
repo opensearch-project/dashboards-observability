@@ -5,7 +5,7 @@
 
 type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
 
-interface CatalogReader {
+interface CatalogDataAdaptor {
   /**
    * Reads a file from the data source.
    *
@@ -48,5 +48,5 @@ interface CatalogReader {
    * @param subdirectory The path to append to the current directory.
    * @returns A new CatalogReader instance.
    */
-  join: (subdirectory: string) => CatalogReader;
+  join: (subdirectory: string) => CatalogDataAdaptor;
 }

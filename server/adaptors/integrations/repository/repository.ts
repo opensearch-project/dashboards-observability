@@ -5,15 +5,15 @@
 
 import * as path from 'path';
 import { Integration } from './integration';
-import { LocalCatalogReader } from './local_catalog_reader';
+import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 
 export class Repository {
-  reader: CatalogReader;
+  reader: CatalogDataAdaptor;
   directory: string;
 
-  constructor(directory: string, reader?: CatalogReader) {
+  constructor(directory: string, reader?: CatalogDataAdaptor) {
     this.directory = directory;
-    this.reader = reader ?? new LocalCatalogReader(directory);
+    this.reader = reader ?? new FileSystemCatalogDataAdaptor(directory);
   }
 
   async getIntegrationList(): Promise<Integration[]> {

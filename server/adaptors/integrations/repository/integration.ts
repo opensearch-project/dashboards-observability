@@ -5,7 +5,7 @@
 
 import path from 'path';
 import { validateTemplate } from '../validators';
-import { LocalCatalogReader } from './local_catalog_reader';
+import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 
 /**
  * Helper function to compare version numbers.
@@ -39,14 +39,14 @@ function compareVersions(a: string, b: string): number {
  * It includes accessor methods for integration configs, as well as helpers for nested components.
  */
 export class Integration {
-  reader: CatalogReader;
+  reader: CatalogDataAdaptor;
   directory: string;
   name: string;
 
-  constructor(directory: string, reader?: CatalogReader) {
+  constructor(directory: string, reader?: CatalogDataAdaptor) {
     this.directory = directory;
     this.name = path.basename(directory);
-    this.reader = reader ?? new LocalCatalogReader(directory);
+    this.reader = reader ?? new FileSystemCatalogDataAdaptor(directory);
   }
 
   /**

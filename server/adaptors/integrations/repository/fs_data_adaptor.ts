@@ -8,14 +8,14 @@ import path from 'path';
 import sanitize from 'sanitize-filename';
 
 /**
- * A CatalogReader that reads from the local filesystem.
+ * A CatalogDataAdaptor that reads from the local filesystem.
  * Used to read Integration information when the user uploads their own catalog.
  */
-export class LocalCatalogReader implements CatalogReader {
+export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
   directory: string;
 
   /**
-   * Creates a new LocalCatalogReader instance.
+   * Creates a new FileSystemCatalogDataAdaptor instance.
    *
    * @param directory The base directory from which to read files. This is not sanitized.
    */
@@ -52,7 +52,7 @@ export class LocalCatalogReader implements CatalogReader {
     return (await fs.lstat(this._prepare(dirname))).isDirectory();
   }
 
-  join(filename: string): LocalCatalogReader {
-    return new LocalCatalogReader(path.join(this.directory, filename));
+  join(filename: string): FileSystemCatalogDataAdaptor {
+    return new FileSystemCatalogDataAdaptor(path.join(this.directory, filename));
   }
 }

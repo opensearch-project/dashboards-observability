@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IntegrationsKibanaBackend } from '../integrations_kibana_backend';
+import { IntegrationsManager } from '../integrations_manager';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../../src/core/server/types';
 import { Repository } from '../repository/repository';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
@@ -13,7 +13,7 @@ import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
 describe('IntegrationsKibanaBackend', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockRepository: jest.Mocked<Repository>;
-  let backend: IntegrationsKibanaBackend;
+  let backend: IntegrationsManager;
 
   beforeEach(() => {
     mockSavedObjectsClient = {
@@ -26,7 +26,7 @@ describe('IntegrationsKibanaBackend', () => {
       getIntegration: jest.fn(),
       getIntegrationList: jest.fn(),
     } as any;
-    backend = new IntegrationsKibanaBackend(mockSavedObjectsClient, mockRepository);
+    backend = new IntegrationsManager(mockSavedObjectsClient, mockRepository);
   });
 
   describe('deleteIntegrationInstance', () => {
