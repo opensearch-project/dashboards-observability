@@ -130,7 +130,6 @@ export class ObservabilityPlugin
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
-
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -140,7 +139,8 @@ export class ObservabilityPlugin
         savedObjects,
         timestampUtils,
         qm,
-        startPage
+        startPage,
+        setupDeps
       );
     };
 
@@ -251,21 +251,11 @@ export class ObservabilityPlugin
       },
     });
 
-    const { dataSourceService, dataSourceFactory } = setupDeps.data.dataSources;
-    dataSourceFactory.registerDataSourceType('MANAGED_FLINT', FlintDataSource);
-    dataSourceService.registerDataSource(
-      dataSourceFactory.getDataSourceInstance('MANAGED_FLINT', {
-        name: 'Amazon Music US East Prod',
-        type: 'Amazon S3',
-        metadata: null,
-      })
-    );
-
     // Return methods that should be available to other plugins
     return {};
   }
 
-  public start(core: CoreStart): ObservabilityStart {
+  public start(core: CoreStart, setupDeps): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
 
     coreRefs.http = core.http;
@@ -273,6 +263,19 @@ export class ObservabilityPlugin
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
+
+    const { dataSourceService, dataSourceFactory } = setupDeps.data.dataSources;
+    dataSourceFactory.registerDataSourceType('MANAGED_FLINT', FlintDataSource);
+
+    // to-do, get all s3 datasources through show datasources
+
+    dataSourceService.registerDataSource(
+      dataSourceFactory.getDataSourceInstance('MANAGED_FLINT', {
+        name: 'Amazon Music US East Prod',
+        type: 'Amazon S3',
+        metadata: null,
+      })
+    );
 
     return {};
   }
