@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../../src/core/server';
-import { DATASOURCES_BASE } from '../../../common/constants/shared';
+import { DATASOURCES_BASE, JOBS_BASE, OBSERVABILITY_BASE } from '../../../common/constants/shared';
 
 export function registerDatasourcesRoute(router: IRouter) {
   router.get(
@@ -52,6 +52,62 @@ export function registerDatasourcesRoute(router: IRouter) {
         });
       } catch (error: any) {
         console.error('Issue in fetching datasources:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `${OBSERVABILITY_BASE}${JOBS_BASE}`,
+      validate: {
+        query: schema.string,
+        datasource: schema.string,
+        lang: schema.string,
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const res = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('observability.runDirectQuery');
+        return response.ok({
+          body: res,
+        });
+      } catch (error: any) {
+        console.error('Error in running direct query:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{jobId}`,
+      validate: {
+        params: schema.object({
+          jobId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const res = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('observability.getJobStatus', {
+            jobId: request.params.jobId,
+          });
+        return response.ok({
+          body: res,
+        });
+      } catch (error: any) {
+        console.error('Error in fetching job status:', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,
