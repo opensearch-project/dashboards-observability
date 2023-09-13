@@ -792,6 +792,9 @@ exports[`Histogram component Renders histogram component 1`] = `
           "yaxis": Object {
             "rangemode": "normal",
             "showgrid": true,
+            "title": Object {
+              "text": "Count",
+            },
             "zeroline": false,
           },
         }

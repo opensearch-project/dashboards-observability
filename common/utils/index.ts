@@ -10,6 +10,6 @@ export {
   buildRawQuery,
   composeFinalQuery,
   removeBacktick,
-} from './query_utils';
+} from '../../public/components/common/query_utils';
 
 export * from './core_services';
