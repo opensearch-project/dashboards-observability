@@ -87,7 +87,7 @@ export const Field = (props: IFieldProps) => {
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  className="dscSidebarItem__action"
+                  className="explorerSidebarItem__action"
                   size="s"
                   color="text"
                   iconType="inputOutput"
@@ -112,7 +112,7 @@ export const Field = (props: IFieldProps) => {
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_timestamp"
-                  className="dscSidebarItem__action"
+                  className="explorerSidebarItem__action"
                   size="s"
                   color="text"
                   iconType="inputOutput"
@@ -138,7 +138,7 @@ export const Field = (props: IFieldProps) => {
           <>
             {isFieldToggleButtonDisabled ? (
               <EuiButtonIcon
-                className="dscSidebarItem__action"
+                className="explorerSidebarItem__action"
                 color="ghost"
                 display="fill"
                 isDisabled
@@ -150,7 +150,7 @@ export const Field = (props: IFieldProps) => {
               <EuiButtonIcon
                 color={selected ? 'danger' : 'primary'}
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
-                className="dscSidebarItem__action"
+                className="explorerSidebarItem__action"
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   if (e.type === 'click') {
                     e.currentTarget.focus();
@@ -176,7 +176,7 @@ export const Field = (props: IFieldProps) => {
       isOpen={isFieldDetailsOpen}
       closePopover={() => setIsFieldDetailsOpen(false)}
       anchorPosition="rightUp"
-      panelClassName="dscSidebarItem__fieldPopoverPanel"
+      panelClassName="explorerSidebarItem__fieldPopoverPanel"
       button={
         <FieldButton
           size="s"
