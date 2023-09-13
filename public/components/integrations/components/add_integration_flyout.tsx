@@ -114,12 +114,12 @@ export const checkDataSourceName = (
   integrationType: string
 ): ValidationResult => {
   let errors: string[] = [];
-  if (!Boolean(targetDataSource.match(/^[a-z\d\.][a-z\d\._\-\*]*$/))) {
+  if (!/^[a-z\d\.][a-z\d\._\-\*]*$/.test(targetDataSource)) {
     errors = errors.concat('This is not a valid index name.');
     return { ok: false, errors };
   }
-  const nameValidity: boolean = Boolean(
-    targetDataSource.match(new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`))
+  const nameValidity: boolean = new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`).test(
+    targetDataSource
   );
   if (!nameValidity) {
     errors = errors.concat('This index does not match the suggested naming convention.');
