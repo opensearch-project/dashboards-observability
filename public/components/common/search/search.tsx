@@ -5,7 +5,7 @@
 
 import './search.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiFlexGroup,
@@ -92,8 +92,11 @@ export const Search = (props: any) => {
     liveTailName,
     curVisId,
     setSubType,
+    setupDeps,
   } = props;
 
+  const { dataSources } = setupDeps.data;
+  const [activeDataSources, setActiveDataSources] = useState([]);
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -162,6 +165,11 @@ export const Search = (props: any) => {
     sqlDataFetcher.search(tempQuery, getEvents);
   };
 
+  useEffect(() => {
+    const sourceList = Object.values(dataSources.dataSourceService.getDataSources());
+    setActiveDataSources([...sourceList]);
+  }, [dataSources]);
+
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
@@ -175,7 +183,10 @@ export const Search = (props: any) => {
           </EuiFlexItem>
         )}
         <EuiFlexItem key="source-selector" className="search-area">
-          <DataSourceSelectable dataSources={[]} onSourceChange={handleSourceChange} />
+          <DataSourceSelectable
+            dataSources={activeDataSources}
+            onSourceChange={handleSourceChange}
+          />
         </EuiFlexItem>
         <EuiFlexItem key="lang-selector" className="search-area">
           <EuiComboBox

@@ -81,6 +81,7 @@ export const EventAnalytics = ({
                     setToast={setToast}
                     notifications={notifications}
                     queryManager={queryManager}
+                    setupDeps={props.setupDeps}
                   />
                 </LogExplorerRouterContext.Provider>
               );
@@ -105,7 +106,7 @@ export const EventAnalytics = ({
                   dslService={dslService}
                   pplService={pplService}
                   setToast={setToast}
-                  getExistingEmptyTab={getExistingEmptyTab}
+                  setupDeps={props.setupDeps}
                 />
               );
             }}

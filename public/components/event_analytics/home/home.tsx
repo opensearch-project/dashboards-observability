@@ -75,16 +75,18 @@ interface IHomeProps {
   tabsState: any;
 }
 
+const getExistingEmptyTab = ({ tabIds }: EmptyTabParams) => tabIds[0];
+
 const EventAnalyticsHome = (props: IHomeProps) => {
   const {
     pplService,
     dslService,
     setToast,
-    getExistingEmptyTab,
     http,
     queries,
     explorerData,
     tabsState,
+    setupDeps,
   } = props;
   const history = useHistory();
   const dispatch = useDispatch();
@@ -335,6 +337,7 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                   runButtonText="New Query"
                   getSuggestions={parseGetSuggestions}
                   onItemSelect={onItemSelect}
+                  setupDeps={setupDeps}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

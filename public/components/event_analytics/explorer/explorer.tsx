@@ -142,6 +142,7 @@ export const Explorer = ({
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
+  setupDeps,
 }: IExplorerProps) => {
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
@@ -387,27 +388,25 @@ export const Explorer = ({
   };
 
   const handleTimeRangePickerRefresh = async (availability?: boolean) => {
-    console.log(tempQuery);
-    getEvents(tempQuery);
-    // console.log();
-    // handleQuerySearch(availability);
-    // if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
-    //   let currQuery = query.rawQuery;
-    //   const currPattern = currQuery.match(PATTERNS_EXTRACTOR_REGEX)!.groups!.pattern;
-    //   // Remove existing pattern selection if it exists
-    //   if (currQuery.match(PATTERNS_REGEX)) {
-    //     currQuery = currQuery.replace(PATTERNS_REGEX, '');
-    //   }
-    //   const patternSelectQuery = `${currQuery.trim()} | patterns ${currPattern}`;
-    //   await setTempQuery(patternSelectQuery);
-    //   await updateQueryInStore(patternSelectQuery);
-    //   // Passing in empty string will remove pattern query
-    //   const patternErrorHandler = getErrorHandler('Error fetching patterns');
-    //   getPatterns(
-    //     selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
-    //     patternErrorHandler
-    //   );
-    // }
+    // getEvents(tempQuery);
+    handleQuerySearch(availability);
+    if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
+      let currQuery = query.rawQuery;
+      const currPattern = currQuery.match(PATTERNS_EXTRACTOR_REGEX)!.groups!.pattern;
+      // Remove existing pattern selection if it exists
+      if (currQuery.match(PATTERNS_REGEX)) {
+        currQuery = currQuery.replace(PATTERNS_REGEX, '');
+      }
+      const patternSelectQuery = `${currQuery.trim()} | patterns ${currPattern}`;
+      await setTempQuery(patternSelectQuery);
+      await updateQueryInStore(patternSelectQuery);
+      // Passing in empty string will remove pattern query
+      const patternErrorHandler = getErrorHandler('Error fetching patterns');
+      getPatterns(
+        selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
+        patternErrorHandler
+      );
+    }
   };
 
   const sidebarClassName = classNames({
@@ -953,6 +952,7 @@ export const Explorer = ({
           curVisId={curVisId}
           setSubType={setSubType}
           http={http}
+          setupDeps={setupDeps}
         />
         <EuiTabbedContent
           className="mainContentTabs"
