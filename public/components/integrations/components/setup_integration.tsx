@@ -3,36 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiTabs } from '@elastic/eui';
-import { EuiTab } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import {
-  EuiBottomBar,
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiLink,
-  EuiHeader,
-  EuiPage,
-  EuiPageBody,
-  EuiSelect,
-  EuiSelectOption,
-  EuiSteps,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiRadioGroup,
-  EuiTextColor,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiBasicTable,
-  EuiSwitch,
-  EuiCallOut,
-} from '@elastic/eui';
+import * as Eui from '@elastic/eui';
 import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/steps/steps';
 import React, { useState } from 'react';
 
@@ -48,12 +19,12 @@ interface IntegrationConfig {
 }
 
 const STEPS: EuiContainedStepProps[] = [
-  { title: 'Name Integration', children: <EuiText /> },
-  { title: 'Select index or data source for integration', children: <EuiText /> },
-  { title: 'Select integration assets', children: <EuiText /> },
+  { title: 'Name Integration', children: <Eui.EuiText /> },
+  { title: 'Select index or data source for integration', children: <Eui.EuiText /> },
+  { title: 'Select integration assets', children: <Eui.EuiText /> },
 ];
 
-const ALLOWED_FILE_TYPES: EuiSelectOption[] = [
+const ALLOWED_FILE_TYPES: Eui.EuiSelectOption[] = [
   { value: 'parquet', text: 'parquet' },
   { value: 'json', text: 'json' },
 ];
@@ -106,43 +77,43 @@ const getSteps = (activeStep: number): EuiContainedStepProps[] => {
 
 function SetupIntegrationMetadata() {
   return (
-    <EuiForm>
-      <EuiTitle>
+    <Eui.EuiForm>
+      <Eui.EuiTitle>
         <h1>{STEPS[0].title}</h1>
-      </EuiTitle>
-      <EuiFormRow
+      </Eui.EuiTitle>
+      <Eui.EuiFormRow
         label="Name"
         helpText="The name will be used to label the newly added integration"
       >
-        <EuiFieldText />
-      </EuiFormRow>
-    </EuiForm>
+        <Eui.EuiFieldText />
+      </Eui.EuiFormRow>
+    </Eui.EuiForm>
   );
 }
 
 function SetupIntegrationNewTable() {
   return (
-    <EuiForm>
-      <EuiTitle>
+    <Eui.EuiForm>
+      <Eui.EuiTitle>
         <h2>{STEPS[1].title}</h2>
-      </EuiTitle>
-      <EuiCallOut title="There was no table found" iconType="iInCircle">
+      </Eui.EuiTitle>
+      <Eui.EuiCallOut title="There was no table found" iconType="iInCircle">
         <p>No problem, we can help. Tell us about your data.</p>
-      </EuiCallOut>
-      <EuiSpacer />
-      <EuiFormRow label="Title">
-        <EuiFieldText />
-      </EuiFormRow>
-      <EuiFormRow label="Description (optional)">
-        <EuiFieldText />
-      </EuiFormRow>
-      <EuiFormRow label="File Type">
-        <EuiSelect options={ALLOWED_FILE_TYPES} />
-      </EuiFormRow>
-      <EuiFormRow label="Location to store table">
-        <EuiFieldText />
-      </EuiFormRow>
-    </EuiForm>
+      </Eui.EuiCallOut>
+      <Eui.EuiSpacer />
+      <Eui.EuiFormRow label="Title">
+        <Eui.EuiFieldText />
+      </Eui.EuiFormRow>
+      <Eui.EuiFormRow label="Description (optional)">
+        <Eui.EuiFieldText />
+      </Eui.EuiFormRow>
+      <Eui.EuiFormRow label="File Type">
+        <Eui.EuiSelect options={ALLOWED_FILE_TYPES} />
+      </Eui.EuiFormRow>
+      <Eui.EuiFormRow label="Location to store table">
+        <Eui.EuiFieldText />
+      </Eui.EuiFormRow>
+    </Eui.EuiForm>
   );
 }
 
@@ -153,21 +124,21 @@ function IntegrationDataModal(
   let dataModal = null;
   if (isDataModalVisible) {
     dataModal = (
-      <EuiModal onClose={() => setDataModalVisible(false)}>
-        <EuiModalHeader>
+      <Eui.EuiModal onClose={() => setDataModalVisible(false)}>
+        <Eui.EuiModalHeader>
           <h2>Data Table</h2>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiBasicTable
+        </Eui.EuiModalHeader>
+        <Eui.EuiModalBody>
+          <Eui.EuiBasicTable
             items={integrationDataTableData}
             columns={INTEGRATION_DATA_TABLE_COLUMNS}
           />
-          <EuiSpacer />
-          <EuiButton onClick={() => setDataModalVisible(false)} size="s">
+          <Eui.EuiSpacer />
+          <Eui.EuiButton onClick={() => setDataModalVisible(false)} size="s">
             Close
-          </EuiButton>
-        </EuiModalBody>
-      </EuiModal>
+          </Eui.EuiButton>
+        </Eui.EuiModalBody>
+      </Eui.EuiModal>
     );
   }
   return dataModal;
@@ -178,17 +149,17 @@ function SetupIntegrationExistingTable(
   setDataModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   return (
-    <EuiForm>
-      <EuiTitle>
+    <Eui.EuiForm>
+      <Eui.EuiTitle>
         <h1>{STEPS[1].title}</h1>
-      </EuiTitle>
-      <EuiFormRow label="Data" helpText="Manage data associated with this data source">
-        <EuiSelect options={[{ value: 'test_s3', text: 'S3 connection name' }]} />
-      </EuiFormRow>
-      <EuiSpacer />
-      <EuiLink onClick={() => setDataModalVisible(true)}>View table</EuiLink>
+      </Eui.EuiTitle>
+      <Eui.EuiFormRow label="Data" helpText="Manage data associated with this data source">
+        <Eui.EuiSelect options={[{ value: 'test_s3', text: 'S3 connection name' }]} />
+      </Eui.EuiFormRow>
+      <Eui.EuiSpacer />
+      <Eui.EuiLink onClick={() => setDataModalVisible(true)}>View table</Eui.EuiLink>
       {IntegrationDataModal(isDataModalVisible, setDataModalVisible)}
-    </EuiForm>
+    </Eui.EuiForm>
   );
 }
 
@@ -197,111 +168,116 @@ function SetupIntegrationAccelerationStandard(
   setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
 ) {
   return (
-    <EuiForm>
-      <EuiFormRow label="Asset Quantity" helpText="Select the amount of assets you want to install">
-        <EuiRadioGroup
+    <Eui.EuiForm>
+      <Eui.EuiFormRow
+        label="Asset Quantity"
+        helpText="Select the amount of assets you want to install"
+      >
+        <Eui.EuiRadioGroup
           options={[
             {
               id: 'index-only',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   None{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     Set up indices, but don&apos;t install any assets.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
             {
               id: 'queries',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   Minimal{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     Set up indices and include provided saved queries.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
             {
               id: 'visualizations',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   Complete{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     Indices, queries, and visualizations for the data.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
             {
               id: 'all',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   Everything{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     Includes additional assets such as detectors or geospatial.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
           ]}
           idSelected={integConfig.asset_accel}
           onChange={(id) => setConfig(Object.assign({}, integConfig, { asset_accel: id }))}
         />
-      </EuiFormRow>
+      </Eui.EuiFormRow>
 
-      <EuiFormRow label="Query Acceleration" helpText="Select your query acceleration option">
-        <EuiRadioGroup
+      <Eui.EuiFormRow label="Query Acceleration" helpText="Select your query acceleration option">
+        <Eui.EuiRadioGroup
           options={[
             {
               id: 'none',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   None{': '}
-                  <EuiTextColor color="subdued">No acceleration. Cheap, but slow.</EuiTextColor>
-                </EuiText>
+                  <Eui.EuiTextColor color="subdued">
+                    No acceleration. Cheap, but slow.
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
             {
               id: 'basic',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   Basic{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     Minimal optimizations balancing performance and cost.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
             {
               id: 'advanced',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   Advanced{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     More intensive optimization for better performance.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
             {
               id: 'ultra',
               label: (
-                <EuiText>
+                <Eui.EuiText>
                   Ultra{': '}
-                  <EuiTextColor color="subdued">
+                  <Eui.EuiTextColor color="subdued">
                     Ideal for performance-critical indices.
-                  </EuiTextColor>
-                </EuiText>
+                  </Eui.EuiTextColor>
+                </Eui.EuiText>
               ),
             },
           ]}
           idSelected={integConfig.query_accel}
           onChange={(id) => setConfig(Object.assign({}, integConfig, { query_accel: id }))}
         />
-      </EuiFormRow>
-    </EuiForm>
+      </Eui.EuiFormRow>
+    </Eui.EuiForm>
   );
 }
 
@@ -310,7 +286,7 @@ function SetupIntegrationAccelerationAdvanced(
   setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
 ) {
   return (
-    <EuiBasicTable
+    <Eui.EuiBasicTable
       columns={[
         {
           name: 'Name',
@@ -375,23 +351,23 @@ function SetupIntegrationAcceleration(
   setIsStandard: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   return (
-    <EuiForm>
-      <EuiTitle>
+    <Eui.EuiForm>
+      <Eui.EuiTitle>
         <h1>{STEPS[2].title}</h1>
-      </EuiTitle>
-      <EuiTabs>
-        <EuiTab isSelected={isStandard} onClick={() => setIsStandard(true)}>
+      </Eui.EuiTitle>
+      <Eui.EuiTabs>
+        <Eui.EuiTab isSelected={isStandard} onClick={() => setIsStandard(true)}>
           Standard
-        </EuiTab>
-        <EuiTab isSelected={!isStandard} onClick={() => setIsStandard(false)}>
+        </Eui.EuiTab>
+        <Eui.EuiTab isSelected={!isStandard} onClick={() => setIsStandard(false)}>
           Advanced
-        </EuiTab>
-      </EuiTabs>
-      <EuiSpacer />
+        </Eui.EuiTab>
+      </Eui.EuiTabs>
+      <Eui.EuiSpacer />
       {isStandard
         ? SetupIntegrationAccelerationStandard(integConfig, setConfig)
         : SetupIntegrationAccelerationAdvanced(integConfig, setConfig)}
-    </EuiForm>
+    </Eui.EuiForm>
   );
 }
 
@@ -423,8 +399,8 @@ function SetupIntegrationStep(activeStep: number) {
       return (
         <div>
           {tableForm}
-          <EuiSpacer size="xxl" />
-          <EuiSwitch
+          <Eui.EuiSpacer size="xxl" />
+          <Eui.EuiSwitch
             label="(debug) Table detected"
             checked={tableDetected}
             onChange={(event) => setTableDetected(event.target.checked)}
@@ -434,16 +410,16 @@ function SetupIntegrationStep(activeStep: number) {
     case 2:
       return SetupIntegrationAcceleration(integConfig, setConfig, isStandard, setIsStandard);
     default:
-      return <EuiHeader>Something went wrong...</EuiHeader>;
+      return <Eui.EuiHeader>Something went wrong...</Eui.EuiHeader>;
   }
 }
 
 function SetupBottomBar(step: number, setStep: React.Dispatch<React.SetStateAction<number>>) {
   return (
-    <EuiBottomBar>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
+    <Eui.EuiBottomBar>
+      <Eui.EuiFlexGroup justifyContent="flexEnd">
+        <Eui.EuiFlexItem grow={false}>
+          <Eui.EuiButton
             color="danger"
             iconType={'cross'}
             onClick={() => {
@@ -455,25 +431,25 @@ function SetupBottomBar(step: number, setStep: React.Dispatch<React.SetStateActi
             }}
           >
             Cancel
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSpacer />
-        </EuiFlexItem>
+          </Eui.EuiButton>
+        </Eui.EuiFlexItem>
+        <Eui.EuiFlexItem>
+          <Eui.EuiSpacer />
+        </Eui.EuiFlexItem>
         {step > 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton iconType={'returnKey'} onClick={() => setStep(Math.max(step - 1, 0))}>
+          <Eui.EuiFlexItem grow={false}>
+            <Eui.EuiButton iconType={'returnKey'} onClick={() => setStep(Math.max(step - 1, 0))}>
               Back
-            </EuiButton>
-          </EuiFlexItem>
+            </Eui.EuiButton>
+          </Eui.EuiFlexItem>
         ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiButton fill iconType={'check'} onClick={() => setStep(Math.min(step + 1, 2))}>
+        <Eui.EuiFlexItem grow={false}>
+          <Eui.EuiButton fill iconType={'check'} onClick={() => setStep(Math.min(step + 1, 2))}>
             {step === STEPS.length - 1 ? 'Save' : 'Next'}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiBottomBar>
+          </Eui.EuiButton>
+        </Eui.EuiFlexItem>
+      </Eui.EuiFlexGroup>
+    </Eui.EuiBottomBar>
   );
 }
 
@@ -481,16 +457,16 @@ export function SetupIntegrationStepsPage() {
   const [step, setStep] = useState(0);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiSteps steps={getSteps(step)} />
-          </EuiFlexItem>
-          <EuiFlexItem>{SetupIntegrationStep(step)}</EuiFlexItem>
-        </EuiFlexGroup>
+    <Eui.EuiPage>
+      <Eui.EuiPageBody>
+        <Eui.EuiFlexGroup>
+          <Eui.EuiFlexItem>
+            <Eui.EuiSteps steps={getSteps(step)} />
+          </Eui.EuiFlexItem>
+          <Eui.EuiFlexItem>{SetupIntegrationStep(step)}</Eui.EuiFlexItem>
+        </Eui.EuiFlexGroup>
         {SetupBottomBar(step, setStep)}
-      </EuiPageBody>
-    </EuiPage>
+      </Eui.EuiPageBody>
+    </Eui.EuiPage>
   );
 }
