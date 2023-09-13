@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiTabs } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import {
   EuiBottomBar,
   EuiButton,
@@ -27,6 +30,8 @@ import {
   EuiModalHeader,
   EuiModalBody,
   EuiBasicTable,
+  EuiSwitch,
+  EuiCallOut,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/steps/steps';
 import React, { useState } from 'react';
@@ -45,13 +50,45 @@ interface IntegrationConfig {
 const STEPS: EuiContainedStepProps[] = [
   { title: 'Name Integration', children: <EuiText /> },
   { title: 'Select index or data source for integration', children: <EuiText /> },
-  { title: 'Review associated index with data from table', children: <EuiText /> },
   { title: 'Select integration assets', children: <EuiText /> },
 ];
 
 const ALLOWED_FILE_TYPES: EuiSelectOption[] = [
   { value: 'parquet', text: 'parquet' },
   { value: 'json', text: 'json' },
+];
+
+const INTEGRATION_DATA_TABLE_COLUMNS = [
+  {
+    field: 'field',
+    name: 'Field Name',
+  },
+  {
+    field: 'type',
+    name: 'Field Type',
+  },
+  {
+    field: 'isTimestamp',
+    name: 'Timestamp',
+  },
+];
+
+const integrationDataTableData = [
+  {
+    field: 'spanId',
+    type: 'string',
+    isTimestamp: false,
+  },
+  {
+    field: 'severity.number',
+    type: 'long',
+    isTimestamp: false,
+  },
+  {
+    field: '@timestamp',
+    type: 'date',
+    isTimestamp: true,
+  },
 ];
 
 const getSteps = (activeStep: number): EuiContainedStepProps[] => {
@@ -67,7 +104,7 @@ const getSteps = (activeStep: number): EuiContainedStepProps[] => {
   });
 };
 
-function SetupIntegrationStepOne() {
+function SetupIntegrationMetadata() {
   return (
     <EuiForm>
       <EuiTitle>
@@ -83,12 +120,16 @@ function SetupIntegrationStepOne() {
   );
 }
 
-function SetupIntegrationStepTwo() {
+function SetupIntegrationNewTable() {
   return (
     <EuiForm>
       <EuiTitle>
         <h2>{STEPS[1].title}</h2>
       </EuiTitle>
+      <EuiCallOut title="There was no table found" iconType="iInCircle">
+        <p>No problem, we can help. Tell us about your data.</p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiFormRow label="Title">
         <EuiFieldText />
       </EuiFormRow>
@@ -118,37 +159,8 @@ function IntegrationDataModal(
         </EuiModalHeader>
         <EuiModalBody>
           <EuiBasicTable
-            items={[
-              {
-                field: 'spanId',
-                type: 'string',
-                isTimestamp: false,
-              },
-              {
-                field: 'severity.number',
-                type: 'long',
-                isTimestamp: false,
-              },
-              {
-                field: '@timestamp',
-                type: 'date',
-                isTimestamp: true,
-              },
-            ]}
-            columns={[
-              {
-                field: 'field',
-                name: 'Field Name',
-              },
-              {
-                field: 'type',
-                name: 'Field Type',
-              },
-              {
-                field: 'isTimestamp',
-                name: 'Timestamp',
-              },
-            ]}
+            items={integrationDataTableData}
+            columns={INTEGRATION_DATA_TABLE_COLUMNS}
           />
           <EuiSpacer />
           <EuiButton onClick={() => setDataModalVisible(false)} size="s">
@@ -161,14 +173,14 @@ function IntegrationDataModal(
   return dataModal;
 }
 
-function SetupIntegrationStepThree(
+function SetupIntegrationExistingTable(
   isDataModalVisible: boolean,
   setDataModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   return (
     <EuiForm>
       <EuiTitle>
-        <h1>{STEPS[2].title}</h1>
+        <h1>{STEPS[1].title}</h1>
       </EuiTitle>
       <EuiFormRow label="Data" helpText="Manage data associated with this data source">
         <EuiSelect options={[{ value: 'test_s3', text: 'S3 connection name' }]} />
@@ -180,15 +192,12 @@ function SetupIntegrationStepThree(
   );
 }
 
-function SetupIntegrationStepFour(
+function SetupIntegrationAccelerationStandard(
   integConfig: IntegrationConfig,
   setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
 ) {
   return (
     <EuiForm>
-      <EuiTitle>
-        <h1>{STEPS[3].title}</h1>
-      </EuiTitle>
       <EuiFormRow label="Asset Quantity" helpText="Select the amount of assets you want to install">
         <EuiRadioGroup
           options={[
@@ -296,6 +305,96 @@ function SetupIntegrationStepFour(
   );
 }
 
+function SetupIntegrationAccelerationAdvanced(
+  integConfig: IntegrationConfig,
+  setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
+) {
+  return (
+    <EuiBasicTable
+      columns={[
+        {
+          name: 'Name',
+          field: 'name',
+        },
+        {
+          name: 'Type',
+          field: 'type',
+        },
+        {
+          name: 'Acceleration Details',
+          field: 'acceleration',
+        },
+        {
+          name: 'Actions',
+          actions: [
+            {
+              name: 'discover',
+              description: 'Discover?',
+              type: 'icon',
+              icon: 'discoverApp',
+              color: 'primary',
+              onClick: () => {},
+            },
+            {
+              name: 'configure',
+              description: 'Configure Asset',
+              type: 'icon',
+              icon: 'indexSettings',
+              color: 'primary',
+              onClick: () => {},
+            },
+          ],
+        },
+      ]}
+      items={[
+        {
+          name: '[NGINX Core Logs 1.0] Overview',
+          type: 'dashboard',
+          acceleration: 'Enhanced',
+        },
+        {
+          name: 'ss4o_logs-*-*',
+          type: 'index-pattern',
+          acceleration: 'Status',
+        },
+        {
+          name: 'Top Paths',
+          type: 'visualization',
+          acceleration: 'Query',
+        },
+      ]}
+      hasActions={true}
+    />
+  );
+}
+
+function SetupIntegrationAcceleration(
+  integConfig: IntegrationConfig,
+  setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>,
+  isStandard: boolean,
+  setIsStandard: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  return (
+    <EuiForm>
+      <EuiTitle>
+        <h1>{STEPS[2].title}</h1>
+      </EuiTitle>
+      <EuiTabs>
+        <EuiTab isSelected={isStandard} onClick={() => setIsStandard(true)}>
+          Standard
+        </EuiTab>
+        <EuiTab isSelected={!isStandard} onClick={() => setIsStandard(false)}>
+          Advanced
+        </EuiTab>
+      </EuiTabs>
+      <EuiSpacer />
+      {isStandard
+        ? SetupIntegrationAccelerationStandard(integConfig, setConfig)
+        : SetupIntegrationAccelerationAdvanced(integConfig, setConfig)}
+    </EuiForm>
+  );
+}
+
 function SetupIntegrationStep(activeStep: number) {
   const [integConfig, setConfig] = useState({
     instance_name: 'NginX Access 2.0',
@@ -308,16 +407,32 @@ function SetupIntegrationStep(activeStep: number) {
     query_accel: 'basic',
   });
   const [isDataModalVisible, setDataModalVisible] = useState(false);
+  const [tableDetected, setTableDetected] = useState(false);
+  const [isStandard, setIsStandard] = useState(true);
 
   switch (activeStep) {
     case 0:
-      return SetupIntegrationStepOne();
+      return SetupIntegrationMetadata();
     case 1:
-      return SetupIntegrationStepTwo();
+      let tableForm;
+      if (tableDetected) {
+        tableForm = SetupIntegrationExistingTable(isDataModalVisible, setDataModalVisible);
+      } else {
+        tableForm = SetupIntegrationNewTable();
+      }
+      return (
+        <div>
+          {tableForm}
+          <EuiSpacer size="xxl" />
+          <EuiSwitch
+            label="(debug) Table detected"
+            checked={tableDetected}
+            onChange={(event) => setTableDetected(event.target.checked)}
+          />
+        </div>
+      );
     case 2:
-      return SetupIntegrationStepThree(isDataModalVisible, setDataModalVisible);
-    case 3:
-      return SetupIntegrationStepFour(integConfig, setConfig);
+      return SetupIntegrationAcceleration(integConfig, setConfig, isStandard, setIsStandard);
     default:
       return <EuiHeader>Something went wrong...</EuiHeader>;
   }
@@ -353,8 +468,8 @@ function SetupBottomBar(step: number, setStep: React.Dispatch<React.SetStateActi
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType={'check'} onClick={() => setStep(Math.min(step + 1, 3))}>
-            {step === 3 ? 'Save' : 'Next'}
+          <EuiButton fill iconType={'check'} onClick={() => setStep(Math.min(step + 1, 2))}>
+            {step === STEPS.length - 1 ? 'Save' : 'Next'}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
