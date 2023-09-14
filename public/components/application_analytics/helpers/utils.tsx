@@ -16,7 +16,7 @@ import { NEW_SELECTED_QUERY_TAB, TAB_CREATED_TYPE } from '../../../../common/con
 import { SPAN_REGEX } from '../../../../common/constants/shared';
 import { VisualizationType } from '../../../../common/types/custom_panels';
 import { IField } from '../../../../common/types/explorer';
-import { preprocessQuery } from '../../../../common/utils/query_utils';
+import { preprocessQuery } from '../../common/query_utils';
 import { fetchVisualizationById } from '../../../components/custom_panels/helpers/utils';
 import {
   init as initFields,

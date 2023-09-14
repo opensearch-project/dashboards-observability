@@ -6,7 +6,7 @@
 import React, { useMemo, useState, useContext, useEffect } from 'react';
 import { indexOf, last } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
-import { getIndexPatternFromRawQuery } from '../../../../../common/utils/query_utils';
+import { getIndexPatternFromRawQuery } from '../../../common/query_utils';
 import { TabContext } from '../../hooks/use_tab_context';
 
 interface IInsightsReq {

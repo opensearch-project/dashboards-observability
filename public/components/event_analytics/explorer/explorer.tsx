@@ -31,6 +31,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
 import { LogExplorerRouterContext } from '..';
 import {
   CREATE_TAB_PARAM,
@@ -458,6 +459,8 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const dateRange = getDateRange(startTime, endTime, query);
+
   const mainContent = useMemo(() => {
     return (
       <>
@@ -507,38 +510,32 @@ export const Explorer = ({
               <div className="dscResults">
                 {countDistribution?.data && !isLiveTailOnRef.current && (
                   <>
-                    <EuiFlexGroup justifyContent="center" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <HitsCounter
-                          hits={reduce(
-                            countDistribution.data['count()'],
-                            (sum, n) => {
-                              return sum + n;
-                            },
-                            0
-                          )}
-                          showResetButton={false}
-                          onResetQuery={() => {}}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <TimechartHeader
-                          dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
-                          options={timeIntervalOptions}
-                          onChangeInterval={(selectedIntrv) => {
-                            const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                              (item) => item.value === selectedIntrv
-                            );
-                            const intrv = selectedIntrv.replace(/^auto_/, '');
-                            getCountVisualizations(intrv);
-                            selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                            getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                          }}
-                          stateInterval={selectedIntervalRef.current?.value}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <CountDistribution countDistribution={countDistribution} />
+                    <HitsCounter
+                      hits={_.sum(countDistribution.data['count()'])}
+                      showResetButton={false}
+                      onResetQuery={() => {}}
+                    />
+                    <TimechartHeader
+                      options={timeIntervalOptions}
+                      onChangeInterval={(selectedIntrv) => {
+                        const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                          (item) => item.value === selectedIntrv
+                        );
+                        const intrv = selectedIntrv.replace(/^auto_/, '');
+                        getCountVisualizations(intrv);
+                        selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                        getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                      }}
+                      stateInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
+                    <CountDistribution
+                      countDistribution={countDistribution}
+                      selectedInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
@@ -883,8 +880,6 @@ export const Explorer = ({
       </EuiContextMenuItem>
     );
   });
-
-  const dateRange = getDateRange(startTime, endTime, query);
 
   const handleLiveTailSearch = useCallback(
     async (startingTime: string, endingTime: string) => {
