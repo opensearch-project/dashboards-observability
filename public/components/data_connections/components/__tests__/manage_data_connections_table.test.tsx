@@ -11,7 +11,7 @@ import { ManageDataConnectionsTable } from '../manage_data_connections_table';
 import { showDataConnectionsData } from './testing_constants';
 import ReactDOM from 'react-dom';
 
-describe('Manage Datasource Table test', () => {
+describe('Manage Data Connections Table test', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders manage data connections table with data', async () => {

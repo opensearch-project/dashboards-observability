@@ -7,16 +7,14 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
-import { DataConnectionsDescription } from '../manage_data_connections_description';
-import { ManageDataConnectionsTable } from '../manage_data_connections_table';
-import { describeDataConnection, showDataConnectionsData } from './testing_constants';
+import { describeDataConnection } from './testing_constants';
 import { DataConnection } from '../data_connection';
 import ReactDOM from 'react-dom';
 
-describe('Datasource Page test', () => {
+describe('Data Connection Page test', () => {
   configure({ adapter: new Adapter() });
 
-  it('Renders datasource page with data', async () => {
+  it('Renders data connection page with data', async () => {
     const http = {
       get: jest.fn().mockResolvedValue(describeDataConnection),
     };

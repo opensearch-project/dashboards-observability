@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE, DATASOURCES_BASE } from '../../../../common/constants/shared';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { ChromeStart } from '../../../../../../src/core/public';
 
 interface DataConnection {

@@ -5,7 +5,6 @@
 
 import {
   OPENSEARCH_DATACONNECTIONS_API,
-  OPENSEARCH_DATASOURCES_API,
   PPL_ENDPOINT,
   SQL_ENDPOINT,
 } from '../../common/constants/shared';

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Manage Datasource Table test Renders manage data connections table with data 1`] = `
+exports[`Manage Data Connections Table test Renders manage data connections table with data 1`] = `
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
