@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Manage Datasource Table test Renders manage datasource table with data 1`] = `
+exports[`Manage Datasource Table test Renders manage data connections table with data 1`] = `
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -32,7 +32,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            Connect and manage compatible OpenSearch Dashboard data sources and compute.
+            Connect and manage compatible OpenSearch and OpenSearch Dashboard data connections.
              
             <a
               class="euiLink euiLink--primary"
@@ -79,7 +79,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Manage already created data source connections.
+              Manage already created data connections.
             </div>
           </div>
           <hr
@@ -308,7 +308,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                       >
                         <div
                           class="euiText euiText--medium"
-                          data-test-subj="undefinedDatasourceConnectionHealth"
+                          data-test-subj="undefinedDataConnectionHealth"
                         />
                       </div>
                     </td>
@@ -384,7 +384,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                       >
                         <div
                           class="euiText euiText--medium"
-                          data-test-subj="undefinedDatasourceConnectionHealth"
+                          data-test-subj="undefinedDataConnectionHealth"
                         />
                       </div>
                     </td>
@@ -460,7 +460,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                       >
                         <div
                           class="euiText euiText--medium"
-                          data-test-subj="undefinedDatasourceConnectionHealth"
+                          data-test-subj="undefinedDataConnectionHealth"
                         />
                       </div>
                     </td>
@@ -536,7 +536,7 @@ exports[`Manage Datasource Table test Renders manage datasource table with data 
                       >
                         <div
                           class="euiText euiText--medium"
-                          data-test-subj="undefinedDatasourceConnectionHealth"
+                          data-test-subj="undefinedDataConnectionHealth"
                         />
                       </div>
                     </td>

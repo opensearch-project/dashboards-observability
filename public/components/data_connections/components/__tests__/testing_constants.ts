@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const showDatasourceData = [
+export const showDataConnectionsData = [
   {
     name: 'my_spark3',
     connector: 'SPARK',
@@ -59,7 +59,7 @@ export const showDatasourceData = [
   },
 ];
 
-export const describeDatasource = {
+export const describeDataConnection = {
   name: 'my_spark3',
   connector: 'SPARK',
   allowedRoles: [],

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Manage Datasource Description test Renders manage datasource description 1`] = `
+exports[`Manage Data Connections Description test Renders manage data connections description 1`] = `
 <Component>
   <div>
     <EuiTitle
@@ -33,7 +33,7 @@ exports[`Manage Datasource Description test Renders manage datasource descriptio
           <div
             className="euiTextColor euiTextColor--subdued"
           >
-            Manage already created data source connections.
+            Manage already created data connections.
           </div>
         </EuiTextColor>
       </div>

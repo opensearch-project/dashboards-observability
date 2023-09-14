@@ -7,16 +7,16 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { act } from '@testing-library/react';
 import React from 'react';
-import { ManageDatasourcesTable } from '../manage_datasource_table';
-import { showDatasourceData } from './testing_constants';
+import { ManageDataConnectionsTable } from '../manage_data_connections_table';
+import { showDataConnectionsData } from './testing_constants';
 import ReactDOM from 'react-dom';
 
 describe('Manage Datasource Table test', () => {
   configure({ adapter: new Adapter() });
 
-  it('Renders manage datasource table with data', async () => {
+  it('Renders manage data connections table with data', async () => {
     const http = {
-      get: jest.fn().mockResolvedValue(showDatasourceData),
+      get: jest.fn().mockResolvedValue(showDataConnectionsData),
     };
     const pplService = {
       fetch: jest.fn(),
@@ -27,7 +27,7 @@ describe('Manage Datasource Table test', () => {
     const container = document.createElement('div');
     await act(() => {
       ReactDOM.render(
-        <ManageDatasourcesTable http={http} pplService={pplService} chrome={mockChrome} />,
+        <ManageDataConnectionsTable http={http} pplService={pplService} chrome={mockChrome} />,
         container
       );
     });

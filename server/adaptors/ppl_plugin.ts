@@ -4,6 +4,7 @@
  */
 
 import {
+  OPENSEARCH_DATACONNECTIONS_API,
   OPENSEARCH_DATASOURCES_API,
   PPL_ENDPOINT,
   SQL_ENDPOINT,
@@ -42,11 +43,11 @@ export const PPLPlugin = function (Client, config, components) {
     method: 'POST',
   });
 
-  ppl.getDatasourceById = ca({
+  ppl.getDataConnectionById = ca({
     url: {
-      fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}/<%=datasource%>`,
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}/<%=dataconnection%>`,
       req: {
-        datasource: {
+        dataconnection: {
           type: 'string',
           required: true,
         },
@@ -55,9 +56,9 @@ export const PPLPlugin = function (Client, config, components) {
     method: 'GET',
   });
 
-  ppl.getDatasources = ca({
+  ppl.getDataConnections = ca({
     url: {
-      fmt: `${OPENSEARCH_DATASOURCES_API.DATASOURCE}`,
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
     },
     method: 'GET',
   });

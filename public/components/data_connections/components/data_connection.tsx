@@ -29,7 +29,7 @@ interface DatasourceDetails {
   cluster: string;
 }
 
-export const DataSource = (props: any) => {
+export const DataConnection = (props: any) => {
   const { dataSource, pplService, http } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],

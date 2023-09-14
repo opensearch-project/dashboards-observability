@@ -27,7 +27,7 @@ export const DataConnectionsHeader = () => {
       </EuiPageHeader>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Connect and manage compatible OpenSearch Dashboard data sources and compute.{' '}
+        Connect and manage compatible OpenSearch and OpenSearch Dashboard data connections.{' '}
         <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
