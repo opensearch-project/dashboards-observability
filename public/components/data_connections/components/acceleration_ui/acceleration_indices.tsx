@@ -17,7 +17,7 @@ export const AccelerationIndices = ({ dataConnection }: AccelerationIndicesProps
   useEffect(() => {
     coreRefs.chrome?.setBreadcrumbs([
       {
-        text: 'Datasources',
+        text: 'Data Connections',
         href: '#/',
       },
       {
