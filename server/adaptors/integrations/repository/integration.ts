@@ -12,7 +12,7 @@ import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
  * It is backed by the repository file system.
  * It includes accessor methods for integration configs, as well as helpers for nested components.
  */
-export class Integration {
+export class IntegrationReader {
   reader: CatalogDataAdaptor;
   directory: string;
   name: string;
@@ -28,7 +28,7 @@ export class Integration {
    *
    * @returns a Result indicating whether the integration is valid.
    */
-  async deepCheck(): Promise<Result<IntegrationTemplate>> {
+  async deepCheck(): Promise<Result<IntegrationConfig>> {
     const configResult = await this.getConfig();
     if (!configResult.ok) {
       return configResult;
@@ -72,7 +72,7 @@ export class Integration {
    * @param version The version of the config to retrieve.
    * @returns The config if a valid config matching the version is present, otherwise null.
    */
-  async getConfig(version?: string): Promise<Result<IntegrationTemplate>> {
+  async getConfig(version?: string): Promise<Result<IntegrationConfig>> {
     if ((await this.reader.getDirectoryType()) !== 'integration') {
       return { ok: false, error: new Error(`${this.directory} is not a valid integration`) };
     }

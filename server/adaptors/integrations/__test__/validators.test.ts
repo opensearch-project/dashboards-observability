@@ -5,7 +5,7 @@
 
 import { validateTemplate, validateInstance } from '../validators';
 
-const validTemplate: IntegrationTemplate = {
+const validTemplate: IntegrationConfig = {
   name: 'test',
   version: '1.0.0',
   license: 'Apache-2.0',
@@ -29,7 +29,7 @@ const validInstance: IntegrationInstance = {
 
 describe('validateTemplate', () => {
   it('Returns a success value for a valid Integration Template', () => {
-    const result: Result<IntegrationTemplate> = validateTemplate(validTemplate);
+    const result: Result<IntegrationConfig> = validateTemplate(validTemplate);
     expect(result.ok).toBe(true);
     expect((result as any).value).toBe(validTemplate);
   });
@@ -38,7 +38,7 @@ describe('validateTemplate', () => {
     const sample: any = structuredClone(validTemplate);
     sample.license = undefined;
 
-    const result: Result<IntegrationTemplate> = validateTemplate(sample);
+    const result: Result<IntegrationConfig> = validateTemplate(sample);
 
     expect(result.ok).toBe(false);
     expect((result as any).error).toBeInstanceOf(Error);
@@ -48,7 +48,7 @@ describe('validateTemplate', () => {
     const sample: any = structuredClone(validTemplate);
     sample.components[0].name = 'not-logs';
 
-    const result: Result<IntegrationTemplate> = validateTemplate(sample);
+    const result: Result<IntegrationConfig> = validateTemplate(sample);
 
     expect(result.ok).toBe(false);
     expect((result as any).error).toBeInstanceOf(Error);

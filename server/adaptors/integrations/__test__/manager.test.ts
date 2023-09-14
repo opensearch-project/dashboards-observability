@@ -5,14 +5,14 @@
 
 import { IntegrationsManager } from '../integrations_manager';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../../src/core/server/types';
-import { Repository } from '../repository/repository';
+import { RepositoryReader } from '../repository/repository';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { Integration } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration';
 import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
 
 describe('IntegrationsKibanaBackend', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockRepository: jest.Mocked<Repository>;
+  let mockRepository: jest.Mocked<RepositoryReader>;
   let backend: IntegrationsManager;
 
   beforeEach(() => {
@@ -150,7 +150,9 @@ describe('IntegrationsKibanaBackend', () => {
       const integration = {
         getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template1' } }),
       };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getIntegrationTemplates(query);
 
@@ -166,7 +168,7 @@ describe('IntegrationsKibanaBackend', () => {
         { getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template2' } }) },
       ];
       mockRepository.getIntegrationList.mockResolvedValue(
-        (integrationList as unknown) as Integration[]
+        (integrationList as unknown) as IntegrationReader[]
       );
 
       const result = await backend.getIntegrationTemplates();
@@ -226,7 +228,7 @@ describe('IntegrationsKibanaBackend', () => {
         build: jest.fn().mockResolvedValue({ name, dataset: 'nginx', namespace: 'prod' }),
       };
       const createdInstance = { name, dataset: 'nginx', namespace: 'prod' };
-      mockRepository.getIntegration.mockResolvedValue((template as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue((template as unknown) as IntegrationReader);
       mockSavedObjectsClient.create.mockResolvedValue(({
         result: 'created',
       } as unknown) as SavedObject);
@@ -265,7 +267,7 @@ describe('IntegrationsKibanaBackend', () => {
         build: jest.fn().mockRejectedValue(new Error('Failed to build instance')),
       };
       backend.instanceBuilder = (instanceBuilder as unknown) as IntegrationInstanceBuilder;
-      mockRepository.getIntegration.mockResolvedValue((template as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue((template as unknown) as IntegrationReader);
 
       await expect(
         backend.loadIntegrationInstance(templateName, name, 'datasource')
@@ -281,7 +283,9 @@ describe('IntegrationsKibanaBackend', () => {
       const integration = {
         getStatic: jest.fn().mockResolvedValue({ ok: true, value: assetData }),
       };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getStatic(templateName, staticPath);
 
@@ -325,7 +329,9 @@ describe('IntegrationsKibanaBackend', () => {
       const integration = {
         getSchemas: jest.fn().mockResolvedValue({ ok: true, value: schemaData }),
       };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getSchemas(templateName);
 
@@ -361,7 +367,9 @@ describe('IntegrationsKibanaBackend', () => {
       const integration = {
         getAssets: jest.fn().mockResolvedValue({ ok: true, value: assetData }),
       };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getAssets(templateName);
 
@@ -397,7 +405,9 @@ describe('IntegrationsKibanaBackend', () => {
       const integration = {
         getSampleData: jest.fn().mockResolvedValue({ ok: true, value: sampleData }),
       };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getSampleData(templateName);
 

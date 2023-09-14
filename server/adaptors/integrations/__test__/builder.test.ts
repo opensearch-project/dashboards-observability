@@ -5,7 +5,7 @@
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { Integration } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration';
 
 const mockSavedObjectsClient: SavedObjectsClientContract = ({
   bulkCreate: jest.fn(),
@@ -16,7 +16,7 @@ const mockSavedObjectsClient: SavedObjectsClientContract = ({
   update: jest.fn(),
 } as unknown) as SavedObjectsClientContract;
 
-const sampleIntegration: Integration = ({
+const sampleIntegration: IntegrationReader = ({
   deepCheck: jest.fn().mockResolvedValue(true),
   getAssets: jest.fn().mockResolvedValue({
     savedObjects: [
@@ -34,7 +34,7 @@ const sampleIntegration: Integration = ({
     name: 'integration-template',
     type: 'integration-type',
   }),
-} as unknown) as Integration;
+} as unknown) as IntegrationReader;
 
 describe('IntegrationInstanceBuilder', () => {
   let builder: IntegrationInstanceBuilder;
@@ -93,7 +93,7 @@ describe('IntegrationInstanceBuilder', () => {
         ],
       };
 
-      const mockTemplate: Partial<IntegrationTemplate> = {
+      const mockTemplate: Partial<IntegrationConfig> = {
         name: 'integration-template',
         type: 'integration-type',
         assets: {
@@ -298,7 +298,7 @@ describe('IntegrationInstanceBuilder', () => {
       };
 
       const instance = await builder.buildInstance(
-        (integration as unknown) as Integration,
+        (integration as unknown) as IntegrationReader,
         refs,
         options
       );
@@ -326,7 +326,7 @@ describe('IntegrationInstanceBuilder', () => {
       };
 
       await expect(
-        builder.buildInstance((integration as unknown) as Integration, refs, options)
+        builder.buildInstance((integration as unknown) as IntegrationReader, refs, options)
       ).rejects.toThrowError();
     });
   });

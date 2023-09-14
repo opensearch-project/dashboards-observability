@@ -8,16 +8,17 @@ import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import { IntegrationsAdaptor } from './integrations_adaptor';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server/types';
 import { IntegrationInstanceBuilder } from './integrations_builder';
-import { Repository } from './repository/repository';
+import { RepositoryReader } from './repository/repository';
 
 export class IntegrationsManager implements IntegrationsAdaptor {
   client: SavedObjectsClientContract;
   instanceBuilder: IntegrationInstanceBuilder;
-  repository: Repository;
+  repository: RepositoryReader;
 
-  constructor(client: SavedObjectsClientContract, repository?: Repository) {
+  constructor(client: SavedObjectsClientContract, repository?: RepositoryReader) {
     this.client = client;
-    this.repository = repository ?? new Repository(path.join(__dirname, '__data__/repository'));
+    this.repository =
+      repository ?? new RepositoryReader(path.join(__dirname, '__data__/repository'));
     this.instanceBuilder = new IntegrationInstanceBuilder(this.client);
   }
 
@@ -57,7 +58,7 @@ export class IntegrationsManager implements IntegrationsAdaptor {
   _getAllIntegrationTemplates = async (): Promise<IntegrationTemplateSearchResult> => {
     const integrationList = await this.repository.getIntegrationList();
     const configResults = await Promise.all(integrationList.map((x) => x.getConfig()));
-    const configs = configResults.filter((cfg) => cfg.ok) as Array<{ value: IntegrationTemplate }>;
+    const configs = configResults.filter((cfg) => cfg.ok) as Array<{ value: IntegrationConfig }>;
     return Promise.resolve({ hits: configs.map((cfg) => cfg.value) });
   };
 

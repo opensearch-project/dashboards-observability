@@ -4,18 +4,18 @@
  */
 
 import * as fs from 'fs/promises';
-import { Repository } from '../repository';
-import { Integration } from '../integration';
+import { RepositoryReader } from '../repository';
+import { IntegrationReader } from '../integration';
 import { Dirent, Stats } from 'fs';
 import path from 'path';
 
 jest.mock('fs/promises');
 
 describe('Repository', () => {
-  let repository: Repository;
+  let repository: RepositoryReader;
 
   beforeEach(() => {
-    repository = new Repository('path/to/directory');
+    repository = new RepositoryReader('path/to/directory');
   });
 
   describe('getIntegrationList', () => {
@@ -23,14 +23,14 @@ describe('Repository', () => {
       jest.spyOn(fs, 'readdir').mockResolvedValue((['folder1', 'folder2'] as unknown) as Dirent[]);
       jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
       jest
-        .spyOn(Integration.prototype, 'getConfig')
+        .spyOn(IntegrationReader.prototype, 'getConfig')
         .mockResolvedValue({ ok: true, value: {} as any });
 
       const integrations = await repository.getIntegrationList();
 
       expect(integrations).toHaveLength(2);
-      expect(integrations[0]).toBeInstanceOf(Integration);
-      expect(integrations[1]).toBeInstanceOf(Integration);
+      expect(integrations[0]).toBeInstanceOf(IntegrationReader);
+      expect(integrations[1]).toBeInstanceOf(IntegrationReader);
     });
 
     it('should filter out null values from the integration list', async () => {
@@ -46,13 +46,13 @@ describe('Repository', () => {
       });
 
       jest
-        .spyOn(Integration.prototype, 'getConfig')
+        .spyOn(IntegrationReader.prototype, 'getConfig')
         .mockResolvedValue({ ok: true, value: {} as any });
 
       const integrations = await repository.getIntegrationList();
 
       expect(integrations).toHaveLength(1);
-      expect(integrations[0]).toBeInstanceOf(Integration);
+      expect(integrations[0]).toBeInstanceOf(IntegrationReader);
     });
 
     it('should handle errors and return an empty array', async () => {
@@ -68,17 +68,17 @@ describe('Repository', () => {
     it('should return an Integration instance if it exists and passes the check', async () => {
       jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
       jest
-        .spyOn(Integration.prototype, 'getConfig')
+        .spyOn(IntegrationReader.prototype, 'getConfig')
         .mockResolvedValue({ ok: true, value: {} as any });
 
       const integration = await repository.getIntegration('integrationName');
 
-      expect(integration).toBeInstanceOf(Integration);
+      expect(integration).toBeInstanceOf(IntegrationReader);
     });
 
     it('should return null if the integration does not exist or fails checks', async () => {
       jest
-        .spyOn(Integration.prototype, 'getConfig')
+        .spyOn(IntegrationReader.prototype, 'getConfig')
         .mockResolvedValue({ ok: false, error: new Error() });
 
       const integration = await repository.getIntegration('invalidIntegration');
