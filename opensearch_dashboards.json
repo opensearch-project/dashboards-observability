@@ -1,7 +1,7 @@
 {
   "id": "observabilityDashboards",
   "version": "3.0.0.0",
-  "opensearchDashboardsVersion": "3.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -19,6 +19,7 @@
     "visualizations"
   ],
   "optionalPlugins": [
+    "assistantDashboards",
     "managementOverview"
   ]
 }
