@@ -8,20 +8,19 @@ import { EuiContainedStepProps } from '@opensearch-project/oui/src/components/st
 import React, { useState } from 'react';
 
 interface IntegrationConfig {
-  instance_name: string;
-  datasource_name: string;
-  datasource_description: string;
-  datasource_filetype: string;
-  datasourcee_location: string;
-  connection_name: string;
-  asset_accel: string;
-  query_accel: string;
+  instanceName: string;
+  createNewDataSource: boolean;
+  dataSourceName: string;
+  dataSourceDescription: string;
+  dataSourceFileType: string;
+  dataSourceLocation: string;
+  connectionName: string;
 }
 
 const STEPS: EuiContainedStepProps[] = [
   { title: 'Name Integration', children: <Eui.EuiText /> },
   { title: 'Select index or data source for integration', children: <Eui.EuiText /> },
-  { title: 'Select integration assets', children: <Eui.EuiText /> },
+  // { title: 'Select integration assets', children: <Eui.EuiText /> },
 ];
 
 const ALLOWED_FILE_TYPES: Eui.EuiSelectOption[] = [
@@ -62,7 +61,7 @@ const integrationDataTableData = [
   },
 ];
 
-const getSteps = (activeStep: number): EuiContainedStepProps[] => {
+const getSetupStepStatus = (activeStep: number): EuiContainedStepProps[] => {
   return STEPS.map((step, idx) => {
     let status: string = '';
     if (idx < activeStep) {
@@ -75,7 +74,13 @@ const getSteps = (activeStep: number): EuiContainedStepProps[] => {
   });
 };
 
-function SetupIntegrationMetadata() {
+function SetupIntegrationMetadata({
+  name,
+  setName,
+}: {
+  name: string;
+  setName: (name: string) => void;
+}) {
   return (
     <Eui.EuiForm>
       <Eui.EuiTitle>
@@ -85,22 +90,35 @@ function SetupIntegrationMetadata() {
         label="Name"
         helpText="The name will be used to label the newly added integration"
       >
-        <Eui.EuiFieldText />
+        <Eui.EuiFieldText value={name} onChange={(evt) => setName(evt.target.value)} />
       </Eui.EuiFormRow>
     </Eui.EuiForm>
   );
 }
 
+function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Element {
+  return (
+    <Eui.EuiModal onClose={close}>
+      <Eui.EuiModalHeader>
+        <h2>Data Table</h2>
+      </Eui.EuiModalHeader>
+      <Eui.EuiModalBody>
+        <Eui.EuiBasicTable
+          items={integrationDataTableData}
+          columns={INTEGRATION_DATA_TABLE_COLUMNS}
+        />
+        <Eui.EuiSpacer />
+        <Eui.EuiButton onClick={close} size="s">
+          Close
+        </Eui.EuiButton>
+      </Eui.EuiModalBody>
+    </Eui.EuiModal>
+  );
+}
+
 function SetupIntegrationNewTable() {
   return (
-    <Eui.EuiForm>
-      <Eui.EuiTitle>
-        <h2>{STEPS[1].title}</h2>
-      </Eui.EuiTitle>
-      <Eui.EuiCallOut title="There was no table found" iconType="iInCircle">
-        <p>No problem, we can help. Tell us about your data.</p>
-      </Eui.EuiCallOut>
-      <Eui.EuiSpacer />
+    <div>
       <Eui.EuiFormRow label="Title">
         <Eui.EuiFieldText />
       </Eui.EuiFormRow>
@@ -113,308 +131,143 @@ function SetupIntegrationNewTable() {
       <Eui.EuiFormRow label="Location to store table">
         <Eui.EuiFieldText />
       </Eui.EuiFormRow>
-    </Eui.EuiForm>
+    </div>
   );
 }
 
-function IntegrationDataModal(
-  isDataModalVisible: boolean,
-  setDataModalVisible: React.Dispatch<React.SetStateAction<boolean>>
-): React.JSX.Element | null {
-  let dataModal = null;
-  if (isDataModalVisible) {
-    dataModal = (
-      <Eui.EuiModal onClose={() => setDataModalVisible(false)}>
-        <Eui.EuiModalHeader>
-          <h2>Data Table</h2>
-        </Eui.EuiModalHeader>
-        <Eui.EuiModalBody>
-          <Eui.EuiBasicTable
-            items={integrationDataTableData}
-            columns={INTEGRATION_DATA_TABLE_COLUMNS}
-          />
-          <Eui.EuiSpacer />
-          <Eui.EuiButton onClick={() => setDataModalVisible(false)} size="s">
-            Close
-          </Eui.EuiButton>
-        </Eui.EuiModalBody>
-      </Eui.EuiModal>
-    );
-  }
-  return dataModal;
-}
-
-function SetupIntegrationExistingTable(
-  isDataModalVisible: boolean,
-  setDataModalVisible: React.Dispatch<React.SetStateAction<boolean>>
-) {
+function SetupIntegrationExistingTable({
+  showDataModal,
+  setShowDataModal,
+}: {
+  showDataModal: boolean;
+  setShowDataModal: (visible: boolean) => void;
+}) {
+  const dataModal = showDataModal ? (
+    <IntegrationDataModal close={() => setShowDataModal(false)} />
+  ) : null;
   return (
-    <Eui.EuiForm>
-      <Eui.EuiTitle>
-        <h1>{STEPS[1].title}</h1>
-      </Eui.EuiTitle>
+    <div>
       <Eui.EuiFormRow label="Data" helpText="Manage data associated with this data source">
         <Eui.EuiSelect options={[{ value: 'test_s3', text: 'S3 connection name' }]} />
       </Eui.EuiFormRow>
       <Eui.EuiSpacer />
-      <Eui.EuiLink onClick={() => setDataModalVisible(true)}>View table</Eui.EuiLink>
-      {IntegrationDataModal(isDataModalVisible, setDataModalVisible)}
-    </Eui.EuiForm>
+      <Eui.EuiLink onClick={() => setShowDataModal(true)}>View table</Eui.EuiLink>
+      {dataModal}
+    </div>
   );
 }
 
-function SetupIntegrationAccelerationStandard(
-  integConfig: IntegrationConfig,
-  setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
-) {
+function SetupIntegrationDataSource({
+  config,
+  updateConfig,
+  showDataModal,
+  setShowDataModal,
+  tableDetected,
+  setTableDetected,
+}: {
+  config: IntegrationConfig;
+  updateConfig: (updates: Partial<IntegrationConfig>) => void;
+  showDataModal: boolean;
+  setShowDataModal: (show: boolean) => void;
+  tableDetected: boolean;
+  setTableDetected: (detected: boolean) => void;
+}) {
+  let tableForm;
+  if (tableDetected && !config.createNewDataSource) {
+    tableForm = (
+      <SetupIntegrationExistingTable
+        showDataModal={showDataModal}
+        setShowDataModal={(x) => setShowDataModal(x)}
+      />
+    );
+  } else {
+    tableForm = <SetupIntegrationNewTable />;
+  }
+
+  let tablesNotFoundMessage = null;
+  if (!tableDetected) {
+    tablesNotFoundMessage = (
+      <>
+        <Eui.EuiCallOut title="No tables were found" iconType="iInCircle">
+          <p>No problem, we can help. Tell us about your data.</p>
+        </Eui.EuiCallOut>
+        <Eui.EuiSpacer />
+      </>
+    );
+  }
+
   return (
-    <Eui.EuiForm>
-      <Eui.EuiFormRow
-        label="Asset Quantity"
-        helpText="Select the amount of assets you want to install"
-      >
-        <Eui.EuiRadioGroup
-          options={[
-            {
-              id: 'index-only',
-              label: (
-                <Eui.EuiText>
-                  None{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    Set up indices, but don&apos;t install any assets.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-            {
-              id: 'queries',
-              label: (
-                <Eui.EuiText>
-                  Minimal{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    Set up indices and include provided saved queries.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-            {
-              id: 'visualizations',
-              label: (
-                <Eui.EuiText>
-                  Complete{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    Indices, queries, and visualizations for the data.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-            {
-              id: 'all',
-              label: (
-                <Eui.EuiText>
-                  Everything{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    Includes additional assets such as detectors or geospatial.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-          ]}
-          idSelected={integConfig.asset_accel}
-          onChange={(id) => setConfig(Object.assign({}, integConfig, { asset_accel: id }))}
+    <div>
+      <Eui.EuiSwitch
+        label="(debug) Table detected"
+        checked={tableDetected}
+        onChange={(event) => setTableDetected(event.target.checked)}
+      />
+      <Eui.EuiSpacer size="xxl" />
+      <Eui.EuiForm>
+        <Eui.EuiTitle>
+          <h1>{STEPS[1].title}</h1>
+        </Eui.EuiTitle>
+        <Eui.EuiSpacer />
+        {tablesNotFoundMessage}
+        <Eui.EuiSwitch
+          label="Create a new table"
+          checked={config.createNewDataSource}
+          onChange={(evt) => updateConfig({ createNewDataSource: evt.target.checked })}
+          disabled={!tableDetected}
         />
-      </Eui.EuiFormRow>
-
-      <Eui.EuiFormRow label="Query Acceleration" helpText="Select your query acceleration option">
-        <Eui.EuiRadioGroup
-          options={[
-            {
-              id: 'none',
-              label: (
-                <Eui.EuiText>
-                  None{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    No acceleration. Cheap, but slow.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-            {
-              id: 'basic',
-              label: (
-                <Eui.EuiText>
-                  Basic{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    Minimal optimizations balancing performance and cost.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-            {
-              id: 'advanced',
-              label: (
-                <Eui.EuiText>
-                  Advanced{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    More intensive optimization for better performance.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-            {
-              id: 'ultra',
-              label: (
-                <Eui.EuiText>
-                  Ultra{': '}
-                  <Eui.EuiTextColor color="subdued">
-                    Ideal for performance-critical indices.
-                  </Eui.EuiTextColor>
-                </Eui.EuiText>
-              ),
-            },
-          ]}
-          idSelected={integConfig.query_accel}
-          onChange={(id) => setConfig(Object.assign({}, integConfig, { query_accel: id }))}
-        />
-      </Eui.EuiFormRow>
-    </Eui.EuiForm>
+        <Eui.EuiSpacer />
+        {tableForm}
+      </Eui.EuiForm>
+    </div>
   );
 }
 
-function SetupIntegrationAccelerationAdvanced(
-  integConfig: IntegrationConfig,
-  setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>
-) {
-  return (
-    <Eui.EuiBasicTable
-      columns={[
-        {
-          name: 'Name',
-          field: 'name',
-        },
-        {
-          name: 'Type',
-          field: 'type',
-        },
-        {
-          name: 'Acceleration Details',
-          field: 'acceleration',
-        },
-        {
-          name: 'Actions',
-          actions: [
-            {
-              name: 'discover',
-              description: 'Discover?',
-              type: 'icon',
-              icon: 'discoverApp',
-              color: 'primary',
-              onClick: () => {},
-            },
-            {
-              name: 'configure',
-              description: 'Configure Asset',
-              type: 'icon',
-              icon: 'indexSettings',
-              color: 'primary',
-              onClick: () => {},
-            },
-          ],
-        },
-      ]}
-      items={[
-        {
-          name: '[NGINX Core Logs 1.0] Overview',
-          type: 'dashboard',
-          acceleration: 'Enhanced',
-        },
-        {
-          name: 'ss4o_logs-*-*',
-          type: 'index-pattern',
-          acceleration: 'Status',
-        },
-        {
-          name: 'Top Paths',
-          type: 'visualization',
-          acceleration: 'Query',
-        },
-      ]}
-      hasActions={true}
-    />
-  );
-}
-
-function SetupIntegrationAcceleration(
-  integConfig: IntegrationConfig,
-  setConfig: React.Dispatch<React.SetStateAction<IntegrationConfig>>,
-  isStandard: boolean,
-  setIsStandard: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  return (
-    <Eui.EuiForm>
-      <Eui.EuiTitle>
-        <h1>{STEPS[2].title}</h1>
-      </Eui.EuiTitle>
-      <Eui.EuiTabs>
-        <Eui.EuiTab isSelected={isStandard} onClick={() => setIsStandard(true)}>
-          Standard
-        </Eui.EuiTab>
-        <Eui.EuiTab isSelected={!isStandard} onClick={() => setIsStandard(false)}>
-          Advanced
-        </Eui.EuiTab>
-      </Eui.EuiTabs>
-      <Eui.EuiSpacer />
-      {isStandard
-        ? SetupIntegrationAccelerationStandard(integConfig, setConfig)
-        : SetupIntegrationAccelerationAdvanced(integConfig, setConfig)}
-    </Eui.EuiForm>
-  );
-}
-
-function SetupIntegrationStep(activeStep: number) {
+function SetupIntegrationStep({ activeStep }: { activeStep: number }) {
   const [integConfig, setConfig] = useState({
-    instance_name: 'NginX Access 2.0',
-    datasource_name: 'ss4o_logs-nginx-*-*',
-    datasource_description: 'Integration for viewing Nginx logs in S3.',
-    datasource_filetype: 'parquet',
-    datasourcee_location: 'ss4o_logs-nginx-*-*',
-    connection_name: 'S3 connection name',
-    asset_accel: 'visualizations',
-    query_accel: 'basic',
-  });
+    instanceName: '',
+    createNewDataSource: false,
+    dataSourceName: '',
+    dataSourceDescription: '',
+    dataSourceFileType: '',
+    dataSourceLocation: '',
+    connectionName: '',
+  } as IntegrationConfig);
   const [isDataModalVisible, setDataModalVisible] = useState(false);
   const [tableDetected, setTableDetected] = useState(false);
-  const [isStandard, setIsStandard] = useState(true);
+
+  const updateConfig = (updates: Partial<IntegrationConfig>) =>
+    setConfig(Object.assign({}, integConfig, updates));
 
   switch (activeStep) {
     case 0:
-      return SetupIntegrationMetadata();
-    case 1:
-      let tableForm;
-      if (tableDetected) {
-        tableForm = SetupIntegrationExistingTable(isDataModalVisible, setDataModalVisible);
-      } else {
-        tableForm = SetupIntegrationNewTable();
-      }
       return (
-        <div>
-          {tableForm}
-          <Eui.EuiSpacer size="xxl" />
-          <Eui.EuiSwitch
-            label="(debug) Table detected"
-            checked={tableDetected}
-            onChange={(event) => setTableDetected(event.target.checked)}
-          />
-        </div>
+        <SetupIntegrationMetadata
+          name={integConfig.instanceName}
+          setName={(name) => updateConfig({ instanceName: name })}
+        />
       );
-    case 2:
-      return SetupIntegrationAcceleration(integConfig, setConfig, isStandard, setIsStandard);
+    case 1:
+      return (
+        <SetupIntegrationDataSource
+          config={integConfig}
+          updateConfig={updateConfig}
+          showDataModal={isDataModalVisible}
+          setShowDataModal={(show: boolean) => setDataModalVisible(show)}
+          tableDetected={tableDetected}
+          setTableDetected={(detected: boolean) => setTableDetected(detected)}
+        />
+      );
     default:
-      return <Eui.EuiHeader>Something went wrong...</Eui.EuiHeader>;
+      return (
+        <Eui.EuiHeader>
+          Attempted to access integration setup step that doesn&apos;t exist. This is a bug.
+        </Eui.EuiHeader>
+      );
   }
 }
 
-function SetupBottomBar(step: number, setStep: React.Dispatch<React.SetStateAction<number>>) {
+function SetupBottomBar({ step, setStep }: { step: number; setStep: (step: number) => void }) {
   return (
     <Eui.EuiBottomBar>
       <Eui.EuiFlexGroup justifyContent="flexEnd">
@@ -438,13 +291,13 @@ function SetupBottomBar(step: number, setStep: React.Dispatch<React.SetStateActi
         </Eui.EuiFlexItem>
         {step > 0 ? (
           <Eui.EuiFlexItem grow={false}>
-            <Eui.EuiButton iconType={'returnKey'} onClick={() => setStep(Math.max(step - 1, 0))}>
+            <Eui.EuiButton iconType={'returnKey'} onClick={() => setStep(step - 1)}>
               Back
             </Eui.EuiButton>
           </Eui.EuiFlexItem>
         ) : null}
         <Eui.EuiFlexItem grow={false}>
-          <Eui.EuiButton fill iconType={'check'} onClick={() => setStep(Math.min(step + 1, 2))}>
+          <Eui.EuiButton fill iconType={'check'} onClick={() => setStep(step + 1)}>
             {step === STEPS.length - 1 ? 'Save' : 'Next'}
           </Eui.EuiButton>
         </Eui.EuiFlexItem>
@@ -461,11 +314,16 @@ export function SetupIntegrationStepsPage() {
       <Eui.EuiPageBody>
         <Eui.EuiFlexGroup>
           <Eui.EuiFlexItem>
-            <Eui.EuiSteps steps={getSteps(step)} />
+            <Eui.EuiSteps steps={getSetupStepStatus(step)} />
           </Eui.EuiFlexItem>
-          <Eui.EuiFlexItem>{SetupIntegrationStep(step)}</Eui.EuiFlexItem>
+          <Eui.EuiFlexItem>
+            <SetupIntegrationStep activeStep={step} />
+          </Eui.EuiFlexItem>
         </Eui.EuiFlexGroup>
-        {SetupBottomBar(step, setStep)}
+        <SetupBottomBar
+          step={step}
+          setStep={(x) => setStep(Math.min(Math.max(x, 0), STEPS.length - 1))}
+        />
       </Eui.EuiPageBody>
     </Eui.EuiPage>
   );
