@@ -2,6 +2,7 @@ name: Dashboards observability plugin E2E test
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_DASHBOARDS_VERSION: 'main'
