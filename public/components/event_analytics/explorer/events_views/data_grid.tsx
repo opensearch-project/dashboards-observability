@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, RefObject } from 'react';
+import { EuiButtonIcon, EuiDataGrid } from '@elastic/eui';
 import { IExplorerFields } from '../../../../../common/types/explorer';
 import { DEFAULT_COLUMNS, PAGE_SIZE } from '../../../../../common/constants/explorer';
 import { getHeaders, getTrs, populateDataGrid } from '../../utils';
@@ -13,8 +14,8 @@ import PPLService from '../../../../services/requests/ppl';
 interface DataGridProps {
   http: HttpSetup;
   pplService: PPLService;
-  rows: Array<any>;
-  rowsAll: Array<any>;
+  rows: any[];
+  rowsAll: any[];
   explorerFields: IExplorerFields;
   timeStampField: string;
   rawQuery: string;
@@ -24,14 +25,16 @@ export function DataGrid(props: DataGridProps) {
   const { http, pplService, rows, rowsAll, explorerFields, timeStampField, rawQuery } = props;
   const [limit, setLimit] = useState(PAGE_SIZE);
   const loader = useRef<HTMLDivElement>(null);
-  const [rowRefs, setRowRefs] = useState<RefObject<{closeAllFlyouts(openDocId: string): void}>[]>([]);
+  const [rowRefs, setRowRefs] = useState<
+    Array<RefObject<{ closeAllFlyouts(openDocId: string): void }>>
+  >([]);
 
   useEffect(() => {
     if (!loader.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) setLimit((limit) => limit + PAGE_SIZE);
+        if (entries[0].isIntersecting) setLimit((alimit) => alimit + PAGE_SIZE);
       },
       {
         root: null,
@@ -141,9 +144,58 @@ export function DataGrid(props: DataGridProps) {
     );
   }, [limit]);
 
+  const dataGridColumns = [
+    {
+      id: 'order_date',
+      isSortable: true,
+      display: 'Time',
+      schema: 'datetime',
+    },
+    {
+      id: '_source',
+      isSortable: false,
+      display: 'Source',
+      schema: '_source',
+    },
+  ];
+
+  const dataGridColumnVisibility = {
+    visibleColumns: ['order_date', '_source'],
+    setVisibleColumns: () => {},
+  };
+
+  const dataGridLeadingColumns = [
+    {
+      id: 'inspectCollapseColumn',
+      headerCellRender: () => null,
+      rowCellRender: () => {
+        return (
+          <EuiButtonIcon
+            onClick={() => alert('popup opens')}
+            iconType={'inspect'}
+            aria-label="inspect document details"
+          />
+        );
+      },
+      width: 40,
+    },
+  ];
+
   return (
     <>
-      {populateDataGrid(explorerFields, Queriedheaders, QueriedtableRows, headers, tableRows)}
+      {/* {populateDataGrid(explorerFields, Queriedheaders, QueriedtableRows, headers, tableRows)} */}
+      <div className="dscTable dscTableFixedScroll">
+        <EuiDataGrid
+          aria-labelledby="aria-labelledby"
+          columns={dataGridColumns}
+          columnVisibility={dataGridColumnVisibility}
+          leadingControlColumns={dataGridLeadingColumns}
+          rowCount={100}
+          renderCellValue={() => {
+            return null;
+          }}
+        />
+      </div>
       <div ref={loader} />
     </>
   );
