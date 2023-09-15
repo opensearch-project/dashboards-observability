@@ -39,9 +39,9 @@ import {
   observabilityIntegrationsTitle,
   observabilityIntegrationsPluginOrder,
   observabilityPluginOrder,
-  observabilityDatasourcesID,
-  observabilityDatasourcesTitle,
-  observabilityDatasourcesPluginOrder,
+  observabilityDataConnectionsID,
+  observabilityDataConnectionsPluginOrder,
+  observabilityDataConnectionsTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -201,19 +201,19 @@ export class ObservabilityPlugin
     });
 
     core.application.register({
-      id: observabilityDatasourcesID,
-      title: observabilityDatasourcesTitle,
+      id: observabilityDataConnectionsID,
+      title: observabilityDataConnectionsTitle,
       category: DEFAULT_APP_CATEGORIES.management,
-      order: observabilityDatasourcesPluginOrder,
-      mount: appMountWithStartPage('datasources'),
+      order: observabilityDataConnectionsPluginOrder,
+      mount: appMountWithStartPage('dataconnections'),
     });
 
     setupDeps.managementOverview?.register({
-      id: observabilityDatasourcesID,
-      title: observabilityDatasourcesTitle,
+      id: observabilityDataConnectionsID,
+      title: observabilityDataConnectionsTitle,
       order: 9070,
-      description: i18n.translate('observability.datasourcesDescription', {
-        defaultMessage: 'Manage compatible data sources and compute with OpenSearch Dashboards.',
+      description: i18n.translate('observability.dataconnectionsDescription', {
+        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
       }),
     });
 

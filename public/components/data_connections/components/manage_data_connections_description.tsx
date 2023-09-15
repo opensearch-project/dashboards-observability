@@ -4,7 +4,6 @@
  */
 
 import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
-import _ from 'lodash';
 import React from 'react';
 
 export const DataConnectionsDescription = () => {
@@ -16,7 +15,7 @@ export const DataConnectionsDescription = () => {
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Manage already created data source connections.
+        Manage already created data connections.
       </EuiText>
       <EuiHorizontalRule size="full" />
     </div>
