@@ -36,15 +36,15 @@ jobs:
           distribution: 'corretto'
           java-version: '11'
 
-      - name: Download observability artifact
-        uses: peternied/download-file@v2
-        with:
-          url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-observability-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
+      # - name: Download observability artifact
+      #   uses: peternied/download-file@v2
+      #   with:
+      #     url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-observability-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
 
-      - name: Download SQL artifact
-        uses: peternied/download-file@v2
-        with:
-          url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-sql-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
+      # - name: Download SQL artifact
+      #   uses: peternied/download-file@v2
+      #   with:
+      #     url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-sql-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
 
       - name: Download OpenSearch
         uses: peternied/download-file@v2
@@ -59,12 +59,14 @@ jobs:
 
       - name: Install observability plugin
         run: |
-          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/opensearch-observability-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
+          # /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/opensearch-observability-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install observability"
         shell: bash
 
       - name: Install linux SQL plugin
         run: |
-          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/opensearch-sql-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
+          # /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/opensearch-sql-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install sql"
         shell: bash
 
       - name: Run OpenSearch
