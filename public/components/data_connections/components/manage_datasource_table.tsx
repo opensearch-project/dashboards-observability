@@ -22,6 +22,7 @@ import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_datasource_description';
 import { DATASOURCES_BASE } from '../../../../common/constants/shared';
 import { ChromeStart } from '../../../../../../src/core/public';
+import { NoAccess } from './no_access';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
@@ -30,7 +31,8 @@ interface DataConnection {
 }
 
 export const ManageDatasourcesTable = (props: HomeProps) => {
-  const { http, chrome, pplService } = props;
+  const { http, chrome } = props;
+  const [hasAccess, setHasAccess] = useState(true);
 
   const [data, setData] = useState([]);
 
@@ -45,13 +47,20 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
   }, [chrome]);
 
   async function handleDataRequest() {
-    http.get(`${DATASOURCES_BASE}`).then((datasources) =>
-      setData(
-        datasources.map((x: any) => {
-          return { name: x.name, connectionType: x.connector };
-        })
+    http
+      .get(`${DATASOURCES_BASE}`)
+      .then((datasources) =>
+        setData(
+          datasources.map((x: any) => {
+            return { name: x.name, connectionType: x.connector };
+          })
+        )
       )
-    );
+      .catch((err) => {
+        if (err.body.statusCode === 403) {
+          setHasAccess(false);
+        }
+      });
   }
 
   const icon = (record: DataConnection) => {
@@ -135,12 +144,24 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
     return { connectionType, name, data: { name, connectionType } };
   });
 
+  if (!hasAccess) {
+    return (
+      <EuiPage>
+        <EuiPageBody component="div">
+          <DataConnectionsHeader />
+          <NoAccess />
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
+
   return (
     <EuiPage>
       <EuiPageBody component="div">
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
           <DataConnectionsDescription />
+
           <EuiInMemoryTable
             items={entries}
             itemId="id"

@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DATASOURCES_BASE } from '../../../../common/constants/shared';
+import { NoAccess } from './no_access';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -30,21 +31,29 @@ interface DatasourceDetails {
 }
 
 export const DataSource = (props: any) => {
-  const { dataSource, pplService, http } = props;
+  const { dataSource, http } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
     name: '',
     cluster: '',
   });
+  const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    http.get(`${DATASOURCES_BASE}/${dataSource}`).then((data) =>
-      setDatasourceDetails({
-        allowedRoles: data.allowedRoles,
-        name: data.name,
-        cluster: data.properties['emr.cluster'],
-      })
-    );
+    http
+      .get(`${DATASOURCES_BASE}/${dataSource}`)
+      .then((data) =>
+        setDatasourceDetails({
+          allowedRoles: data.allowedRoles,
+          name: data.name,
+          cluster: data.properties['emr.cluster'],
+        })
+      )
+      .catch((err) => {
+        if (err.body.statusCode === 403) {
+          setHasAccess(false);
+        }
+      });
   }, []);
 
   const tabs = [
@@ -127,6 +136,10 @@ export const DataSource = (props: any) => {
       </EuiPanel>
     );
   };
+
+  if (!hasAccess) {
+    return <NoAccess />;
+  }
 
   return (
     <EuiPage>
