@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useEffect, useRef, RefObject, Fragment } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  RefObject,
+  Fragment,
+  useCallback,
+} from 'react';
 import {
   EuiButtonIcon,
   EuiDataGrid,
@@ -244,7 +252,7 @@ export function DataGrid(props: DataGridProps) {
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = useMemo(
     () => ({ rowIndex, columnId }) => {
-      if (rowIndex < tableRows.length) {
+      if (rowIndex < rows.length) {
         if (columnId === '_source') {
           return (
             // <div className="truncate-by-height" type="inline" compressed>
@@ -285,6 +293,23 @@ export function DataGrid(props: DataGridProps) {
     [rows, explorerFields.selectedFields]
   );
 
+  // ** Pagination config
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  // changing the number of items per page, reset index and modify page size
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) =>
+      setPagination(() => ({
+        pageSize,
+        pageIndex: 0,
+      })),
+    [setPagination]
+  );
+  // changing the page index, keep page size constant
+  const onChangePage = useCallback(
+    (pageIndex) => setPagination(({ pageSize }) => ({ pageSize, pageIndex })),
+    [setPagination]
+  );
+
   return (
     <>
       {/* {populateDataGrid(explorerFields, Queriedheaders, QueriedtableRows, headers, tableRows)} */}
@@ -295,8 +320,14 @@ export function DataGrid(props: DataGridProps) {
           columns={dataGridColumns}
           columnVisibility={dataGridColumnVisibility}
           leadingControlColumns={dataGridLeadingColumns}
-          rowCount={100}
+          rowCount={rows.length}
           renderCellValue={dataGridCellRender}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: [25, 50, 100],
+            onChangePage,
+            onChangeItemsPerPage,
+          }}
         />
       </div>
       <div ref={loader} />
