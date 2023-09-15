@@ -1,5 +1,7 @@
 name: Dashboards observability plugin E2E test
-on: [pull_request, push]
+on:
+  schedule:
+    - cron: '0 0 * * *'
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_DASHBOARDS_VERSION: 'main'
