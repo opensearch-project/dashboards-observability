@@ -141,7 +141,7 @@ function SetupIntegrationNewTable({
         <Eui.EuiSelect
           options={ALLOWED_FILE_TYPES}
           value={config.dataSourceFileType}
-          onChange={(evt) => updateConfig({ dataSourceDescription: evt.target.value })}
+          onChange={(evt) => updateConfig({ dataSourceFileType: evt.target.value })}
         />
       </Eui.EuiFormRow>
       <Eui.EuiFormRow label="Location to store table">
