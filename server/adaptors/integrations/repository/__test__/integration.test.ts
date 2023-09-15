@@ -4,15 +4,16 @@
  */
 
 import * as fs from 'fs/promises';
-import { Integration } from '../integration';
+import { IntegrationReader } from '../integration';
 import { Dirent, Stats } from 'fs';
 import * as path from 'path';
+import { FileSystemCatalogDataAdaptor } from '../fs_data_adaptor';
 
 jest.mock('fs/promises');
 
 describe('Integration', () => {
-  let integration: Integration;
-  const sampleIntegration: IntegrationTemplate = {
+  let integration: IntegrationReader;
+  const sampleIntegration: IntegrationConfig = {
     name: 'sample',
     version: '2.0.0',
     license: 'Apache-2.0',
@@ -32,7 +33,7 @@ describe('Integration', () => {
   };
 
   beforeEach(() => {
-    integration = new Integration('./sample');
+    integration = new IntegrationReader('./sample');
     jest.spyOn(fs, 'lstat').mockResolvedValue({ isDirectory: () => true } as Stats);
   });
 
@@ -79,6 +80,7 @@ describe('Integration', () => {
 
     it('should return the parsed config template if it is valid', async () => {
       jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(sampleIntegration));
+      jest.spyOn(fs, 'lstat').mockResolvedValueOnce({ isDirectory: () => true } as Stats);
 
       const result = await integration.getConfig(sampleIntegration.version);
 

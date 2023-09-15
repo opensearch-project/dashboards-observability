@@ -5,7 +5,7 @@
 
 type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
-interface IntegrationTemplate {
+interface IntegrationConfig {
   name: string;
   version: string;
   displayName?: string;
@@ -48,7 +48,7 @@ interface DisplayAsset {
 }
 
 interface IntegrationTemplateSearchResult {
-  hits: IntegrationTemplate[];
+  hits: IntegrationConfig[];
 }
 
 interface IntegrationTemplateQuery {

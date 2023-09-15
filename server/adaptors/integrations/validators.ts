@@ -17,7 +17,7 @@ const staticAsset: JSONSchemaType<StaticAsset> = {
   additionalProperties: false,
 };
 
-const templateSchema: JSONSchemaType<IntegrationTemplate> = {
+const templateSchema: JSONSchemaType<IntegrationConfig> = {
   type: 'object',
   properties: {
     name: { type: 'string' },
@@ -120,7 +120,7 @@ const instanceValidator = ajv.compile(instanceSchema);
  *         If validation succeeds, returns an object with 'ok' set to true and the validated data.
  *         If validation fails, returns an object with 'ok' set to false and an Error object describing the validation error.
  */
-export const validateTemplate = (data: unknown): Result<IntegrationTemplate> => {
+export const validateTemplate = (data: unknown): Result<IntegrationConfig> => {
   if (!templateValidator(data)) {
     return { ok: false, error: new Error(ajv.errorsText(templateValidator.errors)) };
   }

@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { uuidRx } from 'public/components/custom_panels/redux/panel_slice';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
-import { Integration } from './repository/integration';
+import { IntegrationReader } from './repository/integration';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 
 interface BuilderOptions {
@@ -21,7 +21,7 @@ export class IntegrationInstanceBuilder {
     this.client = client;
   }
 
-  build(integration: Integration, options: BuilderOptions): Promise<IntegrationInstance> {
+  build(integration: IntegrationReader, options: BuilderOptions): Promise<IntegrationInstance> {
     const instance = integration
       .deepCheck()
       .then((result) => {
@@ -92,11 +92,11 @@ export class IntegrationInstanceBuilder {
   }
 
   async buildInstance(
-    integration: Integration,
+    integration: IntegrationReader,
     refs: AssetReference[],
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
-    const config: Result<IntegrationTemplate> = await integration.getConfig();
+    const config: Result<IntegrationConfig> = await integration.getConfig();
     if (!config.ok) {
       return Promise.reject(
         new Error('Attempted to create instance with invalid template', config.error)
