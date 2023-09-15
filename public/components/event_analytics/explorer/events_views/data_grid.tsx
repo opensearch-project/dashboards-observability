@@ -4,12 +4,21 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef, RefObject } from 'react';
-import { EuiButtonIcon, EuiDataGrid } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiLink } from '@elastic/eui';
+import moment from 'moment';
+import { toPairs, uniqueId } from 'lodash';
 import { IExplorerFields } from '../../../../../common/types/explorer';
-import { DEFAULT_COLUMNS, PAGE_SIZE } from '../../../../../common/constants/explorer';
-import { getHeaders, getTrs, populateDataGrid } from '../../utils';
+import {
+  DATE_DISPLAY_FORMAT,
+  DEFAULT_COLUMNS,
+  JAEGER_TRACE_ID,
+  OTEL_TRACE_ID,
+  PAGE_SIZE,
+} from '../../../../../common/constants/explorer';
+import { getHeaders, getTrs, isValidTraceId, populateDataGrid } from '../../utils';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
+import { IDocType } from './docViewRow';
 
 interface DataGridProps {
   http: HttpSetup;
@@ -144,12 +153,14 @@ export function DataGrid(props: DataGridProps) {
     );
   }, [limit]);
 
+  // creates the header for each column listing what that column is
   const dataGridColumns = [
     {
-      id: 'order_date',
+      id: 'timestamp',
       isSortable: true,
       display: 'Time',
       schema: 'datetime',
+      initialWidth: 200,
     },
     {
       id: '_source',
@@ -159,11 +170,13 @@ export function DataGrid(props: DataGridProps) {
     },
   ];
 
+  // used for which columns are visible and their order
   const dataGridColumnVisibility = {
-    visibleColumns: ['order_date', '_source'],
+    visibleColumns: ['timestamp', '_source'],
     setVisibleColumns: () => {},
   };
 
+  // sets the very first column, which is the button used for the flyout of each row
   const dataGridLeadingColumns = [
     {
       id: 'inspectCollapseColumn',
@@ -171,7 +184,7 @@ export function DataGrid(props: DataGridProps) {
       rowCellRender: () => {
         return (
           <EuiButtonIcon
-            onClick={() => alert('popup opens')}
+            onClick={() => alert('flyout opens')}
             iconType={'inspect'}
             aria-label="inspect document details"
           />
@@ -180,6 +193,55 @@ export function DataGrid(props: DataGridProps) {
       width: 40,
     },
   ];
+
+  const getDlTmpl = (conf: { doc: IDocType }) => {
+    const { doc: document } = conf;
+
+    return (
+      <div className="truncate-by-height">
+        <span>
+          <dl className="source truncate-by-height">
+            {toPairs(document).map((entry: string[]) => {
+              const isTraceField = entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID;
+              return (
+                <span key={uniqueId('grid-desc')}>
+                  <dt>{entry[0]}:</dt>
+                  <dd>
+                    <span>
+                      {isTraceField &&
+                      (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) ? (
+                        <EuiLink onClick={() => alert('traces?')}>{entry[1]}</EuiLink>
+                      ) : (
+                        entry[1]
+                      )}
+                    </span>
+                  </dd>
+                </span>
+              );
+            })}
+          </dl>
+        </span>
+      </div>
+    );
+  };
+
+  const getDiscoverSourceLikeDOM = (document: IDocType) => {
+    return getDlTmpl({ doc: document });
+  };
+
+  // renders what is shown in each cell, i.e. the content of each row
+  const dataGridCellRender = ({ rowIndex, columnId }) => {
+    if (rowIndex < tableRows.length) {
+      if (columnId === '_source') {
+        return getDiscoverSourceLikeDOM(rows[rowIndex]);
+      }
+      if (columnId === 'timestamp') {
+        return `${moment(rows[rowIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
+      }
+      return `${rows[rowIndex][columnId]}`;
+    }
+    return null;
+  };
 
   return (
     <>
@@ -191,9 +253,7 @@ export function DataGrid(props: DataGridProps) {
           columnVisibility={dataGridColumnVisibility}
           leadingControlColumns={dataGridLeadingColumns}
           rowCount={100}
-          renderCellValue={() => {
-            return null;
-          }}
+          renderCellValue={dataGridCellRender}
         />
       </div>
       <div ref={loader} />
