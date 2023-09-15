@@ -10,22 +10,22 @@ import { AccelerationHeader } from './acceleration_header';
 import { AccelerationManagement } from './management/acceleration_management';
 
 interface AccelerationIndicesProps {
-  dataSource: string;
+  dataConnection: string;
 }
 
-export const AccelerationIndices = ({ dataSource }: AccelerationIndicesProps) => {
+export const AccelerationIndices = ({ dataConnection }: AccelerationIndicesProps) => {
   useEffect(() => {
     coreRefs.chrome?.setBreadcrumbs([
       {
-        text: 'Datasources',
+        text: 'Data Connections',
         href: '#/',
       },
       {
         text: 'Acceleration',
-        href: '#/manage/acceleration/' + { dataSource },
+        href: '#/manage/acceleration/' + { dataConnection },
       },
     ]);
-  }, [dataSource]);
+  }, [dataConnection]);
   return (
     <EuiPage>
       <EuiPageBody component="div">

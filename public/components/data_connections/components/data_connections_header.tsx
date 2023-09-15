@@ -20,15 +20,15 @@ export const DataConnectionsHeader = () => {
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="datasources-header">
+          <EuiTitle size="l" data-test-subj="dataconnections-header">
             <h1>Data connections</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Connect and manage compatible OpenSearch Dashboard data sources and compute.{' '}
-        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
+        Connect and manage compatible OpenSearch and OpenSearch Dashboard data connections.{' '}
+        <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
       </EuiText>
