@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from './datasources_header';
+import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
-import { DataConnectionsDescription } from './manage_datasource_description';
-import { DATASOURCES_BASE } from '../../../../common/constants/shared';
+import { DataConnectionsDescription } from './manage_data_connections_description';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { ChromeStart } from '../../../../../../src/core/public';
 import { NoAccess } from './no_access';
 
@@ -30,16 +30,16 @@ interface DataConnection {
   chrome: ChromeStart;
 }
 
-export const ManageDatasourcesTable = (props: HomeProps) => {
-  const { http, chrome } = props;
-  const [hasAccess, setHasAccess] = useState(true);
+export const ManageDataConnectionsTable = (props: HomeProps) => {
+  const { http, chrome, pplService } = props;
 
   const [data, setData] = useState([]);
+  const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Datasources',
+        text: 'Data Connections',
         href: '#/',
       },
     ]);
@@ -48,10 +48,10 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
 
   async function handleDataRequest() {
     http
-      .get(`${DATASOURCES_BASE}`)
-      .then((datasources) =>
+      .get(`${DATACONNECTIONS_BASE}`)
+      .then((dataconnections) =>
         setData(
-          datasources.map((x: any) => {
+          dataconnections.map((x: any) => {
             return { name: x.name, connectionType: x.connector };
           })
         )
@@ -98,7 +98,7 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
       sortable: true,
       truncateText: true,
       render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}DatasourceConnectionHealth`}>
+        <EuiText data-test-subj={`${record.templateName}DataConnectionHealth`}>
           {_.truncate(record.creationDate, { length: 100 })}
         </EuiText>
       ),

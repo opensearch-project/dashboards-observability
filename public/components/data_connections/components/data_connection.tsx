@@ -21,8 +21,8 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DATASOURCES_BASE } from '../../../../common/constants/shared';
 import { NoAccess } from './no_access';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -30,7 +30,7 @@ interface DatasourceDetails {
   cluster: string;
 }
 
-export const DataSource = (props: any) => {
+export const DataConnection = (props: any) => {
   const { dataSource, http } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
@@ -41,7 +41,7 @@ export const DataSource = (props: any) => {
 
   useEffect(() => {
     http
-      .get(`${DATASOURCES_BASE}/${dataSource}`)
+      .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
       .then((data) =>
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
