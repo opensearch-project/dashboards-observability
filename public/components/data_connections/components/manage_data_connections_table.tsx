@@ -20,7 +20,6 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { ChromeStart } from '../../../../../../src/core/public';
 
 interface DataConnection {
@@ -33,6 +32,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const { http, chrome, pplService } = props;
 
   const [data, setData] = useState([]);
+  const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -45,10 +45,10 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   }, [chrome]);
 
   async function handleDataRequest() {
-    http.get(`${DATACONNECTIONS_BASE}`).then((dataconnections) =>
+    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((dataconnections) =>
       setData(
-        dataconnections.map((x: any) => {
-          return { name: x.name, connectionType: x.connector };
+        dataconnections.jsonData.map((x: any) => {
+          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
         })
       )
     );
@@ -141,6 +141,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
           <DataConnectionsDescription />
+
           <EuiInMemoryTable
             items={entries}
             itemId="id"
