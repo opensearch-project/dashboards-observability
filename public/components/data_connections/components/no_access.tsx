@@ -3,18 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiPage,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPage, EuiPanel, EuiText } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';

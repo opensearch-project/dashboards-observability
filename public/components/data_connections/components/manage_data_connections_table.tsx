@@ -20,9 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { ChromeStart } from '../../../../../../src/core/public';
-import { NoAccess } from './no_access';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
@@ -47,20 +45,13 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   }, [chrome]);
 
   async function handleDataRequest() {
-    http
-      .get(`${DATACONNECTIONS_BASE}`)
-      .then((dataconnections) =>
-        setData(
-          dataconnections.map((x: any) => {
-            return { name: x.name, connectionType: x.connector };
-          })
-        )
+    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((dataconnections) =>
+      setData(
+        dataconnections.jsonData.map((x: any) => {
+          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
+        })
       )
-      .catch((err) => {
-        if (err.body.statusCode === 403) {
-          setHasAccess(false);
-        }
-      });
+    );
   }
 
   const icon = (record: DataConnection) => {
@@ -143,17 +134,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     const connectionType = dataconnection.connectionType;
     return { connectionType, name, data: { name, connectionType } };
   });
-
-  if (!hasAccess) {
-    return (
-      <EuiPage>
-        <EuiPageBody component="div">
-          <DataConnectionsHeader />
-          <NoAccess />
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
 
   return (
     <EuiPage>

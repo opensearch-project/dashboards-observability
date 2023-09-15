@@ -23,6 +23,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { NoAccess } from './no_access';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -31,13 +32,14 @@ interface DatasourceDetails {
 }
 
 export const DataConnection = (props: any) => {
-  const { dataSource, http } = props;
+  const { dataSource } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
     name: '',
     cluster: '',
   });
   const [hasAccess, setHasAccess] = useState(true);
+  const { http } = coreRefs;
 
   useEffect(() => {
     http
