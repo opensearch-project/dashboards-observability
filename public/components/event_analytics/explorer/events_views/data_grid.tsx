@@ -15,6 +15,7 @@ import {
 import moment from 'moment';
 import { toPairs, uniqueId } from 'lodash';
 import dompurify from 'dompurify';
+import { EuiDataGridColumn } from '@opensearch-project/oui';
 import { IExplorerFields } from '../../../../../common/types/explorer';
 import {
   DATE_DISPLAY_FORMAT,
@@ -163,6 +164,21 @@ export function DataGrid(props: DataGridProps) {
 
   // creates the header for each column listing what that column is
   const dataGridColumns = useMemo(() => {
+    if (explorerFields?.selectedFields && explorerFields.selectedFields.length > 0) {
+      const fields = explorerFields.selectedFields;
+      const columns: EuiDataGridColumn[] = [];
+      fields.map(({ name, type }) => {
+        const newColumn = {
+          id: name,
+          display: name,
+          schema: type,
+        };
+        columns.push(newColumn);
+      });
+      return columns;
+    }
+    console.log('default state');
+    // default selected fields
     return [
       {
         id: 'timestamp',
@@ -178,15 +194,32 @@ export function DataGrid(props: DataGridProps) {
         schema: '_source',
       },
     ];
-  }, []);
+  }, [explorerFields.selectedFields]);
 
   // used for which columns are visible and their order
   const dataGridColumnVisibility = useMemo(() => {
+    if (explorerFields?.selectedFields && explorerFields.selectedFields.length > 0) {
+      const fields = explorerFields.selectedFields;
+      const columns: string[] = [];
+      fields.map(({ name }) => {
+        columns.push(name);
+      });
+      return {
+        visibleColumns: columns,
+        setVisibleColumns: (visibleColumns: string[]) => {
+          console.log(visibleColumns);
+        },
+      };
+    }
+    console.log('default states');
+    // default shown fields
     return {
       visibleColumns: ['timestamp', '_source'],
-      setVisibleColumns: () => {},
+      setVisibleColumns: (visibleColumns: string[]) => {
+        console.log(visibleColumns);
+      },
     };
-  }, []);
+  }, [explorerFields.selectedFields]);
 
   // sets the very first column, which is the button used for the flyout of each row
   const dataGridLeadingColumns = useMemo(() => {
@@ -214,6 +247,20 @@ export function DataGrid(props: DataGridProps) {
       if (rowIndex < tableRows.length) {
         if (columnId === '_source') {
           return (
+            // <div className="truncate-by-height" type="inline" compressed>
+            //   <span>
+            //     <dl className="source truncate-by-height">
+            //       {Object.keys(rows[rowIndex]).map((key) => (
+            //         <span key={uniqueId('grid-desc')}>
+            //           <dt>{key}:</dt>
+            //           <dd>
+            //             {dompurify.sanitize(rows[rowIndex][key])}
+            //           </dd>
+            //         </span>
+            //       ))}
+            //     </dl>
+            //   </span>
+            // </div>
             <EuiDescriptionList type="inline" compressed>
               {Object.keys(rows[rowIndex]).map((key) => (
                 <Fragment key={key}>
@@ -235,7 +282,7 @@ export function DataGrid(props: DataGridProps) {
       }
       return null;
     },
-    [rows]
+    [rows, explorerFields.selectedFields]
   );
 
   return (
@@ -244,6 +291,7 @@ export function DataGrid(props: DataGridProps) {
       <div className="dscTable dscTableFixedScroll">
         <EuiDataGrid
           aria-labelledby="aria-labelledby"
+          data-test-subj="docTable"
           columns={dataGridColumns}
           columnVisibility={dataGridColumnVisibility}
           leadingControlColumns={dataGridLeadingColumns}
