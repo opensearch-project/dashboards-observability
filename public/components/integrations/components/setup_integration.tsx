@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 
 interface IntegrationConfig {
   instanceName: string;
-  createNewDataSource: boolean;
+  useExisting: boolean;
   dataSourceName: string;
   dataSourceDescription: string;
   dataSourceFileType: string;
   dataSourceLocation: string;
-  connectionName: string;
+  existingDataSourceName: string;
 }
 
 const STEPS: EuiContainedStepProps[] = [
@@ -116,29 +116,52 @@ function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Eleme
   );
 }
 
-function SetupIntegrationNewTable() {
+function SetupIntegrationNewTable({
+  config,
+  updateConfig,
+}: {
+  config: IntegrationConfig;
+  updateConfig: (updates: Partial<IntegrationConfig>) => void;
+}) {
   return (
     <div>
       <Eui.EuiFormRow label="Title">
-        <Eui.EuiFieldText />
+        <Eui.EuiFieldText
+          value={config.dataSourceName}
+          onChange={(evt) => updateConfig({ dataSourceName: evt.target.value })}
+        />
       </Eui.EuiFormRow>
       <Eui.EuiFormRow label="Description (optional)">
-        <Eui.EuiFieldText />
+        <Eui.EuiFieldText
+          value={config.dataSourceDescription}
+          onChange={(evt) => updateConfig({ dataSourceDescription: evt.target.value })}
+        />
       </Eui.EuiFormRow>
       <Eui.EuiFormRow label="File Type">
-        <Eui.EuiSelect options={ALLOWED_FILE_TYPES} />
+        <Eui.EuiSelect
+          options={ALLOWED_FILE_TYPES}
+          value={config.dataSourceFileType}
+          onChange={(evt) => updateConfig({ dataSourceDescription: evt.target.value })}
+        />
       </Eui.EuiFormRow>
       <Eui.EuiFormRow label="Location to store table">
-        <Eui.EuiFieldText />
+        <Eui.EuiFieldText
+          value={config.dataSourceLocation}
+          onChange={(evt) => updateConfig({ dataSourceLocation: evt.target.value })}
+        />
       </Eui.EuiFormRow>
     </div>
   );
 }
 
 function SetupIntegrationExistingTable({
+  config,
+  updateConfig,
   showDataModal,
   setShowDataModal,
 }: {
+  config: IntegrationConfig;
+  updateConfig: (updates: Partial<IntegrationConfig>) => void;
   showDataModal: boolean;
   setShowDataModal: (visible: boolean) => void;
 }) {
@@ -147,8 +170,15 @@ function SetupIntegrationExistingTable({
   ) : null;
   return (
     <div>
-      <Eui.EuiFormRow label="Data" helpText="Manage data associated with this data source">
-        <Eui.EuiSelect options={[{ value: 'test_s3', text: 'S3 connection name' }]} />
+      <Eui.EuiFormRow label="Data Source" helpText="Manage data associated with this data source">
+        <Eui.EuiSelect
+          options={[
+            { value: 'test_s3', text: 'S3 connection name' },
+            { value: 'logs_idx', text: 'SS4O Logs Index' },
+          ]}
+          value={config.existingDataSourceName}
+          onChange={(evt) => updateConfig({ existingDataSourceName: evt.target.value })}
+        />
       </Eui.EuiFormRow>
       <Eui.EuiSpacer />
       <Eui.EuiLink onClick={() => setShowDataModal(true)}>View table</Eui.EuiLink>
@@ -173,15 +203,17 @@ function SetupIntegrationDataSource({
   setTableDetected: (detected: boolean) => void;
 }) {
   let tableForm;
-  if (tableDetected && !config.createNewDataSource) {
+  if (tableDetected && config.useExisting) {
     tableForm = (
       <SetupIntegrationExistingTable
+        config={config}
+        updateConfig={updateConfig}
         showDataModal={showDataModal}
         setShowDataModal={(x) => setShowDataModal(x)}
       />
     );
   } else {
-    tableForm = <SetupIntegrationNewTable />;
+    tableForm = <SetupIntegrationNewTable config={config} updateConfig={updateConfig} />;
   }
 
   let tablesNotFoundMessage = null;
@@ -211,9 +243,9 @@ function SetupIntegrationDataSource({
         <Eui.EuiSpacer />
         {tablesNotFoundMessage}
         <Eui.EuiSwitch
-          label="Create a new table"
-          checked={config.createNewDataSource}
-          onChange={(evt) => updateConfig({ createNewDataSource: evt.target.checked })}
+          label="Use existing Data Source"
+          checked={config.useExisting && tableDetected}
+          onChange={(evt) => updateConfig({ useExisting: evt.target.checked })}
           disabled={!tableDetected}
         />
         <Eui.EuiSpacer />
@@ -223,34 +255,30 @@ function SetupIntegrationDataSource({
   );
 }
 
-function SetupIntegrationStep({ activeStep }: { activeStep: number }) {
-  const [integConfig, setConfig] = useState({
-    instanceName: '',
-    createNewDataSource: false,
-    dataSourceName: '',
-    dataSourceDescription: '',
-    dataSourceFileType: '',
-    dataSourceLocation: '',
-    connectionName: '',
-  } as IntegrationConfig);
+function SetupIntegrationStep({
+  activeStep,
+  config,
+  updateConfig,
+}: {
+  activeStep: number;
+  config: IntegrationConfig;
+  updateConfig: (updates: Partial<IntegrationConfig>) => void;
+}) {
   const [isDataModalVisible, setDataModalVisible] = useState(false);
   const [tableDetected, setTableDetected] = useState(false);
-
-  const updateConfig = (updates: Partial<IntegrationConfig>) =>
-    setConfig(Object.assign({}, integConfig, updates));
 
   switch (activeStep) {
     case 0:
       return (
         <SetupIntegrationMetadata
-          name={integConfig.instanceName}
+          name={config.instanceName}
           setName={(name) => updateConfig({ instanceName: name })}
         />
       );
     case 1:
       return (
         <SetupIntegrationDataSource
-          config={integConfig}
+          config={config}
           updateConfig={updateConfig}
           showDataModal={isDataModalVisible}
           setShowDataModal={(show: boolean) => setDataModalVisible(show)}
@@ -267,7 +295,15 @@ function SetupIntegrationStep({ activeStep }: { activeStep: number }) {
   }
 }
 
-function SetupBottomBar({ step, setStep }: { step: number; setStep: (step: number) => void }) {
+function SetupBottomBar({
+  step,
+  setStep,
+  config,
+}: {
+  step: number;
+  setStep: (step: number) => void;
+  config: IntegrationConfig;
+}) {
   return (
     <Eui.EuiBottomBar>
       <Eui.EuiFlexGroup justifyContent="flexEnd">
@@ -297,7 +333,17 @@ function SetupBottomBar({ step, setStep }: { step: number; setStep: (step: numbe
           </Eui.EuiFlexItem>
         ) : null}
         <Eui.EuiFlexItem grow={false}>
-          <Eui.EuiButton fill iconType={'check'} onClick={() => setStep(step + 1)}>
+          <Eui.EuiButton
+            fill
+            iconType={'check'}
+            onClick={() => {
+              if (step < STEPS.length - 1) {
+                setStep(step + 1);
+              } else {
+                console.log(config);
+              }
+            }}
+          >
             {step === STEPS.length - 1 ? 'Save' : 'Next'}
           </Eui.EuiButton>
         </Eui.EuiFlexItem>
@@ -307,7 +353,19 @@ function SetupBottomBar({ step, setStep }: { step: number; setStep: (step: numbe
 }
 
 export function SetupIntegrationStepsPage() {
+  const [integConfig, setConfig] = useState({
+    instanceName: '',
+    useExisting: true,
+    dataSourceName: '',
+    dataSourceDescription: '',
+    dataSourceFileType: 'parquet',
+    dataSourceLocation: '',
+    existingDataSourceName: '',
+  } as IntegrationConfig);
   const [step, setStep] = useState(0);
+
+  const updateConfig = (updates: Partial<IntegrationConfig>) =>
+    setConfig(Object.assign({}, integConfig, updates));
 
   return (
     <Eui.EuiPage>
@@ -317,12 +375,17 @@ export function SetupIntegrationStepsPage() {
             <Eui.EuiSteps steps={getSetupStepStatus(step)} />
           </Eui.EuiFlexItem>
           <Eui.EuiFlexItem>
-            <SetupIntegrationStep activeStep={step} />
+            <SetupIntegrationStep
+              activeStep={step}
+              config={integConfig}
+              updateConfig={updateConfig}
+            />
           </Eui.EuiFlexItem>
         </Eui.EuiFlexGroup>
         <SetupBottomBar
           step={step}
           setStep={(x) => setStep(Math.min(Math.max(x, 0), STEPS.length - 1))}
+          config={integConfig}
         />
       </Eui.EuiPageBody>
     </Eui.EuiPage>
