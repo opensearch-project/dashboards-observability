@@ -3,10 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useEffect, useRef, RefObject } from 'react';
-import { EuiButtonIcon, EuiDataGrid, EuiLink } from '@elastic/eui';
+import React, { useMemo, useState, useEffect, useRef, RefObject, Fragment } from 'react';
+import {
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiLink,
+} from '@elastic/eui';
 import moment from 'moment';
 import { toPairs, uniqueId } from 'lodash';
+import dompurify from 'dompurify';
 import { IExplorerFields } from '../../../../../common/types/explorer';
 import {
   DATE_DISPLAY_FORMAT,
@@ -154,94 +162,81 @@ export function DataGrid(props: DataGridProps) {
   }, [limit]);
 
   // creates the header for each column listing what that column is
-  const dataGridColumns = [
-    {
-      id: 'timestamp',
-      isSortable: true,
-      display: 'Time',
-      schema: 'datetime',
-      initialWidth: 200,
-    },
-    {
-      id: '_source',
-      isSortable: false,
-      display: 'Source',
-      schema: '_source',
-    },
-  ];
+  const dataGridColumns = useMemo(() => {
+    return [
+      {
+        id: 'timestamp',
+        isSortable: true,
+        display: 'Time',
+        schema: 'datetime',
+        initialWidth: 200,
+      },
+      {
+        id: '_source',
+        isSortable: false,
+        display: 'Source',
+        schema: '_source',
+      },
+    ];
+  }, []);
 
   // used for which columns are visible and their order
-  const dataGridColumnVisibility = {
-    visibleColumns: ['timestamp', '_source'],
-    setVisibleColumns: () => {},
-  };
+  const dataGridColumnVisibility = useMemo(() => {
+    return {
+      visibleColumns: ['timestamp', '_source'],
+      setVisibleColumns: () => {},
+    };
+  }, []);
 
   // sets the very first column, which is the button used for the flyout of each row
-  const dataGridLeadingColumns = [
-    {
-      id: 'inspectCollapseColumn',
-      headerCellRender: () => null,
-      rowCellRender: () => {
-        return (
-          <EuiButtonIcon
-            onClick={() => alert('flyout opens')}
-            iconType={'inspect'}
-            aria-label="inspect document details"
-          />
-        );
+  const dataGridLeadingColumns = useMemo(() => {
+    return [
+      {
+        id: 'inspectCollapseColumn',
+        headerCellRender: () => null,
+        rowCellRender: () => {
+          return (
+            <EuiButtonIcon
+              onClick={() => alert('flyout opens')}
+              iconType={'inspect'}
+              aria-label="inspect document details"
+            />
+          );
+        },
+        width: 40,
       },
-      width: 40,
-    },
-  ];
-
-  const getDlTmpl = (conf: { doc: IDocType }) => {
-    const { doc: document } = conf;
-
-    return (
-      <div className="truncate-by-height">
-        <span>
-          <dl className="source truncate-by-height">
-            {toPairs(document).map((entry: string[]) => {
-              const isTraceField = entry[0] === OTEL_TRACE_ID || entry[0] === JAEGER_TRACE_ID;
-              return (
-                <span key={uniqueId('grid-desc')}>
-                  <dt>{entry[0]}:</dt>
-                  <dd>
-                    <span>
-                      {isTraceField &&
-                      (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) ? (
-                        <EuiLink onClick={() => alert('traces?')}>{entry[1]}</EuiLink>
-                      ) : (
-                        entry[1]
-                      )}
-                    </span>
-                  </dd>
-                </span>
-              );
-            })}
-          </dl>
-        </span>
-      </div>
-    );
-  };
-
-  const getDiscoverSourceLikeDOM = (document: IDocType) => {
-    return getDlTmpl({ doc: document });
-  };
+    ];
+  }, []);
 
   // renders what is shown in each cell, i.e. the content of each row
-  const dataGridCellRender = ({ rowIndex, columnId }) => {
-    if (rowIndex < tableRows.length) {
-      if (columnId === '_source') {
-        return getDiscoverSourceLikeDOM(rows[rowIndex]);
+  const dataGridCellRender = useMemo(
+    () => ({ rowIndex, columnId }) => {
+      if (rowIndex < tableRows.length) {
+        if (columnId === '_source') {
+          return (
+            <EuiDescriptionList type="inline" compressed>
+              {Object.keys(rows[rowIndex]).map((key) => (
+                <Fragment key={key}>
+                  <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
+                    {key}
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription
+                    dangerouslySetInnerHTML={{ __html: dompurify.sanitize(rows[rowIndex][key]) }}
+                  />
+                </Fragment>
+              ))}
+            </EuiDescriptionList>
+          );
+        }
+        if (columnId === 'timestamp') {
+          return `${moment(rows[rowIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
+        }
+        return `${rows[rowIndex][columnId]}`;
       }
-      if (columnId === 'timestamp') {
-        return `${moment(rows[rowIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
-      }
-      return `${rows[rowIndex][columnId]}`;
-    }
-    return null;
-  };
+      return null;
+    },
+    [rows]
+  );
 
   return (
     <>
