@@ -17,7 +17,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
           >
             <h1
               class="euiTitle euiTitle--large"
-              data-test-subj="datasources-header"
+              data-test-subj="dataconnections-header"
             >
               Data connections
             </h1>

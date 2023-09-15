@@ -20,7 +20,7 @@ export const DataConnectionsHeader = () => {
     <div>
       <EuiPageHeader>
         <EuiPageHeaderSection>
-          <EuiTitle size="l" data-test-subj="datasources-header">
+          <EuiTitle size="l" data-test-subj="dataconnections-header">
             <h1>Data connections</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
