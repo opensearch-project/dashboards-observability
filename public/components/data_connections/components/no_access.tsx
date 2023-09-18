@@ -13,7 +13,7 @@ export const NoAccess = () => {
     <EuiPage>
       <EuiPanel>
         <EuiEmptyPrompt
-          title={<h2>Data connections not set up</h2>}
+          title={<h2>{"You don't have permissions to access the requested page"}</h2>}
           body={
             <EuiText>
               {

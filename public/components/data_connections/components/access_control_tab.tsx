@@ -15,38 +15,25 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import {
-  ACCELERATION_ALL,
-  ACCELERATION_RESTRICT,
-  QUERY_ALL,
-  QUERY_RESTRICT,
-} from '../../../../common/constants/data_connections';
+import { QUERY_ALL, QUERY_RESTRICT } from '../../../../common/constants/data_connections';
 import { AccessControlCallout } from './access_control_callout';
 import { coreRefs } from '../../../../public/framework/core_refs';
-import { QueryPermissionsFlexItem } from './query_permissions_flex_item';
-import { AccelerationPermissionsFlexItem } from './acceleration_permissions_flex_item';
+import { QueryPermissionsConfiguration } from './query_permissions';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
-export const AccessControlTab = () => {
+interface AccessControlTabProps {
+  dataConnection: string;
+  connector: string;
+}
+
+export const AccessControlTab = (props: AccessControlTabProps) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [roles, setRoles] = useState<Array<{ label: string }>>([]);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
     Array<{ label: string }>
   >([]);
-  const [selectedAccelerationPermissionRoles, setSelectedAccelerationPermissionRoles] = useState<
-    Array<{ label: string }>
-  >([]);
   const [queryPermissionRadioSelected, setQueryRadioIdSelected] = useState(`query-1`);
-  const [accelerationPermissionRadioSelected, setAccelerationRadioIdSelected] = useState(
-    `acceleration-1`
-  );
-
-  const [finalQueryPermissionsPlaceHolder, setFinalQueryPermissionsPlaceHolder] = useState<
-    Array<{ label: string }>
-  >([]);
-  const [
-    finalAccelerationPermissionsPlaceHolder,
-    setFinalAccelerationPermissionsPlaceHolder,
-  ] = useState<Array<{ label: string }>>([]);
+  const { http } = coreRefs;
 
   useEffect(() => {
     coreRefs.http!.get('/api/v1/configuration/roles').then((data) =>
@@ -68,18 +55,8 @@ export const AccessControlTab = () => {
       label: 'Everyone - accessible by all users on this cluster',
     },
   ];
-  const accelerationRadios = [
-    {
-      id: ACCELERATION_RESTRICT,
-      label: 'Restricted - accessible by users with specific OpenSearch roles',
-    },
-    {
-      id: ACCELERATION_ALL,
-      label: 'Everyone - accessible by all users on this cluster',
-    },
-  ];
 
-  const renderViewAccessControlDetails = () => {
+  const AccessControlDetails = () => {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -87,23 +64,7 @@ export const AccessControlTab = () => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Query access</EuiText>
               <EuiText size="s" className="overview-content">
-                {finalQueryPermissionsPlaceHolder.length
-                  ? `Restricted to ${finalQueryPermissionsPlaceHolder.map((role) => role.label)}`
-                  : '-'}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiText className="overview-title">Acceleration permissions</EuiText>
-              <EuiText size="s" className="overview-content">
-                {finalAccelerationPermissionsPlaceHolder.length
-                  ? `Restricted to ${finalAccelerationPermissionsPlaceHolder.map(
-                      (role) => role.label
-                    )}`
-                  : '-'}
+                {[].length ? `Restricted` : '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -112,10 +73,10 @@ export const AccessControlTab = () => {
     );
   };
 
-  const renderEditAccessControlDetails = () => {
+  const EditAccessControlDetails = () => {
     return (
       <EuiFlexGroup direction="column">
-        <QueryPermissionsFlexItem
+        <QueryPermissionsConfiguration
           roles={roles}
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
@@ -123,21 +84,18 @@ export const AccessControlTab = () => {
           setSelectedRadio={setQueryRadioIdSelected}
           radios={queryRadios}
         />
-        <AccelerationPermissionsFlexItem
-          roles={roles}
-          selectedRoles={selectedAccelerationPermissionRoles}
-          setSelectedRoles={setSelectedAccelerationPermissionRoles}
-          selectedRadio={accelerationPermissionRadioSelected}
-          setSelectedRadio={setAccelerationRadioIdSelected}
-          radios={accelerationRadios}
-        />
       </EuiFlexGroup>
     );
   };
 
   const saveChanges = () => {
-    setFinalAccelerationPermissionsPlaceHolder(selectedAccelerationPermissionRoles);
-    setFinalQueryPermissionsPlaceHolder(selectedQueryPermissionRoles);
+    http!.put(`${DATACONNECTIONS_BASE}`, {
+      body: JSON.stringify({
+        name: props.dataConnection,
+        allowedRoles: ['test'],
+        connector: props.connector,
+      }),
+    });
     setMode('view');
   };
 
@@ -158,15 +116,7 @@ export const AccessControlTab = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="createButton"
-              onClick={
-                mode === 'view'
-                  ? () => {
-                      setMode('edit');
-                    }
-                  : () => {
-                      setMode('view');
-                    }
-              }
+              onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
               fill={mode === 'view' ? true : false}
             >
               {mode === 'view' ? 'Edit' : 'Cancel'}
@@ -174,10 +124,10 @@ export const AccessControlTab = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
-        {mode === 'view' ? renderViewAccessControlDetails() : renderEditAccessControlDetails()}
+        {mode === 'view' ? <AccessControlDetails /> : <EditAccessControlDetails />}
       </EuiPanel>
       <EuiSpacer />
-      {mode === 'edit' ? (
+      {mode === 'edit' && (
         <EuiBottomBar affordForDisplacement={false}>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -199,7 +149,8 @@ export const AccessControlTab = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiBottomBar>
-      ) : null}
+      )}
+      <EuiSpacer />
     </>
   );
 };

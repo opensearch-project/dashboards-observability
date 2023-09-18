@@ -19,7 +19,7 @@ import {
   QUERY_RESTRICT,
 } from '../../../../common/constants/data_connections';
 
-export const QueryPermissionsFlexItem = (props: PermissionsFlexItem) => {
+export const QueryPermissionsConfiguration = (props: PermissionsConfiguration) => {
   const { roles, setSelectedRoles, selectedRoles, selectedRadio, radios, setSelectedRadio } = props;
   return (
     <EuiFlexItem>

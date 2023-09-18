@@ -5,11 +5,11 @@
 
 import { EuiRadioGroupOption } from '@elastic/eui';
 
-export interface PermissionsFlexItem {
+export interface PermissionsConfiguration {
   roles: Array<{ label: string }>;
   selectedRoles: Array<{ label: string }>;
   selectedRadio: string;
-  setSelectedRoles: (selectedRoles: Array<{ label: string }>) => void;
-  setSelectedRadio: (selectedRadio: string) => void;
+  setSelectedRoles: React.Dispatch<React.SetStateAction<Array<{ label: string }>>>;
+  setSelectedRadio: React.Dispatch<React.SetStateAction<string>>;
   radios: EuiRadioGroupOption[];
 }

@@ -30,6 +30,7 @@ interface DatasourceDetails {
   allowedRoles: string[];
   name: string;
   cluster: string;
+  connector: string;
 }
 
 export const DataConnection = (props: any) => {
@@ -38,18 +39,30 @@ export const DataConnection = (props: any) => {
     allowedRoles: [],
     name: '',
     cluster: '',
+    connector: '',
   });
   const [hasAccess, setHasAccess] = useState(true);
-  const { http } = coreRefs;
+  const { http, chrome } = coreRefs;
 
   useEffect(() => {
-    http
+    chrome!.setBreadcrumbs([
+      {
+        text: 'Data Connections',
+        href: '#/',
+      },
+      {
+        text: `${dataSource}`,
+        href: `#/manage/${dataSource}`,
+      },
+    ]);
+    http!
       .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
       .then((data) =>
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
           name: data.name,
           cluster: data.properties['emr.cluster'],
+          connector: data.connector,
         })
       )
       .catch((err) => {
@@ -57,7 +70,7 @@ export const DataConnection = (props: any) => {
           setHasAccess(false);
         }
       });
-  }, []);
+  }, [chrome, http]);
 
   const tabs = [
     {
@@ -70,7 +83,9 @@ export const DataConnection = (props: any) => {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
-      content: <AccessControlTab />,
+      content: (
+        <AccessControlTab dataConnection={dataSource} connector={datasourceDetails.connector} />
+      ),
     },
     {
       id: 'connection_configuration',
