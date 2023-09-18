@@ -39,12 +39,12 @@ jobs:
       - name: Download observability artifact
         uses: peternied/download-file@v2
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${{ env.OPENSEARCH_VERSION }}-SNAPSHOT&p=zip
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
 
       - name: Download observability artifact
         uses: peternied/download-file@v2
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql&v=${{ env.OPENSEARCH_VERSION }}-SNAPSHOT&p=zip
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql-plugin&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
 
       - name: Download OpenSearch
         uses: peternied/download-file@v2
@@ -59,12 +59,12 @@ jobs:
 
       - name: Install observability plugin
         run: |
-          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install opensearch-observability"
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip"
         shell: bash
 
       - name: Install linux SQL plugin
         run: |
-          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install opensearch-sql"
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql-plugin&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip"
         shell: bash
 
       - name: Run OpenSearch
@@ -116,7 +116,7 @@ jobs:
         run: |
           cd OpenSearch-Dashboards
           yarn start --no-base-path --no-watch &
-          sleep 400
+          sleep 200
 
       - name: Install Cypress
         run: |
