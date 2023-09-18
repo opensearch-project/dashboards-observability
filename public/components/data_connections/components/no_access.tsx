@@ -3,36 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiPage, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPage, EuiText } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
 
 export const NoAccess = () => {
   return (
     <EuiPage>
-      <EuiPanel>
-        <EuiEmptyPrompt
-          title={<h2>Data connections not set up</h2>}
-          body={
-            <EuiText>
-              {
-                'You do not have the permissions to view and edit data connections. Please reach out to your administrator for access.'
-              }
-            </EuiText>
-          }
-          actions={
-            <EuiButton
-              color="primary"
-              iconSide="right"
-              iconType="popout"
-              onClick={() => window.open(OPENSEARCH_DOCUMENTATION_URL, '_blank')}
-            >
-              Learn more
-            </EuiButton>
-          }
-        />
-      </EuiPanel>
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>{'No permissions to access'}</h2>}
+        body={
+          <EuiText>
+            {
+              'Missing permissions to view connection details. Contact your administrator for permissions.'
+            }
+          </EuiText>
+        }
+        actions={
+          <EuiButton color="primary" fill onClick={() => (window.location.hash = '')}>
+            Return to data connections
+          </EuiButton>
+        }
+      />
     </EuiPage>
   );
 };

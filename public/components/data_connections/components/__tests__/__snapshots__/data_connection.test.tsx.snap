@@ -259,46 +259,59 @@ exports[`Data Connection Page test Renders data connection page with data 1`] = 
           </div>
         </div>
       </div>
-      <div
-        class="euiTabs"
-        role="tablist"
-      >
-        <button
-          aria-selected="true"
-          class="euiTab euiTab-isSelected"
-          role="tab"
-          type="button"
+      <div>
+        <div
+          class="euiTabs"
+          role="tablist"
         >
-          <span
-            class="euiTab__content"
+          <button
+            aria-controls="random_html_id"
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
+            id="data"
+            role="tab"
+            type="button"
           >
-            Data
-          </span>
-        </button>
-        <button
-          aria-selected="false"
-          class="euiTab"
-          role="tab"
-          type="button"
-        >
-          <span
-            class="euiTab__content"
+            <span
+              class="euiTab__content"
+            >
+              Data
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="access_control"
+            role="tab"
+            type="button"
           >
-            Access control
-          </span>
-        </button>
-        <button
-          aria-selected="false"
-          class="euiTab"
-          role="tab"
-          type="button"
-        >
-          <span
-            class="euiTab__content"
+            <span
+              class="euiTab__content"
+            >
+              Access control
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="connection_configuration"
+            role="tab"
+            type="button"
           >
-            Connection configuration
-          </span>
-        </button>
+            <span
+              class="euiTab__content"
+            >
+              Connection configuration
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="data"
+          id="random_html_id"
+          role="tabpanel"
+        />
       </div>
       <div
         class="euiSpacer euiSpacer--l"

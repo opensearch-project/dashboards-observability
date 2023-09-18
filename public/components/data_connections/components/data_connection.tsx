@@ -18,9 +18,10 @@ import {
   EuiIcon,
   EuiCard,
   EuiTab,
-  EuiTabs,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { AccessControlTab } from './access_control_tab';
 import { NoAccess } from './no_access';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../../public/framework/core_refs';
@@ -29,6 +30,8 @@ interface DatasourceDetails {
   allowedRoles: string[];
   name: string;
   cluster: string;
+  connector: string;
+  properties: unknown;
 }
 
 export const DataConnection = (props: any) => {
@@ -37,18 +40,32 @@ export const DataConnection = (props: any) => {
     allowedRoles: [],
     name: '',
     cluster: '',
+    connector: '',
+    properties: {},
   });
   const [hasAccess, setHasAccess] = useState(true);
-  const { http } = coreRefs;
+  const { http, chrome } = coreRefs;
 
   useEffect(() => {
-    http
+    chrome!.setBreadcrumbs([
+      {
+        text: 'Data Connections',
+        href: '#/',
+      },
+      {
+        text: `${dataSource}`,
+        href: `#/manage/${dataSource}`,
+      },
+    ]);
+    http!
       .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
       .then((data) =>
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
           name: data.name,
           cluster: data.properties['emr.cluster'],
+          connector: data.connector,
+          properties: data.properties,
         })
       )
       .catch((err) => {
@@ -56,44 +73,34 @@ export const DataConnection = (props: any) => {
           setHasAccess(false);
         }
       });
-  }, []);
+  }, [chrome, http]);
 
   const tabs = [
     {
       id: 'data',
       name: 'Data',
       disabled: false,
+      content: <></>,
     },
     {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
+      content: (
+        <AccessControlTab
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+        />
+      ),
     },
     {
       id: 'connection_configuration',
       name: 'Connection configuration',
       disabled: false,
+      content: <></>,
     },
   ];
-
-  const [selectedTabId, setSelectedTabId] = useState('data');
-
-  const onSelectedTabChanged = (id) => {
-    setSelectedTabId(id);
-  };
-
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        key={index}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
 
   const renderOverview = () => {
     return (
@@ -184,7 +191,7 @@ export const DataConnection = (props: any) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiAccordion>
-        <EuiTabs>{renderTabs()}</EuiTabs>
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
 
         <EuiSpacer />
       </EuiPageBody>

@@ -55,6 +55,14 @@ export const PPLPlugin = function (Client, config, components) {
     method: 'GET',
   });
 
+  ppl.modifyDataConnection = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
+    },
+    needBody: true,
+    method: 'PUT',
+  });
+
   ppl.getDataConnections = ca({
     url: {
       fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,

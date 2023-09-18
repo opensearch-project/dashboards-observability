@@ -37,6 +37,43 @@ export function registerDataConnectionsRoute(router: IRouter) {
     }
   );
 
+  router.put(
+    {
+      path: `${DATACONNECTIONS_BASE}`,
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          connector: schema.string(),
+          allowedRoles: schema.arrayOf(schema.string()),
+          properties: schema.any(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('ppl.modifyDataConnection', {
+            body: {
+              name: request.body.name,
+              connector: request.body.connector,
+              allowedRoles: request.body.allowedRoles,
+              properties: request.body.properties,
+            },
+          });
+        return response.ok({
+          body: dataConnectionsresponse,
+        });
+      } catch (error: any) {
+        console.error('Issue in modifying data connection:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}`,
