@@ -39,12 +39,12 @@ jobs:
       - name: Download observability artifact
         uses: peternied/download-file@v2
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${ env.OPENSEARCH_VERSION }-SNAPSHOT&p=zip
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${{ env.OPENSEARCH_VERSION }}-SNAPSHOT&p=zip
 
       - name: Download observability artifact
         uses: peternied/download-file@v2
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql&v=${ env.OPENSEARCH_VERSION }-SNAPSHOT&p=zip
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql&v=${{ env.OPENSEARCH_VERSION }}-SNAPSHOT&p=zip
 
       - name: Download OpenSearch
         uses: peternied/download-file@v2
