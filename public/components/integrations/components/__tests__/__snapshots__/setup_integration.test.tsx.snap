@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Integration Setup Page Test Renders integration setup page as expected 1`] = `
+exports[`Integration Setup Page Renders integration setup page as expected 1`] = `
 <SetupIntegrationStepsPage>
   <EuiPage>
     <div
@@ -627,7 +627,7 @@ exports[`Integration Setup Page Test Renders integration setup page as expected 
 </SetupIntegrationStepsPage>
 `;
 
-exports[`Integration Setup Page Test Renders the data source form as expected 1`] = `
+exports[`Integration Setup Page Renders the data source form as expected 1`] = `
 <SetupIntegrationDataSource
   config={
     Object {
@@ -1323,7 +1323,7 @@ exports[`Integration Setup Page Test Renders the data source form as expected 1`
 </SetupIntegrationDataSource>
 `;
 
-exports[`Integration Setup Page Test Renders the existing table form as expected 1`] = `
+exports[`Integration Setup Page Renders the existing table form as expected 1`] = `
 <SetupIntegrationExistingTable
   config={
     Object {
@@ -1533,7 +1533,7 @@ exports[`Integration Setup Page Test Renders the existing table form as expected
 </SetupIntegrationExistingTable>
 `;
 
-exports[`Integration Setup Page Test Renders the metadata form as expected 1`] = `
+exports[`Integration Setup Page Renders the metadata form as expected 1`] = `
 <SetupIntegrationMetadata
   name="Test Instance Name"
   setName={[Function]}
@@ -1638,7 +1638,7 @@ exports[`Integration Setup Page Test Renders the metadata form as expected 1`] =
 </SetupIntegrationMetadata>
 `;
 
-exports[`Integration Setup Page Test Renders the new table form as expected 1`] = `
+exports[`Integration Setup Page Renders the new table form as expected 1`] = `
 <SetupIntegrationNewTable
   config={
     Object {
