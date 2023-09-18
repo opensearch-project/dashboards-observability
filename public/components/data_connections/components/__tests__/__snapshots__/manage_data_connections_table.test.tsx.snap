@@ -37,8 +37,8 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
             <a
               class="euiLink euiLink--primary"
               href="https://opensearch.org/docs/latest/data-connections/index"
-              rel="noopener noreferrer"
-              target="_blank"
+              rel="noreferrer"
+              target="blank"
             >
               Learn more
               <svg
@@ -52,11 +52,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
               />
-              <span
-                class="euiScreenReaderOnly"
-              >
-                (opens in a new tab or window)
-              </span>
             </a>
           </div>
         </div>

@@ -31,6 +31,7 @@ interface DatasourceDetails {
   name: string;
   cluster: string;
   connector: string;
+  properties: unknown;
 }
 
 export const DataConnection = (props: any) => {
@@ -40,6 +41,7 @@ export const DataConnection = (props: any) => {
     name: '',
     cluster: '',
     connector: '',
+    properties: {},
   });
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome } = coreRefs;
@@ -63,6 +65,7 @@ export const DataConnection = (props: any) => {
           name: data.name,
           cluster: data.properties['emr.cluster'],
           connector: data.connector,
+          properties: data.properties,
         })
       )
       .catch((err) => {
@@ -84,7 +87,11 @@ export const DataConnection = (props: any) => {
       name: 'Access control',
       disabled: false,
       content: (
-        <AccessControlTab dataConnection={dataSource} connector={datasourceDetails.connector} />
+        <AccessControlTab
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+        />
       ),
     },
     {
@@ -94,25 +101,6 @@ export const DataConnection = (props: any) => {
       content: <></>,
     },
   ];
-
-  const [selectedTabId, setSelectedTabId] = useState('data');
-
-  const onSelectedTabChanged = (id) => {
-    setSelectedTabId(id);
-  };
-
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        key={index}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
 
   const renderOverview = () => {
     return (

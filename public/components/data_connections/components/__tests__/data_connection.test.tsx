@@ -11,28 +11,28 @@ import { describeDataConnection } from './testing_constants';
 import { DataConnection } from '../data_connection';
 import ReactDOM from 'react-dom';
 
+jest.mock('../../../../../public/framework/core_refs', () => ({
+  coreRefs: {
+    chrome: {
+      setBreadcrumbs: jest.fn(),
+    },
+    http: {
+      get: jest.fn().mockResolvedValue(describeDataConnection),
+    },
+  },
+}));
+
 describe('Data Connection Page test', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders data connection page with data', async () => {
-    const http = {
-      get: jest.fn().mockResolvedValue(describeDataConnection),
-    };
     const pplService = {
       fetch: jest.fn(),
     };
-    const mockChrome = {
-      setBreadcrumbs: jest.fn(),
-    };
-    const wrapper = mount(
-      <DataConnection http={http} pplService={pplService} chrome={mockChrome} />
-    );
+    const wrapper = mount(<DataConnection pplService={pplService} />);
     const container = document.createElement('div');
     await act(() => {
-      ReactDOM.render(
-        <DataConnection http={http} pplService={pplService} chrome={mockChrome} />,
-        container
-      );
+      ReactDOM.render(<DataConnection pplService={pplService} />, container);
     });
     expect(container).toMatchSnapshot();
   });

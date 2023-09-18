@@ -24,6 +24,7 @@ import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 interface AccessControlTabProps {
   dataConnection: string;
   connector: string;
+  properties: unknown;
 }
 
 export const AccessControlTab = (props: AccessControlTabProps) => {
@@ -32,11 +33,10 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
     Array<{ label: string }>
   >([]);
-  const [queryPermissionRadioSelected, setQueryRadioIdSelected] = useState(`query-1`);
   const { http } = coreRefs;
 
   useEffect(() => {
-    coreRefs.http!.get('/api/v1/configuration/roles').then((data) =>
+    http!.get('/api/v1/configuration/roles').then((data) =>
       setRoles(
         Object.keys(data.data).map((key) => {
           return { label: key };
@@ -44,17 +44,6 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
       )
     );
   }, []);
-
-  const queryRadios = [
-    {
-      id: QUERY_RESTRICT,
-      label: 'Restricted - accessible by users with specific OpenSearch roles',
-    },
-    {
-      id: QUERY_ALL,
-      label: 'Everyone - accessible by all users on this cluster',
-    },
-  ];
 
   const AccessControlDetails = () => {
     return (
@@ -80,9 +69,6 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           roles={roles}
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
-          selectedRadio={queryPermissionRadioSelected}
-          setSelectedRadio={setQueryRadioIdSelected}
-          radios={queryRadios}
         />
       </EuiFlexGroup>
     );
@@ -92,11 +78,61 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
     http!.put(`${DATACONNECTIONS_BASE}`, {
       body: JSON.stringify({
         name: props.dataConnection,
-        allowedRoles: ['test'],
+        allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
         connector: props.connector,
+        properties: props.properties,
       }),
     });
     setMode('view');
+  };
+
+  const AccessControlHeader = () => {
+    return (
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem>
+          <EuiText size="m">
+            <h2 className="panel-title">Access Control</h2>
+            Control which OpenSearch users have access to this data source.
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="createButton"
+            onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
+            fill={mode === 'view' ? true : false}
+          >
+            {mode === 'view' ? 'Edit' : 'Cancel'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  const SaveOrCancel = () => {
+    return (
+      <EuiBottomBar affordForDisplacement={false}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => {
+                setMode('view');
+              }}
+              color="ghost"
+              size="s"
+              iconType="cross"
+            >
+              Discard change(s)
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={saveChanges} size="s" iconType="check" fill>
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    );
   };
 
   return (
@@ -105,51 +141,12 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
       <AccessControlCallout />
       <EuiSpacer />
       <EuiPanel>
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem>
-            <EuiText size="m">
-              <h2 className="panel-title">Access Control</h2>
-              Control which OpenSearch users have access to this data source.
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="createButton"
-              onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
-              fill={mode === 'view' ? true : false}
-            >
-              {mode === 'view' ? 'Edit' : 'Cancel'}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AccessControlHeader />
         <EuiHorizontalRule />
         {mode === 'view' ? <AccessControlDetails /> : <EditAccessControlDetails />}
       </EuiPanel>
       <EuiSpacer />
-      {mode === 'edit' && (
-        <EuiBottomBar affordForDisplacement={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => {
-                  setMode('view');
-                }}
-                color="ghost"
-                size="s"
-                iconType="cross"
-              >
-                Discard change(s)
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={saveChanges} size="s" iconType="check" fill>
-                Save
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBottomBar>
-      )}
+      {mode === 'edit' && <SaveOrCancel />}
       <EuiSpacer />
     </>
   );

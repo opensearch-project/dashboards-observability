@@ -3,61 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const showDataConnectionsData = [
-  {
-    name: 'my_spark3',
-    connector: 'SPARK',
-    allowedRoles: [],
-    properties: {
-      'spark.connector': 'emr',
-      'spark.datasource.flint.host': '0.0.0.0',
-      'spark.datasource.flint.integration':
-        'https://aws.oss.sonatype.org/content/repositories/snapshots/org/opensearch/opensearch-spark-standalone_2.12/0.1.0-SNAPSHOT/opensearch-spark-standalone_2.12-0.1.0-20230731.182705-3.jar',
-      'spark.datasource.flint.port': '9200',
-      'spark.datasource.flint.scheme': 'http',
-      'emr.cluster': 'j-3UNQLT1MPBGLG',
+export const showDataConnectionsData = {
+  schema: [
+    {
+      name: 'DATASOURCE_NAME',
+      type: 'string',
     },
-  },
-  {
-    name: 'my_spark4',
-    connector: 'SPARK',
-    allowedRoles: [],
-    properties: {
-      'spark.connector': 'emr',
-      'spark.datasource.flint.host': '15.248.1.68',
-      'spark.datasource.flint.integration':
-        'https://aws.oss.sonatype.org/content/repositories/snapshots/org/opensearch/opensearch-spark-standalone_2.12/0.1.0-SNAPSHOT/opensearch-spark-standalone_2.12-0.1.0-20230731.182705-3.jar',
-      'spark.datasource.flint.port': '9200',
-      'spark.datasource.flint.scheme': 'http',
-      'emr.cluster': 'j-3UNQLT1MPBGLG',
+    {
+      name: 'CONNECTOR_TYPE',
+      type: 'string',
     },
-  },
-  {
-    name: 'my_spark',
-    connector: 'SPARK',
-    allowedRoles: [],
-    properties: {
-      'spark.connector': 'emr',
-      'spark.datasource.flint.host': '0.0.0.0',
-      'spark.datasource.flint.port': '9200',
-      'spark.datasource.flint.scheme': 'http',
-      'spark.datasource.flint.region': 'xxx',
-      'emr.cluster': 'xxx',
+  ],
+  datarows: [
+    ['my_spark_actual', 'SPARK'],
+    ['@opensearch', 'OPENSEARCH'],
+    ['my_spark', 'SPARK'],
+  ],
+  total: 3,
+  size: 3,
+  jsonData: [
+    {
+      DATASOURCE_NAME: 'my_spark3',
+      CONNECTOR_TYPE: 'SPARK',
     },
-  },
-  {
-    name: 'my_spark2',
-    connector: 'SPARK',
-    allowedRoles: [],
-    properties: {
-      'spark.connector': 'emr',
-      'spark.datasource.flint.host': '0.0.0.0',
-      'spark.datasource.flint.port': '9200',
-      'spark.datasource.flint.scheme': 'http',
-      'emr.cluster': 'j-3UNQLT1MPBGLG',
+    {
+      DATASOURCE_NAME: 'my_spark4',
+      CONNECTOR_TYPE: 'SPARK',
     },
-  },
-];
+    {
+      DATASOURCE_NAME: 'my_spark',
+      CONNECTOR_TYPE: 'SPARK',
+    },
+    {
+      DATASOURCE_NAME: 'my_spark2',
+      CONNECTOR_TYPE: 'SPARK',
+    },
+  ],
+};
 
 export const describeDataConnection = {
   name: 'my_spark3',

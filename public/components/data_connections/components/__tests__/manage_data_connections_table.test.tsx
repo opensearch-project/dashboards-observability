@@ -10,6 +10,18 @@ import React from 'react';
 import { ManageDataConnectionsTable } from '../manage_data_connections_table';
 import { showDataConnectionsData } from './testing_constants';
 import ReactDOM from 'react-dom';
+import { coreRefs } from '../../../../../public/framework/core_refs';
+
+jest.mock('../../../../../public/framework/core_refs', () => ({
+  coreRefs: {
+    chrome: {
+      setBreadcrumbs: jest.fn(),
+    },
+    http: {
+      get: jest.fn().mockResolvedValue(showDataConnectionsData),
+    },
+  },
+}));
 
 describe('Manage Data Connections Table test', () => {
   configure({ adapter: new Adapter() });
@@ -19,7 +31,7 @@ describe('Manage Data Connections Table test', () => {
       get: jest.fn().mockResolvedValue(showDataConnectionsData),
     };
     const pplService = {
-      fetch: jest.fn(),
+      fetch: jest.fn().mockResolvedValue(showDataConnectionsData),
     };
     const mockChrome = {
       setBreadcrumbs: jest.fn(),

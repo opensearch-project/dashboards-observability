@@ -45,6 +45,7 @@ export function registerDataConnectionsRoute(router: IRouter) {
           name: schema.string(),
           connector: schema.string(),
           allowedRoles: schema.arrayOf(schema.string()),
+          properties: schema.any(),
         }),
       },
     },
@@ -57,6 +58,7 @@ export function registerDataConnectionsRoute(router: IRouter) {
               name: request.body.name,
               connector: request.body.connector,
               allowedRoles: request.body.allowedRoles,
+              properties: request.body.properties,
             },
           });
         return response.ok({
