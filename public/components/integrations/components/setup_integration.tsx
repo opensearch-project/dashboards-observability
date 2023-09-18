@@ -20,7 +20,6 @@ interface IntegrationConfig {
 const STEPS: EuiContainedStepProps[] = [
   { title: 'Name Integration', children: <Eui.EuiText /> },
   { title: 'Select index or data source for integration', children: <Eui.EuiText /> },
-  // { title: 'Select integration assets', children: <Eui.EuiText /> },
 ];
 
 const ALLOWED_FILE_TYPES: Eui.EuiSelectOption[] = [

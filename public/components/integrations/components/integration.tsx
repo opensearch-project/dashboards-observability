@@ -279,7 +279,7 @@ export function Integration(props: AvailableIntegrationProps) {
         {IntegrationOverview({
           integration,
           showFlyout: () => {
-            window.location.hash = '#/available/nginx/setup';
+            window.location.hash = `#/available/${integration.name}/setup`;
           },
           setUpSample: () => {
             addIntegrationRequest(true, integrationTemplateId);
