@@ -25,7 +25,7 @@ const TEST_CONFIG = {
   existingDataSourceName: 'ss4o_logs-test-existing-location',
 };
 
-describe('Integration Setup Page Test', () => {
+describe('Integration Setup Page', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders integration setup page as expected', async () => {
