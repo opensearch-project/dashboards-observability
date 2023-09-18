@@ -11,5 +11,3 @@ export const OPENSEARCH_ACC_DOCUMENTATION_URL =
 
 export const QUERY_RESTRICTED = 'query-restricted';
 export const QUERY_ALL = 'query-all';
-export const ACCELERATION_RESTRICT = 'acceleration-restrict';
-export const ACCELERATION_ALL = 'acceleration-all';
