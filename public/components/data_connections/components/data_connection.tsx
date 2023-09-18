@@ -69,9 +69,7 @@ export const DataConnection = (props: any) => {
         })
       )
       .catch((err) => {
-        if (err.body.statusCode === 403) {
-          setHasAccess(false);
-        }
+        setHasAccess(false);
       });
   }, [chrome, http]);
 

@@ -23,10 +23,10 @@ import { PermissionsConfigurationProps } from '../../../../common/types/data_con
 export const QueryPermissionsConfiguration = (props: PermissionsConfigurationProps) => {
   const { roles, selectedRoles, setSelectedRoles } = props;
 
-  const [selectedRadio, setSelectedRadio] = useState(
+  const [selectedAccessLevel, setSelectedAccessLevel] = useState(
     selectedRoles.length ? QUERY_RESTRICTED : QUERY_ALL
   );
-  const radios = [
+  const accessLevelOptions = [
     {
       id: QUERY_RESTRICTED,
       label: 'Restricted - accessible by users with specific OpenSearch roles',
@@ -71,15 +71,15 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiRadioGroup
-            options={radios}
-            idSelected={selectedRadio}
-            onChange={(id) => setSelectedRadio(id)}
+            options={accessLevelOptions}
+            idSelected={selectedAccessLevel}
+            onChange={(id) => setSelectedAccessLevel(id)}
             name="query-radio-group"
             legend={{
               children: <span>Access level</span>,
             }}
           />
-          {selectedRadio === QUERY_RESTRICTED && <ConfigureRoles />}
+          {selectedAccessLevel === QUERY_RESTRICTED && <ConfigureRoles />}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

@@ -21,6 +21,8 @@ import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import { ChromeStart } from '../../../../../../src/core/public';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { useToast } from '../../../../public/components/common/toast';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
@@ -31,8 +33,18 @@ interface DataConnection {
 export const ManageDataConnectionsTable = (props: HomeProps) => {
   const { http, chrome, pplService } = props;
 
+  const { setToast } = useToast();
+
   const [data, setData] = useState([]);
-  const [hasAccess, setHasAccess] = useState(true);
+
+  const deleteConnection = (connection: string) => {
+    http!
+      .delete(`${DATACONNECTIONS_BASE}/${connection}`)
+      .then(() => setToast(`Data connection ${connection} deleted successfully`))
+      .catch((err) => {
+        setToast(`Data connection $${connection} not deleted. See output for more details.`);
+      });
+  };
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -84,17 +96,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
-      field: 'connectionStatus',
-      name: 'Connection Status',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}DataConnectionHealth`}>
-          {_.truncate(record.creationDate, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
       field: 'actions',
       name: 'Actions',
       sortable: true,
@@ -103,7 +104,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         <EuiIcon
           type={'trash'}
           onClick={() => {
-            /* Delete Datasource*/
+            deleteConnection(record.name);
           }}
         />
       ),
