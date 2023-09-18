@@ -73,7 +73,7 @@ const getSetupStepStatus = (activeStep: number): EuiContainedStepProps[] => {
   });
 };
 
-function SetupIntegrationMetadata({
+export function SetupIntegrationMetadata({
   name,
   setName,
 }: {
@@ -95,7 +95,7 @@ function SetupIntegrationMetadata({
   );
 }
 
-function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Element {
+export function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Element {
   return (
     <Eui.EuiModal onClose={close}>
       <Eui.EuiModalHeader>
@@ -115,7 +115,7 @@ function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Eleme
   );
 }
 
-function SetupIntegrationNewTable({
+export function SetupIntegrationNewTable({
   config,
   updateConfig,
 }: {
@@ -153,7 +153,7 @@ function SetupIntegrationNewTable({
   );
 }
 
-function SetupIntegrationExistingTable({
+export function SetupIntegrationExistingTable({
   config,
   updateConfig,
   showDataModal,
@@ -186,7 +186,7 @@ function SetupIntegrationExistingTable({
   );
 }
 
-function SetupIntegrationDataSource({
+export function SetupIntegrationDataSource({
   config,
   updateConfig,
   showDataModal,
@@ -254,7 +254,7 @@ function SetupIntegrationDataSource({
   );
 }
 
-function SetupIntegrationStep({
+export function SetupIntegrationStep({
   activeStep,
   config,
   updateConfig,
@@ -294,7 +294,7 @@ function SetupIntegrationStep({
   }
 }
 
-function SetupBottomBar({
+export function SetupBottomBar({
   step,
   setStep,
   config,
