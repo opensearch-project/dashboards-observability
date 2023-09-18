@@ -36,15 +36,15 @@ jobs:
           distribution: 'corretto'
           java-version: '11'
 
-      # - name: Download observability artifact
-      #   uses: peternied/download-file@v2
-      #   with:
-      #     url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-observability-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
+      - name: Download observability artifact
+        uses: peternied/download-file@v2
+        with:
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${ env.OPENSEARCH_VERSION }-SNAPSHOT&p=zip
 
-      # - name: Download SQL artifact
-      #   uses: peternied/download-file@v2
-      #   with:
-      #     url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-sql-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
+      - name: Download observability artifact
+        uses: peternied/download-file@v2
+        with:
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql&v=${ env.OPENSEARCH_VERSION }-SNAPSHOT&p=zip
 
       - name: Download OpenSearch
         uses: peternied/download-file@v2
