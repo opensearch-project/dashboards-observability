@@ -38,7 +38,7 @@ import {
 import { getHeaders, getTrs, isValidTraceId, populateDataGrid } from '../../utils';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
-import { IDocType } from './docViewRow';
+import { FlyoutButton, IDocType } from './docViewRow';
 import { DocFlyout } from './doc_flyout';
 import { useFetchEvents } from '../../hooks';
 import { composeFinalQuery } from '../../../../../common/utils';
@@ -80,7 +80,6 @@ export function DataGrid(props: DataGridProps) {
   const [rowRefs, setRowRefs] = useState<
     Array<RefObject<{ closeAllFlyouts(openDocId: string): void }>>
   >([]);
-  const [modQuery, setModQuery] = useState(rawQuery);
   const { getEvents } = useFetchEvents({
     pplService,
     requestParams,
@@ -316,19 +315,33 @@ export function DataGrid(props: DataGridProps) {
       {
         id: 'inspectCollapseColumn',
         headerCellRender: () => null,
-        rowCellRender: () => {
+        rowCellRender: ({ rowIndex }) => {
           return (
-            <EuiButtonIcon
-              onClick={() => alert('flyout opens')}
-              iconType={'inspect'}
-              aria-label="inspect document details"
+            <FlyoutButton
+              ref={null}
+              http={http}
+              key={null}
+              docId={'undefined'}
+              doc={rows[rowIndex % pageFields.current[1]]}
+              selectedCols={explorerFields.queriedFields}
+              timeStampField={timeStampField}
+              explorerFields={explorerFields}
+              pplService={pplService}
+              rawQuery={rawQuery}
+              onFlyoutOpen={onFlyoutOpen}
             />
+
+            // <EuiButtonIcon
+            //   onClick={() => alert('flyout opens')}
+            //   iconType={'inspect'}
+            //   aria-label="inspect document details"
+            // />
           );
         },
         width: 40,
       },
     ];
-  }, []);
+  }, [rows]);
 
   // ** Flyout code
   // const [detailsOpen, setDetailsOpen] = useState<boolean>(false);
