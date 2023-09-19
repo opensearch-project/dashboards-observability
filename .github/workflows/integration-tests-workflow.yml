@@ -75,11 +75,6 @@ jobs:
         run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
         shell: bash
 
-      - name: Sleep while OpenSearch starts
-        uses: peternied/action-sleep@v1
-        with:
-          seconds: 30
-
       - name: Checkout OpenSearch Dashboards
         uses: actions/checkout@v2
         with:
