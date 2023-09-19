@@ -600,6 +600,10 @@ export const Explorer = ({
                       explorerFields={explorerFields}
                       timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
                       rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                      totalHits={_.sum(countDistribution.data['count()'])}
+                      requestParams={requestParams}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
                     />
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;

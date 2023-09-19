@@ -19,14 +19,17 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiLink,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
 } from '@elastic/eui';
 import moment from 'moment';
 import { toPairs, uniqueId } from 'lodash';
 import dompurify from 'dompurify';
-import { EuiDataGridColumn } from '@opensearch-project/oui';
-import { IExplorerFields } from '../../../../../common/types/explorer';
+import datemath from '@elastic/datemath';
+import { GridSortingColumn, IExplorerFields } from '../../../../../common/types/explorer';
 import {
   DATE_DISPLAY_FORMAT,
+  DATE_PICKER_FORMAT,
   DEFAULT_COLUMNS,
   JAEGER_TRACE_ID,
   OTEL_TRACE_ID,
@@ -36,6 +39,13 @@ import { getHeaders, getTrs, isValidTraceId, populateDataGrid } from '../../util
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import { IDocType } from './docViewRow';
+import { DocFlyout } from './doc_flyout';
+import { useFetchEvents } from '../../hooks';
+import { composeFinalQuery } from '../../../../../common/utils';
+import {
+  PPL_INDEX_INSERT_POINT_REGEX,
+  PPL_NEWLINE_REGEX,
+} from '../../../../../common/constants/shared';
 
 interface DataGridProps {
   http: HttpSetup;
@@ -45,15 +55,38 @@ interface DataGridProps {
   explorerFields: IExplorerFields;
   timeStampField: string;
   rawQuery: string;
+  totalHits: number;
+  requestParams: any;
+  startTime: string;
+  endTime: string;
 }
 
 export function DataGrid(props: DataGridProps) {
-  const { http, pplService, rows, rowsAll, explorerFields, timeStampField, rawQuery } = props;
+  const {
+    http,
+    pplService,
+    rows,
+    rowsAll,
+    explorerFields,
+    timeStampField,
+    rawQuery,
+    totalHits,
+    requestParams,
+    startTime,
+    endTime,
+  } = props;
   const [limit, setLimit] = useState(PAGE_SIZE);
   const loader = useRef<HTMLDivElement>(null);
   const [rowRefs, setRowRefs] = useState<
     Array<RefObject<{ closeAllFlyouts(openDocId: string): void }>>
   >([]);
+  const [modQuery, setModQuery] = useState(rawQuery);
+  const { getEvents } = useFetchEvents({
+    pplService,
+    requestParams,
+  });
+  const sortingFields = useRef([{ id: 'timestamp', direction: 'asc' }]);
+  const pageFields = useRef([0, 25]);
 
   useEffect(() => {
     if (!loader.current) return;
@@ -77,6 +110,54 @@ export function DataGrid(props: DataGridProps) {
     rowRefs.forEach((rowRef) => {
       rowRef.current?.closeAllFlyouts(docId);
     });
+  };
+
+  const redoQuery = () => {
+    let finalQuery = '';
+
+    // convert to moment
+    const start = datemath.parse(startTime)?.utc().format(DATE_PICKER_FORMAT);
+    const end = datemath.parse(endTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT);
+    const tokens = rawQuery.replaceAll(PPL_NEWLINE_REGEX, '').match(PPL_INDEX_INSERT_POINT_REGEX);
+
+    finalQuery = `${tokens![1]}=${
+      tokens![2]
+    } | where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`;
+
+    finalQuery += tokens![3];
+
+    console.log(finalQuery); // to delete
+    // if (isLiveQuery) {
+    //   finalQuery = finalQuery + ` | sort - ${timeField}`;
+    // } else {
+    console.log(sortingFields);
+    for (let i = 0; i < sortingFields.current.length; i++) {
+      const field = sortingFields.current[i];
+      const dir = field.direction === 'asc' ? '+' : '-';
+      finalQuery = finalQuery + ` | sort ${dir} ${field.id}`;
+    }
+    console.log(finalQuery); // to delete
+
+    finalQuery =
+      finalQuery +
+      ` | head ${pageFields.current[1]} from ${pageFields.current[0] * pageFields.current[1]}`;
+    console.log(finalQuery);
+    getEvents(finalQuery);
+  };
+
+  // setSort and setPage are used to change the query and send a direct request to get data
+  const setSort = (sort: GridSortingColumn[]) => {
+    console.log('its sorbing time');
+    sortingFields.current = sort;
+    console.log(sortingFields);
+    console.log(sort);
+    redoQuery();
+  };
+
+  const setPage = (page: number[]) => {
+    console.log('its porbing time');
+    pageFields.current = page;
+    redoQuery();
   };
 
   const Queriedheaders = useMemo(() => getHeaders(explorerFields.queriedFields, DEFAULT_COLUMNS), [
@@ -179,7 +260,7 @@ export function DataGrid(props: DataGridProps) {
         const newColumn = {
           id: name,
           display: name,
-          schema: type,
+          isSortable: true,
         };
         columns.push(newColumn);
       });
@@ -249,10 +330,58 @@ export function DataGrid(props: DataGridProps) {
     ];
   }, []);
 
+  // ** Flyout code
+  // const [detailsOpen, setDetailsOpen] = useState<boolean>(false);
+  // const [surroundingEventsOpen, setSurroundingEventsOpen] = useState<boolean>(false);
+  // const [openTraces, setOpenTraces] = useState<boolean>(false);
+  // const tracesFlyout = () => {
+  //   setOpenTraces(true);
+  //   if (!detailsOpen) toggleDetailOpen();
+  // };
+  // const toggleDetailOpen = () => {
+  //   if (surroundingEventsOpen) {
+  //     setSurroundingEventsOpen(false);
+  //     setDetailsOpen(false);
+  //   } else {
+  //     const newState = !detailsOpen;
+  //     setDetailsOpen(newState);
+  //   }
+  // };
+  // const memorizedDocFlyout = useMemo(() => {
+  //   return (
+  //     <DocFlyout
+  //       http={http}
+  //       detailsOpen={detailsOpen}
+  //       setDetailsOpen={setDetailsOpen}
+  //       doc={doc}
+  //       timeStampField={timeStampField}
+  //       memorizedTds={getTds(doc, selectedCols, true).slice(1)}
+  //       explorerFields={explorerFields}
+  //       openTraces={openTraces}
+  //       rawQuery={rawQuery}
+  //       toggleSize={flyoutToggleSize}
+  //       setToggleSize={setFlyoutToggleSize}
+  //       setOpenTraces={setOpenTraces}
+  //       setSurroundingEventsOpen={setSurroundingEventsOpen}
+  //     />
+  //   );
+  // }, [
+  //   http,
+  //   detailsOpen,
+  //   doc,
+  //   timeStampField,
+  //   selectedCols,
+  //   explorerFields,
+  //   openTraces,
+  //   rawQuery,
+  //   flyoutToggleSize,
+  // ]);
+
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = useMemo(
     () => ({ rowIndex, columnId }) => {
-      if (rowIndex < rows.length) {
+      const trueIndex = rowIndex % pageFields.current[1];
+      if (trueIndex < rows.length) {
         if (columnId === '_source') {
           return (
             // <div className="truncate-by-height" type="inline" compressed>
@@ -270,13 +399,13 @@ export function DataGrid(props: DataGridProps) {
             //   </span>
             // </div>
             <EuiDescriptionList type="inline" compressed>
-              {Object.keys(rows[rowIndex]).map((key) => (
+              {Object.keys(rows[trueIndex]).map((key) => (
                 <Fragment key={key}>
                   <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
                     {key}
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription
-                    dangerouslySetInnerHTML={{ __html: dompurify.sanitize(rows[rowIndex][key]) }}
+                    dangerouslySetInnerHTML={{ __html: dompurify.sanitize(rows[trueIndex][key]) }}
                   />
                 </Fragment>
               ))}
@@ -284,9 +413,9 @@ export function DataGrid(props: DataGridProps) {
           );
         }
         if (columnId === 'timestamp') {
-          return `${moment(rows[rowIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
+          return `${moment(rows[trueIndex][columnId]).format(DATE_DISPLAY_FORMAT)}`;
         }
-        return `${rows[rowIndex][columnId]}`;
+        return `${rows[trueIndex][columnId]}`;
       }
       return null;
     },
@@ -298,15 +427,20 @@ export function DataGrid(props: DataGridProps) {
   // changing the number of items per page, reset index and modify page size
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
-      setPagination(() => ({
-        pageSize,
-        pageIndex: 0,
-      })),
+      setPagination(() => {
+        setPage([0, pageSize]);
+        return { pageIndex: 0, pageSize };
+      }),
     [setPagination]
   );
   // changing the page index, keep page size constant
   const onChangePage = useCallback(
-    (pageIndex) => setPagination(({ pageSize }) => ({ pageSize, pageIndex })),
+    (pageIndex) => {
+      setPagination(({ pageSize }) => {
+        setPage([pageIndex, pageSize]);
+        return { pageSize, pageIndex };
+      });
+    },
     [setPagination]
   );
 
@@ -320,13 +454,26 @@ export function DataGrid(props: DataGridProps) {
           columns={dataGridColumns}
           columnVisibility={dataGridColumnVisibility}
           leadingControlColumns={dataGridLeadingColumns}
-          rowCount={rows.length}
+          rowCount={totalHits}
           renderCellValue={dataGridCellRender}
           pagination={{
             ...pagination,
             pageSizeOptions: [25, 50, 100],
             onChangePage,
             onChangeItemsPerPage,
+          }}
+          // inMemory={{ level: 'sorting' }}
+          sorting={{
+            columns: sortingFields.current,
+            onSort: setSort,
+          }}
+          toolbarVisibility={{
+            showColumnSelector: {
+              allowHide: false,
+              allowReorder: true,
+            },
+            showFullScreenSelector: false,
+            showStyleSelector: false,
           }}
         />
       </div>
