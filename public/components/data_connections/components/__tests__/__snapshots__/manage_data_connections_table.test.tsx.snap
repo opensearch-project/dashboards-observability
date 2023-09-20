@@ -225,24 +225,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                     </th>
                     <th
                       class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_connectionStatus_1"
-                      role="columnheader"
-                      scope="col"
-                    >
-                      <span
-                        class="euiTableCellContent"
-                      >
-                        <span
-                          class="euiTableCellContent__text"
-                          title="Connection Status"
-                        >
-                          Connection Status
-                        </span>
-                      </span>
-                    </th>
-                    <th
-                      class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_actions_2"
+                      data-test-subj="tableHeaderCell_actions_1"
                       role="columnheader"
                       scope="col"
                     >
@@ -293,23 +276,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                             </a>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td
-                      class="euiTableRowCell"
-                    >
-                      <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                      >
-                        Connection Status
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <div
-                          class="euiText euiText--medium"
-                          data-test-subj="undefinedDataConnectionHealth"
-                        />
                       </div>
                     </td>
                     <td
@@ -377,23 +343,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       <div
                         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                       >
-                        Connection Status
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <div
-                          class="euiText euiText--medium"
-                          data-test-subj="undefinedDataConnectionHealth"
-                        />
-                      </div>
-                    </td>
-                    <td
-                      class="euiTableRowCell"
-                    >
-                      <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                      >
                         Actions
                       </div>
                       <div
@@ -453,23 +402,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       <div
                         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                       >
-                        Connection Status
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <div
-                          class="euiText euiText--medium"
-                          data-test-subj="undefinedDataConnectionHealth"
-                        />
-                      </div>
-                    </td>
-                    <td
-                      class="euiTableRowCell"
-                    >
-                      <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                      >
                         Actions
                       </div>
                       <div
@@ -521,23 +453,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                             </a>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td
-                      class="euiTableRowCell"
-                    >
-                      <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                      >
-                        Connection Status
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <div
-                          class="euiText euiText--medium"
-                          data-test-subj="undefinedDataConnectionHealth"
-                        />
                       </div>
                     </td>
                     <td

@@ -62,7 +62,7 @@ exports[`Data Connection Page test Renders data connection page with data 1`] = 
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Access control
+                  Authentication method
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
@@ -84,12 +84,12 @@ exports[`Data Connection Page test Renders data connection page with data 1`] = 
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Connection description
+                  Data source description
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
                 >
-                  my_spark3
+                  -
                 </div>
               </div>
               <div
@@ -98,12 +98,34 @@ exports[`Data Connection Page test Renders data connection page with data 1`] = 
                 <div
                   class="euiText euiText--medium overview-title"
                 >
-                  Connection status
+                  Query permissions
                 </div>
                 <div
                   class="euiText euiText--small overview-content"
                 >
-                  j-3UNQLT1MPBGLG
+                  Everyone
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Spark data location
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  -
                 </div>
               </div>
             </div>
@@ -268,20 +290,6 @@ exports[`Data Connection Page test Renders data connection page with data 1`] = 
             aria-controls="random_html_id"
             aria-selected="true"
             class="euiTab euiTab-isSelected"
-            id="data"
-            role="tab"
-            type="button"
-          >
-            <span
-              class="euiTab__content"
-            >
-              Data
-            </span>
-          </button>
-          <button
-            aria-controls="random_html_id"
-            aria-selected="false"
-            class="euiTab"
             id="access_control"
             role="tab"
             type="button"
@@ -308,10 +316,125 @@ exports[`Data Connection Page test Renders data connection page with data 1`] = 
           </button>
         </div>
         <div
-          aria-labelledby="data"
+          aria-labelledby="access_control"
           id="random_html_id"
           role="tabpanel"
-        />
+        >
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiCallOut euiCallOut--primary"
+          >
+            <div
+              class="euiCallOutHeader"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiCallOutHeader__title"
+              >
+                Configurations may be managed elsewhere.
+              </span>
+            </div>
+            <div
+              class="euiText euiText--small"
+            >
+              <div
+                class="euiTextColor euiTextColor--default"
+              >
+                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  <h2
+                    class="panel-title"
+                  >
+                    Access Control
+                  </h2>
+                  Control which OpenSearch users have access to this data source.
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  class="euiButton euiButton--primary euiButton--fill"
+                  data-test-subj="createButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      class="euiButton__text"
+                    >
+                      Edit
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+            <hr
+              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiText euiText--medium overview-title"
+                    >
+                      Query access
+                    </div>
+                    <div
+                      class="euiText euiText--small overview-content"
+                    >
+                      -
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+        </div>
       </div>
       <div
         class="euiSpacer euiSpacer--l"
