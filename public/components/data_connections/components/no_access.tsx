@@ -12,11 +12,11 @@ export const NoAccess = () => {
     <EuiPage>
       <EuiEmptyPrompt
         iconType="alert"
-        title={<h2>{'No permissions to access or resource does not exist'}</h2>}
+        title={<h2>{'No permissions to access'}</h2>}
         body={
           <EuiText>
             {
-              'This connection does not exist or you are missing permissions to view connection details. Contact your administrator for permissions.'
+              'You are missing permissions to view connection details. Contact your administrator for permissions.'
             }
           </EuiText>
         }

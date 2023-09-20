@@ -10,16 +10,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
-  EuiBottomBar,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
 import { coreRefs } from '../../../../public/framework/core_refs';
-import { QueryPermissionsConfiguration } from './query_permissions';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { SaveOrCancel } from './save_or_cancel';
+import { ConnectionConfiguration } from './connection_configuration';
 
 interface ConnectionDetailProps {
   dataConnection: string;
@@ -32,6 +30,21 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const { http } = coreRefs;
 
+  const { dataConnection, connector, allowedRoles, properties } = props;
+  const [connectionDetails, setConnectionDetails] = useState('');
+  const onChange = (e) => {
+    setConnectionDetails(e.target.value);
+  };
+  const authenticationOptions = [{ value: 'option_one', text: 'Username & Password' }];
+
+  const [selectedAuthenticationMethod, setSelectedAuthenticationMethod] = useState(
+    authenticationOptions[0].value
+  );
+
+  const onAuthenticationMethodChange = (e) => {
+    setSelectedAuthenticationMethod(e.target.value);
+  };
+
   const ConnectionConfigurationView = () => {
     return (
       <EuiFlexGroup>
@@ -40,7 +53,7 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Data source name</EuiText>
               <EuiText size="s" className="overview-content">
-                {'-'}
+                {dataConnection}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -71,16 +84,18 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
     );
   };
 
-  const EditAccessControlDetails = () => {
+  const EditConnectionConfiguration = () => {
     return (
-      // <EuiFlexGroup direction="column">
-      //   <QueryPermissionsConfiguration
-      //     roles={roles}
-      //     selectedRoles={selectedQueryPermissionRoles}
-      //     setSelectedRoles={setSelectedQueryPermissionRoles}
-      //   />
-      // </EuiFlexGroup>
-      <></>
+      <EuiFlexGroup direction="column">
+        <ConnectionConfiguration
+          connectionName={dataConnection}
+          connectionDetails={connectionDetails}
+          onConnectionDetailsChange={onChange}
+          authenticationOptions={authenticationOptions}
+          setSelectedAuthenticationMethod={onAuthenticationMethodChange}
+          selectedAuthenticationMethod={selectedAuthenticationMethod}
+        />
+      </EuiFlexGroup>
     );
   };
 
@@ -127,7 +142,7 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
       <EuiPanel>
         <ConnectionConfigurationHeader />
         <EuiHorizontalRule />
-        {mode === 'view' ? <ConnectionConfigurationView /> : <EditAccessControlDetails />}
+        {mode === 'view' ? <ConnectionConfigurationView /> : <EditConnectionConfiguration />}
       </EuiPanel>
       <EuiSpacer />
       {mode === 'edit' && (

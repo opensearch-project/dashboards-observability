@@ -76,7 +76,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     );
   }
 
-  const getModal = (connectionName: string) => {
+  const displayDeleteModal = (connectionName: string) => {
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
@@ -131,7 +131,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         <EuiIcon
           type={'trash'}
           onClick={() => {
-            getModal(record.name);
+            displayDeleteModal(record.name);
           }}
         />
       ),
