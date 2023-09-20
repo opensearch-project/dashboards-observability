@@ -25,6 +25,7 @@ import { AccessControlTab } from './access_control_tab';
 import { NoAccess } from './no_access';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../../public/framework/core_refs';
+import { ConnectionDetails } from './connection_details';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -90,11 +91,19 @@ export const DataConnection = (props: any) => {
       id: 'connection_configuration',
       name: 'Connection configuration',
       disabled: false,
-      content: <></>,
+      content: (
+        <ConnectionDetails
+          allowedRoles={datasourceDetails.allowedRoles}
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+        />
+      ),
     },
   ];
+  console.log(datasourceDetails);
 
-  const renderOverview = () => {
+  const DatasourceOverview = () => {
     return (
       <EuiPanel>
         <EuiFlexGroup>
@@ -107,11 +116,9 @@ export const DataConnection = (props: any) => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Access control</EuiText>
+                <EuiText className="overview-title">Authentication method</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.allowedRoles && datasourceDetails.allowedRoles.length
-                    ? datasourceDetails.allowedRoles
-                    : '-'}
+                  {'-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -119,15 +126,27 @@ export const DataConnection = (props: any) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Connection description</EuiText>
+                <EuiText className="overview-title">Data source description</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.name || '-'}
+                  {'-'}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Connection status</EuiText>
+                <EuiText className="overview-title">Query permissions</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.cluster || '-'}
+                  {datasourceDetails.allowedRoles && datasourceDetails.allowedRoles.length
+                    ? 'Restricted'
+                    : 'Everyone'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Spark data location</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {'-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -157,7 +176,7 @@ export const DataConnection = (props: any) => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
 
-        {renderOverview()}
+        <DatasourceOverview />
         <EuiSpacer />
         <EuiAccordion
           id="queryOrAccelerateAccordion"

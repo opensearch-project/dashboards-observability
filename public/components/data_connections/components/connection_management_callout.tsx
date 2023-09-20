@@ -6,7 +6,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 
-export const AccessControlCallout = () => {
+export const ConnectionManagementCallout = () => {
   return (
     <EuiCallOut title="Configurations may be managed elsewhere." iconType="iInCircle">
       Access to data can be managed in other systems outside of OpenSearch. Check with your

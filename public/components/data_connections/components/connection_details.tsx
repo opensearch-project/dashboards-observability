@@ -21,39 +21,48 @@ import { QueryPermissionsConfiguration } from './query_permissions';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { SaveOrCancel } from './save_or_cancel';
 
-interface AccessControlTabProps {
+interface ConnectionDetailProps {
   dataConnection: string;
   connector: string;
+  allowedRoles: string[];
   properties: unknown;
 }
 
-export const AccessControlTab = (props: AccessControlTabProps) => {
+export const ConnectionDetails = (props: ConnectionDetailProps) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [roles, setRoles] = useState<Array<{ label: string }>>([]);
-  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
-    Array<{ label: string }>
-  >([]);
   const { http } = coreRefs;
 
-  useEffect(() => {
-    http!.get('/api/v1/configuration/roles').then((data) =>
-      setRoles(
-        Object.keys(data.data).map((key) => {
-          return { label: key };
-        })
-      )
-    );
-  }, []);
-
-  const AccessControlDetails = () => {
+  const ConnectionConfigurationView = () => {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiText className="overview-title">Query access</EuiText>
+              <EuiText className="overview-title">Data source name</EuiText>
               <EuiText size="s" className="overview-content">
-                {[].length ? `Restricted` : '-'}
+                {'-'}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Spark endpoint URL</EuiText>
+              <EuiText size="s" className="overview-content">
+                {'-'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Description</EuiText>
+              <EuiText size="s" className="overview-content">
+                {'-'}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Authentication method</EuiText>
+              <EuiText size="s" className="overview-content">
+                {'-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -64,13 +73,14 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
 
   const EditAccessControlDetails = () => {
     return (
-      <EuiFlexGroup direction="column">
-        <QueryPermissionsConfiguration
-          roles={roles}
-          selectedRoles={selectedQueryPermissionRoles}
-          setSelectedRoles={setSelectedQueryPermissionRoles}
-        />
-      </EuiFlexGroup>
+      // <EuiFlexGroup direction="column">
+      //   <QueryPermissionsConfiguration
+      //     roles={roles}
+      //     selectedRoles={selectedQueryPermissionRoles}
+      //     setSelectedRoles={setSelectedQueryPermissionRoles}
+      //   />
+      // </EuiFlexGroup>
+      <></>
     );
   };
 
@@ -78,7 +88,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
     http!.put(`${DATACONNECTIONS_BASE}`, {
       body: JSON.stringify({
         name: props.dataConnection,
-        allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
+        allowedRoles: props.allowedRoles,
         connector: props.connector,
         properties: props.properties,
       }),
@@ -86,13 +96,13 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
     setMode('view');
   };
 
-  const AccessControlHeader = () => {
+  const ConnectionConfigurationHeader = () => {
     return (
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiText size="m">
-            <h2 className="panel-title">Access Control</h2>
-            Control which OpenSearch users have access to this data source.
+            <h2 className="panel-title">Data source configurations</h2>
+            Control configurations for your data source.
           </EuiText>
         </EuiFlexItem>
 
@@ -115,9 +125,9 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
       <ConnectionManagementCallout />
       <EuiSpacer />
       <EuiPanel>
-        <AccessControlHeader />
+        <ConnectionConfigurationHeader />
         <EuiHorizontalRule />
-        {mode === 'view' ? <AccessControlDetails /> : <EditAccessControlDetails />}
+        {mode === 'view' ? <ConnectionConfigurationView /> : <EditAccessControlDetails />}
       </EuiPanel>
       <EuiSpacer />
       {mode === 'edit' && (
