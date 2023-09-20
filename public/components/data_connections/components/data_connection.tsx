@@ -17,7 +17,6 @@ import {
   EuiAccordion,
   EuiIcon,
   EuiCard,
-  EuiTab,
   EuiTabbedContent,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
@@ -101,7 +100,6 @@ export const DataConnection = (props: any) => {
       ),
     },
   ];
-  console.log(datasourceDetails);
 
   const DatasourceOverview = () => {
     return (

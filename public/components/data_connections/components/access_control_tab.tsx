@@ -10,8 +10,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
-  EuiBottomBar,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';

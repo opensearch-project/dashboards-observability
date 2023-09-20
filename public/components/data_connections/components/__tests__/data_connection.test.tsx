@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
+import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { act, waitFor } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import React from 'react';
-import { describeDataConnection, mockRoleData } from './testing_constants';
+import { describeDataConnection, mockRoleData } from '../../../../../test/datasources';
 import { DataConnection } from '../data_connection';
 import ReactDOM from 'react-dom';
 

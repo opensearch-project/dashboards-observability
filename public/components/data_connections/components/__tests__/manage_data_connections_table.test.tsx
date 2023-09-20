@@ -8,7 +8,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import { act } from '@testing-library/react';
 import React from 'react';
 import { ManageDataConnectionsTable } from '../manage_data_connections_table';
-import { showDataConnectionsData } from './testing_constants';
+import { showDataConnectionsData } from '../../../../../test/datasources';
 import ReactDOM from 'react-dom';
 
 describe('Manage Data Connections Table test', () => {

@@ -14,14 +14,12 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiTableFieldDataColumnType,
-  EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { ChromeStart } from '../../../../../../src/core/public';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { useToast } from '../../../../public/components/common/toast';
 import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
