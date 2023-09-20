@@ -8,20 +8,8 @@ import Adapter from 'enzyme-adapter-react-16';
 import { act } from '@testing-library/react';
 import React from 'react';
 import { ManageDataConnectionsTable } from '../manage_data_connections_table';
-import { showDataConnectionsData } from './testing_constants';
+import { showDataConnectionsData } from '../../../../../test/datasources';
 import ReactDOM from 'react-dom';
-import { coreRefs } from '../../../../../public/framework/core_refs';
-
-jest.mock('../../../../../public/framework/core_refs', () => ({
-  coreRefs: {
-    chrome: {
-      setBreadcrumbs: jest.fn(),
-    },
-    http: {
-      get: jest.fn().mockResolvedValue(showDataConnectionsData),
-    },
-  },
-}));
 
 describe('Manage Data Connections Table test', () => {
   configure({ adapter: new Adapter() });

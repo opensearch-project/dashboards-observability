@@ -4,7 +4,6 @@
  */
 
 import { EuiButton, EuiEmptyPrompt, EuiPage, EuiText } from '@elastic/eui';
-import _ from 'lodash';
 import React from 'react';
 
 export const NoAccess = () => {
@@ -16,7 +15,7 @@ export const NoAccess = () => {
         body={
           <EuiText>
             {
-              'Missing permissions to view connection details. Contact your administrator for permissions.'
+              'You are missing permissions to view connection details. Contact your administrator for permissions.'
             }
           </EuiText>
         }

@@ -9,30 +9,50 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiTableFieldDataColumnType,
-  EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { ChromeStart } from '../../../../../../src/core/public';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { useToast } from '../../../../public/components/common/toast';
+import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
   name: string;
-  chrome: ChromeStart;
 }
 
 export const ManageDataConnectionsTable = (props: HomeProps) => {
   const { http, chrome, pplService } = props;
 
-  const [data, setData] = useState([]);
-  const [hasAccess, setHasAccess] = useState(true);
+  const { setToast } = useToast();
+
+  const [data, setData] = useState<DataConnection[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const deleteConnection = (connectionName: string) => {
+    http!
+      .delete(`${DATACONNECTIONS_BASE}/${connectionName}`)
+      .then(() => {
+        setToast(`Data connection ${connectionName} deleted successfully`);
+        setData(
+          data.filter((connection) => {
+            return !(connection.name === connectionName);
+          })
+        );
+      })
+      .catch((err) => {
+        setToast(`Data connection $${connectionName} not deleted. See output for more details.`);
+      });
+  };
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -53,6 +73,23 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       )
     );
   }
+
+  const displayDeleteModal = (connectionName: string) => {
+    setModalLayout(
+      <DeleteModal
+        onConfirm={() => {
+          setIsModalVisible(false);
+          deleteConnection(connectionName);
+        }}
+        onCancel={() => {
+          setIsModalVisible(false);
+        }}
+        title={`Delete ${connectionName}`}
+        message={`Are you sure you want to delete ${connectionName}?`}
+      />
+    );
+    setIsModalVisible(true);
+  };
 
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
@@ -84,17 +121,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       ),
     },
     {
-      field: 'connectionStatus',
-      name: 'Connection Status',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}DataConnectionHealth`}>
-          {_.truncate(record.creationDate, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
       field: 'actions',
       name: 'Actions',
       sortable: true,
@@ -103,7 +129,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         <EuiIcon
           type={'trash'}
           onClick={() => {
-            /* Delete Datasource*/
+            displayDeleteModal(record.name);
           }}
         />
       ),
@@ -156,6 +182,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
             isSelectable={true}
           />
         </EuiPageContent>
+        {isModalVisible && modalLayout}
       </EuiPageBody>
     </EuiPage>
   );

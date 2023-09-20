@@ -10,16 +10,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
-  EuiBottomBar,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { QUERY_ALL, QUERY_RESTRICT } from '../../../../common/constants/data_connections';
-import { AccessControlCallout } from './access_control_callout';
+import { ConnectionManagementCallout } from './connection_management_callout';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { SaveOrCancel } from './save_or_cancel';
 
 interface AccessControlTabProps {
   dataConnection: string;
@@ -109,36 +107,10 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
     );
   };
 
-  const SaveOrCancel = () => {
-    return (
-      <EuiBottomBar affordForDisplacement={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => {
-                setMode('view');
-              }}
-              color="ghost"
-              size="s"
-              iconType="cross"
-            >
-              Discard change(s)
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={saveChanges} size="s" iconType="check" fill>
-              Save
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBottomBar>
-    );
-  };
-
   return (
     <>
       <EuiSpacer />
-      <AccessControlCallout />
+      <ConnectionManagementCallout />
       <EuiSpacer />
       <EuiPanel>
         <AccessControlHeader />
@@ -146,7 +118,14 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
         {mode === 'view' ? <AccessControlDetails /> : <EditAccessControlDetails />}
       </EuiPanel>
       <EuiSpacer />
-      {mode === 'edit' && <SaveOrCancel />}
+      {mode === 'edit' && (
+        <SaveOrCancel
+          onCancel={() => {
+            setMode('view');
+          }}
+          onSave={saveChanges}
+        />
+      )}
       <EuiSpacer />
     </>
   );

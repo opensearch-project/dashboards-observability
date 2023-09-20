@@ -55,6 +55,19 @@ export const PPLPlugin = function (Client, config, components) {
     method: 'GET',
   });
 
+  ppl.deleteDataConnection = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}/<%=dataconnection%>`,
+      req: {
+        dataconnection: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
+    method: 'DELETE',
+  });
+
   ppl.modifyDataConnection = ca({
     url: {
       fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
