@@ -75,12 +75,6 @@ export const DataConnection = (props: any) => {
 
   const tabs = [
     {
-      id: 'data',
-      name: 'Data',
-      disabled: false,
-      content: <></>,
-    },
-    {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
