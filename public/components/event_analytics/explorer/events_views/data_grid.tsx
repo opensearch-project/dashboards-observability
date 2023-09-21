@@ -15,7 +15,7 @@ import moment from 'moment';
 import dompurify from 'dompurify';
 import datemath from '@elastic/datemath';
 import { MutableRefObject } from 'react';
-import { GridSortingColumn, IExplorerFields } from '../../../../../common/types/explorer';
+import { GridSortingColumn, IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DATE_DISPLAY_FORMAT, DATE_PICKER_FORMAT } from '../../../../../common/constants/explorer';
 import { getHeaders, getTrs, isValidTraceId, populateDataGrid } from '../../utils';
 import { HttpSetup } from '../../../../../../../src/core/public';
@@ -39,6 +39,7 @@ interface DataGridProps {
   requestParams: any;
   startTime: string;
   endTime: string;
+  storedSelectedColumns: IField[];
 }
 
 export function DataGrid(props: DataGridProps) {
@@ -54,6 +55,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    storedSelectedColumns,
   } = props;
   const [rowRefs, setRowRefs] = useState<
     Array<RefObject<{ closeAllFlyouts(openDocId: string): void }>>
@@ -100,77 +102,70 @@ export function DataGrid(props: DataGridProps) {
 
   // setSort and setPage are used to change the query and send a direct request to get data
   const setSort = (sort: GridSortingColumn[]) => {
-    console.log('its sorbing time');
     sortingFields.current = sort;
-    console.log(sortingFields);
-    console.log(sort);
     redoQuery();
   };
 
   const setPage = (page: number[]) => {
-    console.log('its porbing time');
     pageFields.current = page;
     redoQuery();
   };
 
   // creates the header for each column listing what that column is
   const dataGridColumns = useMemo(() => {
-    if (explorerFields?.selectedFields && explorerFields.selectedFields.length > 0) {
-      const fields = explorerFields.selectedFields;
+    if (storedSelectedColumns.length > 0) {
       const columns: EuiDataGridColumn[] = [];
-      fields.map(({ name, type }) => {
-        const newColumn = {
-          id: name,
-          display: name,
-          isSortable: true,
-        };
-        columns.push(newColumn);
+      storedSelectedColumns.map(({ name, type }) => {
+        if (name === 'timestamp') {
+          columns.push({
+            id: 'timestamp',
+            isSortable: true,
+            display: 'Time',
+            schema: 'datetime',
+            initialWidth: 200,
+          });
+        } else if (name === '_source') {
+          columns.push({
+            id: '_source',
+            isSortable: false,
+            display: 'Source',
+            schema: '_source',
+          });
+        } else {
+          console.log('pushy ', name);
+          columns.push({
+            id: name,
+            display: name,
+            isSortable: true, // add functionality here
+          });
+        }
       });
       return columns;
     }
-    console.log('default state');
-    // default selected fields
-    return [
-      {
-        id: 'timestamp',
-        isSortable: true,
-        display: 'Time',
-        schema: 'datetime',
-        initialWidth: 200,
-      },
-      {
-        id: '_source',
-        isSortable: false,
-        display: 'Source',
-        schema: '_source',
-      },
-    ];
-  }, [explorerFields.selectedFields]);
+    return [];
+  }, [storedSelectedColumns]);
 
   // used for which columns are visible and their order
   const dataGridColumnVisibility = useMemo(() => {
-    if (explorerFields?.selectedFields && explorerFields.selectedFields.length > 0) {
-      const fields = explorerFields.selectedFields;
+    if (storedSelectedColumns.length > 0) {
       const columns: string[] = [];
-      fields.map(({ name }) => {
+      storedSelectedColumns.map(({ name }) => {
         columns.push(name);
       });
       return {
         visibleColumns: columns,
         setVisibleColumns: (visibleColumns: string[]) => {
-          console.log(visibleColumns);
+          // console.log(visibleColumns);
         },
       };
     }
-    console.log('default states');
     // default shown fields
+    console.log('oopsy whoopsy');
     return {
-      visibleColumns: ['timestamp', '_source'],
-      setVisibleColumns: (visibleColumns: string[]) => {
-        console.log(visibleColumns);
-      },
+      visibleColumns: [],
+      setVisibleColumns: () => {},
     };
-  }, [explorerFields.selectedFields]);
+  }, [storedSelectedColumns]);
 
   // sets the very first column, which is the button used for the flyout of each row
   const dataGridLeadingColumns = useMemo(() => {
@@ -198,11 +193,11 @@ export function DataGrid(props: DataGridProps) {
         width: 40,
       },
     ];
-  }, [rows]);
+  }, [rows, http, explorerFields, pplService, rawQuery, onFlyoutOpen]);
 
   // renders what is shown in each cell, i.e. the content of each row
-  const dataGridCellRender = useMemo(
-    () => ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+  const dataGridCellRender = useCallback(
+    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const trueIndex = rowIndex % pageFields.current[1];
       if (trueIndex < rows.length) {
         if (columnId === '_source') {
@@ -228,7 +223,7 @@ export function DataGrid(props: DataGridProps) {
       }
       return null;
     },
-    [rows, explorerFields.selectedFields]
+    [rows, pageFields, explorerFields]
   );
 
   // ** Pagination config
@@ -240,7 +235,7 @@ export function DataGrid(props: DataGridProps) {
         setPage([0, pageSize]);
         return { pageIndex: 0, pageSize };
       }),
-    [setPagination]
+    [setPagination, setPage]
   );
   // changing the page index, keep page size constant
   const onChangePage = useCallback(
@@ -250,7 +245,7 @@ export function DataGrid(props: DataGridProps) {
         return { pageSize, pageIndex };
       });
     },
-    [setPagination]
+    [setPagination, setPage]
   );
 
   return (

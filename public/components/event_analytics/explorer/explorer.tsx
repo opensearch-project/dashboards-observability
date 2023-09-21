@@ -461,6 +461,12 @@ export const Explorer = ({
 
   const dateRange = getDateRange(startTime, endTime, query);
 
+  const defaultEmptyEFields = [
+    { name: '_source', type: 'string' },
+    { name: 'timestamp', type: 'timestamp' },
+  ];
+  const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
+
   const mainContent = useMemo(() => {
     return (
       <>
@@ -485,6 +491,8 @@ export const Explorer = ({
                   isEmpty(explorerData.jsonData) ||
                   !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
                 }
+                storedExplorerFields={storedExplorerFields}
+                setStoredExplorerFields={setStoredExplorerFields}
               />
             </div>
           )}
@@ -604,6 +612,11 @@ export const Explorer = ({
                       requestParams={requestParams}
                       startTime={appLogEvents ? startTime : dateRange[0]}
                       endTime={appLogEvents ? endTime : dateRange[1]}
+                      storedSelectedColumns={
+                        storedExplorerFields.selectedFields.length > 0
+                          ? storedExplorerFields.selectedFields
+                          : defaultEmptyEFields
+                      }
                     />
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;
