@@ -11,7 +11,7 @@ type ValidationResult = { ok: true } | { ok: false; errors: string[] };
 // Toast doesn't export, so we need to redeclare locally.
 type Color = 'success' | 'primary' | 'warning' | 'danger' | undefined;
 
-export interface Integration {
+export interface IntegrationTemplate {
   name: string;
   type: string;
 }
@@ -209,7 +209,7 @@ const createIndexMapping = async (
     index_patterns: string[];
   },
   dataSourceName: string,
-  integration: Integration
+  integration: IntegrationTemplate
 ): Promise<{ [key: string]: { properties: any } } | null> => {
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
@@ -226,7 +226,7 @@ const createIndexMapping = async (
 const createDataSourceMappings = async (
   targetDataSource: string,
   integrationTemplateId: string,
-  integration: Integration,
+  integration: IntegrationTemplate,
   setToast: (title: string, color?: Color, text?: string | undefined) => void
 ): Promise<any> => {
   const http = coreRefs.http!;
@@ -279,7 +279,7 @@ export async function addIntegrationRequest(
   addSample: boolean,
   templateName: string,
   integrationTemplateId: string,
-  integration: Integration,
+  integration: IntegrationTemplate,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,

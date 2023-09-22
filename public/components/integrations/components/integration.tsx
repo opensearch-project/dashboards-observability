@@ -23,14 +23,14 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { IntegrationScreenshots } from './integration_screenshots_panel';
 import { useToast } from '../../../../public/components/common/toast';
 import { coreRefs } from '../../../framework/core_refs';
-import { Integration, addIntegrationRequest } from './create_integration_helpers';
+import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
 
 export function Integration(props: AvailableIntegrationProps) {
   const http = coreRefs.http!;
   const { integrationTemplateId, chrome } = props;
 
   const { setToast } = useToast();
-  const [integration, setIntegration] = useState({} as Integration);
+  const [integration, setIntegration] = useState({} as IntegrationTemplate);
 
   const [integrationMapping, setMapping] = useState(null);
   const [integrationAssets, setAssets] = useState([]);
