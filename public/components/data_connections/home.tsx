@@ -9,6 +9,8 @@ import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/cor
 import { DataConnection } from './components/data_connection';
 import { ManageDataConnectionsTable } from './components/manage_data_connections_table';
 import { AccelerationIndices } from './components/acceleration_ui/acceleration_indices';
+import { NewDatasource } from './components/new_datasource';
+import { Configure } from './components/configure_datasource';
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
@@ -44,6 +46,15 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/', '/manage']}
           render={(routerProps) => <ManageDataConnectionsTable {...commonProps} />}
+        />
+        <Route exact path={['/new']} render={(routerProps) => <NewDatasource {...commonProps} />} />
+
+        <Route
+          exact
+          path={['/configure/:id+']}
+          render={(routerProps) => (
+            <Configure {...commonProps} type={decodeURIComponent(routerProps.match.params.id)} />
+          )}
         />
 
         <Route

@@ -57,7 +57,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Data Connections',
+        text: 'Data sources',
         href: '#/',
       },
     ]);
