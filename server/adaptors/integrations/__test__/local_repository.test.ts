@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Repository } from '../repository/repository';
-import { Integration } from '../repository/integration';
+import { RepositoryReader } from '../repository/repository';
+import { IntegrationReader } from '../repository/integration';
 import path from 'path';
 import * as fs from 'fs/promises';
 
@@ -20,15 +20,25 @@ describe('The local repository', () => {
           return Promise.resolve(null);
         }
         // Otherwise, all directories must be integrations
-        const integ = new Integration(integPath);
-        await expect(integ.check()).resolves.toBe(true);
+        const integ = new IntegrationReader(integPath);
+        expect(integ.getConfig()).resolves.toHaveProperty('ok', true);
       })
     );
   });
 
   it('Should pass deep validation for all local integrations.', async () => {
-    const repository: Repository = new Repository(path.join(__dirname, '../__data__/repository'));
-    const integrations: Integration[] = await repository.getIntegrationList();
-    await Promise.all(integrations.map((i) => expect(i.deepCheck()).resolves.toBeTruthy()));
+    const repository: RepositoryReader = new RepositoryReader(
+      path.join(__dirname, '../__data__/repository')
+    );
+    const integrations: IntegrationReader[] = await repository.getIntegrationList();
+    await Promise.all(
+      integrations.map(async (i) => {
+        const result = await i.deepCheck();
+        if (!result.ok) {
+          console.error(result.error);
+        }
+        expect(result.ok).toBe(true);
+      })
+    );
   });
 });
