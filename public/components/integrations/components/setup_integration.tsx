@@ -4,7 +4,7 @@
  */
 
 import * as Eui from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface IntegrationConfig {
   displayName: string;
@@ -100,6 +100,28 @@ const availableIndices = [
   { value: 'ss4o_logs-apache-prod', text: 'ss4o_logs-apache-prod' },
 ];
 
+const fetchAvailableDataSources = async (type: string): Promise<Eui.EuiSelectOption[]> => {
+  // Artificial delay for UI testing
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  await sleep(500);
+  // TODO fetch actual items instead of hardcoded values
+  if (type === 'index') {
+    return [
+      { value: 'ss4o_logs-nginx-prod', text: 'ss4o_logs-nginx-prod' },
+      { value: 'ss4o_logs-nginx-test', text: 'ss4o_logs-nginx-test' },
+      { value: 'ss4o_logs-apache-prod', text: 'ss4o_logs-apache-prod' },
+    ];
+  } else if (type === 's3') {
+    return [
+      { value: 'table_1', text: 'table_1' },
+      { value: 'table_2', text: 'table_2' },
+    ];
+  } else {
+    console.error(`Unknown connection type: ${type}`);
+    return [];
+  }
+};
+
 export function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Element {
   return (
     <Eui.EuiModal onClose={close}>
@@ -126,6 +148,18 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
   const indefiniteArticle = 'aeiou'.includes(connectionType.charAt(0)) ? 'an' : 'a';
   const capitalizedConnectionType =
     connectionType.charAt(0).toUpperCase() + connectionType.slice(1);
+
+  const [availableDataSources, setAvailableDataSources] = useState([] as Eui.EuiSelectOption[]);
+  useEffect(() => {
+    const updateDataSources = async () => {
+      const data = await fetchAvailableDataSources(config.connectionType);
+
+      setAvailableDataSources(data);
+    };
+
+    setAvailableDataSources([]);
+    updateDataSources();
+  }, [config.connectionType]);
 
   return (
     <Eui.EuiForm>
@@ -160,7 +194,7 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
         helpText={`Select ${indefiniteArticle} ${connectionType} to pull the data from.`}
       >
         <Eui.EuiSelect
-          options={availableIndices}
+          options={availableDataSources}
           value={config.connectionDataSource}
           onChange={(event) => updateConfig({ connectionDataSource: event.target.value })}
         />
