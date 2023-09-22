@@ -91,17 +91,25 @@ export const Sidebar = (props: ISidebarProps) => {
     });
   };
 
+  const checkWithStoredFields = () => {
+    if (
+      explorerFields.selectedFields.length === 0 &&
+      storedExplorerFields.selectedFields.length !== 0
+    ) {
+      return storedExplorerFields;
+    } else {
+      return explorerFields;
+    }
+  };
+
   const handleAddField = useCallback(
     (field: IField) => {
-      let nextFields;
-      if (
-        explorerFields.selectedFields.length === 0 &&
-        storedExplorerFields.selectedFields.length !== 0
-      ) {
-        nextFields = toggleFields(storedExplorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS);
-      } else {
-        nextFields = toggleFields(explorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS);
-      }
+      const nextFields = toggleFields(
+        checkWithStoredFields(),
+        field,
+        AVAILABLE_FIELDS,
+        SELECTED_FIELDS
+      );
       updateStoreFields(nextFields, tabId, SELECTED_FIELDS);
       setStoredExplorerFields(nextFields);
     },
@@ -110,15 +118,12 @@ export const Sidebar = (props: ISidebarProps) => {
 
   const handleRemoveField = useCallback(
     (field: IField) => {
-      let nextFields;
-      if (
-        explorerFields.selectedFields.length === 0 &&
-        storedExplorerFields.selectedFields.length !== 0
-      ) {
-        nextFields = toggleFields(storedExplorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS);
-      } else {
-        nextFields = toggleFields(explorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS);
-      }
+      const nextFields = toggleFields(
+        checkWithStoredFields(),
+        field,
+        SELECTED_FIELDS,
+        AVAILABLE_FIELDS
+      );
       updateStoreFields(nextFields, tabId, AVAILABLE_FIELDS);
       setStoredExplorerFields(nextFields);
     },
