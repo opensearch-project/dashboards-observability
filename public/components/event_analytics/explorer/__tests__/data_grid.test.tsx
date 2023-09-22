@@ -19,6 +19,7 @@ import {
   AVAILABLE_FIELDS as SIDEBAR_AVAILABLE_FIELDS,
   QUERY_FIELDS,
   DATA_GRID_ROWS,
+  EXPLORER_DATA_GRID_QUERY,
 } from '../../../../../test/event_analytics_constants';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { sampleEmptyPanel } from '../../../../../test/panels_constants';
@@ -57,9 +58,7 @@ describe('Datagrid component', () => {
           rowsAll={[]}
           explorerFields={explorerFields}
           timeStampField={'timestamp'}
-          rawQuery={
-            "source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')"
-          }
+          rawQuery={EXPLORER_DATA_GRID_QUERY}
           totalHits={1390}
           requestParams={{
             tabId: 'explorer-tab-_fbef9141-48eb-11ee-a60a-af33302cfb3c',
