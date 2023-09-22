@@ -16,8 +16,12 @@ import dompurify from 'dompurify';
 import datemath from '@elastic/datemath';
 import { MutableRefObject } from 'react';
 import { GridSortingColumn, IExplorerFields, IField } from '../../../../../common/types/explorer';
-import { DATE_DISPLAY_FORMAT, DATE_PICKER_FORMAT } from '../../../../../common/constants/explorer';
-import { getHeaders, getTrs, isValidTraceId, populateDataGrid } from '../../utils';
+import {
+  DATE_DISPLAY_FORMAT,
+  DATE_PICKER_FORMAT,
+  defaultSourceColumn,
+  defaultTimestampColumn,
+} from '../../../../../common/constants/explorer';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import { FlyoutButton, IDocType } from './docViewRow';
@@ -64,9 +68,7 @@ export function DataGrid(props: DataGridProps) {
     pplService,
     requestParams,
   });
-  const sortingFields: MutableRefObject<GridSortingColumn[]> = useRef([
-    { id: 'timestamp', direction: 'asc' },
-  ]);
+  const sortingFields: MutableRefObject<GridSortingColumn[]> = useRef([]);
   const pageFields = useRef([0, 25]);
 
   const onFlyoutOpen = (docId: string) => {
@@ -117,26 +119,14 @@ export function DataGrid(props: DataGridProps) {
       const columns: EuiDataGridColumn[] = [];
       storedSelectedColumns.map(({ name, type }) => {
         if (name === 'timestamp') {
-          columns.push({
-            id: 'timestamp',
-            isSortable: true,
-            display: 'Time',
-            schema: 'datetime',
-            initialWidth: 200,
-          });
+          columns.push(defaultTimestampColumn);
         } else if (name === '_source') {
-          columns.push({
-            id: '_source',
-            isSortable: false,
-            display: 'Source',
-            schema: '_source',
-          });
+          columns.push(defaultSourceColumn);
         } else {
-          console.log('pushy ', name);
           columns.push({
             id: name,
             display: name,
-            isSortable: true, // add functionality here
+            isSortable: true, // TODO: add functionality here based on type
           });
         }
       });
@@ -155,12 +145,11 @@ export function DataGrid(props: DataGridProps) {
       return {
         visibleColumns: columns,
         setVisibleColumns: (visibleColumns: string[]) => {
-          // console.log(visibleColumns);
+          // TODO: implement with sidebar field order (dragability) changes
         },
       };
     }
     // default shown fields
-    console.log('oopsy whoopsy');
     return {
       visibleColumns: [],
       setVisibleColumns: () => {},

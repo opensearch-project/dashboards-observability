@@ -324,3 +324,23 @@ export const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
   [SAVED_VISUALIZATION]: TAB_CHART_ID,
 };
+
+export const defaultEmptyEFields = [
+  { name: 'timestamp', type: 'timestamp' },
+  { name: '_source', type: 'string' },
+];
+
+export const defaultTimestampColumn = {
+  id: 'timestamp',
+  isSortable: true,
+  display: 'Time',
+  schema: 'datetime',
+  initialWidth: 200,
+};
+
+export const defaultSourceColumn = {
+  id: '_source',
+  isSortable: false,
+  display: 'Source',
+  schema: '_source',
+};

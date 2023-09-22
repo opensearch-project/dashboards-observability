@@ -55,6 +55,7 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
+  defaultEmptyEFields,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -461,10 +462,6 @@ export const Explorer = ({
 
   const dateRange = getDateRange(startTime, endTime, query);
 
-  const defaultEmptyEFields = [
-    { name: '_source', type: 'string' },
-    { name: 'timestamp', type: 'timestamp' },
-  ];
   const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
 
   const mainContent = useMemo(() => {

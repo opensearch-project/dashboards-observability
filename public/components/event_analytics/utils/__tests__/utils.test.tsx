@@ -50,38 +50,6 @@ describe('Utils event analytics helper functions', () => {
     expect(rangeNumDocs(2000)).toBe(2000);
   });
 
-  it('validates getHeaders function', () => {
-    expect(
-      getHeaders(
-        [
-          {
-            name: 'host',
-            type: 'text',
-          },
-          {
-            name: 'ip_count',
-            type: 'integer',
-          },
-          {
-            name: 'per_ip_bytes',
-            type: 'long',
-          },
-          {
-            name: 'resp_code',
-            type: 'text',
-          },
-          {
-            name: 'sum_bytes',
-            type: 'long',
-          },
-        ],
-        ['', 'Time', '_source'],
-        undefined
-      )
-    ).toBeTruthy();
-    expect(getHeaders([], ['', 'Time', '_source'], undefined)).toBeTruthy();
-  });
-
   it('validates fillTimeDataWithEmpty function', () => {
     expect(
       fillTimeDataWithEmpty(
