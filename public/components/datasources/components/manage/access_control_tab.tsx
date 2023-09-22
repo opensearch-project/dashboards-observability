@@ -14,10 +14,10 @@ import {
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import { coreRefs } from '../../../../framework/core_refs';
 import { QueryPermissionsConfiguration } from './query_permissions';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { SaveOrCancel } from './save_or_cancel';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { SaveOrCancel } from '../save_or_cancel';
 
 interface AccessControlTabProps {
   dataConnection: string;

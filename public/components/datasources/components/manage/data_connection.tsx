@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { AccessControlTab } from './access_control_tab';
-import { NoAccess } from './no_access';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import { NoAccess } from '../no_access';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import { ConnectionDetails } from './connection_details';
 
 interface DatasourceDetails {
@@ -49,7 +49,7 @@ export const DataConnection = (props: any) => {
   useEffect(() => {
     chrome!.setBreadcrumbs([
       {
-        text: 'Data Connections',
+        text: 'Data sources',
         href: '#/',
       },
       {

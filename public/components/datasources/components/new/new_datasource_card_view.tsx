@@ -15,11 +15,9 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useState } from 'react';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { NewDatasourceDescription } from './new_datasource_description';
-import { coreRefs } from '../../../../public/framework/core_refs';
-import { MANAGEMENT_APP_ID } from '../../../../../../src/plugins/management/public';
-import sparkSvg from '../icons/apache_spark-icon.svg';
+import { coreRefs } from '../../../../framework/core_refs';
+import sparkSvg from '../../icons/apache_spark-icon.svg';
 
 export interface DatasourceType {
   name: string;

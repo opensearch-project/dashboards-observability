@@ -21,8 +21,8 @@ import { DataConnectionsHeader } from './data_connections_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../../../public/components/common/toast';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import { useToast } from '../../common/toast';
+import { DeleteModal } from '../../common/helpers/delete_modal';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';

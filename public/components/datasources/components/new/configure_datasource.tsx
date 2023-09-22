@@ -20,9 +20,10 @@ import {
   EuiFieldText,
   EuiBottomBar,
   EuiButtonEmpty,
+  EuiTextArea,
 } from '@elastic/eui';
-import React from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_connections';
+import React, { useState } from 'react';
+import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
 
 interface ConfigureDatasourceProps {
   type: string;
@@ -30,6 +31,9 @@ interface ConfigureDatasourceProps {
 
 export function Configure(props: ConfigureDatasourceProps) {
   const { type } = props;
+
+  const [name, setName] = useState('');
+  const [details, setDetails] = useState('');
   const ConfigureDatasourceSteps = [
     {
       title: 'Step 1',
@@ -66,18 +70,33 @@ export function Configure(props: ConfigureDatasourceProps) {
           </EuiText>
           <EuiSpacer />
           <EuiText>
-            <h3>Connection Details</h3>
+            <h3>Data source details</h3>
           </EuiText>
           <EuiSpacer />
           <EuiFormRow label="Title">
-            <EuiFieldText data-test-subj="data-source-name" name="first" />
+            <EuiFieldText data-test-subj="data-source-name" />
           </EuiFormRow>
           <EuiFormRow label="Description - Optional">
-            <EuiFieldText data-test-subj="data-source-name" name="first" />
+            <EuiFlexGroup direction="row">
+              <EuiText className="overview-title">Description - optional</EuiText>
+              <EuiText size="s" className="overview-content">
+                Text that can help identify the data source or share additional details
+              </EuiText>
+
+              <EuiFormRow label="Description">
+                <EuiTextArea
+                  placeholder="Placeholder text"
+                  aria-label="test"
+                  onChange={(e) => {
+                    setDetails(e.target.value);
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexGroup>
           </EuiFormRow>
 
           <EuiFormRow label="Endpoint URL">
-            <EuiFieldText data-test-subj="data-source-name" name="first" />
+            <EuiFieldText data-test-subj="data-source-endpoint-URL" />
           </EuiFormRow>
         </EuiPanel>
       </div>
