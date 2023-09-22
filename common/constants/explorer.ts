@@ -325,12 +325,12 @@ export const TYPE_TAB_MAPPING = {
   [SAVED_VISUALIZATION]: TAB_CHART_ID,
 };
 
-export const defaultEmptyEFields = [
+export const DEFAULT_EMPTY_EXPLORER_FIELDS = [
   { name: 'timestamp', type: 'timestamp' },
   { name: '_source', type: 'string' },
 ];
 
-export const defaultTimestampColumn = {
+export const DEFAULT_TIMESTAMP_COLUMN = {
   id: 'timestamp',
   isSortable: true,
   display: 'Time',
@@ -338,7 +338,7 @@ export const defaultTimestampColumn = {
   initialWidth: 200,
 };
 
-export const defaultSourceColumn = {
+export const DEFAULT_SOURCE_COLUMN = {
   id: '_source',
   isSortable: false,
   display: 'Source',

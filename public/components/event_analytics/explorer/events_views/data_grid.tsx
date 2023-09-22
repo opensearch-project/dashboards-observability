@@ -19,8 +19,8 @@ import { GridSortingColumn, IExplorerFields, IField } from '../../../../../commo
 import {
   DATE_DISPLAY_FORMAT,
   DATE_PICKER_FORMAT,
-  defaultSourceColumn,
-  defaultTimestampColumn,
+  DEFAULT_SOURCE_COLUMN,
+  DEFAULT_TIMESTAMP_COLUMN,
 } from '../../../../../common/constants/explorer';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
@@ -119,9 +119,9 @@ export function DataGrid(props: DataGridProps) {
       const columns: EuiDataGridColumn[] = [];
       storedSelectedColumns.map(({ name, type }) => {
         if (name === 'timestamp') {
-          columns.push(defaultTimestampColumn);
+          columns.push(DEFAULT_TIMESTAMP_COLUMN);
         } else if (name === '_source') {
-          columns.push(defaultSourceColumn);
+          columns.push(DEFAULT_SOURCE_COLUMN);
         } else {
           columns.push({
             id: name,

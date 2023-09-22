@@ -55,7 +55,7 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
-  defaultEmptyEFields,
+  DEFAULT_EMPTY_EXPLORER_FIELDS,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -612,7 +612,7 @@ export const Explorer = ({
                       storedSelectedColumns={
                         storedExplorerFields.selectedFields.length > 0
                           ? storedExplorerFields.selectedFields
-                          : defaultEmptyEFields
+                          : DEFAULT_EMPTY_EXPLORER_FIELDS
                       }
                     />
                     <a tabIndex={0} id="discoverBottomMarker">
