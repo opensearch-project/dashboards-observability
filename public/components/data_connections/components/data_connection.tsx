@@ -195,7 +195,7 @@ export const DataConnection = (props: any) => {
                 icon={<EuiIcon size="xxl" type="bolt" />}
                 title={'Accelerate performance'}
                 description="Accelerate performance through OpenSearch indexing."
-                onClick={() => (window.location.hash = `/acceleration/${dataSource}`)}
+                onClick={() => {}}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -8,7 +8,6 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
 import { DataConnection } from './components/data_connection';
 import { ManageDataConnectionsTable } from './components/manage_data_connections_table';
-import { AccelerationIndices } from './components/acceleration_ui/acceleration_indices';
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
@@ -44,13 +43,6 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/', '/manage']}
           render={(routerProps) => <ManageDataConnectionsTable {...commonProps} />}
-        />
-
-        <Route
-          path={'/acceleration/:id+'}
-          render={(routerProps) => (
-            <AccelerationIndices dataConnection={decodeURIComponent(routerProps.match.params.id)} />
-          )}
         />
       </Switch>
     </HashRouter>
