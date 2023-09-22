@@ -17,7 +17,7 @@ import { ConnectionManagementCallout } from './connection_management_callout';
 import { coreRefs } from '../../../../framework/core_refs';
 import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { SaveOrCancel } from '../save_or_cancel';
-import { ConnectionConfiguration } from '../new/connection_configuration';
+import { ConnectionConfiguration } from './connection_configuration';
 
 interface ConnectionDetailProps {
   dataConnection: string;

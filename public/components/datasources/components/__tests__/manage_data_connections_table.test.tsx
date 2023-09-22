@@ -7,7 +7,7 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { act } from '@testing-library/react';
 import React from 'react';
-import { ManageDataConnectionsTable } from '../manage_data_connections_table';
+import { ManageDataConnectionsTable } from '../manage/manage_data_connections_table';
 import { showDataConnectionsData } from '../../../../../test/datasources';
 import ReactDOM from 'react-dom';
 

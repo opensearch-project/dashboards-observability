@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from './data_connections_header';
-import { HomeProps } from '../home';
+import { DataConnectionsHeader } from '../data_connections_header';
+import { HomeProps } from '../../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../common/toast';
-import { DeleteModal } from '../../common/helpers/delete_modal';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { useToast } from '../../../common/toast';
+import { DeleteModal } from '../../../common/helpers/delete_modal';
 
 interface DataConnection {
   connectionType: 'OPENSEARCH' | 'SPARK';
