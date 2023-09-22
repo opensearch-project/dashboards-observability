@@ -94,28 +94,19 @@ const integrationDataTableData = [
   },
 ];
 
-const availableIndices = [
-  { value: 'ss4o_logs-nginx-prod', text: 'ss4o_logs-nginx-prod' },
-  { value: 'ss4o_logs-nginx-test', text: 'ss4o_logs-nginx-test' },
-  { value: 'ss4o_logs-apache-prod', text: 'ss4o_logs-apache-prod' },
-];
-
-const fetchAvailableDataSources = async (type: string): Promise<Eui.EuiSelectOption[]> => {
+const suggestDataSources = async (type: string): Promise<Eui.EuiSelectableOption[]> => {
   // Artificial delay for UI testing
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  await sleep(500);
+  await sleep(Math.random() * 2000);
   // TODO fetch actual items instead of hardcoded values
   if (type === 'index') {
     return [
-      { value: 'ss4o_logs-nginx-prod', text: 'ss4o_logs-nginx-prod' },
-      { value: 'ss4o_logs-nginx-test', text: 'ss4o_logs-nginx-test' },
-      { value: 'ss4o_logs-apache-prod', text: 'ss4o_logs-apache-prod' },
+      { label: 'ss4o_logs-nginx-prod' },
+      { label: 'ss4o_logs-nginx-test' },
+      { label: 'ss4o_logs-apache-prod' },
     ];
   } else if (type === 's3') {
-    return [
-      { value: 'table_1', text: 'table_1' },
-      { value: 'table_2', text: 'table_2' },
-    ];
+    return [{ label: 'table_1' }, { label: 'table_2' }];
   } else {
     console.error(`Unknown connection type: ${type}`);
     return [];
@@ -149,15 +140,18 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
   const capitalizedConnectionType =
     connectionType.charAt(0).toUpperCase() + connectionType.slice(1);
 
-  const [availableDataSources, setAvailableDataSources] = useState([] as Eui.EuiSelectOption[]);
+  const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
+    [] as Eui.EuiSelectableOption[]
+  );
+  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
   useEffect(() => {
     const updateDataSources = async () => {
-      const data = await fetchAvailableDataSources(config.connectionType);
-
-      setAvailableDataSources(data);
+      const data = await suggestDataSources(config.connectionType);
+      setDataSourceSuggestions(data);
+      setIsSuggestionsLoading(false);
     };
 
-    setAvailableDataSources([]);
+    setIsSuggestionsLoading(true);
     updateDataSources();
   }, [config.connectionType]);
 
@@ -193,11 +187,28 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
         label={capitalizedConnectionType}
         helpText={`Select ${indefiniteArticle} ${connectionType} to pull the data from.`}
       >
-        <Eui.EuiSelect
-          options={availableDataSources}
-          value={config.connectionDataSource}
-          onChange={(event) => updateConfig({ connectionDataSource: event.target.value })}
-        />
+        <Eui.EuiSelectable
+          options={dataSourceSuggestions}
+          isLoading={isSuggestionsLoading}
+          onChange={(suggestions) => {
+            setDataSourceSuggestions(suggestions);
+            for (const suggestion of suggestions) {
+              if (suggestion.checked) {
+                updateConfig({ connectionDataSource: suggestion.label });
+                return;
+              }
+            }
+          }}
+          singleSelection
+          searchable
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </Eui.EuiSelectable>
       </Eui.EuiFormRow>
       <Eui.EuiButton>Validate</Eui.EuiButton>
     </Eui.EuiForm>
@@ -238,11 +249,11 @@ export function SetupBottomBar({ config }: { config: IntegrationConfig }) {
   );
 }
 
-export function SetupIntegrationPage() {
+export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [integConfig, setConfig] = useState({
-    displayName: 'Test',
+    displayName: `${integration} Integration`,
     connectionType: 'index',
-    connectionDataSource: 'ss4o_logs-nginx-prod',
+    connectionDataSource: '',
   } as IntegrationConfig);
 
   const updateConfig = (updates: Partial<IntegrationConfig>) =>

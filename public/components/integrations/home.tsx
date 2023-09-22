@@ -61,7 +61,13 @@ export const Home = (props: HomeProps) => {
               />
             )}
           />
-          <Route exact path={'/available/:id/setup'} render={() => <SetupIntegrationPage />} />
+          <Route
+            exact
+            path={'/available/:id/setup'}
+            render={(routerProps) => (
+              <SetupIntegrationPage integration={routerProps.match.params.id} />
+            )}
+          />
         </Switch>
       </HashRouter>
     </div>
