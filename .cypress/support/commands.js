@@ -69,3 +69,21 @@ Cypress.Commands.overwrite('request', (originalFn, ...args) => {
 
   return originalFn(Object.assign({}, defaults, options));
 });
+
+// A recursive command to page-reload until some text is found
+Cypress.Commands.add('reloadUntilFound', (url, selector, retries = 3, retry_wait = 30000) => {
+  if (retries == 0) {
+    throw `exhausted retries looking for ${selector} on ${url}`;
+  }
+  cy.visit(url);
+  cy.find(selector, { wait: retry_wait }).then((body) => {
+    let msg = `url:${url} selector:${selector} retries:${retries}`;
+    if (body.find(selector).length === 1) {
+      console.log(`found ${msg}`);
+    } else {
+      console.log(`NOT found ${msg}`);
+      cy.wait(retry_wait);
+      cy.reloadUntilFound(url, selector, retries - 1);
+    }
+  });
+});
