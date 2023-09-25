@@ -8,18 +8,11 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiButton,
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
-import { QueryPermissionsConfiguration } from '../manage/query_permissions';
+import React from 'react';
 
 interface ConfigureS3DatasourceProps {
   selectedQueryPermissionRoles: Array<{ label: string }>;
@@ -90,7 +83,9 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
                 <EuiText className="overview-title">Query Permissions</EuiText>
                 <EuiText size="s" className="overview-content">
                   {selectedQueryPermissionRoles
-                    ? `Restricted - ${JSON.stringify(selectedQueryPermissionRoles)}`
+                    ? `Restricted - ${selectedQueryPermissionRoles
+                        .map((role) => role.label)
+                        .join(',')}`
                     : 'Everyone'}
                 </EuiText>
               </EuiFlexItem>
