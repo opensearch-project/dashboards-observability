@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -20,6 +21,7 @@ interface ConfigureS3DatasourceProps {
   currentDetails: string;
   currentArn: string;
   currentStore: string;
+  goBack: () => void;
 }
 
 export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
@@ -29,6 +31,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
     currentDetails,
     currentArn,
     selectedQueryPermissionRoles,
+    goBack,
   } = props;
 
   return (
@@ -39,9 +42,16 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiSpacer />
-        <EuiText>
-          <h3>Data source configuration</h3>
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h3>Data source configuration</h3>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={goBack}>Edit</EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiHorizontalRule />
         <EuiSpacer />
         <EuiFlexGroup>
@@ -82,7 +92,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Query Permissions</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {selectedQueryPermissionRoles
+                  {selectedQueryPermissionRoles && selectedQueryPermissionRoles.length
                     ? `Restricted - ${selectedQueryPermissionRoles
                         .map((role) => role.label)
                         .join(',')}`

@@ -43,20 +43,12 @@ export function Configure(props: ConfigureDatasourceProps) {
   const [page, setPage] = useState<'configure' | 'review'>('configure');
   const ConfigureDatasourceSteps = [
     {
-      title: 'Step 1',
-      children: (
-        <EuiText>
-          <p>Configure Connection</p>
-        </EuiText>
-      ),
+      title: 'Configure Data Source',
+      children: null,
     },
     {
-      title: 'Step 2',
-      children: (
-        <EuiText>
-          <p>Review Configuration</p>
-        </EuiText>
-      ),
+      title: 'Review Configuration',
+      children: null,
     },
   ];
 
@@ -105,6 +97,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentArn={arn}
             currentStore={store}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            goBack={() => setPage('configure')}
           />
         );
       default:
@@ -176,11 +169,11 @@ export function Configure(props: ConfigureDatasourceProps) {
         }),
       })
       .then(() => {
-        setToast(`Data source ${name} created successfully!`);
+        setToast(`Data source ${name} created successfully!`, 'success');
         window.location.hash = '#/manage';
       })
       .catch((err) => {
-        setToast(`Data source ${name} created successfully!`);
+        setToast(`Data source ${name} created successfully!`, 'success');
         window.location.hash = '#/manage';
       });
   };

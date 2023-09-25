@@ -72,6 +72,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           roles={roles}
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
+          layout={'vertical'}
         />
       </EuiFlexGroup>
     );

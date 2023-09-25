@@ -26,7 +26,7 @@ import { DeleteModal } from '../../../common/helpers/delete_modal';
 import S3Logo from '../../icons/s3-logo.svg';
 
 interface DataConnection {
-  connectionType: 'OPENSEARCH' | 'SPARK' | 'S3';
+  connectionType: 'OPENSEARCH' | 'SPARK' | 'S3GLUE';
   name: string;
 }
 
@@ -96,8 +96,10 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     switch (record.connectionType) {
       case 'OPENSEARCH':
         return <EuiIcon type="logoOpenSearch" />;
-      default:
+      case 'S3GLUE':
         return <EuiIcon type={S3Logo} />;
+      default:
+        return <></>;
     }
   };
 

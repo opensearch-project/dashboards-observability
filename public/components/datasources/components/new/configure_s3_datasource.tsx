@@ -13,6 +13,7 @@ import {
   EuiFieldText,
   EuiTextArea,
   EuiButton,
+  EuiSelect,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
@@ -51,6 +52,12 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
   const [details, setDetails] = useState(currentDetails);
   const [arn, setArn] = useState(currentArn);
   const [store, setStore] = useState(currentStore);
+  const authOptions = [
+    { value: 'option_one', text: 'No authentication' },
+    { value: 'option_two', text: 'SIGV4' },
+    { value: 'option_three', text: 'Basic Auth' },
+  ];
+  const [selectedAuthOption, setSelectedAuthOption] = useState(authOptions[0].value);
 
   return (
     <div>
@@ -119,7 +126,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
                 engine to connect to glue.
               </p>
             </EuiText>
-            <EuiFieldText data-test-subj="authentication-method" value="IAM role" readOnly />
+            <EuiFieldText data-test-subj="authentication-method" value="IAM role" disabled />
           </>
         </EuiFormRow>
 
@@ -174,22 +181,27 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiFormRow label="Glue index store authentication">
           <>
             <EuiText size="xs">
-              <p>Lorem ipsum.</p>
+              <p>Authentication settings to access the index store.</p>
             </EuiText>
-            <EuiFieldText data-test-subj="index-auth" value="False" readOnly />
+            <EuiSelect
+              id="selectAuthMethod"
+              options={authOptions}
+              value={selectedAuthOption}
+              onChange={(e) => {
+                setSelectedAuthOption(e.target.value);
+              }}
+            />
           </>
         </EuiFormRow>
 
         <EuiFormRow label="Glue index store region">
           <>
             <EuiText size="xs">
-              <p>Lorem ipsum.</p>
+              <p>The region where the index store is.</p>
             </EuiText>
-            <EuiFieldText data-test-subj="index-location" value="us-west-2" readOnly />
+            <EuiFieldText data-test-subj="index-location" value="us-west-2" />
           </>
         </EuiFormRow>
-
-        <EuiButton>Test connection</EuiButton>
 
         <EuiSpacer />
 
@@ -197,6 +209,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           roles={roles}
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
+          layout={'vertical'}
         />
       </EuiPanel>
     </div>

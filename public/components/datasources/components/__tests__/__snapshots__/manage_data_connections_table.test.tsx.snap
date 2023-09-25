@@ -294,7 +294,13 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          />
+                          >
+                            <img
+                              alt=""
+                              class="euiIcon euiIcon--medium"
+                              src="file-stub"
+                            />
+                          </div>
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -353,7 +359,13 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          />
+                          >
+                            <img
+                              alt=""
+                              class="euiIcon euiIcon--medium"
+                              src="file-stub"
+                            />
+                          </div>
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -412,7 +424,13 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          />
+                          >
+                            <img
+                              alt=""
+                              class="euiIcon euiIcon--medium"
+                              src="file-stub"
+                            />
+                          </div>
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -471,7 +489,13 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
-                          />
+                          >
+                            <img
+                              alt=""
+                              class="euiIcon euiIcon--medium"
+                              src="file-stub"
+                            />
+                          </div>
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
