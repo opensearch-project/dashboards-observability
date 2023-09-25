@@ -18,6 +18,7 @@ import React, { useState } from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
 import { coreRefs } from '../../../../framework/core_refs';
 import sparkSvg from '../../icons/apache_spark-icon.svg';
+import s3Svg from '../../icons/s3-logo.svg';
 
 export interface DatasourceType {
   name: string;
@@ -32,9 +33,9 @@ const Datasources: DatasourceType[] = [
     displayIcon: <EuiIcon type="logoOpenSearch" size="xl" />,
   },
   {
-    name: 'Spark',
-    description: 'Connect to a self managed instance of Apache Spark',
-    displayIcon: <EuiIcon type={sparkSvg} size="xl" />,
+    name: 'S3',
+    description: 'Connect to Amazon S3 via Amazon Glue',
+    displayIcon: <EuiIcon type={s3Svg} size="xl" />,
   },
 ];
 
