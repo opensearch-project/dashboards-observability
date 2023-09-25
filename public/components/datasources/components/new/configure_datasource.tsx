@@ -9,18 +9,12 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiTitle,
   EuiText,
-  EuiLink,
   EuiButton,
   EuiSteps,
   EuiPageSideBar,
-  EuiPanel,
-  EuiFormRow,
-  EuiFieldText,
   EuiBottomBar,
   EuiButtonEmpty,
-  EuiTextArea,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ConfigureS3Datasource } from './configure_s3_datasource';

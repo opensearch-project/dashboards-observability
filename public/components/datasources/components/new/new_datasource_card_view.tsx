@@ -13,11 +13,8 @@ import {
   EuiButtonGroup,
   EuiIcon,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useState } from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
-import { coreRefs } from '../../../../framework/core_refs';
-import sparkSvg from '../../icons/apache_spark-icon.svg';
 import s3Svg from '../../icons/s3-logo.svg';
 
 export interface DatasourceType {
@@ -40,7 +37,6 @@ const Datasources: DatasourceType[] = [
 ];
 
 export function NewDatasourceCardView() {
-  const { http } = coreRefs;
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
   const toggleButtonsIcons = [
