@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { string } from 'joi';
 import { coreRefs } from '../../../framework/core_refs';
 
-interface IntegrationConfig {
+export interface IntegrationConfig {
   displayName: string;
   connectionType: string;
   connectionDataSource: string;
