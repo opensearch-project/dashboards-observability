@@ -23,9 +23,10 @@ import { DataConnectionsDescription } from './manage_data_connections_descriptio
 import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { useToast } from '../../../common/toast';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
+import S3Logo from '../../icons/s3-logo.svg';
 
 interface DataConnection {
-  connectionType: 'OPENSEARCH' | 'SPARK';
+  connectionType: 'OPENSEARCH' | 'SPARK' | 'S3';
   name: string;
 }
 
@@ -96,7 +97,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       case 'OPENSEARCH':
         return <EuiIcon type="logoOpenSearch" />;
       default:
-        return <></>;
+        return <EuiIcon type={S3Logo} />;
     }
   };
 

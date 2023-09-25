@@ -9,11 +9,6 @@ import { DataConnectionsHeader } from '../data_connections_header';
 import { HomeProps } from '../../home';
 import { NewDatasourceCardView } from './new_datasource_card_view';
 
-interface DataConnection {
-  connectionType: 'OPENSEARCH' | 'SPARK';
-  name: string;
-}
-
 export const NewDatasource = (props: HomeProps) => {
   const { chrome } = props;
 
