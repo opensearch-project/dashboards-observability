@@ -23,6 +23,7 @@ interface AccessControlTabProps {
   dataConnection: string;
   connector: string;
   properties: unknown;
+  allowedRoles: string[];
 }
 
 export const AccessControlTab = (props: AccessControlTabProps) => {
@@ -30,7 +31,11 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
   const [roles, setRoles] = useState<Array<{ label: string }>>([]);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
     Array<{ label: string }>
-  >([]);
+  >(
+    props.allowedRoles.map((role) => {
+      return { label: role };
+    })
+  );
   const { http } = coreRefs;
 
   useEffect(() => {
@@ -51,7 +56,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Query access</EuiText>
               <EuiText size="s" className="overview-content">
-                {[].length ? `Restricted` : '-'}
+                {selectedQueryPermissionRoles.length ? `Restricted` : '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
