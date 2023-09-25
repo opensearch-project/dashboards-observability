@@ -5,6 +5,8 @@
 
 import * as Eui from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { string } from 'joi';
+import { coreRefs } from '../../../framework/core_refs';
 
 interface IntegrationConfig {
   displayName: string;
@@ -95,20 +97,42 @@ const integrationDataTableData = [
 ];
 
 const suggestDataSources = async (type: string): Promise<Eui.EuiSelectableOption[]> => {
-  // Artificial delay for UI testing
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  await sleep(Math.random() * 2000);
-  // TODO fetch actual items instead of hardcoded values
-  if (type === 'index') {
-    return [
-      { label: 'ss4o_logs-nginx-prod' },
-      { label: 'ss4o_logs-nginx-test' },
-      { label: 'ss4o_logs-apache-prod' },
-    ];
-  } else if (type === 's3') {
-    return [{ label: 'table_1' }, { label: 'table_2' }];
-  } else {
-    console.error(`Unknown connection type: ${type}`);
+  const http = coreRefs.http!;
+  try {
+    if (type === 'index') {
+      const result = await http.post('/api/console/proxy', {
+        body: '{}',
+        query: {
+          path: '_data_stream/ss4o_*',
+          method: 'GET',
+        },
+      });
+      return (
+        result.data_streams?.map((item: { name: string }) => {
+          return { label: item.name };
+        }) ?? []
+      );
+    } else if (type === 's3') {
+      const result = (await http.post('/api/console/proxy', {
+        body: '{}',
+        query: {
+          path: '_plugins/_query/_datasources',
+          method: 'GET',
+        },
+      })) as Array<{ name: string; connector: string }>;
+      return (
+        result
+          ?.filter((item) => item.connector === 'S3GLUE')
+          .map((item) => {
+            return { label: item.name };
+          }) ?? []
+      );
+    } else {
+      console.error(`Unknown connection type: ${type}`);
+      return [];
+    }
+  } catch (err: any) {
+    console.error(err.message);
     return [];
   }
 };
