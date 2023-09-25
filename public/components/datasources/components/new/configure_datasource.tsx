@@ -169,11 +169,11 @@ export function Configure(props: ConfigureDatasourceProps) {
         }),
       })
       .then(() => {
-        setToast(`Data source ${name} created successfully!`, 'success');
+        setToast(`Data source ${name} created`, 'success');
         window.location.hash = '#/manage';
       })
       .catch((err) => {
-        setToast(`Data source ${name} created successfully!`, 'success');
+        setToast(`Data source ${name} created`, 'success');
         window.location.hash = '#/manage';
       });
   };
