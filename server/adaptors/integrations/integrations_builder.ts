@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { uuidRx } from 'public/components/custom_panels/redux/panel_slice';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
-import { Integration } from './repository/integration';
+import { IntegrationReader } from './repository/integration';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 
 interface BuilderOptions {
@@ -21,15 +21,21 @@ export class IntegrationInstanceBuilder {
     this.client = client;
   }
 
-  async build(integration: Integration, options: BuilderOptions): Promise<IntegrationInstance> {
+  build(integration: IntegrationReader, options: BuilderOptions): Promise<IntegrationInstance> {
     const instance = integration
       .deepCheck()
       .then((result) => {
-        if (!result) {
-          return Promise.reject(new Error('Integration is not valid'));
+        if (!result.ok) {
+          return Promise.reject(result.error);
         }
+        return integration.getAssets();
       })
-      .then(() => integration.getAssets())
+      .then((assets) => {
+        if (!assets.ok) {
+          return Promise.reject(assets.error);
+        }
+        return assets.value;
+      })
       .then((assets) => this.remapIDs(assets.savedObjects!))
       .then((assets) => this.remapDataSource(assets, options.dataSource))
       .then((assets) => this.postAssets(assets))
@@ -86,14 +92,19 @@ export class IntegrationInstanceBuilder {
   }
 
   async buildInstance(
-    integration: Integration,
+    integration: IntegrationReader,
     refs: AssetReference[],
     options: BuilderOptions
   ): Promise<IntegrationInstance> {
-    const config: IntegrationTemplate = (await integration.getConfig())!;
+    const config: Result<IntegrationConfig> = await integration.getConfig();
+    if (!config.ok) {
+      return Promise.reject(
+        new Error('Attempted to create instance with invalid template', config.error)
+      );
+    }
     return Promise.resolve({
       name: options.name,
-      templateName: config.name,
+      templateName: config.value.name,
       dataSource: options.dataSource,
       creationDate: new Date().toISOString(),
       assets: refs,

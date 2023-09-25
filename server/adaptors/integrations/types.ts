@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-interface IntegrationTemplate {
+type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+
+interface IntegrationConfig {
   name: string;
   version: string;
   displayName?: string;
@@ -46,7 +48,7 @@ interface DisplayAsset {
 }
 
 interface IntegrationTemplateSearchResult {
-  hits: IntegrationTemplate[];
+  hits: IntegrationConfig[];
 }
 
 interface IntegrationTemplateQuery {

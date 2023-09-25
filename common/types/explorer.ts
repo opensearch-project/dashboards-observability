@@ -92,9 +92,7 @@ export interface IExplorerFields {
 }
 
 export interface EmptyTabParams {
-  tabIds: string[] | undefined;
-  queries: any | undefined;
-  explorerData: any | undefined;
+  tabIds: string[];
 }
 
 export interface ILogExplorerProps {
@@ -383,3 +381,23 @@ export interface VisSpecificMetaData {
   x_coordinate: string;
   y_coordinate: string;
 }
+
+export type MOMENT_UNIT_OF_TIME =
+  | 'years'
+  | 'y'
+  | 'quarters'
+  | 'Q'
+  | 'months'
+  | 'M'
+  | 'weeks'
+  | 'w'
+  | 'days'
+  | 'd'
+  | 'hours'
+  | 'h'
+  | 'minutes'
+  | 'm'
+  | 'seconds'
+  | 's'
+  | 'milliseconds'
+  | 'ms';

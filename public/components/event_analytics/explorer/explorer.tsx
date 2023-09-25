@@ -31,6 +31,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
 import { LogExplorerRouterContext } from '..';
 import {
   CREATE_TAB_PARAM,
@@ -38,7 +39,6 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  NEW_TAB,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -52,7 +52,6 @@ import {
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
   TAB_CHART_TITLE,
-  TAB_CREATED_TYPE,
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
@@ -347,17 +346,6 @@ export const Explorer = ({
   }, [appBasedRef.current]);
 
   useEffect(() => {
-    let objectId;
-    if (queryRef.current![TAB_CREATED_TYPE] === NEW_TAB || appLogEvents) {
-      objectId = queryRef.current!.savedObjectId || '';
-    } else {
-      objectId = queryRef.current!.savedObjectId || savedObjectId;
-    }
-    if (objectId) {
-      updateTabData(objectId);
-    } else {
-      fetchData(startTime, endTime);
-    }
     if (
       routerContext &&
       routerContext.searchParams.get(CREATE_TAB_PARAM_KEY) === CREATE_TAB_PARAM[TAB_CHART_ID]
@@ -367,10 +355,8 @@ export const Explorer = ({
   }, []);
 
   useEffect(() => {
-    if (appLogEvents) {
-      if (savedObjectId) {
-        updateTabData(savedObjectId);
-      }
+    if (savedObjectId) {
+      updateTabData(savedObjectId);
     }
   }, [savedObjectId]);
 
@@ -473,6 +459,8 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
+  const dateRange = getDateRange(startTime, endTime, query);
+
   const mainContent = useMemo(() => {
     return (
       <>
@@ -522,38 +510,32 @@ export const Explorer = ({
               <div className="dscResults">
                 {countDistribution?.data && !isLiveTailOnRef.current && (
                   <>
-                    <EuiFlexGroup justifyContent="center" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <HitsCounter
-                          hits={reduce(
-                            countDistribution.data['count()'],
-                            (sum, n) => {
-                              return sum + n;
-                            },
-                            0
-                          )}
-                          showResetButton={false}
-                          onResetQuery={() => {}}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <TimechartHeader
-                          dateFormat={'MMM D, YYYY @ HH:mm:ss.SSS'}
-                          options={timeIntervalOptions}
-                          onChangeInterval={(selectedIntrv) => {
-                            const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                              (item) => item.value === selectedIntrv
-                            );
-                            const intrv = selectedIntrv.replace(/^auto_/, '');
-                            getCountVisualizations(intrv);
-                            selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                            getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                          }}
-                          stateInterval={selectedIntervalRef.current?.value}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <CountDistribution countDistribution={countDistribution} />
+                    <HitsCounter
+                      hits={_.sum(countDistribution.data['count()'])}
+                      showResetButton={false}
+                      onResetQuery={() => {}}
+                    />
+                    <TimechartHeader
+                      options={timeIntervalOptions}
+                      onChangeInterval={(selectedIntrv) => {
+                        const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                          (item) => item.value === selectedIntrv
+                        );
+                        const intrv = selectedIntrv.replace(/^auto_/, '');
+                        getCountVisualizations(intrv);
+                        selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                        getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                      }}
+                      stateInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
+                    <CountDistribution
+                      countDistribution={countDistribution}
+                      selectedInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
@@ -642,7 +624,7 @@ export const Explorer = ({
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
-    isOverridingPattern
+    isOverridingPattern,
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
@@ -898,8 +880,6 @@ export const Explorer = ({
       </EuiContextMenuItem>
     );
   });
-
-  const dateRange = getDateRange(startTime, endTime, query);
 
   const handleLiveTailSearch = useCallback(
     async (startingTime: string, endingTime: string) => {

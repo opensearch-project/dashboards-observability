@@ -773,6 +773,9 @@ exports[`Pie component Renders pie component 1`] = `
           "yaxis": Object {
             "rangemode": "normal",
             "showgrid": true,
+            "title": Object {
+              "text": "Count",
+            },
             "zeroline": false,
           },
         }

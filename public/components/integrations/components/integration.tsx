@@ -27,7 +27,6 @@ import { useToast } from '../../../../public/components/common/toast';
 export function Integration(props: AvailableIntegrationProps) {
   const { http, integrationTemplateId, chrome } = props;
 
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { setToast } = useToast();
   const [integration, setIntegration] = useState({} as { name: string; type: string });
 
@@ -280,7 +279,7 @@ export function Integration(props: AvailableIntegrationProps) {
         {IntegrationOverview({
           integration,
           showFlyout: () => {
-            setIsFlyoutVisible(true);
+            window.location.hash = `#/available/${integration.name}/setup`;
           },
           setUpSample: () => {
             addIntegrationRequest(true, integrationTemplateId);
@@ -299,19 +298,6 @@ export function Integration(props: AvailableIntegrationProps) {
           : IntegrationFields({ integration, integrationMapping })}
         <EuiSpacer />
       </EuiPageBody>
-      {isFlyoutVisible && (
-        <AddIntegrationFlyout
-          onClose={() => {
-            setIsFlyoutVisible(false);
-          }}
-          onCreate={(name, dataSource) => {
-            addIntegrationRequest(false, integrationTemplateId, name, dataSource);
-          }}
-          integrationName={integrationTemplateId}
-          integrationType={integration.type}
-          http={http}
-        />
-      )}
     </EuiPage>
   );
 }
