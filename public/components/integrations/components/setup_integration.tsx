@@ -96,7 +96,7 @@ const integrationDataTableData = [
   },
 ];
 
-const suggestDataSources = async (type: string): Promise<Eui.EuiSelectableOption[]> => {
+const suggestDataSources = async (type: string): Promise<Array<{ label: string }>> => {
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
@@ -165,7 +165,7 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
     connectionType.charAt(0).toUpperCase() + connectionType.slice(1);
 
   const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
-    [] as Eui.EuiSelectableOption[]
+    [] as Array<{ label: string }>
   );
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
   useEffect(() => {
@@ -204,35 +204,28 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
         <Eui.EuiSelect
           options={integrationConnectionSelectorItems}
           value={config.connectionType}
-          onChange={(event) => updateConfig({ connectionType: event.target.value })}
+          onChange={(event) =>
+            updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
+          }
         />
       </Eui.EuiFormRow>
       <Eui.EuiFormRow
         label={capitalizedConnectionType}
         helpText={`Select ${indefiniteArticle} ${connectionType} to pull the data from.`}
       >
-        <Eui.EuiSelectable
+        <Eui.EuiComboBox
           options={dataSourceSuggestions}
           isLoading={isSuggestionsLoading}
-          onChange={(suggestions) => {
-            setDataSourceSuggestions(suggestions);
-            for (const suggestion of suggestions) {
-              if (suggestion.checked) {
-                updateConfig({ connectionDataSource: suggestion.label });
-                return;
-              }
+          onChange={(selected) => {
+            if (selected.length === 0) {
+              updateConfig({ connectionDataSource: '' });
+            } else {
+              updateConfig({ connectionDataSource: selected[0].label });
             }
           }}
-          singleSelection
-          searchable
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </Eui.EuiSelectable>
+          selectedOptions={[{ label: config.connectionDataSource }]}
+          singleSelection={{ asPlainText: true }}
+        />
       </Eui.EuiFormRow>
       <Eui.EuiButton>Validate</Eui.EuiButton>
     </Eui.EuiForm>
