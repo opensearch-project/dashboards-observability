@@ -6,7 +6,7 @@
 import './search.scss';
 
 import React, { useState, useEffect } from 'react';
-import { isEqual } from 'lodash';
+import { isEqual, lowerCase } from 'lodash';
 import {
   EuiFlexGroup,
   EuiButton,
@@ -20,6 +20,7 @@ import {
   EuiCallOut,
   EuiComboBox,
 } from '@elastic/eui';
+import { useCallback } from 'react';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
 import { Autocomplete } from './autocomplete';
@@ -33,8 +34,10 @@ import { DataSourceSelectable } from '../../../../../../src/plugins/data/public'
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLDataFetcher } from '../../../services/data_fetchers/sql/sql_data_fetcher';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
-import SQLService from '../../../services/requests/sql';
+import { SQLService } from '../../../services/requests/sql';
 import PPLService from '../../../services/requests/ppl';
+import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { usePolling } from '../../../components/hooks/use_polling';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -92,21 +95,35 @@ export const Search = (props: any) => {
     liveTailName,
     curVisId,
     setSubType,
-    setupDeps,
+    setIsQueryRunning,
   } = props;
 
-  const { dataSources } = setupDeps.data;
+  const { dataSources } = coreRefs;
   const [activeDataSources, setActiveDataSources] = useState([]);
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState([{ label: 'SQL' }]);
+  const [selectedSources, setSelectedSources] = useState([]);
+  const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
+  const [jobId, setJobId] = useState('');
+  const sqlService = new SQLService(coreRefs.http);
+
+  const {
+    data: pollingResult,
+    loading: pollingLoading,
+    error: pollingError,
+    startPolling,
+    stopPolling,
+  } = usePolling<any, any>((params) => {
+    return sqlService.fetchWithJobId(params);
+  }, 5000);
+
   const requestParams = { tabId };
-  const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
+  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
     pplService: new SQLService(coreRefs.http),
     requestParams,
   });
-  const sqlDataFetcher = new SQLDataFetcher(coreRefs.http);
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
@@ -159,16 +176,78 @@ export const Search = (props: any) => {
   };
 
   const onQuerySearch = (lang) => {
+    console.log('lang: ', lang);
     if (lang[0].label === 'DQL') return;
     if (lang[0].label === 'PPL') return handleTimeRangePickerRefresh();
     // SQL
-    sqlDataFetcher.search(tempQuery, getEvents);
+    // sqlDataFetcher.search(tempQuery, getEvents);
+    console.log('on searching selectedSources: ', selectedSources);
+
+    // console.log(
+    //   'queryLang.label: ',
+    //   queryLang[0].label,
+    //   ', tempQuery: ',
+    //   tempQuery,
+    //   ' selectedSources[0].label: ',
+    //   selectedSources[0].label
+    // );
+
+    console.log('running? ');
+
+    setIsQueryRunning(true);
+
+    sqlService
+      .fetch({
+        kind: lowerCase(lang[0].label),
+        query: tempQuery,
+        // datasource: selectedSources[0].label
+      })
+      .then((result) => {
+        console.log('result: ', result);
+        if (result.queryId) {
+          setJobId(result.queryId);
+          startPolling({
+            queryId: result.queryId,
+          });
+        } else {
+          console.log('no query id found in response');
+        }
+      })
+      .catch((e) => {
+        setIsQueryRunning(false);
+        console.error(e);
+      })
+      .finally(() => {});
   };
 
   useEffect(() => {
-    const sourceList = Object.values(dataSources.dataSourceService.getDataSources());
-    setActiveDataSources([...sourceList]);
-  }, [dataSources]);
+    console.log('pollingResult: ', pollingResult, ', pollingError: ', pollingError);
+    if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
+      console.log('entering polling?');
+      // update page with data
+      dispatchOnGettingHis(pollingResult, '');
+
+      // stop polling
+      stopPolling();
+
+      setIsQueryRunning(false);
+    }
+  }, [pollingResult, pollingError]);
+
+  useEffect(() => {
+    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
+      (currentDataSources) => {
+        console.log('currentDataSources: ', currentDataSources);
+        setActiveDataSources([...Object.values(currentDataSources)]);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleDataSetFetchError = useCallback(() => {
+    return (error) => {};
+  }, []);
 
   return (
     <div className="globalQueryBar">
@@ -185,13 +264,17 @@ export const Search = (props: any) => {
         <EuiFlexItem key="source-selector" className="search-area">
           <DataSourceSelectable
             dataSources={activeDataSources}
-            onSourceChange={handleSourceChange}
+            dataSourceOptionList={dataSourceOptionList}
+            setDataSourceOptionList={setDataSourceOptionList}
+            selectedSources={selectedSources}
+            setSelectedSources={setSelectedSources}
+            onFetchDataSetError={handleDataSetFetchError}
           />
         </EuiFlexItem>
         <EuiFlexItem key="lang-selector" className="search-area">
           <EuiComboBox
             placeholder="No language selected yet"
-            options={[{ label: 'SQL' }, { label: 'PPL' }, { label: 'DQL' }]}
+            options={[{ label: 'SQL' }, { label: 'PPL' }]}
             selectedOptions={queryLang}
             onChange={handleQueryLanguageChange}
             singleSelection={true}

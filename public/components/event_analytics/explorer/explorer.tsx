@@ -17,6 +17,7 @@ import {
   EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  OuiLoadingDashboards,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
@@ -142,7 +143,6 @@ export const Explorer = ({
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
-  setupDeps,
 }: IExplorerProps) => {
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
@@ -163,6 +163,7 @@ export const Explorer = ({
     pplService,
     requestParams,
   });
+
   const appLogEvents = tabId.startsWith('application-analytics-tab');
   const query = useSelector(selectQueries)[tabId];
   const explorerData = useSelector(selectQueryResult)[tabId];
@@ -188,6 +189,7 @@ export const Explorer = ({
   const [browserTabFocus, setBrowserTabFocus] = useState(true);
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
+  const [isQueryRunning, setIsQueryRunning] = useState(false);
 
   const selectedIntervalRef = useRef<{
     text: string;
@@ -627,6 +629,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isOverridingPattern,
+    isQueryRunning,
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
@@ -675,11 +678,11 @@ export const Explorer = ({
       name: getContentTabTitle(TAB_EVENT_ID, TAB_EVENT_TITLE),
       content: mainContent,
     },
-    // {
-    //   id: TAB_CHART_ID,
-    //   name: getContentTabTitle(TAB_CHART_ID, TAB_CHART_TITLE),
-    //   content: explorerVis,
-    // },
+    {
+      id: TAB_CHART_ID,
+      name: getContentTabTitle(TAB_CHART_ID, TAB_CHART_TITLE),
+      content: explorerVis,
+    },
   ];
 
   const handleContentTabClick = (selectedTab: IQueryTab) => setSelectedContentTab(selectedTab.id);
@@ -952,16 +955,22 @@ export const Explorer = ({
           curVisId={curVisId}
           setSubType={setSubType}
           http={http}
-          setupDeps={setupDeps}
+          setIsQueryRunning={setIsQueryRunning}
         />
-        <EuiTabbedContent
-          className="mainContentTabs"
-          initialSelectedTab={contentTabs[0]}
-          selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-          onTabClick={(selectedTab: EuiTabbedContentTab) => handleContentTabClick(selectedTab)}
-          tabs={contentTabs}
-          size="s"
-        />
+        {isQueryRunning ? (
+          <div className="explorer-loading-spinner">
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        ) : (
+          <EuiTabbedContent
+            className="mainContentTabs"
+            initialSelectedTab={contentTabs[0]}
+            selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+            onTabClick={(selectedTab: EuiTabbedContentTab) => handleContentTabClick(selectedTab)}
+            tabs={contentTabs}
+            size="s"
+          />
+        )}
       </div>
     </TabContext.Provider>
   );

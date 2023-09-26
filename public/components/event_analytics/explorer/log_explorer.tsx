@@ -104,7 +104,6 @@ export const LogExplorer = ({
         http={http}
         searchBarConfigs={searchBarConfigs}
         queryManager={queryManager}
-        setupDeps={setupDeps}
       />
     </>
   );

@@ -28,7 +28,7 @@ interface IFetchEventsParams {
   requestParams: { tabId: string };
 }
 
-export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams) => {
+export const useFetchDirectEvents = ({ pplService, requestParams }: IFetchEventsParams) => {
   const dispatch = useDispatch();
   const [isEventsLoading, setIsEventsLoading] = useState(false);
   const queries = useSelector(selectQueries);
@@ -40,6 +40,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
   queriesRef.current = queries;
   fieldsRef.current = fields;
   responseRef.current = response;
+  // const {} = usePolling();
 
   const fetchEvents = (
     { query }: { query: string },
@@ -48,7 +49,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     errorHandler?: (error: any) => void
   ) => {
     setIsEventsLoading(true);
-    console.log('pplService: ', pplService);
+    // console.log('pplService: ', pplService);
     return pplService
       .fetch({ query, format }, errorHandler)
       .then((res: any) => handler(res))
@@ -59,41 +60,12 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
       .finally(() => setIsEventsLoading(false));
   };
 
-  const addSchemaRowMapping = (queryResult) => {
-    const pplRes = queryResult;
-
-    const data: any[] = [];
-
-    _.forEach(pplRes.datarows, (row) => {
-      const record: any = {};
-
-      for (let i = 0; i < pplRes.schema.length; i++) {
-        const cur = pplRes.schema[i];
-
-        if (typeof row[i] === 'object') {
-          record[cur.name] = JSON.stringify(row[i]);
-        } else if (typeof row[i] === 'boolean') {
-          record[cur.name] = row[i].toString();
-        } else {
-          record[cur.name] = row[i];
-        }
-      }
-
-      data.push(record);
-    });
-    return {
-      ...queryResult,
-      jsonData: data,
-    };
-  };
-
   const dispatchOnGettingHis = (res: any, query: string) => {
     console.log('dispatchOnGettingHis res: ', res);
     const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
       (field: IField) => field.name
     );
-    const processedRes = addSchemaRowMapping(res);
-    setResponse(processedRes);
+    setResponse(res);
     batch(() => {
       dispatch(
         queryResultReset({
@@ -104,7 +76,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
         fetchSuccess({
           tabId: requestParams.tabId,
           data: {
-            ...processedRes,
+            ...res,
           },
         })
       );
@@ -112,9 +84,9 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
         updateFields({
           tabId: requestParams.tabId,
           data: {
-            [UNSELECTED_FIELDS]: processedRes?.schema ? [...processedRes.schema] : [],
-            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...processedRes.schema] : [], // when query contains stats, need populate this
-            [AVAILABLE_FIELDS]: processedRes?.schema ? [...processedRes.schema] : [],
+            [UNSELECTED_FIELDS]: res?.schema ? [...res.schema] : [],
+            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...res.schema] : [], // when query contains stats, need populate this
+            [AVAILABLE_FIELDS]: res?.schema ? [...res.schema] : [],
             [SELECTED_FIELDS]: [],
           },
         })
@@ -198,53 +170,56 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
   const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
     console.log('query: ', query);
     if (isEmpty(query)) return;
-    if (query.match(/show tables/i)) {
-      const res = {
-        datarows: [['default', 'Person', false]],
-        jsonData: [
-          {
-            namespace: 'default',
-            tableName: 'Person',
-            isTemporary: false,
-          },
-        ],
-        schema: [
-          { name: 'namespace', type: 'string' },
-          { name: 'tableName', type: 'string' },
-          { name: 'isTemporary', type: 'boolean' },
-        ],
-      };
-      return dispatchOnGettingHis(res, '');
-    }
-    const res = {
-      datarows: [
-        ['david', 'Shen Zhen', 31],
-        ['eason', 'Shen Yang', 27],
-        ['jarry', 'Wu Han', 35],
-      ],
-      jsonData: [
-        {
-          name: 'david',
-          city: 'Shen Zhen',
-          age: 31,
-        },
-        {
-          name: 'eason',
-          city: 'Shen Yang',
-          age: 27,
-        },
-        {
-          name: 'jarry',
-          city: 'Wu Han',
-          age: 35,
-        },
-      ],
-      schema: [
-        { name: 'name', type: 'string' },
-        { name: 'city', type: 'string' },
-        { name: 'age', type: 'integer' },
-      ],
-    };
+
+    // long polling
+
+    // if (query.match(/show tables/i)) {
+    //   const res = {
+    //     datarows: [['default', 'Person', false]],
+    //     jsonData: [
+    //       {
+    //         namespace: 'default',
+    //         tableName: 'Person',
+    //         isTemporary: false,
+    //       },
+    //     ],
+    //     schema: [
+    //       { name: 'namespace', type: 'string' },
+    //       { name: 'tableName', type: 'string' },
+    //       { name: 'isTemporary', type: 'boolean' },
+    //     ],
+    //   };
+    //   return dispatchOnGettingHis(res, '');
+    // }
+    // const res = {
+    //   datarows: [
+    //     ['david', 'Shen Zhen', 31],
+    //     ['eason', 'Shen Yang', 27],
+    //     ['jarry', 'Wu Han', 35],
+    //   ],
+    //   jsonData: [
+    //     {
+    //       name: 'david',
+    //       city: 'Shen Zhen',
+    //       age: 31,
+    //     },
+    //     {
+    //       name: 'eason',
+    //       city: 'Shen Yang',
+    //       age: 27,
+    //     },
+    //     {
+    //       name: 'jarry',
+    //       city: 'Wu Han',
+    //       age: 35,
+    //     },
+    //   ],
+    //   schema: [
+    //     { name: 'name', type: 'string' },
+    //     { name: 'city', type: 'string' },
+    //     { name: 'age', type: 'integer' },
+    //   ],
+    // };
     return dispatchOnGettingHis(res, '');
     // const cur = queriesRef.current;
     // const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
@@ -292,6 +267,5 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     getEvents,
     getAvailableFields,
     fetchEvents,
-    dispatchOnGettingHis,
   };
 };
