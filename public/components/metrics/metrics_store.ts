@@ -21,6 +21,7 @@ import { coreRefs } from '../../framework/core_refs';
 export interface IconAttributes {
   color: string;
 }
+
 const coloredIconsFrom = (dataSources: string[]): { [dataSource: string]: IconAttributes } => {
   const colorCycle = ouiPaletteColorBlindBehindText({ sortBy: 'natural' });
   const keyedIcons = dataSources.map((dataSource, index) => {
@@ -38,7 +39,7 @@ const coloredIconsFrom = (dataSources: string[]): { [dataSource: string]: IconAt
 interface MetricState {
   metrics: MetricType[];
 
-  selected: MetricType[];
+  selected: string[];
 
   searched: MetricType[];
 
@@ -72,7 +73,7 @@ const fetchCustomMetrics = async () => {
   const dataSet = await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
     objectType: [SAVED_VISUALIZATION],
   });
-  console.log('fetchCustomMetrics', JSON.stringify({ dataSet }, '', 2));
+  console.log('fetchCustomMetrics', { dataSet });
   const savedMetrics = dataSet.observabilityObjectList.filter(
     (obj) => obj.savedVisualization.sub_type === 'metric'
   );
@@ -95,17 +96,17 @@ const fetchRemoteDataSource = async (dataSource) => {
   return { jsonData: response.jsonData, dataSource };
 };
 
-const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => {
+const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any[]> => {
   return remoteDataSources.map((dataSource) =>
-    fetchRemoteDataSource(dataSource).then(({ jsonData }) =>
-      jsonData.map((obj: any) => ({
+    fetchRemoteDataSource(dataSource).then(({ jsonData }) => {
+      return jsonData.map((obj: any) => ({
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         catalog: `${dataSource}`,
         type: obj.TABLE_TYPE,
         recentlyCreated: false,
-      }))
-    )
+      }));
+    })
   );
 };
 
@@ -145,14 +146,11 @@ const updatedLayoutByDeSelection = (state: any, newMetric: any) => {
 const fetchDataSources = async () => {
   const { pplService } = coreRefs;
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
-  console.log(
-    'loadMetrics remoteDataSourcesResponse',
-    JSON.stringify({ remoteDataSourcesResponse })
-  );
+  console.log('fetchDataSources', { remoteDataSourcesResponse });
   return remoteDataSourcesResponse.data.DATASOURCE_NAME;
 };
 
-export const useMetricStore = create<MetricState>((get, set) => ({
+export const useMetricStore = create<MetricState>()((set) => ({
   ...initialState,
 
   selectMetric: (metric: MetricType) => {
@@ -188,39 +186,25 @@ const setDataSourceTitles = (dataSourceTitles) =>
 const setDataSourceIcons = (dataSourceIcons) => useMetricStore.setState({ dataSourceIcons });
 
 export const loadMetrics = async () => {
-  console.log('loadMetrics');
   const customDataRequest = fetchCustomMetrics();
 
   const remoteDataSources = await fetchDataSources();
-  console.log('loadMetrics remoteDataSources', JSON.stringify({ remoteDataSources }));
 
   setDataSources(remoteDataSources);
   setDataSourceTitles(remoteDataSources);
   setDataSourceIcons(coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources]));
 
-  const remoteDataRequests = fetchRemoteMetrics(remoteDataSources);
-
-  const dataResponses = await Promise.all([customDataRequest]);
+  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
+  const dataResponses = await Promise.all([customDataRequest, ...remoteDataRequests]);
   console.log(
-    'loadMetrics',
-    JSON.stringify(
-      {
-        customDataRequest,
-        // remoteDataSources,
-        // remoteDataRequests,
-        dataResponses,
-      },
-      '',
-      2
-    )
+    'loadmetrics',
+    JSON.stringify({ remoteDataRequests, dataResponses: dataResponses.flat() })
   );
   setMetrics(dataResponses.flat());
 };
 
 const setMetrics = (metrics) => {
-  console.log('setMetrics', { metrics });
   useMetricStore.setState((state) => {
-    console.log('setMetrics', { metrics });
     return { metrics };
   });
 };
@@ -234,7 +218,6 @@ export const selectedMetricsSelector = (state) =>
   state.selected.map((id) => state.metrics.find((metric) => metric.id === id));
 
 export const searchSelector = (state) => {
-  console.log('searchSelector', state);
   return state.search;
 };
 

@@ -1,0 +1,646 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Side Bar Component renders Side Bar Component for Prometheus Metric 1`] = `
+<div>
+  <section
+    class="sidebarHeight"
+  >
+    <div
+      class="metrics-search-bar-input"
+      data-test-subj="metricsSearch"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      >
+        <div
+          class="euiFlexItem euiSearchBar__searchHolder"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                class="euiFieldSearch euiFieldSearch--fullWidth"
+                placeholder="Search for metrics"
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
+              >
+                <span
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiAccordion euiAccordion-isOpen"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="Selected MetricsSelector"
+          aria-expanded="true"
+          class="euiAccordion__button"
+          id="random_html_id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__iconWrapper"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+          <span
+            class="euiIEFlexWrapFix"
+          >
+            <span
+              class="euiTitle euiTitle--xxxsmall"
+            >
+              Selected Metrics
+               
+              0
+               of 
+              0
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="random_html_id"
+        class="euiAccordion__childWrapper"
+        id="Selected MetricsSelector"
+        role="region"
+        style="height: 0px"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <ul
+              class="metricsList"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiAccordion euiAccordion-isOpen"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="Available MetricsSelector"
+          aria-expanded="true"
+          class="euiAccordion__button"
+          id="random_html_id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__iconWrapper"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+          <span
+            class="euiIEFlexWrapFix"
+          >
+            <span
+              class="euiTitle euiTitle--xxxsmall"
+            >
+              Available Metrics
+               
+              1
+               of 
+              1
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="random_html_id"
+        class="euiAccordion__childWrapper"
+        id="Available MetricsSelector"
+        role="region"
+        style="height: 0px"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <ul
+              class="metricsList"
+            >
+              <li
+                class="metricsListContainer"
+                data-test-subj="metricsListItems_availableMetrics"
+              >
+                <button
+                  class="euiFacetButton euiFacetButton--unSelected obsMetric-Name eui-textTruncate"
+                  title="datasource1.metric1"
+                  type="button"
+                >
+                  <span
+                    class="euiFacetButton__content"
+                  >
+                    <div
+                      aria-label="datasource1"
+                      class="euiAvatar euiAvatar--s euiAvatar--space"
+                      style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
+                      title="datasource1"
+                    >
+                      <span
+                        aria-hidden="true"
+                      >
+                        d
+                      </span>
+                    </div>
+                    <span
+                      class="euiFacetButton__text"
+                      data-text="metric1"
+                    >
+                      metric1
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`Side Bar Component renders Side Bar Component for Saved Metric 1`] = `
+<div>
+  <section
+    class="sidebarHeight"
+  >
+    <div
+      class="metrics-search-bar-input"
+      data-test-subj="metricsSearch"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      >
+        <div
+          class="euiFlexItem euiSearchBar__searchHolder"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                class="euiFieldSearch euiFieldSearch--fullWidth"
+                placeholder="Search for metrics"
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
+              >
+                <span
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiAccordion euiAccordion-isOpen"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="Selected MetricsSelector"
+          aria-expanded="true"
+          class="euiAccordion__button"
+          id="random_html_id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__iconWrapper"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+          <span
+            class="euiIEFlexWrapFix"
+          >
+            <span
+              class="euiTitle euiTitle--xxxsmall"
+            >
+              Selected Metrics
+               
+              0
+               of 
+              0
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="random_html_id"
+        class="euiAccordion__childWrapper"
+        id="Selected MetricsSelector"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <ul
+              class="metricsList"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiAccordion euiAccordion-isOpen"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="Available MetricsSelector"
+          aria-expanded="true"
+          class="euiAccordion__button"
+          id="random_html_id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__iconWrapper"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+          <span
+            class="euiIEFlexWrapFix"
+          >
+            <span
+              class="euiTitle euiTitle--xxxsmall"
+            >
+              Available Metrics
+               
+              1
+               of 
+              1
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="random_html_id"
+        class="euiAccordion__childWrapper"
+        id="Available MetricsSelector"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <ul
+              class="metricsList"
+            >
+              <li
+                class="metricsListContainer"
+                data-test-subj="metricsListItems_availableMetrics"
+              >
+                <button
+                  class="euiFacetButton euiFacetButton--unSelected obsMetric-Name eui-textTruncate"
+                  title="[Logs] Average ram usage per day by windows os "
+                  type="button"
+                >
+                  <span
+                    class="euiFacetButton__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      aria-labelledby="random_html_id"
+                      class="euiIcon euiIcon--large euiIcon-isLoading"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                    <span
+                      class="euiFacetButton__text"
+                      data-text="[Logs] Average ram usage per day by windows os "
+                    >
+                      [Logs] Average ram usage per day by windows os 
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`renders Side Bar Component for Saved Metric 1`] = `
+<div>
+  <section
+    class="sidebarHeight"
+  >
+    <div
+      class="metrics-search-bar-input"
+      data-test-subj="metricsSearch"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      >
+        <div
+          class="euiFlexItem euiSearchBar__searchHolder"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                class="euiFieldSearch euiFieldSearch--fullWidth"
+                placeholder="Search for metrics"
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
+              >
+                <span
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiAccordion euiAccordion-isOpen"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="Selected MetricsSelector"
+          aria-expanded="true"
+          class="euiAccordion__button"
+          id="random_html_id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__iconWrapper"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+          <span
+            class="euiIEFlexWrapFix"
+          >
+            <span
+              class="euiTitle euiTitle--xxxsmall"
+            >
+              Selected Metrics
+               
+              0
+               of 
+              0
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="random_html_id"
+        class="euiAccordion__childWrapper"
+        id="Selected MetricsSelector"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <ul
+              class="metricsList"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiAccordion euiAccordion-isOpen"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="Available MetricsSelector"
+          aria-expanded="true"
+          class="euiAccordion__button"
+          id="random_html_id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__iconWrapper"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+          <span
+            class="euiIEFlexWrapFix"
+          >
+            <span
+              class="euiTitle euiTitle--xxxsmall"
+            >
+              Available Metrics
+               
+              1
+               of 
+              1
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="random_html_id"
+        class="euiAccordion__childWrapper"
+        id="Available MetricsSelector"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <ul
+              class="metricsList"
+            >
+              <li
+                class="metricsListContainer"
+                data-test-subj="metricsListItems_availableMetrics"
+              >
+                <button
+                  class="euiFacetButton euiFacetButton--unSelected obsMetric-Name eui-textTruncate"
+                  title="[Logs] Average ram usage per day by windows os "
+                  type="button"
+                >
+                  <span
+                    class="euiFacetButton__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      aria-labelledby="random_html_id"
+                      class="euiIcon euiIcon--large euiIcon-isLoading"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                    <span
+                      class="euiFacetButton__text"
+                      data-text="[Logs] Average ram usage per day by windows os "
+                    >
+                      [Logs] Average ram usage per day by windows os 
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+`;

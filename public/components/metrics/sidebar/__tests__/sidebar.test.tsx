@@ -26,67 +26,90 @@ describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
 
   it('renders Side Bar Component for Saved Metric', async () => {
-    let objectListResolver;
-    SavedObjectsActions.getBulk = () =>
-      new Promise((_resolve) => {
-        console.log('savedObject resolver set');
-        objectListResolver = _resolve;
-      });
+    jest.useFakeTimers();
+
+    console.log('*** CUSTOM ***');
+
+    SavedObjectsActions.getBulk = jest
+      .fn()
+      .mockResolvedValue({ observabilityObjectList: [sampleSavedMetric] });
 
     httpClientMock.get = jest.fn();
 
     coreRefs.pplService = new PPLService(httpClientMock);
-    coreRefs.pplService.fetch = jest.fn(() => {
-      console.log('mock pplService fetch');
-      return new Promise((resolve) => {
-        resolve({
-          data: { DATA_SOURCES: ['datasource1', 'datasource2'] },
-          then: () => Promise.resolve(),
-        });
-      });
+    coreRefs.pplService.fetch = jest.fn().mockResolvedValueOnce({
+      data: { DATASOURCE_NAME: [] },
     });
 
     const el = document.createElement('div');
-    act(() => {
-      ReactDOM.render(<Sidebar />, el);
-    });
-    expect(el.innerHTML).toContain('Available Metrics 0 of 0');
+    let wrapper;
     await act(async () => {
-      objectListResolver({ observabilityObjectList: [sampleSavedMetric] });
+      jest.advanceTimersByTime(1);
+      wrapper = mount(<Sidebar />);
+      await Promise.resolve();
+      wrapper.update();
+      // ReactDOM.render(<Sidebar />, el);
     });
-    expect(el.innerHTML).toContain('Available Metrics 1 of 1');
-    expect(el).toMatchSnapshot();
+
+    expect(wrapper).toContain('Available Metrics 0 of 0');
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+      await Promise.resolve();
+      wrapper.update();
+    });
+
+    expect(wrapper).toContain('Available Metrics 1 of 1');
+    expect(wrapper).toMatchSnapshot();
+
+    jest.useRealTimers();
   });
 
   it('renders Side Bar Component for Prometheus Metric', async () => {
-    let objectListResolver;
-    SavedObjectsActions.getBulk = () =>
-      new Promise((_resolve) => {
-        _resolve([]);
-      });
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    console.log('*** PROMETHEUS ***');
+    SavedObjectsActions.getBulk = jest.fn().mockResolvedValue({ observabilityObjectList: [] });
 
     httpClientMock.get = jest.fn();
 
     coreRefs.pplService = new PPLService(httpClientMock);
-    coreRefs.pplService.fetch = jest.fn(() => {
-      console.log('mock pplService fetch');
-      return new Promise((resolve) => {
-        resolve({
-          data: { DATA_SOURCES: ['datasource1', 'datasource2'] },
-          then: () => Promise.resolve(),
-        });
+    coreRefs.pplService.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data: { DATASOURCE_NAME: ['datasource1'] },
+      })
+      .mockResolvedValueOnce({
+        jsonData: [
+          {
+            TABLE_CATALOG: 'datasource1',
+            TABLE_NAME: 'metric1',
+            TABLE_TYPE: 'metric',
+          },
+        ],
       });
-    });
 
     const el = document.createElement('div');
-    act(() => {
-      ReactDOM.render(<Sidebar />, el);
-    });
-    expect(el.innerHTML).toContain('Available Metrics 0 of 0');
+    let wrapper;
     await act(async () => {
-      objectListResolver({ observabilityObjectList: [sampleSavedMetric] });
+      jest.advanceTimersByTime(1);
+      ReactDOM.render(<Sidebar />, el);
+      jest.runAllTicks();
+      await Promise.resolve();
     });
+
+    expect(el.innerHTML).toContain('Available Metrics 0 of 0');
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+      jest.runAllTicks();
+      await Promise.resolve();
+    });
+
     expect(el.innerHTML).toContain('Available Metrics 1 of 1');
     expect(el).toMatchSnapshot();
+
+    jest.useRealTimers();
   });
 });
