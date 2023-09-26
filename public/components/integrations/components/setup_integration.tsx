@@ -5,8 +5,8 @@
 
 import * as Eui from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { string } from 'joi';
 import { coreRefs } from '../../../framework/core_refs';
+import { doExistingDataSourceValidation } from './create_integration_helpers';
 
 export interface IntegrationConfig {
   displayName: string;
@@ -17,6 +17,10 @@ export interface IntegrationConfig {
 interface IntegrationConfigProps {
   config: IntegrationConfig;
   updateConfig: (updates: Partial<IntegrationConfig>) => void;
+  integration: {
+    name: string;
+    type: string;
+  };
 }
 
 const INTEGRATION_DATA_TABLE_COLUMNS = [
@@ -157,7 +161,11 @@ export function IntegrationDataModal({ close }: { close: () => void }): React.JS
   );
 }
 
-export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfigProps) {
+export function SetupIntegrationForm({
+  config,
+  updateConfig,
+  integration,
+}: IntegrationConfigProps) {
   const connectionType =
     INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType) ?? 'index';
   const indefiniteArticle = 'aeiou'.includes(connectionType.charAt(0)) ? 'an' : 'a';
@@ -227,7 +235,18 @@ export function SetupIntegrationForm({ config, updateConfig }: IntegrationConfig
           singleSelection={{ asPlainText: true }}
         />
       </Eui.EuiFormRow>
-      <Eui.EuiButton>Validate</Eui.EuiButton>
+      <Eui.EuiButton
+        onClick={async () => {
+          const validationResult = await doExistingDataSourceValidation(
+            config.connectionDataSource,
+            integration.name,
+            integration.type
+          );
+          console.log(validationResult);
+        }}
+      >
+        Validate
+      </Eui.EuiButton>
     </Eui.EuiForm>
   );
 }
@@ -266,9 +285,16 @@ export function SetupBottomBar({ config }: { config: IntegrationConfig }) {
   );
 }
 
-export function SetupIntegrationPage({ integration }: { integration: string }) {
+export function SetupIntegrationPage({
+  integration,
+}: {
+  integration: {
+    name: string;
+    type: string;
+  };
+}) {
   const [integConfig, setConfig] = useState({
-    displayName: `${integration} Integration`,
+    displayName: `${integration.name} Integration`,
     connectionType: 'index',
     connectionDataSource: '',
   } as IntegrationConfig);
@@ -281,7 +307,11 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
       <Eui.EuiPageBody>
         <Eui.EuiPageContent>
           <Eui.EuiPageContentBody restrictWidth>
-            <SetupIntegrationForm config={integConfig} updateConfig={updateConfig} />
+            <SetupIntegrationForm
+              config={integConfig}
+              updateConfig={updateConfig}
+              integration={integration}
+            />
           </Eui.EuiPageContentBody>
         </Eui.EuiPageContent>
         <SetupBottomBar config={integConfig} />

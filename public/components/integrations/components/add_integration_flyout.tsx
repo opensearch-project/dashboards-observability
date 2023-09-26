@@ -85,8 +85,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                   const validationResult = await doExistingDataSourceValidation(
                     dataSource,
                     integrationName,
-                    integrationType,
-                    http
+                    integrationType
                   );
                   if (validationResult.ok) {
                     setToast('Index name or wildcard pattern is valid', 'success');

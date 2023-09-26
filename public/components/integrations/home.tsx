@@ -65,7 +65,12 @@ export const Home = (props: HomeProps) => {
             exact
             path={'/available/:id/setup'}
             render={(routerProps) => (
-              <SetupIntegrationPage integration={routerProps.match.params.id} />
+              <SetupIntegrationPage
+                integration={{
+                  name: routerProps.match.params.id,
+                  type: 'logs', // TODO
+                }}
+              />
             )}
           />
         </Switch>

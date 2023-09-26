@@ -65,6 +65,10 @@ export const doPropertyValidation = (
   requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
 ): ValidationResult => {
   // Check root object type (without dependencies)
+  if (!Object.hasOwn(requiredMappings, rootType)) {
+    // This is a configuration error for the integration.
+    return { ok: false, errors: ['Required mapping for integration has no root type.'] };
+  }
   for (const [key, value] of Object.entries(
     requiredMappings[rootType].template.mappings.properties
   )) {
@@ -156,9 +160,9 @@ export const fetchIntegrationMappings = async (
 export const doExistingDataSourceValidation = async (
   targetDataSource: string,
   integrationName: string,
-  integrationType: string,
-  http: HttpSetup
+  integrationType: string
 ): Promise<ValidationResult> => {
+  const http = coreRefs.http!;
   const dataSourceNameCheck = checkDataSourceName(targetDataSource, integrationType);
   if (!dataSourceNameCheck.ok) {
     return dataSourceNameCheck;
