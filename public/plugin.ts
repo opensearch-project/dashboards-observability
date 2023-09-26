@@ -41,6 +41,8 @@ import {
   observabilityDatasourcesID,
   observabilityDatasourcesTitle,
   observabilityDatasourcesPluginOrder,
+  DATASOURCES_BASE,
+  S3_DATASOURCE_TYPE,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -74,7 +76,8 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { FlintDataSource } from './framework/datasources/flint_datasource';
+import { S3DataSource } from './framework/datasources/s3_datasource';
+import { DataSourceType } from '../../../src/plugins/data/public';
 
 export class ObservabilityPlugin
   implements
@@ -255,7 +258,7 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public start(core: CoreStart, setupDeps): ObservabilityStart {
+  public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
 
     coreRefs.http = core.http;
@@ -263,19 +266,23 @@ export class ObservabilityPlugin
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
+    coreRefs.dataSources = startDeps.data.dataSources;
 
-    const { dataSourceService, dataSourceFactory } = setupDeps.data.dataSources;
-    dataSourceFactory.registerDataSourceType('MANAGED_FLINT', FlintDataSource);
+    const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 
-    // to-do, get all s3 datasources through show datasources
-
-    dataSourceService.registerDataSource(
-      dataSourceFactory.getDataSourceInstance('MANAGED_FLINT', {
-        name: 'Amazon Music US East Prod',
-        type: 'Amazon S3',
-        metadata: null,
-      })
-    );
+    // register all s3 datasources
+    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+    core.http.get(`${DATASOURCES_BASE}`).then((s3DataSources) => {
+      s3DataSources.map((s3ds) => {
+        dataSourceService.registerDataSource(
+          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+            name: s3ds.name,
+            type: s3ds.connector.toLowerCase(),
+            metadata: s3ds,
+          })
+        );
+      });
+    });
 
     return {};
   }
