@@ -488,7 +488,11 @@ export const Explorer = ({
                   isEmpty(explorerData.jsonData) ||
                   !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
                 }
-                storedExplorerFields={storedExplorerFields}
+                storedExplorerFields={
+                  storedExplorerFields.availableFields.length > 0
+                    ? storedExplorerFields
+                    : explorerFields
+                }
                 setStoredExplorerFields={setStoredExplorerFields}
               />
             </div>
