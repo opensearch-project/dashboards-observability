@@ -267,7 +267,7 @@ exports[`Datagrid component Renders data grid component 1`] = `
             "onChangeItemsPerPage": [Function],
             "onChangePage": [Function],
             "pageIndex": 0,
-            "pageSize": 25,
+            "pageSize": 100,
             "pageSizeOptions": Array [
               25,
               50,
