@@ -277,6 +277,13 @@ exports[`Datagrid component Renders data grid component 1`] = `
         }
         renderCellValue={[Function]}
         rowCount={1390}
+        rowHeightsOptions={
+          Object {
+            "defaultHeight": Object {
+              "lineCount": 3,
+            },
+          }
+        }
         sorting={
           Object {
             "columns": Array [],

@@ -10,6 +10,7 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiDataGridColumn,
+  EuiDataGridSorting,
 } from '@elastic/eui';
 import moment from 'moment';
 import dompurify from 'dompurify';
@@ -68,7 +69,7 @@ export function DataGrid(props: DataGridProps) {
     pplService,
     requestParams,
   });
-  const sortingFields: MutableRefObject<GridSortingColumn[]> = useRef([]);
+  const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
   const pageFields = useRef([0, 100]);
 
   const onFlyoutOpen = (docId: string) => {
@@ -103,7 +104,7 @@ export function DataGrid(props: DataGridProps) {
   };
 
   // setSort and setPage are used to change the query and send a direct request to get data
-  const setSort = (sort: GridSortingColumn[]) => {
+  const setSort = (sort: EuiDataGridSorting['columns']) => {
     sortingFields.current = sort;
     redoQuery();
   };
@@ -197,9 +198,9 @@ export function DataGrid(props: DataGridProps) {
                   <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
                     {key}
                   </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription
-                    dangerouslySetInnerHTML={{ __html: dompurify.sanitize(rows[trueIndex][key]) }}
-                  />
+                  <EuiDescriptionListDescription>
+                    {rows[trueIndex][key]}
+                  </EuiDescriptionListDescription>
                 </Fragment>
               ))}
             </EuiDescriptionList>
@@ -237,6 +238,16 @@ export function DataGrid(props: DataGridProps) {
     [setPagination, setPage]
   );
 
+  const rowHeightsOptions = useMemo(
+    () => ({
+      defaultHeight: {
+        // if source is listed as a column, add extra space
+        lineCount: storedSelectedColumns.some((obj) => obj.name === '_source') ? 3 : 1,
+      },
+    }),
+    [storedSelectedColumns]
+  );
+
   return (
     <>
       <div className="dscTable dscTableFixedScroll">
@@ -266,6 +277,7 @@ export function DataGrid(props: DataGridProps) {
             showFullScreenSelector: false,
             showStyleSelector: false,
           }}
+          rowHeightsOptions={rowHeightsOptions}
         />
       </div>
     </>
