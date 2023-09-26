@@ -69,7 +69,7 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
   });
   const sortingFields: MutableRefObject<GridSortingColumn[]> = useRef([]);
-  const pageFields = useRef([0, 25]);
+  const pageFields = useRef([0, 100]);
 
   const onFlyoutOpen = (docId: string) => {
     rowRefs.forEach((rowRef) => {
@@ -216,7 +216,7 @@ export function DataGrid(props: DataGridProps) {
   );
 
   // ** Pagination config
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
   // changing the number of items per page, reset index and modify page size
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
