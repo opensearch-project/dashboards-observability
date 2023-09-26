@@ -6,7 +6,12 @@
 import * as Eui from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
-import { doExistingDataSourceValidation } from './create_integration_helpers';
+import {
+  addIntegrationRequest,
+  doExistingDataSourceValidation,
+} from './create_integration_helpers';
+import { useToast } from '../../../../public/components/common/toast';
+import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 export interface IntegrationConfig {
   displayName: string;
@@ -161,6 +166,12 @@ export function IntegrationDataModal({ close }: { close: () => void }): React.JS
   );
 }
 
+const findTemplate = async (integrationTemplateId: string) => {
+  const http = coreRefs.http!;
+  const result = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`);
+  return result;
+};
+
 export function SetupIntegrationForm({
   config,
   updateConfig,
@@ -251,7 +262,10 @@ export function SetupIntegrationForm({
   );
 }
 
-export function SetupBottomBar({ config }: { config: IntegrationConfig }) {
+export function SetupBottomBar({ config, integration }: IntegrationConfigProps) {
+  const { setToast } = useToast();
+  const [loading, setLoading] = useState(false);
+
   return (
     <Eui.EuiBottomBar>
       <Eui.EuiFlexGroup justifyContent="flexEnd">
@@ -275,7 +289,21 @@ export function SetupBottomBar({ config }: { config: IntegrationConfig }) {
             fill
             iconType="arrowRight"
             iconSide="right"
-            onClick={() => console.log(config)}
+            isLoading={loading}
+            onClick={async () => {
+              setLoading(true);
+              const template = await findTemplate(integration.name);
+              await addIntegrationRequest(
+                false,
+                integration.name,
+                config.displayName,
+                template,
+                setToast,
+                config.displayName,
+                config.connectionDataSource
+              );
+              setLoading(false);
+            }}
           >
             Add Integration
           </Eui.EuiButton>
@@ -306,7 +334,7 @@ export function SetupIntegrationPage({
     <Eui.EuiPage>
       <Eui.EuiPageBody>
         <Eui.EuiPageContent>
-          <Eui.EuiPageContentBody restrictWidth>
+          <Eui.EuiPageContentBody>
             <SetupIntegrationForm
               config={integConfig}
               updateConfig={updateConfig}
@@ -314,7 +342,7 @@ export function SetupIntegrationPage({
             />
           </Eui.EuiPageContentBody>
         </Eui.EuiPageContent>
-        <SetupBottomBar config={integConfig} />
+        <SetupBottomBar config={integConfig} integration={integration} />
       </Eui.EuiPageBody>
     </Eui.EuiPage>
   );

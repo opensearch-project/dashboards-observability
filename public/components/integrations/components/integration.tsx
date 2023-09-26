@@ -142,15 +142,16 @@ export function Integration(props: AvailableIntegrationProps) {
           showFlyout: () => {
             window.location.hash = `#/available/${integration.name}/setup`;
           },
-          setUpSample: () => {
-            addIntegrationRequest(
+          setUpSample: async () => {
+            setLoading(true);
+            await addIntegrationRequest(
               true,
               integration.name,
               integrationTemplateId,
               integration,
-              setLoading,
               setToast
             );
+            setLoading(false);
           },
           loading,
         })}

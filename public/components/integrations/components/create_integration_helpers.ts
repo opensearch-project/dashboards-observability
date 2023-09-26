@@ -284,13 +284,11 @@ export async function addIntegrationRequest(
   templateName: string,
   integrationTemplateId: string,
   integration: IntegrationTemplate,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,
   dataSource?: string
 ) {
   const http = coreRefs.http!;
-  setLoading(true);
   if (addSample) {
     createDataSourceMappings(
       `ss4o_${integration.type}-${integrationTemplateId}-*-sample`,
@@ -319,7 +317,6 @@ export async function addIntegrationRequest(
       return false;
     });
   if (!addSample || !response) {
-    setLoading(false);
     return;
   }
   const data: { sampleData: unknown[] } = await http
@@ -345,8 +342,5 @@ export async function addIntegrationRequest(
     .catch((err) => {
       console.error(err);
       setToast('Failed to load sample data', 'danger');
-    })
-    .finally(() => {
-      setLoading(false);
     });
 }
