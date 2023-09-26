@@ -125,7 +125,7 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
 
   observability.getJobStatus = clientAction({
     url: {
-      fmt: `${JOBS_ENDPOINT_BASE}/<%=jobId%>/${JOB_RESULT_ENDPOINT}`,
+      fmt: `${JOBS_ENDPOINT_BASE}/<%=queryId%>`,
       req: {
         jobId: {
           type: 'string',
@@ -133,18 +133,14 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
         },
       },
     },
-    method: 'POST',
+    method: 'GET',
   });
 
   observability.runDirectQuery = clientAction({
     url: {
       fmt: `${JOBS_ENDPOINT_BASE}`,
-      params: {
-        query: { type: 'string', required: true },
-        datasource: { type: 'string', required: true },
-        lang: { type: 'string', required: true },
-      },
     },
     method: 'POST',
+    needBody: true,
   });
 }

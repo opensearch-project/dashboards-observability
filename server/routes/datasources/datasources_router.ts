@@ -64,16 +64,24 @@ export function registerDatasourcesRoute(router: IRouter) {
     {
       path: `${OBSERVABILITY_BASE}${JOBS_BASE}`,
       validate: {
-        query: schema.string,
-        datasource: schema.string,
-        lang: schema.string,
+        body: schema.object({
+          query: schema.string(),
+          kind: schema.string(),
+        }),
       },
     },
     async (context, request, response): Promise<any> => {
+      console.log('request: ', request);
+      const params = {
+        body: {
+          ...request.body,
+        },
+      };
+      console.log('params: ', params);
       try {
         const res = await context.observability_plugin.observabilityClient
           .asScoped(request)
-          .callAsCurrentUser('observability.runDirectQuery');
+          .callAsCurrentUser('observability.runDirectQuery', params);
         return response.ok({
           body: res,
         });
@@ -89,10 +97,10 @@ export function registerDatasourcesRoute(router: IRouter) {
 
   router.get(
     {
-      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{jobId}`,
+      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{queryId}`,
       validate: {
         params: schema.object({
-          jobId: schema.string(),
+          queryId: schema.string(),
         }),
       },
     },
@@ -101,7 +109,7 @@ export function registerDatasourcesRoute(router: IRouter) {
         const res = await context.observability_plugin.observabilityClient
           .asScoped(request)
           .callAsCurrentUser('observability.getJobStatus', {
-            jobId: request.params.jobId,
+            queryId: request.params.queryId,
           });
         return response.ok({
           body: res,
