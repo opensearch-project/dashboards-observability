@@ -1602,7 +1602,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
@@ -1835,7 +1835,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
@@ -2333,7 +2333,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
