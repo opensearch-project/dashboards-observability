@@ -16,6 +16,7 @@ export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const DATASOURCES_BASE = '/api/query/jobs';
 export const JOBS_BASE = '/query/jobs';
+export const DATACONNECTIONS_BASE = '/api/dataconnections';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -25,9 +26,9 @@ export const SAVED_VISUALIZATION = '/vis';
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
-export const DATASOURCES_ENDPOINT = '/_plugins/_query/_datasources';
 export const JOBS_ENDPOINT_BASE = '/_plugins/_query/_jobs';
 export const JOB_RESULT_ENDPOINT = '/_result';
+export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
@@ -61,9 +62,9 @@ export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
 
-export const observabilityDatasourcesID = 'datasources';
-export const observabilityDatasourcesTitle = 'Datasources';
-export const observabilityDatasourcesPluginOrder = 9030;
+export const observabilityDataConnectionsID = 'dataconnections';
+export const observabilityDataConnectionsTitle = 'Data Connections';
+export const observabilityDataConnectionsPluginOrder = 9030;
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
@@ -83,12 +84,12 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
-const BASE_DATASOURCES_URI = '/_plugins/_query/_datasources';
+const BASE_DATACONNECTIONS_URI = '/_plugins/_query/_datasources';
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };
-export const OPENSEARCH_DATASOURCES_API = {
-  DATASOURCE: `${BASE_DATASOURCES_URI}`,
+export const OPENSEARCH_DATACONNECTIONS_API = {
+  DATACONNECTION: `${BASE_DATACONNECTIONS_URI}`,
 };
 
 // Saved Objects
