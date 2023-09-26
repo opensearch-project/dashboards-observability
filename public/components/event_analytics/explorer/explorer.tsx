@@ -530,7 +530,12 @@ export const Explorer = ({
                       startTime={appLogEvents ? startTime : dateRange[0]}
                       endTime={appLogEvents ? endTime : dateRange[1]}
                     />
-                    <CountDistribution countDistribution={countDistribution} />
+                    <CountDistribution
+                      countDistribution={countDistribution}
+                      selectedInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
                     <EuiHorizontalRule margin="xs" />
                     <LogPatterns
                       selectedIntervalUnit={selectedIntervalRef.current}
