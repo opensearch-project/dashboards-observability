@@ -26,6 +26,7 @@ type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantSetup {
   registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
+  assistantEnabled: () => Promise<boolean>;
 }
 
 export interface SetupDependencies {

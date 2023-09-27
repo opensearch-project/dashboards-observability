@@ -23,6 +23,7 @@ class CoreRefs {
   public toasts?: IToasts;
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
+  public assistantEnabled?: boolean;
   private constructor() {
     // ...
   }

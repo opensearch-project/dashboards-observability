@@ -14,8 +14,10 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiPopoverFooter,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
@@ -28,6 +30,7 @@ import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
+import { LLMInput, SubmitPPLButton } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
@@ -36,6 +39,7 @@ import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { QueryArea } from './query_area';
+import './search.scss';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -100,6 +104,7 @@ export const Search = (props: any) => {
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isQueryBarVisible, setIsQueryBarVisible] = useState(!coreRefs.assistantEnabled);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const [timePicker, setTimePicker] = useState(['now', 'now']); // TODO: make sure this default value won't interfere with anything
   const sqlService = new SQLService(coreRefs.http);
