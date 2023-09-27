@@ -137,6 +137,6 @@ describe('Utils event analytics helper functions', () => {
         },
         () => {}
       )
-    ).toReturn();
+    ).toBe(undefined);
   });
 });
