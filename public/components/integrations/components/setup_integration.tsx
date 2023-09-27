@@ -246,7 +246,8 @@ export function SetupIntegrationForm({
           singleSelection={{ asPlainText: true }}
         />
       </Eui.EuiFormRow>
-      <Eui.EuiButton
+      {/* TODO temporarily removing validate button until error states are ready. */}
+      {/* <Eui.EuiButton
         onClick={async () => {
           const validationResult = await doExistingDataSourceValidation(
             config.connectionDataSource,
@@ -257,12 +258,18 @@ export function SetupIntegrationForm({
         }}
       >
         Validate
-      </Eui.EuiButton>
+      </Eui.EuiButton> */}
     </Eui.EuiForm>
   );
 }
 
-export function SetupBottomBar({ config, integration }: IntegrationConfigProps) {
+export function SetupBottomBar({
+  config,
+  integration,
+}: {
+  config: IntegrationConfig;
+  integration: { name: string; type: string };
+}) {
   const { setToast } = useToast();
   const [loading, setLoading] = useState(false);
 
