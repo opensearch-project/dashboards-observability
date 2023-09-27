@@ -11,6 +11,13 @@ import { ManageDataConnectionsTable } from '../manage/manage_data_connections_ta
 import { showDataConnectionsData } from '../../../../../test/datasources';
 import ReactDOM from 'react-dom';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    pathname: '/manage',
+  }),
+}));
+
 describe('Manage Data Connections Table test', () => {
   configure({ adapter: new Adapter() });
 
