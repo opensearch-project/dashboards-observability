@@ -17,11 +17,11 @@ import {
   OPENSEARCH_DOCUMENTATION_URL,
   QUERY_ALL,
   QUERY_RESTRICTED,
-} from '../../../../common/constants/data_connections';
-import { PermissionsConfigurationProps } from '../../../../common/types/data_connections';
+} from '../../../../../common/constants/data_connections';
+import { PermissionsConfigurationProps } from '../../../../../common/types/data_connections';
 
 export const QueryPermissionsConfiguration = (props: PermissionsConfigurationProps) => {
-  const { roles, selectedRoles, setSelectedRoles } = props;
+  const { roles, selectedRoles, setSelectedRoles, layout } = props;
 
   const [selectedAccessLevel, setSelectedAccessLevel] = useState(
     selectedRoles.length ? QUERY_RESTRICTED : QUERY_ALL
@@ -59,7 +59,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
 
   return (
     <EuiFlexItem>
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction={layout === 'horizontal' ? 'row' : 'column'}>
         <EuiFlexItem>
           <EuiText className="overview-title">Query Permissions</EuiText>
           <EuiText size="s" className="overview-content">

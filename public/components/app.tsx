@@ -19,7 +19,7 @@ import { EventAnalytics } from './event_analytics';
 import { Home as MetricsHome } from './metrics/index';
 import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
-import { Home as DataConnectionsHome } from './data_connections/home';
+import { Home as DataConnectionsHome } from './datasources/home';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;

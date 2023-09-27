@@ -68,6 +68,14 @@ export const PPLPlugin = function (Client, config, components) {
     method: 'DELETE',
   });
 
+  ppl.createDataSource = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
+    },
+    needBody: true,
+    method: 'POST',
+  });
+
   ppl.modifyDataConnection = ca({
     url: {
       fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
