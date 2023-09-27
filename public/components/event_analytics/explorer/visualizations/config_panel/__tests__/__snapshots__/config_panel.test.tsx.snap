@@ -465,7 +465,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "props": Object {
                         "defaultSelections": Array [
                           Object {
-                            "id": "v",
+                            "id": "h",
                             "name": "Right",
                           },
                         ],
@@ -628,7 +628,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         "id": "bar",
         "label": "Vertical bar",
         "labelangle": 0,
-        "legendposition": "v",
+        "legendposition": "h",
         "linewidth": 0,
         "mode": "group",
         "name": "bar",
@@ -787,7 +787,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                               ],
@@ -951,7 +951,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "id": "bar",
               "label": "Vertical bar",
               "labelangle": 0,
-              "legendposition": "v",
+              "legendposition": "h",
               "linewidth": 0,
               "mode": "group",
               "name": "bar",
@@ -1092,7 +1092,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                               ],
@@ -1255,7 +1255,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "id": "horizontal_bar",
               "label": "Horizontal bar",
               "labelangle": 0,
-              "legendposition": "v",
+              "legendposition": "h",
               "linewidth": 0,
               "mode": "group",
               "name": "horizontal_bar",
@@ -1337,7 +1337,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                               ],
@@ -1688,13 +1688,13 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                               ],
                               "options": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                                 Object {
@@ -1821,7 +1821,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "icontype": "visPie",
               "id": "pie",
               "label": "Pie",
-              "legendposition": "v",
+              "legendposition": "h",
               "mode": "pie",
               "name": "pie",
               "seriesaxis": "yaxis",
@@ -2484,7 +2484,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                               ],
@@ -2648,7 +2648,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "id": "bar",
               "label": "Vertical bar",
               "labelangle": 0,
-              "legendposition": "v",
+              "legendposition": "h",
               "linewidth": 0,
               "mode": "group",
               "name": "bar",
@@ -2821,7 +2821,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 "props": Object {
                                   "defaultSelections": Array [
                                     Object {
-                                      "id": "v",
+                                      "id": "h",
                                       "name": "Right",
                                     },
                                   ],
@@ -2985,7 +2985,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   "id": "bar",
                   "label": "Vertical bar",
                   "labelangle": 0,
-                  "legendposition": "v",
+                  "legendposition": "h",
                   "linewidth": 0,
                   "mode": "group",
                   "name": "bar",
@@ -3163,7 +3163,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       "props": Object {
                                         "defaultSelections": Array [
                                           Object {
-                                            "id": "v",
+                                            "id": "h",
                                             "name": "Right",
                                           },
                                         ],
@@ -3328,7 +3328,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       id="bar"
                       key="vertical bar"
                       labelangle={0}
-                      legendposition="v"
+                      legendposition="h"
                       linewidth={0}
                       mode="group"
                       name="bar"
@@ -3440,7 +3440,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         "props": Object {
                                           "defaultSelections": Array [
                                             Object {
-                                              "id": "v",
+                                              "id": "h",
                                               "name": "Right",
                                             },
                                           ],
@@ -3604,7 +3604,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           "id": "bar",
                           "label": "Vertical bar",
                           "labelangle": 0,
-                          "legendposition": "v",
+                          "legendposition": "h",
                           "linewidth": 0,
                           "mode": "group",
                           "name": "bar",
@@ -3783,7 +3783,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         "props": Object {
                                           "defaultSelections": Array [
                                             Object {
-                                              "id": "v",
+                                              "id": "h",
                                               "name": "Right",
                                             },
                                           ],
@@ -3947,7 +3947,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         icontype="visBarVerticalStacked"
                         id="bar"
                         labelangle={0}
-                        legendposition="v"
+                        legendposition="h"
                         linewidth={0}
                         mode="group"
                         name="bar"
@@ -4096,7 +4096,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             "props": Object {
                                               "defaultSelections": Array [
                                                 Object {
-                                                  "id": "v",
+                                                  "id": "h",
                                                   "name": "Right",
                                                 },
                                               ],
@@ -4259,7 +4259,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             icontype="visBarVerticalStacked"
                             id="bar"
                             labelangle={0}
-                            legendposition="v"
+                            legendposition="h"
                             linewidth={0}
                             mode="group"
                             name="bar"
@@ -4577,7 +4577,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           "props": Object {
                             "defaultSelections": Array [
                               Object {
-                                "id": "v",
+                                "id": "h",
                                 "name": "Right",
                               },
                             ],
@@ -5187,7 +5187,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "props": Object {
                                     "defaultSelections": Array [
                                       Object {
-                                        "id": "v",
+                                        "id": "h",
                                         "name": "Right",
                                       },
                                     ],
@@ -5350,7 +5350,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "id": "bar",
                     "label": "Vertical bar",
                     "labelangle": 0,
-                    "legendposition": "v",
+                    "legendposition": "h",
                     "linewidth": 0,
                     "mode": "group",
                     "name": "bar",
@@ -5519,7 +5519,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "v",
+                                  "id": "h",
                                   "name": "Right",
                                 },
                               ],
@@ -6129,7 +6129,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     "props": Object {
                                       "defaultSelections": Array [
                                         Object {
-                                          "id": "v",
+                                          "id": "h",
                                           "name": "Right",
                                         },
                                       ],
@@ -6292,7 +6292,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "id": "bar",
                       "label": "Vertical bar",
                       "labelangle": 0,
-                      "legendposition": "v",
+                      "legendposition": "h",
                       "linewidth": 0,
                       "mode": "group",
                       "name": "bar",
@@ -6502,7 +6502,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           "props": Object {
                             "defaultSelections": Array [
                               Object {
-                                "id": "v",
+                                "id": "h",
                                 "name": "Right",
                               },
                             ],
@@ -7112,7 +7112,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "props": Object {
                                     "defaultSelections": Array [
                                       Object {
-                                        "id": "v",
+                                        "id": "h",
                                         "name": "Right",
                                       },
                                     ],
@@ -7275,7 +7275,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "id": "bar",
                     "label": "Vertical bar",
                     "labelangle": 0,
-                    "legendposition": "v",
+                    "legendposition": "h",
                     "linewidth": 0,
                     "mode": "group",
                     "name": "bar",
@@ -7823,7 +7823,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 "props": Object {
                                                   "defaultSelections": Array [
                                                     Object {
-                                                      "id": "v",
+                                                      "id": "h",
                                                       "name": "Right",
                                                     },
                                                   ],
@@ -7986,7 +7986,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "id": "bar",
                                   "label": "Vertical bar",
                                   "labelangle": 0,
-                                  "legendposition": "v",
+                                  "legendposition": "h",
                                   "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
@@ -8269,6 +8269,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="tooltip_options"
                       labelType="label"
                     >
                       <div
@@ -8801,7 +8802,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 "props": Object {
                                                   "defaultSelections": Array [
                                                     Object {
-                                                      "id": "v",
+                                                      "id": "h",
                                                       "name": "Right",
                                                     },
                                                   ],
@@ -8964,7 +8965,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "id": "bar",
                                   "label": "Vertical bar",
                                   "labelangle": 0,
-                                  "legendposition": "v",
+                                  "legendposition": "h",
                                   "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
@@ -9743,6 +9744,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="legend"
                       labelType="label"
                     >
                       <div
@@ -9790,7 +9792,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "props": Object {
                                     "defaultSelections": Array [
                                       Object {
-                                        "id": "v",
+                                        "id": "h",
                                         "name": "Right",
                                       },
                                     ],
@@ -10278,7 +10280,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 "props": Object {
                                                   "defaultSelections": Array [
                                                     Object {
-                                                      "id": "v",
+                                                      "id": "h",
                                                       "name": "Right",
                                                     },
                                                   ],
@@ -10441,7 +10443,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "id": "bar",
                                   "label": "Vertical bar",
                                   "labelangle": 0,
-                                  "legendposition": "v",
+                                  "legendposition": "h",
                                   "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
@@ -10830,7 +10832,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           defaultSelections={
                                             Array [
                                               Object {
-                                                "id": "v",
+                                                "id": "h",
                                                 "name": "Right",
                                               },
                                             ]
@@ -10850,7 +10852,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             ]
                                           }
                                           handleButtonChange={[Function]}
-                                          idSelected="v"
+                                          idSelected="h"
                                           legend="Position"
                                           options={
                                             Array [
@@ -10893,7 +10895,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             <EuiButtonGroup
                                               buttonSize="compressed"
                                               id="random_html_id"
-                                              idSelected="v"
+                                              idSelected="h"
                                               isFullWidth={false}
                                               legend="Position"
                                               name="Position"
@@ -10934,7 +10936,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                     id="v"
                                                     isDisabled={false}
                                                     isIconOnly={false}
-                                                    isSelected={true}
+                                                    isSelected={false}
                                                     key="0"
                                                     label="Right"
                                                     name="Right"
@@ -10943,7 +10945,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   >
                                                     <EuiButtonDisplay
                                                       baseClassName="euiButtonGroupButton"
-                                                      className="euiButtonGroupButton-isSelected"
+                                                      className=""
                                                       color="text"
                                                       element="label"
                                                       fill={false}
@@ -10961,7 +10963,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       }
                                                     >
                                                       <label
-                                                        className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
+                                                        className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
                                                         disabled={false}
                                                         htmlFor="random_html_id"
                                                         onClick={[Function]}
@@ -10992,7 +10994,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               title="Right"
                                                             >
                                                               <input
-                                                                checked={true}
+                                                                checked={false}
                                                                 className="euiScreenReaderOnly"
                                                                 data-test-subj="v"
                                                                 disabled={false}
@@ -11014,7 +11016,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                     id="h"
                                                     isDisabled={false}
                                                     isIconOnly={false}
-                                                    isSelected={false}
+                                                    isSelected={true}
                                                     key="1"
                                                     label="Bottom"
                                                     name="Bottom"
@@ -11023,7 +11025,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   >
                                                     <EuiButtonDisplay
                                                       baseClassName="euiButtonGroupButton"
-                                                      className=""
+                                                      className="euiButtonGroupButton-isSelected"
                                                       color="text"
                                                       element="label"
                                                       fill={false}
@@ -11041,7 +11043,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       }
                                                     >
                                                       <label
-                                                        className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                                        className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
                                                         disabled={false}
                                                         htmlFor="random_html_id"
                                                         onClick={[Function]}
@@ -11072,7 +11074,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               title="Bottom"
                                                             >
                                                               <input
-                                                                checked={false}
+                                                                checked={true}
                                                                 className="euiScreenReaderOnly"
                                                                 data-test-subj="h"
                                                                 disabled={false}
@@ -11188,6 +11190,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="chart_styles"
                       labelType="label"
                     >
                       <div
@@ -11776,7 +11779,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 "props": Object {
                                                   "defaultSelections": Array [
                                                     Object {
-                                                      "id": "v",
+                                                      "id": "h",
                                                       "name": "Right",
                                                     },
                                                   ],
@@ -11939,7 +11942,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "id": "bar",
                                   "label": "Vertical bar",
                                   "labelangle": 0,
-                                  "legendposition": "v",
+                                  "legendposition": "h",
                                   "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
@@ -14360,6 +14363,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
+                      key="color-theme"
                       labelType="label"
                     >
                       <div
@@ -14839,7 +14843,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 "props": Object {
                                                   "defaultSelections": Array [
                                                     Object {
-                                                      "id": "v",
+                                                      "id": "h",
                                                       "name": "Right",
                                                     },
                                                   ],
@@ -15002,7 +15006,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "id": "bar",
                                   "label": "Vertical bar",
                                   "labelangle": 0,
-                                  "legendposition": "v",
+                                  "legendposition": "h",
                                   "linewidth": 0,
                                   "mode": "group",
                                   "name": "bar",
