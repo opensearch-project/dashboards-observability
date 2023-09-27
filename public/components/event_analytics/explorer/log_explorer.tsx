@@ -43,6 +43,7 @@ export const LogExplorer = ({
   notifications,
   http,
   queryManager,
+  dataSourcePluggables,
 }: ILogExplorerProps) => {
   const history = useHistory();
   const routerContext = useContext(LogExplorerRouterContext);
@@ -104,6 +105,7 @@ export const LogExplorer = ({
         http={http}
         searchBarConfigs={searchBarConfigs}
         queryManager={queryManager}
+        dataSourcePluggables={dataSourcePluggables}
       />
     </>
   );

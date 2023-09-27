@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import CSS from 'csstype';
-import { IField } from '../../common/types/explorer';
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -14,7 +13,6 @@ export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
-export const DATASOURCES_BASE = '/api/datasources';
 export const JOBS_BASE = '/query/jobs';
 export const DATACONNECTIONS_BASE = '/api/dataconnections';
 export const EVENT_ANALYTICS = '/event_analytics';

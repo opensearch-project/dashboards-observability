@@ -144,6 +144,7 @@ export const Explorer = ({
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
+  dataSourcePluggables,
 }: IExplorerProps) => {
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();

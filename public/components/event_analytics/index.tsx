@@ -81,7 +81,7 @@ export const EventAnalytics = ({
                     setToast={setToast}
                     notifications={notifications}
                     queryManager={queryManager}
-                    setupDeps={props.setupDeps}
+                    dataSourcePluggables={props.dataSourcePluggables}
                   />
                 </LogExplorerRouterContext.Provider>
               );
@@ -106,7 +106,7 @@ export const EventAnalytics = ({
                   dslService={dslService}
                   pplService={pplService}
                   setToast={setToast}
-                  setupDeps={props.setupDeps}
+                  dataSourcePluggables={props.dataSourcePluggables}
                 />
               );
             }}

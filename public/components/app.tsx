@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { CoreStart } from '../../../../src/core/public';
 import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import { store } from '../framework/redux/store';
-import { AppPluginStartDependencies, SetupDependencies } from '../types';
+import { AppPluginStartDependencies } from '../types';
 import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
 import { Home as IntegrationsHome } from './integrations/home';
 import { MetricsListener } from './common/metrics_listener';
@@ -30,7 +30,6 @@ interface ObservabilityAppDeps {
   timestampUtils: any;
   queryManager: QueryManager;
   startPage: string;
-  setupDeps: SetupDependencies;
 }
 
 // for cypress to test redux store
@@ -58,7 +57,7 @@ export const App = ({
   timestampUtils,
   queryManager,
   startPage,
-  setupDeps,
+  dataSourcePluggables,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
@@ -89,7 +88,7 @@ export const App = ({
             parentBreadcrumb={parentBreadcrumb}
             parentBreadcrumbs={[parentBreadcrumb]}
             setBreadcrumbs={chrome.setBreadcrumbs}
-            setupDeps={setupDeps}
+            dataSourcePluggables={dataSourcePluggables}
           />
         </MetricsListener>
       </I18nProvider>

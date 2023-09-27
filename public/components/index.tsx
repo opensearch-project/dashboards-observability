@@ -20,7 +20,7 @@ export const Observability = (
   timestampUtils: any,
   queryManager: QueryManager,
   startPage: string,
-  setupDeps: SetupDependencies
+  dataSourcePluggables
 ) => {
   ReactDOM.render(
     <App
@@ -32,7 +32,7 @@ export const Observability = (
       timestampUtils={timestampUtils}
       queryManager={queryManager}
       startPage={startPage}
-      setupDeps={setupDeps}
+      dataSourcePluggables={dataSourcePluggables}
     />,
     AppMountParametersProp.element
   );
