@@ -22,7 +22,11 @@ import {
 import React, { useEffect, useState } from 'react';
 import { AccessControlTab } from './access_control_tab';
 import { NoAccess } from '../no_access';
-import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import {
+  DATACONNECTIONS_BASE,
+  observabilityLogsID,
+  observabilityMetricsID,
+} from '../../../../../common/constants/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { ConnectionDetails } from './connection_details';
 
@@ -44,7 +48,7 @@ export const DataConnection = (props: any) => {
     properties: {},
   });
   const [hasAccess, setHasAccess] = useState(true);
-  const { http, chrome } = coreRefs;
+  const { http, chrome, application } = coreRefs;
 
   useEffect(() => {
     chrome!.setBreadcrumbs([
@@ -103,35 +107,45 @@ export const DataConnection = (props: any) => {
     },
   ];
 
-  const QueryData = () => {
+  const QueryOrAccelerateData = () => {
+    console.log(chrome);
     switch (datasourceDetails.connector) {
-      case 'S3GlUE':
+      case 'S3GLUE':
         return (
-          <EuiCard
-            icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={'Query data'}
-            description="Query your data in Data Explorer or Observability Logs."
-            href={'http://localhost:5601/app/observability-logs#/'}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="discoverApp" />}
+                title={'Query data'}
+                description="Query your data in Data Explorer or Observability Logs."
+                onClick={() => application!.navigateToApp(observabilityLogsID)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="bolt" />}
+                title={'Accelerate performance'}
+                description="Accelerate performance through OpenSearch indexing."
+                onClick={() => {}}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       case 'PROMETHEUS':
         return (
-          <EuiCard
-            icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={'Query data'}
-            description="Query your data in Metrics Analytics"
-            href={'http://localhost:5601/app/observability-metrics#/'}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="discoverApp" />}
+                title={'Query data'}
+                description="Query your data in Metrics Analytics."
+                onClick={() => application!.navigateToApp(observabilityMetricsID)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       default:
-        return (
-          <EuiCard
-            icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={'Query data'}
-            description="Query your data in Data Explorer or Observability Logs."
-            href={'http://localhost:5601/app/observability-logs#/'}
-          />
-        );
+        return null;
     }
   };
 
@@ -215,19 +229,7 @@ export const DataConnection = (props: any) => {
           buttonContent="Ways to use in Dashboards"
           initialIsOpen={true}
         >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <QueryData />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="bolt" />}
-                title={'Accelerate performance'}
-                description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <QueryOrAccelerateData />
         </EuiAccordion>
         <EuiTabbedContent tabs={tabs} />
 
