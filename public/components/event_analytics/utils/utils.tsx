@@ -7,8 +7,8 @@
 
 import { uniqueId, isEmpty } from 'lodash';
 import moment from 'moment';
-import React from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { MutableRefObject } from 'react';
+import { EuiDataGridSorting, EuiText } from '@elastic/eui';
 import datemath from '@elastic/datemath';
 import { HttpStart } from '../../../../../../src/core/public';
 import {
@@ -19,7 +19,12 @@ import {
   BREAKDOWNS,
   DATE_PICKER_FORMAT,
 } from '../../../../common/constants/explorer';
-import { PPL_DATE_FORMAT, PPL_INDEX_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_DATE_FORMAT,
+  PPL_INDEX_INSERT_POINT_REGEX,
+  PPL_INDEX_REGEX,
+  PPL_NEWLINE_REGEX,
+} from '../../../../common/constants/shared';
 import {
   ConfigListEntry,
   GetTooltipHoverInfoType,
@@ -278,13 +283,15 @@ export const getDefaultVisConfig = (statsToken: statsChunk) => {
   // const seriesToken = statsToken.aggregations && statsToken.aggregations[0];
   const span = getSpanValue(groupByToken);
   return {
-    [AGGREGATIONS]: statsToken.aggregations.map((agg) => ({
-      label: agg.function?.value_expression,
-      name: agg.function?.value_expression,
-      aggregation: agg.function?.name,
-      [CUSTOM_LABEL]: agg[CUSTOM_LABEL as keyof StatsAggregationChunk],
-    })),
-    [GROUPBY]: groupByToken?.group_fields?.map((agg) => ({
+    [AGGREGATIONS]: statsToken.aggregations.map(
+      (agg: { [x: string]: any; function: { value_expression: any; name: any } }) => ({
+        label: agg.function?.value_expression,
+        name: agg.function?.value_expression,
+        aggregation: agg.function?.name,
+        [CUSTOM_LABEL]: agg[CUSTOM_LABEL as keyof StatsAggregationChunk],
+      })
+    ),
+    [GROUPBY]: groupByToken?.group_fields?.map((agg: { [x: string]: any; name: any }) => ({
       label: agg.name ?? '',
       name: agg.name ?? '',
       [CUSTOM_LABEL]: agg[CUSTOM_LABEL as keyof GroupField] ?? '',
@@ -397,4 +404,37 @@ export const fillTimeDataWithEmpty = (
   });
 
   return { buckets, values };
+};
+
+export const redoQuery = (
+  startTime: string,
+  endTime: string,
+  rawQuery: string,
+  timeStampField: string,
+  sortingFields: MutableRefObject<EuiDataGridSorting['columns']>,
+  pageFields: MutableRefObject<number[]>,
+  getEvents: any
+) => {
+  let finalQuery = '';
+
+  const start = datemath.parse(startTime)?.utc().format(DATE_PICKER_FORMAT);
+  const end = datemath.parse(endTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT);
+  const tokens = rawQuery.replaceAll(PPL_NEWLINE_REGEX, '').match(PPL_INDEX_INSERT_POINT_REGEX);
+
+  finalQuery = `${tokens![1]}=${
+    tokens![2]
+  } | where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`;
+
+  finalQuery += tokens![3];
+
+  for (let i = 0; i < sortingFields.current.length; i++) {
+    const field = sortingFields.current[i];
+    const dir = field.direction === 'asc' ? '+' : '-';
+    finalQuery = finalQuery + ` | sort ${dir} ${field.id}`;
+  }
+
+  finalQuery =
+    finalQuery +
+    ` | head ${pageFields.current[1]} from ${pageFields.current[0] * pageFields.current[1]}`;
+  getEvents(finalQuery);
 };

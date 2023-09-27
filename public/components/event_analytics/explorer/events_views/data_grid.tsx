@@ -31,6 +31,7 @@ import {
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_NEWLINE_REGEX,
 } from '../../../../../common/constants/shared';
+import { redoQuery } from '../../utils/utils';
 
 interface DataGridProps {
   http: HttpSetup;
@@ -71,40 +72,15 @@ export function DataGrid(props: DataGridProps) {
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
   const pageFields = useRef([0, 100]);
 
-  const redoQuery = () => {
-    let finalQuery = '';
-
-    const start = datemath.parse(startTime)?.utc().format(DATE_PICKER_FORMAT);
-    const end = datemath.parse(endTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT);
-    const tokens = rawQuery.replaceAll(PPL_NEWLINE_REGEX, '').match(PPL_INDEX_INSERT_POINT_REGEX);
-
-    finalQuery = `${tokens![1]}=${
-      tokens![2]
-    } | where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`;
-
-    finalQuery += tokens![3];
-
-    for (let i = 0; i < sortingFields.current.length; i++) {
-      const field = sortingFields.current[i];
-      const dir = field.direction === 'asc' ? '+' : '-';
-      finalQuery = finalQuery + ` | sort ${dir} ${field.id}`;
-    }
-
-    finalQuery =
-      finalQuery +
-      ` | head ${pageFields.current[1]} from ${pageFields.current[0] * pageFields.current[1]}`;
-    getEvents(finalQuery);
-  };
-
   // setSort and setPage are used to change the query and send a direct request to get data
   const setSort = (sort: EuiDataGridSorting['columns']) => {
     sortingFields.current = sort;
-    redoQuery();
+    redoQuery(startTime, endTime, rawQuery, timeStampField, sortingFields, pageFields, getEvents);
   };
 
   const setPage = (page: number[]) => {
     pageFields.current = page;
-    redoQuery();
+    redoQuery(startTime, endTime, rawQuery, timeStampField, sortingFields, pageFields, getEvents);
   };
 
   // creates the header for each column listing what that column is
