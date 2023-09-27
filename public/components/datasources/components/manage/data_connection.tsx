@@ -197,7 +197,23 @@ export const DataConnection = (props: any) => {
                 icon={<EuiIcon size="xxl" type="bolt" />}
                 title={'Accelerate performance'}
                 description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
+                onClick={() => (window.location.hash = `/acceleration/${dataSource}`)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="database" />}
+                title={'Tables'}
+                description="Manually Define Tables"
+                onClick={() => (window.location.href = `/app/opensearch-query-workbench/`)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+                title={'Integrations data'}
+                description="Explore data faster through integrations"
+                onClick={() => (window.location.href = `/app/integrations`)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
