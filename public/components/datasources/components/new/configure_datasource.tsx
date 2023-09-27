@@ -81,6 +81,22 @@ export function Configure(props: ConfigureDatasourceProps) {
             setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
           />
         );
+      case 'Prometheus':
+        return (
+          <ConfigureS3Datasource
+            currentName={name}
+            currentDetails={details}
+            setNameForRequest={setName}
+            setDetailsForRequest={setDetails}
+            currentArn={arn}
+            setArnForRequest={setArn}
+            currentStore={store}
+            setStoreForRequest={setStore}
+            roles={roles}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
+          />
+        );
       default:
         return <></>;
     }
