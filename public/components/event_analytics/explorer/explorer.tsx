@@ -110,6 +110,10 @@ import {
   change as updateVizConfig,
   selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
+import {
+  update as updateSearchMetaData,
+  selectSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
 import { DataGrid } from './events_views/data_grid';
@@ -173,6 +177,7 @@ export const Explorer = ({
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const explorerVisualizations = useSelector(selectExplorerVisualization)[tabId];
   const userVizConfigs = useSelector(selectVisualizationConfig)[tabId] || {};
+  const explorerMeta = useSelector(selectSearchMetaData)[tabId];
   const [selectedContentTabId, setSelectedContentTab] = useState(TAB_EVENT_ID);
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
@@ -192,6 +197,18 @@ export const Explorer = ({
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
+  const currentPluggable = useMemo(() => {
+    return (
+      dataSourcePluggables[explorerMeta.datasources[0]?.type] ||
+      dataSourcePluggables.DEFAULT_INDEX_PATTERNS
+    );
+  }, [explorerMeta.datasources]);
+  const { ui } =
+    currentPluggable?.getComponentSetForVariation(
+      'languages',
+      explorerMeta.lang[0].label || 'SQL'
+    ) || {};
+  const SearchBar = ui?.SearchBar || Search;
 
   const selectedIntervalRef = useRef<{
     text: string;
@@ -925,7 +942,7 @@ export const Explorer = ({
           uiSettingsService.get('theme:darkMode') && ' explorer-dark'
         }`}
       >
-        <Search
+        <SearchBar
           key="search-component"
           query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
           tempQuery={tempQuery}

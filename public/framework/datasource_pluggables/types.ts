@@ -17,6 +17,6 @@ export interface IDataSourceComponentSet {
 }
 
 export interface IDataSourcePluggableComponents {
-  language?: Record<string, IDataSourceComponentSet>;
+  languages?: Record<string, IDataSourceComponentSet>;
   // Other variation keys can be added in the future
 }

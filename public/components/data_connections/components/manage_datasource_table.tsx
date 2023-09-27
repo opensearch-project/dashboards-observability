@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from './datasources_header';
 import { HomeProps } from '../home';
 import { DataConnectionsDescription } from './manage_datasource_description';
-import { DATASOURCES_BASE } from '../../../../common/constants/shared';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 import { ChromeStart } from '../../../../../../src/core/public';
 
 interface DataConnection {
@@ -45,7 +45,7 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
   }, [chrome]);
 
   async function handleDataRequest() {
-    http.get(`${DATASOURCES_BASE}`).then((datasources) =>
+    http.get(`${DATACONNECTIONS_BASE}`).then((datasources) =>
       setData(
         datasources.map((x: any) => {
           return { name: x.name, connectionType: x.connector };

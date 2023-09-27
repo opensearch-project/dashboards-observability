@@ -11,7 +11,7 @@ import { REDUX_EXPL_SLICE_SEARCH_META_DATA } from '../../../../../common/constan
 const initialState = {
   [initialTabId]: {
     lang: 'sql',
-    datasource: [],
+    datasources: [],
   },
 };
 
@@ -22,7 +22,7 @@ export const searchMetaDataSlice = createSlice({
     update: (state, { payload }) => {
       state[payload.tabId] = {
         ...state[payload.tabId],
-        ...payload.metadata,
+        ...payload.data,
       };
     },
     reset: (state, { payload }) => {
@@ -39,9 +39,9 @@ export const searchMetaDataSlice = createSlice({
 
 export const { update, remove, init } = searchMetaDataSlice.actions;
 
-export const selectQueryResult = createSelector(
-  (state) => state.queryResults,
-  (queryResultState) => queryResultState
+export const selectSearchMetaData = createSelector(
+  (state) => state.searchMetadata,
+  (searchMetadata) => searchMetadata
 );
 
 export const searchMetaDataSliceReducer = searchMetaDataSlice.reducer;

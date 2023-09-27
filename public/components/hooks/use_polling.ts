@@ -54,7 +54,3 @@ export function usePolling<T, P = void>(
 
   return { data, loading, error, startPolling, stopPolling };
 }
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */

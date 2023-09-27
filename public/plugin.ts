@@ -78,6 +78,8 @@ import {
 } from './types';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
+import { SQLSearch } from './components/common/search/sql_search';
+import { Search } from './components/common/search/search';
 
 export class ObservabilityPlugin
   implements
@@ -127,8 +129,12 @@ export class ObservabilityPlugin
       },
     });
 
+    // Adding a variation entails associating a key-value pair, where a change in the key results in
+    // a switch of UI/services to its corresponding context. In the following cases, for an S3 datasource,
+    // selecting SQL will render SQL-specific UI components or services, while selecting PPL will
+    // render a set of UI components or services specific to PPL.
     const openSearchLocalDataSourcePluggable = new DataSourcePluggable().addVariationSet(
-      'language',
+      'languages',
       'ppl',
       {
         ui: {
@@ -139,30 +145,36 @@ export class ObservabilityPlugin
     );
 
     const s3DataSourcePluggable = new DataSourcePluggable()
-      .addVariationSet('language', 'SQL', {
+      .addVariationSet('languages', 'SQL', {
         ui: {
           QueryEditor: null,
           ConfigEditor: null,
           SidePanel: null,
+          SearchBar: SQLSearch,
         },
         services: {
           data_fetcher: null,
         },
       })
-      .addVariationSet('language', 'PPL', {
+      .addVariationSet('languages', 'PPL', {
         ui: {
           QueryEditor: null,
           ConfigEditor: null,
           SidePanel: null,
+          SearchBar: Search,
         },
         services: {
           data_fetcher: null,
         },
       });
 
+    // below datasource types is referencing:
+    // https://github.com/opensearch-project/sql/blob/feature/job-apis/core/src/main/java/org/opensearch/sql/datasource/model/DataSourceType.java
     const dataSourcePluggables = {
       DEFAULT_INDEX_PATTERNS: openSearchLocalDataSourcePluggable,
-      [S3_DATASOURCE_TYPE]: s3DataSourcePluggable,
+      spark: s3DataSourcePluggable,
+      s3glue: s3DataSourcePluggable,
+      // prometheus: openSearchLocalDataSourcePluggable
     };
 
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {

@@ -64,7 +64,7 @@ const getPlainDataSourceMetaData = (datasourceInstance: DataSourceType) => ({
   meta: datasourceInstance.getMetadata(),
 });
 
-export const Search = (props: any) => {
+export const SQLSearch = (props: any) => {
   const {
     query,
     tempQuery,
@@ -105,6 +105,7 @@ export const Search = (props: any) => {
     setIsQueryRunning,
   } = props;
 
+  // const explorerMeta = useSelector(updateSearchMetaData)[tabId];
   const dispatch = useDispatch();
   const { dataSources } = coreRefs;
   const [activeDataSources, setActiveDataSources] = useState([]);
@@ -172,6 +173,7 @@ export const Search = (props: any) => {
   );
 
   const handleSourceChange = (selectedSource) => {
+    console.log('selectedSource: ', selectedSource);
     dispatch(
       updateSearchMetaData({
         tabId,
@@ -209,6 +211,7 @@ export const Search = (props: any) => {
         query: tempQuery,
       })
       .then((result) => {
+        console.log('result: ', result);
         if (result.queryId) {
           setJobId(result.queryId);
           startPolling({
@@ -309,44 +312,10 @@ export const Search = (props: any) => {
             onClick={() => showFlyout()}
             onClickAriaLabel={'pplLinkShowFlyout'}
           >
-            PPL
+            SQL
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
-        <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-          {!isLiveTailOn && (
-            <DatePicker
-              startTime={startTime}
-              endTime={endTime}
-              setStartTime={setStartTime}
-              setEndTime={setEndTime}
-              setIsOutputStale={setIsOutputStale}
-              liveStreamChecked={props.liveStreamChecked}
-              onLiveStreamChange={props.onLiveStreamChange}
-              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              handleTimeRangePickerRefresh={() => {
-                onQuerySearch(queryLang);
-              }}
-            />
-          )}
-        </EuiFlexItem>
-        {showSaveButton && !showSavePanelOptionsList && (
-          <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
-            <EuiPopover
-              panelPaddingSize="none"
-              button={liveButton}
-              isOpen={isLiveTailPopoverOpen}
-              closePopover={closeLiveTailPopover}
-            >
-              <EuiContextMenuPanel items={popoverItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-        {isLiveTailOn && (
-          <EuiFlexItem grow={false}>
-            <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
-          </EuiFlexItem>
-        )}
         {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
           <>
             <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">
