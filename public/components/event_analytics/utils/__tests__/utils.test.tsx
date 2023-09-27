@@ -14,7 +14,9 @@ import {
   rangeNumDocs,
   getHeaders,
   fillTimeDataWithEmpty,
+  redoQuery,
 } from '../utils';
+import { EXPLORER_DATA_GRID_QUERY } from '../../../../../test/event_analytics_constants';
 
 describe('Utils event analytics helper functions', () => {
   configure({ adapter: new Adapter() });
@@ -113,5 +115,28 @@ describe('Utils event analytics helper functions', () => {
       ],
       values: [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 5, 4, 2, 3, 3, 1, 0, 0],
     });
+  });
+
+  it('validates redoQuery function', () => {
+    expect(
+      redoQuery(
+        'now/y',
+        'now',
+        EXPLORER_DATA_GRID_QUERY,
+        'timestamp',
+        {
+          current: [
+            {
+              id: 'timestamp',
+              direction: 'asc',
+            },
+          ],
+        },
+        {
+          current: [0, 100],
+        },
+        null
+      )
+    );
   });
 });
