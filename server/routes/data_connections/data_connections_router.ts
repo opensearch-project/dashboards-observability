@@ -115,7 +115,7 @@ export function registerDataConnectionsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response): Promise<any> => {
+    async (context, request, response) => {
       try {
         const dataConnectionsresponse = await context.observability_plugin.observabilityClient
           .asScoped(request)

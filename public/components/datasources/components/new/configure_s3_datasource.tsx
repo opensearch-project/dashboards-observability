@@ -18,11 +18,12 @@ import {
 import React, { useState } from 'react';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
 import { QueryPermissionsConfiguration } from '../manage/query_permissions';
+import { Role } from '../../../../../common/types/data_connections';
 
 interface ConfigureS3DatasourceProps {
-  roles: Array<{ label: string }>;
-  selectedQueryPermissionRoles: Array<{ label: string }>;
-  setSelectedQueryPermissionRoles: React.Dispatch<React.SetStateAction<Array<{ label: string }>>>;
+  roles: Role[];
+  selectedQueryPermissionRoles: Role[];
+  setSelectedQueryPermissionRoles: React.Dispatch<React.SetStateAction<Role[]>>;
   currentName: string;
   currentDetails: string;
   currentArn: string;

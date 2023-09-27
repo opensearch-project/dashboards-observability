@@ -22,6 +22,7 @@ import { coreRefs } from '../../../../../public/framework/core_refs';
 import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { ReviewS3Datasource } from './review_s3_datasource_configuration';
 import { useToast } from '../../../../../public/components/common/toast';
+import { DatasourceType, Role } from '../../../../../common/types/data_connections';
 
 interface ConfigureDatasourceProps {
   type: string;
@@ -36,10 +37,8 @@ export function Configure(props: ConfigureDatasourceProps) {
   const [details, setDetails] = useState('');
   const [arn, setArn] = useState('');
   const [store, setStore] = useState('');
-  const [roles, setRoles] = useState<Array<{ label: string }>>([]);
-  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
-    Array<{ label: string }>
-  >([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
   const [page, setPage] = useState<'configure' | 'review'>('configure');
   const ConfigureDatasourceSteps = [
     {
@@ -62,26 +61,10 @@ export function Configure(props: ConfigureDatasourceProps) {
     );
   }, []);
 
-  const ConfigureDatasource = (configurationProps: { datasourceType: string }) => {
+  const ConfigureDatasource = (configurationProps: { datasourceType: DatasourceType }) => {
     const { datasourceType } = configurationProps;
     switch (datasourceType) {
-      case 'S3':
-        return (
-          <ConfigureS3Datasource
-            currentName={name}
-            currentDetails={details}
-            setNameForRequest={setName}
-            setDetailsForRequest={setDetails}
-            currentArn={arn}
-            setArnForRequest={setArn}
-            currentStore={store}
-            setStoreForRequest={setStore}
-            roles={roles}
-            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
-            setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
-          />
-        );
-      case 'Prometheus':
+      case 'S3GLUE':
         return (
           <ConfigureS3Datasource
             currentName={name}
@@ -139,7 +122,7 @@ export function Configure(props: ConfigureDatasourceProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={page === 'review' ? () => setPage('configure') : () => {}}
+              onClick={() => (page === 'review' ? setPage('configure') : {})}
               color="ghost"
               size="s"
               iconType="arrowLeft"
@@ -149,13 +132,7 @@ export function Configure(props: ConfigureDatasourceProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={
-                page === 'review'
-                  ? () => createDatasource()
-                  : () => {
-                      setPage('review');
-                    }
-              }
+              onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
               size="s"
               iconType="arrowRight"
               fill

@@ -16,29 +16,27 @@ import {
 import React, { useState } from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
-import prometheusSvg from '../../icons/prometheus-logo.svg';
+import { DatasourceType } from '../../../../../common/types/data_connections';
 
-export interface DatasourceType {
-  name: string;
+export interface DatasourceCard {
+  name: DatasourceType;
+  displayName: string;
   description: string;
   displayIcon: JSX.Element;
 }
 
-const Datasources: DatasourceType[] = [
+const Datasources: DatasourceCard[] = [
   {
-    name: 'OpenSearch',
+    name: 'OPENSEARCH',
+    displayName: 'OpenSearch',
     description: 'Connect to self managed OpenSearch clusters',
     displayIcon: <EuiIcon type="logoOpenSearch" size="xl" />,
   },
   {
-    name: 'S3',
+    name: 'S3GLUE',
+    displayName: 'S3',
     description: 'Connect to Amazon S3 via Amazon Glue',
     displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-  },
-  {
-    name: 'Prometheus',
-    description: 'Connect to Amazon managed Prometheus',
-    displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
   },
 ];
 
@@ -62,7 +60,7 @@ export function NewDatasourceCardView() {
     setToggleIconIdSelected(optionId);
   };
 
-  const renderRows = (datasources: DatasourceType[]) => {
+  const renderRows = (datasources: DatasourceCard[]) => {
     return (
       <>
         <EuiFlexGroup gutterSize="l" style={{ flexWrap: 'wrap' }}>
@@ -71,7 +69,7 @@ export function NewDatasourceCardView() {
               <EuiFlexItem key={v} style={{ minWidth: '14rem', maxWidth: '14rem' }}>
                 <EuiCard
                   icon={i.displayIcon}
-                  title={i.name}
+                  title={i.displayName}
                   description={i.description}
                   data-test-subj={`datasource_card_${i.name.toLowerCase()}`}
                   titleElement="span"
