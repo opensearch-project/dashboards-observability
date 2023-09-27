@@ -58,8 +58,8 @@ export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
 
-export const observabilityDataConnectionsID = 'dataconnections';
-export const observabilityDataConnectionsTitle = 'Data Connections';
+export const observabilityDataConnectionsID = 'datasources';
+export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
 
 // Shared Constants

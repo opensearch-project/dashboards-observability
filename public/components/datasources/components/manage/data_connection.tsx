@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { AccessControlTab } from './access_control_tab';
-import { NoAccess } from './no_access';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import { NoAccess } from '../no_access';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import { ConnectionDetails } from './connection_details';
 
 interface DatasourceDetails {
@@ -49,7 +49,7 @@ export const DataConnection = (props: any) => {
   useEffect(() => {
     chrome!.setBreadcrumbs([
       {
-        text: 'Data Connections',
+        text: 'Data sources',
         href: '#/',
       },
       {
@@ -59,15 +59,15 @@ export const DataConnection = (props: any) => {
     ]);
     http!
       .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
-      .then((data) =>
+      .then((data) => {
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
           name: data.name,
           cluster: data.properties['emr.cluster'],
           connector: data.connector,
           properties: data.properties,
-        })
-      )
+        });
+      })
       .catch((err) => {
         setHasAccess(false);
       });
@@ -80,9 +80,11 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: (
         <AccessControlTab
+          allowedRoles={datasourceDetails.allowedRoles}
           dataConnection={dataSource}
           connector={datasourceDetails.connector}
           properties={datasourceDetails.properties}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
         />
       ),
     },
@@ -200,7 +202,7 @@ export const DataConnection = (props: any) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiAccordion>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+        <EuiTabbedContent tabs={tabs} />
 
         <EuiSpacer />
       </EuiPageBody>

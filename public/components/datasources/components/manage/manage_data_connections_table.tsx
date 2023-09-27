@@ -17,15 +17,17 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from './data_connections_header';
-import { HomeProps } from '../home';
+import { DataConnectionsHeader } from '../data_connections_header';
+import { HomeProps } from '../../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../../../public/components/common/toast';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { useToast } from '../../../common/toast';
+import { DeleteModal } from '../../../common/helpers/delete_modal';
+import S3Logo from '../../icons/s3-logo.svg';
+import { DatasourceType } from '../../../../../common/types/data_connections';
 
 interface DataConnection {
-  connectionType: 'OPENSEARCH' | 'SPARK';
+  connectionType: DatasourceType;
   name: string;
 }
 
@@ -57,7 +59,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Data Connections',
+        text: 'Data sources',
         href: '#/',
       },
     ]);
@@ -93,8 +95,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
 
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
-      case 'OPENSEARCH':
-        return <EuiIcon type="logoOpenSearch" />;
+      case 'S3GLUE':
+        return <EuiIcon type={S3Logo} />;
       default:
         return <></>;
     }

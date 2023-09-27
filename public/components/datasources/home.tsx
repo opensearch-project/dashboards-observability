@@ -6,8 +6,10 @@
 import React from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
-import { DataConnection } from './components/data_connection';
-import { ManageDataConnectionsTable } from './components/manage_data_connections_table';
+import { DataConnection } from './components/manage/data_connection';
+import { ManageDataConnectionsTable } from './components/manage/manage_data_connections_table';
+import { NewDatasource } from './components/new/new_datasource';
+import { Configure } from './components/new/configure_datasource';
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
@@ -43,6 +45,15 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/', '/manage']}
           render={(routerProps) => <ManageDataConnectionsTable {...commonProps} />}
+        />
+        <Route exact path={['/new']} render={(routerProps) => <NewDatasource {...commonProps} />} />
+
+        <Route
+          exact
+          path={['/configure/:id+']}
+          render={(routerProps) => (
+            <Configure {...commonProps} type={decodeURIComponent(routerProps.match.params.id)} />
+          )}
         />
       </Switch>
     </HashRouter>
