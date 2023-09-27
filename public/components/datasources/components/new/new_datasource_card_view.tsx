@@ -16,6 +16,7 @@ import {
 import React, { useState } from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
+import prometheusSvg from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 
 export interface DatasourceCard {
@@ -37,6 +38,12 @@ const Datasources: DatasourceCard[] = [
     displayName: 'S3',
     description: 'Connect to Amazon S3 via Amazon Glue',
     displayIcon: <EuiIcon type={s3Svg} size="xl" />,
+  },
+  {
+    name: 'PROMETHEUS',
+    displayName: 'Prometheus',
+    description: 'Connect to Amazon managed Prometheus',
+    displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
   },
 ];
 

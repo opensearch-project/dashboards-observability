@@ -24,6 +24,7 @@ import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { useToast } from '../../../common/toast';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
 import S3Logo from '../../icons/s3-logo.svg';
+import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 
 interface DataConnection {
@@ -97,6 +98,8 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     switch (record.connectionType) {
       case 'S3GLUE':
         return <EuiIcon type={S3Logo} />;
+      case 'PROMETHEUS':
+        return <EuiIcon type={PrometheusLogo} />;
       default:
         return <></>;
     }

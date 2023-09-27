@@ -14,4 +14,4 @@ export interface PermissionsConfigurationProps {
 
 export type Role = EuiComboBoxOptionOption;
 
-export type DatasourceType = 'SPARK' | 'S3GLUE' | 'OPENSEARCH';
+export type DatasourceType = 'SPARK' | 'S3GLUE' | 'OPENSEARCH' | 'PROMETHEUS';

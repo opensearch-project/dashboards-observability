@@ -103,6 +103,38 @@ export const DataConnection = (props: any) => {
     },
   ];
 
+  const QueryData = () => {
+    switch (datasourceDetails.connector) {
+      case 'S3GlUE':
+        return (
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Query your data in Data Explorer or Observability Logs."
+            href={'http://localhost:5601/app/observability-logs#/'}
+          />
+        );
+      case 'PROMETHEUS':
+        return (
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Query your data in Metrics Analytics"
+            href={'http://localhost:5601/app/observability-metrics#/'}
+          />
+        );
+      default:
+        return (
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Query your data in Data Explorer or Observability Logs."
+            href={'http://localhost:5601/app/observability-logs#/'}
+          />
+        );
+    }
+  };
+
   const DatasourceOverview = () => {
     return (
       <EuiPanel>
@@ -185,12 +217,7 @@ export const DataConnection = (props: any) => {
         >
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="discoverApp" />}
-                title={'Query data'}
-                description="Query your data in Data Explorer or Observability Logs."
-                onClick={() => {}}
-              />
+              <QueryData />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiCard
