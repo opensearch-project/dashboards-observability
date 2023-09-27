@@ -15,7 +15,7 @@ export class SQLService {
   fetch = async (
     params: {
       query: string;
-      kind: string;
+      lang: string;
     },
     errorHandler?: (error: any) => void
   ) => {

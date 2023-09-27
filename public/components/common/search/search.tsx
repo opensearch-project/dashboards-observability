@@ -180,27 +180,13 @@ export const Search = (props: any) => {
     if (lang[0].label === 'DQL') return;
     if (lang[0].label === 'PPL') return handleTimeRangePickerRefresh();
     // SQL
-    // sqlDataFetcher.search(tempQuery, getEvents);
-    console.log('on searching selectedSources: ', selectedSources);
-
-    // console.log(
-    //   'queryLang.label: ',
-    //   queryLang[0].label,
-    //   ', tempQuery: ',
-    //   tempQuery,
-    //   ' selectedSources[0].label: ',
-    //   selectedSources[0].label
-    // );
-
-    console.log('running? ');
 
     setIsQueryRunning(true);
 
     sqlService
       .fetch({
-        kind: lowerCase(lang[0].label),
+        lang: lowerCase(lang[0].label),
         query: tempQuery,
-        // datasource: selectedSources[0].label
       })
       .then((result) => {
         console.log('result: ', result);

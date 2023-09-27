@@ -121,7 +121,7 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
     url: {
       fmt: `${JOBS_ENDPOINT_BASE}/<%=queryId%>`,
       req: {
-        jobId: {
+        queryId: {
           type: 'string',
           required: true,
         },
