@@ -38,7 +38,7 @@ import {
   observabilityIntegrationsTitle,
   observabilityIntegrationsPluginOrder,
   observabilityPluginOrder,
-  DATASOURCES_BASE,
+  DATACONNECTIONS_BASE,
   S3_DATASOURCE_TYPE,
   observabilityDataConnectionsID,
   observabilityDataConnectionsPluginOrder,
@@ -77,6 +77,7 @@ import {
   SetupDependencies,
 } from './types';
 import { S3DataSource } from './framework/datasources/s3_datasource';
+import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 
 export class ObservabilityPlugin
   implements
@@ -126,6 +127,44 @@ export class ObservabilityPlugin
       },
     });
 
+    const openSearchLocalDataSourcePluggable = new DataSourcePluggable().addVariationSet(
+      'language',
+      'ppl',
+      {
+        ui: {
+          searchUI: {},
+        },
+        services: {},
+      }
+    );
+
+    const s3DataSourcePluggable = new DataSourcePluggable()
+      .addVariationSet('language', 'SQL', {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+        },
+        services: {
+          data_fetcher: null,
+        },
+      })
+      .addVariationSet('language', 'PPL', {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+        },
+        services: {
+          data_fetcher: null,
+        },
+      });
+
+    const dataSourcePluggables = {
+      DEFAULT_INDEX_PATTERNS: openSearchLocalDataSourcePluggable,
+      [S3_DATASOURCE_TYPE]: s3DataSourcePluggable,
+    };
+
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
@@ -142,7 +181,7 @@ export class ObservabilityPlugin
         timestampUtils,
         qm,
         startPage,
-        setupDeps
+        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
       );
     };
 
@@ -271,7 +310,7 @@ export class ObservabilityPlugin
 
     // register all s3 datasources
     dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
-    core.http.get(`${DATASOURCES_BASE}`).then((s3DataSources) => {
+    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
       s3DataSources.map((s3ds) => {
         dataSourceService.registerDataSource(
           dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
