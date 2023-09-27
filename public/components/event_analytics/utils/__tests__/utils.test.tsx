@@ -122,7 +122,7 @@ describe('Utils event analytics helper functions', () => {
       redoQuery(
         'now/y',
         'now',
-        EXPLORER_DATA_GRID_QUERY,
+        "source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')",
         'timestamp',
         {
           current: [
@@ -135,8 +135,8 @@ describe('Utils event analytics helper functions', () => {
         {
           current: [0, 100],
         },
-        null
+        () => {}
       )
-    );
+    ).toReturn();
   });
 });
