@@ -16,7 +16,7 @@ import {
 import React from 'react';
 
 interface ConfigureS3DatasourceProps {
-  selectedQueryPermissionRoles: Array<{ label: string }>;
+  selectedQueryPermissionRoles: Role[];
   currentName: string;
   currentDetails: string;
   currentArn: string;

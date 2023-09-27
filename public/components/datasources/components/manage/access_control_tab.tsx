@@ -18,6 +18,7 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { SaveOrCancel } from '../save_or_cancel';
+import { Role } from '../../../../../common/types/data_connections';
 
 interface AccessControlTabProps {
   dataConnection: string;
@@ -28,10 +29,8 @@ interface AccessControlTabProps {
 
 export const AccessControlTab = (props: AccessControlTabProps) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [roles, setRoles] = useState<Array<{ label: string }>>([]);
-  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
-    Array<{ label: string }>
-  >(
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>(
     props.allowedRoles.map((role) => {
       return { label: role };
     })
