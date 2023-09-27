@@ -157,7 +157,7 @@ export const samplenewDimensions1 = {
   x: 0,
   y: 2,
   w: 12,
-  h: 2,
+  h: 3,
 };
 
 export const samplePanelVisualizations2 = [
@@ -185,7 +185,7 @@ export const samplenewDimensions2 = {
   x: 0,
   y: 4,
   w: 12,
-  h: 2,
+  h: 3,
 };
 
 export const samplePrometheusVisualizationId = 'prometheus.process_resident_memory_bytes';
@@ -258,7 +258,7 @@ export const samplePrometheusSampleUpdateWithSelections = {
   subType: 'metric',
   timestamp: '@timestamp',
   type: 'line',
-  userConfigs: '{}',
+  userConfigs: {},
 };
 
 export const sampleSavedMetric = {
@@ -320,6 +320,22 @@ export const sampleSavedMetricUpdate = {
   subType: 'metric',
   timestamp: 'timestamp',
   type: 'line',
-  userConfigs:
-    '{"dataConfig":{"series":[{"label":"machine.ram","name":"machine.ram","aggregation":"avg","customLabel":""}],"dimensions":[],"span":{"time_field":[{"name":"timestamp","type":"timestamp","label":"timestamp"}],"unit":[{"text":"Day","value":"d","label":"Day"}],"interval":"1"}}}',
+  userConfigs: {
+    dataConfig: {
+      series: [
+        {
+          label: 'machine.ram',
+          name: 'machine.ram',
+          aggregation: 'avg',
+          customLabel: '',
+        },
+      ],
+      dimensions: [],
+      span: {
+        time_field: [{ name: 'timestamp', type: 'timestamp', label: 'timestamp' }],
+        unit: [{ text: 'Day', value: 'd', label: 'Day' }],
+        interval: '1',
+      },
+    },
+  },
 };

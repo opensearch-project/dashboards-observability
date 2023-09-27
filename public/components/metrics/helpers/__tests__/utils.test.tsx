@@ -59,7 +59,7 @@ describe('Utils helper functions', () => {
       x: 0,
       y: 0,
       w: 12,
-      h: 2,
+      h: 3,
     });
 
     expect(getNewVizDimensions(samplePanelVisualizations1)).toStrictEqual(samplenewDimensions1);

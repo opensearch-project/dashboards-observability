@@ -57,7 +57,7 @@ export const MetricsGrid = ({
   };
 
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
-  const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
+  const [previousEditLayout, setPreviousEditLayout] = useState<Layout[]>([]);
   const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
   const [removeMetricsList, setRemoveMetricsList] = useState<Array<{ id: string }>>([]);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
