@@ -62,21 +62,14 @@ export function DataGrid(props: DataGridProps) {
     endTime,
     storedSelectedColumns,
   } = props;
-  const [rowRefs, setRowRefs] = useState<
-    Array<RefObject<{ closeAllFlyouts(openDocId: string): void }>>
-  >([]);
   const { getEvents } = useFetchEvents({
     pplService,
     requestParams,
   });
+  // useRef instead of useState somehow solves the issue of user triggered sorting not
+  // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
   const pageFields = useRef([0, 100]);
-
-  const onFlyoutOpen = (docId: string) => {
-    rowRefs.forEach((rowRef) => {
-      rowRef.current?.closeAllFlyouts(docId);
-    });
-  };
 
   const redoQuery = () => {
     let finalQuery = '';
@@ -151,10 +144,7 @@ export function DataGrid(props: DataGridProps) {
       };
     }
     // default shown fields
-    return {
-      visibleColumns: [],
-      setVisibleColumns: () => {},
-    };
+    throw new Error('explorer data grid stored columns empty');
   }, [storedSelectedColumns]);
 
   // sets the very first column, which is the button used for the flyout of each row
@@ -176,14 +166,14 @@ export function DataGrid(props: DataGridProps) {
               explorerFields={explorerFields}
               pplService={pplService}
               rawQuery={rawQuery}
-              onFlyoutOpen={onFlyoutOpen}
+              onFlyoutOpen={() => {}}
             />
           );
         },
         width: 40,
       },
     ];
-  }, [rows, http, explorerFields, pplService, rawQuery, onFlyoutOpen]);
+  }, [rows, http, explorerFields, pplService, rawQuery]);
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = useCallback(
@@ -247,6 +237,8 @@ export function DataGrid(props: DataGridProps) {
     }),
     [storedSelectedColumns]
   );
+
+  // TODO: memoize the expensive table below
 
   return (
     <>
