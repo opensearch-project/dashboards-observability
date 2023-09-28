@@ -254,10 +254,11 @@ export function Configure(props: ConfigureDatasourceProps) {
         window.location.hash = '#/manage';
       })
       .catch((err) => {
+        console.log(JSON.stringify(err));
         setToast(
           `Could not create data source`,
           'danger',
-          `An error occured while trying to create the ${type} data source ${name}: ${err}`
+          `An error occured while trying to create the ${type} data source ${name}: ${err.body.message}`
         );
         setPage('configure');
       });

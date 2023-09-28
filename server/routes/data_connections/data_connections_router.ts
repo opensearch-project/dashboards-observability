@@ -4,7 +4,11 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter } from '../../../../../src/core/server';
+import {
+  IOpenSearchDashboardsResponse,
+  IRouter,
+  ResponseError,
+} from '../../../../../src/core/server';
 import { DATACONNECTIONS_BASE } from '../../../common/constants/shared';
 
 export function registerDataConnectionsRoute(router: IRouter) {
@@ -115,7 +119,11 @@ export function registerDataConnectionsRoute(router: IRouter) {
         }),
       },
     },
-    async (context, request, response) => {
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const dataConnectionsresponse = await context.observability_plugin.observabilityClient
           .asScoped(request)
@@ -131,10 +139,10 @@ export function registerDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in creating data source:', error);
+        console.error('Issue in creating data source:', JSON.stringify(error));
         return response.custom({
           statusCode: error.statusCode || 500,
-          body: error.message,
+          body: error.response,
         });
       }
     }
@@ -154,10 +162,10 @@ export function registerDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data connections:', error);
+        console.error('Issue in fetching data connections:', JSON.stringify(error));
         return response.custom({
           statusCode: error.statusCode || 500,
-          body: error.message,
+          message: error.body,
         });
       }
     }
