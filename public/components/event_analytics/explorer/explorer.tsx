@@ -5,11 +5,9 @@
 
 import dateMath from '@elastic/datemath';
 import {
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -17,10 +15,6 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
-  EuiTitle,
-  OuiLoadingDashboards,
-  OuiFlexGroup,
-  OuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
@@ -127,7 +121,6 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DataSourceSelection } from './datasources/datasources_selection';
-import { QueryLanguageSelection } from './query_language/query_language';
 import { DirectQueryRunning } from './direct_query_running';
 
 export const Explorer = ({
@@ -411,7 +404,6 @@ export const Explorer = ({
   };
 
   const handleTimeRangePickerRefresh = async (availability?: boolean) => {
-    // getEvents(tempQuery);
     handleQuerySearch(availability);
     if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
       let currQuery = query.rawQuery;
@@ -431,10 +423,6 @@ export const Explorer = ({
       );
     }
   };
-
-  const sidebarClassName = classNames({
-    closed: isSidebarClosed,
-  });
 
   const mainSectionClassName = classNames({
     'col-md-10': !isSidebarClosed,

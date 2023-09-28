@@ -88,10 +88,6 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
   };
 
   const dispatchOnGettingHis = (res: any, query: string) => {
-    console.log('dispatchOnGettingHis res: ', res);
-    const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
-      (field: IField) => field.name
-    );
     const processedRes = addSchemaRowMapping(res);
     setResponse(processedRes);
     batch(() => {
@@ -196,73 +192,23 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
   };
 
   const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
-    console.log('query: ', query);
     if (isEmpty(query)) return;
-    if (query.match(/show tables/i)) {
-      const res = {
-        datarows: [['default', 'Person', false]],
-        jsonData: [
-          {
-            namespace: 'default',
-            tableName: 'Person',
-            isTemporary: false,
-          },
-        ],
-        schema: [
-          { name: 'namespace', type: 'string' },
-          { name: 'tableName', type: 'string' },
-          { name: 'isTemporary', type: 'boolean' },
-        ],
-      };
-      return dispatchOnGettingHis(res, '');
-    }
-    const res = {
-      datarows: [
-        ['david', 'Shen Zhen', 31],
-        ['eason', 'Shen Yang', 27],
-        ['jarry', 'Wu Han', 35],
-      ],
-      jsonData: [
-        {
-          name: 'david',
-          city: 'Shen Zhen',
-          age: 31,
-        },
-        {
-          name: 'eason',
-          city: 'Shen Yang',
-          age: 27,
-        },
-        {
-          name: 'jarry',
-          city: 'Wu Han',
-          age: 35,
-        },
-      ],
-      schema: [
-        { name: 'name', type: 'string' },
-        { name: 'city', type: 'string' },
-        { name: 'age', type: 'integer' },
-      ],
-    };
-    return dispatchOnGettingHis(res, '');
-    // const cur = queriesRef.current;
-    // const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
-    // fetchEvents(
-    //   { query: searchQuery },
-    //   'jdbc',
-    //   (res: any) => {
-    //     if (!isEmpty(res.jsonData)) {
-    //       return dispatchOnGettingHis(res, searchQuery);
-    //     } else if (!isEmpty(res.data?.resp)) {
-    //       console.log('JSON.parse(res.data?.resp): ', JSON.parse(res.data?.resp));
-    //       return dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
-    //     }
-    //     // when no hits and needs to get available fields to override default timestamp
-    //     dispatchOnNoHis(res);
-    //   },
-    //   errorHandler
-    // );
+    const cur = queriesRef.current;
+    const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
+    fetchEvents(
+      { query: searchQuery },
+      'jdbc',
+      (res: any) => {
+        if (!isEmpty(res.jsonData)) {
+          return dispatchOnGettingHis(res, searchQuery);
+        } else if (!isEmpty(res.data?.resp)) {
+          return dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
+        }
+        // when no hits and needs to get available fields to override default timestamp
+        dispatchOnNoHis(res);
+      },
+      errorHandler
+    );
   };
 
   const getAvailableFields = (query: string) => {

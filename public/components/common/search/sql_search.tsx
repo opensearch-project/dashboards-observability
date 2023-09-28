@@ -16,27 +16,19 @@ import {
   EuiButtonEmpty,
   EuiPopoverFooter,
   EuiBadge,
-  EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut,
   EuiComboBox,
 } from '@elastic/eui';
-import { useCallback } from 'react';
-import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
 import { Autocomplete } from './autocomplete';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { PPLReferenceFlyout } from '../helpers';
 import { uiSettingsService } from '../../../../common/utils';
 import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
-import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { DataSourceSelectable, DataSourceType } from '../../../../../../src/plugins/data/public';
 import { coreRefs } from '../../../framework/core_refs';
-import { SQLDataFetcher } from '../../../services/data_fetchers/sql/sql_data_fetcher';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { SQLService } from '../../../services/requests/sql';
-import PPLService from '../../../services/requests/ppl';
 import { usePolling } from '../../../components/hooks/use_polling';
 import {
   selectSearchMetaData,
@@ -66,14 +58,7 @@ export const SQLSearch = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
-    handleQuerySearch,
-    handleTimePickerChange,
     dslService,
-    startTime,
-    endTime,
-    setStartTime,
-    setEndTime,
-    setIsOutputStale,
     selectedPanelName,
     selectedCustomPanelOptions,
     setSelectedPanelName,
@@ -83,20 +68,12 @@ export const SQLSearch = (props: any) => {
     savedObjects,
     showSavePanelOptionsList,
     showSaveButton = true,
-    handleTimeRangePickerRefresh,
-    isLiveTailPopoverOpen,
-    closeLiveTailPopover,
-    popoverItems,
-    isLiveTailOn,
     selectedSubTabId,
     searchBarConfigs = {},
     getSuggestions,
     onItemSelect,
     tabId = '',
     baseQuery = '',
-    stopLive,
-    setIsLiveTailPopoverOpen,
-    liveTailName,
     curVisId,
     setSubType,
     setIsQueryRunning,
@@ -170,11 +147,6 @@ export const SQLSearch = (props: any) => {
   };
 
   const onQuerySearch = (lang) => {
-    console.log('lang: ', lang);
-    if (lang[0].label === 'DQL') return;
-    if (lang[0].label === 'PPL') return handleTimeRangePickerRefresh();
-    // SQL
-
     setIsQueryRunning(true);
 
     sqlService
@@ -183,7 +155,6 @@ export const SQLSearch = (props: any) => {
         query: tempQuery,
       })
       .then((result) => {
-        console.log('result: ', result);
         if (result.queryId) {
           setJobId(result.queryId);
           startPolling({
@@ -201,9 +172,7 @@ export const SQLSearch = (props: any) => {
   };
 
   useEffect(() => {
-    console.log('pollingResult: ', pollingResult, ', pollingError: ', pollingError);
     if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
-      console.log('entering polling?');
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
 

@@ -20,11 +20,14 @@ export const countDistributionSlice = createSlice({
         ...payload.data,
       };
     },
+    reset: (state, { payload }) => {
+      state[payload.tabId] = {};
+    },
   },
   extraReducers: (builder) => {},
 });
 
-export const { render } = countDistributionSlice.actions;
+export const { render, reset } = countDistributionSlice.actions;
 
 export const selectCountDistribution = createSelector(
   (state) => state.countDistribution,

@@ -18,30 +18,26 @@ import {
   EuiBadge,
   EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut,
   EuiComboBox,
 } from '@elastic/eui';
-import { useCallback } from 'react';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
 import { Autocomplete } from './autocomplete';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { PPLReferenceFlyout } from '../helpers';
 import { uiSettingsService } from '../../../../common/utils';
-import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
+import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { DataSourceSelectable, DataSourceType } from '../../../../../../src/plugins/data/public';
 import { coreRefs } from '../../../framework/core_refs';
-import { SQLDataFetcher } from '../../../services/data_fetchers/sql/sql_data_fetcher';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { SQLService } from '../../../services/requests/sql';
-import PPLService from '../../../services/requests/ppl';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
+import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -66,7 +62,6 @@ export const Search = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
-    handleQuerySearch,
     handleTimePickerChange,
     dslService,
     startTime,
@@ -180,10 +175,11 @@ export const Search = (props: any) => {
   };
 
   const onQuerySearch = (lang) => {
-    console.log('lang: ', lang);
-    if (lang[0].label === 'DQL') return;
-    if (lang[0].label === 'PPL') return handleTimeRangePickerRefresh();
-    // SQL
+    if (
+      lang[0].label === 'PPL' &&
+      explorerSearchMetadata.datasources[0].ds.getType() === 'DEFAULT_INDEX_PATTERNS'
+    )
+      return handleTimeRangePickerRefresh();
 
     setIsQueryRunning(true);
 
@@ -210,18 +206,29 @@ export const Search = (props: any) => {
   };
 
   useEffect(() => {
-    console.log('pollingResult: ', pollingResult, ', pollingError: ', pollingError);
     if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
-      console.log('entering polling?');
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
-
       // stop polling
       stopPolling();
-
       setIsQueryRunning(false);
     }
   }, [pollingResult, pollingError]);
+
+  useEffect(() => {
+    if (explorerSearchMetadata.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS') {
+      const queryWithSelectedSource = `source = ${explorerSearchMetadata.datasources[0].label}`;
+      handleQueryChange(queryWithSelectedSource);
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            [RAW_QUERY]: queryWithSelectedSource,
+          },
+        })
+      );
+    }
+  }, [explorerSearchMetadata.datasources]);
 
   return (
     <div className="globalQueryBar">
