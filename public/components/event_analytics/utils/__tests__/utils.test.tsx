@@ -118,25 +118,27 @@ describe('Utils event analytics helper functions', () => {
   });
 
   it('validates redoQuery function', () => {
-    expect(
-      redoQuery(
-        'now/y',
-        'now',
-        "source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')",
-        'timestamp',
-        {
-          current: [
-            {
-              id: 'timestamp',
-              direction: 'asc',
-            },
-          ],
-        },
-        {
-          current: [0, 100],
-        },
-        () => {}
-      )
-    ).toBe(undefined);
+    const getEvents = jest.fn();
+    redoQuery(
+      '2023-01-01 00:00:00',
+      '2023-09-28 23:19:10',
+      "source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')",
+      'timestamp',
+      {
+        current: [
+          {
+            id: 'timestamp',
+            direction: 'asc',
+          },
+        ],
+      },
+      {
+        current: [0, 100],
+      },
+      getEvents
+    );
+    const expectedFinalQuery =
+      "source=opensearch_dashboards_sample_data_logs | where timestamp >= '2023-01-01 00:00:00' and timestamp <= '2023-09-28 23:19:10' | where match(request,'filebeat') | sort + timestamp | head 100 from 0";
+    expect(getEvents).toBeCalledWith(expectedFinalQuery);
   });
 });
