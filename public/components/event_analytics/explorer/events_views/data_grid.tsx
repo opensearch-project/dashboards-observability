@@ -149,7 +149,7 @@ export function DataGrid(props: DataGridProps) {
         width: 40,
       },
     ];
-  }, [rows, http, explorerFields, pplService, rawQuery]);
+  }, [rows, http, explorerFields, pplService, rawQuery, timeStampField]);
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = useCallback(

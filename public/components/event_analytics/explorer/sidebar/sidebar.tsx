@@ -97,9 +97,8 @@ export const Sidebar = (props: ISidebarProps) => {
       storedExplorerFields.selectedFields.length !== 0
     ) {
       return storedExplorerFields;
-    } else {
-      return explorerFields;
     }
+    return explorerFields;
   };
 
   const handleAddField = useCallback(
