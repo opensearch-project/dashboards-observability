@@ -145,19 +145,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'templateName',
-        name: 'Type',
-        multiSelect: false,
-        options: [].map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
   };
 
   const entries = data.map((dataconnection: DataConnection) => {

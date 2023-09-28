@@ -159,53 +159,6 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                 </div>
               </div>
             </div>
-            <div
-              class="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
-            >
-              <div
-                class="euiFilterGroup"
-              >
-                <div
-                  class="euiPopover euiPopover--anchorDownCenter"
-                  id="field_value_selection_0"
-                >
-                  <div
-                    class="euiPopover__anchor"
-                  >
-                    <button
-                      class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
-                      type="button"
-                    >
-                      <span
-                        class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                        <span
-                          class="euiButtonEmpty__text"
-                        >
-                          <span
-                            class="euiFilterButton__textShift"
-                            data-text="Type"
-                            title="Type"
-                          >
-                            Type
-                          </span>
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
           <div
             class="euiSpacer euiSpacer--l"
