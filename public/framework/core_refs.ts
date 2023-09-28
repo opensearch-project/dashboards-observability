@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ApplicationStart,
-  ChromeStart,
-  HttpStart,
-  IToasts,
-  IUiSettingsClient,
-} from '../../../../src/core/public';
+import { ApplicationStart, ChromeStart, HttpStart, IToasts } from '../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../src/core/public';
 import PPLService from '../services/requests/ppl';
 

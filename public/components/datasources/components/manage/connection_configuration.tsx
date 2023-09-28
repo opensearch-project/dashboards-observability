@@ -126,7 +126,7 @@ export const ConnectionConfiguration = (props: ConnectionConfigurationProps) => 
           </EuiFormRow>
           <EuiFormRow label="Password">
             <EuiFieldPassword
-              type={'dual'}
+              type="dual"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />

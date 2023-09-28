@@ -51,6 +51,45 @@ export const DataConnection = (props: any) => {
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
 
+  const DefaultDatasourceCards = () => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Query your data in Data Explorer or Observability Logs."
+            onClick={() => application!.navigateToApp(observabilityLogsID)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="bolt" />}
+            title={'Accelerate performance'}
+            description="Accelerate performance through OpenSearch indexing."
+            onClick={() => {}}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="database" />}
+            title={'Tables'}
+            description="Manually Define Tables"
+            onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+            title={'Integrations data'}
+            description="Explore data faster through integrations"
+            onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   useEffect(() => {
     chrome!.setBreadcrumbs([
       {
@@ -109,46 +148,11 @@ export const DataConnection = (props: any) => {
   ];
 
   const QueryOrAccelerateData = () => {
-    console.log(chrome);
     switch (datasourceDetails.connector) {
       case 'S3GLUE':
-        return (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="discoverApp" />}
-                title={'Query data'}
-                description="Query your data in Data Explorer or Observability Logs."
-                onClick={() => application!.navigateToApp(observabilityLogsID)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="bolt" />}
-                title={'Accelerate performance'}
-                description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="database" />}
-                title={'Tables'}
-                description="Manually Define Tables"
-                onClick={() => application!.navigateToApp('opensearch-query-workbench')}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-                title={'Integrations data'}
-                description="Explore data faster through integrations"
-                onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
+        return <DefaultDatasourceCards />;
       case 'PROMETHEUS':
+        // Prometheus does not have acceleration or integrations, and should go to metrics analytics
         return (
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -162,42 +166,7 @@ export const DataConnection = (props: any) => {
           </EuiFlexGroup>
         );
       default:
-        return (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="discoverApp" />}
-                title={'Query data'}
-                description="Query your data in Data Explorer or Observability Logs."
-                onClick={() => application!.navigateToApp(observabilityLogsID)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="bolt" />}
-                title={'Accelerate performance'}
-                description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="database" />}
-                title={'Tables'}
-                description="Manually Define Tables"
-                onClick={() => application!.navigateToApp('opensearch-query-workbench')}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-                title={'Integrations data'}
-                description="Explore data faster through integrations"
-                onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
+        return <DefaultDatasourceCards />;
     }
   };
 
