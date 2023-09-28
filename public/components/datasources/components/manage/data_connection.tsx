@@ -24,6 +24,7 @@ import { AccessControlTab } from './access_control_tab';
 import { NoAccess } from '../no_access';
 import {
   DATACONNECTIONS_BASE,
+  observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
@@ -129,6 +130,22 @@ export const DataConnection = (props: any) => {
                 onClick={() => {}}
               />
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="database" />}
+                title={'Tables'}
+                description="Manually Define Tables"
+                onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+                title={'Integrations data'}
+                description="Explore data faster through integrations"
+                onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         );
       case 'PROMETHEUS':
@@ -145,7 +162,42 @@ export const DataConnection = (props: any) => {
           </EuiFlexGroup>
         );
       default:
-        return null;
+        return (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="discoverApp" />}
+                title={'Query data'}
+                description="Query your data in Data Explorer or Observability Logs."
+                onClick={() => application!.navigateToApp(observabilityLogsID)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="bolt" />}
+                title={'Accelerate performance'}
+                description="Accelerate performance through OpenSearch indexing."
+                onClick={() => {}}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="database" />}
+                title={'Tables'}
+                description="Manually Define Tables"
+                onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+                title={'Integrations data'}
+                description="Explore data faster through integrations"
+                onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
     }
   };
 

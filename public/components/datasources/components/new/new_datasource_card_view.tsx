@@ -18,9 +18,6 @@ import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
 import prometheusSvg from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
-import { coreRefs } from '../../../../../public/framework/core_refs';
-import { MANAGEMENT_APP_ID } from '../../../../../../../src/plugins/management/public';
-import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../../../../../../src/plugins/vis_augmenter/common';
 
 export interface DatasourceCard {
   name: DatasourceType;
@@ -33,18 +30,7 @@ export interface DatasourceCard {
 export function NewDatasourceCardView() {
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
 
-  const { application } = coreRefs;
   const Datasources: DatasourceCard[] = [
-    {
-      name: 'OPENSEARCH',
-      displayName: 'OpenSearch',
-      description: 'Connect to self managed OpenSearch clusters',
-      displayIcon: <EuiIcon type="logoOpenSearch" size="xl" />,
-      onClick: () =>
-        application!.navigateToApp(MANAGEMENT_APP_ID, {
-          path: 'opensearch-dashboards/dataSources',
-        }),
-    },
     {
       name: 'S3GLUE',
       displayName: 'S3',
