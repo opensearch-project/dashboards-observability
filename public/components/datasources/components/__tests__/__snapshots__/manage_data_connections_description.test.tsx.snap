@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Manage Data Connections Description test Renders manage data connections description 1`] = `
+<Component>
+  <div>
+    <EuiTitle
+      size="s"
+    >
+      <h2
+        className="euiTitle euiTitle--small"
+      >
+        Manage existing data sources
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    >
+      <div
+        className="euiSpacer euiSpacer--s"
+      />
+    </EuiSpacer>
+    <EuiText
+      color="subdued"
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <EuiTextColor
+          color="subdued"
+          component="div"
+        >
+          <div
+            className="euiTextColor euiTextColor--subdued"
+          >
+            Manage already created data sources.
+          </div>
+        </EuiTextColor>
+      </div>
+    </EuiText>
+    <EuiHorizontalRule
+      size="full"
+    >
+      <hr
+        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+      />
+    </EuiHorizontalRule>
+  </div>
+</Component>
+`;

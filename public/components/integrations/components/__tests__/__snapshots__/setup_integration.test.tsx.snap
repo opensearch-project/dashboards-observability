@@ -2,7 +2,12 @@
 
 exports[`Integration Setup Page Renders integration setup page as expected 1`] = `
 <SetupIntegrationPage
-  integration="test_integration"
+  integration={
+    Object {
+      "name": "test-integ",
+      "type": "logs",
+    }
+  }
 >
   <EuiPage>
     <div
@@ -22,18 +27,22 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                 className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                 role="main"
               >
-                <EuiPageContentBody
-                  restrictWidth={true}
-                >
+                <EuiPageContentBody>
                   <div
-                    className="euiPageContentBody euiPage--restrictWidth-default"
+                    className="euiPageContentBody"
                   >
                     <SetupIntegrationForm
                       config={
                         Object {
                           "connectionDataSource": "",
                           "connectionType": "index",
-                          "displayName": "test_integration Integration",
+                          "displayName": "test-integ Integration",
+                        }
+                      }
+                      integration={
+                        Object {
+                          "name": "test-integ",
+                          "type": "logs",
                         }
                       }
                       updateConfig={[Function]}
@@ -104,7 +113,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
-                                  value="test_integration Integration"
+                                  value="test-integ Integration"
                                 >
                                   <EuiFormControlLayout
                                     fullWidth={false}
@@ -124,7 +133,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             onChange={[Function]}
                                             onFocus={[Function]}
                                             type="text"
-                                            value="test_integration Integration"
+                                            value="test-integ Integration"
                                           />
                                         </EuiValidatableControl>
                                         <EuiFormControlLayoutIcons />
@@ -689,46 +698,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               </div>
                             </div>
                           </EuiFormRow>
-                          <EuiButton>
-                            <EuiButtonDisplay
-                              baseClassName="euiButton"
-                              disabled={false}
-                              element="button"
-                              isDisabled={false}
-                              type="button"
-                            >
-                              <button
-                                className="euiButton euiButton--primary"
-                                disabled={false}
-                                style={
-                                  Object {
-                                    "minWidth": undefined,
-                                  }
-                                }
-                                type="button"
-                              >
-                                <EuiButtonContent
-                                  className="euiButton__content"
-                                  iconSide="left"
-                                  textProps={
-                                    Object {
-                                      "className": "euiButton__text",
-                                    }
-                                  }
-                                >
-                                  <span
-                                    className="euiButtonContent euiButton__content"
-                                  >
-                                    <span
-                                      className="euiButton__text"
-                                    >
-                                      Validate
-                                    </span>
-                                  </span>
-                                </EuiButtonContent>
-                              </button>
-                            </EuiButtonDisplay>
-                          </EuiButton>
                         </div>
                       </EuiForm>
                     </SetupIntegrationForm>
@@ -742,7 +711,13 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
               Object {
                 "connectionDataSource": "",
                 "connectionType": "index",
-                "displayName": "test_integration Integration",
+                "displayName": "test-integ Integration",
+              }
+            }
+            integration={
+              Object {
+                "name": "test-integ",
+                "type": "logs",
               }
             }
           >
@@ -952,6 +927,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 fill={true}
                                 iconSide="right"
                                 iconType="arrowRight"
+                                isLoading={false}
                                 onClick={[Function]}
                               >
                                 <EuiButtonDisplay
@@ -962,6 +938,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   iconSide="right"
                                   iconType="arrowRight"
                                   isDisabled={false}
+                                  isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
@@ -980,6 +957,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                       className="euiButton__content"
                                       iconSide="right"
                                       iconType="arrowRight"
+                                      isLoading={false}
                                       textProps={
                                         Object {
                                           "className": "euiButton__text",
@@ -1062,6 +1040,12 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
       "connectionDataSource": "ss4o_logs-nginx-test",
       "connectionType": "index",
       "displayName": "Test Instance Name",
+    }
+  }
+  integration={
+    Object {
+      "name": "test-integ",
+      "type": "logs",
     }
   }
   updateConfig={[Function]}
@@ -1733,46 +1717,6 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           </div>
         </div>
       </EuiFormRow>
-      <EuiButton>
-        <EuiButtonDisplay
-          baseClassName="euiButton"
-          disabled={false}
-          element="button"
-          isDisabled={false}
-          type="button"
-        >
-          <button
-            className="euiButton euiButton--primary"
-            disabled={false}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
-            type="button"
-          >
-            <EuiButtonContent
-              className="euiButton__content"
-              iconSide="left"
-              textProps={
-                Object {
-                  "className": "euiButton__text",
-                }
-              }
-            >
-              <span
-                className="euiButtonContent euiButton__content"
-              >
-                <span
-                  className="euiButton__text"
-                >
-                  Validate
-                </span>
-              </span>
-            </EuiButtonContent>
-          </button>
-        </EuiButtonDisplay>
-      </EuiButton>
     </div>
   </EuiForm>
 </SetupIntegrationForm>

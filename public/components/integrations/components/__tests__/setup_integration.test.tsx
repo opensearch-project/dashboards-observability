@@ -19,11 +19,16 @@ const TEST_CONFIG: IntegrationConfig = {
   connectionDataSource: 'ss4o_logs-nginx-test',
 };
 
+const TEST_INTEGRATION = {
+  name: 'test-integ',
+  type: 'logs',
+};
+
 describe('Integration Setup Page', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders integration setup page as expected', async () => {
-    const wrapper = mount(<SetupIntegrationPage integration="test_integration" />);
+    const wrapper = mount(<SetupIntegrationPage integration={TEST_INTEGRATION} />);
 
     await waitFor(() => {
       expect(wrapper).toMatchSnapshot();
@@ -31,7 +36,13 @@ describe('Integration Setup Page', () => {
   });
 
   it('Renders the form as expected', async () => {
-    const wrapper = mount(<SetupIntegrationForm config={TEST_CONFIG} updateConfig={() => {}} />);
+    const wrapper = mount(
+      <SetupIntegrationForm
+        config={TEST_CONFIG}
+        updateConfig={() => {}}
+        integration={TEST_INTEGRATION}
+      />
+    );
 
     await waitFor(() => {
       expect(wrapper).toMatchSnapshot();
