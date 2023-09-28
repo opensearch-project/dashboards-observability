@@ -5,6 +5,18 @@
 
 type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
+interface IntegrationAssets {
+  savedObjects?: {
+    name: string;
+    version: string;
+  };
+  queries?: Array<{
+    name: string;
+    version: string;
+    language: string;
+  }>;
+}
+
 interface IntegrationConfig {
   name: string;
   version: string;
@@ -22,12 +34,7 @@ interface IntegrationConfig {
     darkModeGallery?: StaticAsset[];
   };
   components: IntegrationComponent[];
-  assets: {
-    savedObjects?: {
-      name: string;
-      version: string;
-    };
-  };
+  assets: IntegrationAssets;
   sampleData?: {
     path: string;
   };

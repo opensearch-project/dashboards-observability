@@ -64,6 +64,19 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
           nullable: true,
           additionalProperties: false,
         },
+        queries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              version: { type: 'string' },
+              language: { type: 'string' },
+            },
+            required: ['name', 'version', 'language'],
+          },
+          nullable: true,
+        },
       },
       additionalProperties: false,
     },
