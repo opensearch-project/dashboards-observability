@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 export const DataConnectionsDescription = () => {
@@ -15,7 +15,8 @@ export const DataConnectionsDescription = () => {
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Manage already created data sources.
+        Manage already created data sources or{' '}
+        <EuiLink href="#/new">create a new data source</EuiLink>
       </EuiText>
       <EuiHorizontalRule size="full" />
     </div>

@@ -111,7 +111,15 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Manage already created data sources.
+              Manage already created data sources or
+               
+              <a
+                class="euiLink euiLink--primary"
+                href="#/new"
+                rel="noreferrer"
+              >
+                create a new data source
+              </a>
             </div>
           </div>
           <hr
