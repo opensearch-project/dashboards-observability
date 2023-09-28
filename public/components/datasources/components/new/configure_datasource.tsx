@@ -58,8 +58,6 @@ export function Configure(props: ConfigureDatasourceProps) {
     },
   ];
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     http!.get('/api/v1/configuration/roles').then((data) =>
       setRoles(

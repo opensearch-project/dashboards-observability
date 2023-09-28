@@ -16,7 +16,8 @@
     "savedObjects",
     "uiActions",
     "urlForwarding",
-    "visualizations"
+    "visualizations",
+    "management"
   ],
   "optionalPlugins": [
     "managementOverview"

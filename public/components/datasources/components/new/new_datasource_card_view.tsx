@@ -18,37 +18,48 @@ import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
 import prometheusSvg from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../public/framework/core_refs';
+import { MANAGEMENT_APP_ID } from '../../../../../../../src/plugins/management/public';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../../../../../../src/plugins/vis_augmenter/common';
 
 export interface DatasourceCard {
   name: DatasourceType;
   displayName: string;
   description: string;
   displayIcon: JSX.Element;
+  onClick: () => void;
 }
-
-const Datasources: DatasourceCard[] = [
-  {
-    name: 'OPENSEARCH',
-    displayName: 'OpenSearch',
-    description: 'Connect to self managed OpenSearch clusters',
-    displayIcon: <EuiIcon type="logoOpenSearch" size="xl" />,
-  },
-  {
-    name: 'S3GLUE',
-    displayName: 'S3',
-    description: 'Connect to Amazon S3 via Amazon Glue',
-    displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-  },
-  {
-    name: 'PROMETHEUS',
-    displayName: 'Prometheus',
-    description: 'Connect to Amazon managed Prometheus',
-    displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
-  },
-];
 
 export function NewDatasourceCardView() {
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
+
+  const { application } = coreRefs;
+  const Datasources: DatasourceCard[] = [
+    {
+      name: 'OPENSEARCH',
+      displayName: 'OpenSearch',
+      description: 'Connect to self managed OpenSearch clusters',
+      displayIcon: <EuiIcon type="logoOpenSearch" size="xl" />,
+      onClick: () =>
+        application!.navigateToApp(MANAGEMENT_APP_ID, {
+          path: 'opensearch-dashboards/dataSources',
+        }),
+    },
+    {
+      name: 'S3GLUE',
+      displayName: 'S3',
+      description: 'Connect to Amazon S3 via Amazon Glue',
+      displayIcon: <EuiIcon type={s3Svg} size="xl" />,
+      onClick: () => (window.location.hash = `#/configure/S3GLUE`),
+    },
+    {
+      name: 'PROMETHEUS',
+      displayName: 'Prometheus',
+      description: 'Connect to Amazon managed Prometheus',
+      displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
+      onClick: () => (window.location.hash = `#/configure/PROMETHEUS`),
+    },
+  ];
 
   const toggleButtonsIcons = [
     {
@@ -80,7 +91,7 @@ export function NewDatasourceCardView() {
                   description={i.description}
                   data-test-subj={`datasource_card_${i.name.toLowerCase()}`}
                   titleElement="span"
-                  onClick={() => (window.location.hash = `#/configure/${i.name}`)}
+                  onClick={i.onClick}
                 />
               </EuiFlexItem>
             );
