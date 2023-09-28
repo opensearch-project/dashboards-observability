@@ -4,17 +4,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiButton,
-  EuiTitle,
-  EuiCallOut,
-  EuiLink,
-  EuiProgress,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiProgress, EuiSpacer } from '@elastic/eui';
 
 export const DirectQueryRunning = () => {
   return (
@@ -29,32 +19,5 @@ export const DirectQueryRunning = () => {
         Cancel
       </EuiButton>
     </EuiCallOut>
-    // <EuiFlexGroup direction="column" justifyContent="flexStart">
-    //   <EuiFlexItem grow={false}>
-    //     <EuiFlexGroup direction="row" justifyContent="spaceAround">
-    //       <EuiFlexItem grow={false}>
-    //         <EuiLoadingSpinner size="l" />
-    //       </EuiFlexItem>
-    //     </EuiFlexGroup>
-    //   </EuiFlexItem>
-    //   <EuiFlexItem grow={false}>
-    //     <EuiFlexGroup direction="row" justifyContent="spaceAround">
-    //       <EuiFlexItem grow={false}>
-    //         <EuiTitle>
-    //           <h3>Query Processing...</h3>
-    //         </EuiTitle>
-    //       </EuiFlexItem>
-    //     </EuiFlexGroup>
-    //   </EuiFlexItem>
-    //   <EuiFlexItem grow={false}>
-    //     <EuiFlexGroup direction="row" justifyContent="spaceAround">
-    //       <EuiFlexItem grow={false}>
-    //         <EuiButton color="success" onClick={() => {}}>
-    //           Cancel
-    //         </EuiButton>
-    //       </EuiFlexItem>
-    //     </EuiFlexGroup>
-    //   </EuiFlexItem>
-    // </EuiFlexGroup>
   );
 };

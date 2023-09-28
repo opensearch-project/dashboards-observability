@@ -37,7 +37,10 @@ import { SQLDataFetcher } from '../../../services/data_fetchers/sql/sql_data_fet
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { SQLService } from '../../../services/requests/sql';
 import PPLService from '../../../services/requests/ppl';
-import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import {
+  selectSearchMetaData,
+  update as updateSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
 export interface IQueryBarProps {
   query: string;
@@ -57,12 +60,6 @@ export interface IDatePickerProps {
   handleTimePickerChange: (timeRange: string[]) => any;
   handleTimeRangePickerRefresh: () => any;
 }
-
-const getPlainDataSourceMetaData = (datasourceInstance: DataSourceType) => ({
-  name: datasourceInstance.getName(),
-  type: datasourceInstance.getType(),
-  meta: datasourceInstance.getMetadata(),
-});
 
 export const Search = (props: any) => {
   const {
@@ -105,15 +102,12 @@ export const Search = (props: any) => {
     setIsQueryRunning,
   } = props;
 
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
   const dispatch = useDispatch();
-  const { dataSources } = coreRefs;
-  const [activeDataSources, setActiveDataSources] = useState([]);
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [queryLang, setQueryLang] = useState([{ label: 'SQL' }]);
-  const [selectedSources, setSelectedSources] = useState([]);
-  const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
+  const [queryLang, setQueryLang] = useState([{ label: explorerSearchMetadata.lang }]);
   const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
 
@@ -171,16 +165,6 @@ export const Search = (props: any) => {
     />
   );
 
-  const handleSourceChange = (selectedSource) => {
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { datasources: [getPlainDataSourceMetaData(selectedSource[0].ds)] },
-      })
-    );
-    setSelectedSources(selectedSource);
-  };
-
   const handleQueryLanguageChange = (lang) => {
     if (lang[0].label === 'DQL') {
       window.location.href = '/app/data-explorer/discover';
@@ -189,7 +173,7 @@ export const Search = (props: any) => {
     dispatch(
       updateSearchMetaData({
         tabId,
-        data: { lang },
+        data: { lang: lang[0].label },
       })
     );
     setQueryLang(lang);
@@ -239,21 +223,6 @@ export const Search = (props: any) => {
     }
   }, [pollingResult, pollingError]);
 
-  useEffect(() => {
-    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
-      (currentDataSources) => {
-        console.log('currentDataSources: ', currentDataSources);
-        setActiveDataSources([...Object.values(currentDataSources)]);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleDataSetFetchError = useCallback(() => {
-    return (error) => {};
-  }, []);
-
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
@@ -266,26 +235,16 @@ export const Search = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        <EuiFlexItem key="source-selector" className="search-area">
-          <DataSourceSelectable
-            dataSources={activeDataSources}
-            dataSourceOptionList={dataSourceOptionList}
-            setDataSourceOptionList={setDataSourceOptionList}
-            selectedSources={selectedSources}
-            setSelectedSources={handleSourceChange}
-            onFetchDataSetError={handleDataSetFetchError}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem key="lang-selector" className="search-area">
+        <EuiFlexItem key="lang-selector" className="search-area" grow={1}>
           <EuiComboBox
             placeholder="No language selected yet"
             options={[{ label: 'SQL' }, { label: 'PPL' }]}
             selectedOptions={queryLang}
             onChange={handleQueryLanguageChange}
-            singleSelection={true}
+            singleSelection={{ asPlainText: true }}
           />
         </EuiFlexItem>
-        <EuiFlexItem key="search-bar" className="search-area">
+        <EuiFlexItem key="search-bar" className="search-area" grow={5}>
           <Autocomplete
             key={'autocomplete-search-bar'}
             query={query}

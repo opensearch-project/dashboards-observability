@@ -135,10 +135,13 @@ export class ObservabilityPlugin
     // render a set of UI components or services specific to PPL.
     const openSearchLocalDataSourcePluggable = new DataSourcePluggable().addVariationSet(
       'languages',
-      'ppl',
+      'PPL',
       {
         ui: {
-          searchUI: {},
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: Search,
         },
         services: {},
       }

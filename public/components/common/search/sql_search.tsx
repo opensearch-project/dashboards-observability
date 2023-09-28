@@ -37,8 +37,11 @@ import { SQLDataFetcher } from '../../../services/data_fetchers/sql/sql_data_fet
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { SQLService } from '../../../services/requests/sql';
 import PPLService from '../../../services/requests/ppl';
-import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
+import {
+  selectSearchMetaData,
+  update as updateSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -57,12 +60,6 @@ export interface IDatePickerProps {
   handleTimePickerChange: (timeRange: string[]) => any;
   handleTimeRangePickerRefresh: () => any;
 }
-
-const getPlainDataSourceMetaData = (datasourceInstance: DataSourceType) => ({
-  name: datasourceInstance.getName(),
-  type: datasourceInstance.getType(),
-  meta: datasourceInstance.getMetadata(),
-});
 
 export const SQLSearch = (props: any) => {
   const {
@@ -105,16 +102,12 @@ export const SQLSearch = (props: any) => {
     setIsQueryRunning,
   } = props;
 
-  // const explorerMeta = useSelector(updateSearchMetaData)[tabId];
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
   const dispatch = useDispatch();
-  const { dataSources } = coreRefs;
-  const [activeDataSources, setActiveDataSources] = useState([]);
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [queryLang, setQueryLang] = useState([{ label: 'SQL' }]);
-  const [selectedSources, setSelectedSources] = useState([]);
-  const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
+  const [queryLang, setQueryLang] = useState([{ label: explorerSearchMetadata.lang }]);
   const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
 
@@ -162,27 +155,6 @@ export const SQLSearch = (props: any) => {
     </EuiButton>
   );
 
-  const liveButton = (
-    <LiveTailButton
-      isLiveTailOn={isLiveTailOn}
-      setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-      liveTailName={liveTailName}
-      isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-      dataTestSubj="eventLiveTail"
-    />
-  );
-
-  const handleSourceChange = (selectedSource) => {
-    console.log('selectedSource: ', selectedSource);
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { datasources: [getPlainDataSourceMetaData(selectedSource[0].ds)] },
-      })
-    );
-    setSelectedSources(selectedSource);
-  };
-
   const handleQueryLanguageChange = (lang) => {
     if (lang[0].label === 'DQL') {
       window.location.href = '/app/data-explorer/discover';
@@ -191,7 +163,7 @@ export const SQLSearch = (props: any) => {
     dispatch(
       updateSearchMetaData({
         tabId,
-        data: { lang },
+        data: { lang: lang[0].label },
       })
     );
     setQueryLang(lang);
@@ -242,21 +214,6 @@ export const SQLSearch = (props: any) => {
     }
   }, [pollingResult, pollingError]);
 
-  useEffect(() => {
-    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
-      (currentDataSources) => {
-        console.log('currentDataSources: ', currentDataSources);
-        setActiveDataSources([...Object.values(currentDataSources)]);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleDataSetFetchError = useCallback(() => {
-    return (error) => {};
-  }, []);
-
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
@@ -269,26 +226,16 @@ export const SQLSearch = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        <EuiFlexItem key="source-selector" className="search-area">
-          <DataSourceSelectable
-            dataSources={activeDataSources}
-            dataSourceOptionList={dataSourceOptionList}
-            setDataSourceOptionList={setDataSourceOptionList}
-            selectedSources={selectedSources}
-            setSelectedSources={handleSourceChange}
-            onFetchDataSetError={handleDataSetFetchError}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem key="lang-selector" className="search-area">
+        <EuiFlexItem key="lang-selector" className="search-area" grow={1}>
           <EuiComboBox
             placeholder="No language selected yet"
             options={[{ label: 'SQL' }, { label: 'PPL' }]}
             selectedOptions={queryLang}
             onChange={handleQueryLanguageChange}
-            singleSelection={true}
+            singleSelection={{ asPlainText: true }}
           />
         </EuiFlexItem>
-        <EuiFlexItem key="search-bar" className="search-area">
+        <EuiFlexItem key="search-bar" className="search-area" grow={5}>
           <Autocomplete
             key={'autocomplete-search-bar'}
             query={query}
@@ -316,6 +263,17 @@ export const SQLSearch = (props: any) => {
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
+        <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
+          <EuiButton
+            color="success"
+            onClick={() => {
+              onQuerySearch(queryLang);
+            }}
+            fill
+          >
+            Search
+          </EuiButton>
+        </EuiFlexItem>
         {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
           <>
             <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">

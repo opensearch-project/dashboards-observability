@@ -19,6 +19,8 @@ import {
   EuiText,
   EuiTitle,
   OuiLoadingDashboards,
+  OuiFlexGroup,
+  OuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
@@ -124,6 +126,9 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
+import { DataSourceSelection } from './datasources/datasources_selection';
+import { QueryLanguageSelection } from './query_language/query_language';
+import { DirectQueryRunning } from './direct_query_running';
 
 export const Explorer = ({
   pplService,
@@ -204,10 +209,7 @@ export const Explorer = ({
     );
   }, [explorerMeta.datasources]);
   const { ui } =
-    currentPluggable?.getComponentSetForVariation(
-      'languages',
-      explorerMeta.lang[0].label || 'SQL'
-    ) || {};
+    currentPluggable?.getComponentSetForVariation('languages', explorerMeta.lang || 'SQL') || {};
   const SearchBar = ui?.SearchBar || Search;
 
   const selectedIntervalRef = useRef<{
@@ -487,46 +489,6 @@ export const Explorer = ({
   const mainContent = useMemo(() => {
     return (
       <>
-        <div
-          className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
-          id="discover-sidebar"
-          data-test-subj="eventExplorer__sidebar"
-        >
-          {!isSidebarClosed && (
-            <div className="explorerFieldSelector">
-              <Sidebar
-                query={query}
-                explorerFields={explorerFields}
-                explorerData={explorerData}
-                selectedTimestamp={query[SELECTED_TIMESTAMP]}
-                selectedPattern={query[SELECTED_PATTERN_FIELD]}
-                handleOverrideTimestamp={handleOverrideTimestamp}
-                handleOverridePattern={handleOverridePattern}
-                isOverridingTimestamp={isOverridingTimestamp}
-                isOverridingPattern={isOverridingPattern}
-                isFieldToggleButtonDisabled={
-                  isEmpty(explorerData.jsonData) ||
-                  !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
-                }
-              />
-            </div>
-          )}
-          <EuiButtonIcon
-            iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-            iconSize="m"
-            size="s"
-            onClick={() => {
-              setIsSidebarClosed((staleState) => {
-                return !staleState;
-              });
-            }}
-            data-test-subj="collapseSideBarButton"
-            aria-controls="discover-sidebar"
-            aria-expanded={isSidebarClosed ? 'false' : 'true'}
-            aria-label="Toggle sidebar"
-            className="dscCollapsibleSidebar__collapseButton"
-          />
-        </div>
         <div className={`dscWrapper ${mainSectionClassName}`}>
           {explorerData && !isEmpty(explorerData.jsonData) ? (
             <EuiFlexGroup direction="column" gutterSize="none">
@@ -841,6 +803,8 @@ export const Explorer = ({
     selectedCustomPanelOptions,
   ]);
 
+  // live tail
+
   const liveTailLoop = async (
     name: string,
     startingTime: string,
@@ -942,57 +906,87 @@ export const Explorer = ({
           uiSettingsService.get('theme:darkMode') && ' explorer-dark'
         }`}
       >
-        <SearchBar
-          key="search-component"
-          query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
-          tempQuery={tempQuery}
-          handleQueryChange={handleQueryChange}
-          handleQuerySearch={handleQuerySearch}
-          dslService={dslService}
-          startTime={appLogEvents ? startTime : dateRange[0]}
-          endTime={appLogEvents ? endTime : dateRange[1]}
-          handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-          selectedPanelName={selectedPanelNameRef.current}
-          selectedCustomPanelOptions={selectedCustomPanelOptions}
-          setSelectedPanelName={setSelectedPanelName}
-          setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
-          handleSavingObject={handleSavingObject}
-          isPanelTextFieldInvalid={isPanelTextFieldInvalid}
-          savedObjects={savedObjects}
-          showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
-          handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-          isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-          closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
-          popoverItems={popoverItems}
-          isLiveTailOn={isLiveTailOnRef.current}
-          selectedSubTabId={selectedContentTabId}
-          searchBarConfigs={searchBarConfigs}
-          getSuggestions={parseGetSuggestions}
-          onItemSelect={onItemSelect}
-          tabId={tabId}
-          baseQuery={appBaseQuery}
-          stopLive={stopLive}
-          setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-          liveTailName={liveTailNameRef.current}
-          curVisId={curVisId}
-          setSubType={setSubType}
-          http={http}
-          setIsQueryRunning={setIsQueryRunning}
-        />
-        {isQueryRunning ? (
-          <div className="explorer-loading-spinner">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        ) : (
-          <EuiTabbedContent
-            className="mainContentTabs"
-            initialSelectedTab={contentTabs[0]}
-            selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-            onTabClick={(selectedTab: EuiTabbedContentTab) => handleContentTabClick(selectedTab)}
-            tabs={contentTabs}
-            size="s"
-          />
-        )}
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <DataSourceSelection tabId={tabId} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div className="explorerFieldSelector">
+                  <Sidebar
+                    query={query}
+                    explorerFields={explorerFields}
+                    explorerData={explorerData}
+                    selectedTimestamp={query[SELECTED_TIMESTAMP]}
+                    selectedPattern={query[SELECTED_PATTERN_FIELD]}
+                    handleOverrideTimestamp={handleOverrideTimestamp}
+                    handleOverridePattern={handleOverridePattern}
+                    isOverridingTimestamp={isOverridingTimestamp}
+                    isOverridingPattern={isOverridingPattern}
+                    isFieldToggleButtonDisabled={
+                      isEmpty(explorerData.jsonData) ||
+                      !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
+                    }
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SearchBar
+              key="search-component"
+              query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
+              tempQuery={tempQuery}
+              handleQueryChange={handleQueryChange}
+              handleQuerySearch={handleQuerySearch}
+              dslService={dslService}
+              startTime={appLogEvents ? startTime : dateRange[0]}
+              endTime={appLogEvents ? endTime : dateRange[1]}
+              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
+              selectedPanelName={selectedPanelNameRef.current}
+              selectedCustomPanelOptions={selectedCustomPanelOptions}
+              setSelectedPanelName={setSelectedPanelName}
+              setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
+              handleSavingObject={handleSavingObject}
+              isPanelTextFieldInvalid={isPanelTextFieldInvalid}
+              savedObjects={savedObjects}
+              showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
+              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              isLiveTailPopoverOpen={isLiveTailPopoverOpen}
+              closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
+              popoverItems={popoverItems}
+              isLiveTailOn={isLiveTailOnRef.current}
+              selectedSubTabId={selectedContentTabId}
+              searchBarConfigs={searchBarConfigs}
+              getSuggestions={parseGetSuggestions}
+              onItemSelect={onItemSelect}
+              tabId={tabId}
+              baseQuery={appBaseQuery}
+              stopLive={stopLive}
+              setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
+              liveTailName={liveTailNameRef.current}
+              curVisId={curVisId}
+              setSubType={setSubType}
+              http={http}
+              setIsQueryRunning={setIsQueryRunning}
+            />
+            {isQueryRunning ? (
+              <DirectQueryRunning />
+            ) : (
+              <EuiTabbedContent
+                className="mainContentTabs"
+                initialSelectedTab={contentTabs[0]}
+                selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+                onTabClick={(selectedTab: EuiTabbedContentTab) =>
+                  handleContentTabClick(selectedTab)
+                }
+                tabs={contentTabs}
+                size="s"
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     </TabContext.Provider>
   );

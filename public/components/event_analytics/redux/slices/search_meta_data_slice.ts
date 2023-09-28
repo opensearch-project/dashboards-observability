@@ -10,7 +10,7 @@ import { REDUX_EXPL_SLICE_SEARCH_META_DATA } from '../../../../../common/constan
 
 const initialState = {
   [initialTabId]: {
-    lang: 'sql',
+    lang: 'PPL',
     datasources: [],
   },
 };
