@@ -14,6 +14,17 @@ type Color = 'success' | 'primary' | 'warning' | 'danger' | undefined;
 export interface IntegrationTemplate {
   name: string;
   type: string;
+  assets: {
+    savedObjects?: {
+      name: string;
+      version: string;
+    };
+    queries?: Array<{
+      name: string;
+      version: string;
+      language: string;
+    }>;
+  };
 }
 
 export const doTypeValidation = (

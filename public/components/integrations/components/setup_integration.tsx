@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
-import { addIntegrationRequest } from './create_integration_helpers';
+import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
 import { useToast } from '../../../../public/components/common/toast';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
@@ -36,10 +36,7 @@ export interface IntegrationConfig {
 interface IntegrationConfigProps {
   config: IntegrationConfig;
   updateConfig: (updates: Partial<IntegrationConfig>) => void;
-  integration: {
-    name: string;
-    type: string;
-  };
+  integration: IntegrationTemplate;
 }
 
 // TODO support localization
@@ -169,7 +166,24 @@ export function SetupIntegrationForm({
       <EuiSpacer />
       <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
         <EuiSelect
-          options={integrationConnectionSelectorItems}
+          options={integrationConnectionSelectorItems.map((item) => {
+            const copy: { value: string; text: string; disabled?: boolean } = Object.assign(
+              {},
+              item
+            );
+            console.log(item);
+            console.log(integration);
+            switch (item.value) {
+              case 's3':
+                copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'queries');
+                return copy;
+              case 'index':
+                copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'savedObjects');
+                return copy;
+              default:
+                return copy;
+            }
+          })}
           value={config.connectionType}
           onChange={(event) =>
             updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
@@ -200,7 +214,7 @@ export function SetupBottomBar({
   integration,
 }: {
   config: IntegrationConfig;
-  integration: { name: string; type: string };
+  integration: IntegrationTemplate;
 }) {
   const { setToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -252,19 +266,26 @@ export function SetupBottomBar({
   );
 }
 
-export function SetupIntegrationPage({
-  integration,
-}: {
-  integration: {
-    name: string;
-    type: string;
-  };
-}) {
+export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [integConfig, setConfig] = useState({
-    displayName: `${integration.name} Integration`,
+    displayName: `${integration} Integration`,
     connectionType: 'index',
     connectionDataSource: '',
   } as IntegrationConfig);
+
+  const [template, setTemplate] = useState({
+    name: integration,
+    type: '',
+  } as IntegrationTemplate);
+
+  useEffect(() => {
+    const getTemplate = async () => {
+      const http = coreRefs.http!;
+      const value = await http.get(INTEGRATIONS_BASE + `/repository/${integration}`);
+      setTemplate(value.data);
+    };
+    getTemplate();
+  }, [integration]);
 
   const updateConfig = (updates: Partial<IntegrationConfig>) =>
     setConfig(Object.assign({}, integConfig, updates));
@@ -277,11 +298,11 @@ export function SetupIntegrationPage({
             <SetupIntegrationForm
               config={integConfig}
               updateConfig={updateConfig}
-              integration={integration}
+              integration={template}
             />
           </EuiPageContentBody>
         </EuiPageContent>
-        <SetupBottomBar config={integConfig} integration={integration} />
+        <SetupBottomBar config={integConfig} integration={template} />
       </EuiPageBody>
     </EuiPage>
   );
