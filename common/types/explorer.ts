@@ -401,3 +401,8 @@ export type MOMENT_UNIT_OF_TIME =
   | 's'
   | 'milliseconds'
   | 'ms';
+
+export interface GridSortingColumn {
+  id: string;
+  direction: 'asc' | 'desc';
+}

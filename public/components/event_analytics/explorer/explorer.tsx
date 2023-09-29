@@ -56,6 +56,7 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
+  DEFAULT_EMPTY_EXPLORER_FIELDS,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -462,6 +463,8 @@ export const Explorer = ({
 
   const dateRange = getDateRange(startTime, endTime, query);
 
+  const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
+
   const mainContent = useMemo(() => {
     return (
       <>
@@ -486,6 +489,12 @@ export const Explorer = ({
                   isEmpty(explorerData.jsonData) ||
                   !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
                 }
+                storedExplorerFields={
+                  storedExplorerFields.availableFields.length > 0
+                    ? storedExplorerFields
+                    : explorerFields
+                }
+                setStoredExplorerFields={setStoredExplorerFields}
               />
             </div>
           )}
@@ -602,6 +611,15 @@ export const Explorer = ({
                           explorerFields={explorerFields}
                           timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
                           rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                          totalHits={_.sum(countDistribution.data['count()'])}
+                          requestParams={requestParams}
+                          startTime={appLogEvents ? startTime : dateRange[0]}
+                          endTime={appLogEvents ? endTime : dateRange[1]}
+                          storedSelectedColumns={
+                            storedExplorerFields.selectedFields.length > 0
+                              ? storedExplorerFields.selectedFields
+                              : DEFAULT_EMPTY_EXPLORER_FIELDS
+                          }
                         />
                         <a tabIndex={0} id="discoverBottomMarker">
                           &#8203;
