@@ -22,10 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
-import {
-  addIntegrationRequest,
-  doExistingDataSourceValidation,
-} from './create_integration_helpers';
+import { addIntegrationRequest } from './create_integration_helpers';
 import { useToast } from '../../../../public/components/common/toast';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
@@ -79,45 +76,6 @@ const integrationConnectionSelectorItems = [
   {
     value: 'index',
     text: 'OpenSearch Index',
-  },
-];
-
-const integrationDataTableData = [
-  {
-    field: 'domain.bytes',
-    sourceType: 'string',
-    destType: 'integer',
-    group: 'communication',
-  },
-  {
-    field: 'http.url',
-    sourceType: 'string',
-    destType: 'keyword',
-    group: 'http',
-  },
-  {
-    field: 'destination.address',
-    sourceType: 'string',
-    destType: 'keyword',
-    group: 'communication',
-  },
-  {
-    field: 'netflow.error_rate',
-    sourceType: 'string',
-    destType: 'string',
-    group: 'http',
-  },
-  {
-    field: 'http.route',
-    sourceType: 'string',
-    destType: 'string',
-    group: 'http',
-  },
-  {
-    field: 'destination.packets',
-    sourceType: 'integer',
-    destType: 'integer',
-    group: 'communication',
   },
 ];
 
