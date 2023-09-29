@@ -7,8 +7,8 @@
 
 import { uniqueId, isEmpty } from 'lodash';
 import moment from 'moment';
-import React from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { MutableRefObject } from 'react';
+import { EuiDataGridSorting, EuiText } from '@elastic/eui';
 import datemath from '@elastic/datemath';
 import { HttpStart } from '../../../../../../src/core/public';
 import {
@@ -19,7 +19,12 @@ import {
   BREAKDOWNS,
   DATE_PICKER_FORMAT,
 } from '../../../../common/constants/explorer';
-import { PPL_DATE_FORMAT, PPL_INDEX_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_DATE_FORMAT,
+  PPL_INDEX_INSERT_POINT_REGEX,
+  PPL_INDEX_REGEX,
+  PPL_NEWLINE_REGEX,
+} from '../../../../common/constants/shared';
 import {
   ConfigListEntry,
   GetTooltipHoverInfoType,
@@ -37,123 +42,6 @@ import {
   StatsAggregationChunk,
   statsChunk,
 } from '../../../../common/query_manager/ast/types';
-
-// Create Individual table rows for events datagrid and flyouts
-export const getTrs = (
-  http: HttpStart,
-  explorerFields: IField[],
-  limit: number,
-  setLimit: React.Dispatch<React.SetStateAction<number>>,
-  pageSize: number,
-  timeStampField: any,
-  explorerFieldsFull: IExplorerFields,
-  pplService: PPLService,
-  rawQuery: string,
-  rowRefs: Array<
-    React.RefObject<{
-      closeAllFlyouts(openDocId: string): void;
-    }>
-  >,
-  setRowRefs: React.Dispatch<
-    React.SetStateAction<
-      Array<
-        React.RefObject<{
-          closeAllFlyouts(openDocId: string): void;
-        }>
-      >
-    >
-  >,
-  onFlyoutOpen: (docId: string) => void,
-  docs: any[] = [],
-  prevTrs: any[] = []
-) => {
-  if (prevTrs.length >= docs.length) return prevTrs;
-
-  // reset limit if no previous table rows
-  if (prevTrs.length === 0 && limit !== pageSize) setLimit(pageSize);
-  const trs = prevTrs.slice();
-
-  const upperLimit = Math.min(trs.length === 0 ? pageSize : limit, docs.length);
-  const tempRefs = rowRefs;
-  for (let i = trs.length; i < upperLimit; i++) {
-    const docId = uniqueId('doc_view');
-    const tempRowRef = React.createRef<{
-      closeAllFlyouts(openDocId: string): void;
-    }>();
-    tempRefs.push(tempRowRef);
-    trs.push(
-      <DocViewRow
-        ref={tempRowRef}
-        http={http}
-        key={docId}
-        docId={docId}
-        doc={docs[i]}
-        selectedCols={explorerFields}
-        timeStampField={timeStampField}
-        explorerFields={explorerFieldsFull}
-        pplService={pplService}
-        rawQuery={rawQuery}
-        onFlyoutOpen={onFlyoutOpen}
-      />
-    );
-  }
-  setRowRefs(tempRefs);
-  return trs;
-};
-
-// Create table headers for events datagrid and flyouts
-export const getHeaders = (fields: any, defaultCols: string[], isFlyout?: boolean) => {
-  let tableHeadContent = null;
-  if (!fields || fields.length === 0) {
-    tableHeadContent = (
-      <>
-        {defaultCols.map((colName: string) => {
-          return <th key={uniqueId('datagrid-header-')}>{colName}</th>;
-        })}
-      </>
-    );
-  } else {
-    tableHeadContent = fields.map((selField: any) => {
-      return <th key={uniqueId('datagrid-header-')}>{selField.name}</th>;
-    });
-
-    if (!isFlyout) {
-      tableHeadContent.unshift(<th key={uniqueId('datagrid-header-')} />);
-    }
-  }
-
-  return <tr className="osdDocTableHeader">{tableHeadContent}</tr>;
-};
-
-// Populate Events datagrid and flyouts
-export const populateDataGrid = (
-  explorerFields: IExplorerFields,
-  header1: JSX.Element,
-  body1: JSX.Element,
-  header2: JSX.Element,
-  body2: JSX.Element
-) => {
-  return (
-    <>
-      <div className="dscTable dscTableFixedScroll">
-        {explorerFields?.queriedFields && explorerFields.queriedFields.length > 0 && (
-          <table className="osd-table table" data-test-subj="docTable">
-            <thead>{header1}</thead>
-            <tbody>{body1}</tbody>
-          </table>
-        )}
-        {explorerFields?.queriedFields &&
-        explorerFields?.queriedFields?.length > 0 &&
-        explorerFields.selectedFields?.length === 0 ? null : (
-          <table className="osd-table table" data-test-subj="docTable">
-            <thead>{header2}</thead>
-            <tbody>{body2}</tbody>
-          </table>
-        )}
-      </div>
-    </>
-  );
-};
 
 /* Builds Final Query for the surrounding events
  * -> Final Query is as follows:
@@ -395,13 +283,15 @@ export const getDefaultVisConfig = (statsToken: statsChunk) => {
   // const seriesToken = statsToken.aggregations && statsToken.aggregations[0];
   const span = getSpanValue(groupByToken);
   return {
-    [AGGREGATIONS]: statsToken.aggregations.map((agg) => ({
-      label: agg.function?.value_expression,
-      name: agg.function?.value_expression,
-      aggregation: agg.function?.name,
-      [CUSTOM_LABEL]: agg[CUSTOM_LABEL as keyof StatsAggregationChunk],
-    })),
-    [GROUPBY]: groupByToken?.group_fields?.map((agg) => ({
+    [AGGREGATIONS]: statsToken.aggregations.map(
+      (agg: { [x: string]: any; function: { value_expression: any; name: any } }) => ({
+        label: agg.function?.value_expression,
+        name: agg.function?.value_expression,
+        aggregation: agg.function?.name,
+        [CUSTOM_LABEL]: agg[CUSTOM_LABEL as keyof StatsAggregationChunk],
+      })
+    ),
+    [GROUPBY]: groupByToken?.group_fields?.map((agg: { [x: string]: any; name: any }) => ({
       label: agg.name ?? '',
       name: agg.name ?? '',
       [CUSTOM_LABEL]: agg[CUSTOM_LABEL as keyof GroupField] ?? '',
@@ -514,4 +404,37 @@ export const fillTimeDataWithEmpty = (
   });
 
   return { buckets, values };
+};
+
+export const redoQuery = (
+  startTime: string,
+  endTime: string,
+  rawQuery: string,
+  timeStampField: string,
+  sortingFields: MutableRefObject<EuiDataGridSorting['columns']>,
+  pageFields: MutableRefObject<number[]>,
+  getEvents: any
+) => {
+  let finalQuery = '';
+
+  const start = datemath.parse(startTime)?.utc().format(DATE_PICKER_FORMAT);
+  const end = datemath.parse(endTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT);
+  const tokens = rawQuery.replaceAll(PPL_NEWLINE_REGEX, '').match(PPL_INDEX_INSERT_POINT_REGEX);
+
+  finalQuery = `${tokens![1]}=${
+    tokens![2]
+  } | where ${timeStampField} >= '${start}' and ${timeStampField} <= '${end}'`;
+
+  finalQuery += tokens![3];
+
+  for (let i = 0; i < sortingFields.current.length; i++) {
+    const field = sortingFields.current[i];
+    const dir = field.direction === 'asc' ? '+' : '-';
+    finalQuery = finalQuery + ` | sort ${dir} ${field.id}`;
+  }
+
+  finalQuery =
+    finalQuery +
+    ` | head ${pageFields.current[1]} from ${pageFields.current[0] * pageFields.current[1]}`;
+  getEvents(finalQuery);
 };

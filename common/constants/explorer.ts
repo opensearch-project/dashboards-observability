@@ -325,3 +325,23 @@ export const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
   [SAVED_VISUALIZATION]: TAB_CHART_ID,
 };
+
+export const DEFAULT_EMPTY_EXPLORER_FIELDS = [
+  { name: 'timestamp', type: 'timestamp' },
+  { name: '_source', type: 'string' },
+];
+
+export const DEFAULT_TIMESTAMP_COLUMN = {
+  id: 'timestamp',
+  isSortable: true,
+  display: 'Time',
+  schema: 'datetime',
+  initialWidth: 200,
+};
+
+export const DEFAULT_SOURCE_COLUMN = {
+  id: '_source',
+  isSortable: false,
+  display: 'Source',
+  schema: '_source',
+};

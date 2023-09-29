@@ -9,35 +9,57 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiTableFieldDataColumnType,
-  EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from './datasources_header';
-import { HomeProps } from '../home';
-import { DataConnectionsDescription } from './manage_datasource_description';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { ChromeStart } from '../../../../../../src/core/public';
+import { DataConnectionsHeader } from '../data_connections_header';
+import { HomeProps } from '../../home';
+import { DataConnectionsDescription } from './manage_data_connections_description';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { useToast } from '../../../common/toast';
+import { DeleteModal } from '../../../common/helpers/delete_modal';
+import S3Logo from '../../icons/s3-logo.svg';
+import { DatasourceType } from '../../../../../common/types/data_connections';
 
 interface DataConnection {
-  connectionType: 'OPENSEARCH' | 'SPARK';
+  connectionType: DatasourceType;
   name: string;
-  chrome: ChromeStart;
 }
 
-export const ManageDatasourcesTable = (props: HomeProps) => {
+export const ManageDataConnectionsTable = (props: HomeProps) => {
   const { http, chrome, pplService } = props;
 
-  const [data, setData] = useState([]);
+  const { setToast } = useToast();
+
+  const [data, setData] = useState<DataConnection[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  const deleteConnection = (connectionName: string) => {
+    http!
+      .delete(`${DATACONNECTIONS_BASE}/${connectionName}`)
+      .then(() => {
+        setToast(`Data connection ${connectionName} deleted successfully`);
+        setData(
+          data.filter((connection) => {
+            return !(connection.name === connectionName);
+          })
+        );
+      })
+      .catch((err) => {
+        setToast(`Data connection $${connectionName} not deleted. See output for more details.`);
+      });
+  };
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Datasources',
+        text: 'Data sources',
         href: '#/',
       },
     ]);
@@ -45,19 +67,36 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
   }, [chrome]);
 
   async function handleDataRequest() {
-    http.get(`${DATACONNECTIONS_BASE}`).then((datasources) =>
+    pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((dataconnections) =>
       setData(
-        datasources.map((x: any) => {
-          return { name: x.name, connectionType: x.connector };
+        dataconnections.jsonData.map((x: any) => {
+          return { name: x.DATASOURCE_NAME, connectionType: x.CONNECTOR_TYPE };
         })
       )
     );
   }
 
+  const displayDeleteModal = (connectionName: string) => {
+    setModalLayout(
+      <DeleteModal
+        onConfirm={() => {
+          setIsModalVisible(false);
+          deleteConnection(connectionName);
+        }}
+        onCancel={() => {
+          setIsModalVisible(false);
+        }}
+        title={`Delete ${connectionName}`}
+        message={`Are you sure you want to delete ${connectionName}?`}
+      />
+    );
+    setIsModalVisible(true);
+  };
+
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
-      case 'OPENSEARCH':
-        return <EuiIcon type="logoOpenSearch" />;
+      case 'S3GLUE':
+        return <EuiIcon type={S3Logo} />;
       default:
         return <></>;
     }
@@ -84,17 +123,6 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
       ),
     },
     {
-      field: 'connectionStatus',
-      name: 'Connection Status',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiText data-test-subj={`${record.templateName}DatasourceConnectionHealth`}>
-          {_.truncate(record.creationDate, { length: 100 })}
-        </EuiText>
-      ),
-    },
-    {
       field: 'actions',
       name: 'Actions',
       sortable: true,
@@ -103,7 +131,7 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
         <EuiIcon
           type={'trash'}
           onClick={() => {
-            /* Delete Datasource*/
+            displayDeleteModal(record.name);
           }}
         />
       ),
@@ -141,6 +169,7 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
           <DataConnectionsDescription />
+
           <EuiInMemoryTable
             items={entries}
             itemId="id"
@@ -155,6 +184,7 @@ export const ManageDatasourcesTable = (props: HomeProps) => {
             isSelectable={true}
           />
         </EuiPageContent>
+        {isModalVisible && modalLayout}
       </EuiPageBody>
     </EuiPage>
   );

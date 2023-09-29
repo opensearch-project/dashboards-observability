@@ -17,74 +17,93 @@ import {
   EuiAccordion,
   EuiIcon,
   EuiCard,
-  EuiTab,
-  EuiTabs,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { AccessControlTab } from './access_control_tab';
+import { NoAccess } from '../no_access';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { coreRefs } from '../../../../framework/core_refs';
+import { ConnectionDetails } from './connection_details';
 
 interface DatasourceDetails {
   allowedRoles: string[];
   name: string;
   cluster: string;
+  connector: string;
+  properties: unknown;
 }
 
-export const DataSource = (props: any) => {
-  const { dataSource, pplService, http } = props;
+export const DataConnection = (props: any) => {
+  const { dataSource } = props;
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
     name: '',
     cluster: '',
+    connector: '',
+    properties: {},
   });
+  const [hasAccess, setHasAccess] = useState(true);
+  const { http, chrome } = coreRefs;
 
   useEffect(() => {
-    http.get(`${DATACONNECTIONS_BASE}/${dataSource}`).then((data) =>
-      setDatasourceDetails({
-        allowedRoles: data.allowedRoles,
-        name: data.name,
-        cluster: data.properties['emr.cluster'],
+    chrome!.setBreadcrumbs([
+      {
+        text: 'Data sources',
+        href: '#/',
+      },
+      {
+        text: `${dataSource}`,
+        href: `#/manage/${dataSource}`,
+      },
+    ]);
+    http!
+      .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
+      .then((data) => {
+        setDatasourceDetails({
+          allowedRoles: data.allowedRoles,
+          name: data.name,
+          cluster: data.properties['emr.cluster'],
+          connector: data.connector,
+          properties: data.properties,
+        });
       })
-    );
-  }, []);
+      .catch((err) => {
+        setHasAccess(false);
+      });
+  }, [chrome, http]);
 
   const tabs = [
-    {
-      id: 'data',
-      name: 'Data',
-      disabled: false,
-    },
     {
       id: 'access_control',
       name: 'Access control',
       disabled: false,
+      content: (
+        <AccessControlTab
+          allowedRoles={datasourceDetails.allowedRoles}
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
+        />
+      ),
     },
     {
       id: 'connection_configuration',
       name: 'Connection configuration',
       disabled: false,
+      content: (
+        <ConnectionDetails
+          allowedRoles={datasourceDetails.allowedRoles}
+          dataConnection={dataSource}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+        />
+      ),
     },
   ];
 
-  const [selectedTabId, setSelectedTabId] = useState('data');
-
-  const onSelectedTabChanged = (id) => {
-    setSelectedTabId(id);
-  };
-
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        key={index}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
-
-  const renderOverview = () => {
+  const DatasourceOverview = () => {
     return (
       <EuiPanel>
         <EuiFlexGroup>
@@ -97,11 +116,9 @@ export const DataSource = (props: any) => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Access control</EuiText>
+                <EuiText className="overview-title">Authentication method</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.allowedRoles && datasourceDetails.allowedRoles.length
-                    ? datasourceDetails.allowedRoles
-                    : '-'}
+                  {'-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -109,15 +126,27 @@ export const DataSource = (props: any) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Connection description</EuiText>
+                <EuiText className="overview-title">Data source description</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.name || '-'}
+                  {'-'}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Connection status</EuiText>
+                <EuiText className="overview-title">Query permissions</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {datasourceDetails.cluster || '-'}
+                  {datasourceDetails.allowedRoles && datasourceDetails.allowedRoles.length
+                    ? 'Restricted'
+                    : 'Everyone'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Spark data location</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {'-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -127,6 +156,10 @@ export const DataSource = (props: any) => {
       </EuiPanel>
     );
   };
+
+  if (!hasAccess) {
+    return <NoAccess />;
+  }
 
   return (
     <EuiPage>
@@ -143,7 +176,7 @@ export const DataSource = (props: any) => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
 
-        {renderOverview()}
+        <DatasourceOverview />
         <EuiSpacer />
         <EuiAccordion
           id="queryOrAccelerateAccordion"
@@ -164,12 +197,12 @@ export const DataSource = (props: any) => {
                 icon={<EuiIcon size="xxl" type="bolt" />}
                 title={'Accelerate performance'}
                 description="Accelerate performance through OpenSearch indexing."
-                onClick={() => (window.location.hash = `/acceleration/${dataSource}`)}
+                onClick={() => {}}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiAccordion>
-        <EuiTabs>{renderTabs()}</EuiTabs>
+        <EuiTabbedContent tabs={tabs} />
 
         <EuiSpacer />
       </EuiPageBody>

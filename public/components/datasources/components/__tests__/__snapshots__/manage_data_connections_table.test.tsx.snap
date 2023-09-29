@@ -19,7 +19,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
               class="euiTitle euiTitle--large"
               data-test-subj="dataconnections-header"
             >
-              Data connections
+              Data sources
             </h1>
           </div>
         </header>
@@ -32,7 +32,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            Connect and manage compatible OpenSearch and OpenSearch Dashboard data connections.
+            Connect and manage compatible OpenSearch and OpenSearch Dashboard data sources.
              
             <a
               class="euiLink euiLink--primary"
@@ -58,6 +58,38 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
         <div
           class="euiSpacer euiSpacer--l"
         />
+        <div
+          class="euiTabs euiTabs--condensed"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Manage data source
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              New data source
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
       </div>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
@@ -68,7 +100,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
           <h2
             class="euiTitle euiTitle--small"
           >
-            Manage existing data connections
+            Manage existing data sources
           </h2>
           <div
             class="euiSpacer euiSpacer--s"
@@ -79,7 +111,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Manage already created data connections.
+              Manage already created data sources.
             </div>
           </div>
           <hr

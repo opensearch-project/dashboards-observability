@@ -8,7 +8,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import { act } from '@testing-library/react';
 import React from 'react';
 import { describeDataConnection, mockRoleData } from '../../../../../test/datasources';
-import { DataConnection } from '../data_connection';
+import { DataConnection } from '../manage/data_connection';
 import ReactDOM from 'react-dom';
 
 jest.mock('../../../../../public/framework/core_refs', () => ({
