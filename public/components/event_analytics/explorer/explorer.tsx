@@ -122,6 +122,7 @@ import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
+import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 
 export const Explorer = ({
   pplService,
@@ -628,7 +629,7 @@ export const Explorer = ({
   };
 
   const explorerVis = useMemo(() => {
-    return (
+    return explorerMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ? (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -641,8 +642,18 @@ export const Explorer = ({
         callback={callbackForConfig}
         queryManager={queryManager}
       />
+    ) : (
+      <DirectQueryVisualization />
     );
-  }, [query, curVisId, explorerFields, explorerVisualizations, explorerData, visualizations]);
+  }, [
+    query,
+    curVisId,
+    explorerFields,
+    explorerVisualizations,
+    explorerData,
+    visualizations,
+    explorerMeta.datasources,
+  ]);
 
   const contentTabs = [
     {
