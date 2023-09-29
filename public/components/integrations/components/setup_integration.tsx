@@ -28,41 +28,41 @@ interface IntegrationConfigProps {
   };
 }
 
-const INTEGRATION_DATA_TABLE_COLUMNS = [
-  {
-    field: 'field',
-    name: 'Field',
-  },
-  {
-    field: 'sourceType',
-    name: 'Source Data Type',
-  },
-  {
-    field: 'destType',
-    name: 'Destination Data Type',
-  },
-  {
-    field: 'group',
-    name: 'Mapping Group',
-  },
-];
-
 // TODO support localization
-const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<string, string> = new Map([
-  ['s3', 'table'],
-  ['index', 'index'],
+const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
+  string,
+  {
+    title: string;
+    lower: string;
+    help: string;
+  }
+> = new Map([
+  [
+    's3',
+    {
+      title: 'Table',
+      lower: 'table',
+      help: 'Select a table to pull the data from.',
+    },
+  ],
+  [
+    'index',
+    {
+      title: 'Index',
+      lower: 'index',
+      help: 'Select an index to pull the data from.',
+    },
+  ],
 ]);
 
 const integrationConnectionSelectorItems = [
   {
     value: 's3',
     text: 'S3 Connection',
-    dataSourceName: ['table', 'tables'],
   },
   {
     value: 'index',
     text: 'OpenSearch Index',
-    dataSourceName: ['index', 'indexes'],
   },
 ];
 
@@ -146,26 +146,6 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
   }
 };
 
-export function IntegrationDataModal({ close }: { close: () => void }): React.JSX.Element {
-  return (
-    <Eui.EuiModal onClose={close}>
-      <Eui.EuiModalHeader>
-        <h2>Data Table</h2>
-      </Eui.EuiModalHeader>
-      <Eui.EuiModalBody>
-        <Eui.EuiBasicTable
-          items={integrationDataTableData}
-          columns={INTEGRATION_DATA_TABLE_COLUMNS}
-        />
-        <Eui.EuiSpacer />
-        <Eui.EuiButton onClick={close} size="s">
-          Close
-        </Eui.EuiButton>
-      </Eui.EuiModalBody>
-    </Eui.EuiModal>
-  );
-}
-
 const findTemplate = async (integrationTemplateId: string) => {
   const http = coreRefs.http!;
   const result = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`);
@@ -177,11 +157,7 @@ export function SetupIntegrationForm({
   updateConfig,
   integration,
 }: IntegrationConfigProps) {
-  const connectionType =
-    INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType) ?? 'index';
-  const indefiniteArticle = 'aeiou'.includes(connectionType.charAt(0)) ? 'an' : 'a';
-  const capitalizedConnectionType =
-    connectionType.charAt(0).toUpperCase() + connectionType.slice(1);
+  const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
   const [dataSourceSuggestions, setDataSourceSuggestions] = useState(
     [] as Array<{ label: string }>
@@ -228,10 +204,7 @@ export function SetupIntegrationForm({
           }
         />
       </Eui.EuiFormRow>
-      <Eui.EuiFormRow
-        label={capitalizedConnectionType}
-        helpText={`Select ${indefiniteArticle} ${connectionType} to pull the data from.`}
-      >
+      <Eui.EuiFormRow label={connectionType.title} helpText={connectionType.help}>
         <Eui.EuiComboBox
           options={dataSourceSuggestions}
           isLoading={isSuggestionsLoading}
