@@ -25,6 +25,7 @@ import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { useToast } from '../../../../public/components/common/toast';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
 export interface IntegrationConfig {
   displayName: string;
@@ -96,7 +97,7 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
         }) ?? []
       );
     } else if (type === 's3') {
-      const result = (await http.get('/api/dataconnections')) as Array<{
+      const result = (await http.get(DATACONNECTIONS_BASE)) as Array<{
         name: string;
         connector: string;
       }>;
