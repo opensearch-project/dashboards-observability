@@ -139,7 +139,7 @@ export function registerDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in creating data source:', JSON.stringify(error));
+        console.error('Issue in creating data source:', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.response,
@@ -162,10 +162,10 @@ export function registerDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data connections:', JSON.stringify(error));
+        console.error('Issue in fetching data sources:', error);
         return response.custom({
           statusCode: error.statusCode || 500,
-          message: error.body,
+          body: error.response,
         });
       }
     }
