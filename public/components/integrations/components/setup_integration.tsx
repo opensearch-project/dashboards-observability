@@ -3,7 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as Eui from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiComboBox,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import {
@@ -175,37 +191,37 @@ export function SetupIntegrationForm({
   }, [config.connectionType]);
 
   return (
-    <Eui.EuiForm>
-      <Eui.EuiTitle>
+    <EuiForm>
+      <EuiTitle>
         <h1>Set Up Integration</h1>
-      </Eui.EuiTitle>
-      <Eui.EuiSpacer />
-      <Eui.EuiTitle>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiTitle>
         <h2>Integration Details</h2>
-      </Eui.EuiTitle>
-      <Eui.EuiSpacer />
-      <Eui.EuiFormRow label="Display Name">
-        <Eui.EuiFieldText
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFormRow label="Display Name">
+        <EuiFieldText
           value={config.displayName}
           onChange={(event) => updateConfig({ displayName: event.target.value })}
         />
-      </Eui.EuiFormRow>
-      <Eui.EuiSpacer />
-      <Eui.EuiTitle>
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiTitle>
         <h2>Integration Connection</h2>
-      </Eui.EuiTitle>
-      <Eui.EuiSpacer />
-      <Eui.EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
-        <Eui.EuiSelect
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
+        <EuiSelect
           options={integrationConnectionSelectorItems}
           value={config.connectionType}
           onChange={(event) =>
             updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
           }
         />
-      </Eui.EuiFormRow>
-      <Eui.EuiFormRow label={connectionType.title} helpText={connectionType.help}>
-        <Eui.EuiComboBox
+      </EuiFormRow>
+      <EuiFormRow label={connectionType.title} helpText={connectionType.help}>
+        <EuiComboBox
           options={dataSourceSuggestions}
           isLoading={isSuggestionsLoading}
           onChange={(selected) => {
@@ -218,8 +234,8 @@ export function SetupIntegrationForm({
           selectedOptions={[{ label: config.connectionDataSource }]}
           singleSelection={{ asPlainText: true }}
         />
-      </Eui.EuiFormRow>
-    </Eui.EuiForm>
+      </EuiFormRow>
+    </EuiForm>
   );
 }
 
@@ -234,10 +250,10 @@ export function SetupBottomBar({
   const [loading, setLoading] = useState(false);
 
   return (
-    <Eui.EuiBottomBar>
-      <Eui.EuiFlexGroup justifyContent="flexEnd">
-        <Eui.EuiFlexItem grow={false}>
-          <Eui.EuiButton
+    <EuiBottomBar>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
             color="secondary"
             iconType="cross"
             onClick={() => {
@@ -249,10 +265,10 @@ export function SetupBottomBar({
             }}
           >
             Discard
-          </Eui.EuiButton>
-        </Eui.EuiFlexItem>
-        <Eui.EuiFlexItem grow={false}>
-          <Eui.EuiButton
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
             fill
             iconType="arrowRight"
             iconSide="right"
@@ -273,10 +289,10 @@ export function SetupBottomBar({
             }}
           >
             Add Integration
-          </Eui.EuiButton>
-        </Eui.EuiFlexItem>
-      </Eui.EuiFlexGroup>
-    </Eui.EuiBottomBar>
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBottomBar>
   );
 }
 
@@ -298,19 +314,19 @@ export function SetupIntegrationPage({
     setConfig(Object.assign({}, integConfig, updates));
 
   return (
-    <Eui.EuiPage>
-      <Eui.EuiPageBody>
-        <Eui.EuiPageContent>
-          <Eui.EuiPageContentBody>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageContentBody>
             <SetupIntegrationForm
               config={integConfig}
               updateConfig={updateConfig}
               integration={integration}
             />
-          </Eui.EuiPageContentBody>
-        </Eui.EuiPageContent>
+          </EuiPageContentBody>
+        </EuiPageContent>
         <SetupBottomBar config={integConfig} integration={integration} />
-      </Eui.EuiPageBody>
-    </Eui.EuiPage>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
