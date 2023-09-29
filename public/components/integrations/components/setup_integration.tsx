@@ -115,10 +115,38 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
   }
 };
 
-const findTemplate = async (integrationTemplateId: string) => {
-  const http = coreRefs.http!;
-  const result = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`);
-  return result;
+const runQuery = async (query: string): Promise<Result<object>> => {
+  try {
+    console.log('- Posting query');
+    const http = coreRefs.http!;
+    const queryId = (
+      await http.post(CONSOLE_PROXY, {
+        body: JSON.stringify({ query, lang: 'sql' }),
+        query: {
+          path: '_plugins/_async_query',
+          method: 'POST',
+        },
+      })
+    ).queryId;
+    while (true) {
+      const poll = await http.post(CONSOLE_PROXY, {
+        body: '{}',
+        query: {
+          path: '_plugins/_async_query/' + '00fdjdogncrsto0q',
+          method: 'GET',
+        },
+      });
+      console.log('Poll:', poll);
+      if (poll.status === 'SUCCESS') {
+        return { ok: true, value: poll };
+      } else if (poll.status === 'FAILURE') {
+        return { ok: false, error: new Error('FAILURE status') };
+      }
+    }
+  } catch (err: any) {
+    console.error(err);
+    return { ok: false, error: err };
+  }
 };
 
 export function SetupIntegrationForm({
@@ -171,8 +199,6 @@ export function SetupIntegrationForm({
               {},
               item
             );
-            console.log(item);
-            console.log(integration);
             switch (item.value) {
               case 's3':
                 copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'queries');
@@ -245,16 +271,40 @@ export function SetupBottomBar({
             isLoading={loading}
             onClick={async () => {
               setLoading(true);
-              const template = await findTemplate(integration.name);
-              await addIntegrationRequest(
-                false,
-                integration.name,
-                config.displayName,
-                template,
-                setToast,
-                config.displayName,
-                config.connectionDataSource
-              );
+              if (config.connectionType === 'index') {
+                await addIntegrationRequest(
+                  false,
+                  integration.name,
+                  config.displayName,
+                  integration,
+                  setToast,
+                  config.displayName,
+                  config.connectionDataSource
+                );
+              } else if (config.connectionType === 's3') {
+                console.log('Starting S3 loading');
+                const http = coreRefs.http!;
+
+                console.log('Fetching assets');
+                const assets = await http.get(
+                  `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+                );
+
+                console.log('Beginning queries');
+                // Queries must exist because we disable s3 if they're not present
+                for (const query of assets.data.queries!) {
+                  console.log('Query:', query);
+                  const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
+                  const result = await runQuery(queryStr);
+                  if (!result.ok) {
+                    console.error('Query failed', result.error);
+                    break;
+                  }
+                  console.log('Query successful', result.value);
+                }
+              } else {
+                console.error('Invalid data source type');
+              }
               setLoading(false);
             }}
           >

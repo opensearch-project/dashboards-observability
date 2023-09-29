@@ -53,7 +53,12 @@
     },
     "queries": [
       {
-        "name": "elb_query",
+        "name": "aws_elb_s3_table",
+        "version": "1.0.0",
+        "language": "sql"
+      },
+      {
+        "name": "aws_elb_s3_skipping_index",
         "version": "1.0.0",
         "language": "sql"
       }
