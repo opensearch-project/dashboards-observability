@@ -4,7 +4,7 @@
  */
 import { HttpSetup } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 type ValidationResult = { ok: true } | { ok: false; errors: string[] };
 
@@ -120,7 +120,7 @@ export const fetchDataSourceMappings = async (
   http: HttpSetup
 ): Promise<{ [key: string]: { properties: any } } | null> => {
   return http
-    .post('/api/console/proxy', {
+    .post(CONSOLE_PROXY, {
       query: {
         path: `${targetDataSource}/_mapping`,
         method: 'GET',
@@ -196,7 +196,7 @@ const createComponentMapping = async (
 ): Promise<{ [key: string]: { properties: any } } | null> => {
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
-  return http.post('/api/console/proxy', {
+  return http.post(CONSOLE_PROXY, {
     body: JSON.stringify(payload),
     query: {
       path: `_component_template/ss4o_${componentName}-${version}-template`,
@@ -218,7 +218,7 @@ const createIndexMapping = async (
   const http = coreRefs.http!;
   const version = payload.template.mappings._meta.version;
   payload.index_patterns = [dataSourceName];
-  return http.post('/api/console/proxy', {
+  return http.post(CONSOLE_PROXY, {
     body: JSON.stringify(payload),
     query: {
       path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
@@ -256,7 +256,7 @@ const createDataSourceMappings = async (
       })
     );
     // In order to see our changes, we need to manually provoke a refresh
-    await http.post('/api/console/proxy', {
+    await http.post(CONSOLE_PROXY, {
       query: {
         path: '_refresh',
         method: 'GET',
@@ -332,7 +332,7 @@ export async function addIntegrationRequest(
       .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
       .join('\n') + '\n';
   http
-    .post('/api/console/proxy', {
+    .post(CONSOLE_PROXY, {
       body: requestBody,
       query: {
         path: `${dataSource}/_bulk?refresh=wait_for`,

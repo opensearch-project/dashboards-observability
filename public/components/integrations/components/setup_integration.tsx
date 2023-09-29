@@ -24,7 +24,7 @@ import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { useToast } from '../../../../public/components/common/toast';
-import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
+import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
 export interface IntegrationConfig {
@@ -84,7 +84,7 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
   const http = coreRefs.http!;
   try {
     if (type === 'index') {
-      const result = await http.post('/api/console/proxy', {
+      const result = await http.post(CONSOLE_PROXY, {
         body: '{}',
         query: {
           path: '_data_stream/ss4o_*',
