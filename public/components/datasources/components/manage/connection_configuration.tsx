@@ -38,7 +38,6 @@ export const ConnectionConfiguration = (props: ConnectionConfigurationProps) => 
   const [details, setDetails] = useState(connectionDetails);
 
   const [password, setPassword] = useState('');
-  const [dual, setDual] = useState(true);
 
   const NameRow = () => {
     return (
@@ -127,7 +126,7 @@ export const ConnectionConfiguration = (props: ConnectionConfigurationProps) => 
           </EuiFormRow>
           <EuiFormRow label="Password">
             <EuiFieldPassword
-              type={dual ? 'dual' : undefined}
+              type="dual"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />

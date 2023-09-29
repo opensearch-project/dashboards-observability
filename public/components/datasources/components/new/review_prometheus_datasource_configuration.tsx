@@ -16,21 +16,22 @@ import {
 import { Role } from 'common/types/data_connections';
 import React from 'react';
 
-interface ConfigureS3DatasourceProps {
+interface ConfigurePrometheusDatasourceProps {
   selectedQueryPermissionRoles: Role[];
   currentName: string;
   currentDetails: string;
   currentArn: string;
   currentStore: string;
+  currentUsername: string;
   goBack: () => void;
 }
 
-export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
+export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceProps) => {
   const {
     currentStore,
     currentName,
     currentDetails,
-    currentArn,
+    currentUsername,
     selectedQueryPermissionRoles,
     goBack,
   } = props;
@@ -39,7 +40,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Review S3 Data Source Configuration`}</h1>
+          <h1>{`Review Prometheus Data Source Configuration`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiSpacer />
@@ -75,15 +76,15 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Glue authentication ARN</EuiText>
+                <EuiText className="overview-title">Prometheus URI</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {currentArn}
+                  {currentStore}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Glue index store URI</EuiText>
+                <EuiText className="overview-title">Authentication method</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {currentStore}
+                  {currentUsername ? 'Basic auth' : 'AWSSigV4'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

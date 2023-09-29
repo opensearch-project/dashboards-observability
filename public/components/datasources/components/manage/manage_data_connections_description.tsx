@@ -3,20 +3,47 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React from 'react';
 
-export const DataConnectionsDescription = () => {
+interface DataConnectionsDescriptionProps {
+  refresh: () => void;
+}
+
+export const DataConnectionsDescription = (props: DataConnectionsDescriptionProps) => {
+  const { refresh } = props;
   return (
     <div>
-      <EuiTitle size="s">
-        <h2>Manage existing data sources</h2>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <>
+            <EuiTitle size="s">
+              <h2>Manage existing data sources</h2>
+            </EuiTitle>
 
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        Manage already created data sources.
-      </EuiText>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              Manage already created data sources or{' '}
+              <EuiLink href="#/new">create a new data source</EuiLink>
+            </EuiText>
+          </>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={refresh} iconType="refresh">
+            Refresh
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiHorizontalRule size="full" />
     </div>
   );

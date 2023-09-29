@@ -16,6 +16,7 @@ import {
 import React, { useState } from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
+import prometheusSvg from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 
 export interface DatasourceCard {
@@ -23,25 +24,28 @@ export interface DatasourceCard {
   displayName: string;
   description: string;
   displayIcon: JSX.Element;
+  onClick: () => void;
 }
-
-const Datasources: DatasourceCard[] = [
-  {
-    name: 'OPENSEARCH',
-    displayName: 'OpenSearch',
-    description: 'Connect to self managed OpenSearch clusters',
-    displayIcon: <EuiIcon type="logoOpenSearch" size="xl" />,
-  },
-  {
-    name: 'S3GLUE',
-    displayName: 'S3',
-    description: 'Connect to Amazon S3 via Amazon Glue',
-    displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-  },
-];
 
 export function NewDatasourceCardView() {
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
+
+  const Datasources: DatasourceCard[] = [
+    {
+      name: 'S3GLUE',
+      displayName: 'S3',
+      description: 'Connect to Amazon S3 via Amazon Glue',
+      displayIcon: <EuiIcon type={s3Svg} size="xl" />,
+      onClick: () => (window.location.hash = `#/configure/S3GLUE`),
+    },
+    {
+      name: 'PROMETHEUS',
+      displayName: 'Prometheus',
+      description: 'Connect to Amazon managed Prometheus',
+      displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
+      onClick: () => (window.location.hash = `#/configure/PROMETHEUS`),
+    },
+  ];
 
   const toggleButtonsIcons = [
     {
@@ -73,7 +77,7 @@ export function NewDatasourceCardView() {
                   description={i.description}
                   data-test-subj={`datasource_card_${i.name.toLowerCase()}`}
                   titleElement="span"
-                  onClick={() => (window.location.hash = `#/configure/${i.name}`)}
+                  onClick={i.onClick}
                 />
               </EuiFlexItem>
             );
@@ -87,28 +91,6 @@ export function NewDatasourceCardView() {
   return (
     <EuiPanel>
       <NewDatasourceDescription />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            isClearable={false}
-            placeholder="Search..."
-            data-test-subj="search-bar-input-box"
-            // TODO: implement searching
-            onChange={(e) => {}}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend="Text align"
-            options={toggleButtonsIcons}
-            idSelected={toggleIconIdSelected}
-            onChange={(id) => onChangeIcons(id)}
-            isIconOnly
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
       {renderRows(Datasources)}
     </EuiPanel>
   );
