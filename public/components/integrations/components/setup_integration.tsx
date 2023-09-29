@@ -219,19 +219,6 @@ export function SetupIntegrationForm({
           singleSelection={{ asPlainText: true }}
         />
       </Eui.EuiFormRow>
-      {/* TODO temporarily removing validate button until error states are ready. */}
-      {/* <Eui.EuiButton
-        onClick={async () => {
-          const validationResult = await doExistingDataSourceValidation(
-            config.connectionDataSource,
-            integration.name,
-            integration.type
-          );
-          console.log(validationResult);
-        }}
-      >
-        Validate
-      </Eui.EuiButton> */}
     </Eui.EuiForm>
   );
 }
