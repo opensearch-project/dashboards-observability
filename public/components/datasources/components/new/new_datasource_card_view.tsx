@@ -91,28 +91,6 @@ export function NewDatasourceCardView() {
   return (
     <EuiPanel>
       <NewDatasourceDescription />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            isClearable={false}
-            placeholder="Search..."
-            data-test-subj="search-bar-input-box"
-            // TODO: implement searching
-            onChange={(e) => {}}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend="Text align"
-            options={toggleButtonsIcons}
-            idSelected={toggleIconIdSelected}
-            onChange={(id) => onChangeIcons(id)}
-            isIconOnly
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
       {renderRows(Datasources)}
     </EuiPanel>
   );
