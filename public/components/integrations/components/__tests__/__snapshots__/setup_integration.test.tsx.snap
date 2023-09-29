@@ -204,18 +204,10 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   options={
                                     Array [
                                       Object {
-                                        "dataSourceName": Array [
-                                          "table",
-                                          "tables",
-                                        ],
                                         "text": "S3 Connection",
                                         "value": "s3",
                                       },
                                       Object {
-                                        "dataSourceName": Array [
-                                          "index",
-                                          "indexes",
-                                        ],
                                         "text": "OpenSearch Index",
                                         "value": "index",
                                       },
@@ -253,24 +245,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             value="index"
                                           >
                                             <option
-                                              dataSourceName={
-                                                Array [
-                                                  "table",
-                                                  "tables",
-                                                ]
-                                              }
                                               key="0"
                                               value="s3"
                                             >
                                               S3 Connection
                                             </option>
                                             <option
-                                              dataSourceName={
-                                                Array [
-                                                  "index",
-                                                  "indexes",
-                                                ]
-                                              }
                                               key="1"
                                               value="index"
                                             >
@@ -1207,18 +1187,10 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               options={
                 Array [
                   Object {
-                    "dataSourceName": Array [
-                      "table",
-                      "tables",
-                    ],
                     "text": "S3 Connection",
                     "value": "s3",
                   },
                   Object {
-                    "dataSourceName": Array [
-                      "index",
-                      "indexes",
-                    ],
                     "text": "OpenSearch Index",
                     "value": "index",
                   },
@@ -1256,24 +1228,12 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                         value="index"
                       >
                         <option
-                          dataSourceName={
-                            Array [
-                              "table",
-                              "tables",
-                            ]
-                          }
                           key="0"
                           value="s3"
                         >
                           S3 Connection
                         </option>
                         <option
-                          dataSourceName={
-                            Array [
-                              "index",
-                              "indexes",
-                            ]
-                          }
                           key="1"
                           value="index"
                         >
