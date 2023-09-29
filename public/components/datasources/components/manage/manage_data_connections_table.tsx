@@ -124,7 +124,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
           datasource.connectionType === 'PROMETHEUS' ? observabilityMetricsID : observabilityLogsID
         );
       },
-      'data-test-subj': 'action-edit',
+      'data-test-subj': 'action-query',
     },
     {
       name: 'Accelerate performance',
@@ -135,7 +135,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       onClick: () => {
         application!.navigateToApp('opensearch-query-workbench');
       },
-      'data-test-subj': 'action-edit',
+      'data-test-subj': 'action-accelerate',
     },
     {
       name: 'Delete',
@@ -204,7 +204,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       <EuiPageBody component="div">
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
-          <DataConnectionsDescription />
+          <DataConnectionsDescription refresh={handleDataRequest} />
 
           <EuiInMemoryTable
             items={entries}

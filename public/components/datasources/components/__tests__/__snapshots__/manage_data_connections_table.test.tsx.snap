@@ -97,29 +97,65 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
         role="main"
       >
         <div>
-          <h2
-            class="euiTitle euiTitle--small"
-          >
-            Manage existing data sources
-          </h2>
           <div
-            class="euiSpacer euiSpacer--s"
-          />
-          <div
-            class="euiText euiText--small"
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <div
-              class="euiTextColor euiTextColor--subdued"
+              class="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              Manage already created data sources or
-               
-              <a
-                class="euiLink euiLink--primary"
-                href="#/new"
-                rel="noreferrer"
+              <h2
+                class="euiTitle euiTitle--small"
               >
-                create a new data source
-              </a>
+                Manage existing data sources
+              </h2>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--small"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  Manage already created data sources or
+                   
+                  <a
+                    class="euiLink euiLink--primary"
+                    href="#/new"
+                    rel="noreferrer"
+                  >
+                    create a new data source
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    class="euiButton__text"
+                  >
+                    Refresh
+                  </span>
+                </span>
+              </button>
             </div>
           </div>
           <hr
@@ -302,7 +338,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         <button
                           aria-labelledby="random_html_id"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
-                          data-test-subj="action-edit"
+                          data-test-subj="action-query"
                           type="button"
                         >
                           <svg
@@ -426,7 +462,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         <button
                           aria-labelledby="random_html_id"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
-                          data-test-subj="action-edit"
+                          data-test-subj="action-query"
                           type="button"
                         >
                           <svg
@@ -550,7 +586,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         <button
                           aria-labelledby="random_html_id"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
-                          data-test-subj="action-edit"
+                          data-test-subj="action-query"
                           type="button"
                         >
                           <svg
@@ -674,7 +710,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                         <button
                           aria-labelledby="random_html_id"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
-                          data-test-subj="action-edit"
+                          data-test-subj="action-query"
                           type="button"
                         >
                           <svg
