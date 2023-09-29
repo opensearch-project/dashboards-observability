@@ -20,12 +20,17 @@ import React, { useEffect, useState } from 'react';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { HomeProps } from '../../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import {
+  DATACONNECTIONS_BASE,
+  observabilityLogsID,
+  observabilityMetricsID,
+} from '../../../../../common/constants/shared';
 import { useToast } from '../../../common/toast';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
 import S3Logo from '../../icons/s3-logo.svg';
 import PrometheusLogo from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 
 interface DataConnection {
   connectionType: DatasourceType;
@@ -34,6 +39,7 @@ interface DataConnection {
 
 export const ManageDataConnectionsTable = (props: HomeProps) => {
   const { http, chrome, pplService } = props;
+  const { application } = coreRefs;
 
   const { setToast } = useToast();
 
@@ -94,6 +100,55 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     setIsModalVisible(true);
   };
 
+  const actions = [
+    {
+      name: 'Edit',
+      isPrimary: true,
+      icon: 'pencil',
+      type: 'icon',
+      onClick: (datasource: DataConnection) => {
+        window.location.href = `#/manage/${datasource.name}`;
+      },
+      'data-test-subj': 'action-edit',
+    },
+    {
+      name: (datasource: DataConnection) =>
+        `Query in ${
+          datasource.connectionType === 'PROMETHEUS' ? 'Metrics Analytics' : 'Observability Logs'
+        }`,
+      isPrimary: true,
+      icon: 'discoverApp',
+      type: 'icon',
+      onClick: (datasource: DataConnection) => {
+        application!.navigateToApp(
+          datasource.connectionType === 'PROMETHEUS' ? observabilityMetricsID : observabilityLogsID
+        );
+      },
+      'data-test-subj': 'action-edit',
+    },
+    {
+      name: 'Accelerate performance',
+      isPrimary: false,
+      icon: 'bolt',
+      type: 'icon',
+      available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
+      onClick: () => {
+        application!.navigateToApp('opensearch-query-workbench');
+      },
+      'data-test-subj': 'action-edit',
+    },
+    {
+      name: 'Delete',
+      description: 'Delete this data source',
+      icon: 'trash',
+      color: 'danger',
+      type: 'icon',
+      onClick: (datasource: DataConnection) => displayDeleteModal(datasource.name),
+      isPrimary: false,
+      'data-test-subj': 'action-delete',
+    },
+  ];
+
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
       case 'S3GLUE':
@@ -128,16 +183,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     {
       field: 'actions',
       name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiIcon
-          type={'trash'}
-          onClick={() => {
-            displayDeleteModal(record.name);
-          }}
-        />
-      ),
+      actions,
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 

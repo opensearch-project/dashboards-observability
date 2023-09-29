@@ -218,12 +218,11 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                     </th>
                     <th
                       class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_actions_1"
                       role="columnheader"
                       scope="col"
                     >
                       <span
-                        class="euiTableCellContent"
+                        class="euiTableCellContent euiTableCellContent--alignRight"
                       >
                         <span
                           class="euiTableCellContent__text"
@@ -237,7 +236,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                 </thead>
                 <tbody>
                   <tr
-                    class="euiTableRow euiTableRow-isSelectable"
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                   >
                     <td
                       class="euiTableRowCell"
@@ -272,31 +271,96 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       </div>
                     </td>
                     <td
-                      class="euiTableRowCell"
+                      class="euiTableRowCell euiTableRowCell--hasActions"
                     >
                       <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                       >
-                        Actions
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon-isLoading"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="0-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>
                   <tr
-                    class="euiTableRow euiTableRow-isSelectable"
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                   >
                     <td
                       class="euiTableRowCell"
@@ -331,31 +395,96 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       </div>
                     </td>
                     <td
-                      class="euiTableRowCell"
+                      class="euiTableRowCell euiTableRowCell--hasActions"
                     >
                       <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                       >
-                        Actions
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon-isLoading"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="1-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>
                   <tr
-                    class="euiTableRow euiTableRow-isSelectable"
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                   >
                     <td
                       class="euiTableRowCell"
@@ -390,31 +519,96 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       </div>
                     </td>
                     <td
-                      class="euiTableRowCell"
+                      class="euiTableRowCell euiTableRowCell--hasActions"
                     >
                       <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                       >
-                        Actions
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon-isLoading"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="2-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>
                   <tr
-                    class="euiTableRow euiTableRow-isSelectable"
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                   >
                     <td
                       class="euiTableRowCell"
@@ -449,26 +643,91 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                       </div>
                     </td>
                     <td
-                      class="euiTableRowCell"
+                      class="euiTableRowCell euiTableRowCell--hasActions"
                     >
                       <div
-                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                       >
-                        Actions
-                      </div>
-                      <div
-                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon-isLoading"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="3-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>
