@@ -138,13 +138,10 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
         }) ?? []
       );
     } else if (type === 's3') {
-      const result = (await http.post('/api/console/proxy', {
-        body: '{}',
-        query: {
-          path: '_plugins/_query/_datasources',
-          method: 'GET',
-        },
-      })) as Array<{ name: string; connector: string }>;
+      const result = (await http.get('/api/dataconnections')) as Array<{
+        name: string;
+        connector: string;
+      }>;
       return (
         result
           ?.filter((item) => item.connector === 'S3GLUE')
