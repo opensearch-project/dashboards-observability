@@ -217,12 +217,13 @@ export const VisualizationContainer = ({
     popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
   }
 
-  const loadVisaulization = async () => {
-    if (catalogVisualization)
+  const loadVisualization = async () => {
+    console.log('loadVisualization');
+    if (catalogVisualization) {
       await renderCatalogVisualization({
         http,
         pplService,
-        catalogSource: savedVisualizationId,
+        catalogSource: visualizationId,
         startTime: fromTime,
         endTime: toTime,
         filterQuery: pplFilterValue,
@@ -235,7 +236,8 @@ export const VisualizationContainer = ({
         setIsError,
         queryMetaData,
       });
-    else
+      console.log('loadVisualization renderCatalogVisualization complete');
+    } else {
       await renderSavedVisualization(
         http,
         pplService,
@@ -251,6 +253,8 @@ export const VisualizationContainer = ({
         setIsLoading,
         setIsError
       );
+      console.log('loadVisualization renderSavedVisualization complete');
+    }
   };
 
   const memoisedVisualizationBox = useMemo(
@@ -287,12 +291,12 @@ export const VisualizationContainer = ({
   );
 
   useEffect(() => {
-    loadVisaulization();
-  }, [onRefresh]);
+    loadVisualization();
+  }, []);
 
-  useEffect(() => {
-    if (catalogVisualization) loadVisaulization();
-  }, [queryMetaData]);
+  // useEffect(() => {
+  //   if (catalogVisualization) loadVisaulization();
+  // }, [queryMetaData]);
 
   const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 

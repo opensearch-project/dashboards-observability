@@ -35,9 +35,6 @@ export const MetricsEditInline = ({ visualizationId }: { visualizationId: string
   const dispatch = useDispatch();
 
   const query = useSelector(metricQuerySelector(visualizationId));
-  useEffect(() => {
-    console.log({ visualizationId, query });
-  }, [query, visualizationId]);
 
   const availableAttributesLabels = query.availableAttributes.map((attribute) => ({
     label: attribute,

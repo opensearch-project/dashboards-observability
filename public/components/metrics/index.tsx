@@ -18,8 +18,10 @@ import React, { ReactChild, useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
 import { StaticContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { createContext } from 'react';
+import { VisualizationType } from 'common/types/custom_panels';
 import { ChromeBreadcrumb, Toast } from '../../../../../src/core/public';
-import { onTimeChange } from './helpers/utils';
+import { getNewVizDimensions, onTimeChange } from './helpers/utils';
 import { Sidebar } from './sidebar/sidebar';
 import { EmptyMetricsView } from './view/empty_view';
 import PPLService from '../../services/requests/ppl';
@@ -27,7 +29,7 @@ import { TopMenu } from './top_menu/top_menu';
 import { MetricType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
 import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
-import { resolutionOptions } from '../../../common/constants/metrics';
+import { OBSERVABILITY_CUSTOM_METRIC, resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import { observabilityLogsID } from '../../../common/constants/shared';
 
@@ -39,10 +41,54 @@ interface MetricsProps {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
+export const MetricsLayoutContext = createContext<{
+  layout: VisualizationType[];
+  addToLayout: (id: string) => void;
+}>({
+  layout: [],
+  addToLayout: () => {},
+});
+
+const MetricsLayoutProvider = ({ children }) => {
+  const [layout, setLayout] = useState<VisualizationType[]>([]);
+
+  const addToLayout = (id) => {
+    setLayout((prevLayout) => {
+      const newVisLayout = getNewVizDimensions(prevLayout);
+
+      const metricVisualization: MetricType = {
+        id,
+        savedVisualizationId: id,
+        x: newVisLayout.x,
+        y: newVisLayout.y,
+        h: newVisLayout.h,
+        w: newVisLayout.w,
+        query: {
+          type:
+            newVisLayout.catalog === OBSERVABILITY_CUSTOM_METRIC
+              ? 'savedCustomMetric'
+              : 'prometheusMetric',
+          catalog: newVisLayout.id,
+          aggregation: 'avg',
+          attributesGroupBy: [],
+          availableAttributes: [],
+        },
+      };
+      return [...prevLayout, metricVisualization];
+    });
+  };
+
+  return (
+    <MetricsLayoutContext.Provider value={{ layout, addToLayout }}>
+      {children}
+    </MetricsLayoutContext.Provider>
+  );
+};
+
 export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
   // Redux tools
   const selectedMetrics = useSelector(selectedMetricsSelector);
-  const metricsLayout = useSelector(metricsLayoutSelector);
+  const [metricsLayout, setMetricsLayout] = useSelector(metricsLayoutSelector);
 
   // Date picker constants
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
@@ -133,57 +179,49 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
             <div>
               <EuiPage>
                 <EuiPageBody component="div">
-                  <TopMenu
-                    IsTopPanelDisabled={IsTopPanelDisabled}
-                    startTime={startTime}
-                    endTime={endTime}
-                    onDatePickerChange={onDatePickerChange}
-                    recentlyUsedRanges={recentlyUsedRanges}
-                    editMode={editMode}
-                    setEditMode={setEditMode}
-                    setEditActionType={setEditActionType}
-                    panelVisualizations={panelVisualizations}
-                    setPanelVisualizations={setPanelVisualizations}
-                    resolutionValue={resolutionValue}
-                    setResolutionValue={setResolutionValue}
-                    spanValue={spanValue}
-                    setSpanValue={setSpanValue}
-                    resolutionSelectId={resolutionSelectId}
-                    setToast={setToast}
-                  />
-                  <div className="dscAppContainer">
-                    <EuiResizableContainer>
-                      {(EuiResizablePanel, EuiResizableButton) => (
-                        <>
-                          <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
-                            <Sidebar />
-                          </EuiResizablePanel>
+                  <MetricsLayoutProvider>
+                    <TopMenu
+                      IsTopPanelDisabled={IsTopPanelDisabled}
+                      startTime={startTime}
+                      endTime={endTime}
+                      onDatePickerChange={onDatePickerChange}
+                      recentlyUsedRanges={recentlyUsedRanges}
+                      resolutionValue={resolutionValue}
+                      setResolutionValue={setResolutionValue}
+                      spanValue={spanValue}
+                      setSpanValue={setSpanValue}
+                      resolutionSelectId={resolutionSelectId}
+                      setToast={setToast}
+                    />
+                    <div className="dscAppContainer">
+                      <EuiResizableContainer>
+                        {(EuiResizablePanel, EuiResizableButton) => (
+                          <>
+                            <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
+                              <Sidebar />
+                            </EuiResizablePanel>
 
-                          <EuiResizableButton />
+                            <EuiResizableButton />
 
-                          <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
-                            {selectedMetrics.length > 0 ? (
-                              <MetricsGrid
-                                chrome={chrome}
-                                panelVisualizations={panelVisualizations}
-                                setPanelVisualizations={setPanelVisualizations}
-                                editMode={editMode}
-                                startTime={startTime}
-                                endTime={endTime}
-                                moveToEvents={onEditClick}
-                                onRefresh={onRefresh}
-                                editActionType={editActionType}
-                                setEditActionType={setEditActionType}
-                                spanParam={spanValue + resolutionValue}
-                              />
-                            ) : (
-                              <EmptyMetricsView />
-                            )}
-                          </EuiResizablePanel>
-                        </>
-                      )}
-                    </EuiResizableContainer>
-                  </div>
+                            <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
+                              {selectedMetrics.length > 0 ? (
+                                <MetricsGrid
+                                  chrome={chrome}
+                                  startTime={startTime}
+                                  endTime={endTime}
+                                  moveToEvents={onEditClick}
+                                  onRefresh={onRefresh}
+                                  spanParam={spanValue + resolutionValue}
+                                />
+                              ) : (
+                                <EmptyMetricsView />
+                              )}
+                            </EuiResizablePanel>
+                          </>
+                        )}
+                      </EuiResizableContainer>
+                    </div>
+                  </MetricsLayoutProvider>
                 </EuiPageBody>
               </EuiPage>
             </div>
