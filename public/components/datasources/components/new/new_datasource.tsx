@@ -10,7 +10,7 @@ import { HomeProps } from '../../home';
 import { NewDatasourceCardView } from './new_datasource_card_view';
 
 export const NewDatasource = (props: HomeProps) => {
-  const { chrome } = props;
+  const { chrome, notifications } = props;
 
   useEffect(() => {
     chrome.setBreadcrumbs([

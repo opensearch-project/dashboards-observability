@@ -25,13 +25,15 @@ import { useToast } from '../../../../../public/components/common/toast';
 import { DatasourceType, Role } from '../../../../../common/types/data_connections';
 import { ConfigurePrometheusDatasource } from './configure_prometheus_datasource';
 import { ReviewPrometheusDatasource } from './review_prometheus_datasource_configuration';
+import { DatasourceTypeToDisplayName } from '../../../../../common/constants/data_connections';
+import { formatError } from '../../../../../public/components/event_analytics/utils';
 
 interface ConfigureDatasourceProps {
   type: string;
 }
 
 export function Configure(props: ConfigureDatasourceProps) {
-  const { type } = props;
+  const { type, notifications } = props;
   const { http, chrome } = coreRefs;
   const { setToast } = useToast();
 
@@ -76,7 +78,7 @@ export function Configure(props: ConfigureDatasourceProps) {
         href: '#/new',
       },
       {
-        text: `${type}`,
+        text: `${DatasourceTypeToDisplayName[type]}`,
         href: `#/configure/${type}`,
       },
     ]);
@@ -194,7 +196,9 @@ export function Configure(props: ConfigureDatasourceProps) {
               iconType="arrowRight"
               fill
             >
-              {page === 'configure' ? `Review Configuration` : `Connect to ${type}`}
+              {page === 'configure'
+                ? `Review Configuration`
+                : `Connect to ${DatasourceTypeToDisplayName[type]}`}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -255,11 +259,10 @@ export function Configure(props: ConfigureDatasourceProps) {
       })
       .catch((err) => {
         console.log(JSON.stringify(err));
-        setToast(
-          `Could not create data source`,
-          'danger',
-          `An error occured while trying to create the ${type} data source ${name}: ${err.body.message}`
-        );
+        const formattedError = formatError(err.name, err.message, err.body.message);
+        notifications.toasts.addError(formattedError, {
+          title: 'Could not create data source',
+        });
         setPage('configure');
       });
   };

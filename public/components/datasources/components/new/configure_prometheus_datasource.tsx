@@ -16,9 +16,8 @@ import {
   EuiFieldPassword,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { access } from 'fs';
 import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
-import { QueryPermissionsConfiguration } from '../manage/query_permissions';
+import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
 
 interface ConfigurePrometheusDatasourceProps {
