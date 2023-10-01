@@ -21,6 +21,8 @@ import { SAMPLE_PANEL } from '../utils/panel_constants';
 
 import { skipOn } from '@cypress/skip-test';
 
+import { v4 as uuid4 } from 'uuid';
+
 const moveToEventsHome = () => {
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`);
 };
@@ -157,7 +159,7 @@ describe('Test reporting integration if plugin installed', () => {
   beforeEach(() => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-notebooks#/`);
     cy.get('.euiTableCellContent').contains(TEST_NOTEBOOK).click();
-    cy.wait(delay);//page needs to process before checking
+    cy.wait(delay); //page needs to process before checking
     cy.get('body').then(($body) => {
       skipOn($body.find('#reportingActionsButton').length <= 0);
     });
@@ -290,8 +292,9 @@ describe('Testing paragraphs', () => {
 
   it('Adds a SQL query paragraph', () => {
     cy.contains('Add paragraph').click();
-    cy.get('.euiContextMenuItem__text').contains('Code block').click(), { timeout: COMMAND_TIMEOUT_LONG };
-    cy.wait(delay);//SQL_QUERY_TEXT will sometimes fail to type without this delay
+    cy.get('.euiContextMenuItem__text').contains('Code block').click(),
+      { timeout: COMMAND_TIMEOUT_LONG };
+    cy.wait(delay); //SQL_QUERY_TEXT will sometimes fail to type without this delay
 
     cy.get('.euiTextArea').type(SQL_QUERY_TEXT);
     cy.get('.euiButton__text').contains('Run').click();
@@ -299,6 +302,45 @@ describe('Testing paragraphs', () => {
     cy.get('b').contains('select * from opensearch_dashboards_sample_data_flights limit 20');
 
     cy.get('.euiDataGrid__overflow').should('exist');
+  });
+
+  it('Renders very long markdown as wrapped', () => {
+    cy.contains('Add paragraph').click();
+    cy.get('.euiContextMenuItem__text').contains('Code block').click(),
+      { timeout: COMMAND_TIMEOUT_LONG };
+    cy.wait(delay); //SQL_QUERY_TEXT will sometimes fail to type without this delay
+
+    const testWord = uuid4().replace(/-/gi, '').repeat(10);
+    cy.get('.euiTextArea').type(`%md\n${testWord}`);
+    cy.get('.euiButton__text').contains('Run').click();
+
+    cy.get('p')
+      .contains(testWord)
+      .then((element) => {
+        const clientWidth = element[0].clientWidth;
+        const scrollWidth = element[0].scrollWidth;
+        console.log('paragraph', { clientWidth, scrollWidth });
+        expect(scrollWidth, 'Output Text has not been wrapped').to.be.at.most(clientWidth);
+      });
+  });
+
+  it('Renders very long query as wrapped', () => {
+    cy.contains('Add paragraph').click();
+    cy.get('.euiContextMenuItem__text').contains('Code block').click(),
+      { timeout: COMMAND_TIMEOUT_LONG };
+    cy.wait(delay); //SQL_QUERY_TEXT will sometimes fail to type without this delay
+
+    const testWord = uuid4().replace(/-/gi, '').repeat(10);
+    cy.get('.euiTextArea').type(`%sql\nSELECT 1 AS ${testWord}`);
+    cy.get('.euiButton__text').contains('Run').click();
+
+    cy.get('b')
+      .contains(testWord)
+      .then((element) => {
+        const clientWidth = element[0].clientWidth;
+        const scrollWidth = element[0].scrollWidth;
+        expect(scrollWidth, 'Output Text has not been wrapped').to.be.at.most(clientWidth);
+      });
   });
 
   it('Adds an observability visualization paragraph', () => {
@@ -319,8 +361,9 @@ describe('Testing paragraphs', () => {
 
   it('Adds a PPL query paragraph', () => {
     cy.contains('Add paragraph').click();
-    cy.get('.euiContextMenuItem__text').contains('Code block').click(), { timeout: COMMAND_TIMEOUT_LONG };;
-    cy.wait(delay);//PPL_QUERY_TEXT will sometimes fail to type without this delay
+    cy.get('.euiContextMenuItem__text').contains('Code block').click(),
+      { timeout: COMMAND_TIMEOUT_LONG };
+    cy.wait(delay); //PPL_QUERY_TEXT will sometimes fail to type without this delay
 
     cy.get('.euiTextArea').type(PPL_QUERY_TEXT);
     cy.get('.euiButton__text').contains('Run').click();
@@ -433,7 +476,7 @@ describe('clean up all test data', () => {
     cy.get('.euiButton__text').contains('Actions').trigger('mouseover').click();
     cy.get('.euiContextMenuItem__text').contains('Delete').trigger('mouseover').click();
     cy.get('button.euiButton--danger').should('be.disabled');
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', {delay: 50, });
+    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', { delay: 50 });
     cy.get('button.euiButton--danger').should('not.be.disabled');
     cy.get('.euiButton__text').contains('Delete').trigger('mouseover').click();
     cy.get('.euiTextAlign').contains('No Queries or Visualizations').should('exist');
@@ -445,7 +488,7 @@ describe('clean up all test data', () => {
     cy.get('.euiButton__text').contains('Actions').trigger('mouseover').click();
     cy.get('.euiContextMenuItem__text').contains('Delete').trigger('mouseover').click();
     cy.get('button.euiButton--danger').should('be.disabled');
-    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', { delay: 50, });
+    cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete', { delay: 50 });
     cy.get('button.euiButton--danger').should('not.be.disabled');
     cy.get('.euiButton__text').contains('Delete').trigger('mouseover').click();
   });

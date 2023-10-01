@@ -101,17 +101,6 @@ export const Home = (props: HomeProps) => {
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
-  const dashboardBreadcrumbs = [
-    {
-      text: 'Trace analytics',
-      href: '#/',
-    },
-    {
-      text: 'Dashboard',
-      href: '#/',
-    },
-  ];
-
   const serviceBreadcrumbs = [
     {
       text: 'Trace analytics',
@@ -177,21 +166,6 @@ export const Home = (props: HomeProps) => {
       <HashRouter>
         <Route
           exact
-          path={['/']}
-          render={(routerProps) => (
-            <TraceSideBar>
-              <Dashboard
-                page="dashboard"
-                childBreadcrumbs={dashboardBreadcrumbs}
-                {...commonProps}
-                setToast={setToast}
-                toasts={toasts}
-              />
-            </TraceSideBar>
-          )}
-        />
-        <Route
-          exact
           path="/traces"
           render={(routerProps) => (
             <TraceSideBar>
@@ -218,7 +192,7 @@ export const Home = (props: HomeProps) => {
         />
         <Route
           exact
-          path="/services"
+          path={['/services', '/']}
           render={(routerProps) => (
             <TraceSideBar>
               <Services
@@ -226,6 +200,7 @@ export const Home = (props: HomeProps) => {
                 childBreadcrumbs={serviceBreadcrumbs}
                 nameColumnAction={nameColumnAction}
                 traceColumnAction={traceColumnAction}
+                toasts={toasts}
                 {...commonProps}
               />
             </TraceSideBar>

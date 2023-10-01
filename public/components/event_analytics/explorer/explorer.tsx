@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
@@ -34,6 +35,7 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
 import { LogExplorerRouterContext } from '..';
 import {
   CREATE_TAB_PARAM,
@@ -41,7 +43,6 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  NEW_TAB,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -55,10 +56,10 @@ import {
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
   TAB_CHART_TITLE,
-  TAB_CREATED_TYPE,
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
+  DEFAULT_EMPTY_EXPLORER_FIELDS,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -350,17 +351,6 @@ export const Explorer = ({
   }, [appBasedRef.current]);
 
   useEffect(() => {
-    let objectId;
-    if (queryRef.current![TAB_CREATED_TYPE] === NEW_TAB || appLogEvents) {
-      objectId = queryRef.current!.savedObjectId || '';
-    } else {
-      objectId = queryRef.current!.savedObjectId || savedObjectId;
-    }
-    if (objectId) {
-      updateTabData(objectId);
-    } else {
-      fetchData(startTime, endTime);
-    }
     if (
       routerContext &&
       routerContext.searchParams.get(CREATE_TAB_PARAM_KEY) === CREATE_TAB_PARAM[TAB_CHART_ID]
@@ -370,10 +360,8 @@ export const Explorer = ({
   }, []);
 
   useEffect(() => {
-    if (appLogEvents) {
-      if (savedObjectId) {
-        updateTabData(savedObjectId);
-      }
+    if (savedObjectId) {
+      updateTabData(savedObjectId);
     }
   }, [savedObjectId]);
 
@@ -475,6 +463,10 @@ export const Explorer = ({
     }
     return 0;
   }, [countDistribution?.data]);
+
+  const dateRange = getDateRange(startTime, endTime, query);
+
+  const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
 
   const mainContent = useMemo(() => {
     return (
@@ -637,6 +629,7 @@ export const Explorer = ({
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
+    isOverridingPattern,
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
@@ -892,8 +885,6 @@ export const Explorer = ({
       </EuiContextMenuItem>
     );
   });
-
-  const dateRange = getDateRange(startTime, endTime, query);
 
   const handleLiveTailSearch = useCallback(
     async (startingTime: string, endingTime: string) => {

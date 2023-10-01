@@ -37,6 +37,8 @@ interface ISidebarProps {
   isFieldToggleButtonDisabled: boolean;
   handleOverridePattern: (pattern: IField) => void;
   handleOverrideTimestamp: (timestamp: IField) => void;
+  storedExplorerFields: IExplorerFields;
+  setStoredExplorerFields: (explorer: IExplorerFields) => void;
 }
 
 export const Sidebar = (props: ISidebarProps) => {
@@ -51,6 +53,8 @@ export const Sidebar = (props: ISidebarProps) => {
     isFieldToggleButtonDisabled,
     handleOverridePattern,
     handleOverrideTimestamp,
+    storedExplorerFields,
+    setStoredExplorerFields,
   } = props;
 
   const dispatch = useDispatch();
@@ -99,24 +103,40 @@ export const Sidebar = (props: ISidebarProps) => {
     });
   };
 
+  const checkWithStoredFields = () => {
+    if (
+      explorerFields.selectedFields.length === 0 &&
+      storedExplorerFields.selectedFields.length !== 0
+    ) {
+      return storedExplorerFields;
+    }
+    return explorerFields;
+  };
+
   const handleAddField = useCallback(
     (field: IField) => {
-      updateStoreFields(
-        toggleFields(explorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS),
-        tabId,
+      const nextFields = toggleFields(
+        checkWithStoredFields(),
+        field,
+        AVAILABLE_FIELDS,
         SELECTED_FIELDS
       );
+      updateStoreFields(nextFields, tabId, SELECTED_FIELDS);
+      setStoredExplorerFields(nextFields);
     },
     [explorerFields, tabId]
   );
 
   const handleRemoveField = useCallback(
     (field: IField) => {
-      updateStoreFields(
-        toggleFields(explorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS),
-        tabId,
+      const nextFields = toggleFields(
+        checkWithStoredFields(),
+        field,
+        SELECTED_FIELDS,
         AVAILABLE_FIELDS
       );
+      updateStoreFields(nextFields, tabId, AVAILABLE_FIELDS);
+      setStoredExplorerFields(nextFields);
     },
     [explorerFields, tabId]
   );
@@ -231,7 +251,7 @@ export const Sidebar = (props: ISidebarProps) => {
                             paddingSize="s"
                             className="dscSidebar__item"
                             // data-test-subj={`fieldList-field`}
-                          >
+
                             <Field
                               query={query}
                               field={field}
@@ -264,8 +284,8 @@ export const Sidebar = (props: ISidebarProps) => {
                   data-test-subj={`fieldList-unpopular`}
                   droppableId="Available fields"
                 >
-                  {explorerFields.availableFields &&
-                    explorerFields.availableFields
+                  {storedExplorerFields.availableFields &&
+                    storedExplorerFields.availableFields
                       .filter((field) => searchTerm === '' || field.name.indexOf(searchTerm) !== -1)
                       .map((field, index) => {
                         return (

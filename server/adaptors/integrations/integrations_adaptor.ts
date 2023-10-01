@@ -24,9 +24,7 @@ export interface IntegrationsAdaptor {
 
   getStatic: (templateName: string, path: string) => Promise<Buffer>;
 
-  getSchemas: (
-    templateName: string
-  ) => Promise<{ mappings: { [key: string]: unknown }; schemas: { [key: string]: unknown } }>;
+  getSchemas: (templateName: string) => Promise<{ mappings: { [key: string]: unknown } }>;
 
   getAssets: (templateName: string) => Promise<{ savedObjects?: unknown }>;
 

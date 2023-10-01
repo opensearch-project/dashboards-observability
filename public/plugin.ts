@@ -39,6 +39,9 @@ import {
   observabilityIntegrationsTitle,
   observabilityIntegrationsPluginOrder,
   observabilityPluginOrder,
+  observabilityDataConnectionsID,
+  observabilityDataConnectionsPluginOrder,
+  observabilityDataConnectionsTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -197,6 +200,23 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('integrations'),
     });
 
+    core.application.register({
+      id: observabilityDataConnectionsID,
+      title: observabilityDataConnectionsTitle,
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: observabilityDataConnectionsPluginOrder,
+      mount: appMountWithStartPage('dataconnections'),
+    });
+
+    setupDeps.managementOverview?.register({
+      id: observabilityDataConnectionsID,
+      title: observabilityDataConnectionsTitle,
+      order: 9070,
+      description: i18n.translate('observability.dataconnectionsDescription', {
+        defaultMessage: 'Manage compatible data connections with OpenSearch Dashboards.',
+      }),
+    });
+
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
@@ -242,6 +262,8 @@ export class ObservabilityPlugin
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
+    coreRefs.chrome = core.chrome;
+    coreRefs.application = core.application;
 
     return {};
   }

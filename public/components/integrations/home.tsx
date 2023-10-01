@@ -13,6 +13,7 @@ import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { AddedIntegrationOverviewPage } from './components/added_integration_overview_page';
 import { AddedIntegration } from './components/added_integration';
+import { SetupIntegrationStepsPage } from './components/setup_integration';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -54,7 +55,7 @@ export const Home = (props: HomeProps) => {
           />
           <Route
             exact
-            path={'/available/:id+'}
+            path={'/available/:id'}
             render={(routerProps) => (
               <Integration
                 integrationTemplateId={decodeURIComponent(routerProps.match.params.id)}
@@ -62,6 +63,7 @@ export const Home = (props: HomeProps) => {
               />
             )}
           />
+          <Route exact path={'/available/:id/setup'} render={() => <SetupIntegrationStepsPage />} />
         </Switch>
       </HashRouter>
     </div>
