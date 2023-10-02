@@ -67,6 +67,10 @@ exports[`Field component Renders a sidebar field 1`] = `
                   iconType="cross"
                   onClick={[Function]}
                 />
+                <EuiButtonIcon
+                  iconType="inspect"
+                  size="xs"
+                />
               </React.Fragment>
             </EuiToolTip>
           </React.Fragment>
@@ -150,6 +154,10 @@ exports[`Field component Renders a sidebar field 1`] = `
                     data-test-subj="fieldToggle-agent"
                     iconType="cross"
                     onClick={[Function]}
+                  />
+                  <EuiButtonIcon
+                    iconType="inspect"
+                    size="xs"
                   />
                 </React.Fragment>
               </EuiToolTip>
@@ -352,6 +360,44 @@ exports[`Field component Renders a sidebar field 1`] = `
                         color="inherit"
                         size="m"
                         type="cross"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                  <EuiButtonIcon
+                    iconType="inspect"
+                    size="xs"
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                      disabled={false}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="inspect"
                       >
                         <EuiIconEmpty
                           aria-hidden={true}
