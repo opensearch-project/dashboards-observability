@@ -223,23 +223,33 @@ export function Configure(props: ConfigureDatasourceProps) {
     let response;
     switch (type) {
       case 'S3GLUE':
+        const s3properties =
+          authMethod === 'basicauth'
+            ? {
+                'glue.auth.type': 'iam_role',
+                'glue.auth.role_arn': arn,
+                'glue.indexstore.opensearch.uri': storeURI,
+                'glue.indexstore.opensearch.auth': authMethod,
+                'glue.indexstore.opensearch.auth.username': username,
+                'glue.indexstore.opensearch.auth.password': password,
+              }
+            : {
+                'glue.auth.type': 'iam_role',
+                'glue.auth.role_arn': arn,
+                'glue.indexstore.opensearch.uri': storeURI,
+                'glue.indexstore.opensearch.auth': authMethod,
+              };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
           body: JSON.stringify({
             name,
             allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
             connector: 's3glue',
-            properties: {
-              'glue.auth.type': 'iam_role',
-              'glue.auth.role_arn': arn,
-              'glue.indexstore.opensearch.uri': storeURI,
-              'glue.indexstore.opensearch.auth': false,
-              'glue.indexstore.opensearch.region': 'us-west-2',
-            },
+            properties: s3properties,
           }),
         });
         break;
       case 'PROMETHEUS':
-        const properties =
+        const prometheusProperties =
           authMethod === 'basicauth'
             ? {
                 'prometheus.uri': storeURI,
@@ -259,7 +269,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             name,
             allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
             connector: 'prometheus',
-            properties,
+            properties: prometheusProperties,
           }),
         });
         break;
