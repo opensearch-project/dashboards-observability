@@ -17,7 +17,7 @@ export class S3DataSource extends DataSource<any, any, any, any, any> {
   }
 
   async getDataSet(dataSetParams?: any) {
-    return { ds: this, data_sets: [this.getName()] };
+    return [this.getName()];
   }
 
   async testConnection(): Promise<void> {

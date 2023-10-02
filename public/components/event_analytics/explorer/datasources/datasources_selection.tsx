@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { DataSourceSelectable } from '../../../../../../../src/plugins/data/public';
 import {
@@ -16,10 +16,12 @@ import { reset as resetQueryResults } from '../../redux/slices/query_result_slic
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetCountDistribution } from '../../redux/slices/count_distribution_slice';
+import { LogExplorerRouterContext } from '../..';
 
 export const DataSourceSelection = ({ tabId }) => {
   const { dataSources } = coreRefs;
   const dispatch = useDispatch();
+  const routerContext = useContext(LogExplorerRouterContext);
   const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
   const [activeDataSources, setActiveDataSources] = useState([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
@@ -90,6 +92,27 @@ export const DataSourceSelection = ({ tabId }) => {
     );
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // update datasource if url contains
+    const datasourceName = routerContext?.searchParams.get('datasourceName');
+    const datasourceType = routerContext?.searchParams.get('datasourceType');
+    if (datasourceName && datasourceType) {
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            datasources: [
+              {
+                label: datasourceName,
+                type: datasourceType,
+              },
+            ],
+          },
+        })
+      );
+    }
   }, []);
 
   return (
