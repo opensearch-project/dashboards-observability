@@ -86,7 +86,11 @@ exports[`Field component Renders a sidebar field 1`] = `
             data-test-subj="field-agent"
             title="agent"
           >
-            agent
+            <EuiText
+              size="xs"
+            >
+              agent
+            </EuiText>
           </span>
         }
         isActive={false}
@@ -174,7 +178,11 @@ exports[`Field component Renders a sidebar field 1`] = `
               data-test-subj="field-agent"
               title="agent"
             >
-              agent
+              <EuiText
+                size="xs"
+              >
+                agent
+              </EuiText>
             </span>
           }
           isActive={false}
@@ -247,7 +255,15 @@ exports[`Field component Renders a sidebar field 1`] = `
                   data-test-subj="field-agent"
                   title="agent"
                 >
-                  agent
+                  <EuiText
+                    size="xs"
+                  >
+                    <div
+                      className="euiText euiText--extraSmall"
+                    >
+                      agent
+                    </div>
+                  </EuiText>
                 </span>
               </span>
             </button>
