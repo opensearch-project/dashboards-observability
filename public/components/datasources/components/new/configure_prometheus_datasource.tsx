@@ -16,7 +16,10 @@ import {
   EuiFieldPassword,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
+import {
+  AuthMethod,
+  OPENSEARCH_DOCUMENTATION_URL,
+} from '../../../../../common/constants/data_connections';
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
 
@@ -32,6 +35,8 @@ interface ConfigurePrometheusDatasourceProps {
   currentAccessKey: string;
   currentSecretKey: string;
   currentRegion: string;
+  currentAuthMethod: AuthMethod;
+  setAuthMethodForRequest: React.Dispatch<React.SetStateAction<AuthMethod>>;
   setRegionForRequest: React.Dispatch<React.SetStateAction<string>>;
   setAccessKeyForRequest: React.Dispatch<React.SetStateAction<string>>;
   setSecretKeyForRequest: React.Dispatch<React.SetStateAction<string>>;
@@ -63,16 +68,17 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
     setSecretKeyForRequest,
     currentRegion,
     setRegionForRequest,
+    currentAuthMethod,
+    setAuthMethodForRequest,
   } = props;
 
   const [name, setName] = useState(currentName);
   const [details, setDetails] = useState(currentDetails);
   const [store, setStore] = useState(currentStore);
   const authOptions = [
-    { value: 'basic', text: 'Basic Auth' },
-    { value: 'sigv4', text: 'SIGV4' },
+    { value: 'basicauth', text: 'Basic Auth' },
+    { value: 'awssigv4', text: 'SIGV4' },
   ];
-  const [selectedAuthOption, setSelectedAuthOption] = useState(authOptions[0].value);
 
   const AuthDetails = () => {
     const [password, setPassword] = useState(currentPassword);
@@ -80,8 +86,8 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
     const [accessKey, setAccessKey] = useState(currentAccessKey);
     const [secretKey, setSecretKey] = useState(currentSecretKey);
     const [region, setRegion] = useState(currentRegion);
-    switch (selectedAuthOption) {
-      case 'basic':
+    switch (currentAuthMethod) {
+      case 'basicauth':
         return (
           <>
             <EuiFormRow label="Username">
@@ -102,7 +108,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             </EuiFormRow>
           </>
         );
-      case 'sigv4':
+      case 'awssigv4':
         return (
           <>
             <EuiFormRow label="Auth Region">
@@ -228,9 +234,9 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           <EuiSelect
             id="selectAuthMethod"
             options={authOptions}
-            value={selectedAuthOption}
+            value={currentAuthMethod}
             onChange={(e) => {
-              setSelectedAuthOption(e.target.value);
+              setAuthMethodForRequest(e.target.value as AuthMethod);
             }}
           />
         </EuiFormRow>

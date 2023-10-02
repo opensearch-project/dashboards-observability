@@ -9,7 +9,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiText,
   EuiButton,
   EuiSteps,
   EuiPageSideBar,
@@ -25,18 +24,23 @@ import { useToast } from '../../../../../public/components/common/toast';
 import { DatasourceType, Role } from '../../../../../common/types/data_connections';
 import { ConfigurePrometheusDatasource } from './configure_prometheus_datasource';
 import { ReviewPrometheusDatasource } from './review_prometheus_datasource_configuration';
-import { DatasourceTypeToDisplayName } from '../../../../../common/constants/data_connections';
+import {
+  AuthMethod,
+  DatasourceTypeToDisplayName,
+} from '../../../../../common/constants/data_connections';
 import { formatError } from '../../../../../public/components/event_analytics/utils';
+import { NotificationsStart } from '../../../../../../../src/core/public';
 
 interface ConfigureDatasourceProps {
-  type: string;
+  type: DatasourceType;
+  notifications: NotificationsStart;
 }
 
 export function Configure(props: ConfigureDatasourceProps) {
   const { type, notifications } = props;
   const { http, chrome } = coreRefs;
   const { setToast } = useToast();
-
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('basicauth');
   const [name, setName] = useState('');
   const [details, setDetails] = useState('');
   const [arn, setArn] = useState('');
@@ -124,6 +128,8 @@ export function Configure(props: ConfigureDatasourceProps) {
             setSecretKeyForRequest={setSecretKey}
             currentRegion={region}
             setRegionForRequest={setRegion}
+            currentAuthMethod={authMethod}
+            setAuthMethodForRequest={setAuthMethod}
           />
         );
       default:
@@ -225,20 +231,21 @@ export function Configure(props: ConfigureDatasourceProps) {
         });
         break;
       case 'PROMETHEUS':
-        const properties = username
-          ? {
-              'prometheus.uri': storeURI,
-              'prometheus.auth.type': 'basicauth',
-              'prometheus.auth.username': username,
-              'prometheus.auth.password': password,
-            }
-          : {
-              'prometheus.uri': storeURI,
-              'prometheus.auth.type': 'awssigv4',
-              'prometheus.auth.region': region,
-              'prometheus.auth.access_key': accessKey,
-              'prometheus.auth.secret_key': secretKey,
-            };
+        const properties =
+          authMethod === 'basicauth'
+            ? {
+                'prometheus.uri': storeURI,
+                'prometheus.auth.type': authMethod,
+                'prometheus.auth.username': username,
+                'prometheus.auth.password': password,
+              }
+            : {
+                'prometheus.uri': storeURI,
+                'prometheus.auth.type': authMethod,
+                'prometheus.auth.region': region,
+                'prometheus.auth.access_key': accessKey,
+                'prometheus.auth.secret_key': secretKey,
+              };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
           body: JSON.stringify({
             name,
@@ -257,7 +264,6 @@ export function Configure(props: ConfigureDatasourceProps) {
         window.location.hash = '#/manage';
       })
       .catch((err) => {
-        console.log(JSON.stringify(err));
         const formattedError = formatError(err.name, err.message, err.body.message);
         notifications.toasts.addError(formattedError, {
           title: 'Could not create data source',

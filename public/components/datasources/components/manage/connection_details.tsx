@@ -17,19 +17,6 @@ interface ConnectionDetailProps {
 
 export const ConnectionDetails = (props: ConnectionDetailProps) => {
   const { dataConnection, connector, allowedRoles, properties } = props;
-  const [connectionDetails, setConnectionDetails] = useState('');
-  const onChange = (e) => {
-    setConnectionDetails(e.target.value);
-  };
-  const authenticationOptions = [{ value: 'option_one', text: 'Username & Password' }];
-
-  const [selectedAuthenticationMethod, setSelectedAuthenticationMethod] = useState(
-    authenticationOptions[0].value
-  );
-
-  const onAuthenticationMethodChange = (e) => {
-    setSelectedAuthenticationMethod(e.target.value);
-  };
 
   const ConnectionConfigurationView = () => {
     return (

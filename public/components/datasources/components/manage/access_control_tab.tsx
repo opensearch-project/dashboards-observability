@@ -7,7 +7,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiHorizontalRule } from
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
-import { coreRefs } from '../../../../framework/core_refs';
 import { Role } from '../../../../../common/types/data_connections';
 
 interface AccessControlTabProps {
