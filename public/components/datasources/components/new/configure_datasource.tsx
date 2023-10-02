@@ -52,11 +52,10 @@ export function Configure(props: ConfigureDatasourceProps) {
   const ConfigureDatasourceSteps = [
     {
       title: 'Configure Data Source',
-      children: null,
+      status: page === 'review' ? 'complete' : undefined,
     },
     {
       title: 'Review Configuration',
-      children: null,
     },
   ];
 
