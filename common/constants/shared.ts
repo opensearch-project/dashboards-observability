@@ -58,8 +58,8 @@ export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
 
-export const observabilityDataConnectionsID = 'dataconnections';
-export const observabilityDataConnectionsTitle = 'Data Connections';
+export const observabilityDataConnectionsID = 'datasources';
+export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
 
 // Shared Constants
@@ -94,7 +94,7 @@ export const SAVED_OBJECT = '/object';
 // Color Constants
 export const PLOTLY_COLOR = [
   '#3CA1C7',
-  '#8C55A3',
+  '#54B399',
   '#DB748A',
   '#F2BE4B',
   '#68CCC2',

@@ -3,8 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+
 export interface PermissionsConfigurationProps {
-  roles: Array<{ label: string }>;
-  selectedRoles: Array<{ label: string }>;
-  setSelectedRoles: React.Dispatch<React.SetStateAction<Array<{ label: string }>>>;
+  roles: Role[];
+  selectedRoles: Role[];
+  setSelectedRoles: React.Dispatch<React.SetStateAction<Role[]>>;
+  layout: 'horizontal' | 'vertical';
 }
+
+export type Role = EuiComboBoxOptionOption;
+
+export type DatasourceType = 'SPARK' | 'S3GLUE' | 'OPENSEARCH' | 'PROMETHEUS';

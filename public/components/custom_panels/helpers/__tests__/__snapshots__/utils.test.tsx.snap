@@ -1423,7 +1423,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               "barmode": "group",
               "colorway": Array [
                 "#3CA1C7",
-                "#8C55A3",
+                "#54B399",
                 "#DB748A",
                 "#F2BE4B",
                 "#68CCC2",
@@ -1516,7 +1516,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 "barmode": "group",
                 "colorway": Array [
                   "#3CA1C7",
-                  "#8C55A3",
+                  "#54B399",
                   "#DB748A",
                   "#F2BE4B",
                   "#68CCC2",
@@ -2057,7 +2057,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
             "layout": Object {
               "colorway": Array [
                 "#3CA1C7",
-                "#8C55A3",
+                "#54B399",
                 "#DB748A",
                 "#F2BE4B",
                 "#68CCC2",
@@ -2573,7 +2573,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               "layout": Object {
                 "colorway": Array [
                   "#3CA1C7",
-                  "#8C55A3",
+                  "#54B399",
                   "#DB748A",
                   "#F2BE4B",
                   "#68CCC2",
@@ -3103,7 +3103,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 "layout": Object {
                   "colorway": Array [
                     "#3CA1C7",
-                    "#8C55A3",
+                    "#54B399",
                     "#DB748A",
                     "#F2BE4B",
                     "#68CCC2",
@@ -4768,7 +4768,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               "barmode": "group",
               "colorway": Array [
                 "#3CA1C7",
-                "#8C55A3",
+                "#54B399",
                 "#DB748A",
                 "#F2BE4B",
                 "#68CCC2",
@@ -4861,7 +4861,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 "barmode": "group",
                 "colorway": Array [
                   "#3CA1C7",
-                  "#8C55A3",
+                  "#54B399",
                   "#DB748A",
                   "#F2BE4B",
                   "#68CCC2",

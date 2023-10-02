@@ -17,20 +17,29 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { DataConnectionsHeader } from './data_connections_header';
-import { HomeProps } from '../home';
+import { DataConnectionsHeader } from '../data_connections_header';
+import { HomeProps } from '../../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { useToast } from '../../../../public/components/common/toast';
-import { DeleteModal } from '../../../../public/components/common/helpers/delete_modal';
+import {
+  DATACONNECTIONS_BASE,
+  observabilityLogsID,
+  observabilityMetricsID,
+} from '../../../../../common/constants/shared';
+import { useToast } from '../../../common/toast';
+import { DeleteModal } from '../../../common/helpers/delete_modal';
+import S3Logo from '../../icons/s3-logo.svg';
+import PrometheusLogo from '../../icons/prometheus-logo.svg';
+import { DatasourceType } from '../../../../../common/types/data_connections';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 
 interface DataConnection {
-  connectionType: 'OPENSEARCH' | 'SPARK';
+  connectionType: DatasourceType;
   name: string;
 }
 
 export const ManageDataConnectionsTable = (props: HomeProps) => {
   const { http, chrome, pplService } = props;
+  const { application } = coreRefs;
 
   const { setToast } = useToast();
 
@@ -57,7 +66,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Data Connections',
+        text: 'Data sources',
         href: '#/',
       },
     ]);
@@ -91,10 +100,61 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     setIsModalVisible(true);
   };
 
+  const actions = [
+    {
+      name: 'Edit',
+      isPrimary: true,
+      icon: 'pencil',
+      type: 'icon',
+      onClick: (datasource: DataConnection) => {
+        window.location.href = `#/manage/${datasource.name}`;
+      },
+      'data-test-subj': 'action-edit',
+    },
+    {
+      name: (datasource: DataConnection) =>
+        `Query in ${
+          datasource.connectionType === 'PROMETHEUS' ? 'Metrics Analytics' : 'Observability Logs'
+        }`,
+      isPrimary: true,
+      icon: 'discoverApp',
+      type: 'icon',
+      onClick: (datasource: DataConnection) => {
+        application!.navigateToApp(
+          datasource.connectionType === 'PROMETHEUS' ? observabilityMetricsID : observabilityLogsID
+        );
+      },
+      'data-test-subj': 'action-query',
+    },
+    {
+      name: 'Accelerate performance',
+      isPrimary: false,
+      icon: 'bolt',
+      type: 'icon',
+      available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
+      onClick: () => {
+        application!.navigateToApp('opensearch-query-workbench');
+      },
+      'data-test-subj': 'action-accelerate',
+    },
+    {
+      name: 'Delete',
+      description: 'Delete this data source',
+      icon: 'trash',
+      color: 'danger',
+      type: 'icon',
+      onClick: (datasource: DataConnection) => displayDeleteModal(datasource.name),
+      isPrimary: false,
+      'data-test-subj': 'action-delete',
+    },
+  ];
+
   const icon = (record: DataConnection) => {
     switch (record.connectionType) {
-      case 'OPENSEARCH':
-        return <EuiIcon type="logoOpenSearch" />;
+      case 'S3GLUE':
+        return <EuiIcon type={S3Logo} />;
+      case 'PROMETHEUS':
+        return <EuiIcon type={PrometheusLogo} />;
       default:
         return <></>;
     }
@@ -123,16 +183,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     {
       field: 'actions',
       name: 'Actions',
-      sortable: true,
-      truncateText: true,
-      render: (value, record) => (
-        <EuiIcon
-          type={'trash'}
-          onClick={() => {
-            displayDeleteModal(record.name);
-          }}
-        />
-      ),
+      actions,
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
@@ -140,19 +191,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'templateName',
-        name: 'Type',
-        multiSelect: false,
-        options: [].map((i) => ({
-          value: i,
-          name: i,
-          view: i,
-        })),
-      },
-    ],
   };
 
   const entries = data.map((dataconnection: DataConnection) => {
@@ -166,7 +204,7 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       <EuiPageBody component="div">
         <DataConnectionsHeader />
         <EuiPageContent data-test-subj="manageDataConnectionsarea">
-          <DataConnectionsDescription />
+          <DataConnectionsDescription refresh={handleDataRequest} />
 
           <EuiInMemoryTable
             items={entries}

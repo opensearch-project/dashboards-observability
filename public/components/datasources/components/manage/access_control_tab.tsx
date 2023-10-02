@@ -14,23 +14,27 @@ import {
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import { coreRefs } from '../../../../framework/core_refs';
 import { QueryPermissionsConfiguration } from './query_permissions';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { SaveOrCancel } from './save_or_cancel';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { SaveOrCancel } from '../save_or_cancel';
+import { Role } from '../../../../../common/types/data_connections';
 
 interface AccessControlTabProps {
   dataConnection: string;
   connector: string;
   properties: unknown;
+  allowedRoles: string[];
 }
 
 export const AccessControlTab = (props: AccessControlTabProps) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [roles, setRoles] = useState<Array<{ label: string }>>([]);
-  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<
-    Array<{ label: string }>
-  >([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>(
+    props.allowedRoles.map((role) => {
+      return { label: role };
+    })
+  );
   const { http } = coreRefs;
 
   useEffect(() => {
@@ -51,7 +55,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Query access</EuiText>
               <EuiText size="s" className="overview-content">
-                {[].length ? `Restricted` : '-'}
+                {selectedQueryPermissionRoles.length ? `Restricted` : '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -67,6 +71,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           roles={roles}
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
+          layout={'vertical'}
         />
       </EuiFlexGroup>
     );

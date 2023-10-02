@@ -12,6 +12,10 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPage,
+  EuiPageBody,
+  EuiPageSideBar,
+  EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
@@ -55,6 +59,7 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
+  DEFAULT_EMPTY_EXPLORER_FIELDS,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -412,7 +417,7 @@ export const Explorer = ({
   });
 
   const mainSectionClassName = classNames({
-    'col-md-10': !isSidebarClosed,
+    'col-md-8': !isSidebarClosed,
     'col-md-12': isSidebarClosed,
   });
 
@@ -461,157 +466,181 @@ export const Explorer = ({
 
   const dateRange = getDateRange(startTime, endTime, query);
 
+  const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
+
   const mainContent = useMemo(() => {
     return (
       <>
-        <div
-          className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
-          id="discover-sidebar"
-          data-test-subj="eventExplorer__sidebar"
-        >
-          {!isSidebarClosed && (
-            <div className="explorerFieldSelector">
-              <Sidebar
-                query={query}
-                explorerFields={explorerFields}
-                explorerData={explorerData}
-                selectedTimestamp={query[SELECTED_TIMESTAMP]}
-                selectedPattern={query[SELECTED_PATTERN_FIELD]}
-                handleOverrideTimestamp={handleOverrideTimestamp}
-                handleOverridePattern={handleOverridePattern}
-                isOverridingTimestamp={isOverridingTimestamp}
-                isOverridingPattern={isOverridingPattern}
-                isFieldToggleButtonDisabled={
-                  isEmpty(explorerData.jsonData) ||
-                  !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
-                }
-              />
-            </div>
-          )}
-          <EuiButtonIcon
-            iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-            iconSize="m"
-            size="s"
-            onClick={() => {
-              setIsSidebarClosed((staleState) => {
-                return !staleState;
-              });
-            }}
-            data-test-subj="collapseSideBarButton"
-            aria-controls="discover-sidebar"
-            aria-expanded={isSidebarClosed ? 'false' : 'true'}
-            aria-label="Toggle sidebar"
-            className="dscCollapsibleSidebar__collapseButton"
-          />
-        </div>
-        <div className={`dscWrapper ${mainSectionClassName}`}>
-          {explorerData && !isEmpty(explorerData.jsonData) ? (
-            <div className="dscWrapper__content">
-              <div className="dscResults">
-                {countDistribution?.data && !isLiveTailOnRef.current && (
-                  <>
-                    <HitsCounter
-                      hits={_.sum(countDistribution.data['count()'])}
-                      showResetButton={false}
-                      onResetQuery={() => {}}
-                    />
-                    <TimechartHeader
-                      options={timeIntervalOptions}
-                      onChangeInterval={(selectedIntrv) => {
-                        const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                          (item) => item.value === selectedIntrv
-                        );
-                        const intrv = selectedIntrv.replace(/^auto_/, '');
-                        getCountVisualizations(intrv);
-                        selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                        getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                      }}
-                      stateInterval={selectedIntervalRef.current?.value}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                    />
-                    <CountDistribution
-                      countDistribution={countDistribution}
-                      selectedInterval={selectedIntervalRef.current?.value}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                    />
-                    <EuiHorizontalRule margin="xs" />
-                    <LogPatterns
-                      selectedIntervalUnit={selectedIntervalRef.current}
-                      handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-                    />
-                  </>
-                )}
-
-                <section
-                  className="dscTable dscTableFixedScroll"
-                  aria-labelledby="documentsAriaLabel"
-                >
-                  <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
-                    <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
-                  </h2>
-                  <div className="dscDiscover">
-                    {isLiveTailOnRef.current && (
-                      <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
-                          <EuiLoadingSpinner size="l" />
-                          <EuiText textAlign="center" data-test-subj="LiveStreamIndicator_on">
-                            <strong>&nbsp;&nbsp;Live streaming</strong>
-                          </EuiText>
-                          <EuiFlexItem grow={false}>
-                            <HitsCounter
-                              hits={totalHits}
-                              showResetButton={false}
-                              onResetQuery={() => {}}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>since {liveTimestamp}</EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="m" />
-                      </>
-                    )}
-                    {countDistribution?.data && (
-                      <EuiTitle size="s">
-                        <h3 style={{ margin: '0px', textAlign: 'left', marginLeft: '10px' }}>
-                          Events
-                          <span className="event-header-count">
-                            {' '}
-                            (
-                            {reduce(
-                              countDistribution.data['count()'],
-                              (sum, n) => {
-                                return sum + n;
-                              },
-                              0
-                            )}
-                            )
-                          </span>
-                        </h3>
-                      </EuiTitle>
-                    )}
-                    <EuiHorizontalRule margin="xs" />
-                    <DataGrid
-                      http={http}
-                      pplService={pplService}
-                      rows={explorerData.jsonData}
-                      rowsAll={explorerData.jsonDataAll}
-                      explorerFields={explorerFields}
-                      timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
-                      rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
-                    />
-                    <a tabIndex={0} id="discoverBottomMarker">
-                      &#8203;
-                    </a>
-                  </div>
-                </section>
+        <EuiPage>
+          <EuiPageSideBar
+            className="euiPage--paddingMedium .euiPageSideBar"
+            id="discover-sidebar"
+            data-test-subj="eventExplorer__sidebar"
+            sticky
+          >
+            {!isSidebarClosed && (
+              <div className="explorerFieldSelector">
+                <Sidebar
+                  query={query}
+                  explorerFields={explorerFields}
+                  explorerData={explorerData}
+                  selectedTimestamp={query[SELECTED_TIMESTAMP]}
+                  selectedPattern={query[SELECTED_PATTERN_FIELD]}
+                  handleOverrideTimestamp={handleOverrideTimestamp}
+                  handleOverridePattern={handleOverridePattern}
+                  isOverridingTimestamp={isOverridingTimestamp}
+                  isOverridingPattern={isOverridingPattern}
+                  isFieldToggleButtonDisabled={
+                    isEmpty(explorerData.jsonData) ||
+                    !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
+                  }
+                  storedExplorerFields={
+                    storedExplorerFields.availableFields.length > 0
+                      ? storedExplorerFields
+                      : explorerFields
+                  }
+                  setStoredExplorerFields={setStoredExplorerFields}
+                />
               </div>
-            </div>
-          ) : (
-            <NoResults />
-          )}
-        </div>
+            )}
+            <EuiButtonIcon
+              iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+              iconSize="m"
+              size="s"
+              onClick={() => {
+                setIsSidebarClosed((staleState) => {
+                  return !staleState;
+                });
+              }}
+              data-test-subj="collapseSideBarButton"
+              aria-controls="discover-sidebar"
+              aria-expanded={isSidebarClosed ? 'false' : 'true'}
+              aria-label="Toggle sidebar"
+              className="dscCollapsibleSidebar__collapseButton"
+            />
+          </EuiPageSideBar>
+          <EuiPageBody className={`dscWrapper ${mainSectionClassName}`}>
+            {explorerData && !isEmpty(explorerData.jsonData) ? (
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                      {countDistribution?.data && !isLiveTailOnRef.current && (
+                        <>
+                          <HitsCounter
+                            hits={_.sum(countDistribution.data['count()'])}
+                            showResetButton={false}
+                            onResetQuery={() => {}}
+                          />
+                          <TimechartHeader
+                            options={timeIntervalOptions}
+                            onChangeInterval={(selectedIntrv) => {
+                              const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                                (item) => item.value === selectedIntrv
+                              );
+                              const intrv = selectedIntrv.replace(/^auto_/, '');
+                              getCountVisualizations(intrv);
+                              selectedIntervalRef.current =
+                                timeIntervalOptions[intervalOptionsIndex];
+                              getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                            }}
+                            stateInterval={selectedIntervalRef.current?.value}
+                            startTime={appLogEvents ? startTime : dateRange[0]}
+                            endTime={appLogEvents ? endTime : dateRange[1]}
+                          />
+                          <CountDistribution
+                            countDistribution={countDistribution}
+                            selectedInterval={selectedIntervalRef.current?.value}
+                            startTime={appLogEvents ? startTime : dateRange[0]}
+                            endTime={appLogEvents ? endTime : dateRange[1]}
+                          />
+                        </>
+                      )}
+                    </EuiPanel>
+                  </EuiPanel>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                      <LogPatterns
+                        selectedIntervalUnit={selectedIntervalRef.current}
+                        handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                      />
+                    </EuiPanel>
+                  </EuiPanel>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                      <section
+                        className="dscTable dscTableFixedScroll"
+                        aria-labelledby="documentsAriaLabel"
+                      >
+                        <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
+                          <FormattedMessage
+                            id="discover.documentsAriaLabel"
+                            defaultMessage="Documents"
+                          />
+                        </h2>
+                        <div className="dscDiscover">
+                          {isLiveTailOnRef.current && (
+                            <>
+                              <EuiSpacer size="m" />
+                              <EuiFlexGroup
+                                justifyContent="center"
+                                alignItems="center"
+                                gutterSize="m"
+                              >
+                                <EuiLoadingSpinner size="l" />
+                                <EuiText textAlign="center" data-test-subj="LiveStreamIndicator_on">
+                                  <strong>&nbsp;&nbsp;Live streaming</strong>
+                                </EuiText>
+                                <EuiFlexItem grow={false}>
+                                  <HitsCounter
+                                    hits={totalHits}
+                                    showResetButton={false}
+                                    onResetQuery={() => {}}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>since {liveTimestamp}</EuiFlexItem>
+                              </EuiFlexGroup>
+                              <EuiSpacer size="m" />
+                            </>
+                          )}
+                          <DataGrid
+                            http={http}
+                            pplService={pplService}
+                            rows={explorerData.jsonData}
+                            rowsAll={explorerData.jsonDataAll}
+                            explorerFields={explorerFields}
+                            timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                            rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                            totalHits={_.sum(countDistribution.data['count()'])}
+                            requestParams={requestParams}
+                            startTime={appLogEvents ? startTime : dateRange[0]}
+                            endTime={appLogEvents ? endTime : dateRange[1]}
+                            storedSelectedColumns={
+                              storedExplorerFields.selectedFields.length > 0
+                                ? storedExplorerFields.selectedFields
+                                : DEFAULT_EMPTY_EXPLORER_FIELDS
+                            }
+                          />
+                          <a tabIndex={0} id="discoverBottomMarker">
+                            &#8203;
+                          </a>
+                        </div>
+                      </section>
+                    </EuiPanel>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <NoResults />
+            )}
+          </EuiPageBody>
+        </EuiPage>
       </>
     );
   }, [

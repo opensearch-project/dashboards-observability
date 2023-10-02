@@ -21,9 +21,14 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { AccessControlTab } from './access_control_tab';
-import { NoAccess } from './no_access';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { coreRefs } from '../../../../public/framework/core_refs';
+import { NoAccess } from '../no_access';
+import {
+  DATACONNECTIONS_BASE,
+  observabilityIntegrationsID,
+  observabilityLogsID,
+  observabilityMetricsID,
+} from '../../../../../common/constants/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import { ConnectionDetails } from './connection_details';
 
 interface DatasourceDetails {
@@ -44,12 +49,51 @@ export const DataConnection = (props: any) => {
     properties: {},
   });
   const [hasAccess, setHasAccess] = useState(true);
-  const { http, chrome } = coreRefs;
+  const { http, chrome, application } = coreRefs;
+
+  const DefaultDatasourceCards = () => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Query your data in Data Explorer or Observability Logs."
+            onClick={() => application!.navigateToApp(observabilityLogsID)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="bolt" />}
+            title={'Accelerate performance'}
+            description="Accelerate performance through OpenSearch indexing."
+            onClick={() => {}}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="database" />}
+            title={'Tables'}
+            description="Manually Define Tables"
+            onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+            title={'Integrations data'}
+            description="Explore data faster through integrations"
+            onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   useEffect(() => {
     chrome!.setBreadcrumbs([
       {
-        text: 'Data Connections',
+        text: 'Data sources',
         href: '#/',
       },
       {
@@ -59,15 +103,15 @@ export const DataConnection = (props: any) => {
     ]);
     http!
       .get(`${DATACONNECTIONS_BASE}/${dataSource}`)
-      .then((data) =>
+      .then((data) => {
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
           name: data.name,
           cluster: data.properties['emr.cluster'],
           connector: data.connector,
           properties: data.properties,
-        })
-      )
+        });
+      })
       .catch((err) => {
         setHasAccess(false);
       });
@@ -80,9 +124,11 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: (
         <AccessControlTab
+          allowedRoles={datasourceDetails.allowedRoles}
           dataConnection={dataSource}
           connector={datasourceDetails.connector}
           properties={datasourceDetails.properties}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
         />
       ),
     },
@@ -100,6 +146,29 @@ export const DataConnection = (props: any) => {
       ),
     },
   ];
+
+  const QueryOrAccelerateData = () => {
+    switch (datasourceDetails.connector) {
+      case 'S3GLUE':
+        return <DefaultDatasourceCards />;
+      case 'PROMETHEUS':
+        // Prometheus does not have acceleration or integrations, and should go to metrics analytics
+        return (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="discoverApp" />}
+                title={'Query data'}
+                description="Query your data in Metrics Analytics."
+                onClick={() => application!.navigateToApp(observabilityMetricsID)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      default:
+        return <DefaultDatasourceCards />;
+    }
+  };
 
   const DatasourceOverview = () => {
     return (
@@ -181,26 +250,9 @@ export const DataConnection = (props: any) => {
           buttonContent="Ways to use in Dashboards"
           initialIsOpen={true}
         >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="discoverApp" />}
-                title={'Query data'}
-                description="Query your data in Data Explorer or Observability Logs."
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="bolt" />}
-                title={'Accelerate performance'}
-                description="Accelerate performance through OpenSearch indexing."
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <QueryOrAccelerateData />
         </EuiAccordion>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+        <EuiTabbedContent tabs={tabs} />
 
         <EuiSpacer />
       </EuiPageBody>

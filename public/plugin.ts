@@ -263,6 +263,7 @@ export class ObservabilityPlugin
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
+    coreRefs.application = core.application;
 
     return {};
   }

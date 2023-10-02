@@ -14,9 +14,9 @@ import {
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
-import { coreRefs } from '../../../../public/framework/core_refs';
-import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
-import { SaveOrCancel } from './save_or_cancel';
+import { coreRefs } from '../../../../framework/core_refs';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { SaveOrCancel } from '../save_or_cancel';
 import { ConnectionConfiguration } from './connection_configuration';
 
 interface ConnectionDetailProps {
