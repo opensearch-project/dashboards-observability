@@ -12,12 +12,16 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLoadingDashboards,
+  EuiModal,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
@@ -115,10 +119,35 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
   }
 };
 
-const runQuery = async (query: string): Promise<Result<object>> => {
+const runQuery = async (
+  query: string,
+  trackProgress: (step: number) => void
+): Promise<Result<object>> => {
+  // Used for polling
+  const sleep = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
   try {
     console.log('- Posting query');
-    const http = coreRefs.http!;
+    // const http = coreRefs.http!;
+    // TODO temporary mock stub
+    let count = 0;
+    const http = {
+      post: (_url: string, params: { body: string; query: { path: string; method: string } }) => {
+        if (params.query.path === '_plugins/_async_query') {
+          return { queryId: '1234testjob' };
+        } else if (count === 0) {
+          count = 1;
+          return { status: 'PENDING' };
+        } else if (count === 1) {
+          count = 2;
+          return { status: 'RUNNING' };
+        } else {
+          return { status: 'FAILURE' };
+        }
+      },
+    };
     const queryId = (
       await http.post(CONSOLE_PROXY, {
         body: JSON.stringify({ query, lang: 'sql' }),
@@ -132,16 +161,22 @@ const runQuery = async (query: string): Promise<Result<object>> => {
       const poll = await http.post(CONSOLE_PROXY, {
         body: '{}',
         query: {
-          path: '_plugins/_async_query/' + '00fdjdogncrsto0q',
+          path: '_plugins/_async_query/' + queryId,
           method: 'GET',
         },
       });
-      console.log('Poll:', poll);
-      if (poll.status === 'SUCCESS') {
+      console.log('- Poll:', poll);
+      if (poll.status === 'PENDING') {
+        trackProgress(1);
+      } else if (poll.status === 'RUNNING') {
+        trackProgress(2);
+      } else if (poll.status === 'SUCCESS') {
+        trackProgress(3);
         return { ok: true, value: poll };
       } else if (poll.status === 'FAILURE') {
         return { ok: false, error: new Error('FAILURE status') };
       }
+      await sleep(3000);
     }
   } catch (err: any) {
     console.error(err);
@@ -238,12 +273,19 @@ export function SetupIntegrationForm({
 export function SetupBottomBar({
   config,
   integration,
+  loading,
+  setLoading,
+  loadingProgress,
+  setProgress,
 }: {
   config: IntegrationConfig;
   integration: IntegrationTemplate;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  loadingProgress: number;
+  setProgress: (progress: number) => void;
 }) {
   const { setToast } = useToast();
-  const [loading, setLoading] = useState(false);
 
   return (
     <EuiBottomBar>
@@ -271,6 +313,10 @@ export function SetupBottomBar({
             isLoading={loading}
             onClick={async () => {
               setLoading(true);
+              // Not sure why if I make an incrementer it doesn't change the prop,
+              // But since it doesn't, we track our progress manually.
+              let progress = loadingProgress;
+
               if (config.connectionType === 'index') {
                 await addIntegrationRequest(
                   false,
@@ -281,6 +327,8 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
+                progress += 2;
+                setProgress(progress);
               } else if (config.connectionType === 's3') {
                 console.log('Starting S3 loading');
                 const http = coreRefs.http!;
@@ -289,19 +337,37 @@ export function SetupBottomBar({
                 const assets = await http.get(
                   `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
                 );
+                progress += 1;
+                setProgress(progress);
 
                 console.log('Beginning queries');
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
                   console.log('Query:', query);
                   const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
-                  const result = await runQuery(queryStr);
+                  const result = await runQuery(queryStr, (step) => setProgress(progress + step));
                   if (!result.ok) {
                     console.error('Query failed', result.error);
-                    break;
+                    setLoading(false);
+                    setToast('Something went wrong.', 'danger');
+                    return;
                   }
                   console.log('Query successful', result.value);
+                  progress += 3;
                 }
+                // Once everything is ready, add the integration to the new datasource as usual
+                // TODO determine actual values here after more about queries is known
+                await addIntegrationRequest(
+                  false,
+                  integration.name,
+                  config.displayName,
+                  integration,
+                  setToast,
+                  config.displayName,
+                  config.connectionDataSource
+                );
+                progress += 1;
+                setProgress(progress);
               } else {
                 console.error('Invalid data source type');
               }
@@ -313,6 +379,31 @@ export function SetupBottomBar({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiBottomBar>
+  );
+}
+
+export function LoadingPage({ value, max }: { value: number; max: number }) {
+  return (
+    <>
+      <EuiSpacer size="xxl" />
+      <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingDashboards size="xxl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h3>Adding Integration</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            This may take a few minutes. The integration and assets are being added.
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiProgress value={value} max={max} size="m" />
+    </>
   );
 }
 
@@ -328,6 +419,9 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     type: '',
   } as IntegrationTemplate);
 
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
   useEffect(() => {
     const getTemplate = async () => {
       const http = coreRefs.http!;
@@ -339,20 +433,32 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
 
   const updateConfig = (updates: Partial<IntegrationConfig>) =>
     setConfig(Object.assign({}, integConfig, updates));
+  const maxProgress = 2 + 3 * (template.assets?.queries?.length ?? 0);
 
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
           <EuiPageContentBody>
-            <SetupIntegrationForm
-              config={integConfig}
-              updateConfig={updateConfig}
-              integration={template}
-            />
+            {showLoading ? (
+              <LoadingPage value={loadingProgress} max={maxProgress} />
+            ) : (
+              <SetupIntegrationForm
+                config={integConfig}
+                updateConfig={updateConfig}
+                integration={template}
+              />
+            )}
           </EuiPageContentBody>
         </EuiPageContent>
-        <SetupBottomBar config={integConfig} integration={template} />
+        <SetupBottomBar
+          config={integConfig}
+          integration={template}
+          loading={showLoading}
+          setLoading={setShowLoading}
+          loadingProgress={loadingProgress}
+          setProgress={setLoadingProgress}
+        />
       </EuiPageBody>
     </EuiPage>
   );
