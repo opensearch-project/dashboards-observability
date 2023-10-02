@@ -87,6 +87,7 @@ export const SQLSearch = (props: any) => {
   const [queryLang, setQueryLang] = useState([{ label: explorerSearchMetadata.lang }]);
   const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
+  const { application } = coreRefs;
 
   const {
     data: pollingResult,
@@ -134,8 +135,9 @@ export const SQLSearch = (props: any) => {
 
   const handleQueryLanguageChange = (lang) => {
     if (lang[0].label === 'DQL') {
-      window.location.href = '/app/data-explorer/discover';
-      return;
+      return application.navigateToUrl(
+        `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
+      );
     }
     dispatch(
       updateSearchMetaData({
