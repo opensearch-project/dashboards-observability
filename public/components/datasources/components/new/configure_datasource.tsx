@@ -104,6 +104,12 @@ export function Configure(props: ConfigureDatasourceProps) {
             roles={roles}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
             setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
+            currentUsername={username}
+            setUsernameForRequest={setUsername}
+            currentPassword={password}
+            setPasswordForRequest={setPassword}
+            currentAuthMethod={authMethod}
+            setAuthMethodForRequest={setAuthMethod}
           />
         );
       case 'PROMETHEUS':
@@ -148,6 +154,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentArn={arn}
             currentStore={storeURI}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
             goBack={() => setPage('configure')}
           />
         );
@@ -160,6 +167,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentStore={storeURI}
             currentUsername={username}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
             goBack={() => setPage('configure')}
           />
         );

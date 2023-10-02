@@ -22,6 +22,7 @@ import {
 } from '../../../../../common/constants/data_connections';
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
+import { AuthDetails } from './auth_details';
 
 interface ConfigurePrometheusDatasourceProps {
   roles: Role[];
@@ -76,75 +77,9 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
   const [details, setDetails] = useState(currentDetails);
   const [store, setStore] = useState(currentStore);
   const authOptions = [
-    { value: 'basicauth', text: 'Basic Auth' },
-    { value: 'awssigv4', text: 'SIGV4' },
+    { value: 'basicauth', text: 'Basic authentication' },
+    { value: 'awssigv4', text: 'AWS Signature Version 4' },
   ];
-
-  const AuthDetails = () => {
-    const [password, setPassword] = useState(currentPassword);
-    const [username, setUsername] = useState(currentUsername);
-    const [accessKey, setAccessKey] = useState(currentAccessKey);
-    const [secretKey, setSecretKey] = useState(currentSecretKey);
-    const [region, setRegion] = useState(currentRegion);
-    switch (currentAuthMethod) {
-      case 'basicauth':
-        return (
-          <>
-            <EuiFormRow label="Username">
-              <EuiFieldText
-                placeholder={'Username placeholder'}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onBlur={(e) => setUsernameForRequest(e.target.value)}
-              />
-            </EuiFormRow>
-            <EuiFormRow label="Password">
-              <EuiFieldPassword
-                type={'dual'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onBlur={(e) => setPasswordForRequest(e.target.value)}
-              />
-            </EuiFormRow>
-          </>
-        );
-      case 'awssigv4':
-        return (
-          <>
-            <EuiFormRow label="Auth Region">
-              <EuiFieldText
-                placeholder="us-west-2"
-                value={region}
-                onBlur={(e) => {
-                  setRegionForRequest(e.target.value);
-                }}
-                onChange={(e) => {
-                  setRegion(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-            <EuiFormRow label="Access Key">
-              <EuiFieldText
-                placeholder={'Access key placeholder'}
-                value={accessKey}
-                onChange={(e) => setAccessKey(e.target.value)}
-                onBlur={(e) => setAccessKeyForRequest(e.target.value)}
-              />
-            </EuiFormRow>
-            <EuiFormRow label="Secret Key">
-              <EuiFieldPassword
-                type={'dual'}
-                value={secretKey}
-                onChange={(e) => setSecretKey(e.target.value)}
-                onBlur={(e) => setSecretKeyForRequest(e.target.value)}
-              />
-            </EuiFormRow>
-          </>
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <div>
@@ -241,7 +176,19 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           />
         </EuiFormRow>
 
-        <AuthDetails />
+        <AuthDetails
+          currentUsername={currentUsername}
+          setUsernameForRequest={setUsernameForRequest}
+          currentPassword={currentPassword}
+          setPasswordForRequest={setPasswordForRequest}
+          currentAccessKey={currentAccessKey}
+          currentSecretKey={currentSecretKey}
+          setAccessKeyForRequest={setAccessKeyForRequest}
+          setSecretKeyForRequest={setSecretKeyForRequest}
+          currentRegion={currentRegion}
+          setRegionForRequest={setRegionForRequest}
+          currentAuthMethod={currentAuthMethod}
+        />
 
         <EuiSpacer />
 
