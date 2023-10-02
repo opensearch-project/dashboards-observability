@@ -17,7 +17,7 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
       setBreadcrumbs: jest.fn(),
     },
     http: {
-      get: jest.fn().mockResolvedValueOnce(mockRoleData).mockResolvedValue(describeDataConnection),
+      get: jest.fn().mockResolvedValue(describeDataConnection),
     },
   },
 }));

@@ -3,21 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
-import { coreRefs } from '../../../../framework/core_refs';
-import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
-import { SaveOrCancel } from '../save_or_cancel';
-import { ConnectionConfiguration } from './connection_configuration';
 
 interface ConnectionDetailProps {
   dataConnection: string;
@@ -27,9 +16,6 @@ interface ConnectionDetailProps {
 }
 
 export const ConnectionDetails = (props: ConnectionDetailProps) => {
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const { http } = coreRefs;
-
   const { dataConnection, connector, allowedRoles, properties } = props;
   const [connectionDetails, setConnectionDetails] = useState('');
   const onChange = (e) => {
@@ -84,33 +70,6 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
     );
   };
 
-  const EditConnectionConfiguration = () => {
-    return (
-      <EuiFlexGroup direction="column">
-        <ConnectionConfiguration
-          connectionName={dataConnection}
-          connectionDetails={connectionDetails}
-          onConnectionDetailsChange={onChange}
-          authenticationOptions={authenticationOptions}
-          setSelectedAuthenticationMethod={onAuthenticationMethodChange}
-          selectedAuthenticationMethod={selectedAuthenticationMethod}
-        />
-      </EuiFlexGroup>
-    );
-  };
-
-  const saveChanges = () => {
-    http!.put(`${DATACONNECTIONS_BASE}`, {
-      body: JSON.stringify({
-        name: props.dataConnection,
-        allowedRoles: props.allowedRoles,
-        connector: props.connector,
-        properties: props.properties,
-      }),
-    });
-    setMode('view');
-  };
-
   const ConnectionConfigurationHeader = () => {
     return (
       <EuiFlexGroup direction="row">
@@ -119,16 +78,6 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
             <h2 className="panel-title">Data source configurations</h2>
             Control configurations for your data source.
           </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="createButton"
-            onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
-            fill={mode === 'view' ? true : false}
-          >
-            {mode === 'view' ? 'Edit' : 'Cancel'}
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -142,17 +91,9 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
       <EuiPanel>
         <ConnectionConfigurationHeader />
         <EuiHorizontalRule />
-        {mode === 'view' ? <ConnectionConfigurationView /> : <EditConnectionConfiguration />}
+        <ConnectionConfigurationView />
       </EuiPanel>
       <EuiSpacer />
-      {mode === 'edit' && (
-        <SaveOrCancel
-          onCancel={() => {
-            setMode('view');
-          }}
-          onSave={saveChanges}
-        />
-      )}
       <EuiSpacer />
     </>
   );
