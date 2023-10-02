@@ -12,10 +12,6 @@ import { NewDatasourceCardView } from './new_datasource_card_view';
 export const NewDatasource = (props: HomeProps) => {
   const { chrome } = props;
 
-  // TODO: implement searching the card view with this
-  const [query, setQuery] = useState('');
-  const [isCardView, setCardView] = useState(true);
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
@@ -25,16 +21,11 @@ export const NewDatasource = (props: HomeProps) => {
     ]);
   }, []);
 
-  // TODO: implement table view
-  const NewDatasourceTableView = () => {
-    return null;
-  };
-
   return (
     <EuiPage>
       <EuiPageBody component="div">
         <DataConnectionsHeader />
-        {isCardView ? <NewDatasourceCardView /> : <NewDatasourceTableView />}
+        <NewDatasourceCardView />
       </EuiPageBody>
     </EuiPage>
   );

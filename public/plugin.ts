@@ -320,6 +320,7 @@ export class ObservabilityPlugin
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
     coreRefs.dataSources = startDeps.data.dataSources;
+    coreRefs.application = core.application;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
 

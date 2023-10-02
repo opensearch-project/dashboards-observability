@@ -12,7 +12,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiTextArea,
-  EuiButton,
   EuiSelect,
 } from '@elastic/eui';
 import React, { useState } from 'react';
