@@ -56,7 +56,6 @@ import { convertLegacyNotebooksUrl } from './components/notebooks/components/hel
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { SavedObject } from '../../../src/core/public';
 import { coreRefs } from './framework/core_refs';
-
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,

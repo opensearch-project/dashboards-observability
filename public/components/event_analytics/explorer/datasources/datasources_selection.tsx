@@ -121,7 +121,7 @@ export const DataSourceSelection = ({ tabId }) => {
       dataSourceOptionList={dataSourceOptionList}
       setDataSourceOptionList={setDataSourceOptionList}
       selectedSources={selectedSources}
-      setSelectedSources={handleSourceChange}
+      onDataSourceSelect={handleSourceChange}
       onFetchDataSetError={handleDataSetFetchError}
       singleSelection={{ asPlainText: true }}
     />
