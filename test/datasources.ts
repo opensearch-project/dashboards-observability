@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DatasourceType } from '../common/types/data_connections';
+
 export const showDataConnectionsData = {
   schema: [
     {
@@ -46,6 +48,25 @@ export const describePrometheusDataConnection = {
   description: '',
   connector: 'PROMETHEUS',
   allowedRoles: [],
+  properties: {
+    'prometheus.uri': 'localhost:9201',
+  },
+};
+
+export const testS3ConnectionDetails = {
+  dataConnection: 'ya',
+  description: '',
+  connector: 'S3GLUE' as DatasourceType,
+  properties: {
+    'glue.indexstore.opensearch.uri': 'y',
+    'glue.indexstore.opensearch.region': 'us-west-2',
+  },
+};
+
+export const testPrometheusConnectionDetails = {
+  dataConnection: 'prom',
+  description: '',
+  connector: 'PROMETHEUS' as DatasourceType,
   properties: {
     'prometheus.uri': 'localhost:9201',
   },
