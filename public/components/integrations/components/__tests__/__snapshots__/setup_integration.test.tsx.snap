@@ -2,26 +2,7 @@
 
 exports[`Integration Setup Page Renders integration setup page as expected 1`] = `
 <SetupIntegrationPage
-  integration={
-    Object {
-      "assets": Object {
-        "savedObjects": Object {
-          "name": "sample",
-          "version": "1.0.1",
-        },
-      },
-      "components": Array [
-        Object {
-          "name": "logs",
-          "version": "1.0.0",
-        },
-      ],
-      "license": "Apache-2.0",
-      "name": "sample",
-      "type": "logs",
-      "version": "2.0.0",
-    }
-  }
+  integration="sample"
 >
   <EuiPage>
     <div
@@ -50,29 +31,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                         Object {
                           "connectionDataSource": "",
                           "connectionType": "index",
-                          "displayName": "[object Object] Integration",
+                          "displayName": "sample Integration",
                         }
                       }
                       integration={
                         Object {
-                          "name": Object {
-                            "assets": Object {
-                              "savedObjects": Object {
-                                "name": "sample",
-                                "version": "1.0.1",
-                              },
-                            },
-                            "components": Array [
-                              Object {
-                                "name": "logs",
-                                "version": "1.0.0",
-                              },
-                            ],
-                            "license": "Apache-2.0",
-                            "name": "sample",
-                            "type": "logs",
-                            "version": "2.0.0",
-                          },
+                          "name": "sample",
                           "type": "",
                         }
                       }
@@ -144,7 +108,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
-                                  value="[object Object] Integration"
+                                  value="sample Integration"
                                 >
                                   <EuiFormControlLayout
                                     fullWidth={false}
@@ -164,7 +128,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             onChange={[Function]}
                                             onFocus={[Function]}
                                             type="text"
-                                            value="[object Object] Integration"
+                                            value="sample Integration"
                                           />
                                         </EuiValidatableControl>
                                         <EuiFormControlLayoutIcons />
@@ -726,29 +690,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
               Object {
                 "connectionDataSource": "",
                 "connectionType": "index",
-                "displayName": "[object Object] Integration",
+                "displayName": "sample Integration",
               }
             }
             integration={
               Object {
-                "name": Object {
-                  "assets": Object {
-                    "savedObjects": Object {
-                      "name": "sample",
-                      "version": "1.0.1",
-                    },
-                  },
-                  "components": Array [
-                    Object {
-                      "name": "logs",
-                      "version": "1.0.0",
-                    },
-                  ],
-                  "license": "Apache-2.0",
-                  "name": "sample",
-                  "type": "logs",
-                  "version": "2.0.0",
-                },
+                "name": "sample",
                 "type": "",
               }
             }
