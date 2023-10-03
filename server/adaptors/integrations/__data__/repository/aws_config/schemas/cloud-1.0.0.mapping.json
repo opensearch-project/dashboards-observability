@@ -1,0 +1,42 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "cloud"
+      },
+      "properties": {
+        "cloud": {
+          "type" : "object",
+          "properties": {
+            "provider": {
+              "type": "keyword"
+            },
+            "account": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "region": {
+              "type": "keyword"
+            },
+            "resource_id": {
+              "type": "keyword"
+            },
+            "availability_zone": {
+              "type": "keyword"
+            },
+            "platform": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
