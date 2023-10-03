@@ -19,6 +19,7 @@ export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
 export const SAVED_VISUALIZATION = '/vis';
+export const CONSOLE_PROXY = '/api/console/proxy';
 
 // Server route
 export const PPL_ENDPOINT = '/_plugins/_ppl';

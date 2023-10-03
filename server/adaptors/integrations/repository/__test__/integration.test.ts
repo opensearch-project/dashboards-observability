@@ -7,30 +7,12 @@ import * as fs from 'fs/promises';
 import { IntegrationReader } from '../integration';
 import { Dirent, Stats } from 'fs';
 import * as path from 'path';
-import { FileSystemCatalogDataAdaptor } from '../fs_data_adaptor';
+import { TEST_INTEGRATION_CONFIG } from '../../../../../test/constants';
 
 jest.mock('fs/promises');
 
 describe('Integration', () => {
   let integration: IntegrationReader;
-  const sampleIntegration: IntegrationConfig = {
-    name: 'sample',
-    version: '2.0.0',
-    license: 'Apache-2.0',
-    type: 'logs',
-    components: [
-      {
-        name: 'logs',
-        version: '1.0.0',
-      },
-    ],
-    assets: {
-      savedObjects: {
-        name: 'sample',
-        version: '1.0.1',
-      },
-    },
-  };
 
   beforeEach(() => {
     integration = new IntegrationReader('./sample');
@@ -79,19 +61,19 @@ describe('Integration', () => {
     });
 
     it('should return the parsed config template if it is valid', async () => {
-      jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(sampleIntegration));
+      jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(TEST_INTEGRATION_CONFIG));
       jest.spyOn(fs, 'lstat').mockResolvedValueOnce({ isDirectory: () => true } as Stats);
 
-      const result = await integration.getConfig(sampleIntegration.version);
+      const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result).toEqual({ ok: true, value: sampleIntegration });
+      expect(result).toEqual({ ok: true, value: TEST_INTEGRATION_CONFIG });
     });
 
     it('should return an error if the config template is invalid', async () => {
-      const invalidTemplate = { ...sampleIntegration, version: 2 };
+      const invalidTemplate = { ...TEST_INTEGRATION_CONFIG, version: 2 };
       jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(invalidTemplate));
 
-      const result = await integration.getConfig(sampleIntegration.version);
+      const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
       expect(result.ok).toBe(false);
     });
@@ -99,7 +81,7 @@ describe('Integration', () => {
     it('should return an error if the config file has syntax errors', async () => {
       jest.spyOn(fs, 'readFile').mockResolvedValue('Invalid JSON');
 
-      const result = await integration.getConfig(sampleIntegration.version);
+      const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
       expect(result.ok).toBe(false);
     });
@@ -114,7 +96,7 @@ describe('Integration', () => {
         return Promise.reject(error);
       });
 
-      const result = await integration.getConfig(sampleIntegration.version);
+      const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
       expect(readFileMock).toHaveBeenCalled();
       expect(result.ok).toBe(false);
@@ -123,10 +105,12 @@ describe('Integration', () => {
 
   describe('getAssets', () => {
     it('should return linked saved object assets when available', async () => {
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleIntegration });
+      integration.getConfig = jest
+        .fn()
+        .mockResolvedValue({ ok: true, value: TEST_INTEGRATION_CONFIG });
       jest.spyOn(fs, 'readFile').mockResolvedValue('{"name":"asset1"}\n{"name":"asset2"}');
 
-      const result = await integration.getAssets(sampleIntegration.version);
+      const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
       expect(result.ok).toBe(true);
       expect((result as any).value.savedObjects).toStrictEqual([
@@ -142,10 +126,12 @@ describe('Integration', () => {
     });
 
     it('should return an error if the saved object assets are invalid', async () => {
-      integration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: sampleIntegration });
+      integration.getConfig = jest
+        .fn()
+        .mockResolvedValue({ ok: true, value: TEST_INTEGRATION_CONFIG });
       jest.spyOn(fs, 'readFile').mockResolvedValue('{"unclosed":');
 
-      const result = await integration.getAssets(sampleIntegration.version);
+      const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
       expect(result.ok).toBe(false);
     });
