@@ -27,15 +27,15 @@ import { useToast } from '../../../../public/components/common/toast';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
-export interface IntegrationConfig {
+export interface IntegrationSetupInputs {
   displayName: string;
   connectionType: string;
   connectionDataSource: string;
 }
 
 interface IntegrationConfigProps {
-  config: IntegrationConfig;
-  updateConfig: (updates: Partial<IntegrationConfig>) => void;
+  config: IntegrationSetupInputs;
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: {
     name: string;
     type: string;
@@ -199,7 +199,7 @@ export function SetupBottomBar({
   config,
   integration,
 }: {
-  config: IntegrationConfig;
+  config: IntegrationSetupInputs;
   integration: { name: string; type: string };
 }) {
   const { setToast } = useToast();
@@ -264,9 +264,9 @@ export function SetupIntegrationPage({
     displayName: `${integration.name} Integration`,
     connectionType: 'index',
     connectionDataSource: '',
-  } as IntegrationConfig);
+  } as IntegrationSetupInputs);
 
-  const updateConfig = (updates: Partial<IntegrationConfig>) =>
+  const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
 
   return (

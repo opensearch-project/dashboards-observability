@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Color, VALID_INDEX_NAME } from 'common/constants/integrations';
+import { Color, VALID_INDEX_NAME } from '../../../../common/constants/integrations';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
