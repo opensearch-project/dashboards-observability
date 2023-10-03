@@ -214,7 +214,6 @@ export const SQLSearch = (props: any) => {
             baseQuery={baseQuery}
             handleQueryChange={handleQueryChange}
             handleQuerySearch={() => {
-              console.log('query search...');
               onQuerySearch(queryLang);
             }}
             dslService={dslService}

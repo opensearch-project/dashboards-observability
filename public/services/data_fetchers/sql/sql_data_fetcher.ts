@@ -33,9 +33,6 @@ export class SQLDataFetcher extends DataFetcherBase implements IDataFetcher {
   }
 
   async search(query: string, callback) {
-    // const requestParams = { tabId };
-
-    console.log('query: ', query);
     callback(query);
 
     const sqlService = new SQLService(this.http);
@@ -44,15 +41,5 @@ export class SQLDataFetcher extends DataFetcherBase implements IDataFetcher {
       lang: 'sql',
       datasource: '',
     });
-
-    // return this.http
-    //   .post(`${PPL_BASE}${PPL_SEARCH}`, {
-    //     body: JSON.stringify({ query, format: 'jdbc' }),
-    //   })
-    //   .catch((error) => {
-    //     console.error('fetch error: ', error.body);
-    //     // if (errorHandler) errorHandler(error);
-    //     throw error;
-    //   });
   }
 }

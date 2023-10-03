@@ -4,7 +4,6 @@
  */
 
 import { createSlice, createSelector } from '@reduxjs/toolkit';
-// import { fetchSuccess as fetchSuccessReducer } from '../reducers';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import { REDUX_EXPL_SLICE_SEARCH_META_DATA } from '../../../../../common/constants/explorer';
 

@@ -48,7 +48,6 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     errorHandler?: (error: any) => void
   ) => {
     setIsEventsLoading(true);
-    console.log('pplService: ', pplService);
     return pplService
       .fetch({ query, format }, errorHandler)
       .then((res: any) => handler(res))

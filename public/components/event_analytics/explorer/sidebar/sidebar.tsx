@@ -54,7 +54,6 @@ export const Sidebar = (props: ISidebarProps) => {
     storedExplorerFields,
     setStoredExplorerFields,
   } = props;
-  console.log('storedExplorerFields: ', storedExplorerFields);
   const dispatch = useDispatch();
   const { tabId } = useContext<any>(TabContext);
   const [showFields, setShowFields] = useState<boolean>(false);

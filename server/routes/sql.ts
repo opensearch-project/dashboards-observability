@@ -20,7 +20,6 @@ export function registerSqlRoute({ router, facet }: { router: IRouter; facet: PP
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      console.log('=============sql server');
       const queryRes: any = await facet.describeQuery(req);
       if (queryRes.success) {
         const result: any = {

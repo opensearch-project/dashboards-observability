@@ -48,7 +48,6 @@ export const useFetchDirectEvents = ({ pplService, requestParams }: IFetchEvents
     errorHandler?: (error: any) => void
   ) => {
     setIsEventsLoading(true);
-    // console.log('pplService: ', pplService);
     return pplService
       .fetch({ query, format }, errorHandler)
       .then((res: any) => handler(res))
@@ -60,7 +59,6 @@ export const useFetchDirectEvents = ({ pplService, requestParams }: IFetchEvents
   };
 
   const dispatchOnGettingHis = (res: any, query: string) => {
-    console.log('dispatchOnGettingHis res: ', res);
     const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
       (field: IField) => field.name
     );
