@@ -2,14 +2,12 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { Color, VALID_INDEX_NAME } from '../../../../common/constants/integrations';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 type ValidationResult = { ok: true } | { ok: false; errors: string[] };
-
-// Toast doesn't export, so we need to redeclare locally.
-type Color = 'success' | 'primary' | 'warning' | 'danger' | undefined;
 
 export interface IntegrationTemplate {
   name: string;
@@ -112,11 +110,11 @@ export const checkDataSourceName = (
   integrationType: string
 ): ValidationResult => {
   let errors: string[] = [];
-  if (!/^[a-z\d\.][a-z\d\._\-\*]*$/.test(targetDataSource)) {
+  if (!VALID_INDEX_NAME.test(targetDataSource)) {
     errors = errors.concat('This is not a valid index name.');
     return { ok: false, errors };
   }
-  const nameValidity: boolean = new RegExp(`^ss4o_${integrationType}-[^\\-]+-[^\\-]+`).test(
+  const nameValidity: boolean = new RegExp(`^ss4?o_${integrationType}-[^\\-]+-.+`).test(
     targetDataSource
   );
   if (!nameValidity) {

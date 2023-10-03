@@ -31,15 +31,15 @@ import { useToast } from '../../../../public/components/common/toast';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
-export interface IntegrationConfig {
+export interface IntegrationSetupInputs {
   displayName: string;
   connectionType: string;
   connectionDataSource: string;
 }
 
 interface IntegrationConfigProps {
-  config: IntegrationConfig;
-  updateConfig: (updates: Partial<IntegrationConfig>) => void;
+  config: IntegrationSetupInputs;
+  updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationTemplate;
 }
 
@@ -278,7 +278,7 @@ export function SetupBottomBar({
   loadingProgress,
   setProgress,
 }: {
-  config: IntegrationConfig;
+  config: IntegrationSetupInputs;
   integration: IntegrationTemplate;
   loading: boolean;
   setLoading: (loading: boolean) => void;
@@ -412,7 +412,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     displayName: `${integration} Integration`,
     connectionType: 'index',
     connectionDataSource: '',
-  } as IntegrationConfig);
+  } as IntegrationSetupInputs);
 
   const [template, setTemplate] = useState({
     name: integration,
@@ -431,7 +431,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     getTemplate();
   }, [integration]);
 
-  const updateConfig = (updates: Partial<IntegrationConfig>) =>
+  const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
   const maxProgress = 2 + 3 * (template.assets?.queries?.length ?? 0);
 
