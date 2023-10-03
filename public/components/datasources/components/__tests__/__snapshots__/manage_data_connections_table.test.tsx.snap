@@ -65,6 +65,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
           <button
             aria-selected="true"
             class="euiTab euiTab-isSelected"
+            data-test-subj="manage"
             role="tab"
             type="button"
           >
@@ -77,6 +78,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
           <button
             aria-selected="false"
             class="euiTab"
+            data-test-subj="new"
             role="tab"
             type="button"
           >

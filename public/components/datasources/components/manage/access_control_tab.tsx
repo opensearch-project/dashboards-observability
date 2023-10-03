@@ -31,7 +31,11 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Query access</EuiText>
               <EuiText size="s" className="overview-content">
-                {selectedQueryPermissionRoles.length ? `Restricted` : '-'}
+                {selectedQueryPermissionRoles.length
+                  ? `Restricted to ${selectedQueryPermissionRoles
+                      .map((role) => role.label)
+                      .join(',')}`
+                  : 'Everyone'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -293,7 +293,7 @@ export function Configure(props: ConfigureDatasourceProps) {
   return (
     <EuiPage>
       <EuiPageSideBar>
-        <EuiSteps steps={ConfigureDatasourceSteps} />
+        <EuiSteps titleSize="xs" steps={ConfigureDatasourceSteps} />
       </EuiPageSideBar>
       <EuiPageBody>
         {page === 'configure' ? (

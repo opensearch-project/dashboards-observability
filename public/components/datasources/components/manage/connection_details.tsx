@@ -7,18 +7,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiHorizontalRule } from
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
+import { PrometheusProperties, S3GlueProperties } from './data_connection';
+import { DatasourceType } from '../../../../../common/types/data_connections';
 
 interface ConnectionDetailProps {
   dataConnection: string;
-  connector: string;
-  allowedRoles: string[];
-  properties: unknown;
+  connector: DatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
 }
 
 export const ConnectionDetails = (props: ConnectionDetailProps) => {
-  const { dataConnection, connector, allowedRoles, properties } = props;
+  const { dataConnection, connector, description, properties } = props;
 
-  const ConnectionConfigurationView = () => {
+  const S3ConnectionConfigurationView = () => {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -30,9 +32,9 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText className="overview-title">Spark endpoint URL</EuiText>
+              <EuiText className="overview-title">Data source description</EuiText>
               <EuiText size="s" className="overview-content">
-                {'-'}
+                {description || '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -40,15 +42,48 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiText className="overview-title">Description</EuiText>
+              <EuiText className="overview-title">Index store region</EuiText>
               <EuiText size="s" className="overview-content">
-                {'-'}
+                {(properties as S3GlueProperties)['glue.indexstore.opensearch.region'] || '-'}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText className="overview-title">Authentication method</EuiText>
+              <EuiText className="overview-title">Index store URI</EuiText>
               <EuiText size="s" className="overview-content">
-                {'-'}
+                {(properties as S3GlueProperties)['glue.indexstore.opensearch.uri'] || '-'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  const PrometheusConnectionConfigurationView = () => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data source name</EuiText>
+              <EuiText size="s" className="overview-content">
+                {dataConnection}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data source description</EuiText>
+              <EuiText size="s" className="overview-content">
+                {description || '-'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Prometheus URI</EuiText>
+              <EuiText size="s" className="overview-content">
+                {(properties as PrometheusProperties)['prometheus.uri'] || '-'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -78,7 +113,11 @@ export const ConnectionDetails = (props: ConnectionDetailProps) => {
       <EuiPanel>
         <ConnectionConfigurationHeader />
         <EuiHorizontalRule />
-        <ConnectionConfigurationView />
+        {connector === 'S3GLUE' ? (
+          <S3ConnectionConfigurationView />
+        ) : (
+          <PrometheusConnectionConfigurationView />
+        )}
       </EuiPanel>
       <EuiSpacer />
       <EuiSpacer />

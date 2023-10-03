@@ -42,17 +42,12 @@ export const showDataConnectionsData = {
 };
 
 export const describeDataConnection = {
-  name: 'my_spark3',
-  connector: 'SPARK',
+  name: 'prom',
+  description: '',
+  connector: 'PROMETHEUS',
   allowedRoles: [],
   properties: {
-    'spark.connector': 'emr',
-    'spark.datasource.flint.host': '0.0.0.0',
-    'spark.datasource.flint.integration':
-      'https://aws.oss.sonatype.org/content/repositories/snapshots/org/opensearch/opensearch-spark-standalone_2.12/0.1.0-SNAPSHOT/opensearch-spark-standalone_2.12-0.1.0-20230731.182705-3.jar',
-    'spark.datasource.flint.port': '9200',
-    'spark.datasource.flint.scheme': 'http',
-    'emr.cluster': 'j-3UNQLT1MPBGLG',
+    'prometheus.uri': 'localhost:9201',
   },
 };
 

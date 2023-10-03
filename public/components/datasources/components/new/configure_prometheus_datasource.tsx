@@ -14,6 +14,7 @@ import {
   EuiTextArea,
   EuiSelect,
   EuiFieldPassword,
+  EuiForm,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
@@ -85,7 +86,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Configure Prometheus Data Source`}</h1>
+          <h4>{`Configure Prometheus Data Source`}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
@@ -95,109 +96,112 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           </EuiLink>
         </EuiText>
         <EuiSpacer />
-        <EuiText>
-          <h3>Data source details</h3>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFormRow label="Data source name">
-          <>
-            <EuiText size="xs">
-              <p>
-                This is the name the connection will be referenced by in OpenSearch Dashboards. It
-                is recommended to make this short yet descriptive to help users when selecting a
-                connection.
-              </p>
-            </EuiText>
-            <EuiFieldText
-              data-test-subj="data-source-name"
-              placeholder="Title"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
+        <EuiForm component="form">
+          <EuiText>
+            <h3>Data source details</h3>
+          </EuiText>
+          <EuiSpacer />
+          <EuiFormRow label="Data source name">
+            <>
+              <EuiText size="xs">
+                <p>
+                  This is the name the connection will be referenced by in OpenSearch Dashboards. It
+                  is recommended to make this short yet descriptive to help users when selecting a
+                  connection.
+                </p>
+              </EuiText>
+              <EuiFieldText
+                data-test-subj="name"
+                placeholder="Title"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                }}
+                onBlur={(e) => {
+                  setNameForRequest(e.target.value);
+                }}
+              />
+            </>
+          </EuiFormRow>
+          <EuiFormRow label="Description - Optional">
+            <EuiTextArea
+              data-test-subj="data-source-description"
+              placeholder="Placeholder"
+              value={details}
               onBlur={(e) => {
-                setNameForRequest(e.target.value);
+                setDetailsForRequest(e.target.value);
+              }}
+              onChange={(e) => {
+                setDetails(e.target.value);
               }}
             />
-          </>
-        </EuiFormRow>
-        <EuiFormRow label="Description - Optional">
-          <EuiTextArea
-            placeholder="Placeholder"
-            value={details}
-            onBlur={(e) => {
-              setDetailsForRequest(e.target.value);
-            }}
-            onChange={(e) => {
-              setDetails(e.target.value);
-            }}
-          />
-        </EuiFormRow>
-        <EuiSpacer />
+          </EuiFormRow>
+          <EuiSpacer />
 
-        <EuiText>
-          <h3>Prometheus data location</h3>
-        </EuiText>
-        <EuiSpacer />
+          <EuiText>
+            <h3>Prometheus data location</h3>
+          </EuiText>
+          <EuiSpacer />
 
-        <EuiFormRow label="Prometheus URI">
-          <>
-            <EuiText size="xs">
-              <p>Provide the Prometheus URI endpoint to connect to.</p>
-            </EuiText>
-            <EuiFieldText
-              data-test-subj="Prometheus-URI"
-              placeholder="Prometheus URI"
-              value={store}
+          <EuiFormRow label="Prometheus URI">
+            <>
+              <EuiText size="xs">
+                <p>Provide the Prometheus URI endpoint to connect to.</p>
+              </EuiText>
+              <EuiFieldText
+                data-test-subj="Prometheus-URI"
+                placeholder="Prometheus URI"
+                value={store}
+                onChange={(e) => {
+                  setStore(e.target.value);
+                }}
+                onBlur={(e) => {
+                  setStoreForRequest(e.target.value);
+                }}
+              />
+            </>
+          </EuiFormRow>
+          <EuiSpacer />
+
+          <EuiText>
+            <h3>Authentication details</h3>
+          </EuiText>
+          <EuiSpacer />
+
+          <EuiFormRow label="Authentication Method">
+            <EuiSelect
+              id="selectAuthMethod"
+              options={authOptions}
+              value={currentAuthMethod}
               onChange={(e) => {
-                setStore(e.target.value);
-              }}
-              onBlur={(e) => {
-                setStoreForRequest(e.target.value);
+                setAuthMethodForRequest(e.target.value as AuthMethod);
               }}
             />
-          </>
-        </EuiFormRow>
-        <EuiSpacer />
+          </EuiFormRow>
 
-        <EuiText>
-          <h3>Authentication details</h3>
-        </EuiText>
-        <EuiSpacer />
-
-        <EuiFormRow label="Authentication Method">
-          <EuiSelect
-            id="selectAuthMethod"
-            options={authOptions}
-            value={currentAuthMethod}
-            onChange={(e) => {
-              setAuthMethodForRequest(e.target.value as AuthMethod);
-            }}
+          <AuthDetails
+            currentUsername={currentUsername}
+            setUsernameForRequest={setUsernameForRequest}
+            currentPassword={currentPassword}
+            setPasswordForRequest={setPasswordForRequest}
+            currentAccessKey={currentAccessKey}
+            currentSecretKey={currentSecretKey}
+            setAccessKeyForRequest={setAccessKeyForRequest}
+            setSecretKeyForRequest={setSecretKeyForRequest}
+            currentRegion={currentRegion}
+            setRegionForRequest={setRegionForRequest}
+            currentAuthMethod={currentAuthMethod}
           />
-        </EuiFormRow>
 
-        <AuthDetails
-          currentUsername={currentUsername}
-          setUsernameForRequest={setUsernameForRequest}
-          currentPassword={currentPassword}
-          setPasswordForRequest={setPasswordForRequest}
-          currentAccessKey={currentAccessKey}
-          currentSecretKey={currentSecretKey}
-          setAccessKeyForRequest={setAccessKeyForRequest}
-          setSecretKeyForRequest={setSecretKeyForRequest}
-          currentRegion={currentRegion}
-          setRegionForRequest={setRegionForRequest}
-          currentAuthMethod={currentAuthMethod}
-        />
+          <EuiSpacer />
 
-        <EuiSpacer />
-
-        <QueryPermissionsConfiguration
-          roles={roles}
-          selectedRoles={selectedQueryPermissionRoles}
-          setSelectedRoles={setSelectedQueryPermissionRoles}
-          layout={'vertical'}
-        />
+          <QueryPermissionsConfiguration
+            roles={roles}
+            selectedRoles={selectedQueryPermissionRoles}
+            setSelectedRoles={setSelectedQueryPermissionRoles}
+            layout={'vertical'}
+          />
+        </EuiForm>
       </EuiPanel>
     </div>
   );
