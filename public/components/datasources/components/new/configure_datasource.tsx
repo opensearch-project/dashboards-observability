@@ -23,6 +23,8 @@ import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { ReviewS3Datasource } from './review_s3_datasource_configuration';
 import { useToast } from '../../../../../public/components/common/toast';
 import { DatasourceType, Role } from '../../../../../common/types/data_connections';
+import { ConfigurePrometheusDatasource } from './configure_prometheus_datasource';
+import { ReviewPrometheusDatasource } from './review_prometheus_datasource_configuration';
 
 interface ConfigureDatasourceProps {
   type: string;
@@ -30,13 +32,18 @@ interface ConfigureDatasourceProps {
 
 export function Configure(props: ConfigureDatasourceProps) {
   const { type } = props;
-  const { http } = coreRefs;
+  const { http, chrome } = coreRefs;
   const { setToast } = useToast();
 
   const [name, setName] = useState('');
   const [details, setDetails] = useState('');
   const [arn, setArn] = useState('');
-  const [store, setStore] = useState('');
+  const [storeURI, setStoreURI] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [accessKey, setAccessKey] = useState('');
+  const [secretKey, setSecretKey] = useState('');
+  const [region, setRegion] = useState('');
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
   const [page, setPage] = useState<'configure' | 'review'>('configure');
@@ -59,6 +66,20 @@ export function Configure(props: ConfigureDatasourceProps) {
         })
       )
     );
+    chrome!.setBreadcrumbs([
+      {
+        text: 'Data sources',
+        href: '#/',
+      },
+      {
+        text: 'New',
+        href: '#/new',
+      },
+      {
+        text: `${type}`,
+        href: `#/configure/${type}`,
+      },
+    ]);
   }, []);
 
   const ConfigureDatasource = (configurationProps: { datasourceType: DatasourceType }) => {
@@ -73,11 +94,35 @@ export function Configure(props: ConfigureDatasourceProps) {
             setDetailsForRequest={setDetails}
             currentArn={arn}
             setArnForRequest={setArn}
-            currentStore={store}
-            setStoreForRequest={setStore}
+            currentStore={storeURI}
+            setStoreForRequest={setStoreURI}
             roles={roles}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
             setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
+          />
+        );
+      case 'PROMETHEUS':
+        return (
+          <ConfigurePrometheusDatasource
+            currentName={name}
+            currentDetails={details}
+            setNameForRequest={setName}
+            setDetailsForRequest={setDetails}
+            currentStore={storeURI}
+            setStoreForRequest={setStoreURI}
+            roles={roles}
+            currentUsername={username}
+            setUsernameForRequest={setUsername}
+            currentPassword={password}
+            setPasswordForRequest={setPassword}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
+            currentAccessKey={accessKey}
+            currentSecretKey={secretKey}
+            setAccessKeyForRequest={setAccessKey}
+            setSecretKeyForRequest={setSecretKey}
+            currentRegion={region}
+            setRegionForRequest={setRegion}
           />
         );
       default:
@@ -88,13 +133,25 @@ export function Configure(props: ConfigureDatasourceProps) {
   const ReviewDatasourceConfiguration = (configurationProps: { datasourceType: string }) => {
     const { datasourceType } = configurationProps;
     switch (datasourceType) {
-      case 'S3':
+      case 'S3GLUE':
         return (
           <ReviewS3Datasource
             currentName={name}
             currentDetails={details}
             currentArn={arn}
-            currentStore={store}
+            currentStore={storeURI}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            goBack={() => setPage('configure')}
+          />
+        );
+      case 'PROMETHEUS':
+        return (
+          <ReviewPrometheusDatasource
+            currentName={name}
+            currentDetails={details}
+            currentArn={arn}
+            currentStore={storeURI}
+            currentUsername={username}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
             goBack={() => setPage('configure')}
           />
@@ -146,28 +203,64 @@ export function Configure(props: ConfigureDatasourceProps) {
   }, [page]);
 
   const createDatasource = () => {
-    http!
-      .post(`${DATACONNECTIONS_BASE}`, {
-        body: JSON.stringify({
-          name,
-          allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
-          connector: 's3glue',
-          properties: {
-            'glue.auth.type': 'iam_role',
-            'glue.auth.role_arn': arn,
-            'glue.indexstore.opensearch.uri': store,
-            'glue.indexstore.opensearch.auth': false,
-            'glue.indexstore.opensearch.region': 'us-west-2',
-          },
-        }),
-      })
+    let response;
+    switch (type) {
+      case 'S3GLUE':
+        response = http!.post(`${DATACONNECTIONS_BASE}`, {
+          body: JSON.stringify({
+            name,
+            allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
+            connector: 's3glue',
+            properties: {
+              'glue.auth.type': 'iam_role',
+              'glue.auth.role_arn': arn,
+              'glue.indexstore.opensearch.uri': storeURI,
+              'glue.indexstore.opensearch.auth': false,
+              'glue.indexstore.opensearch.region': 'us-west-2',
+            },
+          }),
+        });
+        break;
+      case 'PROMETHEUS':
+        const properties = username
+          ? {
+              'prometheus.uri': storeURI,
+              'prometheus.auth.type': 'basicauth',
+              'prometheus.auth.username': username,
+              'prometheus.auth.password': password,
+            }
+          : {
+              'prometheus.uri': storeURI,
+              'prometheus.auth.type': 'awssigv4',
+              'prometheus.auth.region': region,
+              'prometheus.auth.access_key': accessKey,
+              'prometheus.auth.secret_key': secretKey,
+            };
+        response = http!.post(`${DATACONNECTIONS_BASE}`, {
+          body: JSON.stringify({
+            name,
+            allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
+            connector: 'prometheus',
+            properties,
+          }),
+        });
+        break;
+      default:
+        response = Promise.reject('Invalid data source type');
+    }
+    response
       .then(() => {
         setToast(`Data source ${name} created`, 'success');
         window.location.hash = '#/manage';
       })
       .catch((err) => {
-        setToast(`Data source ${name} created`, 'success');
-        window.location.hash = '#/manage';
+        console.log(JSON.stringify(err));
+        setToast(
+          `Could not create data source`,
+          'danger',
+          `An error occured while trying to create the ${type} data source ${name}: ${err.body.message}`
+        );
+        setPage('configure');
       });
   };
 
