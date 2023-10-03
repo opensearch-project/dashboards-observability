@@ -13,7 +13,7 @@ describe('Manage Data Connections Description test', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders manage data connections description', async () => {
-    const wrapper = mount(<DataConnectionsDescription />);
+    const wrapper = mount(<DataConnectionsDescription refresh={() => {}} />);
 
     await waitFor(() => {
       expect(wrapper).toMatchSnapshot();

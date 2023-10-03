@@ -47,6 +47,7 @@ export const DataConnectionsHeader = () => {
         isSelected={tab.id === selectedTabId}
         disabled={tab.disabled}
         key={index}
+        data-test-subj={tab.id}
       >
         {tab.name}
       </EuiTab>

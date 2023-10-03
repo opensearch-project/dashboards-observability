@@ -13,8 +13,9 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { Role } from 'common/types/data_connections';
 import React from 'react';
+import { AuthMethod } from '../../../../../common/constants/data_connections';
+import { Role } from '../../../../../common/types/data_connections';
 
 interface ConfigurePrometheusDatasourceProps {
   selectedQueryPermissionRoles: Role[];
@@ -23,6 +24,7 @@ interface ConfigurePrometheusDatasourceProps {
   currentArn: string;
   currentStore: string;
   currentUsername: string;
+  currentAuthMethod: AuthMethod;
   goBack: () => void;
 }
 
@@ -31,7 +33,7 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
     currentStore,
     currentName,
     currentDetails,
-    currentUsername,
+    currentAuthMethod,
     selectedQueryPermissionRoles,
     goBack,
   } = props;
@@ -84,7 +86,9 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Authentication method</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {currentUsername ? 'Basic auth' : 'AWSSigV4'}
+                  {currentAuthMethod === 'basicauth'
+                    ? 'Basic authentication'
+                    : 'AWS Signature Version 4'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

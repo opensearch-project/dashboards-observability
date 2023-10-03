@@ -61,12 +61,14 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
     <EuiFlexItem>
       <EuiFlexGroup direction={layout === 'horizontal' ? 'row' : 'column'}>
         <EuiFlexItem>
-          <EuiText className="overview-title">Query Permissions</EuiText>
-          <EuiText size="s" className="overview-content">
-            Control which OpenSearch roles have query permissions on this data source.{' '}
-            <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
-              Learn more
-            </EuiLink>
+          <EuiText>
+            <h3>Query permissions</h3>
+          </EuiText>
+          <EuiText size="s">
+            <p>
+              Control which OpenSearch roles have permission to query and index data from this data
+              source
+            </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -76,7 +78,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
             onChange={(id) => setSelectedAccessLevel(id)}
             name="query-radio-group"
             legend={{
-              children: <span>Access level</span>,
+              children: <span>Query access level</span>,
             }}
           />
           {selectedAccessLevel === QUERY_RESTRICTED && <ConfigureRoles />}
