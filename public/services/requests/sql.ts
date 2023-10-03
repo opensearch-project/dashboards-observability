@@ -16,6 +16,7 @@ export class SQLService {
     params: {
       query: string;
       lang: string;
+      datasource: string;
     },
     errorHandler?: (error: any) => void
   ) => {

@@ -15,6 +15,7 @@ export function registerDatasourcesRoute(router: IRouter) {
         body: schema.object({
           query: schema.string(),
           lang: schema.string(),
+          datasource: schema.string(),
         }),
       },
     },

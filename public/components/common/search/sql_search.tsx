@@ -155,6 +155,7 @@ export const SQLSearch = (props: any) => {
       .fetch({
         lang: lowerCase(lang[0].label),
         query: tempQuery,
+        datasource: explorerSearchMetadata.datasources[0].name,
       })
       .then((result) => {
         if (result.queryId) {
