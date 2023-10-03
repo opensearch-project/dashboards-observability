@@ -130,24 +130,8 @@ const runQuery = async (
 
   try {
     console.log('- Posting query');
-    // const http = coreRefs.http!;
+    const http = coreRefs.http!;
     // TODO temporary mock stub
-    let count = 0;
-    const http = {
-      post: (_url: string, params: { body: string; query: { path: string; method: string } }) => {
-        if (params.query.path === '_plugins/_async_query') {
-          return { queryId: '1234testjob' };
-        } else if (count === 0) {
-          count = 1;
-          return { status: 'PENDING' };
-        } else if (count === 1) {
-          count = 2;
-          return { status: 'RUNNING' };
-        } else {
-          return { status: 'FAILURE' };
-        }
-      },
-    };
     const queryId = (
       await http.post(CONSOLE_PROXY, {
         body: JSON.stringify({ query, lang: 'sql' }),
@@ -174,7 +158,7 @@ const runQuery = async (
         trackProgress(3);
         return { ok: true, value: poll };
       } else if (poll.status === 'FAILURE') {
-        return { ok: false, error: new Error('FAILURE status') };
+        return { ok: false, error: new Error('FAILURE status', { cause: poll }) };
       }
       await sleep(3000);
     }
