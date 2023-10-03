@@ -2,14 +2,12 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { Color } from 'common/constants/integrations';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 
 type ValidationResult = { ok: true } | { ok: false; errors: string[] };
-
-// Toast doesn't export, so we need to redeclare locally.
-type Color = 'success' | 'primary' | 'warning' | 'danger' | undefined;
 
 export interface IntegrationTemplate {
   name: string;
