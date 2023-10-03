@@ -4,15 +4,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiLink,
-  EuiProgress,
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiLoadingLogo,
-} from '@elastic/eui';
+import { EuiProgress, EuiEmptyPrompt } from '@elastic/eui';
 
 export const DirectQueryRunning = () => {
   return (
