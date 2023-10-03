@@ -4,7 +4,7 @@
  */
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { DataConnectionsHeader } from '../data_connections_header';
 import { HomeProps } from '../../home';
 import { NewDatasourceCardView } from './new_datasource_card_view';

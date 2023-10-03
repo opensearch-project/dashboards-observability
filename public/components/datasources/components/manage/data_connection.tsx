@@ -30,13 +30,23 @@ import {
 } from '../../../../../common/constants/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { ConnectionDetails } from './connection_details';
+import { DatasourceType } from '../../../../../common/types/data_connections';
 
 interface DatasourceDetails {
   allowedRoles: string[];
   name: string;
-  cluster: string;
-  connector: string;
-  properties: unknown;
+  connector: DatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+}
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
+}
+
+export interface PrometheusProperties {
+  'prometheus.uri': string;
 }
 
 export const DataConnection = (props: any) => {
@@ -44,9 +54,9 @@ export const DataConnection = (props: any) => {
   const [datasourceDetails, setDatasourceDetails] = useState<DatasourceDetails>({
     allowedRoles: [],
     name: '',
-    cluster: '',
-    connector: '',
-    properties: {},
+    description: '',
+    connector: 'PROMETHEUS',
+    properties: { 'prometheus.uri': 'placeholder' },
   });
   const [hasAccess, setHasAccess] = useState(true);
   const { http, chrome, application } = coreRefs;
@@ -106,8 +116,8 @@ export const DataConnection = (props: any) => {
       .then((data) => {
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
+          description: data.description,
           name: data.name,
-          cluster: data.properties['emr.cluster'],
           connector: data.connector,
           properties: data.properties,
         });
@@ -138,8 +148,8 @@ export const DataConnection = (props: any) => {
       disabled: false,
       content: (
         <ConnectionDetails
-          allowedRoles={datasourceDetails.allowedRoles}
           dataConnection={dataSource}
+          description={datasourceDetails.description}
           connector={datasourceDetails.connector}
           properties={datasourceDetails.properties}
         />
@@ -170,7 +180,7 @@ export const DataConnection = (props: any) => {
     }
   };
 
-  const DatasourceOverview = () => {
+  const S3DatasourceOverview = () => {
     return (
       <EuiPanel>
         <EuiFlexGroup>
@@ -183,27 +193,9 @@ export const DataConnection = (props: any) => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Authentication method</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {'-'}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Data source description</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {'-'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query permissions</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {datasourceDetails.allowedRoles && datasourceDetails.allowedRoles.length
-                    ? 'Restricted'
-                    : 'Everyone'}
+                  {datasourceDetails.description || '-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -211,9 +203,19 @@ export const DataConnection = (props: any) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Spark data location</EuiText>
+                <EuiText className="overview-title">Index store region</EuiText>
                 <EuiText size="s" className="overview-content">
-                  {'-'}
+                  {(datasourceDetails.properties as S3GlueProperties)[
+                    'glue.indexstore.opensearch.region'
+                  ] || '-'}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Index store URI</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {(datasourceDetails.properties as S3GlueProperties)[
+                    'glue.indexstore.opensearch.uri'
+                  ] || '-'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -222,6 +224,51 @@ export const DataConnection = (props: any) => {
         <EuiSpacer />
       </EuiPanel>
     );
+  };
+
+  const PrometheusDatasourceOverview = () => {
+    return (
+      <EuiPanel>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Connection title</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {datasourceDetails.name || '-'}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Data source description</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {datasourceDetails.description || '-'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Prometheus URI</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {(datasourceDetails.properties as PrometheusProperties)['prometheus.uri'] || '-'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </EuiPanel>
+    );
+  };
+
+  const DatasourceOverview = () => {
+    switch (datasourceDetails.connector) {
+      case 'S3GLUE':
+        return <S3DatasourceOverview />;
+      case 'PROMETHEUS':
+        return <PrometheusDatasourceOverview />;
+    }
   };
 
   if (!hasAccess) {

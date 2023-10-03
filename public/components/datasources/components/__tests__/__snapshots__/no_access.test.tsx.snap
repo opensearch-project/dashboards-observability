@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`No access test Renders no access view of data source 1`] = `
+<Component>
+  <EuiPage>
+    <div
+      className="euiPage euiPage--paddingMedium euiPage--grow"
+    >
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            color="primary"
+            fill={true}
+            onClick={[Function]}
+          >
+            Return to data connections
+          </EuiButton>
+        }
+        body={
+          <EuiText>
+            You are missing permissions to view connection details. Contact your administrator for permissions.
+          </EuiText>
+        }
+        iconType="alert"
+        title={
+          <h2>
+            No permissions to access
+          </h2>
+        }
+      >
+        <div
+          className="euiEmptyPrompt"
+        >
+          <EuiIcon
+            color="subdued"
+            size="xxl"
+            type="alert"
+          >
+            <EuiIconEmpty
+              aria-hidden={true}
+              className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon-isLoading"
+              focusable="false"
+              role="img"
+              style={null}
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </EuiIconEmpty>
+          </EuiIcon>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
+          <EuiTitle
+            size="m"
+          >
+            <h2
+              className="euiTitle euiTitle--medium"
+            >
+              No permissions to access
+            </h2>
+          </EuiTitle>
+          <EuiTextColor
+            color="subdued"
+          >
+            <span
+              className="euiTextColor euiTextColor--subdued"
+            >
+              <EuiSpacer
+                size="m"
+              >
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+              <EuiText>
+                <div
+                  className="euiText euiText--medium"
+                >
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      You are missing permissions to view connection details. Contact your administrator for permissions.
+                    </div>
+                  </EuiText>
+                </div>
+              </EuiText>
+            </span>
+          </EuiTextColor>
+          <EuiSpacer
+            size="l"
+          >
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+          </EuiSpacer>
+          <EuiButton
+            color="primary"
+            fill={true}
+            onClick={[Function]}
+          >
+            <EuiButtonDisplay
+              baseClassName="euiButton"
+              color="primary"
+              disabled={false}
+              element="button"
+              fill={true}
+              isDisabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <button
+                className="euiButton euiButton--primary euiButton--fill"
+                disabled={false}
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
+              >
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
+                >
+                  <span
+                    className="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      className="euiButton__text"
+                    >
+                      Return to data connections
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
+          </EuiButton>
+        </div>
+      </EuiEmptyPrompt>
+    </div>
+  </EuiPage>
+</Component>
+`;

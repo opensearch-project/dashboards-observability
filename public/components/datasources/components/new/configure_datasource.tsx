@@ -9,7 +9,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiText,
   EuiButton,
   EuiSteps,
   EuiPageSideBar,
@@ -25,16 +24,23 @@ import { useToast } from '../../../../../public/components/common/toast';
 import { DatasourceType, Role } from '../../../../../common/types/data_connections';
 import { ConfigurePrometheusDatasource } from './configure_prometheus_datasource';
 import { ReviewPrometheusDatasource } from './review_prometheus_datasource_configuration';
+import {
+  AuthMethod,
+  DatasourceTypeToDisplayName,
+} from '../../../../../common/constants/data_connections';
+import { formatError } from '../../../../../public/components/event_analytics/utils';
+import { NotificationsStart } from '../../../../../../../src/core/public';
 
 interface ConfigureDatasourceProps {
-  type: string;
+  type: DatasourceType;
+  notifications: NotificationsStart;
 }
 
 export function Configure(props: ConfigureDatasourceProps) {
-  const { type } = props;
+  const { type, notifications } = props;
   const { http, chrome } = coreRefs;
   const { setToast } = useToast();
-
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('basicauth');
   const [name, setName] = useState('');
   const [details, setDetails] = useState('');
   const [arn, setArn] = useState('');
@@ -50,11 +56,10 @@ export function Configure(props: ConfigureDatasourceProps) {
   const ConfigureDatasourceSteps = [
     {
       title: 'Configure Data Source',
-      children: null,
+      status: page === 'review' ? 'complete' : undefined,
     },
     {
       title: 'Review Configuration',
-      children: null,
     },
   ];
 
@@ -76,7 +81,7 @@ export function Configure(props: ConfigureDatasourceProps) {
         href: '#/new',
       },
       {
-        text: `${type}`,
+        text: `${DatasourceTypeToDisplayName[type]}`,
         href: `#/configure/${type}`,
       },
     ]);
@@ -99,6 +104,12 @@ export function Configure(props: ConfigureDatasourceProps) {
             roles={roles}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
             setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
+            currentUsername={username}
+            setUsernameForRequest={setUsername}
+            currentPassword={password}
+            setPasswordForRequest={setPassword}
+            currentAuthMethod={authMethod}
+            setAuthMethodForRequest={setAuthMethod}
           />
         );
       case 'PROMETHEUS':
@@ -123,6 +134,8 @@ export function Configure(props: ConfigureDatasourceProps) {
             setSecretKeyForRequest={setSecretKey}
             currentRegion={region}
             setRegionForRequest={setRegion}
+            currentAuthMethod={authMethod}
+            setAuthMethodForRequest={setAuthMethod}
           />
         );
       default:
@@ -141,6 +154,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentArn={arn}
             currentStore={storeURI}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
             goBack={() => setPage('configure')}
           />
         );
@@ -153,6 +167,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentStore={storeURI}
             currentUsername={username}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
             goBack={() => setPage('configure')}
           />
         );
@@ -194,7 +209,9 @@ export function Configure(props: ConfigureDatasourceProps) {
               iconType="arrowRight"
               fill
             >
-              {page === 'configure' ? `Review Configuration` : `Connect to ${type}`}
+              {page === 'configure'
+                ? `Review Configuration`
+                : `Connect to ${DatasourceTypeToDisplayName[type]}`}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -206,42 +223,53 @@ export function Configure(props: ConfigureDatasourceProps) {
     let response;
     switch (type) {
       case 'S3GLUE':
+        const s3properties =
+          authMethod === 'basicauth'
+            ? {
+                'glue.auth.type': 'iam_role',
+                'glue.auth.role_arn': arn,
+                'glue.indexstore.opensearch.uri': storeURI,
+                'glue.indexstore.opensearch.auth': authMethod,
+                'glue.indexstore.opensearch.auth.username': username,
+                'glue.indexstore.opensearch.auth.password': password,
+              }
+            : {
+                'glue.auth.type': 'iam_role',
+                'glue.auth.role_arn': arn,
+                'glue.indexstore.opensearch.uri': storeURI,
+                'glue.indexstore.opensearch.auth': authMethod,
+              };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
           body: JSON.stringify({
             name,
             allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
             connector: 's3glue',
-            properties: {
-              'glue.auth.type': 'iam_role',
-              'glue.auth.role_arn': arn,
-              'glue.indexstore.opensearch.uri': storeURI,
-              'glue.indexstore.opensearch.auth': false,
-              'glue.indexstore.opensearch.region': 'us-west-2',
-            },
+            properties: s3properties,
           }),
         });
         break;
       case 'PROMETHEUS':
-        const properties = username
-          ? {
-              'prometheus.uri': storeURI,
-              'prometheus.auth.type': 'basicauth',
-              'prometheus.auth.username': username,
-              'prometheus.auth.password': password,
-            }
-          : {
-              'prometheus.uri': storeURI,
-              'prometheus.auth.type': 'awssigv4',
-              'prometheus.auth.region': region,
-              'prometheus.auth.access_key': accessKey,
-              'prometheus.auth.secret_key': secretKey,
-            };
+        const prometheusProperties =
+          authMethod === 'basicauth'
+            ? {
+                'prometheus.uri': storeURI,
+                'prometheus.auth.type': authMethod,
+                'prometheus.auth.username': username,
+                'prometheus.auth.password': password,
+              }
+            : {
+                'prometheus.uri': storeURI,
+                'prometheus.auth.type': authMethod,
+                'prometheus.auth.region': region,
+                'prometheus.auth.access_key': accessKey,
+                'prometheus.auth.secret_key': secretKey,
+              };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
           body: JSON.stringify({
             name,
             allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
             connector: 'prometheus',
-            properties,
+            properties: prometheusProperties,
           }),
         });
         break;
@@ -254,12 +282,10 @@ export function Configure(props: ConfigureDatasourceProps) {
         window.location.hash = '#/manage';
       })
       .catch((err) => {
-        console.log(JSON.stringify(err));
-        setToast(
-          `Could not create data source`,
-          'danger',
-          `An error occured while trying to create the ${type} data source ${name}: ${err.body.message}`
-        );
+        const formattedError = formatError(err.name, err.message, err.body.message);
+        notifications.toasts.addError(formattedError, {
+          title: 'Could not create data source',
+        });
         setPage('configure');
       });
   };
@@ -267,7 +293,7 @@ export function Configure(props: ConfigureDatasourceProps) {
   return (
     <EuiPage>
       <EuiPageSideBar>
-        <EuiSteps steps={ConfigureDatasourceSteps} />
+        <EuiSteps titleSize="xs" steps={ConfigureDatasourceSteps} />
       </EuiPageSideBar>
       <EuiPageBody>
         {page === 'configure' ? (

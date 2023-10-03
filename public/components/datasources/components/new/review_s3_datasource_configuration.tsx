@@ -13,8 +13,9 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { Role } from 'common/types/data_connections';
 import React from 'react';
+import { AuthMethod } from '../../../../../common/constants/data_connections';
+import { Role } from '../../../../../common/types/data_connections';
 
 interface ConfigureS3DatasourceProps {
   selectedQueryPermissionRoles: Role[];
@@ -22,6 +23,7 @@ interface ConfigureS3DatasourceProps {
   currentDetails: string;
   currentArn: string;
   currentStore: string;
+  currentAuthMethod: AuthMethod;
   goBack: () => void;
 }
 
@@ -32,6 +34,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
     currentDetails,
     currentArn,
     selectedQueryPermissionRoles,
+    currentAuthMethod,
     goBack,
   } = props;
 
@@ -98,6 +101,12 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
                         .map((role) => role.label)
                         .join(',')}`
                     : 'Everyone'}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText className="overview-title">Authentication method</EuiText>
+                <EuiText size="s" className="overview-content">
+                  {currentAuthMethod === 'basicauth' ? 'Basic authentication' : 'No authentication'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
