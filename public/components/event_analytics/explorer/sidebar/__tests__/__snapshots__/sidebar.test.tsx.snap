@@ -1215,7 +1215,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-double_per_ip_bytes"
                                                                         title="double_per_ip_bytes"
                                                                       >
-                                                                        double_per_ip_bytes
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          double_per_ip_bytes
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -1292,7 +1296,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-double_per_ip_bytes"
                                                                           title="double_per_ip_bytes"
                                                                         >
-                                                                          double_per_ip_bytes
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            double_per_ip_bytes
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -1365,7 +1373,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-double_per_ip_bytes"
                                                                               title="double_per_ip_bytes"
                                                                             >
-                                                                              double_per_ip_bytes
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  double_per_ip_bytes
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -1679,7 +1695,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-host"
                                                                         title="host"
                                                                       >
-                                                                        host
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          host
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -1756,7 +1776,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-host"
                                                                           title="host"
                                                                         >
-                                                                          host
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            host
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -1829,7 +1853,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-host"
                                                                               title="host"
                                                                             >
-                                                                              host
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  host
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -2143,7 +2175,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-ip_count"
                                                                         title="ip_count"
                                                                       >
-                                                                        ip_count
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          ip_count
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -2220,7 +2256,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-ip_count"
                                                                           title="ip_count"
                                                                         >
-                                                                          ip_count
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            ip_count
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -2293,7 +2333,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-ip_count"
                                                                               title="ip_count"
                                                                             >
-                                                                              ip_count
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  ip_count
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -2607,7 +2655,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-per_ip_bytes"
                                                                         title="per_ip_bytes"
                                                                       >
-                                                                        per_ip_bytes
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          per_ip_bytes
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -2684,7 +2736,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-per_ip_bytes"
                                                                           title="per_ip_bytes"
                                                                         >
-                                                                          per_ip_bytes
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            per_ip_bytes
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -2757,7 +2813,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-per_ip_bytes"
                                                                               title="per_ip_bytes"
                                                                             >
-                                                                              per_ip_bytes
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  per_ip_bytes
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -3071,7 +3135,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-resp_code"
                                                                         title="resp_code"
                                                                       >
-                                                                        resp_code
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          resp_code
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -3148,7 +3216,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-resp_code"
                                                                           title="resp_code"
                                                                         >
-                                                                          resp_code
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            resp_code
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -3221,7 +3293,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-resp_code"
                                                                               title="resp_code"
                                                                             >
-                                                                              resp_code
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  resp_code
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -3535,7 +3615,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-sum_bytes"
                                                                         title="sum_bytes"
                                                                       >
-                                                                        sum_bytes
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          sum_bytes
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -3612,7 +3696,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-sum_bytes"
                                                                           title="sum_bytes"
                                                                         >
-                                                                          sum_bytes
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            sum_bytes
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -3685,7 +3773,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-sum_bytes"
                                                                               title="sum_bytes"
                                                                             >
-                                                                              sum_bytes
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  sum_bytes
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -4350,7 +4446,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-agent"
                                                                         title="agent"
                                                                       >
-                                                                        agent
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          agent
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -4438,7 +4538,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-agent"
                                                                           title="agent"
                                                                         >
-                                                                          agent
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            agent
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -4511,7 +4615,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-agent"
                                                                               title="agent"
                                                                             >
-                                                                              agent
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  agent
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -4871,7 +4983,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-bytes"
                                                                         title="bytes"
                                                                       >
-                                                                        bytes
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          bytes
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -4947,7 +5063,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-bytes"
                                                                           title="bytes"
                                                                         >
-                                                                          bytes
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            bytes
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -5020,7 +5140,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-bytes"
                                                                               title="bytes"
                                                                             >
-                                                                              bytes
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  bytes
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -5333,7 +5461,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-clientip"
                                                                         title="clientip"
                                                                       >
-                                                                        clientip
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          clientip
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -5409,7 +5541,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-clientip"
                                                                           title="clientip"
                                                                         >
-                                                                          clientip
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            clientip
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -5482,7 +5618,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-clientip"
                                                                               title="clientip"
                                                                             >
-                                                                              clientip
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  clientip
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -5795,7 +5939,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-event"
                                                                         title="event"
                                                                       >
-                                                                        event
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          event
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -5871,7 +6019,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-event"
                                                                           title="event"
                                                                         >
-                                                                          event
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            event
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -5944,7 +6096,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-event"
                                                                               title="event"
                                                                             >
-                                                                              event
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  event
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -6269,7 +6429,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-extension"
                                                                         title="extension"
                                                                       >
-                                                                        extension
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          extension
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -6357,7 +6521,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-extension"
                                                                           title="extension"
                                                                         >
-                                                                          extension
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            extension
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -6430,7 +6598,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-extension"
                                                                               title="extension"
                                                                             >
-                                                                              extension
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  extension
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -6790,7 +6966,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-geo"
                                                                         title="geo"
                                                                       >
-                                                                        geo
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          geo
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -6866,7 +7046,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-geo"
                                                                           title="geo"
                                                                         >
-                                                                          geo
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            geo
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -6939,7 +7123,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-geo"
                                                                               title="geo"
                                                                             >
-                                                                              geo
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  geo
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -7264,7 +7456,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-host"
                                                                         title="host"
                                                                       >
-                                                                        host
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          host
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -7352,7 +7548,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-host"
                                                                           title="host"
                                                                         >
-                                                                          host
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            host
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -7425,7 +7625,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-host"
                                                                               title="host"
                                                                             >
-                                                                              host
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  host
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -7797,7 +8005,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-index"
                                                                         title="index"
                                                                       >
-                                                                        index
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          index
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -7885,7 +8097,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-index"
                                                                           title="index"
                                                                         >
-                                                                          index
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            index
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -7958,7 +8174,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-index"
                                                                               title="index"
                                                                             >
-                                                                              index
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  index
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -8318,7 +8542,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-ip"
                                                                         title="ip"
                                                                       >
-                                                                        ip
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          ip
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -8394,7 +8622,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-ip"
                                                                           title="ip"
                                                                         >
-                                                                          ip
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            ip
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -8467,7 +8699,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-ip"
                                                                               title="ip"
                                                                             >
-                                                                              ip
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  ip
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -8780,7 +9020,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-machine"
                                                                         title="machine"
                                                                       >
-                                                                        machine
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          machine
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -8856,7 +9100,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-machine"
                                                                           title="machine"
                                                                         >
-                                                                          machine
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            machine
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -8929,7 +9177,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-machine"
                                                                               title="machine"
                                                                             >
-                                                                              machine
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  machine
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -9242,7 +9498,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-memory"
                                                                         title="memory"
                                                                       >
-                                                                        memory
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          memory
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -9318,7 +9578,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-memory"
                                                                           title="memory"
                                                                         >
-                                                                          memory
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            memory
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -9391,7 +9655,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-memory"
                                                                               title="memory"
                                                                             >
-                                                                              memory
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  memory
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -9716,7 +9988,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-message"
                                                                         title="message"
                                                                       >
-                                                                        message
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          message
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -9804,7 +10080,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-message"
                                                                           title="message"
                                                                         >
-                                                                          message
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            message
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -9877,7 +10157,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-message"
                                                                               title="message"
                                                                             >
-                                                                              message
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  message
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -10237,7 +10525,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-phpmemory"
                                                                         title="phpmemory"
                                                                       >
-                                                                        phpmemory
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          phpmemory
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -10313,7 +10605,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-phpmemory"
                                                                           title="phpmemory"
                                                                         >
-                                                                          phpmemory
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            phpmemory
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -10386,7 +10682,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-phpmemory"
                                                                               title="phpmemory"
                                                                             >
-                                                                              phpmemory
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  phpmemory
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -10711,7 +11015,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-referer"
                                                                         title="referer"
                                                                       >
-                                                                        referer
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          referer
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -10799,7 +11107,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-referer"
                                                                           title="referer"
                                                                         >
-                                                                          referer
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            referer
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -10872,7 +11184,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-referer"
                                                                               title="referer"
                                                                             >
-                                                                              referer
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  referer
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -11244,7 +11564,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-request"
                                                                         title="request"
                                                                       >
-                                                                        request
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          request
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -11332,7 +11656,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-request"
                                                                           title="request"
                                                                         >
-                                                                          request
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            request
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -11405,7 +11733,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-request"
                                                                               title="request"
                                                                             >
-                                                                              request
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  request
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -11777,7 +12113,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-response"
                                                                         title="response"
                                                                       >
-                                                                        response
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          response
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -11865,7 +12205,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-response"
                                                                           title="response"
                                                                         >
-                                                                          response
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            response
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -11938,7 +12282,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-response"
                                                                               title="response"
                                                                             >
-                                                                              response
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  response
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -12310,7 +12662,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-tags"
                                                                         title="tags"
                                                                       >
-                                                                        tags
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          tags
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -12398,7 +12754,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-tags"
                                                                           title="tags"
                                                                         >
-                                                                          tags
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            tags
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -12471,7 +12831,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-tags"
                                                                               title="tags"
                                                                             >
-                                                                              tags
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  tags
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -12837,7 +13205,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-timestamp"
                                                                         title="timestamp"
                                                                       >
-                                                                        timestamp
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          timestamp
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -12919,7 +13291,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-timestamp"
                                                                           title="timestamp"
                                                                         >
-                                                                          timestamp
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            timestamp
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -12992,7 +13368,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-timestamp"
                                                                               title="timestamp"
                                                                             >
-                                                                              timestamp
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  timestamp
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -13328,7 +13712,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-url"
                                                                         title="url"
                                                                       >
-                                                                        url
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          url
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -13416,7 +13804,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-url"
                                                                           title="url"
                                                                         >
-                                                                          url
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            url
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -13489,7 +13881,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-url"
                                                                               title="url"
                                                                             >
-                                                                              url
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  url
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
@@ -13861,7 +14261,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                         data-test-subj="field-utc_time"
                                                                         title="utc_time"
                                                                       >
-                                                                        utc_time
+                                                                        <EuiText
+                                                                          size="xs"
+                                                                        >
+                                                                          utc_time
+                                                                        </EuiText>
                                                                       </span>
                                                                     }
                                                                     isActive={false}
@@ -13949,7 +14353,11 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           data-test-subj="field-utc_time"
                                                                           title="utc_time"
                                                                         >
-                                                                          utc_time
+                                                                          <EuiText
+                                                                            size="xs"
+                                                                          >
+                                                                            utc_time
+                                                                          </EuiText>
                                                                         </span>
                                                                       }
                                                                       isActive={false}
@@ -14022,7 +14430,15 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                               data-test-subj="field-utc_time"
                                                                               title="utc_time"
                                                                             >
-                                                                              utc_time
+                                                                              <EuiText
+                                                                                size="xs"
+                                                                              >
+                                                                                <div
+                                                                                  className="euiText euiText--extraSmall"
+                                                                                >
+                                                                                  utc_time
+                                                                                </div>
+                                                                              </EuiText>
                                                                             </span>
                                                                           </span>
                                                                         </button>
