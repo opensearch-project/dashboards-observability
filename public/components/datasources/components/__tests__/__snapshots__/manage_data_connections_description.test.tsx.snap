@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Manage Data Connections Description test Renders manage data connections description 1`] = `
-<Component>
+<Component
+  refresh={[Function]}
+>
   <div>
     <EuiFlexGroup
       justifyContent="spaceBetween"
@@ -72,6 +74,7 @@ exports[`Manage Data Connections Description test Renders manage data connection
           >
             <EuiButton
               iconType="refresh"
+              onClick={[Function]}
             >
               <EuiButtonDisplay
                 baseClassName="euiButton"
@@ -79,11 +82,13 @@ exports[`Manage Data Connections Description test Renders manage data connection
                 element="button"
                 iconType="refresh"
                 isDisabled={false}
+                onClick={[Function]}
                 type="button"
               >
                 <button
                   className="euiButton euiButton--primary"
                   disabled={false}
+                  onClick={[Function]}
                   style={
                     Object {
                       "minWidth": undefined,

@@ -7,9 +7,13 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { act } from '@testing-library/react';
 import React from 'react';
-import { describeDataConnection, mockRoleData } from '../../../../../test/datasources';
+import {
+  describePrometheusDataConnection,
+  describeS3Dataconnection,
+} from '../../../../../test/datasources';
 import { DataConnection } from '../manage/data_connection';
 import ReactDOM from 'react-dom';
+import { coreRefs } from '../../../../../public/framework/core_refs';
 
 jest.mock('../../../../../public/framework/core_refs', () => ({
   coreRefs: {
@@ -17,7 +21,7 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
       setBreadcrumbs: jest.fn(),
     },
     http: {
-      get: jest.fn().mockResolvedValue(describeDataConnection),
+      get: jest.fn(),
     },
   },
 }));
@@ -25,11 +29,29 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
 describe('Data Connection Page test', () => {
   configure({ adapter: new Adapter() });
 
-  it('Renders data connection page with data', async () => {
+  beforeEach(() => {
+    // Clear the mock implementation before each test
+    (coreRefs.http!.get as jest.Mock).mockClear();
+  });
+
+  it('Renders Prometheus data connection page with data', async () => {
     const pplService = {
       fetch: jest.fn(),
     };
     const container = document.createElement('div');
+    (coreRefs.http!.get as jest.Mock).mockResolvedValue(describePrometheusDataConnection);
+    await act(() => {
+      ReactDOM.render(<DataConnection pplService={pplService} />, container);
+    });
+    expect(container).toMatchSnapshot();
+  });
+
+  it('Renders S3 data connection page with data', async () => {
+    const pplService = {
+      fetch: jest.fn(),
+    };
+    const container = document.createElement('div');
+    (coreRefs.http!.get as jest.Mock).mockResolvedValue(describeS3Dataconnection);
     await act(() => {
       ReactDOM.render(<DataConnection pplService={pplService} />, container);
     });

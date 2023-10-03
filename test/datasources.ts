@@ -41,13 +41,24 @@ export const showDataConnectionsData = {
   ],
 };
 
-export const describeDataConnection = {
+export const describePrometheusDataConnection = {
   name: 'prom',
   description: '',
   connector: 'PROMETHEUS',
   allowedRoles: [],
   properties: {
     'prometheus.uri': 'localhost:9201',
+  },
+};
+
+export const describeS3Dataconnection = {
+  name: 'ya',
+  description: '',
+  connector: 'S3GLUE',
+  allowedRoles: [],
+  properties: {
+    'glue.indexstore.opensearch.uri': 'y',
+    'glue.indexstore.opensearch.region': 'us-west-2',
   },
 };
 
