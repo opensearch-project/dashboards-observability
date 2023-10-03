@@ -131,7 +131,6 @@ const runQuery = async (
   try {
     console.log('- Posting query');
     const http = coreRefs.http!;
-    // TODO temporary mock stub
     const queryId = (
       await http.post(CONSOLE_PROXY, {
         body: JSON.stringify({ query, lang: 'sql' }),
