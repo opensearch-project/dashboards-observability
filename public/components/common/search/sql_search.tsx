@@ -18,6 +18,7 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiComboBox,
+  EuiTextArea,
 } from '@elastic/eui';
 import '@algolia/autocomplete-theme-classic';
 import { Autocomplete } from './autocomplete';
@@ -221,17 +222,8 @@ export const SQLSearch = (props: any) => {
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
             tabId={tabId}
+            isSuggestionDisabled={true}
           />
-          <EuiBadge
-            className={`ppl-link ${
-              uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
-            }`}
-            color="hollow"
-            onClick={() => showFlyout()}
-            onClickAriaLabel={'pplLinkShowFlyout'}
-          >
-            SQL
-          </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
