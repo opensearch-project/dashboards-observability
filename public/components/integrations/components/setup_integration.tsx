@@ -129,7 +129,6 @@ const runQuery = async (
   };
 
   try {
-    console.log('- Posting query');
     const http = coreRefs.http!;
     const queryId = (
       await http.post(CONSOLE_PROXY, {
@@ -148,7 +147,6 @@ const runQuery = async (
           method: 'GET',
         },
       });
-      console.log('- Poll:', poll);
       if (poll.status === 'PENDING') {
         trackProgress(1);
       } else if (poll.status === 'RUNNING') {
@@ -313,20 +311,16 @@ export function SetupBottomBar({
                 progress += 2;
                 setProgress(progress);
               } else if (config.connectionType === 's3') {
-                console.log('Starting S3 loading');
                 const http = coreRefs.http!;
 
-                console.log('Fetching assets');
                 const assets = await http.get(
                   `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
                 );
                 progress += 1;
                 setProgress(progress);
 
-                console.log('Beginning queries');
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
-                  console.log('Query:', query);
                   const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
                   const result = await runQuery(queryStr, (step) => setProgress(progress + step));
                   if (!result.ok) {
@@ -335,7 +329,6 @@ export function SetupBottomBar({
                     setToast('Something went wrong.', 'danger');
                     return;
                   }
-                  console.log('Query successful', result.value);
                   progress += 3;
                 }
                 // Once everything is ready, add the integration to the new datasource as usual
