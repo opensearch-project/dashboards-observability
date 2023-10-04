@@ -4,31 +4,32 @@
  */
 
 import {
+  EuiAccordion,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPage,
   EuiPageBody,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiPanel,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiAccordion,
-  EuiIcon,
-  EuiCard,
+  EuiPanel,
+  EuiSpacer,
   EuiTabbedContent,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { AccessControlTab } from './access_control_tab';
-import { NoAccess } from '../no_access';
 import {
   DATACONNECTIONS_BASE,
   observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
+  queryWorkbenchPluginID,
 } from '../../../../../common/constants/shared';
 import { coreRefs } from '../../../../framework/core_refs';
+import { NoAccess } from '../no_access';
+import { AccessControlTab } from './access_control_tab';
 import { ConnectionDetails } from './connection_details';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 
@@ -77,7 +78,11 @@ export const DataConnection = (props: any) => {
             icon={<EuiIcon size="xxl" type="bolt" />}
             title={'Accelerate performance'}
             description="Accelerate performance through OpenSearch indexing."
-            onClick={() => {}}
+            onClick={() =>
+              application!.navigateToApp(queryWorkbenchPluginID, {
+                path: `#/accelerate/${dataSource}`,
+              })
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -85,7 +90,11 @@ export const DataConnection = (props: any) => {
             icon={<EuiIcon size="xxl" type="database" />}
             title={'Tables'}
             description="Manually Define Tables"
-            onClick={() => application!.navigateToApp('opensearch-query-workbench')}
+            onClick={() =>
+              application!.navigateToApp(queryWorkbenchPluginID, {
+                path: `#/${dataSource}`,
+              })
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem>
