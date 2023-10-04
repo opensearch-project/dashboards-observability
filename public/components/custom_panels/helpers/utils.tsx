@@ -3,19 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { castArray, forEach, isEmpty } from 'lodash';
+import _, { forEach, isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { CoreStart } from '../../../../../../src/core/public';
-import {
-  PPL_DATE_FORMAT,
-  PPL_INDEX_REGEX,
-  PPL_WHERE_CLAUSE_REGEX,
-} from '../../../../common/constants/shared';
+import { PPL_INDEX_REGEX, PPL_WHERE_CLAUSE_REGEX } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
   SavedVisualizationType,
@@ -324,10 +319,12 @@ const updateCatalogVisualizationQuery = ({
   const attributesGroupString = attributesGroupBy.toString();
   const startEpochTime = convertDateTime(startTime, true, false, true);
   const endEpochTime = convertDateTime(endTime, false, false, true);
-  const promQuery =
-    attributesGroupBy.length === 0
-      ? catalogTableName
-      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+  // const promQuery =
+  //   attributesGroupBy.length === 0
+  //     ? `${aggregation} (${catalogTableName})`
+  //     : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+
+  const promQuery = `${aggregation} (${catalogTableName})`;
 
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
 };
@@ -399,7 +396,7 @@ export const renderCatalogVisualization = async ({
     layoutConfig: {
       height: 390,
       margin: { t: 5 },
-      legend: { orientation: 'h', yanchor: 'top', x: 0.0, y: -0.4 },
+      legend: { visible: false },
     },
   };
 
