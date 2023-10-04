@@ -31,12 +31,12 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
+import { convertDateTime } from '../../common/query_utils';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
  *
  * isNameValid - Validates string to length > 0 and < 50
- * convertDateTime - Converts input datetime string to required format
  * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
  * getQueryResponse - Get response of PPL query to load visualizations
  * renderSavedVisualization - Fetches savedVisualization by Id and runs getQueryResponse
@@ -49,28 +49,6 @@ import { MetricType } from '../../../../common/types/metrics';
 // Name validation 0>Name<=50
 export const isNameValid = (name: string) => {
   return !(name.length >= 50 || name.length === 0);
-};
-
-// DateTime convertor to required format
-export const convertDateTime = (
-  datetime: string,
-  isStart = true,
-  formatted = true,
-  isMetrics: boolean = false
-) => {
-  let returnTime: undefined | Moment;
-  if (isStart) {
-    returnTime = dateMath.parse(datetime);
-  } else {
-    returnTime = dateMath.parse(datetime, { roundUp: true });
-  }
-  if (isMetrics) {
-    const myDate = new Date(returnTime._d); // Your timezone!
-    const epochTime = myDate.getTime() / 1000.0;
-    return Math.round(epochTime);
-  }
-  if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
-  return returnTime;
 };
 
 // Merges new layout into visualizations
