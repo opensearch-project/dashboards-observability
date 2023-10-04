@@ -75,8 +75,6 @@ Observability is collection of plugins and applications that let you visualize d
 
 ## Plugin Components
 
-The Dashboards Observability plugin has four components: Trace Analytics, Event Analytics, Observability Dashboards, and Notebooks.
-
 ### Trace Analytics
 
 Trace Analytics page provides instant on dashboards in OpenSearch Dashboards for users to quickly analyze their logs. The plugin uses aggregated results from two indices, `otel-v1-apm-span-*` and `otel-v1-apm-service-map*` created by the otel-trace-raw-processor and service-map-processor, and renders three main views:
@@ -93,21 +91,53 @@ Additionally the fields can be sorted and filtered.
 
 Event Analytics allows user to monitor, correlate, analyze and visualize machine generated data through [Piped Processing Language](https://opensearch.org/docs/latest/observability-plugins/ppl/index/). It also enables the user to turn data-driven events into visualizations and save frequently used ones for quick access.
 
-### Observability Dashboards
+### Metrics Analytics
 
-Observability Dashboards provides the users to create and view different visualizations on ingested observability data, using Piped Processing Language queries. Use PPL 'where clauses' and datetime timespans to filter all visualizations in the dashboard.
+Metrics Analytics allows ingesting and visualize metric data from log data aggregated within OpenSearch, allowing you to analyze and correlate data across logs, traces, and metrics.
+Previously, you could ingest and visualize only logs and traces from your monitored environments. Using Metrics Analytics one can observe your digital assets with more granularity, gain deeper insight into the health of your infrastructure, and better inform your root cause analysis.
+
+### Operational Panels
+
+Operational panels provides the users to create and view different visualizations on ingested observability data, using Piped Processing Language queries. Use PPL 'where clauses' and datetime timespans to filter all visualizations in the panel.
 
 ### Notebooks
 
 Dashboards offer a solution for a few selected use cases, and are great tools if you’re focused on monitoring a known set of metrics over time. Notebooks enables contextual use of data with detailed explanations by allowing a user to combine saved visualizations, text, graphs and decorate data with other reference data sources.
 
-## Documentation
+### Integrations
+Integration is a new type of logical component that allows high level composition of multiple Dashboards / Applications / Queries and more. Integrations can be used to bring together all the metrics and logs from the infrastructure and gain insight into the unified system as a whole.
 
+---
+
+Integration usually consist of the following assets:
+- dashboards & visualization 
+- schema configuration (mapping & templates)
+- data on-boarding (sample data)
+
+[See Integration Documentation](https://github.com/opensearch-project/dashboards-observability/wiki/Integration-Documentation-Reference)
+
+[See Integration Tutorial](https://github.com/opensearch-project/dashboards-observability/wiki/Integration-Creation-Guide)
+
+Please See additional information [documentation](https://opensearch.org/docs/latest/integrations/index)
+
+> Integration Spec [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3412#schema-support-for-observability)
+
+### Observability Correlation
+In order to be able to correlate information across different signal (represented in different indices) we introduced the notion of correlation into the schema. This information is represented explicitly in both the declarative schema file and the physical mapping file.
+Using this metadata information will enable the knowledge to be projected and allow for analytic engine to produce a join query that will take advantage of these relationships.
+
+The Observability dashboard vision of [telemetry Data Correlation](https://github.com/opensearch-project/dashboards-observability/wiki/Observability-Future-Vision)
+
+---
+## WIKI Home
+Please see our WIKI page for additional information [WIKI](https://opensearch.org/docs/latest/observability/index/) to learn more about our features.
+
+## Documentation
 Please see our technical [documentation](https://opensearch.org/docs/latest/observability/index/) to learn more about its features.
 
 ## Contributing
-
-See [developer guide](DEVELOPER_GUIDE.md) and [how to contribute to this project](CONTRIBUTING.md).
+- See [developer guide](DEVELOPER_GUIDE.md) and [how to contribute to this project](CONTRIBUTING.md).
+- See [Integration Contribution Guide](https://github.com/opensearch-project/dashboards-observability/wiki/Integration-Creation-Guide) for integration creation additional context
 
 ## Getting Help
 
@@ -130,3 +160,7 @@ This project is licensed under the [Apache v2.0 License](LICENSE).
 ## Copyright
 
 Copyright OpenSearch Contributors. See [NOTICE](NOTICE) for details.
+
+## Screenshots
+
+<video src='https://github.com/opensearch-project/dashboards-observability/assets/48943349/8c918fce-35b8-4824-ae2d-6881aad7b9a2' width=180/>
