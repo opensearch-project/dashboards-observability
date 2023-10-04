@@ -28,6 +28,7 @@ interface AutocompleteProps extends IQueryBarProps {
   placeholder?: string;
   possibleCommands?: Array<{ label: string }>;
   append?: any;
+  isSuggestionDisabled?: boolean;
 }
 
 export const Autocomplete = (props: AutocompleteProps) => {
@@ -45,6 +46,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
     placeholder = 'Enter PPL query',
     possibleCommands,
     append,
+    isSuggestionDisabled = false,
   } = props;
 
   const [autocompleteState, setAutocompleteState] = useState<AutocompleteState<AutocompleteItem>>({
@@ -143,7 +145,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
         {...(panelsFilter && { append, fullWidth: true })}
         disabled={isDisabled}
       />
-      {autocompleteState.isOpen && (
+      {autocompleteState.isOpen && !isSuggestionDisabled && (
         <div
           className={[
             'aa-Panel',
