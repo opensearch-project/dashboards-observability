@@ -49,13 +49,13 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import {
-  convertDateTime,
   displayVisualization,
   getQueryResponse,
   isDateValid,
   parseSavedVisualizations,
 } from '../../helpers/utils';
 import './visualization_flyout.scss';
+import { convertDateTime } from '../../../common/query_utils';
 
 /*
  * VisaulizationFlyout - This module create a flyout to add visualization

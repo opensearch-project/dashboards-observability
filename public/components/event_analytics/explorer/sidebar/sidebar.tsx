@@ -180,7 +180,7 @@ export const Sidebar = (props: ISidebarProps) => {
                       className="dscSidebarList explorerFieldList--selected"
                       aria-labelledby="queried_fields"
                       data-test-subj={`fieldList-selected`}
-                      droppableId=""
+                      droppableId="queried_fields_drop"
                       spacing="m"
                     >
                       {explorerFields.queriedFields &&
@@ -192,7 +192,7 @@ export const Sidebar = (props: ISidebarProps) => {
                               data-attr-field={field.name}
                               className="dscSidebar__item sidebar_content"
                               index={index}
-                              draggableId=""
+                              draggableId={field.name}
                             >
                               <EuiPanel
                                 data-attr-field={field.name}
