@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CoreStart } from '../../../src/core/public';
 import { SavedObjectsClient } from '../../../src/core/server';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
-import { DataPublicPluginSetup } from '../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
@@ -16,6 +17,7 @@ export interface AppPluginStartDependencies {
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
   savedObjectsClient: SavedObjectsClient;
+  data: DataPublicPluginStart;
 }
 
 export interface SetupDependencies {

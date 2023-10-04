@@ -88,6 +88,7 @@ export const REDUX_EXPL_SLICE_QUERY_TABS = 'queryTabs';
 export const REDUX_EXPL_SLICE_VISUALIZATION = 'explorerVisualization';
 export const REDUX_EXPL_SLICE_COUNT_DISTRIBUTION = 'countDistributionVisualization';
 export const REDUX_EXPL_SLICE_PATTERNS = 'patterns';
+export const REDUX_EXPL_SLICE_SEARCH_META_DATA = 'searchMetaData';
 export const PLOTLY_GAUGE_COLUMN_NUMBER = 4;
 export const APP_ANALYTICS_TAB_ID_REGEX = /application-analytics-tab.+/;
 export const DEFAULT_AVAILABILITY_QUERY = 'stats count() by span( timestamp, 1h )';
