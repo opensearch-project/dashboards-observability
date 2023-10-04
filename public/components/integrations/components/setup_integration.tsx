@@ -35,6 +35,7 @@ export interface IntegrationSetupInputs {
   displayName: string;
   connectionType: string;
   connectionDataSource: string;
+  connectionLocation: string;
 }
 
 interface IntegrationConfigProps {
@@ -203,6 +204,7 @@ export function SetupIntegrationForm({
         <EuiFieldText
           value={config.displayName}
           onChange={(event) => updateConfig({ displayName: event.target.value })}
+          placeholder={`${integration.name} Integration`}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -249,6 +251,15 @@ export function SetupIntegrationForm({
           singleSelection={{ asPlainText: true }}
         />
       </EuiFormRow>
+      {config.connectionType === 's3' ? (
+        <EuiFormRow label="S3 Bucket Location">
+          <EuiFieldText
+            value={config.connectionLocation}
+            onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+            placeholder="s3://"
+          />
+        </EuiFormRow>
+      ) : null}
     </EuiForm>
   );
 }
@@ -395,6 +406,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     displayName: `${integration} Integration`,
     connectionType: 'index',
     connectionDataSource: '',
+    connectionLocation: '',
   } as IntegrationSetupInputs);
 
   const [template, setTemplate] = useState({
