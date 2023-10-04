@@ -26,8 +26,6 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
-import { CoreStart } from '../../../../../../../src/core/public';
-import PPLService from '../../../../services/requests/ppl';
 import {
   displayVisualization,
   renderCatalogVisualization,
@@ -35,6 +33,7 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { coreRefs } from '../../../../framework/core_refs';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -58,11 +57,9 @@ import { VizContainerError } from '../../../../../common/types/custom_panels';
  */
 
 interface Props {
-  http: CoreStart['http'];
   editMode: boolean;
   visualizationId: string;
   savedVisualizationId: string;
-  pplService: PPLService;
   fromTime: string;
   toTime: string;
   onRefresh: boolean;
@@ -77,11 +74,9 @@ interface Props {
 }
 
 export const VisualizationContainer = ({
-  http,
   editMode,
   visualizationId,
   savedVisualizationId,
-  pplService,
   fromTime,
   toTime,
   onRefresh,
@@ -103,6 +98,7 @@ export const VisualizationContainer = ({
   const [isError, setIsError] = useState({} as VizContainerError);
   const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
+  const { http, pplService } = coreRefs;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
@@ -217,21 +213,21 @@ export const VisualizationContainer = ({
 
   const loadVisaulization = async () => {
     if (catalogVisualization)
-      await renderCatalogVisualization(
+      await renderCatalogVisualization({
         http,
         pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
+        catalogSource: savedVisualizationId,
+        startTime: fromTime,
+        endTime: toTime,
+        filterQuery: pplFilterValue,
         spanParam,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
-      );
+        setIsError,
+      });
     else
       await renderSavedVisualization(
         http,
