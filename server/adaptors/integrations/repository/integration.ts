@@ -109,6 +109,10 @@ export class IntegrationReader {
   ): Promise<
     Result<{
       savedObjects?: object[];
+      queries?: Array<{
+        query: string;
+        language: string;
+      }>;
     }>
   > {
     const configResult = await this.getConfig(version);
@@ -117,7 +121,10 @@ export class IntegrationReader {
     }
     const config = configResult.value;
 
-    const resultValue: { savedObjects?: object[] } = {};
+    const resultValue: {
+      savedObjects?: object[];
+      queries?: Array<{ query: string; language: string }>;
+    } = {};
     if (config.assets.savedObjects) {
       const sobjPath = `${config.assets.savedObjects.name}-${config.assets.savedObjects.version}.ndjson`;
       const assets = await this.reader.readFile(sobjPath, 'assets');
@@ -125,6 +132,31 @@ export class IntegrationReader {
         return assets;
       }
       resultValue.savedObjects = assets.value as object[];
+    }
+    if (config.assets.queries) {
+      resultValue.queries = [];
+      const queries = await Promise.all(
+        config.assets.queries.map(async (item) => {
+          const queryPath = `${item.name}-${item.version}.${item.language}`;
+          const query = await this.reader.readFileRaw(queryPath, 'assets');
+          if (!query.ok) {
+            return query;
+          }
+          return {
+            ok: true as const,
+            value: {
+              language: item.language,
+              query: query.value.toString('utf8'),
+            },
+          };
+        })
+      );
+      for (const query of queries) {
+        if (!query.ok) {
+          return query;
+        }
+        resultValue.queries.push(query.value);
+      }
     }
     return { ok: true, value: resultValue };
   }

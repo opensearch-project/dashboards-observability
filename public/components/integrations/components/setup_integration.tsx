@@ -12,17 +12,21 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLoadingDashboards,
+  EuiModal,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { coreRefs } from '../../../framework/core_refs';
-import { addIntegrationRequest } from './create_integration_helpers';
+import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
 import { useToast } from '../../../../public/components/common/toast';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
@@ -36,10 +40,7 @@ export interface IntegrationSetupInputs {
 interface IntegrationConfigProps {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
-  integration: {
-    name: string;
-    type: string;
-  };
+  integration: IntegrationTemplate;
 }
 
 // TODO support localization
@@ -118,10 +119,50 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
   }
 };
 
-const findTemplate = async (integrationTemplateId: string) => {
-  const http = coreRefs.http!;
-  const result = await http.get(`${INTEGRATIONS_BASE}/repository/${integrationTemplateId}`);
-  return result;
+const runQuery = async (
+  query: string,
+  trackProgress: (step: number) => void
+): Promise<Result<object>> => {
+  // Used for polling
+  const sleep = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  try {
+    const http = coreRefs.http!;
+    const queryId = (
+      await http.post(CONSOLE_PROXY, {
+        body: JSON.stringify({ query, lang: 'sql' }),
+        query: {
+          path: '_plugins/_async_query',
+          method: 'POST',
+        },
+      })
+    ).queryId;
+    while (true) {
+      const poll = await http.post(CONSOLE_PROXY, {
+        body: '{}',
+        query: {
+          path: '_plugins/_async_query/' + queryId,
+          method: 'GET',
+        },
+      });
+      if (poll.status === 'PENDING') {
+        trackProgress(1);
+      } else if (poll.status === 'RUNNING') {
+        trackProgress(2);
+      } else if (poll.status === 'SUCCESS') {
+        trackProgress(3);
+        return { ok: true, value: poll };
+      } else if (poll.status === 'FAILURE') {
+        return { ok: false, error: new Error('FAILURE status', { cause: poll }) };
+      }
+      await sleep(3000);
+    }
+  } catch (err: any) {
+    console.error(err);
+    return { ok: false, error: err };
+  }
 };
 
 export function SetupIntegrationForm({
@@ -169,7 +210,19 @@ export function SetupIntegrationForm({
       <EuiSpacer />
       <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
         <EuiSelect
-          options={integrationConnectionSelectorItems}
+          options={integrationConnectionSelectorItems.map((item) => {
+            const copy: { value: string; text: string; disabled?: boolean } = { ...item };
+            switch (item.value) {
+              case 's3':
+                copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'queries');
+                return copy;
+              case 'index':
+                copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'savedObjects');
+                return copy;
+              default:
+                return copy;
+            }
+          })}
           value={config.connectionType}
           onChange={(event) =>
             updateConfig({ connectionType: event.target.value, connectionDataSource: '' })
@@ -198,12 +251,19 @@ export function SetupIntegrationForm({
 export function SetupBottomBar({
   config,
   integration,
+  loading,
+  setLoading,
+  loadingProgress,
+  setProgress,
 }: {
   config: IntegrationSetupInputs;
-  integration: { name: string; type: string };
+  integration: IntegrationTemplate;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  loadingProgress: number;
+  setProgress: (updater: number | ((progress: number) => void)) => void;
 }) {
   const { setToast } = useToast();
-  const [loading, setLoading] = useState(false);
 
   return (
     <EuiBottomBar>
@@ -231,16 +291,55 @@ export function SetupBottomBar({
             isLoading={loading}
             onClick={async () => {
               setLoading(true);
-              const template = await findTemplate(integration.name);
-              await addIntegrationRequest(
-                false,
-                integration.name,
-                config.displayName,
-                template,
-                setToast,
-                config.displayName,
-                config.connectionDataSource
-              );
+
+              if (config.connectionType === 'index') {
+                await addIntegrationRequest(
+                  false,
+                  integration.name,
+                  config.displayName,
+                  integration,
+                  setToast,
+                  config.displayName,
+                  config.connectionDataSource
+                );
+                setProgress((progress) => progress + 1);
+              } else if (config.connectionType === 's3') {
+                const http = coreRefs.http!;
+
+                const assets = await http.get(
+                  `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+                );
+                setProgress((progress) => progress + 1);
+
+                // Queries must exist because we disable s3 if they're not present
+                for (const query of assets.data.queries!) {
+                  const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
+                  const currProgress = loadingProgress; // Need a frozen copy for getting accurate query steps
+                  const result = await runQuery(queryStr, (step) =>
+                    setProgress(currProgress + step)
+                  );
+                  if (!result.ok) {
+                    console.error('Query failed', result.error);
+                    setLoading(false);
+                    setToast('Something went wrong.', 'danger');
+                    return;
+                  }
+                }
+                // Once everything is ready, add the integration to the new datasource as usual
+                // TODO determine actual values here after more about queries is known
+                await addIntegrationRequest(
+                  false,
+                  integration.name,
+                  config.displayName,
+                  integration,
+                  setToast,
+                  config.displayName,
+                  config.connectionDataSource
+                );
+                setProgress((progress) => progress + 1);
+              } else {
+                console.error('Invalid data source type');
+              }
               setLoading(false);
             }}
           >
@@ -252,36 +351,84 @@ export function SetupBottomBar({
   );
 }
 
-export function SetupIntegrationPage({
-  integration,
-}: {
-  integration: {
-    name: string;
-    type: string;
-  };
-}) {
+export function LoadingPage({ value, max }: { value: number; max: number }) {
+  return (
+    <>
+      <EuiSpacer size="xxl" />
+      <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingDashboards size="xxl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h3>Adding Integration</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            This may take a few minutes. The integration and assets are being added.
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiProgress value={value} max={max} size="m" />
+    </>
+  );
+}
+
+export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [integConfig, setConfig] = useState({
-    displayName: `${integration.name} Integration`,
+    displayName: `${integration} Integration`,
     connectionType: 'index',
     connectionDataSource: '',
   } as IntegrationSetupInputs);
 
+  const [template, setTemplate] = useState({
+    name: integration,
+    type: '',
+    assets: {},
+  } as IntegrationTemplate);
+
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  useEffect(() => {
+    const getTemplate = async () => {
+      const http = coreRefs.http!;
+      const value = await http.get(INTEGRATIONS_BASE + `/repository/${integration}`);
+      setTemplate(value.data);
+    };
+    getTemplate();
+  }, [integration]);
+
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
+  const maxProgress = 2 + 3 * (template.assets?.queries?.length ?? 0);
 
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
           <EuiPageContentBody>
-            <SetupIntegrationForm
-              config={integConfig}
-              updateConfig={updateConfig}
-              integration={integration}
-            />
+            {showLoading ? (
+              <LoadingPage value={loadingProgress} max={maxProgress} />
+            ) : (
+              <SetupIntegrationForm
+                config={integConfig}
+                updateConfig={updateConfig}
+                integration={template}
+              />
+            )}
           </EuiPageContentBody>
         </EuiPageContent>
-        <SetupBottomBar config={integConfig} integration={integration} />
+        <SetupBottomBar
+          config={integConfig}
+          integration={template}
+          loading={showLoading}
+          setLoading={setShowLoading}
+          loadingProgress={loadingProgress}
+          setProgress={setLoadingProgress}
+        />
       </EuiPageBody>
     </EuiPage>
   );

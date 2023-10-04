@@ -17,7 +17,7 @@ describe('Integration Setup Page', () => {
   configure({ adapter: new Adapter() });
 
   it('Renders integration setup page as expected', async () => {
-    const wrapper = mount(<SetupIntegrationPage integration={TEST_INTEGRATION_CONFIG} />);
+    const wrapper = mount(<SetupIntegrationPage integration={TEST_INTEGRATION_CONFIG.name} />);
 
     await waitFor(() => {
       expect(wrapper).toMatchSnapshot();
