@@ -5,11 +5,9 @@
 
 import dateMath from '@elastic/datemath';
 import {
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
   EuiPage,
@@ -20,7 +18,6 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import classNames from 'classnames';
@@ -113,6 +110,10 @@ import {
   change as updateVizConfig,
   selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
+import {
+  update as updateSearchMetaData,
+  selectSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
 import { DataGrid } from './events_views/data_grid';
@@ -123,6 +124,9 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
+import { DataSourceSelection } from './datasources/datasources_selection';
+import { DirectQueryRunning } from './direct_query_running';
+import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 
 export const Explorer = ({
   pplService,
@@ -147,6 +151,7 @@ export const Explorer = ({
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
+  dataSourcePluggables,
 }: IExplorerProps) => {
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
@@ -167,6 +172,7 @@ export const Explorer = ({
     pplService,
     requestParams,
   });
+
   const appLogEvents = tabId.startsWith('application-analytics-tab');
   const query = useSelector(selectQueries)[tabId];
   const explorerData = useSelector(selectQueryResult)[tabId];
@@ -174,6 +180,7 @@ export const Explorer = ({
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const explorerVisualizations = useSelector(selectExplorerVisualization)[tabId];
   const userVizConfigs = useSelector(selectVisualizationConfig)[tabId] || {};
+  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
   const [selectedContentTabId, setSelectedContentTab] = useState(TAB_EVENT_ID);
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
@@ -192,6 +199,17 @@ export const Explorer = ({
   const [browserTabFocus, setBrowserTabFocus] = useState(true);
   const [liveTimestamp, setLiveTimestamp] = useState(DATE_PICKER_FORMAT);
   const [triggerAvailability, setTriggerAvailability] = useState(false);
+  const [isQueryRunning, setIsQueryRunning] = useState(false);
+  const currentPluggable = useMemo(() => {
+    return (
+      dataSourcePluggables[explorerSearchMeta.datasources[0]?.type] ||
+      dataSourcePluggables.DEFAULT_INDEX_PATTERNS
+    );
+  }, [explorerSearchMeta.datasources]);
+  const { ui } =
+    currentPluggable?.getComponentSetForVariation('languages', explorerSearchMeta.lang || 'SQL') ||
+    {};
+  const SearchBar = ui?.SearchBar || Search;
 
   const selectedIntervalRef = useRef<{
     text: string;
@@ -412,10 +430,6 @@ export const Explorer = ({
     }
   };
 
-  const sidebarClassName = classNames({
-    closed: isSidebarClosed,
-  });
-
   const mainSectionClassName = classNames({
     'col-md-8': !isSidebarClosed,
     'col-md-12': isSidebarClosed,
@@ -470,178 +484,117 @@ export const Explorer = ({
 
   const mainContent = useMemo(() => {
     return (
-      <>
-        <EuiPage>
-          <EuiPageSideBar
-            className="euiPage--paddingMedium .euiPageSideBar"
-            id="discover-sidebar"
-            data-test-subj="eventExplorer__sidebar"
-            sticky
-          >
-            {!isSidebarClosed && (
-              <div className="explorerFieldSelector">
-                <Sidebar
-                  query={query}
-                  explorerFields={explorerFields}
-                  explorerData={explorerData}
-                  selectedTimestamp={query[SELECTED_TIMESTAMP]}
-                  selectedPattern={query[SELECTED_PATTERN_FIELD]}
-                  handleOverrideTimestamp={handleOverrideTimestamp}
-                  handleOverridePattern={handleOverridePattern}
-                  isOverridingTimestamp={isOverridingTimestamp}
-                  isOverridingPattern={isOverridingPattern}
-                  isFieldToggleButtonDisabled={
-                    isEmpty(explorerData.jsonData) ||
-                    !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
-                  }
-                  storedExplorerFields={
-                    storedExplorerFields.availableFields.length > 0
-                      ? storedExplorerFields
-                      : explorerFields
-                  }
-                  setStoredExplorerFields={setStoredExplorerFields}
-                />
-              </div>
-            )}
-            <EuiButtonIcon
-              iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-              iconSize="m"
-              size="s"
-              onClick={() => {
-                setIsSidebarClosed((staleState) => {
-                  return !staleState;
-                });
-              }}
-              data-test-subj="collapseSideBarButton"
-              aria-controls="discover-sidebar"
-              aria-expanded={isSidebarClosed ? 'false' : 'true'}
-              aria-label="Toggle sidebar"
-              className="dscCollapsibleSidebar__collapseButton"
-            />
-          </EuiPageSideBar>
-          <EuiPageBody className={`dscWrapper ${mainSectionClassName}`}>
-            {explorerData && !isEmpty(explorerData.jsonData) ? (
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-                      {countDistribution?.data && !isLiveTailOnRef.current && (
-                        <>
-                          <HitsCounter
-                            hits={_.sum(countDistribution.data['count()'])}
-                            showResetButton={false}
-                            onResetQuery={() => {}}
-                          />
-                          <TimechartHeader
-                            options={timeIntervalOptions}
-                            onChangeInterval={(selectedIntrv) => {
-                              const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                                (item) => item.value === selectedIntrv
-                              );
-                              const intrv = selectedIntrv.replace(/^auto_/, '');
-                              getCountVisualizations(intrv);
-                              selectedIntervalRef.current =
-                                timeIntervalOptions[intervalOptionsIndex];
-                              getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                            }}
-                            stateInterval={selectedIntervalRef.current?.value}
-                            startTime={appLogEvents ? startTime : dateRange[0]}
-                            endTime={appLogEvents ? endTime : dateRange[1]}
-                          />
-                          <CountDistribution
-                            countDistribution={countDistribution}
-                            selectedInterval={selectedIntervalRef.current?.value}
-                            startTime={appLogEvents ? startTime : dateRange[0]}
-                            endTime={appLogEvents ? endTime : dateRange[1]}
-                          />
-                        </>
-                      )}
-                    </EuiPanel>
-                  </EuiPanel>
-                </EuiFlexItem>
+      <div className={`dscWrapper ${mainSectionClassName}`}>
+        {explorerData && !isEmpty(explorerData.jsonData) ? (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                {/* <EuiPanel paddingSize="s" style={{ height: '100%' }}> */}
+                {countDistribution?.data && !isLiveTailOnRef.current && (
+                  <>
+                    <HitsCounter
+                      hits={_.sum(countDistribution.data['count()'])}
+                      showResetButton={false}
+                      onResetQuery={() => {}}
+                    />
+                    <TimechartHeader
+                      options={timeIntervalOptions}
+                      onChangeInterval={(selectedIntrv) => {
+                        const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                          (item) => item.value === selectedIntrv
+                        );
+                        const intrv = selectedIntrv.replace(/^auto_/, '');
+                        getCountVisualizations(intrv);
+                        selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                        getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                      }}
+                      stateInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
+                    <CountDistribution
+                      countDistribution={countDistribution}
+                      selectedInterval={selectedIntervalRef.current?.value}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                    />
+                  </>
+                )}
+              </EuiPanel>
+            </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-                      <LogPatterns
-                        selectedIntervalUnit={selectedIntervalRef.current}
-                        handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-                      />
-                    </EuiPanel>
-                  </EuiPanel>
-                </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                  <LogPatterns
+                    selectedIntervalUnit={selectedIntervalRef.current}
+                    handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                  />
+                </EuiPanel>
+              </EuiPanel>
+            </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-                      <section
-                        className="dscTable dscTableFixedScroll"
-                        aria-labelledby="documentsAriaLabel"
-                      >
-                        <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
-                          <FormattedMessage
-                            id="discover.documentsAriaLabel"
-                            defaultMessage="Documents"
-                          />
-                        </h2>
-                        <div className="dscDiscover">
-                          {isLiveTailOnRef.current && (
-                            <>
-                              <EuiSpacer size="m" />
-                              <EuiFlexGroup
-                                justifyContent="center"
-                                alignItems="center"
-                                gutterSize="m"
-                              >
-                                <EuiLoadingSpinner size="l" />
-                                <EuiText textAlign="center" data-test-subj="LiveStreamIndicator_on">
-                                  <strong>&nbsp;&nbsp;Live streaming</strong>
-                                </EuiText>
-                                <EuiFlexItem grow={false}>
-                                  <HitsCounter
-                                    hits={totalHits}
-                                    showResetButton={false}
-                                    onResetQuery={() => {}}
-                                  />
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>since {liveTimestamp}</EuiFlexItem>
-                              </EuiFlexGroup>
-                              <EuiSpacer size="m" />
-                            </>
-                          )}
-                          <DataGrid
-                            http={http}
-                            pplService={pplService}
-                            rows={explorerData.jsonData}
-                            rowsAll={explorerData.jsonDataAll}
-                            explorerFields={explorerFields}
-                            timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
-                            rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
-                            totalHits={_.sum(countDistribution.data['count()'])}
-                            requestParams={requestParams}
-                            startTime={appLogEvents ? startTime : dateRange[0]}
-                            endTime={appLogEvents ? endTime : dateRange[1]}
-                            storedSelectedColumns={
-                              storedExplorerFields.selectedFields.length > 0
-                                ? storedExplorerFields.selectedFields
-                                : DEFAULT_EMPTY_EXPLORER_FIELDS
-                            }
-                          />
-                          <a tabIndex={0} id="discoverBottomMarker">
-                            &#8203;
-                          </a>
-                        </div>
-                      </section>
-                    </EuiPanel>
-                  </EuiPanel>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <NoResults />
-            )}
-          </EuiPageBody>
-        </EuiPage>
-      </>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                <section
+                  className="dscTable dscTableFixedScroll"
+                  aria-labelledby="documentsAriaLabel"
+                >
+                  <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
+                    <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
+                  </h2>
+                  <div className="dscDiscover">
+                    {isLiveTailOnRef.current && (
+                      <>
+                        <EuiSpacer size="m" />
+                        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
+                          <EuiLoadingSpinner size="l" />
+                          <EuiText textAlign="center" data-test-subj="LiveStreamIndicator_on">
+                            <strong>&nbsp;&nbsp;Live streaming</strong>
+                          </EuiText>
+                          <EuiFlexItem grow={false}>
+                            <HitsCounter
+                              hits={totalHits}
+                              showResetButton={false}
+                              onResetQuery={() => {}}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>since {liveTimestamp}</EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer size="m" />
+                      </>
+                    )}
+
+                    <DataGrid
+                      http={http}
+                      pplService={pplService}
+                      rows={explorerData.jsonData}
+                      rowsAll={explorerData.jsonDataAll}
+                      explorerFields={explorerFields}
+                      timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                      rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                      totalHits={explorerData?.datarows?.length || 0}
+                      requestParams={requestParams}
+                      startTime={appLogEvents ? startTime : dateRange[0]}
+                      endTime={appLogEvents ? endTime : dateRange[1]}
+                      storedSelectedColumns={
+                        storedExplorerFields.selectedFields.length > 0
+                          ? storedExplorerFields.selectedFields
+                          : DEFAULT_EMPTY_EXPLORER_FIELDS
+                      }
+                    />
+                    <a tabIndex={0} id="discoverBottomMarker">
+                      &#8203;
+                    </a>
+                  </div>
+                </section>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <NoResults />
+        )}
+      </div>
     );
   }, [
     isPanelTextFieldInvalid,
@@ -654,6 +607,7 @@ export const Explorer = ({
     query,
     isLiveTailOnRef.current,
     isOverridingPattern,
+    isQueryRunning,
   ]);
 
   const visualizations: IVisualizationContainerProps = useMemo(() => {
@@ -680,7 +634,7 @@ export const Explorer = ({
   };
 
   const explorerVis = useMemo(() => {
-    return (
+    return explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ? (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -693,8 +647,18 @@ export const Explorer = ({
         callback={callbackForConfig}
         queryManager={queryManager}
       />
+    ) : (
+      <DirectQueryVisualization />
     );
-  }, [query, curVisId, explorerFields, explorerVisualizations, explorerData, visualizations]);
+  }, [
+    query,
+    curVisId,
+    explorerFields,
+    explorerVisualizations,
+    explorerData,
+    visualizations,
+    explorerSearchMeta.datasources,
+  ]);
 
   const contentTabs = [
     {
@@ -843,6 +807,8 @@ export const Explorer = ({
     selectedCustomPanelOptions,
   ]);
 
+  // live tail
+
   const liveTailLoop = async (
     name: string,
     startingTime: string,
@@ -944,49 +910,93 @@ export const Explorer = ({
           uiSettingsService.get('theme:darkMode') && ' explorer-dark'
         }`}
       >
-        <Search
-          key="search-component"
-          query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
-          tempQuery={tempQuery}
-          handleQueryChange={handleQueryChange}
-          handleQuerySearch={handleQuerySearch}
-          dslService={dslService}
-          startTime={appLogEvents ? startTime : dateRange[0]}
-          endTime={appLogEvents ? endTime : dateRange[1]}
-          handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-          selectedPanelName={selectedPanelNameRef.current}
-          selectedCustomPanelOptions={selectedCustomPanelOptions}
-          setSelectedPanelName={setSelectedPanelName}
-          setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
-          handleSavingObject={handleSavingObject}
-          isPanelTextFieldInvalid={isPanelTextFieldInvalid}
-          savedObjects={savedObjects}
-          showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
-          handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-          isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-          closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
-          popoverItems={popoverItems}
-          isLiveTailOn={isLiveTailOnRef.current}
-          selectedSubTabId={selectedContentTabId}
-          searchBarConfigs={searchBarConfigs}
-          getSuggestions={parseGetSuggestions}
-          onItemSelect={onItemSelect}
-          tabId={tabId}
-          baseQuery={appBaseQuery}
-          stopLive={stopLive}
-          setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-          liveTailName={liveTailNameRef.current}
-          curVisId={curVisId}
-          setSubType={setSubType}
-        />
-        <EuiTabbedContent
-          className="mainContentTabs"
-          initialSelectedTab={contentTabs[0]}
-          selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-          onTabClick={(selectedTab: EuiTabbedContentTab) => handleContentTabClick(selectedTab)}
-          tabs={contentTabs}
-          size="s"
-        />
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <DataSourceSelection tabId={tabId} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div className="explorerFieldSelector">
+                  <Sidebar
+                    query={query}
+                    explorerFields={explorerFields}
+                    explorerData={explorerData}
+                    selectedTimestamp={query[SELECTED_TIMESTAMP]}
+                    selectedPattern={query[SELECTED_PATTERN_FIELD]}
+                    handleOverrideTimestamp={handleOverrideTimestamp}
+                    handleOverridePattern={handleOverridePattern}
+                    isOverridingTimestamp={isOverridingTimestamp}
+                    isOverridingPattern={isOverridingPattern}
+                    isFieldToggleButtonDisabled={
+                      isEmpty(explorerData.jsonData) ||
+                      !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
+                    }
+                    storedExplorerFields={
+                      storedExplorerFields.availableFields.length > 0
+                        ? storedExplorerFields
+                        : explorerFields
+                    }
+                    setStoredExplorerFields={setStoredExplorerFields}
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SearchBar
+              key="search-component"
+              query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
+              tempQuery={tempQuery}
+              handleQueryChange={handleQueryChange}
+              handleQuerySearch={handleQuerySearch}
+              dslService={dslService}
+              startTime={appLogEvents ? startTime : dateRange[0]}
+              endTime={appLogEvents ? endTime : dateRange[1]}
+              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
+              selectedPanelName={selectedPanelNameRef.current}
+              selectedCustomPanelOptions={selectedCustomPanelOptions}
+              setSelectedPanelName={setSelectedPanelName}
+              setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
+              handleSavingObject={handleSavingObject}
+              isPanelTextFieldInvalid={isPanelTextFieldInvalid}
+              savedObjects={savedObjects}
+              showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
+              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              isLiveTailPopoverOpen={isLiveTailPopoverOpen}
+              closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
+              popoverItems={popoverItems}
+              isLiveTailOn={isLiveTailOnRef.current}
+              selectedSubTabId={selectedContentTabId}
+              searchBarConfigs={searchBarConfigs}
+              getSuggestions={parseGetSuggestions}
+              onItemSelect={onItemSelect}
+              tabId={tabId}
+              baseQuery={appBaseQuery}
+              stopLive={stopLive}
+              setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
+              liveTailName={liveTailNameRef.current}
+              curVisId={curVisId}
+              setSubType={setSubType}
+              http={http}
+              setIsQueryRunning={setIsQueryRunning}
+            />
+            {explorerSearchMeta.isPolling ? (
+              <DirectQueryRunning tabId={tabId} />
+            ) : (
+              <EuiTabbedContent
+                className="mainContentTabs"
+                initialSelectedTab={contentTabs[0]}
+                selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+                onTabClick={(selectedTab: EuiTabbedContentTab) =>
+                  handleContentTabClick(selectedTab)
+                }
+                tabs={contentTabs}
+                size="s"
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     </TabContext.Provider>
   );
