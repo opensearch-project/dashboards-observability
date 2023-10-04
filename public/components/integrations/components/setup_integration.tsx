@@ -211,10 +211,7 @@ export function SetupIntegrationForm({
       <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
         <EuiSelect
           options={integrationConnectionSelectorItems.map((item) => {
-            const copy: { value: string; text: string; disabled?: boolean } = Object.assign(
-              {},
-              item
-            );
+            const copy: { value: string; text: string; disabled?: boolean } = { ...item };
             switch (item.value) {
               case 's3':
                 copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'queries');
