@@ -15,9 +15,13 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../../common/constants/data_connections';
-import { QueryPermissionsConfiguration } from '../manage/query_permissions';
+import {
+  AuthMethod,
+  OPENSEARCH_DOCUMENTATION_URL,
+} from '../../../../../common/constants/data_connections';
+import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
+import { AuthDetails } from './auth_details';
 
 interface ConfigureS3DatasourceProps {
   roles: Role[];
@@ -27,6 +31,12 @@ interface ConfigureS3DatasourceProps {
   currentDetails: string;
   currentArn: string;
   currentStore: string;
+  currentAuthMethod: AuthMethod;
+  currentUsername: string;
+  currentPassword: string;
+  setAuthMethodForRequest: React.Dispatch<React.SetStateAction<AuthMethod>>;
+  setPasswordForRequest: React.Dispatch<React.SetStateAction<string>>;
+  setUsernameForRequest: React.Dispatch<React.SetStateAction<string>>;
   setStoreForRequest: React.Dispatch<React.SetStateAction<string>>;
   setNameForRequest: React.Dispatch<React.SetStateAction<string>>;
   setDetailsForRequest: React.Dispatch<React.SetStateAction<string>>;
@@ -44,8 +54,14 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
     currentDetails,
     currentArn,
     roles,
+    currentAuthMethod,
+    setAuthMethodForRequest,
     selectedQueryPermissionRoles,
     setSelectedQueryPermissionRoles,
+    currentPassword,
+    currentUsername,
+    setPasswordForRequest,
+    setUsernameForRequest,
   } = props;
 
   const [name, setName] = useState(currentName);
@@ -53,11 +69,9 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
   const [arn, setArn] = useState(currentArn);
   const [store, setStore] = useState(currentStore);
   const authOptions = [
-    { value: 'option_one', text: 'No authentication' },
-    { value: 'option_two', text: 'SIGV4' },
-    { value: 'option_three', text: 'Basic Auth' },
+    { value: 'basicauth', text: 'Basic authentication' },
+    { value: 'noauth', text: 'No authentication' },
   ];
-  const [selectedAuthOption, setSelectedAuthOption] = useState(authOptions[0].value);
 
   return (
     <div>
@@ -186,22 +200,20 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiSelect
               id="selectAuthMethod"
               options={authOptions}
-              value={selectedAuthOption}
+              value={currentAuthMethod}
               onChange={(e) => {
-                setSelectedAuthOption(e.target.value);
+                setAuthMethodForRequest(e.target.value as AuthMethod);
               }}
             />
           </>
         </EuiFormRow>
-
-        <EuiFormRow label="Glue index store region">
-          <>
-            <EuiText size="xs">
-              <p>The region where the index store is.</p>
-            </EuiText>
-            <EuiFieldText data-test-subj="index-location" value="us-west-2" />
-          </>
-        </EuiFormRow>
+        <AuthDetails
+          currentUsername={currentUsername}
+          setUsernameForRequest={setUsernameForRequest}
+          currentPassword={currentPassword}
+          setPasswordForRequest={setPasswordForRequest}
+          currentAuthMethod={currentAuthMethod}
+        />
 
         <EuiSpacer />
 

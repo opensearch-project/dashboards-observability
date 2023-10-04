@@ -3,17 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiPanel,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiFieldSearch,
-  EuiButtonGroup,
-  EuiIcon,
-} from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiPanel, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon } from '@elastic/eui';
+import React from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
 import prometheusSvg from '../../icons/prometheus-logo.svg';
@@ -28,8 +19,6 @@ export interface DatasourceCard {
 }
 
 export function NewDatasourceCardView() {
-  const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
-
   const Datasources: DatasourceCard[] = [
     {
       name: 'S3GLUE',
@@ -41,28 +30,11 @@ export function NewDatasourceCardView() {
     {
       name: 'PROMETHEUS',
       displayName: 'Prometheus',
-      description: 'Connect to Amazon managed Prometheus',
+      description: 'Connect to Prometheus',
       displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
       onClick: () => (window.location.hash = `#/configure/PROMETHEUS`),
     },
   ];
-
-  const toggleButtonsIcons = [
-    {
-      id: '0',
-      label: 'list',
-      iconType: 'list',
-    },
-    {
-      id: '1',
-      label: 'grid',
-      iconType: 'grid',
-    },
-  ];
-
-  const onChangeIcons = (optionId: string) => {
-    setToggleIconIdSelected(optionId);
-  };
 
   const renderRows = (datasources: DatasourceCard[]) => {
     return (

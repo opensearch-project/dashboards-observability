@@ -130,7 +130,6 @@ const runQuery = async (
   };
 
   try {
-    console.log('- Posting query');
     const http = coreRefs.http!;
     const queryId = (
       await http.post(CONSOLE_PROXY, {
@@ -149,7 +148,6 @@ const runQuery = async (
           method: 'GET',
         },
       });
-      console.log('- Poll:', poll);
       if (poll.status === 'PENDING') {
         trackProgress(1);
       } else if (poll.status === 'RUNNING') {
@@ -215,10 +213,7 @@ export function SetupIntegrationForm({
       <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
         <EuiSelect
           options={integrationConnectionSelectorItems.map((item) => {
-            const copy: { value: string; text: string; disabled?: boolean } = Object.assign(
-              {},
-              item
-            );
+            const copy: { value: string; text: string; disabled?: boolean } = { ...item };
             switch (item.value) {
               case 's3':
                 copy.disabled = !Object.hasOwn(integration.assets ?? {}, 'queries');
@@ -277,7 +272,7 @@ export function SetupBottomBar({
   loading: boolean;
   setLoading: (loading: boolean) => void;
   loadingProgress: number;
-  setProgress: (progress: number) => void;
+  setProgress: (updater: number | ((progress: number) => number)) => void;
 }) {
   const { setToast } = useToast();
 
@@ -307,9 +302,6 @@ export function SetupBottomBar({
             isLoading={loading}
             onClick={async () => {
               setLoading(true);
-              // Not sure why if I make an incrementer it doesn't change the prop,
-              // But since it doesn't, we track our progress manually.
-              let progress = loadingProgress;
 
               if (config.connectionType === 'index') {
                 await addIntegrationRequest(
@@ -321,33 +313,28 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
-                progress += 2;
-                setProgress(progress);
+                setProgress((progress) => progress + 1);
               } else if (config.connectionType === 's3') {
-                console.log('Starting S3 loading');
                 const http = coreRefs.http!;
 
-                console.log('Fetching assets');
                 const assets = await http.get(
                   `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
                 );
-                progress += 1;
-                setProgress(progress);
+                setProgress((progress) => progress + 1);
 
-                console.log('Beginning queries');
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
-                  console.log('Query:', query);
                   const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
-                  const result = await runQuery(queryStr, (step) => setProgress(progress + step));
+                  const currProgress = loadingProgress; // Need a frozen copy for getting accurate query steps
+                  const result = await runQuery(queryStr, (step) =>
+                    setProgress(currProgress + step)
+                  );
                   if (!result.ok) {
                     console.error('Query failed', result.error);
                     setLoading(false);
                     setToast('Something went wrong.', 'danger');
                     return;
                   }
-                  console.log('Query successful', result.value);
-                  progress += 3;
                 }
                 // Once everything is ready, add the integration to the new datasource as usual
                 // TODO determine actual values here after more about queries is known
@@ -360,8 +347,7 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
-                progress += 1;
-                setProgress(progress);
+                setProgress((progress) => progress + 1);
               } else {
                 console.error('Invalid data source type');
               }
@@ -412,6 +398,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [template, setTemplate] = useState({
     name: integration,
     type: '',
+    assets: {},
   } as IntegrationTemplate);
 
   const [showLoading, setShowLoading] = useState(false);

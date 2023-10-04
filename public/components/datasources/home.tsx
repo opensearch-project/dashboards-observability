@@ -5,7 +5,12 @@
 
 import React from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { ChromeBreadcrumb, ChromeStart, HttpStart } from '../../../../../src/core/public';
+import {
+  ChromeBreadcrumb,
+  ChromeStart,
+  HttpStart,
+  NotificationsStart,
+} from '../../../../../src/core/public';
 import { DataConnection } from './components/manage/data_connection';
 import { ManageDataConnectionsTable } from './components/manage/manage_data_connections_table';
 import { NewDatasource } from './components/new/new_datasource';
@@ -16,15 +21,17 @@ export interface HomeProps extends RouteComponentProps {
   parentBreadcrumb: ChromeBreadcrumb;
   http: HttpStart;
   chrome: ChromeStart;
+  notifications: NotificationsStart;
 }
 
 export const Home = (props: HomeProps) => {
-  const { http, chrome, pplService } = props;
+  const { http, chrome, pplService, notifications } = props;
 
   const commonProps = {
     http,
     chrome,
     pplService,
+    notifications,
   };
 
   return (
