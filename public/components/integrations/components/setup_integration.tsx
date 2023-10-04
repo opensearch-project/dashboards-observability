@@ -390,6 +390,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [template, setTemplate] = useState({
     name: integration,
     type: '',
+    assets: {},
   } as IntegrationTemplate);
 
   const [showLoading, setShowLoading] = useState(false);

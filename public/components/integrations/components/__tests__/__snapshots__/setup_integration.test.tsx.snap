@@ -36,6 +36,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                       }
                       integration={
                         Object {
+                          "assets": Object {},
                           "name": "sample",
                           "type": "",
                         }
@@ -695,6 +696,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
             }
             integration={
               Object {
+                "assets": Object {},
                 "name": "sample",
                 "type": "",
               }
