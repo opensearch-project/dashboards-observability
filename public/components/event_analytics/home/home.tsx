@@ -26,7 +26,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { batch, connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';
@@ -93,8 +93,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
     tabsState,
   } = props;
   const history = useHistory();
-  const dispatch = useDispatch();
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDateRange, setSelectedDateRange] = useState<string[]>(['now-15m', 'now']);
   const [savedHistories, setSavedHistories] = useState<any[]>([]);
   const [selectedHistories, setSelectedHistories] = useState<any[]>([]);
@@ -360,31 +358,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
-          <EuiPageContent className="event-home">
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <Search
-                  query={queries[RAW_QUERY]}
-                  tempQuery={searchQuery}
-                  handleQueryChange={handleQueryChange}
-                  handleQuerySearch={handleQuerySearch}
-                  handleTimePickerChange={handleTimePickerChange}
-                  handleTimeRangePickerRefresh={handleQuerySearch}
-                  pplService={pplService}
-                  dslService={dslService}
-                  startTime={selectedDateRange[0]}
-                  endTime={selectedDateRange[1]}
-                  setStartTime={() => {}}
-                  setEndTime={() => {}}
-                  showSaveButton={false}
-                  runButtonText="New Query"
-                  getSuggestions={parseGetSuggestions}
-                  onItemSelect={onItemSelect}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </EuiPageContent>
           <EuiSpacer size="m" />
           <EuiPageContent className="event-home">
             <EuiPageContentHeader>

@@ -4,7 +4,6 @@
  */
 
 import './index.scss';
-
 import { i18n } from '@osd/i18n';
 import {
   AppCategory,
@@ -39,6 +38,11 @@ import {
   observabilityIntegrationsTitle,
   observabilityIntegrationsPluginOrder,
   observabilityPluginOrder,
+  DATACONNECTIONS_BASE,
+  S3_DATASOURCE_TYPE,
+  observabilityDataConnectionsID,
+  observabilityDataConnectionsPluginOrder,
+  observabilityDataConnectionsTitle,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_object_attributes';
@@ -52,7 +56,6 @@ import { convertLegacyNotebooksUrl } from './components/notebooks/components/hel
 import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
 import { SavedObject } from '../../../src/core/public';
 import { coreRefs } from './framework/core_refs';
-
 import {
   OBSERVABILITY_EMBEDDABLE,
   OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
@@ -72,6 +75,10 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import { S3DataSource } from './framework/datasources/s3_datasource';
+import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
+import { DirectSearch } from './components/common/search/sql_search';
+import { Search } from './components/common/search/search';
 
 export class ObservabilityPlugin
   implements
@@ -121,13 +128,63 @@ export class ObservabilityPlugin
       },
     });
 
+    // Adding a variation entails associating a key-value pair, where a change in the key results in
+    // a switch of UI/services to its corresponding context. In the following cases, for an S3 datasource,
+    // selecting SQL will render SQL-specific UI components or services, while selecting PPL will
+    // render a set of UI components or services specific to PPL.
+    const openSearchLocalDataSourcePluggable = new DataSourcePluggable().addVariationSet(
+      'languages',
+      'PPL',
+      {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: Search,
+        },
+        services: {},
+      }
+    );
+
+    const s3DataSourcePluggable = new DataSourcePluggable()
+      .addVariationSet('languages', 'SQL', {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: DirectSearch,
+        },
+        services: {
+          data_fetcher: null,
+        },
+      })
+      .addVariationSet('languages', 'PPL', {
+        ui: {
+          QueryEditor: null,
+          ConfigEditor: null,
+          SidePanel: null,
+          SearchBar: DirectSearch,
+        },
+        services: {
+          data_fetcher: null,
+        },
+      });
+
+    // below datasource types is referencing:
+    // https://github.com/opensearch-project/sql/blob/feature/job-apis/core/src/main/java/org/opensearch/sql/datasource/model/DataSourceType.java
+    const dataSourcePluggables = {
+      DEFAULT_INDEX_PATTERNS: openSearchLocalDataSourcePluggable,
+      spark: s3DataSourcePluggable,
+      s3glue: s3DataSourcePluggable,
+      // prometheus: openSearchLocalDataSourcePluggable
+    };
+
     const appMountWithStartPage = (startPage: string) => async (params: AppMountParameters) => {
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
-
       return Observability(
         coreStart,
         depsStart as AppPluginStartDependencies,
@@ -137,7 +194,8 @@ export class ObservabilityPlugin
         savedObjects,
         timestampUtils,
         qm,
-        startPage
+        startPage,
+        dataSourcePluggables // just pass down for now due to time constraint, later may better expose this as context
       );
     };
 
@@ -235,13 +293,32 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public start(core: CoreStart): ObservabilityStart {
+  public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
 
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
     coreRefs.toasts = core.notifications.toasts;
+    coreRefs.chrome = core.chrome;
+    coreRefs.dataSources = startDeps.data.dataSources;
+    coreRefs.application = core.application;
+
+    const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
+
+    // register all s3 datasources
+    dataSourceFactory.registerDataSourceType(S3_DATASOURCE_TYPE, S3DataSource);
+    core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
+      s3DataSources.map((s3ds) => {
+        dataSourceService.registerDataSource(
+          dataSourceFactory.getDataSourceInstance(S3_DATASOURCE_TYPE, {
+            name: s3ds.name,
+            type: s3ds.connector.toLowerCase(),
+            metadata: s3ds,
+          })
+        );
+      });
+    });
 
     return {};
   }

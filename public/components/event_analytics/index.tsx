@@ -93,9 +93,9 @@ export const EventAnalytics = ({
                     timestampUtils={timestampUtils}
                     http={http}
                     setToast={setToast}
-                    getExistingEmptyTab={getExistingEmptyTab}
                     notifications={notifications}
                     queryManager={queryManager}
+                    dataSourcePluggables={props.dataSourcePluggables}
                   />
                 </LogExplorerRouterContext.Provider>
               );
@@ -120,7 +120,7 @@ export const EventAnalytics = ({
                   dslService={dslService}
                   pplService={pplService}
                   setToast={setToast}
-                  getExistingEmptyTab={getExistingEmptyTab}
+                  dataSourcePluggables={props.dataSourcePluggables}
                 />
               );
             }}
