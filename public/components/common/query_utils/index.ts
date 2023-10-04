@@ -199,9 +199,8 @@ export const preprocessQuery = ({
 
   if (isEmpty(tokens)) return finalQuery;
 
-  finalQuery = `${tokens![1]}=${
-    tokens![2]
-  } | where ${timeField} >= '${start}' and ${timeField} <= '${end}'`;
+  finalQuery = `${tokens![1]}=${tokens![2]
+    } | where ${timeField} >= '${start}' and ${timeField} <= '${end}'`;
 
   if (whereClause) {
     finalQuery += ` AND ${whereClause}`;
