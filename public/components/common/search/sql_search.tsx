@@ -16,10 +16,9 @@ import {
   EuiButtonEmpty,
   EuiPopoverFooter,
   EuiBadge,
-  EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut,
   EuiComboBox,
+  EuiTextArea,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
@@ -28,17 +27,15 @@ import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { PPLReferenceFlyout } from '../helpers';
 import { uiSettingsService } from '../../../../common/utils';
 import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { SQLService } from '../../../services/requests/sql';
+import { usePolling } from '../../../components/hooks/use_polling';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
-import { usePolling } from '../../../components/hooks/use_polling';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -58,7 +55,7 @@ export interface IDatePickerProps {
   handleTimeRangePickerRefresh: () => any;
 }
 
-export const Search = (props: any) => {
+export const DirectSearch = (props: any) => {
   const {
     query,
     tempQuery,
@@ -152,16 +149,6 @@ export const Search = (props: any) => {
     </EuiButton>
   );
 
-  const liveButton = (
-    <LiveTailButton
-      isLiveTailOn={isLiveTailOn}
-      setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-      liveTailName={liveTailName}
-      isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-      dataTestSubj="eventLiveTail"
-    />
-  );
-
   const handleQueryLanguageChange = (lang) => {
     if (lang[0].label === 'DQL') {
       return application.navigateToUrl(
@@ -178,33 +165,63 @@ export const Search = (props: any) => {
   };
 
   const onQuerySearch = (lang) => {
-    handleTimeRangePickerRefresh();
+    setIsQueryRunning(true);
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: {
+          isPolling: true,
+        },
+      })
+    );
+    sqlService
+      .fetch({
+        lang: lowerCase(lang[0].label),
+        query: tempQuery || query,
+        datasource: explorerSearchMetadata.datasources[0].name,
+      })
+      .then((result) => {
+        if (result.queryId) {
+          setJobId(result.queryId);
+          startPolling({
+            queryId: result.queryId,
+          });
+        } else {
+          console.log('no query id found in response');
+        }
+      })
+      .catch((e) => {
+        setIsQueryRunning(false);
+        console.error(e);
+      })
+      .finally(() => {});
   };
 
   useEffect(() => {
+    // cancel direct query
     if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
-      // update page with data
-      dispatchOnGettingHis(pollingResult, '');
       // stop polling
       stopPolling();
       setIsQueryRunning(false);
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            isPolling: false,
+          },
+        })
+      );
+      // update page with data
+      dispatchOnGettingHis(pollingResult, '');
     }
   }, [pollingResult, pollingError]);
 
   useEffect(() => {
-    if (explorerSearchMetadata.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS') {
-      const queryWithSelectedSource = `source = ${explorerSearchMetadata.datasources[0].label}`;
-      handleQueryChange(queryWithSelectedSource);
-      dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [RAW_QUERY]: queryWithSelectedSource,
-          },
-        })
-      );
+    if (explorerSearchMetadata.isPolling === false) {
+      stopPolling();
+      setIsQueryRunning(false);
     }
-  }, [explorerSearchMetadata.datasources]);
+  }, [explorerSearchMetadata.isPolling]);
 
   return (
     <div className="globalQueryBar">
@@ -221,7 +238,7 @@ export const Search = (props: any) => {
         <EuiFlexItem key="lang-selector" className="search-area" grow={1}>
           <EuiComboBox
             placeholder="No language selected yet"
-            options={[{ label: 'PPL' }, { label: 'DQL' }]}
+            options={[{ label: 'SQL' }, { label: 'PPL' }]}
             selectedOptions={queryLang}
             onChange={handleQueryLanguageChange}
             singleSelection={{ asPlainText: true }}
@@ -241,54 +258,34 @@ export const Search = (props: any) => {
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
             tabId={tabId}
+            isSuggestionDisabled={queryLang[0]?.label === 'SQL'}
           />
-          <EuiBadge
-            className={`ppl-link ${
-              uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
-            }`}
-            data-click-metric-element="common.search.ppl_reference"
-            color="hollow"
-            onClick={() => showFlyout()}
-            onClickAriaLabel={'pplLinkShowFlyout'}
-          >
-            PPL
-          </EuiBadge>
+          {queryLang[0]?.label && (
+            <EuiBadge
+              className={`ppl-link ${
+                uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+              }`}
+              color="hollow"
+              onClick={() => showFlyout()}
+              onClickAriaLabel={'pplLinkShowFlyout'}
+            >
+              PPL
+            </EuiBadge>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false} />
         <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-          {!isLiveTailOn && (
-            <DatePicker
-              startTime={startTime}
-              endTime={endTime}
-              setStartTime={setStartTime}
-              setEndTime={setEndTime}
-              setIsOutputStale={setIsOutputStale}
-              liveStreamChecked={props.liveStreamChecked}
-              onLiveStreamChange={props.onLiveStreamChange}
-              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              handleTimeRangePickerRefresh={() => {
-                onQuerySearch(queryLang);
-              }}
-            />
-          )}
+          <EuiButton
+            color="success"
+            onClick={() => {
+              onQuerySearch(queryLang);
+            }}
+            fill
+          >
+            Search
+          </EuiButton>
         </EuiFlexItem>
-        {showSaveButton && !showSavePanelOptionsList && (
-          <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
-            <EuiPopover
-              panelPaddingSize="none"
-              button={liveButton}
-              isOpen={isLiveTailPopoverOpen}
-              closePopover={closeLiveTailPopover}
-            >
-              <EuiContextMenuPanel items={popoverItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-        {isLiveTailOn && (
-          <EuiFlexItem grow={false}>
-            <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
-          </EuiFlexItem>
-        )}
+
         {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
           <>
             <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">

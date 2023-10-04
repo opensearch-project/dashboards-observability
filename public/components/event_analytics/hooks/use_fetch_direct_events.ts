@@ -28,7 +28,7 @@ interface IFetchEventsParams {
   requestParams: { tabId: string };
 }
 
-export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams) => {
+export const useFetchDirectEvents = ({ pplService, requestParams }: IFetchEventsParams) => {
   const dispatch = useDispatch();
   const [isEventsLoading, setIsEventsLoading] = useState(false);
   const queries = useSelector(selectQueries);
@@ -88,7 +88,9 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
 
   const dispatchOnGettingHis = (res: any, query: string) => {
     const processedRes = addSchemaRowMapping(res);
-    setResponse(processedRes);
+    const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
+      (field: IField) => field.name
+    );
     batch(() => {
       dispatch(
         queryResultReset({
@@ -192,22 +194,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
 
   const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
     if (isEmpty(query)) return;
-    const cur = queriesRef.current;
-    const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
-    fetchEvents(
-      { query: searchQuery },
-      'jdbc',
-      (res: any) => {
-        if (!isEmpty(res.jsonData)) {
-          return dispatchOnGettingHis(res, searchQuery);
-        } else if (!isEmpty(res.data?.resp)) {
-          return dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
-        }
-        // when no hits and needs to get available fields to override default timestamp
-        dispatchOnNoHis(res);
-      },
-      errorHandler
-    );
+    return dispatchOnGettingHis(res, '');
   };
 
   const getAvailableFields = (query: string) => {
@@ -237,6 +224,5 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     getEvents,
     getAvailableFields,
     fetchEvents,
-    dispatchOnGettingHis,
   };
 };
