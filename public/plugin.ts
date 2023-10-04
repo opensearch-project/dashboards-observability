@@ -77,7 +77,7 @@ import {
 } from './types';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
-import { SQLSearch } from './components/common/search/sql_search';
+import { DirectSearch } from './components/common/search/sql_search';
 import { Search } from './components/common/search/search';
 
 export class ObservabilityPlugin
@@ -152,7 +152,7 @@ export class ObservabilityPlugin
           QueryEditor: null,
           ConfigEditor: null,
           SidePanel: null,
-          SearchBar: SQLSearch,
+          SearchBar: DirectSearch,
         },
         services: {
           data_fetcher: null,
@@ -163,7 +163,7 @@ export class ObservabilityPlugin
           QueryEditor: null,
           ConfigEditor: null,
           SidePanel: null,
-          SearchBar: Search,
+          SearchBar: DirectSearch,
         },
         services: {
           data_fetcher: null,

@@ -180,7 +180,7 @@ export const Explorer = ({
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const explorerVisualizations = useSelector(selectExplorerVisualization)[tabId];
   const userVizConfigs = useSelector(selectVisualizationConfig)[tabId] || {};
-  const explorerMeta = useSelector(selectSearchMetaData)[tabId];
+  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
   const [selectedContentTabId, setSelectedContentTab] = useState(TAB_EVENT_ID);
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
@@ -202,12 +202,13 @@ export const Explorer = ({
   const [isQueryRunning, setIsQueryRunning] = useState(false);
   const currentPluggable = useMemo(() => {
     return (
-      dataSourcePluggables[explorerMeta.datasources[0]?.type] ||
+      dataSourcePluggables[explorerSearchMeta.datasources[0]?.type] ||
       dataSourcePluggables.DEFAULT_INDEX_PATTERNS
     );
-  }, [explorerMeta.datasources]);
+  }, [explorerSearchMeta.datasources]);
   const { ui } =
-    currentPluggable?.getComponentSetForVariation('languages', explorerMeta.lang || 'SQL') || {};
+    currentPluggable?.getComponentSetForVariation('languages', explorerSearchMeta.lang || 'SQL') ||
+    {};
   const SearchBar = ui?.SearchBar || Search;
 
   const selectedIntervalRef = useRef<{
@@ -633,7 +634,7 @@ export const Explorer = ({
   };
 
   const explorerVis = useMemo(() => {
-    return explorerMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ? (
+    return explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ? (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -656,7 +657,7 @@ export const Explorer = ({
     explorerVisualizations,
     explorerData,
     visualizations,
-    explorerMeta.datasources,
+    explorerSearchMeta.datasources,
   ]);
 
   const contentTabs = [
@@ -980,8 +981,8 @@ export const Explorer = ({
               http={http}
               setIsQueryRunning={setIsQueryRunning}
             />
-            {isQueryRunning ? (
-              <DirectQueryRunning />
+            {explorerSearchMeta.isPolling ? (
+              <DirectQueryRunning tabId={tabId} />
             ) : (
               <EuiTabbedContent
                 className="mainContentTabs"

@@ -11,6 +11,7 @@ const initialState = {
   [initialTabId]: {
     lang: 'PPL',
     datasources: [],
+    isPolling: false,
   },
 };
 

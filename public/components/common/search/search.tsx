@@ -102,7 +102,7 @@ export const Search = (props: any) => {
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [queryLang, setQueryLang] = useState([{ label: explorerSearchMetadata.lang }]);
+  const [queryLang, setQueryLang] = useState([]);
   const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
@@ -177,35 +177,7 @@ export const Search = (props: any) => {
   };
 
   const onQuerySearch = (lang) => {
-    if (
-      lang[0].label === 'PPL' &&
-      explorerSearchMetadata.datasources[0].ds.getType() === 'DEFAULT_INDEX_PATTERNS'
-    )
-      return handleTimeRangePickerRefresh();
-
-    setIsQueryRunning(true);
-
-    sqlService
-      .fetch({
-        lang: lowerCase(lang[0].label),
-        query: tempQuery,
-        datasource: explorerSearchMetadata.datasources[0].name,
-      })
-      .then((result) => {
-        if (result.queryId) {
-          setJobId(result.queryId);
-          startPolling({
-            queryId: result.queryId,
-          });
-        } else {
-          console.log('no query id found in response');
-        }
-      })
-      .catch((e) => {
-        setIsQueryRunning(false);
-        console.error(e);
-      })
-      .finally(() => {});
+    handleTimeRangePickerRefresh();
   };
 
   useEffect(() => {
@@ -248,7 +220,7 @@ export const Search = (props: any) => {
         <EuiFlexItem key="lang-selector" className="search-area" grow={1}>
           <EuiComboBox
             placeholder="No language selected yet"
-            options={[{ label: 'SQL' }, { label: 'PPL' }, { label: 'DQL' }]}
+            options={[{ label: 'PPL' }, { label: 'DQL' }]}
             selectedOptions={queryLang}
             onChange={handleQueryLanguageChange}
             singleSelection={{ asPlainText: true }}
