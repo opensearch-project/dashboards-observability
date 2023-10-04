@@ -12,6 +12,17 @@ type ValidationResult = { ok: true } | { ok: false; errors: string[] };
 export interface IntegrationTemplate {
   name: string;
   type: string;
+  assets: {
+    savedObjects?: {
+      name: string;
+      version: string;
+    };
+    queries?: Array<{
+      name: string;
+      version: string;
+      language: string;
+    }>;
+  };
 }
 
 export const doTypeValidation = (

@@ -2,26 +2,7 @@
 
 exports[`Integration Setup Page Renders integration setup page as expected 1`] = `
 <SetupIntegrationPage
-  integration={
-    Object {
-      "assets": Object {
-        "savedObjects": Object {
-          "name": "sample",
-          "version": "1.0.1",
-        },
-      },
-      "components": Array [
-        Object {
-          "name": "logs",
-          "version": "1.0.0",
-        },
-      ],
-      "license": "Apache-2.0",
-      "name": "sample",
-      "type": "logs",
-      "version": "2.0.0",
-    }
-  }
+  integration="sample"
 >
   <EuiPage>
     <div
@@ -55,22 +36,9 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                       }
                       integration={
                         Object {
-                          "assets": Object {
-                            "savedObjects": Object {
-                              "name": "sample",
-                              "version": "1.0.1",
-                            },
-                          },
-                          "components": Array [
-                            Object {
-                              "name": "logs",
-                              "version": "1.0.0",
-                            },
-                          ],
-                          "license": "Apache-2.0",
+                          "assets": Object {},
                           "name": "sample",
-                          "type": "logs",
-                          "version": "2.0.0",
+                          "type": "",
                         }
                       }
                       updateConfig={[Function]}
@@ -232,10 +200,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   options={
                                     Array [
                                       Object {
+                                        "disabled": true,
                                         "text": "S3 Connection",
                                         "value": "s3",
                                       },
                                       Object {
+                                        "disabled": true,
                                         "text": "OpenSearch Index",
                                         "value": "index",
                                       },
@@ -273,12 +243,14 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             value="index"
                                           >
                                             <option
+                                              disabled={true}
                                               key="0"
                                               value="s3"
                                             >
                                               S3 Connection
                                             </option>
                                             <option
+                                              disabled={true}
                                               key="1"
                                               value="index"
                                             >
@@ -724,24 +696,15 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
             }
             integration={
               Object {
-                "assets": Object {
-                  "savedObjects": Object {
-                    "name": "sample",
-                    "version": "1.0.1",
-                  },
-                },
-                "components": Array [
-                  Object {
-                    "name": "logs",
-                    "version": "1.0.0",
-                  },
-                ],
-                "license": "Apache-2.0",
+                "assets": Object {},
                 "name": "sample",
-                "type": "logs",
-                "version": "2.0.0",
+                "type": "",
               }
             }
+            loading={false}
+            loadingProgress={0}
+            setLoading={[Function]}
+            setProgress={[Function]}
           >
             <EuiBottomBar>
               <EuiPortal>
@@ -1243,10 +1206,12 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               options={
                 Array [
                   Object {
+                    "disabled": true,
                     "text": "S3 Connection",
                     "value": "s3",
                   },
                   Object {
+                    "disabled": false,
                     "text": "OpenSearch Index",
                     "value": "index",
                   },
@@ -1284,12 +1249,14 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                         value="index"
                       >
                         <option
+                          disabled={true}
                           key="0"
                           value="s3"
                         >
                           S3 Connection
                         </option>
                         <option
+                          disabled={false}
                           key="1"
                           value="index"
                         >
