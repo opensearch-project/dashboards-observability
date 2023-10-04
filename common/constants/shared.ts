@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import CSS from 'csstype';
-import { IField } from '../../common/types/explorer';
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -62,6 +61,8 @@ export const observabilityIntegrationsPluginOrder = 9020;
 export const observabilityDataConnectionsID = 'datasources';
 export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
+
+export const queryWorkbenchPluginID = 'opensearch-query-workbench';
 
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
