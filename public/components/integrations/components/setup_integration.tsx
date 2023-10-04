@@ -261,7 +261,7 @@ export function SetupBottomBar({
   loading: boolean;
   setLoading: (loading: boolean) => void;
   loadingProgress: number;
-  setProgress: (progress: number) => void;
+  setProgress: (updater: number | ((progress: number) => void)) => void;
 }) {
   const { setToast } = useToast();
 
@@ -291,9 +291,6 @@ export function SetupBottomBar({
             isLoading={loading}
             onClick={async () => {
               setLoading(true);
-              // Not sure why if I make an incrementer it doesn't change the prop,
-              // But since it doesn't, we track our progress manually.
-              let progress = loadingProgress;
 
               if (config.connectionType === 'index') {
                 await addIntegrationRequest(
@@ -305,28 +302,28 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
-                progress += 2;
-                setProgress(progress);
+                setProgress((progress) => progress + 1);
               } else if (config.connectionType === 's3') {
                 const http = coreRefs.http!;
 
                 const assets = await http.get(
                   `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
                 );
-                progress += 1;
-                setProgress(progress);
+                setProgress((progress) => progress + 1);
 
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
                   const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
-                  const result = await runQuery(queryStr, (step) => setProgress(progress + step));
+                  const currProgress = loadingProgress; // Need a frozen copy for getting accurate query steps
+                  const result = await runQuery(queryStr, (step) =>
+                    setProgress(currProgress + step)
+                  );
                   if (!result.ok) {
                     console.error('Query failed', result.error);
                     setLoading(false);
                     setToast('Something went wrong.', 'danger');
                     return;
                   }
-                  progress += 3;
                 }
                 // Once everything is ready, add the integration to the new datasource as usual
                 // TODO determine actual values here after more about queries is known
@@ -339,8 +336,7 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
-                progress += 1;
-                setProgress(progress);
+                setProgress((progress) => progress + 1);
               } else {
                 console.error('Invalid data source type');
               }
