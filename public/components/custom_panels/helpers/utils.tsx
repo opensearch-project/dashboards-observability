@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import _ from 'lodash';
@@ -12,7 +11,6 @@ import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
-  PPL_DATE_FORMAT,
   PPL_INDEX_REGEX,
   PPL_WHERE_CLAUSE_REGEX,
 } from '../../../../common/constants/shared';
@@ -30,12 +28,12 @@ import { SavedObjectsActions } from '../../../services/saved_objects/saved_objec
 import { ObservabilitySavedVisualization } from '../../../services/saved_objects/saved_object_client/types';
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
+import { convertDateTime } from '../../common/query_utils';
 
 /*
  * "Utils" This file contains different reused functions in Observability Dashboards
  *
  * isNameValid - Validates string to length > 0 and < 50
- * convertDateTime - Converts input datetime string to required format
  * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
  * getQueryResponse - Get response of PPL query to load visualizations
  * renderSavedVisualization - Fetches savedVisualization by Id and runs getQueryResponse
@@ -48,19 +46,6 @@ import { Visualization } from '../../visualizations/visualization';
 // Name validation 0>Name<=50
 export const isNameValid = (name: string) => {
   return name.length >= 50 || name.length === 0 ? false : true;
-};
-
-// DateTime convertor to required format
-export const convertDateTime = (datetime: string, isStart = true, formatted = true) => {
-  let returnTime: undefined | Moment;
-  if (isStart) {
-    returnTime = dateMath.parse(datetime);
-  } else {
-    returnTime = dateMath.parse(datetime, { roundUp: true });
-  }
-
-  if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
-  return returnTime;
 };
 
 // Merges new layout into visualizations

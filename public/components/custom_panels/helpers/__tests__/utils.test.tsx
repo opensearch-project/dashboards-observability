@@ -20,7 +20,6 @@ import {
   sampleSavedVisualizationForLine,
 } from '../../../../../test/panels_constants';
 import {
-  convertDateTime,
   displayVisualization,
   isDateValid,
   isNameValid,
@@ -28,6 +27,7 @@ import {
   mergeLayoutAndVisualizations,
   onTimeChange,
 } from '../utils';
+import { convertDateTime } from '../../../common/query_utils';
 
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
