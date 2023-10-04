@@ -6,6 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
 import { isEmpty } from 'lodash';
+import moment from 'moment';
 import {
   DATE_PICKER_FORMAT,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
