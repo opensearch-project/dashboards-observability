@@ -30,6 +30,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                       config={
                         Object {
                           "connectionDataSource": "",
+                          "connectionLocation": "",
                           "connectionType": "index",
                           "displayName": "sample Integration",
                         }
@@ -109,6 +110,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
+                                  placeholder="sample Integration"
                                   value="sample Integration"
                                 >
                                   <EuiFormControlLayout
@@ -128,6 +130,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                             onBlur={[Function]}
                                             onChange={[Function]}
                                             onFocus={[Function]}
+                                            placeholder="sample Integration"
                                             type="text"
                                             value="sample Integration"
                                           />
@@ -690,6 +693,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
             config={
               Object {
                 "connectionDataSource": "",
+                "connectionLocation": "",
                 "connectionType": "index",
                 "displayName": "sample Integration",
               }
@@ -1115,6 +1119,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               onBlur={[Function]}
               onChange={[Function]}
               onFocus={[Function]}
+              placeholder="sample Integration"
               value="Test Instance Name"
             >
               <EuiFormControlLayout
@@ -1134,6 +1139,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
+                        placeholder="sample Integration"
                         type="text"
                         value="Test Instance Name"
                       />
