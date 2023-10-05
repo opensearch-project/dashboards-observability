@@ -29,6 +29,7 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
+import dateMath from '@elastic/datemath';
 
 /*
  * "Utils" This file contains different reused functions in Observability Dashboards
