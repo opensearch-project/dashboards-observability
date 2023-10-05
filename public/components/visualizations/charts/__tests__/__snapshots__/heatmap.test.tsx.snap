@@ -6,7 +6,7 @@ exports[`Heatmap component Renders heatmap component 1`] = `
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -703,7 +703,7 @@ exports[`Heatmap component Renders heatmap component 1`] = `
     layout={
       Object {
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "height": 220,
         "margin": Object {
@@ -756,7 +756,7 @@ exports[`Heatmap component Renders heatmap component 1`] = `
           "autosize": true,
           "barmode": "stack",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "height": 220,
           "hovermode": "closest",

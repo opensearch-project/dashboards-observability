@@ -3,33 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.dscIndexPattern__container {
+.explorerIndexPattern__container {
   display: flex;
   align-items: center;
   height: $euiSize * 3;
   margin-top: -$euiSizeS;
 }
 
-.dscIndexPattern__triggerButton {
+.explorerIndexPattern__triggerButton {
   @include euiTitle('xs');
   line-height: $euiSizeXXL;
 }
 
-.dscFieldList {
+.explorerFieldList {
   list-style: none;
   margin-bottom: 0;
 }
 
-.dscFieldListHeader {
+.explorerFieldListHeader {
   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
-.dscFieldList--popular {
+.explorerFieldList--popular {
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
-.dscFieldChooser__toggle {
+.explorerFieldChooser__toggle {
   color: $euiColorMediumShade;
   margin-left: $euiSizeS !important;
 }
@@ -38,7 +38,7 @@
  * 1. Only visually hide the action, so that it's still accessible to screen readers.
  * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
  */
-.dscSidebarItem__action {
+.explorerSidebarItem__action {
   opacity: 0; /* 1 */
   transition: none;
 
@@ -54,31 +54,31 @@
   }
 }
 
-.dscFieldSearch {
+.explorerFieldSearch {
   padding: $euiSizeS;
 }
 
-.dscFieldSearch__toggleButton {
+.explorerFieldSearch__toggleButton {
   width: calc(100% - #{$euiSizeS});
   color: $euiColorPrimary;
   padding-left: $euiSizeXS;
   margin-left: $euiSizeXS;
 }
 
-.dscFieldSearch__filterWrapper {
+.explorerFieldSearch__filterWrapper {
   flex-grow: 0;
 }
 
-.dscFieldSearch__formWrapper {
+.explorerFieldSearch__formWrapper {
   padding: $euiSizeM;
 }
 
-.dscFieldDetails {
+.explorerFieldDetails {
   color: $euiTextColor;
   margin-bottom: $euiSizeS;
 }
 
-.dscSidebarItem__fieldPopoverPanel {
+.explorerSidebarItem__fieldPopoverPanel {
   min-width: 300px;
   max-width: 600px;
   max-height: 600px;
@@ -123,4 +123,9 @@
 
 .ws__configPanel--right{
   overflow-y: unset;
+}
+
+.sidebar_content{
+  white-space: nowrap;
+  padding: 0.1px;
 }

@@ -18,7 +18,6 @@ import {
   EuiBadge,
   EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut,
   EuiComboBox,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';

@@ -23,7 +23,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
@@ -34,10 +33,8 @@ import {
   EVENT_ANALYTICS_DOCUMENTATION_URL,
   NEW_TAB,
   RAW_QUERY,
-  REDIRECT_TAB,
   SELECTED_DATE_RANGE,
   TAB_CREATED_TYPE,
-  TAB_ID_TXT_PFX,
 } from '../../../../common/constants/explorer';
 import {
   EVENT_ANALYTICS,
@@ -56,11 +53,9 @@ import { getSampleDataModal } from '../../common/helpers/add_sample_modal';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
 import { Search } from '../../common/search/search';
-import { init as initFields } from '../redux/slices/field_slice';
-import { init as initPatterns } from '../redux/slices/patterns_slice';
-import { init as initQueryResult, selectQueryResult } from '../redux/slices/query_result_slice';
-import { changeQuery, init as initQuery, selectQueries } from '../redux/slices/query_slice';
-import { addTab, selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
+import { selectQueryResult } from '../redux/slices/query_result_slice';
+import { changeQuery, selectQueries } from '../redux/slices/query_slice';
+import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
 import { SavedQueryTable } from './saved_objects_table';
 
 interface IHomeProps {
@@ -84,7 +79,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
   const {
     pplService,
     dslService,
-    savedObjects,
     setToast,
     getExistingEmptyTab,
     http,
@@ -144,22 +138,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       });
   };
 
-  const addNewTab = async () => {
-    // get a new tabId
-    const tabId = htmlIdGenerator(TAB_ID_TXT_PFX)();
-
-    // create a new tab
-    await batch(() => {
-      dispatch(initQuery({ tabId }));
-      dispatch(initQueryResult({ tabId }));
-      dispatch(initFields({ tabId }));
-      dispatch(addTab({ tabId }));
-      dispatch(initPatterns({ tabId }));
-    });
-
-    return tabId;
-  };
-
   useEffect(() => {
     fetchHistories();
   }, []);
@@ -186,10 +164,9 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       queries,
       explorerData,
     });
-    const newTabId = emptyTabId ? emptyTabId : await addNewTab();
 
     // update this new tab with data
-    await dispatchInitialData(newTabId);
+    await dispatchInitialData(emptyTabId);
 
     // redirect to explorer
     history.push('/explorer');
@@ -198,28 +175,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
   const handleQueryChange = async (query: string) => setSearchQuery(query);
 
   const handleTimePickerChange = async (timeRange: string[]) => setSelectedDateRange(timeRange);
-
-  const handleHistoryClick = async (objectId: string) => {
-    const emptyTabId = getExistingEmptyTab({
-      tabIds: tabsState.queryTabIds,
-      queries,
-      explorerData,
-    });
-    const newTabId = emptyTabId ? emptyTabId : await addNewTab();
-    batch(() => {
-      dispatch(
-        changeQuery({
-          tabId: newTabId,
-          query: {
-            [TAB_CREATED_TYPE]: REDIRECT_TAB,
-          },
-        })
-      );
-      dispatch(setSelectedQueryTab({ tabId: newTabId }));
-    });
-    // redirect to explorer
-    history.push(`/explorer/${objectId}`);
-  };
 
   const addSampledata = async () => {
     setModalLayout(
@@ -404,7 +359,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                 {savedHistories.length > 0 ? (
                   <SavedQueryTable
                     savedHistories={savedHistories}
-                    handleHistoryClick={handleHistoryClick}
                     isTableLoading={isTableLoading}
                     handleSelectHistory={setSelectedHistories}
                     selectedHistories={selectedHistories}

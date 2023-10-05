@@ -51,11 +51,15 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-
       - name: Plugin Bootstrap
-        run: |
-          cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn osd bootstrap
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 20
+          max_attempts: 2
+          command: |
+            cd OpenSearch-Dashboards
+            yarn config set network-timeout 1000000 -g
+            yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |

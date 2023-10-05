@@ -7,10 +7,13 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { ThresholdUnitType } from '../../public/components/event_analytics/explorer/visualizations/config_panel/config_panes/config_controls/config_thresholds';
 import { VIS_CHART_TYPES } from './shared';
 
+// URLs
 export const EVENT_ANALYTICS_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/observability-plugin/event-analytics/';
 export const OPEN_TELEMETRY_LOG_CORRELATION_LINK =
   'https://opentelemetry.io/docs/reference/specification/logs/overview/#log-correlation';
+export const LOG_EXPLORER_BASE_PATH = 'observability-logs#/explorer/';
+
 export const RAW_QUERY = 'rawQuery';
 export const FINAL_QUERY = 'finalQuery';
 export const SELECTED_DATE_RANGE = 'selectedDateRange';
@@ -50,6 +53,8 @@ export const DEFAULT_COLUMNS = ['', 'Time', '_source'];
 export const OTEL_TRACE_ID = 'traceId';
 export const JAEGER_TRACE_ID = 'traceID';
 export const DATE_PICKER_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+export const DATE_DISPLAY_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+export const DEFAULT_DATETIME_STRING = 'now';
 export const TIME_INTERVAL_OPTIONS = [
   {
     text: 'Minute',
@@ -319,4 +324,24 @@ export const sampleLogPatternData = {
 export const TYPE_TAB_MAPPING = {
   [SAVED_QUERY]: TAB_EVENT_ID,
   [SAVED_VISUALIZATION]: TAB_CHART_ID,
+};
+
+export const DEFAULT_EMPTY_EXPLORER_FIELDS = [
+  { name: 'timestamp', type: 'timestamp' },
+  { name: '_source', type: 'string' },
+];
+
+export const DEFAULT_TIMESTAMP_COLUMN = {
+  id: 'timestamp',
+  isSortable: true,
+  display: 'Time',
+  schema: 'datetime',
+  initialWidth: 200,
+};
+
+export const DEFAULT_SOURCE_COLUMN = {
+  id: '_source',
+  isSortable: false,
+  display: 'Source',
+  schema: '_source',
 };

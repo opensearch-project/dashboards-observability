@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Manage Data Connections Description test Renders manage data connections description 1`] = `
+<Component
+  refresh={[Function]}
+>
+  <div>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiTitle
+              size="s"
+            >
+              <h2
+                className="euiTitle euiTitle--small"
+              >
+                Manage existing data sources
+              </h2>
+            </EuiTitle>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
+            <EuiText
+              color="subdued"
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <EuiTextColor
+                  color="subdued"
+                  component="div"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--subdued"
+                  >
+                    Manage already created data sources or
+                     
+                    <EuiLink
+                      href="#/new"
+                    >
+                      <a
+                        className="euiLink euiLink--primary"
+                        href="#/new"
+                        rel="noreferrer"
+                      >
+                        create a new data source
+                      </a>
+                    </EuiLink>
+                  </div>
+                </EuiTextColor>
+              </div>
+            </EuiText>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiButton
+              iconType="refresh"
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                disabled={false}
+                element="button"
+                iconType="refresh"
+                isDisabled={false}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--primary"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="refresh"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="refresh"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Refresh
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      size="full"
+    >
+      <hr
+        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+      />
+    </EuiHorizontalRule>
+  </div>
+</Component>
+`;

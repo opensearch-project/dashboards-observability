@@ -7,19 +7,18 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText, EuiSelect } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import moment from 'moment';
+import datemath from '@elastic/datemath';
+import {
+  DATE_DISPLAY_FORMAT,
+  DEFAULT_DATETIME_STRING,
+} from '../../../../../common/constants/explorer';
+
+function reformatDate(inputDate: string | undefined) {
+  return moment(datemath.parse(inputDate ?? DEFAULT_DATETIME_STRING)).format(DATE_DISPLAY_FORMAT);
+}
 
 export interface TimechartHeaderProps {
-  /**
-   * Format of date to be displayed
-   */
-  dateFormat?: string;
-  /**
-   * Range of dates to be displayed
-   */
-  timeRange?: {
-    from: string;
-    to: string;
-  };
   /**
    * Interval Options
    */
@@ -32,14 +31,20 @@ export interface TimechartHeaderProps {
    * selected interval
    */
   stateInterval?: string | undefined;
+  /**
+   * current time span being displayed on the count distribution
+   */
+  startTime?: string;
+  endTime?: string;
 }
 
 export function TimechartHeader({
   options,
   onChangeInterval,
   stateInterval,
+  startTime,
+  endTime,
 }: TimechartHeaderProps) {
-
   const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChangeInterval(e.target.value);
   };
@@ -54,7 +59,9 @@ export function TimechartHeader({
             })}
             delay="long"
           >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s"></EuiText>
+            <EuiText data-test-subj="discoverIntervalDateRange" size="s">
+              {reformatDate(startTime) + ' - ' + reformatDate(endTime)}
+            </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -21,7 +21,7 @@ exports[`Field component Renders a sidebar field 1`] = `
     anchorPosition="rightUp"
     button={
       <FieldButton
-        className="shard__fieldSelectorField explorer__fieldSelectorField"
+        className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
         dataTestSubj="field-agent-showDetails"
         fieldAction={
           <React.Fragment>
@@ -34,7 +34,7 @@ exports[`Field component Renders a sidebar field 1`] = `
               <React.Fragment>
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  className="dscSidebarItem__action"
+                  className="explorerSidebarItem__action"
                   color="text"
                   data-test-subj="eventExplorer__overrideDefaultPattern"
                   iconType="inputOutput"
@@ -61,11 +61,15 @@ exports[`Field component Renders a sidebar field 1`] = `
               <React.Fragment>
                 <EuiButtonIcon
                   aria-label="Remove agent from table"
-                  className="dscSidebarItem__action"
+                  className="explorerSidebarItem__action"
                   color="danger"
                   data-test-subj="fieldToggle-agent"
                   iconType="cross"
                   onClick={[Function]}
+                />
+                <EuiButtonIcon
+                  iconType="inspect"
+                  size="xs"
                 />
               </React.Fragment>
             </EuiToolTip>
@@ -82,12 +86,16 @@ exports[`Field component Renders a sidebar field 1`] = `
             data-test-subj="field-agent"
             title="agent"
           >
-            agent
+            <EuiText
+              size="xs"
+            >
+              agent
+            </EuiText>
           </span>
         }
         isActive={false}
         onClick={[Function]}
-        size="m"
+        size="s"
       />
     }
     closePopover={[Function]}
@@ -95,7 +103,7 @@ exports[`Field component Renders a sidebar field 1`] = `
     hasArrow={true}
     isOpen={false}
     ownFocus={true}
-    panelClassName="dscSidebarItem__fieldPopoverPanel"
+    panelClassName="explorerSidebarItem__fieldPopoverPanel"
     panelPaddingSize="m"
   >
     <div
@@ -105,7 +113,7 @@ exports[`Field component Renders a sidebar field 1`] = `
         className="euiPopover__anchor"
       >
         <FieldButton
-          className="shard__fieldSelectorField explorer__fieldSelectorField"
+          className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
           dataTestSubj="field-agent-showDetails"
           fieldAction={
             <React.Fragment>
@@ -118,7 +126,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 <React.Fragment>
                   <EuiButtonIcon
                     aria-labelledby="override_pattern"
-                    className="dscSidebarItem__action"
+                    className="explorerSidebarItem__action"
                     color="text"
                     data-test-subj="eventExplorer__overrideDefaultPattern"
                     iconType="inputOutput"
@@ -145,11 +153,15 @@ exports[`Field component Renders a sidebar field 1`] = `
                 <React.Fragment>
                   <EuiButtonIcon
                     aria-label="Remove agent from table"
-                    className="dscSidebarItem__action"
+                    className="explorerSidebarItem__action"
                     color="danger"
                     data-test-subj="fieldToggle-agent"
                     iconType="cross"
                     onClick={[Function]}
+                  />
+                  <EuiButtonIcon
+                    iconType="inspect"
+                    size="xs"
                   />
                 </React.Fragment>
               </EuiToolTip>
@@ -166,15 +178,19 @@ exports[`Field component Renders a sidebar field 1`] = `
               data-test-subj="field-agent"
               title="agent"
             >
-              agent
+              <EuiText
+                size="xs"
+              >
+                agent
+              </EuiText>
             </span>
           }
           isActive={false}
           onClick={[Function]}
-          size="m"
+          size="s"
         >
           <div
-            className="osdFieldButton shard__fieldSelectorField explorer__fieldSelectorField"
+            className="osdFieldButton osdFieldButton--small shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
           >
             <button
               className="osd-resetFocusState osdFieldButton__button"
@@ -239,7 +255,15 @@ exports[`Field component Renders a sidebar field 1`] = `
                   data-test-subj="field-agent"
                   title="agent"
                 >
-                  agent
+                  <EuiText
+                    size="xs"
+                  >
+                    <div
+                      className="euiText euiText--extraSmall"
+                    >
+                      agent
+                    </div>
+                  </EuiText>
                 </span>
               </span>
             </button>
@@ -260,7 +284,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 >
                   <EuiButtonIcon
                     aria-labelledby="override_pattern"
-                    className="dscSidebarItem__action"
+                    className="explorerSidebarItem__action"
                     color="text"
                     data-test-subj="eventExplorer__overrideDefaultPattern"
                     iconType="inputOutput"
@@ -269,7 +293,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                   >
                     <button
                       aria-labelledby="override_pattern"
-                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small dscSidebarItem__action"
+                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small explorerSidebarItem__action"
                       data-test-subj="eventExplorer__overrideDefaultPattern"
                       disabled={false}
                       onClick={[Function]}
@@ -332,7 +356,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                 >
                   <EuiButtonIcon
                     aria-label="Remove agent from table"
-                    className="dscSidebarItem__action"
+                    className="explorerSidebarItem__action"
                     color="danger"
                     data-test-subj="fieldToggle-agent"
                     iconType="cross"
@@ -340,7 +364,7 @@ exports[`Field component Renders a sidebar field 1`] = `
                   >
                     <button
                       aria-label="Remove agent from table"
-                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarItem__action"
+                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall explorerSidebarItem__action"
                       data-test-subj="fieldToggle-agent"
                       disabled={false}
                       onClick={[Function]}
@@ -352,6 +376,44 @@ exports[`Field component Renders a sidebar field 1`] = `
                         color="inherit"
                         size="m"
                         type="cross"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                  <EuiButtonIcon
+                    iconType="inspect"
+                    size="xs"
+                  >
+                    <button
+                      className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                      disabled={false}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="inspect"
                       >
                         <EuiIconEmpty
                           aria-hidden={true}

@@ -1,0 +1,856 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Connection Page test Renders Prometheus data connection page with data 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <header
+        class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+        style="justify-content: spaceBetween;"
+      >
+        <div
+          class="euiPageHeaderSection"
+          style="width: 100%; justify-content: space-between;"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <h1
+                class="euiTitle euiTitle--large"
+                data-test-subj="dataspirceTitle"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Connection title
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  prom
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Data source description
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  -
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Prometheus URI
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  localhost:9201
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiAccordion euiAccordion-isOpen"
+      >
+        <div
+          class="euiAccordion__triggerWrapper"
+        >
+          <button
+            aria-controls="queryOrAccelerateAccordion"
+            aria-expanded="true"
+            class="euiAccordion__button"
+            id="random_html_id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__iconWrapper"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon euiAccordion__icon-isOpen"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </span>
+            <span
+              class="euiIEFlexWrapFix"
+            >
+              Ways to use in Dashboards
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="random_html_id"
+          class="euiAccordion__childWrapper"
+          id="queryOrAccelerateAccordion"
+          role="region"
+          tabindex="-1"
+        >
+          <div>
+            <div
+              class=""
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Query data
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Query your data in Metrics Analytics.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="euiTabs"
+          role="tablist"
+        >
+          <button
+            aria-controls="random_html_id"
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
+            id="access_control"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Access control
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="connection_configuration"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Connection configuration
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="access_control"
+          id="random_html_id"
+          role="tabpanel"
+        >
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiCallOut euiCallOut--primary"
+          >
+            <div
+              class="euiCallOutHeader"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiCallOutHeader__title"
+              >
+                Configurations may be managed elsewhere.
+              </span>
+            </div>
+            <div
+              class="euiText euiText--small"
+            >
+              <div
+                class="euiTextColor euiTextColor--default"
+              >
+                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  <h2
+                    class="panel-title"
+                  >
+                    Access Control
+                  </h2>
+                  Control which OpenSearch users have access to this data source.
+                </div>
+              </div>
+            </div>
+            <hr
+              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiText euiText--medium overview-title"
+                    >
+                      Query access
+                    </div>
+                    <div
+                      class="euiText euiText--small overview-content"
+                    >
+                      Everyone
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Data Connection Page test Renders S3 data connection page with data 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <header
+        class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+        style="justify-content: spaceBetween;"
+      >
+        <div
+          class="euiPageHeaderSection"
+          style="width: 100%; justify-content: space-between;"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <h1
+                class="euiTitle euiTitle--large"
+                data-test-subj="dataspirceTitle"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Connection title
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  ya
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Data source description
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  -
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Index store region
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  us-west-2
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--medium overview-title"
+                >
+                  Index store URI
+                </div>
+                <div
+                  class="euiText euiText--small overview-content"
+                >
+                  y
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiAccordion euiAccordion-isOpen"
+      >
+        <div
+          class="euiAccordion__triggerWrapper"
+        >
+          <button
+            aria-controls="queryOrAccelerateAccordion"
+            aria-expanded="true"
+            class="euiAccordion__button"
+            id="random_html_id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__iconWrapper"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiAccordion__icon euiAccordion__icon-isOpen"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                  fill-rule="nonzero"
+                />
+              </svg>
+            </span>
+            <span
+              class="euiIEFlexWrapFix"
+            >
+              Ways to use in Dashboards
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="random_html_id"
+          class="euiAccordion__childWrapper"
+          id="queryOrAccelerateAccordion"
+          role="region"
+          tabindex="-1"
+        >
+          <div>
+            <div
+              class=""
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon--app euiCard__icon"
+                        focusable="false"
+                        height="32"
+                        role="img"
+                        viewBox="0 0 32 32"
+                        width="32"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          class="euiIcon__fillSecondary"
+                          d="m8.33 23.67 4.79-10.55 10.55-4.79-4.79 10.55-10.55 4.79Zm6.3-9-2.28 5 5-2.28 2.28-5-5 2.28Z"
+                        />
+                        <path
+                          d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16A16 16 0 0 0 16 0Zm1 29.95V28h-2v1.95A14 14 0 0 1 2.05 17H4v-2H2.05A14 14 0 0 1 15 2.05V4h2V2.05A14 14 0 0 1 29.95 15H28v2h1.95A14 14 0 0 1 17 29.95Z"
+                        />
+                      </svg>
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Query data
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Query your data in Data Explorer or Observability Logs.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Accelerate performance
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Accelerate performance through OpenSearch indexing.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Tables
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Manually Define Tables
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
+                  >
+                    <div
+                      class="euiCard__top"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </div>
+                    <div
+                      class="euiCard__content"
+                    >
+                      <span
+                        class="euiTitle euiTitle--small euiCard__title"
+                        id="random_html_idTitle"
+                      >
+                        <button
+                          aria-describedby=" random_html_idDescription"
+                          class="euiCard__titleButton"
+                        >
+                          Integrations data
+                        </button>
+                      </span>
+                      <div
+                        class="euiText euiText--small euiCard__description"
+                        id="random_html_idDescription"
+                      >
+                        <p>
+                          Explore data faster through integrations
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="euiTabs"
+          role="tablist"
+        >
+          <button
+            aria-controls="random_html_id"
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
+            id="access_control"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Access control
+            </span>
+          </button>
+          <button
+            aria-controls="random_html_id"
+            aria-selected="false"
+            class="euiTab"
+            id="connection_configuration"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Connection configuration
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="access_control"
+          id="random_html_id"
+          role="tabpanel"
+        >
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiCallOut euiCallOut--primary"
+          >
+            <div
+              class="euiCallOutHeader"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
+                  fill-rule="evenodd"
+                />
+              </svg>
+              <span
+                class="euiCallOutHeader__title"
+              >
+                Configurations may be managed elsewhere.
+              </span>
+            </div>
+            <div
+              class="euiText euiText--small"
+            >
+              <div
+                class="euiTextColor euiTextColor--default"
+              >
+                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  <h2
+                    class="panel-title"
+                  >
+                    Access Control
+                  </h2>
+                  Control which OpenSearch users have access to this data source.
+                </div>
+              </div>
+            </div>
+            <hr
+              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiText euiText--medium overview-title"
+                    >
+                      Query access
+                    </div>
+                    <div
+                      class="euiText euiText--small overview-content"
+                    >
+                      Everyone
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+    </div>
+  </div>
+</div>
+`;

@@ -15,7 +15,7 @@ import {
   SELECTED_PATTERN_FIELD,
   SELECTED_TIMESTAMP,
 } from '../../../../common/constants/explorer';
-import { buildPatternsQuery } from '../../../../common/utils/query_utils';
+import { buildPatternsQuery } from '../../common/query_utils';
 import { IPPLEventsDataSource } from '../../../../server/common/types';
 import { reset as resetPatterns, setPatterns } from '../redux/slices/patterns_slice';
 import { changeQuery, selectQueries } from '../redux/slices/query_slice';
@@ -97,7 +97,7 @@ export const useFetchPatterns = ({ pplService, requestParams }: IFetchPatternsPa
       fetchEvents({ query: anomaliesQuery }, 'jdbc', (res) => res),
     ])
       .then((res) => {
-        const [statsResp, anomaliesResp] = res as PromiseSettledResult<IPPLEventsDataSource>[];
+        const [statsResp, anomaliesResp] = res as Array<PromiseSettledResult<IPPLEventsDataSource>>;
         if (statsResp.status === 'rejected') {
           throw statsResp.reason;
         }
