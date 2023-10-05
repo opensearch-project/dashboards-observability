@@ -50,7 +50,6 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import {
-  convertDateTime,
   displayVisualization,
   getQueryResponse,
   isDateValid,
@@ -59,6 +58,7 @@ import {
 import { replaceVizInPanel, selectPanel } from '../../redux/panel_slice';
 import './visualization_flyout.scss';
 import { useToast } from '../../../common/toast';
+import { convertDateTime } from '../../../common/query_utils';
 
 /*
  * VisaulizationFlyoutSO - This module create a flyout to add visualization for SavedObjects custom Panels
