@@ -10,7 +10,10 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { CoreStart } from '../../../../../../src/core/public';
-import { PPL_INDEX_REGEX, PPL_WHERE_CLAUSE_REGEX } from '../../../../common/constants/shared';
+import {
+  PPL_INDEX_REGEX,
+  PPL_WHERE_CLAUSE_REGEX,
+} from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
   SavedVisualizationType,
@@ -26,12 +29,12 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
+import dateMath from '@elastic/datemath';
 
 /*
  * "Utils" This file contains different reused functions in Observability Dashboards
  *
  * isNameValid - Validates string to length > 0 and < 50
- * convertDateTime - Converts input datetime string to required format
  * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
  * getQueryResponse - Get response of PPL query to load visualizations
  * renderSavedVisualization - Fetches savedVisualization by Id and runs getQueryResponse

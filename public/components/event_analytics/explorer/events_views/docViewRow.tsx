@@ -24,7 +24,7 @@ export interface IDocType {
   [key: string]: string;
 }
 
-interface IDocViewRowProps {
+interface FlyoutButtonProps {
   http: HttpStart;
   doc: IDocType;
   docId: string;
@@ -36,7 +36,7 @@ interface IDocViewRowProps {
   onFlyoutOpen: (docId: string) => void;
 }
 
-export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
+export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
   const {
     http,
     doc,
@@ -271,15 +271,11 @@ export const DocViewRow = forwardRef((props: IDocViewRowProps, ref) => {
 
   return (
     <>
-      <tr
-        className={
-          detailsOpen || surroundingEventsOpen
-            ? 'osdDocTable__row selected-event-row'
-            : 'osdDocTable__row'
-        }
-      >
-        {memorizedTds}
-      </tr>
+      <EuiButtonIcon
+        onClick={() => toggleDetailOpen()}
+        iconType={'inspect'}
+        aria-label="inspect document details"
+      />
       {flyout}
     </>
   );

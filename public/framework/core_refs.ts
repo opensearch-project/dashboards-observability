@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import { HttpStart, IToasts } from '../../../../src/core/public';
+import { ApplicationStart, ChromeStart, HttpStart, IToasts } from '../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../src/core/public';
 import PPLService from '../services/requests/ppl';
 
@@ -20,6 +20,8 @@ class CoreRefs {
   public savedObjectsClient?: SavedObjectsClientContract;
   public pplService?: PPLService;
   public toasts?: IToasts;
+  public chrome?: ChromeStart;
+  public application?: ApplicationStart;
   private constructor() {
     // ...
   }

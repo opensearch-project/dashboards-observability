@@ -58,11 +58,37 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
       .finally(() => setIsEventsLoading(false));
   };
 
+  const addSchemaRowMapping = (queryResult) => {
+    const pplRes = queryResult;
+
+    const data: any[] = [];
+
+    _.forEach(pplRes.datarows, (row) => {
+      const record: any = {};
+
+      for (let i = 0; i < pplRes.schema.length; i++) {
+        const cur = pplRes.schema[i];
+
+        if (typeof row[i] === 'object') {
+          record[cur.name] = JSON.stringify(row[i]);
+        } else if (typeof row[i] === 'boolean') {
+          record[cur.name] = row[i].toString();
+        } else {
+          record[cur.name] = row[i];
+        }
+      }
+
+      data.push(record);
+    });
+    return {
+      ...queryResult,
+      jsonData: data,
+    };
+  };
+
   const dispatchOnGettingHis = (res: any, query: string) => {
-    const selectedFields: string[] = fieldsRef.current![requestParams.tabId][SELECTED_FIELDS].map(
-      (field: IField) => field.name
-    );
-    setResponse(res);
+    const processedRes = addSchemaRowMapping(res);
+    setResponse(processedRes);
     batch(() => {
       dispatch(
         queryResultReset({
@@ -73,7 +99,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
         fetchSuccess({
           tabId: requestParams.tabId,
           data: {
-            ...res,
+            ...processedRes,
           },
         })
       );
@@ -81,9 +107,9 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
         updateFields({
           tabId: requestParams.tabId,
           data: {
-            [UNSELECTED_FIELDS]: res?.schema ? [...res.schema] : [],
-            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...res.schema] : [], // when query contains stats, need populate this
-            [AVAILABLE_FIELDS]: res?.schema ? [...res.schema] : [],
+            [UNSELECTED_FIELDS]: processedRes?.schema ? [...processedRes.schema] : [],
+            [QUERIED_FIELDS]: query.match(PPL_STATS_REGEX) ? [...processedRes.schema] : [], // when query contains stats, need populate this
+            [AVAILABLE_FIELDS]: processedRes?.schema ? [...processedRes.schema] : [],
             [SELECTED_FIELDS]: [],
           },
         })
@@ -165,6 +191,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
   };
 
   const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
+    if (isEmpty(query)) return;
     const cur = queriesRef.current;
     const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
     fetchEvents(
@@ -173,6 +200,8 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
       (res: any) => {
         if (!isEmpty(res.jsonData)) {
           return dispatchOnGettingHis(res, searchQuery);
+        } else if (!isEmpty(res.data?.resp)) {
+          return dispatchOnGettingHis(JSON.parse(res.data?.resp), searchQuery);
         }
         // when no hits and needs to get available fields to override default timestamp
         dispatchOnNoHis(res);
@@ -208,5 +237,6 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     getEvents,
     getAvailableFields,
     fetchEvents,
+    dispatchOnGettingHis,
   };
 };

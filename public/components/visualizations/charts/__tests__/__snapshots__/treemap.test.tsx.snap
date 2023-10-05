@@ -6,7 +6,7 @@ exports[`Treemap component Renders treemap component 1`] = `
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -716,7 +716,7 @@ exports[`Treemap component Renders treemap component 1`] = `
     layout={
       Object {
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "height": 220,
         "margin": Object {
@@ -783,7 +783,7 @@ exports[`Treemap component Renders treemap component 1`] = `
           "autosize": true,
           "barmode": "stack",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "height": 220,
           "hovermode": "closest",
@@ -810,6 +810,9 @@ exports[`Treemap component Renders treemap component 1`] = `
           "yaxis": Object {
             "rangemode": "normal",
             "showgrid": true,
+            "title": Object {
+              "text": "Count",
+            },
             "zeroline": false,
           },
         }

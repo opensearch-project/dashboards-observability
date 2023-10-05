@@ -6,7 +6,7 @@ exports[`Histogram component Renders histogram component 1`] = `
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -704,7 +704,7 @@ exports[`Histogram component Renders histogram component 1`] = `
       Object {
         "barmode": "group",
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "height": 220,
         "legend": Object {
@@ -760,7 +760,7 @@ exports[`Histogram component Renders histogram component 1`] = `
           "autosize": true,
           "barmode": "group",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "height": 220,
           "hovermode": "closest",
@@ -785,6 +785,9 @@ exports[`Histogram component Renders histogram component 1`] = `
           "yaxis": Object {
             "rangemode": "normal",
             "showgrid": true,
+            "title": Object {
+              "text": "Count",
+            },
             "zeroline": false,
           },
         }

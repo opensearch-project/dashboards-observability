@@ -6,7 +6,7 @@ exports[`Gauge component Renders gauge component 1`] = `
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {

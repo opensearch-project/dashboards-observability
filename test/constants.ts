@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IntegrationSetupInputs } from 'public/components/integrations/components/setup_integration';
+
 export const TEST_SPAN_RESPONSE = {
   took: 1,
   timed_out: false,
@@ -556,4 +558,37 @@ export const TEST_SERVICE_MAP = {
     error_rate: 6.25,
     throughput: 16,
   },
+};
+
+export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
+  displayName: 'Test Instance Name',
+  connectionType: 'index',
+  connectionDataSource: 'ss4o_logs-nginx-test',
+};
+
+// TODO fill in the rest of the fields
+export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
+  name: 'sample',
+  version: '2.0.0',
+  license: 'Apache-2.0',
+  type: 'logs',
+  components: [
+    {
+      name: 'logs',
+      version: '1.0.0',
+    },
+  ],
+  assets: {
+    savedObjects: {
+      name: 'sample',
+      version: '1.0.1',
+    },
+  },
+};
+
+export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {
+  return {
+    get: jest.fn().mockResolvedValue({ observabilityObjectList: get }),
+    getBulk: jest.fn().mockResolvedValue({ observabilityObjectList: getBulk }),
+  };
 };

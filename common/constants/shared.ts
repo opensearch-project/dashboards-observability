@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import CSS from 'csstype';
-import { IField } from '../../common/types/explorer';
 
 // Client route
 export const PPL_BASE = '/api/ppl';
@@ -14,15 +13,18 @@ export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
+export const DATACONNECTIONS_BASE = '/api/dataconnections';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
 export const SAVED_VISUALIZATION = '/vis';
+export const CONSOLE_PROXY = '/api/console/proxy';
 
 // Server route
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
+export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
@@ -56,6 +58,12 @@ export const observabilityIntegrationsID = 'integrations';
 export const observabilityIntegrationsTitle = 'Integrations';
 export const observabilityIntegrationsPluginOrder = 9020;
 
+export const observabilityDataConnectionsID = 'datasources';
+export const observabilityDataConnectionsTitle = 'Data sources';
+export const observabilityDataConnectionsPluginOrder = 9030;
+
+export const queryWorkbenchPluginID = 'opensearch-query-workbench';
+
 // Shared Constants
 export const SQL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/index/';
 export const PPL_DOCUMENTATION_URL =
@@ -74,9 +82,12 @@ export const PPL_NEWLINE_REGEX = /[\n\r]+/g;
 
 // Observability plugin URI
 const BASE_OBSERVABILITY_URI = '/_plugins/_observability';
-const BASE_INTEGRATIONS_URI = '/_plugins/_integrations'; // Used later in front-end for routing
+const BASE_DATACONNECTIONS_URI = '/_plugins/_query/_datasources';
 export const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
+};
+export const OPENSEARCH_DATACONNECTIONS_API = {
+  DATACONNECTION: `${BASE_DATACONNECTIONS_URI}`,
 };
 
 // Saved Objects
@@ -85,7 +96,7 @@ export const SAVED_OBJECT = '/object';
 // Color Constants
 export const PLOTLY_COLOR = [
   '#3CA1C7',
-  '#8C55A3',
+  '#54B399',
   '#DB748A',
   '#F2BE4B',
   '#68CCC2',
@@ -227,3 +238,5 @@ export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
 };
+
+export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';

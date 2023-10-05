@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { validateTemplate, validateInstance, ValidationResult } from '../validators';
+import { validateTemplate, validateInstance } from '../validators';
 
-const validTemplate: IntegrationTemplate = {
+const validTemplate: IntegrationConfig = {
   name: 'test',
   version: '1.0.0',
   license: 'Apache-2.0',
@@ -29,7 +29,7 @@ const validInstance: IntegrationInstance = {
 
 describe('validateTemplate', () => {
   it('Returns a success value for a valid Integration Template', () => {
-    const result: ValidationResult<IntegrationTemplate> = validateTemplate(validTemplate);
+    const result: Result<IntegrationConfig> = validateTemplate(validTemplate);
     expect(result.ok).toBe(true);
     expect((result as any).value).toBe(validTemplate);
   });
@@ -38,7 +38,7 @@ describe('validateTemplate', () => {
     const sample: any = structuredClone(validTemplate);
     sample.license = undefined;
 
-    const result: ValidationResult<IntegrationTemplate> = validateTemplate(sample);
+    const result: Result<IntegrationConfig> = validateTemplate(sample);
 
     expect(result.ok).toBe(false);
     expect((result as any).error).toBeInstanceOf(Error);
@@ -48,7 +48,7 @@ describe('validateTemplate', () => {
     const sample: any = structuredClone(validTemplate);
     sample.components[0].name = 'not-logs';
 
-    const result: ValidationResult<IntegrationTemplate> = validateTemplate(sample);
+    const result: Result<IntegrationConfig> = validateTemplate(sample);
 
     expect(result.ok).toBe(false);
     expect((result as any).error).toBeInstanceOf(Error);
@@ -62,7 +62,7 @@ describe('validateTemplate', () => {
 
 describe('validateInstance', () => {
   it('Returns true for a valid Integration Instance', () => {
-    const result: ValidationResult<IntegrationInstance> = validateInstance(validInstance);
+    const result: Result<IntegrationInstance> = validateInstance(validInstance);
     expect(result.ok).toBe(true);
     expect((result as any).value).toBe(validInstance);
   });
@@ -71,7 +71,7 @@ describe('validateInstance', () => {
     const sample: any = structuredClone(validInstance);
     sample.templateName = undefined;
 
-    const result: ValidationResult<IntegrationInstance> = validateInstance(sample);
+    const result: Result<IntegrationInstance> = validateInstance(sample);
 
     expect(result.ok).toBe(false);
     expect((result as any).error).toBeInstanceOf(Error);

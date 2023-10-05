@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IntegrationsKibanaBackend } from '../integrations_kibana_backend';
+import { IntegrationsManager } from '../integrations_manager';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../../src/core/server/types';
-import { Repository } from '../repository/repository';
+import { RepositoryReader } from '../repository/repository';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { Integration } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration';
 import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
 
 describe('IntegrationsKibanaBackend', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockRepository: jest.Mocked<Repository>;
-  let backend: IntegrationsKibanaBackend;
+  let mockRepository: jest.Mocked<RepositoryReader>;
+  let backend: IntegrationsManager;
 
   beforeEach(() => {
     mockSavedObjectsClient = {
@@ -26,7 +26,7 @@ describe('IntegrationsKibanaBackend', () => {
       getIntegration: jest.fn(),
       getIntegrationList: jest.fn(),
     } as any;
-    backend = new IntegrationsKibanaBackend(mockSavedObjectsClient, mockRepository);
+    backend = new IntegrationsManager(mockSavedObjectsClient, mockRepository);
   });
 
   describe('deleteIntegrationInstance', () => {
@@ -147,24 +147,28 @@ describe('IntegrationsKibanaBackend', () => {
   describe('getIntegrationTemplates', () => {
     it('should get integration templates by name', async () => {
       const query = { name: 'template1' };
-      const integration = { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      const integration = {
+        getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template1' } }),
+      };
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getIntegrationTemplates(query);
 
       expect(mockRepository.getIntegration).toHaveBeenCalledWith(query.name);
       expect(integration.getConfig).toHaveBeenCalled();
-      expect(result).toEqual({ hits: [await integration.getConfig()] });
+      expect(result).toEqual({ hits: [{ name: 'template1' }] });
     });
 
     it('should get all integration templates', async () => {
       const integrationList = [
-        { getConfig: jest.fn().mockResolvedValue({ name: 'template1' }) },
-        { getConfig: jest.fn().mockResolvedValue(null) },
-        { getConfig: jest.fn().mockResolvedValue({ name: 'template2' }) },
+        { getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template1' } }) },
+        { getConfig: jest.fn().mockResolvedValue({ ok: false, error: new Error() }) },
+        { getConfig: jest.fn().mockResolvedValue({ ok: true, value: { name: 'template2' } }) },
       ];
       mockRepository.getIntegrationList.mockResolvedValue(
-        (integrationList as unknown) as Integration[]
+        (integrationList as unknown) as IntegrationReader[]
       );
 
       const result = await backend.getIntegrationTemplates();
@@ -174,7 +178,7 @@ describe('IntegrationsKibanaBackend', () => {
       expect(integrationList[1].getConfig).toHaveBeenCalled();
       expect(integrationList[2].getConfig).toHaveBeenCalled();
       expect(result).toEqual({
-        hits: [await integrationList[0].getConfig(), await integrationList[2].getConfig()],
+        hits: [{ name: 'template1' }, { name: 'template2' }],
       });
     });
   });
@@ -224,7 +228,7 @@ describe('IntegrationsKibanaBackend', () => {
         build: jest.fn().mockResolvedValue({ name, dataset: 'nginx', namespace: 'prod' }),
       };
       const createdInstance = { name, dataset: 'nginx', namespace: 'prod' };
-      mockRepository.getIntegration.mockResolvedValue((template as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue((template as unknown) as IntegrationReader);
       mockSavedObjectsClient.create.mockResolvedValue(({
         result: 'created',
       } as unknown) as SavedObject);
@@ -263,7 +267,7 @@ describe('IntegrationsKibanaBackend', () => {
         build: jest.fn().mockRejectedValue(new Error('Failed to build instance')),
       };
       backend.instanceBuilder = (instanceBuilder as unknown) as IntegrationInstanceBuilder;
-      mockRepository.getIntegration.mockResolvedValue((template as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue((template as unknown) as IntegrationReader);
 
       await expect(
         backend.loadIntegrationInstance(templateName, name, 'datasource')
@@ -277,9 +281,11 @@ describe('IntegrationsKibanaBackend', () => {
       const staticPath = 'path/to/static';
       const assetData = Buffer.from('asset data');
       const integration = {
-        getStatic: jest.fn().mockResolvedValue(assetData),
+        getStatic: jest.fn().mockResolvedValue({ ok: true, value: assetData }),
       };
-      mockRepository.getIntegration.mockResolvedValue((integration as unknown) as Integration);
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
 
       const result = await backend.getStatic(templateName, staticPath);
 
@@ -288,7 +294,7 @@ describe('IntegrationsKibanaBackend', () => {
       expect(result).toEqual(assetData);
     });
 
-    it('should reject with a 404 if asset is not found', async () => {
+    it('should reject with a 404 if integration is not found', async () => {
       const templateName = 'template1';
       const staticPath = 'path/to/static';
       mockRepository.getIntegration.mockResolvedValue(null);
@@ -297,6 +303,136 @@ describe('IntegrationsKibanaBackend', () => {
         'statusCode',
         404
       );
+    });
+
+    it('should reject with a 404 if static data is not found', async () => {
+      const templateName = 'template1';
+      const staticPath = 'path/to/static';
+      mockRepository.getIntegration.mockResolvedValue({
+        getStatic: jest.fn().mockResolvedValue({
+          ok: false,
+          error: { message: 'Not found', code: 'ENOENT' },
+        }),
+      } as any);
+
+      await expect(backend.getStatic(templateName, staticPath)).rejects.toHaveProperty(
+        'statusCode',
+        404
+      );
+    });
+  });
+
+  describe('getSchemas', () => {
+    it('should get schema data', async () => {
+      const templateName = 'template1';
+      const schemaData = { mappings: { test: {} } };
+      const integration = {
+        getSchemas: jest.fn().mockResolvedValue({ ok: true, value: schemaData }),
+      };
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
+
+      const result = await backend.getSchemas(templateName);
+
+      expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
+      expect(integration.getSchemas).toHaveBeenCalled();
+      expect(result).toEqual(schemaData);
+    });
+
+    it('should reject with a 404 if integration is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue(null);
+
+      await expect(backend.getSchemas(templateName)).rejects.toHaveProperty('statusCode', 404);
+    });
+
+    it('should reject with a 404 if schema data is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue({
+        getSchemas: jest.fn().mockResolvedValue({
+          ok: false,
+          error: { message: 'Not found', code: 'ENOENT' },
+        }),
+      } as any);
+
+      await expect(backend.getSchemas(templateName)).rejects.toHaveProperty('statusCode', 404);
+    });
+  });
+
+  describe('getAssets', () => {
+    it('should get asset data', async () => {
+      const templateName = 'template1';
+      const assetData = { savedObjects: [{ test: true }] };
+      const integration = {
+        getAssets: jest.fn().mockResolvedValue({ ok: true, value: assetData }),
+      };
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
+
+      const result = await backend.getAssets(templateName);
+
+      expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
+      expect(integration.getAssets).toHaveBeenCalled();
+      expect(result).toEqual(assetData);
+    });
+
+    it('should reject with a 404 if integration is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue(null);
+
+      await expect(backend.getAssets(templateName)).rejects.toHaveProperty('statusCode', 404);
+    });
+
+    it('should reject with a 404 if asset data is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue({
+        getAssets: jest.fn().mockResolvedValue({
+          ok: false,
+          error: { message: 'Not found', code: 'ENOENT' },
+        }),
+      } as any);
+
+      await expect(backend.getAssets(templateName)).rejects.toHaveProperty('statusCode', 404);
+    });
+  });
+
+  describe('getSampleData', () => {
+    it('should get sample data', async () => {
+      const templateName = 'template1';
+      const sampleData = { sampleData: [{ test: true }] };
+      const integration = {
+        getSampleData: jest.fn().mockResolvedValue({ ok: true, value: sampleData }),
+      };
+      mockRepository.getIntegration.mockResolvedValue(
+        (integration as unknown) as IntegrationReader
+      );
+
+      const result = await backend.getSampleData(templateName);
+
+      expect(mockRepository.getIntegration).toHaveBeenCalledWith(templateName);
+      expect(integration.getSampleData).toHaveBeenCalled();
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should reject with a 404 if integration is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue(null);
+
+      await expect(backend.getSampleData(templateName)).rejects.toHaveProperty('statusCode', 404);
+    });
+
+    it('should reject with a 404 if sample data is not found', async () => {
+      const templateName = 'template1';
+      mockRepository.getIntegration.mockResolvedValue({
+        getSampleData: jest.fn().mockResolvedValue({
+          ok: false,
+          error: { message: 'Not found', code: 'ENOENT' },
+        }),
+      } as any);
+
+      await expect(backend.getSampleData(templateName)).rejects.toHaveProperty('statusCode', 404);
     });
   });
 

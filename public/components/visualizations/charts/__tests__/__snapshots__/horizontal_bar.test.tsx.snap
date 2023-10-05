@@ -6,7 +6,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
   layout={
     Object {
       "colorway": Array [
-        "#8C55A3",
+        "#54B399",
       ],
       "height": 220,
       "margin": Object {
@@ -691,7 +691,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
         "bargroupgap": 0.030000000000000027,
         "barmode": "group",
         "colorway": Array [
-          "#8C55A3",
+          "#54B399",
         ],
         "height": 220,
         "hovermode": "closest",
@@ -749,7 +749,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
           "bargroupgap": 0.030000000000000027,
           "barmode": "group",
           "colorway": Array [
-            "#8C55A3",
+            "#54B399",
           ],
           "height": 220,
           "hovermode": "closest",

@@ -1,0 +1,550 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Connection Details test Renders connection details for prometheus datasource 1`] = `
+<Component
+  connector="PROMETHEUS"
+  dataConnection="prom"
+  description=""
+  properties={
+    Object {
+      "prometheus.uri": "localhost:9201",
+    }
+  }
+>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <Component>
+    <EuiCallOut
+      iconType="iInCircle"
+      title="Configurations may be managed elsewhere."
+    >
+      <div
+        className="euiCallOut euiCallOut--primary"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <EuiIcon
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            size="m"
+            type="iInCircle"
+          >
+            <EuiIconIInCircle
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+              focusable="false"
+              role="img"
+              style={null}
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
+                  fillRule="evenodd"
+                />
+              </svg>
+            </EuiIconIInCircle>
+          </EuiIcon>
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Configurations may be managed elsewhere.
+          </span>
+        </div>
+        <EuiText
+          color="default"
+          size="s"
+        >
+          <div
+            className="euiText euiText--small"
+          >
+            <EuiTextColor
+              color="default"
+              component="div"
+            >
+              <div
+                className="euiTextColor euiTextColor--default"
+              >
+                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+              </div>
+            </EuiTextColor>
+          </div>
+        </EuiText>
+      </div>
+    </EuiCallOut>
+  </Component>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiPanel>
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    >
+      <ConnectionConfigurationHeader>
+        <EuiFlexGroup
+          direction="row"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  size="m"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <h2
+                      className="panel-title"
+                    >
+                      Data source configurations
+                    </h2>
+                    Control configurations for your data source.
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </ConnectionConfigurationHeader>
+      <EuiHorizontalRule>
+        <hr
+          className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+        />
+      </EuiHorizontalRule>
+      <PrometheusConnectionConfigurationView>
+        <EuiFlexGroup>
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiFlexGroup
+                  direction="column"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Data source name
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            prom
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Data source description
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            -
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiFlexGroup
+                  direction="column"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Prometheus URI
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            localhost:9201
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </PrometheusConnectionConfigurationView>
+    </div>
+  </EuiPanel>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+</Component>
+`;
+
+exports[`Connection Details test Renders connection details for s3 datasource 1`] = `
+<Component
+  connector="S3GLUE"
+  dataConnection="ya"
+  description=""
+  properties={
+    Object {
+      "glue.indexstore.opensearch.region": "us-west-2",
+      "glue.indexstore.opensearch.uri": "y",
+    }
+  }
+>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <Component>
+    <EuiCallOut
+      iconType="iInCircle"
+      title="Configurations may be managed elsewhere."
+    >
+      <div
+        className="euiCallOut euiCallOut--primary"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <EuiIcon
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            color="inherit"
+            size="m"
+            type="iInCircle"
+          >
+            <EuiIconEmpty
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+              focusable="false"
+              role="img"
+              style={null}
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </EuiIconEmpty>
+          </EuiIcon>
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Configurations may be managed elsewhere.
+          </span>
+        </div>
+        <EuiText
+          color="default"
+          size="s"
+        >
+          <div
+            className="euiText euiText--small"
+          >
+            <EuiTextColor
+              color="default"
+              component="div"
+            >
+              <div
+                className="euiTextColor euiTextColor--default"
+              >
+                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+              </div>
+            </EuiTextColor>
+          </div>
+        </EuiText>
+      </div>
+    </EuiCallOut>
+  </Component>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiPanel>
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    >
+      <ConnectionConfigurationHeader>
+        <EuiFlexGroup
+          direction="row"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  size="m"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <h2
+                      className="panel-title"
+                    >
+                      Data source configurations
+                    </h2>
+                    Control configurations for your data source.
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </ConnectionConfigurationHeader>
+      <EuiHorizontalRule>
+        <hr
+          className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+        />
+      </EuiHorizontalRule>
+      <S3ConnectionConfigurationView>
+        <EuiFlexGroup>
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiFlexGroup
+                  direction="column"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Data source name
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            ya
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Data source description
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            -
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiFlexGroup
+                  direction="column"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Index store region
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            us-west-2
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiText
+                          className="overview-title"
+                        >
+                          <div
+                            className="euiText euiText--medium overview-title"
+                          >
+                            Index store URI
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          className="overview-content"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small overview-content"
+                          >
+                            y
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </S3ConnectionConfigurationView>
+    </div>
+  </EuiPanel>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+</Component>
+`;

@@ -71,6 +71,11 @@ export const queriesSlice = createSlice({
     remove: (state, { payload }) => {
       delete state[payload.tabId];
     },
+    reset: (state, { payload }) => {
+      state[payload.tabId] = {
+        ...initialQueryState,
+      };
+    },
   },
   extraReducers: (builder) => {},
 });

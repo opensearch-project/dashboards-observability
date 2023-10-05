@@ -5,8 +5,9 @@
 
 import './search.scss';
 
-import React, { useState } from 'react';
-import { isEqual } from 'lodash';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { isEqual, lowerCase } from 'lodash';
 import {
   EuiFlexGroup,
   EuiButton,
@@ -17,7 +18,7 @@ import {
   EuiBadge,
   EuiContextMenuPanel,
   EuiToolTip,
-  EuiCallOut,
+  EuiComboBox,
 } from '@elastic/eui';
 import { DatePicker } from './date_picker';
 import '@algolia/autocomplete-theme-classic';
@@ -25,9 +26,18 @@ import { Autocomplete } from './autocomplete';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { PPLReferenceFlyout } from '../helpers';
 import { uiSettingsService } from '../../../../common/utils';
-import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
+import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import { coreRefs } from '../../../framework/core_refs';
+import { useFetchEvents } from '../../../components/event_analytics/hooks';
+import { SQLService } from '../../../services/requests/sql';
+import {
+  selectSearchMetaData,
+  update as updateSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { usePolling } from '../../../components/hooks/use_polling';
+import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -52,7 +62,6 @@ export const Search = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
-    handleQuerySearch,
     handleTimePickerChange,
     dslService,
     startTime,
@@ -85,11 +94,34 @@ export const Search = (props: any) => {
     liveTailName,
     curVisId,
     setSubType,
+    setIsQueryRunning,
   } = props;
 
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
+  const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [queryLang, setQueryLang] = useState([]);
+  const [jobId, setJobId] = useState('');
+  const sqlService = new SQLService(coreRefs.http);
+  const { application } = coreRefs;
+
+  const {
+    data: pollingResult,
+    loading: pollingLoading,
+    error: pollingError,
+    startPolling,
+    stopPolling,
+  } = usePolling<any, any>((params) => {
+    return sqlService.fetchWithJobId(params);
+  }, 5000);
+
+  const requestParams = { tabId };
+  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
+    pplService: new SQLService(coreRefs.http),
+    requestParams,
+  });
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
@@ -129,6 +161,50 @@ export const Search = (props: any) => {
     />
   );
 
+  const handleQueryLanguageChange = (lang) => {
+    if (lang[0].label === 'DQL') {
+      return application.navigateToUrl(
+        `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
+      );
+    }
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: { lang: lang[0].label },
+      })
+    );
+    setQueryLang(lang);
+  };
+
+  const onQuerySearch = (lang) => {
+    handleTimeRangePickerRefresh();
+  };
+
+  useEffect(() => {
+    if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
+      // update page with data
+      dispatchOnGettingHis(pollingResult, '');
+      // stop polling
+      stopPolling();
+      setIsQueryRunning(false);
+    }
+  }, [pollingResult, pollingError]);
+
+  useEffect(() => {
+    if (explorerSearchMetadata.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS') {
+      const queryWithSelectedSource = `source = ${explorerSearchMetadata.datasources[0].label}`;
+      handleQueryChange(queryWithSelectedSource);
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            [RAW_QUERY]: queryWithSelectedSource,
+          },
+        })
+      );
+    }
+  }, [explorerSearchMetadata.datasources]);
+
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
@@ -141,14 +217,25 @@ export const Search = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        <EuiFlexItem key="search-bar" className="search-area">
+        <EuiFlexItem key="lang-selector" className="search-area" grow={1}>
+          <EuiComboBox
+            placeholder="No language selected yet"
+            options={[{ label: 'PPL' }, { label: 'DQL' }]}
+            selectedOptions={queryLang}
+            onChange={handleQueryLanguageChange}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem key="search-bar" className="search-area" grow={5}>
           <Autocomplete
             key={'autocomplete-search-bar'}
             query={query}
             tempQuery={tempQuery}
             baseQuery={baseQuery}
             handleQueryChange={handleQueryChange}
-            handleQuerySearch={handleQuerySearch}
+            handleQuerySearch={() => {
+              onQuerySearch(queryLang);
+            }}
             dslService={dslService}
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
@@ -178,7 +265,9 @@ export const Search = (props: any) => {
               liveStreamChecked={props.liveStreamChecked}
               onLiveStreamChange={props.onLiveStreamChange}
               handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              handleTimeRangePickerRefresh={() => {
+                onQuerySearch(queryLang);
+              }}
             />
           )}
         </EuiFlexItem>

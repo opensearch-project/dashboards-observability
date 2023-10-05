@@ -13,7 +13,10 @@ import {
   isValidTraceId,
   rangeNumDocs,
   getHeaders,
+  fillTimeDataWithEmpty,
+  redoQuery,
 } from '../utils';
+import { EXPLORER_DATA_GRID_QUERY } from '../../../../../test/event_analytics_constants';
 
 describe('Utils event analytics helper functions', () => {
   configure({ adapter: new Adapter() });
@@ -49,35 +52,93 @@ describe('Utils event analytics helper functions', () => {
     expect(rangeNumDocs(2000)).toBe(2000);
   });
 
-  it('validates getHeaders function', () => {
+  it('validates fillTimeDataWithEmpty function', () => {
     expect(
-      getHeaders(
+      fillTimeDataWithEmpty(
+        ['2023-07-01 00:00:00', '2023-08-01 00:00:00', '2023-09-01 00:00:00'],
+        [54, 802, 292],
+        'M',
+        '2023-01-01T08:00:00.000Z',
+        '2023-09-12T21:36:31.389Z'
+      )
+    ).toEqual({
+      buckets: [
+        '2023-01-01 00:00:00',
+        '2023-02-01 00:00:00',
+        '2023-03-01 00:00:00',
+        '2023-04-01 00:00:00',
+        '2023-05-01 00:00:00',
+        '2023-06-01 00:00:00',
+        '2023-07-01 00:00:00',
+        '2023-08-01 00:00:00',
+        '2023-09-01 00:00:00',
+      ],
+      values: [0, 0, 0, 0, 0, 0, 54, 802, 292],
+    });
+    expect(
+      fillTimeDataWithEmpty(
         [
+          '2023-09-11 07:00:00',
+          '2023-09-11 09:00:00',
+          '2023-09-11 10:00:00',
+          '2023-09-11 11:00:00',
+          '2023-09-11 12:00:00',
+          '2023-09-11 13:00:00',
+          '2023-09-11 14:00:00',
+          '2023-09-11 15:00:00',
+        ],
+        [1, 1, 5, 4, 2, 3, 3, 1],
+        'h',
+        '2023-09-11T00:00:00.000',
+        '2023-09-11T17:00:00.000'
+      )
+    ).toEqual({
+      buckets: [
+        '2023-09-11 00:00:00',
+        '2023-09-11 01:00:00',
+        '2023-09-11 02:00:00',
+        '2023-09-11 03:00:00',
+        '2023-09-11 04:00:00',
+        '2023-09-11 05:00:00',
+        '2023-09-11 06:00:00',
+        '2023-09-11 07:00:00',
+        '2023-09-11 08:00:00',
+        '2023-09-11 09:00:00',
+        '2023-09-11 10:00:00',
+        '2023-09-11 11:00:00',
+        '2023-09-11 12:00:00',
+        '2023-09-11 13:00:00',
+        '2023-09-11 14:00:00',
+        '2023-09-11 15:00:00',
+        '2023-09-11 16:00:00',
+        '2023-09-11 17:00:00',
+      ],
+      values: [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 5, 4, 2, 3, 3, 1, 0, 0],
+    });
+  });
+
+  it('validates redoQuery function', () => {
+    const getEvents = jest.fn();
+    redoQuery(
+      '2023-01-01 00:00:00',
+      '2023-09-28 23:19:10',
+      "source = opensearch_dashboards_sample_data_logs | where match(request,'filebeat')",
+      'timestamp',
+      {
+        current: [
           {
-            name: 'host',
-            type: 'text',
-          },
-          {
-            name: 'ip_count',
-            type: 'integer',
-          },
-          {
-            name: 'per_ip_bytes',
-            type: 'long',
-          },
-          {
-            name: 'resp_code',
-            type: 'text',
-          },
-          {
-            name: 'sum_bytes',
-            type: 'long',
+            id: 'timestamp',
+            direction: 'asc',
           },
         ],
-        ['', 'Time', '_source'],
-        undefined
-      )
-    ).toBeTruthy();
-    expect(getHeaders([], ['', 'Time', '_source'], undefined)).toBeTruthy();
+      },
+      {
+        current: [0, 100],
+      },
+      getEvents
+    );
+    const expectedFinalQuery =
+      "source=opensearch_dashboards_sample_data_logs | where timestamp >= '2023-01-01 00:00:00' and timestamp <= '2023-09-28 23:19:10' | where match(request,'filebeat') | sort + timestamp | head 100 from 0";
+    expect(getEvents).toBeCalledWith(expectedFinalQuery);
   });
 });
