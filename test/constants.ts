@@ -147,58 +147,58 @@ export const TEST_JAEGER_SPAN_RESPONSE = {
   took: 10,
   timed_out: false,
   _shards: {
-      total: 5,
-      successful: 5,
-      skipped: 0,
-      failed: 0
+    total: 5,
+    successful: 5,
+    skipped: 0,
+    failed: 0,
   },
   hits: {
-      total: {
-          value: 1,
-          relation: "eq"
+    total: {
+      value: 1,
+      relation: 'eq',
+    },
+    max_score: 4.0943446,
+    hits: [
+      {
+        _index: 'jaeger-span-2022-12-16',
+        _id: 'FQ_alIUB3s3m6OOm24MJ',
+        _score: 4.0943446,
+        _source: {
+          traceID: '00de6a9aaf045bd4',
+          spanID: '00de6a9aaf045bd4',
+          flags: 1,
+          operationName: 'HTTP GET /config',
+          references: [],
+          startTime: 1671214092597974,
+          startTimeMillis: 1671214092597,
+          duration: 40,
+          tags: [],
+          tag: {
+            component: 'net/http',
+            'http@method': 'GET',
+            'http@status_code': 200,
+            'http@url': '/config?nonse=0.8009634976926217',
+            'internal@span@format': 'proto',
+            'sampler@param': true,
+            'sampler@type': 'const',
+            'span@kind': 'server',
+          },
+          logs: [],
+          process: {
+            serviceName: 'frontend',
+            tags: [],
+            tag: {
+              'client-uuid': '40958cebd77cf9a2',
+              hostname: 'b0f1d89879ca',
+              ip: '10.18.203.1',
+              'jaeger@version': 'Go-2.30.0',
+            },
+          },
+        },
       },
-      max_score: 4.0943446,
-      hits: [
-          {
-              _index: "jaeger-span-2022-12-16",
-              _id: "FQ_alIUB3s3m6OOm24MJ",
-              _score: 4.0943446,
-              _source: {
-                  traceID: "00de6a9aaf045bd4",
-                  spanID: "00de6a9aaf045bd4",
-                  flags: 1,
-                  operationName: "HTTP GET /config",
-                  references: [],
-                  startTime: 1671214092597974,
-                  startTimeMillis: 1671214092597,
-                  duration: 40,
-                  tags: [],
-                  tag: {
-                      "component": "net/http",
-                      "http@method": "GET",
-                      "http@status_code": 200,
-                      "http@url": "/config?nonse=0.8009634976926217",
-                      "internal@span@format": "proto",
-                      "sampler@param": true,
-                      "sampler@type": "const",
-                      "span@kind": "server"
-                  },
-                  logs: [],
-                  process: {
-                      "serviceName": "frontend",
-                      "tags": [],
-                      "tag": {
-                          "client-uuid": "40958cebd77cf9a2",
-                          "hostname": "b0f1d89879ca",
-                          "ip": "10.18.203.1",
-                          "jaeger@version": "Go-2.30.0"
-                      }
-                  }
-              }
-          }
-      ]
-  }
-}
+    ],
+  },
+};
 
 export const TEST_SERVICE_MAP_GRAPH = {
   graph: {

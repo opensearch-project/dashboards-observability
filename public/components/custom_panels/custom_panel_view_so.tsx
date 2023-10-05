@@ -57,7 +57,6 @@ import { VisaulizationFlyoutSO } from './panel_modules/visualization_flyout/visu
 import {
   clonePanel,
   deletePanels,
-  doesNameExist,
   fetchPanel,
   renameCustomPanel,
   selectPanel,
@@ -209,9 +208,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    if (await doesNameExist(newCustomPanelName)) {
-      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
-    } else if (!isNameValid(newCustomPanelName)) {
+    if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
       dispatch(renameCustomPanel(newCustomPanelName, panel.id));
@@ -237,7 +234,7 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
 
   const onClone = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Observability Dashboard name', 'danger');
+      setToast('Invalid Operational Panel name', 'danger');
     } else {
       dispatch(clonePanel(panel, newCustomPanelName));
     }

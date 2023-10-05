@@ -352,7 +352,7 @@ export const VisaulizationFlyoutSO = ({
         }
       })
       .catch((err) => {
-        console.error('Issue in fetching the Observability Dashboards', err);
+        console.error('Issue in fetching the operational panels', err);
       });
   };
 

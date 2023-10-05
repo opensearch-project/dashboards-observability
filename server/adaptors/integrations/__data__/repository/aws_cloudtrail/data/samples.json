@@ -36,8 +36,8 @@
         "sourceIPAddress": "cloudtrail.amazonaws.com",
         "userAgent": "cloudtrail.amazonaws.com",
         "requestParameters": {
-          "bucketName": "aws-cloudtrail-mytrail-347283850106-059ac1d5",
-          "Host": "aws-cloudtrail-mytrail-347283850106-059ac1d5.s3.eu-west-1.amazonaws.com",
+          "bucketName": "aws-cloudtrail-mytrail-345678901234-059ac1d5",
+          "Host": "aws-cloudtrail-mytrail-345678901234-059ac1d5.s3.eu-west-1.amazonaws.com",
           "acl": ""
         },
         "responseElements": null,
@@ -54,14 +54,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-cloudtrail-mytrail-347283850106-059ac1d5"
+            "ARN": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "535103f5-cc74-4812-90dd-6861bfa00ff3",
         "eventCategory": "Management"
       }
@@ -104,8 +104,8 @@
         "sourceIPAddress": "cloudtrail.amazonaws.com",
         "userAgent": "cloudtrail.amazonaws.com",
         "requestParameters": {
-          "bucketName": "aws-cloudtrail-logs-347283850106-222dcf7b",
-          "Host": "aws-cloudtrail-logs-347283850106-222dcf7b.s3.eu-west-1.amazonaws.com",
+          "bucketName": "aws-cloudtrail-logs-345678901234-222dcf7b",
+          "Host": "aws-cloudtrail-logs-345678901234-222dcf7b.s3.eu-west-1.amazonaws.com",
           "acl": ""
         },
         "responseElements": null,
@@ -122,14 +122,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-347283850106-222dcf7b"
+            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "120e2232-5d8f-4797-845d-5cae63fa2ad6",
         "eventCategory": "Management"
       }
@@ -172,10 +172,10 @@
         "sourceIPAddress": "cloudtrail.amazonaws.com",
         "userAgent": "cloudtrail.amazonaws.com",
         "requestParameters": {
-          "keyId": "arn:aws:kms:eu-west-1:347283850106:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07",
+          "keyId": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07",
           "encryptionContext": {
-            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:347283850106:trail/mytrail",
-            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-347283850106-059ac1d5/AWSLogs/347283850106/CloudTrail/eu-west-1/2021/12/02/347283850106_CloudTrail_eu-west-1_20211202T2215Z_MTTBopRY9S74a4oz.json.gz"
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/mytrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_MTTBopRY9S74a4oz.json.gz"
           },
           "keySpec": "AES_256"
         },
@@ -185,14 +185,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::KMS::Key",
-            "ARN": "arn:aws:kms:eu-west-1:347283850106:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "49038fb9-cc61-44e2-a093-ba9e37ba090d",
         "eventCategory": "Management"
       }
@@ -227,15 +227,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:ElasticLoadBalancingDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/ElasticLoadBalancingDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/ElasticLoadBalancingDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5C6HNYQPO",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -260,7 +260,7 @@
         "eventType": "AwsApiCall",
         "apiVersion": "2012-06-01",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -303,10 +303,10 @@
         "userAgent": "cloudtrail.amazonaws.com",
         "requestParameters": {
           "encryptionContext": {
-            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:347283850106:trail/testtrail",
-            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-logs-347283850106-222dcf7b/AWSLogs/347283850106/CloudTrail/eu-west-1/2021/12/02/347283850106_CloudTrail_eu-west-1_20211202T2215Z_ypT1EKjIs0DWxgUy.json.gz"
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/testtrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_ypT1EKjIs0DWxgUy.json.gz"
           },
-          "keyId": "arn:aws:kms:eu-west-1:347283850106:key/fcf34ed2-684c-4d2d-9dae-d173e6794772",
+          "keyId": "arn:aws:kms:eu-west-1:345678901234:key/fcf34ed2-684c-4d2d-9dae-d173e6794772",
           "keySpec": "AES_256"
         },
         "responseElements": null,
@@ -315,14 +315,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::KMS::Key",
-            "ARN": "arn:aws:kms:eu-west-1:347283850106:key/fcf34ed2-684c-4d2d-9dae-d173e6794772"
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/fcf34ed2-684c-4d2d-9dae-d173e6794772"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "5655d7ec-f1b6-4bec-948e-c0cc072fd7f9",
         "eventCategory": "Management"
       }
@@ -365,7 +365,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
           "roleSessionName": "SNSDescribeHandlerSession"
         },
         "responseElements": {
@@ -376,7 +376,7 @@
           },
           "assumedRoleUser": {
             "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-            "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession"
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession"
           }
         },
         "requestID": "a10348a0-c7f4-4d5a-b596-39339966b01c",
@@ -384,14 +384,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "c87280b6-b9ba-46af-849e-ddf7fa509848",
         "eventCategory": "Management"
       }
@@ -426,15 +426,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5KP6PYYL2B:LogHub-Pipe-bfe64-S3toOpenSearchStacklogSenderFnEB-tm2bztjl5WTH",
-          "arn": "arn:aws:sts::347283850106:assumed-role/LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV/LogHub-Pipe-bfe64-S3toOpenSearchStacklogSenderFnEB-tm2bztjl5WTH",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV/LogHub-Pipe-bfe64-S3toOpenSearchStacklogSenderFnEB-tm2bztjl5WTH",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAINP7HHMSNLIOUBQA",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5KP6PYYL2B",
-              "arn": "arn:aws:iam::347283850106:role/LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV",
+              "accountId": "345678901234",
               "userName": "LogHub-Pipe-bfe64-S3toOpenSearchStackSenderLambdaR-UNR6O2WK9FTV"
             },
             "webIdFederationData": {},
@@ -454,8 +454,8 @@
         "requestParameters": {
           "encryptionAlgorithm": "SYMMETRIC_DEFAULT",
           "encryptionContext": {
-            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:347283850106:trail/testtrail",
-            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-logs-347283850106-222dcf7b/AWSLogs/347283850106/CloudTrail/eu-west-1/2021/12/02/347283850106_CloudTrail_eu-west-1_20211202T2215Z_ypT1EKjIs0DWxgUy.json.gz"
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/testtrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_ypT1EKjIs0DWxgUy.json.gz"
           }
         },
         "responseElements": null,
@@ -464,14 +464,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::KMS::Key",
-            "ARN": "arn:aws:kms:eu-west-1:347283850106:key/fcf34ed2-684c-4d2d-9dae-d173e6794772"
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/fcf34ed2-684c-4d2d-9dae-d173e6794772"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -505,14 +505,14 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
+          "accountId": "345678901234",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -538,7 +538,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -580,7 +580,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
           "roleSessionName": "EC2DescribeHandlerSession"
         },
         "responseElements": {
@@ -591,7 +591,7 @@
           },
           "assumedRoleUser": {
             "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
-            "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession"
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession"
           }
         },
         "requestID": "c97d3f28-a45b-40ac-9e52-b7434aadfa91",
@@ -599,14 +599,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "014a546e-de1c-4cb1-ab26-995d2a6690a1",
         "eventCategory": "Management"
       }
@@ -649,7 +649,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
           "roleSessionName": "ElasticLoadBalancingDescribeHandlerSession"
         },
         "responseElements": {
@@ -660,7 +660,7 @@
           },
           "assumedRoleUser": {
             "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:ElasticLoadBalancingDescribeHandlerSession",
-            "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/ElasticLoadBalancingDescribeHandlerSession"
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/ElasticLoadBalancingDescribeHandlerSession"
           }
         },
         "requestID": "865d2e3c-24f1-49f6-b107-690ce5dfb254",
@@ -668,14 +668,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "00a0b0c9-b74c-44ed-b4e3-7e0cbf914fd9",
         "eventCategory": "Management"
       }
@@ -718,7 +718,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
           "roleSessionName": "EC2DescribeHandlerSession"
         },
         "responseElements": {
@@ -729,7 +729,7 @@
           },
           "assumedRoleUser": {
             "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
-            "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession"
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession"
           }
         },
         "requestID": "0f376fbd-06ed-4788-9c9c-ea5c0aa020b2",
@@ -737,14 +737,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "f8001dce-ba63-4bed-8715-7e3446c6dfcf",
         "eventCategory": "Management"
       }
@@ -779,15 +779,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638481888699734314",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638481888699734314",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638481888699734314",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5A2ZEP66K",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5NMPY4GP3I",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForAppSync"
             },
             "webIdFederationData": {},
@@ -811,7 +811,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -845,14 +845,14 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:EC2DescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/EC2DescribeHandlerSession",
+          "accountId": "345678901234",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -878,7 +878,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -912,15 +912,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5MGPHCXONO:CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
-          "arn": "arn:aws:sts::347283850106:assumed-role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK/CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK/CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAIYLMNBUCLSGRCUEQ",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5MGPHCXONO",
-              "arn": "arn:aws:iam::347283850106:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+              "accountId": "345678901234",
               "userName": "CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
             },
             "webIdFederationData": {},
@@ -939,8 +939,8 @@
         "userAgent": "AWS Internal",
         "requestParameters": {
           "encryptionContext": {
-            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:347283850106:trail/mytrail",
-            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-347283850106-059ac1d5/AWSLogs/347283850106/CloudTrail/eu-west-1/2021/12/02/347283850106_CloudTrail_eu-west-1_20211202T2215Z_MTTBopRY9S74a4oz.json.gz"
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/mytrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_MTTBopRY9S74a4oz.json.gz"
           },
           "encryptionAlgorithm": "SYMMETRIC_DEFAULT"
         },
@@ -950,14 +950,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::KMS::Key",
-            "ARN": "arn:aws:kms:eu-west-1:347283850106:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -999,7 +999,7 @@
         "sourceIPAddress": "lambda.amazonaws.com",
         "userAgent": "lambda.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+          "roleArn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
           "roleSessionName": "awslambda_248_20211202221117529"
         },
         "responseElements": {
@@ -1014,14 +1014,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
+            "ARN": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "1473513b-ee8b-479b-a7b4-9b547b644063",
         "eventCategory": "Management"
       }
@@ -1064,7 +1064,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
           "roleSessionName": "AWSConfig-Describe"
         },
         "responseElements": {
@@ -1075,7 +1075,7 @@
           },
           "assumedRoleUser": {
             "assumedRoleId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-            "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe"
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe"
           }
         },
         "requestID": "f7f55ba9-968a-4f9d-8c85-a46eb49c1dfd",
@@ -1083,14 +1083,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "d92e1358-d0a5-4641-9067-c037acde13d6",
         "eventCategory": "Management"
       }
@@ -1125,15 +1125,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638482156450755254",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638482156450755254",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638482156450755254",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DT2DFC4X",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5NMPY4GP3I",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForAppSync"
             },
             "webIdFederationData": {},
@@ -1157,7 +1157,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -1191,15 +1191,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5DGNE5U7AI:c95c6bcfe9033cfff4d3d0c295caf16e",
-          "arn": "arn:aws:sts::347283850106:assumed-role/LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ/c95c6bcfe9033cfff4d3d0c295caf16e",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ/c95c6bcfe9033cfff4d3d0c295caf16e",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAI6XAITHH276POBAA",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5DGNE5U7AI",
-              "arn": "arn:aws:iam::347283850106:role/LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ",
+              "accountId": "345678901234",
               "userName": "LogHub-Pipe-3a2ac-CWtoOpenSearchStackCWDestination-1WCPOGLE1YLYQ"
             },
             "webIdFederationData": {},
@@ -1219,7 +1219,7 @@
         "requestParameters": {
           "keyId": "alias/aws/kinesis",
           "encryptionContext": {
-            "aws:kinesis:arn": "arn:aws:kinesis:eu-west-1:347283850106:stream/LogHub-Pipe-3a2ac-CWtoOpenSearchStackcwDataStream22A58C70-plrsK4s3GlGG"
+            "aws:kinesis:arn": "arn:aws:kinesis:eu-west-1:345678901234:stream/LogHub-Pipe-3a2ac-CWtoOpenSearchStackcwDataStream22A58C70-plrsK4s3GlGG"
           },
           "numberOfBytes": 32
         },
@@ -1229,14 +1229,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::KMS::Key",
-            "ARN": "arn:aws:kms:eu-west-1:347283850106:key/10a963d1-db97-4382-b1ac-43dc8bd25e1d"
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/10a963d1-db97-4382-b1ac-43dc8bd25e1d"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -1270,15 +1270,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638481533224676745",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638481533224676745",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638481533224676745",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5JTI2Z37S",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5NMPY4GP3I",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForAppSync"
             },
             "webIdFederationData": {},
@@ -1302,7 +1302,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -1336,15 +1336,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1380,14 +1380,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
             "ARN": "arn:aws:s3:::aiden-dev-bucket-eu-west-1"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -1422,15 +1422,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1448,9 +1448,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "athena-test-347283850106",
+          "bucketName": "athena-test-345678901234",
           "location": "",
-          "Host": "athena-test-347283850106.s3.eu-west-1.amazonaws.com"
+          "Host": "athena-test-345678901234.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -1466,14 +1466,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::athena-test-347283850106"
+            "ARN": "arn:aws:s3:::athena-test-345678901234"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -1508,15 +1508,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5HYW6RMIDH:LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
-          "arn": "arn:aws:sts::347283850106:assumed-role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-czSef9qts2To",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5KXKBYXWC",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5HYW6RMIDH",
-              "arn": "arn:aws:iam::347283850106:role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY",
+              "accountId": "345678901234",
               "userName": "LogHub-LogHubInstanceMetaAPIInstanceAgentStatusHan-1MBVWRVD11MZY"
             },
             "webIdFederationData": {},
@@ -1583,7 +1583,7 @@
         "readOnly": false,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management",
         "tlsDetails": {
           "tlsVersion": "TLSv1.2",
@@ -1622,15 +1622,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1648,9 +1648,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-analytics-immersion-day-347283850106",
+          "bucketName": "aws-analytics-immersion-day-345678901234",
           "location": "",
-          "Host": "aws-analytics-immersion-day-347283850106.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-analytics-immersion-day-345678901234.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -1666,14 +1666,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-analytics-immersion-day-347283850106"
+            "ARN": "arn:aws:s3:::aws-analytics-immersion-day-345678901234"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -1708,15 +1708,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1734,9 +1734,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-athena-query-results-eu-west-1-347283850106",
+          "bucketName": "aws-athena-query-results-eu-west-1-345678901234",
           "location": "",
-          "Host": "aws-athena-query-results-eu-west-1-347283850106.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-athena-query-results-eu-west-1-345678901234.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -1752,14 +1752,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-athena-query-results-eu-west-1-347283850106"
+            "ARN": "arn:aws:s3:::aws-athena-query-results-eu-west-1-345678901234"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -1794,15 +1794,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1826,7 +1826,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -1860,15 +1860,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1886,7 +1886,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "topicArn": "arn:aws:sns:eu-west-1:347283850106:LogHub-Alarm-d24af-AlarmTopicD01E77F9-14C8QVTFGPAVT"
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:LogHub-Alarm-d24af-AlarmTopicD01E77F9-14C8QVTFGPAVT"
         },
         "responseElements": null,
         "requestID": "bc3730d6-4c22-595f-bb49-6af50af21850",
@@ -1894,7 +1894,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -1928,15 +1928,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -1954,7 +1954,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "resourceArn": "arn:aws:sns:eu-west-1:347283850106:LogHub-Alarm-d24af-AlarmTopicD01E77F9-14C8QVTFGPAVT"
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:LogHub-Alarm-d24af-AlarmTopicD01E77F9-14C8QVTFGPAVT"
         },
         "responseElements": null,
         "requestID": "734ee4ff-8ba6-5c6b-87bb-bedccd765d64",
@@ -1962,7 +1962,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -1996,15 +1996,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2022,7 +2022,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "topicArn": "arn:aws:sns:eu-west-1:347283850106:aosalert"
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:aosalert"
         },
         "responseElements": null,
         "requestID": "f0e55f08-27bf-5108-ab29-052b616fe007",
@@ -2030,7 +2030,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -2064,15 +2064,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2090,7 +2090,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "resourceArn": "arn:aws:sns:eu-west-1:347283850106:aosalert"
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:aosalert"
         },
         "responseElements": null,
         "requestID": "ef5c2cf2-2654-56a0-bf83-76d1608497af",
@@ -2098,7 +2098,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -2132,15 +2132,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2158,7 +2158,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "topicArn": "arn:aws:sns:eu-west-1:347283850106:dynamodb"
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:dynamodb"
         },
         "responseElements": null,
         "requestID": "1e083a45-439f-5d72-8bb7-6066054f0c7d",
@@ -2166,7 +2166,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -2200,15 +2200,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2226,7 +2226,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "resourceArn": "arn:aws:sns:eu-west-1:347283850106:dynamodb"
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:dynamodb"
         },
         "responseElements": null,
         "requestID": "522d7e3e-1055-5d2e-baf3-241d56849c21",
@@ -2234,7 +2234,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -2268,15 +2268,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2294,7 +2294,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "topicArn": "arn:aws:sns:eu-west-1:347283850106:test"
+          "topicArn": "arn:aws:sns:eu-west-1:345678901234:test"
         },
         "responseElements": null,
         "requestID": "9524e443-2dd5-5094-8cbd-be606b04119b",
@@ -2302,7 +2302,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -2336,15 +2336,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:SNSDescribeHandlerSession",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/SNSDescribeHandlerSession",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5DKBTAAFP",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2362,7 +2362,7 @@
         "sourceIPAddress": "config.amazonaws.com",
         "userAgent": "config.amazonaws.com",
         "requestParameters": {
-          "resourceArn": "arn:aws:sns:eu-west-1:347283850106:test"
+          "resourceArn": "arn:aws:sns:eu-west-1:345678901234:test"
         },
         "responseElements": null,
         "requestID": "2faf9210-6118-5261-8b9f-c83327c9236e",
@@ -2370,7 +2370,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -2404,15 +2404,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2430,9 +2430,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-codestar-eu-west-1-347283850106-ttt-pipe",
+          "bucketName": "aws-codestar-eu-west-1-345678901234-ttt-pipe",
           "location": "",
-          "Host": "aws-codestar-eu-west-1-347283850106-ttt-pipe.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-codestar-eu-west-1-345678901234-ttt-pipe.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -2448,14 +2448,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-codestar-eu-west-1-347283850106-ttt-pipe"
+            "ARN": "arn:aws:s3:::aws-codestar-eu-west-1-345678901234-ttt-pipe"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -2490,15 +2490,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2516,9 +2516,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-cloudtrail-logs-347283850106-222dcf7b",
+          "bucketName": "aws-cloudtrail-logs-345678901234-222dcf7b",
           "location": "",
-          "Host": "aws-cloudtrail-logs-347283850106-222dcf7b.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-cloudtrail-logs-345678901234-222dcf7b.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -2534,14 +2534,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-347283850106-222dcf7b"
+            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-222dcf7b"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -2576,15 +2576,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2602,9 +2602,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-emr-resources-347283850106-eu-west-1",
+          "bucketName": "aws-emr-resources-345678901234-eu-west-1",
           "location": "",
-          "Host": "aws-emr-resources-347283850106-eu-west-1.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-emr-resources-345678901234-eu-west-1.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -2620,14 +2620,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-emr-resources-347283850106-eu-west-1"
+            "ARN": "arn:aws:s3:::aws-emr-resources-345678901234-eu-west-1"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -2662,15 +2662,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2688,9 +2688,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-cloudtrail-mytrail-347283850106-059ac1d5",
+          "bucketName": "aws-cloudtrail-mytrail-345678901234-059ac1d5",
           "location": "",
-          "Host": "aws-cloudtrail-mytrail-347283850106-059ac1d5.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-cloudtrail-mytrail-345678901234-059ac1d5.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -2706,14 +2706,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-cloudtrail-mytrail-347283850106-059ac1d5"
+            "ARN": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -2748,15 +2748,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2774,9 +2774,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-cloudtrail-logs-347283850106-80d2c6dc",
+          "bucketName": "aws-cloudtrail-logs-345678901234-80d2c6dc",
           "location": "",
-          "Host": "aws-cloudtrail-logs-347283850106-80d2c6dc.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-cloudtrail-logs-345678901234-80d2c6dc.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -2792,14 +2792,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-347283850106-80d2c6dc"
+            "ARN": "arn:aws:s3:::aws-cloudtrail-logs-345678901234-80d2c6dc"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -2834,15 +2834,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2878,14 +2878,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
             "ARN": "arn:aws:s3:::aws-lambda-12843845950"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -2920,15 +2920,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -2964,14 +2964,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
             "ARN": "arn:aws:s3:::aws-lakeformation-129390405"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -3006,15 +3006,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -3050,14 +3050,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
             "ARN": "arn:aws:s3:::aws-sam-cli-managed-default-samclisourcebucket-13z2c2q3lq9gf"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -3092,15 +3092,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -3118,9 +3118,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "cdk-hnb659fds-assets-347283850106-eu-west-1",
+          "bucketName": "cdk-hnb659fds-assets-345678901234-eu-west-1",
           "location": "",
-          "Host": "cdk-hnb659fds-assets-347283850106-eu-west-1.s3.eu-west-1.amazonaws.com"
+          "Host": "cdk-hnb659fds-assets-345678901234-eu-west-1.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -3136,14 +3136,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::cdk-hnb659fds-assets-347283850106-eu-west-1"
+            "ARN": "arn:aws:s3:::cdk-hnb659fds-assets-345678901234-eu-west-1"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -3178,15 +3178,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -3204,9 +3204,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "aws-logs-347283850106-eu-west-1",
+          "bucketName": "aws-logs-345678901234-eu-west-1",
           "location": "",
-          "Host": "aws-logs-347283850106-eu-west-1.s3.eu-west-1.amazonaws.com"
+          "Host": "aws-logs-345678901234-eu-west-1.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -3222,14 +3222,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::aws-logs-347283850106-eu-west-1"
+            "ARN": "arn:aws:s3:::aws-logs-345678901234-eu-west-1"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -3264,14 +3264,14 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5LHWXI4D6J:AutoScaling",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling",
+          "accountId": "345678901234",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5LHWXI4D6J",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForAutoScaling"
             },
             "webIdFederationData": {},
@@ -3308,7 +3308,7 @@
         "readOnly": true,
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -3342,15 +3342,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5LHWXI4D6J:AutoScaling",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAutoScaling/AutoScaling",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5JGPGGIHJ",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5LHWXI4D6J",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForAutoScaling"
             },
             "webIdFederationData": {},
@@ -3368,7 +3368,7 @@
         "sourceIPAddress": "autoscaling.amazonaws.com",
         "userAgent": "autoscaling.amazonaws.com",
         "requestParameters": {
-          "targetGroupArn": "arn:aws:elasticloadbalancing:eu-west-1:347283850106:targetgroup/LogHu-LoadB-12VYXWEUPWAXC/305585e75190679b",
+          "targetGroupArn": "arn:aws:elasticloadbalancing:eu-west-1:345678901234:targetgroup/LogHu-LoadB-12VYXWEUPWAXC/305585e75190679b",
           "targets": []
         },
         "responseElements": null,
@@ -3378,7 +3378,7 @@
         "eventType": "AwsApiCall",
         "apiVersion": "2015-12-01",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }
@@ -3412,15 +3412,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -3456,14 +3456,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
             "ARN": "arn:aws:s3:::cf-templates-1u5skpqfeees8-eu-west-1"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -3506,7 +3506,7 @@
         "sourceIPAddress": "appsync.amazonaws.com",
         "userAgent": "appsync.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
+          "roleArn": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync",
           "roleSessionName": "xray-daemon-1638483114921406273",
           "durationSeconds": 3600
         },
@@ -3518,7 +3518,7 @@
           },
           "assumedRoleUser": {
             "assumedRoleId": "AROAVBW53AN5NMPY4GP3I:xray-daemon-1638483114921406273",
-            "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638483114921406273"
+            "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForAppSync/xray-daemon-1638483114921406273"
           }
         },
         "requestID": "eb91a628-e311-4425-bd0e-f62c2e016a5b",
@@ -3526,14 +3526,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync"
+            "ARN": "arn:aws:iam::345678901234:role/aws-service-role/appsync.amazonaws.com/AWSServiceRoleForAppSync"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "d39f1780-7857-437e-96b5-e6374dd73648",
         "eventCategory": "Management"
       }
@@ -3568,15 +3568,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5GFCIVAFEF:AWSConfig-Describe",
-          "arn": "arn:aws:sts::347283850106:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/AWSServiceRoleForConfig/AWSConfig-Describe",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAVBW53AN5GW3HPS62",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5GFCIVAFEF",
-              "arn": "arn:aws:iam::347283850106:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig",
+              "accountId": "345678901234",
               "userName": "AWSServiceRoleForConfig"
             },
             "webIdFederationData": {},
@@ -3594,9 +3594,9 @@
         "sourceIPAddress": "AWS Internal",
         "userAgent": "AWS Internal",
         "requestParameters": {
-          "bucketName": "config-bucket-347283850106",
+          "bucketName": "config-bucket-345678901234",
           "location": "",
-          "Host": "config-bucket-347283850106.s3.eu-west-1.amazonaws.com"
+          "Host": "config-bucket-345678901234.s3.eu-west-1.amazonaws.com"
         },
         "responseElements": null,
         "additionalEventData": {
@@ -3612,14 +3612,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::S3::Bucket",
-            "ARN": "arn:aws:s3:::config-bucket-347283850106"
+            "ARN": "arn:aws:s3:::config-bucket-345678901234"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "vpcEndpointId": "vpce-61638908",
         "eventCategory": "Management"
       }
@@ -3662,7 +3662,7 @@
         "sourceIPAddress": "lambda.amazonaws.com",
         "userAgent": "lambda.amazonaws.com",
         "requestParameters": {
-          "roleArn": "arn:aws:iam::347283850106:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+          "roleArn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
           "roleSessionName": "awslambda_198_20211202221146461"
         },
         "responseElements": {
@@ -3677,14 +3677,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::IAM::Role",
-            "ARN": "arn:aws:iam::347283850106:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
+            "ARN": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "sharedEventID": "58eec27e-5418-4ff7-bcfc-d79cbb8d48af",
         "eventCategory": "Management"
       }
@@ -3719,15 +3719,15 @@
         "userIdentity": {
           "type": "AssumedRole",
           "principalId": "AROAVBW53AN5MGPHCXONO:CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
-          "arn": "arn:aws:sts::347283850106:assumed-role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK/CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
-          "accountId": "347283850106",
+          "arn": "arn:aws:sts::345678901234:assumed-role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK/CloudTrailLog-CloudTrailLogPipelineLogProcessorFnE-Pkgt7cmJfhQj",
+          "accountId": "345678901234",
           "accessKeyId": "ASIAJCK5XCYKUUIL4LHQ",
           "sessionContext": {
             "sessionIssuer": {
               "type": "Role",
               "principalId": "AROAVBW53AN5MGPHCXONO",
-              "arn": "arn:aws:iam::347283850106:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
-              "accountId": "347283850106",
+              "arn": "arn:aws:iam::345678901234:role/CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK",
+              "accountId": "345678901234",
               "userName": "CloudTrailLog-CloudTrailLogPipelineLogProcessorRol-LMN03K1C37JK"
             },
             "webIdFederationData": {},
@@ -3746,8 +3746,8 @@
         "userAgent": "AWS Internal",
         "requestParameters": {
           "encryptionContext": {
-            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:347283850106:trail/mytrail",
-            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-347283850106-059ac1d5/AWSLogs/347283850106/CloudTrail/eu-west-1/2021/12/02/347283850106_CloudTrail_eu-west-1_20211202T2215Z_CZFG6hKgcknqRdCV.json.gz"
+            "aws:cloudtrail:arn": "arn:aws:cloudtrail:eu-west-1:345678901234:trail/mytrail",
+            "aws:s3:arn": "arn:aws:s3:::aws-cloudtrail-mytrail-345678901234-059ac1d5/AWSLogs/345678901234/CloudTrail/eu-west-1/2021/12/02/345678901234_CloudTrail_eu-west-1_20211202T2215Z_CZFG6hKgcknqRdCV.json.gz"
           },
           "encryptionAlgorithm": "SYMMETRIC_DEFAULT"
         },
@@ -3757,14 +3757,14 @@
         "readOnly": true,
         "resources": [
           {
-            "accountId": "347283850106",
+            "accountId": "345678901234",
             "type": "AWS::KMS::Key",
-            "ARN": "arn:aws:kms:eu-west-1:347283850106:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
+            "ARN": "arn:aws:kms:eu-west-1:345678901234:key/3a833466-7f7f-4e6d-bb49-63b35c2eab07"
           }
         ],
         "eventType": "AwsApiCall",
         "managementEvent": true,
-        "recipientAccountId": "347283850106",
+        "recipientAccountId": "345678901234",
         "eventCategory": "Management"
       }
     }

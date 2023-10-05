@@ -18,5 +18,7 @@
     "urlForwarding",
     "visualizations"
   ],
-  "optionalPlugins": ["managementOverview"]
+  "optionalPlugins": [
+    "managementOverview"
+  ]
 }

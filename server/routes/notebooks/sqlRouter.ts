@@ -9,8 +9,7 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import { addRequestToMetric } from '../../common/metrics/metrics_helper';
-import QueryService from '../../services/queryService';
+import { QueryService } from '../../services/queryService';
 
 export function registerSqlRoute(server: IRouter, service: QueryService) {
   server.post(
@@ -25,7 +24,6 @@ export function registerSqlRoute(server: IRouter, service: QueryService) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('notebooks', 'run_sql_query', 'count');
       const retVal = await service.describeSQLQuery(request);
       return response.ok({
         body: retVal,
@@ -45,7 +43,6 @@ export function registerSqlRoute(server: IRouter, service: QueryService) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('notebooks', 'run_ppl_query', 'count');
       const retVal = await service.describePPLQuery(request);
       return response.ok({
         body: retVal,

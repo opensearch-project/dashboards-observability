@@ -23,12 +23,6 @@ import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import { REDIRECT_TAB, TAB_CREATED_TYPE, TAB_ID_TXT_PFX } from '../../../common/constants/explorer';
-import { init as initFields } from '../event_analytics/redux/slices/field_slice';
-import { init as initPatterns } from '../event_analytics/redux/slices/patterns_slice';
-import { init as initQueryResult } from '../event_analytics/redux/slices/query_result_slice';
-import { changeQuery, init as initQuery } from '../event_analytics/redux/slices/query_slice';
-import { addTab, setSelectedQueryTab } from '../event_analytics/redux/slices/query_tab_slice';
 import {
   createPanel,
   createPanelSample,
@@ -38,8 +32,13 @@ import {
   newPanelTemplate,
   uuidRx,
 } from './redux/panel_slice';
+import { REDIRECT_TAB, TAB_CREATED_TYPE, TAB_ID_TXT_PFX } from '../../../common/constants/explorer';
+import { init as initFields } from '../event_analytics/redux/slices/field_slice';
+import { init as initPatterns } from '../event_analytics/redux/slices/patterns_slice';
+import { init as initQueryResult } from '../event_analytics/redux/slices/query_result_slice';
+import { changeQuery, init as initQuery } from '../event_analytics/redux/slices/query_slice';
+import { addTab, setSelectedQueryTab } from '../event_analytics/redux/slices/query_tab_slice';
 import { useToast } from '../common/toast';
-import { coreRefs } from '../../framework/core_refs';
 
 // import { ObjectFetcher } from '../common/objectFetcher';
 

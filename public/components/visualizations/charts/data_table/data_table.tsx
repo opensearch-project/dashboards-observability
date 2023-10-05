@@ -27,7 +27,7 @@ const doubleValueGetter = (params) => {
   return params.data[params.column.colId];
 };
 
-export const DataTable = ({ visualizations }: any) => {
+export const DataTable = ({ visualizations, layout, config }: any) => {
   const {
     data: {
       explorer: {

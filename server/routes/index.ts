@@ -5,9 +5,9 @@
 
 import { IRouter, ILegacyClusterClient } from '../../../../src/core/server';
 import { registerPplRoute } from './ppl';
-import PPLFacet from '../services/facets/ppl_facet';
+import { PPLFacet } from '../services/facets/ppl_facet';
 import { registerDslRoute } from './dsl';
-import DSLFacet from '../services/facets/dsl_facet';
+import { DSLFacet } from '../services/facets/dsl_facet';
 import SavedObjectFacet from '../services/facets/saved_objects';
 import { PanelsRouter } from './custom_panels/panels_router';
 import { VisualizationsRouter } from './custom_panels/visualizations_router';
@@ -15,13 +15,14 @@ import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
 import { registerParaRoute } from './notebooks/paraRouter';
 import { registerNoteRoute } from './notebooks/noteRouter';
 import { registerVizRoute } from './notebooks/vizRouter';
-import QueryService from '../services/queryService';
+import { QueryService } from '../services/queryService';
 import { registerSqlRoute } from './notebooks/sqlRouter';
 import { registerEventAnalyticsRouter } from './event_analytics/event_analytics_router';
 import { registerAppAnalyticsRouter } from './application_analytics/app_analytics_router';
 import { registerMetricsRoute } from './metrics/metrics_rounter';
 import { registerIntegrationsRoute } from './integrations/integrations_router';
 import { registerDataConnectionsRoute } from './data_connections/data_connections_router';
+import { registerDatasourcesRoute } from './datasources/datasources_router';
 
 export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
   PanelsRouter(router);
@@ -44,4 +45,5 @@ export function setupRoutes({ router, client }: { router: IRouter; client: ILega
   registerMetricsRoute(router);
   registerIntegrationsRoute(router);
   registerDataConnectionsRoute(router);
+  registerDatasourcesRoute(router);
 }

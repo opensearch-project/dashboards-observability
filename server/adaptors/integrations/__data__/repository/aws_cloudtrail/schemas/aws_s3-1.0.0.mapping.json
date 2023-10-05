@@ -10,10 +10,8 @@
       },
       "properties": {
         "aws": {
-          "type" : "object",
           "properties": {
             "s3": {
-              "type" : "object",
               "properties": {
                 "bucket_owner": {
                   "type": "keyword"
