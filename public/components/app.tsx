@@ -57,6 +57,7 @@ export const App = ({
   timestampUtils,
   queryManager,
   startPage,
+  dataSourcePluggables,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
@@ -87,6 +88,7 @@ export const App = ({
             parentBreadcrumb={parentBreadcrumb}
             parentBreadcrumbs={[parentBreadcrumb]}
             setBreadcrumbs={chrome.setBreadcrumbs}
+            dataSourcePluggables={dataSourcePluggables}
           />
         </MetricsListener>
       </I18nProvider>

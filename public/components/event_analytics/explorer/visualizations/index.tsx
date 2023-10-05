@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
 import React from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { QueryManager } from 'common/query_manager';
-import { RAW_QUERY, SELECTED_TIMESTAMP } from '../../../../../common/constants/explorer';
 import {
   IField,
   IQuery,
@@ -16,9 +14,8 @@ import {
 } from '../../../../../common/types/explorer';
 import { WorkspacePanel } from './workspace_panel';
 import { ConfigPanel } from './config_panel';
-import { Sidebar } from '../sidebar';
 import { DataConfigPanelItem } from './config_panel/config_panes/config_controls/data_configurations_panel';
-import { PPL_STATS_REGEX, VIS_CHART_TYPES } from '../../../../../common/constants/shared';
+import { VIS_CHART_TYPES } from '../../../../../common/constants/shared';
 import { TreemapConfigPanelItem } from './config_panel/config_panes/config_controls/treemap_config_panel_item';
 import { LogsViewConfigPanelItem } from './config_panel/config_panes/config_controls/logs_view_config_panel_item';
 
@@ -36,14 +33,11 @@ interface IExplorerVisualizationsProps {
 }
 
 export const ExplorerVisualizations = ({
-  query,
   curVisId,
   setCurVisId,
   explorerVis,
   explorerFields,
-  explorerData,
   visualizations,
-  handleOverrideTimestamp,
   callback,
   queryManager,
 }: IExplorerVisualizationsProps) => {
@@ -99,22 +93,7 @@ export const ExplorerVisualizations = ({
               paddingSize="none"
               className="vis__leftPanel"
             >
-              <div className={isMarkDown ? 'explorer__configPanel-markdown' : 'explorer__insights'}>
-                <div className="explorerFieldSelector">
-                  <Sidebar
-                    query={query}
-                    explorerFields={explorerFields}
-                    explorerData={explorerData}
-                    selectedTimestamp={visualizations?.data?.query[SELECTED_TIMESTAMP] || ''}
-                    handleOverrideTimestamp={handleOverrideTimestamp}
-                    isFieldToggleButtonDisabled={
-                      vis.name === VIS_CHART_TYPES.LogsView
-                        ? isEmpty(explorerData.jsonData) ||
-                          !isEmpty(query[RAW_QUERY].match(PPL_STATS_REGEX))
-                        : true
-                    }
-                  />
-                </div>
+              <div className="explorerFieldSelector">
                 {!isMarkDown && (
                   <div
                     className="explorer__vizDataConfig"
@@ -128,7 +107,7 @@ export const ExplorerVisualizations = ({
             <EuiResizableButton />
             <EuiResizablePanel
               className="ws__central--canvas"
-              initialSize={isMarkDown ? 68 : 60}
+              initialSize={80}
               minSize="55%"
               mode="main"
               paddingSize="none"

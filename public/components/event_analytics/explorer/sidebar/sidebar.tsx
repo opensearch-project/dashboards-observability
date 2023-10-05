@@ -54,7 +54,6 @@ export const Sidebar = (props: ISidebarProps) => {
     storedExplorerFields,
     setStoredExplorerFields,
   } = props;
-
   const dispatch = useDispatch();
   const { tabId } = useContext<any>(TabContext);
   const [showFields, setShowFields] = useState<boolean>(false);
@@ -241,9 +240,9 @@ export const Sidebar = (props: ISidebarProps) => {
                     spacing="m"
                   >
                     {explorerData &&
-                      !isEmpty(explorerData.jsonData) &&
-                      storedExplorerFields.selectedFields &&
-                      storedExplorerFields.selectedFields.map((field, index) => {
+                      !isEmpty(explorerData?.jsonData) &&
+                      storedExplorerFields?.selectedFields &&
+                      storedExplorerFields?.selectedFields.map((field, index) => {
                         return (
                           <EuiDraggable
                             spacing="m"
@@ -300,8 +299,8 @@ export const Sidebar = (props: ISidebarProps) => {
                     droppableId=""
                     spacing="m"
                   >
-                    {storedExplorerFields.availableFields &&
-                      storedExplorerFields.availableFields
+                    {storedExplorerFields?.availableFields &&
+                      storedExplorerFields?.availableFields
                         .filter(
                           (field) => searchTerm === '' || field.name.indexOf(searchTerm) !== -1
                         )

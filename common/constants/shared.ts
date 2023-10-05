@@ -238,3 +238,5 @@ export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
 };
+
+export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
