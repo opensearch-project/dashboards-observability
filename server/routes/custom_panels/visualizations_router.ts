@@ -12,7 +12,6 @@ import {
   ILegacyScopedClusterClient,
 } from '../../../../../src/core/server';
 import { CUSTOM_PANELS_API_PREFIX as API_PREFIX } from '../../../common/constants/custom_panels';
-import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 
 export function VisualizationsRouter(router: IRouter) {
   // Fetch all the savedVisualzations
@@ -27,7 +26,6 @@ export function VisualizationsRouter(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('operational_panels', 'fetch_visualization', 'count');
       const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
         request
       );
@@ -41,7 +39,6 @@ export function VisualizationsRouter(router: IRouter) {
           },
         });
       } catch (error) {
-        addRequestToMetric('operational_panels', 'fetch_visualization', error);
         console.error('Issue in fetching saved visualizations:', error);
         return response.custom({
           statusCode: error.statusCode || 500,

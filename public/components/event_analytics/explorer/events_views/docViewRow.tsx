@@ -11,11 +11,11 @@ import { useEffect } from 'react';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { DocFlyout } from './doc_flyout';
 import { HttpStart } from '../../../../../../../src/core/public';
-import { 
+import {
   OTEL_TRACE_ID,
-   DATE_PICKER_FORMAT,
-    JAEGER_TRACE_ID 
-  } from '../../../../../common/constants/explorer';
+  DATE_PICKER_FORMAT,
+  JAEGER_TRACE_ID,
+} from '../../../../../common/constants/explorer';
 import { SurroundingFlyout } from './surrounding_flyout';
 import PPLService from '../../../../services/requests/ppl';
 import { isValidTraceId } from '../../utils';
@@ -87,8 +87,8 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
                   <dd>
                     <span>
                       {isTraceField &&
-                       (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) &&
-                        !isFlyout ? (
+                      (isValidTraceId(entry[1]) || entry[0] === JAEGER_TRACE_ID) &&
+                      !isFlyout ? (
                         <EuiLink onClick={tracesFlyout}>{entry[1]}</EuiLink>
                       ) : (
                         entry[1]
@@ -128,7 +128,6 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
       <td className="osdDocTableCell__toggleDetails" key={uniqueId('grid-td-')}>
         <EuiButtonIcon
           className="euiButtonIcon euiButtonIcon--text"
-          data-click-metric-element="event_analytics.events_view.toggle_details"
           data-test-subj="eventExplorer__flyoutArrow"
           onClick={() => {
             toggleDetailOpen();

@@ -174,7 +174,7 @@ export const Home = (props: HomeProps) => {
       })
       .catch((err) => {
         setToast(
-          'Please ask your administrator to enable Observability Dashboards for you.',
+          'Please ask your administrator to enable Operational Panels for you.',
           'danger',
           <EuiLink href={CUSTOM_PANELS_DOCUMENTATION_URL} target="_blank">
             Documentation
@@ -188,7 +188,7 @@ export const Home = (props: HomeProps) => {
     const concatList = [appPanelId].toString();
     return http.delete(`${CUSTOM_PANELS_API_PREFIX}/panelList/` + concatList).catch((err) => {
       setToast(
-        'Error occurred while deleting Observability Dashboards, please make sure you have the correct permission.',
+        'Error occurred while deleting Operational Panels, please make sure you have the correct permission.',
         'danger'
       );
       console.error(err.body.message);

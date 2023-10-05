@@ -11,7 +11,7 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { NOTEBOOKS_API_PREFIX, wreckOptions } from '../../../common/constants/notebooks';
-import BACKEND from '../../adaptors/notebooks';
+import { BACKEND } from '../../adaptors/notebooks';
 import {
   DefaultNotebooks,
   DefaultParagraph,
@@ -175,7 +175,7 @@ export function registerParaRoute(router: IRouter) {
       );
       try {
         const updateNotebook: Partial<DefaultNotebooks> = {
-          paragraphs: request.body.paragraphs as Array<DefaultParagraph>,
+          paragraphs: request.body.paragraphs as DefaultParagraph[],
           dateModified: new Date().toISOString(),
         };
         const updateResponse = await BACKEND.updateNote(

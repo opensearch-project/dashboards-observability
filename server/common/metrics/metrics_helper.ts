@@ -38,19 +38,21 @@ export function addClickToMetric(element: string, counter: CounterNameType = 'co
   time2CountWin.set(timeKey, rollingCounter);
 }
 
-export function addRequestToMetric<T extends ComponentType>(
-  component: T,
-  request: RequestType<T>,
+export function addRequestToMetric(
+  component: ComponentType,
+  request: RequestType,
   error: { statusCode: number }
 ): void;
-export function addRequestToMetric<T extends ComponentType>(
-  component: T,
-  request: RequestType<T>,
-  counter: CounterNameType
+export function addRequestToMetric(
+  component: ComponentType,
+  request: RequestType,
+  // ESLint would prefer less definitions with union types instead of multiple definitions.
+  // Disabled one-time: if this is recurring look at configuring `ignoreDifferentlyNamedParameters=true`
+  counter: CounterNameType // eslint-disable-line @typescript-eslint/unified-signatures
 ): void;
-export function addRequestToMetric<T extends ComponentType>(
-  component: T,
-  request: RequestType<T>,
+export function addRequestToMetric(
+  component: ComponentType,
+  request: RequestType,
   counterNameOrError: CounterNameType | { statusCode: number }
 ) {
   const counter =
@@ -64,11 +66,9 @@ export function addRequestToMetric<T extends ComponentType>(
   const timeKey = getKey(Date.now());
   const rollingCounter = time2CountWin.get(timeKey) || _.cloneDeep(DEFAULT_ROLLING_COUNTER);
 
-  // @ts-ignore not sure why 'request' can't be indexed
   rollingCounter[component][request][counter]!++;
   if (counter === 'count') {
-    // @ts-ignore
-    GLOBAL_BASIC_COUNTER[component][request]['total']!++;
+    GLOBAL_BASIC_COUNTER[component][request].total!++;
   }
 
   time2CountWin.set(timeKey, rollingCounter);
@@ -108,7 +108,7 @@ const getPreKey = (milliseconds: number) => {
 };
 
 const isComponent = (arg: string): arg is ComponentType => {
-  return Object.keys(COMPONENTS).includes(arg);
+  return COMPONENTS.includes(arg as ComponentType);
 };
 
 const buildMetrics = (rollingCounters?: CounterType) => {

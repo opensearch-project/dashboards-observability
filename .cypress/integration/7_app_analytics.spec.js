@@ -483,7 +483,7 @@ describe('Separate from other plugins', () => {
     })
   });
 
-  it('Hides application visualizations in Observability Dashboards', () => {
+  it('Hides application visualizations in Operational Panels', () => {
     cy.visit(
       `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
     );
@@ -499,7 +499,7 @@ describe('Separate from other plugins', () => {
     cy.get('option').contains(visTwoName).should('not.exist');
   });
 
-  it('Hides application panels in Observability Dashboards', () => {
+  it('Hides application panels in Operational Panels', () => {
     cy.visit(
       `${Cypress.env('opensearchDashboards')}/app/observability-dashboards#/`
     );

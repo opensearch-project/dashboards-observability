@@ -14,7 +14,6 @@ import {
   TAB_CHART_ID,
   TAB_EVENT_ID,
 } from '../../../../common/constants/explorer';
-import { initializeTabData, removeTabData } from '../../application_analytics/helpers/utils';
 import { EmptyTabParams, ILogExplorerProps } from '../../../../common/types/explorer';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';

@@ -5,7 +5,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import { EmptyTabParams, EventAnalyticsProps } from 'common/types/explorer';
+import { EventAnalyticsProps } from 'common/types/explorer';
 import React, { createContext, ReactChild, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import '../../variables.scss';
@@ -41,8 +41,6 @@ export const EventAnalytics = ({
     if (!text) text = '';
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
-
-  const getExistingEmptyTab = ({ tabIds }: EmptyTabParams) => tabIds[0];
 
   return (
     <>

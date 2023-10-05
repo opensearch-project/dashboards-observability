@@ -164,3 +164,4 @@ Copyright OpenSearch Contributors. See [NOTICE](NOTICE) for details.
 ## Screenshots
 
 <video src='https://github.com/opensearch-project/dashboards-observability/assets/48943349/8c918fce-35b8-4824-ae2d-6881aad7b9a2' width=180/>
+
