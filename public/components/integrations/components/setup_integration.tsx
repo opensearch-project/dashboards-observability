@@ -324,7 +324,12 @@ export function SetupBottomBar({
 
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
-                  const queryStr = query.query.replace('${TABLE}', config.connectionDataSource);
+                  let queryStr = (query.query as string).replaceAll(
+                    '{table_name}',
+                    `${config.connectionDataSource}.default.${integration.name}`
+                  );
+                  queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
+                  queryStr = queryStr.replaceAll('{object_name}', integration.name);
                   const currProgress = loadingProgress; // Need a frozen copy for getting accurate query steps
                   const result = await runQuery(queryStr, (step) =>
                     setProgress(currProgress + step)
