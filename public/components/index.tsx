@@ -7,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { QueryManager } from 'common/query_manager';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { AppPluginStartDependencies, SetupDependencies } from '../types';
+import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
 
 export const Observability = (
@@ -19,8 +19,7 @@ export const Observability = (
   savedObjects: any,
   timestampUtils: any,
   queryManager: QueryManager,
-  startPage: string,
-  dataSourcePluggables
+  startPage: string
 ) => {
   ReactDOM.render(
     <App
@@ -32,7 +31,6 @@ export const Observability = (
       timestampUtils={timestampUtils}
       queryManager={queryManager}
       startPage={startPage}
-      dataSourcePluggables={dataSourcePluggables}
     />,
     AppMountParametersProp.element
   );

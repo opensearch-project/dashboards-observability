@@ -28,8 +28,8 @@ import {
   TAB_ID_TXT_PFX,
   TAB_TITLE,
 } from '../../../../common/constants/explorer';
+import { ILogExplorerProps } from '../../../../common/types/explorer';
 import { initializeTabData, removeTabData } from '../../application_analytics/helpers/utils';
-import { EmptyTabParams, ILogExplorerProps } from '../../../../common/types/explorer';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs, setSelectedQueryTab } from '../redux/slices/query_tab_slice';
@@ -46,8 +46,6 @@ const searchBarConfigs = {
   },
 };
 
-const getExistingEmptyTab = ({ tabIds }: EmptyTabParams) => tabIds[0];
-
 export const LogExplorer = ({
   pplService,
   dslService,
@@ -55,10 +53,10 @@ export const LogExplorer = ({
   timestampUtils,
   setToast,
   savedObjectId,
+  getExistingEmptyTab,
   notifications,
   http,
   queryManager,
-  dataSourcePluggables,
 }: ILogExplorerProps) => {
   const history = useHistory();
   const routerContext = useContext(LogExplorerRouterContext);
@@ -225,23 +223,14 @@ export const LogExplorer = ({
 
   return (
     <>
-      <Explorer
-        key={`explorer_${tabIds[0]}`}
-        pplService={pplService}
-        dslService={dslService}
-        tabId={tabIds[0]}
-        savedObjects={savedObjects}
-        timestampUtils={timestampUtils}
-        setToast={setToast}
-        history={history}
-        notifications={notifications}
-        savedObjectId={savedObjectId}
-        tabCreatedTypes={tabCreatedTypes}
-        curSelectedTabId={curSelectedTabIdRef}
-        http={http}
-        searchBarConfigs={searchBarConfigs}
-        queryManager={queryManager}
-        dataSourcePluggables={dataSourcePluggables}
+      <EuiTabbedContent
+        id="queryTabs"
+        className="queryTabs"
+        tabs={memorizedTabs}
+        selectedTab={memorizedTabs.find((tab) => tab.id === curSelectedTabId)}
+        onTabClick={(selectedTab: EuiTabbedContentTab) => handleTabClick(selectedTab)}
+        data-test-subj="eventExplorer__topLevelTabbing"
+        size="s"
       />
     </>
   );

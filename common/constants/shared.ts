@@ -14,8 +14,6 @@ export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
-export const JOBS_BASE = '/query/jobs';
-export const DATACONNECTIONS_BASE = '/api/dataconnections';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -25,9 +23,6 @@ export const SAVED_VISUALIZATION = '/vis';
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
-export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
-export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
-export const JOB_RESULT_ENDPOINT = '/result';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
@@ -232,5 +227,3 @@ export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
 };
-
-export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
