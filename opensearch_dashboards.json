@@ -17,5 +17,9 @@
     "uiActions",
     "urlForwarding",
     "visualizations"
+  ],
+  "optionalPlugins": [
+    "managementOverview"
   ]
 }
+

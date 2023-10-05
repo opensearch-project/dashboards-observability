@@ -488,4 +488,8 @@
   .osdDocViewer__warning {
     margin-right: $euiSizeS;
   }
+
+  .euiDescriptionList.euiDescriptionList--inline .euiDescriptionList__title.osdDescriptionListFieldTitle {
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  }  
 }

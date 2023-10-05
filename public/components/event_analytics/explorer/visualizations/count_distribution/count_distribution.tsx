@@ -6,13 +6,20 @@
 import React from 'react';
 import { BarOrientation, LONG_CHART_COLOR } from '../../../../../../common/constants/shared';
 import { Plt } from '../../../../visualizations/plotly/plot';
+import { fillTimeDataWithEmpty } from '../../../utils/utils';
 
-export const CountDistribution = ({ countDistribution }: any) => {
+export const CountDistribution = ({
+  countDistribution,
+  selectedInterval,
+  startTime,
+  endTime,
+}: any) => {
   if (
     !countDistribution ||
     !countDistribution.data ||
     !countDistribution.metadata ||
-    !countDistribution.metadata.fields
+    !countDistribution.metadata.fields ||
+    !selectedInterval
   )
     return null;
 
@@ -31,9 +38,31 @@ export const CountDistribution = ({ countDistribution }: any) => {
     },
   ];
 
+  // fill the final data with the exact right amount of empty buckets
+  function fillWithEmpty(processedData: any) {
+    // original x and y fields
+    const xVals = processedData[0].x;
+    const yVals = processedData[0].y;
+
+    const { buckets, values } = fillTimeDataWithEmpty(
+      xVals,
+      yVals,
+      selectedInterval.replace(/^auto_/, ''),
+      startTime,
+      endTime
+    );
+
+    // replace old x and y values with new
+    processedData[0].x = buckets;
+    processedData[0].y = values;
+
+    // // at the end, return the new object
+    return processedData;
+  }
+
   return (
     <Plt
-      data={finalData}
+      data={fillWithEmpty(finalData)}
       layout={{
         showlegend: true,
         margin: {

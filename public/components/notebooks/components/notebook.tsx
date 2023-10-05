@@ -24,17 +24,13 @@ import {
 } from '@elastic/eui';
 import CSS from 'csstype';
 import moment from 'moment';
-import PPLService from '../../../services/requests/ppl';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
-import {
-  CREATE_NOTE_MESSAGE,
-  NOTEBOOKS_API_PREFIX,
-  NOTEBOOKS_SELECTED_BACKEND,
-} from '../../../../common/constants/notebooks';
+import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
@@ -45,7 +41,6 @@ import {
   contextMenuViewReports,
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
-import { zeppelinParagraphParser } from './helpers/zeppelin_parser';
 import { Paragraphs } from './paragraph_components/paragraphs';
 const panelStyles: CSS.Properties = {
   float: 'left',
@@ -68,7 +63,7 @@ const pageStyles: CSS.Properties = {
  * http object - for making API requests
  * setBreadcrumbs - sets breadcrumbs on top
  */
-type NotebookProps = {
+interface NotebookProps {
   pplService: PPLService;
   openedNoteId: string;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
@@ -81,16 +76,15 @@ type NotebookProps = {
   setToast: (title: string, color?: string, text?: string) => void;
   location: RouteComponentProps['location'];
   history: RouteComponentProps['history'];
-};
+}
 
-type NotebookState = {
+interface NotebookState {
   selectedViewId: string;
   path: string;
   dateCreated: string;
   dateModified: string;
   paragraphs: any; // notebook paragraphs fetched from API
-  parsedPara: Array<ParaType>; // paragraphs parsed to a common format
-  vizPrefix: string; // prefix for visualizations in Zeppelin Adaptor
+  parsedPara: ParaType[]; // paragraphs parsed to a common format
   isAddParaPopoverOpen: boolean;
   isParaActionsPopoverOpen: boolean;
   isNoteActionsPopoverOpen: boolean;
@@ -101,7 +95,7 @@ type NotebookState = {
   modalLayout: React.ReactNode;
   showQueryParagraphError: boolean;
   queryParagraphErrorMessage: string;
-};
+}
 export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props: Readonly<NotebookProps>) {
     super(props);
@@ -112,7 +106,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       dateModified: '',
       paragraphs: [],
       parsedPara: [],
-      vizPrefix: '',
       isAddParaPopoverOpen: false,
       isParaActionsPopoverOpen: false,
       isNoteActionsPopoverOpen: false,
@@ -120,7 +113,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       isReportingActionsPopoverOpen: false,
       isReportingLoadingModalOpen: false,
       isModalVisible: false,
-      modalLayout: <EuiOverlayMask></EuiOverlayMask>,
+      modalLayout: <EuiOverlayMask />,
       showQueryParagraphError: false,
       queryParagraphErrorMessage: '',
     };
@@ -131,33 +124,24 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   parseAllParagraphs = () => {
-    let parsedPara = this.parseParagraphs(this.state.paragraphs);
+    const parsedPara = this.parseParagraphs(this.state.paragraphs);
     this.setState({ parsedPara });
   };
 
   // parse paragraphs based on backend
   parseParagraphs = (paragraphs: any[]): ParaType[] => {
     try {
-      let parsedPara;
-      // @ts-ignore
-      if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
-        parsedPara = zeppelinParagraphParser(paragraphs);
-        this.setState({ vizPrefix: '%sh #vizobject:' });
-      } else {
-        parsedPara = defaultParagraphParser(paragraphs);
-      }
-      parsedPara.forEach((para: ParaType) => {
-        para.isInputExpanded = this.state.selectedViewId === 'input_only';
-        para.paraRef = React.createRef();
-        para.paraDivRef = React.createRef<HTMLDivElement>();
-      });
-      return parsedPara;
+      return defaultParagraphParser(paragraphs).map((para) => ({
+        ...para,
+        isInputExpanded: this.state.selectedViewId === 'input_only',
+        paraRef: React.createRef(),
+        paraDivRef: React.createRef<HTMLDivElement>(),
+      }));
     } catch (err) {
       this.props.setToast(
         'Error parsing paragraphs, please make sure you have the correct permission.',
         'danger'
       );
-      console.error(err);
       this.setState({ parsedPara: [] });
       return [];
     }
@@ -165,7 +149,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   // Assigns Loading, Running & inQueue for paragraphs in current notebook
   showParagraphRunning = (param: number | string) => {
-    let parsedPara = this.state.parsedPara;
+    const parsedPara = this.state.parsedPara;
     this.state.parsedPara.map((_: ParaType, index: number) => {
       if (param === 'queue') {
         parsedPara[index].inQueue = true;
@@ -183,10 +167,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   // Sets a paragraph to selected and deselects all others
   paragraphSelector = (index: number) => {
-    let parsedPara = this.state.parsedPara;
+    const parsedPara = this.state.parsedPara;
     this.state.parsedPara.map((_: ParaType, idx: number) => {
-      if (index === idx) parsedPara[idx].isSelected = true;
-      else parsedPara[idx].isSelected = false;
+      parsedPara[idx].isSelected = index === idx;
     });
     this.setState({ parsedPara });
   };
@@ -213,7 +196,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             'Error deleting paragraph, please make sure you have the correct permission.',
             'danger'
           );
-          console.error(err.body.message);
         });
     }
   };
@@ -255,7 +237,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                 'Error deleting paragraph, please make sure you have the correct permission.',
                 'danger'
               );
-              console.error(err.body.message);
             });
         },
         'Delete all paragraphs',
@@ -364,7 +345,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error deleting visualization, please make sure you have the correct permission.',
           'danger'
         );
-        console.error(err.body.message);
       });
   };
 
@@ -399,7 +379,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error adding paragraph, please make sure you have the correct permission.',
           'danger'
         );
-        console.error(err.body.message);
       });
   };
 
@@ -440,7 +419,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error moving paragraphs, please make sure you have the correct permission.',
           'danger'
         );
-        console.error(err.body.message);
       });
   };
 
@@ -473,27 +451,17 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error clearing paragraphs, please make sure you have the correct permission.',
           'danger'
         );
-        console.error(err.body.message);
       });
   };
 
   // Backend call to update and run contents of paragraph
-  updateRunParagraph = (
-    para: ParaType,
-    index: number,
-    vizObjectInput?: string,
-    paraType?: string
-  ) => {
+  updateRunParagraph = (para: ParaType, index: number) => {
     this.showParagraphRunning(index);
-    if (vizObjectInput) {
-      para.inp = this.state.vizPrefix + vizObjectInput; // "%sh check"
-    }
 
     const paraUpdateObject = {
       noteId: this.props.openedNoteId,
       paragraphId: para.uniqueId,
       paragraphInput: para.inp,
-      paragraphType: paraType || '',
     };
 
     return this.props.http
@@ -522,7 +490,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             'Error running paragraph, please make sure you have the correct permission.',
             'danger'
           );
-        console.error(err.body.message);
       });
   };
 
@@ -554,7 +521,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // Handles text editor value and syncs with paragraph input
   textValueEditor = (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
     if (!(evt.key === 'Enter' && evt.shiftKey)) {
-      let parsedPara = this.state.parsedPara;
+      const parsedPara = this.state.parsedPara;
       parsedPara[index].inp = evt.target.value;
       this.setState({ parsedPara });
     }
@@ -570,7 +537,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // update view mode, scrolls to paragraph and expands input if scrollToIndex is given
   updateView = (selectedViewId: string, scrollToIndex?: number) => {
     this.configureViewParameter(selectedViewId);
-    let parsedPara = [...this.state.parsedPara];
+    const parsedPara = [...this.state.parsedPara];
     this.state.parsedPara.map((para: ParaType, index: number) => {
       parsedPara[index].isInputExpanded = selectedViewId === 'input_only';
     });
@@ -603,7 +570,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           'Error fetching notebooks, please make sure you have the correct permission.',
           'danger'
         );
-        console.error(err?.body?.message || err);
       });
   };
 
@@ -620,7 +586,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       })
       .catch((err) => {
         this.props.setToast('Error getting query output', 'danger');
-        console.error(err);
       });
   };
 
@@ -671,7 +636,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         }
       })
       .catch((error) => {
-        console.log('error is', error);
+        this.props.setToast('Error checking Reporting Plugin Installation status.', 'danger');
       });
   }
 
@@ -687,7 +652,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.loadNotebook();
     this.checkIfReportingPluginIsInstalled();
     const searchParams = queryString.parse(this.props.location.search);
-    const view = searchParams['view'];
+    const view = searchParams.view;
     if (!view) {
       this.configureViewParameter('view_both');
     }
@@ -1009,7 +974,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                       ref={this.state.parsedPara[index].paraRef}
                       pplService={this.props.pplService}
                       para={para}
-                      setPara={(para: ParaType) => this.setPara(para, index)}
+                      setPara={(pr: ParaType) => this.setPara(pr, index)}
                       dateModified={this.state.paragraphs[index]?.dateModified}
                       index={index}
                       paraCount={this.state.parsedPara.length}

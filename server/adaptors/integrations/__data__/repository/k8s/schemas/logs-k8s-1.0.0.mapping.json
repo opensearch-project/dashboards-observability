@@ -11,12 +11,6 @@
         "catalog": "observability",
         "type": "logs",
         "component": "log",
-        "labels": [
-          "log",
-          "k8s",
-          "cloud",
-          "container"
-        ],
         "correlations": [
           {
             "field": "spanId",
@@ -228,10 +222,24 @@
       }
     }
   },
-  "composed_of": [
-    "k8s",
-    "container",
-    "cloud"
-  ],
-  "version": 1
+  "composed_of": ["k8s", "container", "cloud"],
+  "version": 1,
+  "_meta": {
+    "description": "Simple Schema For Observability",
+    "catalog": "observability",
+    "type": "logs",
+    "labels": ["log", "k8s", "cloud", "container"],
+    "correlations": [
+      {
+        "field": "spanId",
+        "foreign-schema": "traces",
+        "foreign-field": "spanId"
+      },
+      {
+        "field": "traceId",
+        "foreign-schema": "traces",
+        "foreign-field": "traceId"
+      }
+    ]
+  }
 }

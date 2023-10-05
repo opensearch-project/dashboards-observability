@@ -29,7 +29,6 @@ import {
   addVisualizationPanel,
 } from '../helpers/add_visualization_helper';
 import { useToast } from '../../../../public/components/common/toast';
-import { htmlIdGenerator } from '@elastic/eui';
 
 interface InitialState {
   id: string;
@@ -85,7 +84,7 @@ const normalizedPanel = (panel: CustomPanelType): CustomPanelType => ({
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
 
-const { setToast } = useToast();
+const {setToast} = useToast();
 
 /*
  ** ASYNC DISPATCH FUNCTIONS
@@ -129,7 +128,7 @@ export const fetchPanel = (id) => async (dispatch, getState) => {
   dispatch(setPanel(panel));
 };
 
-export const fetchVisualization = () => (dispatch, getState) => { };
+export const fetchVisualization = () => (dispatch, getState) => {};
 
 const updateLegacyPanel = (panel: CustomPanelType) =>
   coreRefs.http!.post(`${CUSTOM_PANELS_API_PREFIX}/panels/update`, {
@@ -142,10 +141,6 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
-export const doesNameExist = async (newCustomPanelName: string) => {
-  const panels = await fetchCustomPanels();
-  return (panels.some(({ title }: {title: string}) => title === newCustomPanelName));
-}
 export const updatePanel = (panel: CustomPanelType, successMsg: string, failureMsg: string) => async (dispatch, getState) => {
   try {
     if (isUuid(panel.id)) await updateSavedObjectPanel(panel);
@@ -156,7 +151,7 @@ export const updatePanel = (panel: CustomPanelType, successMsg: string, failureM
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
-  } catch (e) {
+  } catch (e) {    
     if (failureMsg) {
       setToast(failureMsg, 'danger')
     }
@@ -198,7 +193,7 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTit
   const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
 
   const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-
+  
   dispatch(updatePanel(updatedPanel, `Visualization ${newVisualizationTitle} successfully added!`, `Error in adding ${newVisualizationTitle} visualization to the panel`));
 };
 
@@ -216,8 +211,9 @@ const deleteLegacyPanels = (customPanelIdList: string[]) => {
 };
 
 export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispatch, getState) => {
-  const toastMessage = `Observability Dashboard${panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
-    } successfully deleted!`;
+  const toastMessage = `Observability Dashboard${
+    panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
+  } successfully deleted!`;
   try {
     const ids = panelsToDelete.map((p) => p.id);
     await Promise.all([deleteLegacyPanels(ids), deletePanelSO(ids)]);
@@ -258,7 +254,7 @@ export const createPanelSample = (vizIds) => async (dispatch, getState) => {
     ...createDemoPanel(vizIds),
     dateCreated: new Date().getTime(),
     dateModified: new Date().getTime(),
-    title: htmlIdGenerator(samplePanelName)(),
+    title: samplePanelName,
   };
   const newSOPanel = await savedObjectPanelsClient.create(samplePanel);
   const newPanel = savedObjectToCustomPanel(newSOPanel);
@@ -319,7 +315,7 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
 ) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === id);
   const updatedPanel = { ...panel, title: editedCustomPanelName };
-  dispatch(updatePanel(updatedPanel, `Observability Dashboard successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Observability Dashboard, please make sure you have the correct permission.'))
+  dispatch(updatePanel(updatedPanel, `Operational Panel successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Operational Panel, please make sure you have the correct permission.'))
 };
 
 /*

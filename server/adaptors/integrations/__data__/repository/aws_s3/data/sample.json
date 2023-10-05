@@ -27,7 +27,7 @@
       "s3": {
         "bucket_owner": "078d85edf7268fb4814b1b4fc9f4c64adfde218b6b489a38ecf1b269f14f3c7a",
         "bucket": "centralizedlogging-webconsoleuis3bucket22191f5e-t9bxwwr3d7k",
-        "remote_ip": "35.89.52.162",
+        "remote_ip": "48.129.58.200",
         "requester": "arn:aws:sts::347283850106:assumed-role/CentralizedLogging-CustomCDKBucketDeployment8693BB-1X4DVR38SF7ZY/CentralizedLogging-CustomCDKBucketDeployment8693BB-kU6BAxSswmfp",
         "request_id": "HQ37919R28X8MPJV",
         "operation": "REST.GET.BUCKET",
@@ -79,7 +79,7 @@
       "s3": {
         "bucket_owner": "084e71aee5e48296d6b4e0fead4f55abcddb2cf9b6c9923f4c276b7f12f5f1a7",
         "bucket": "alternativebucket-webconsoleuis3bucket44281g5f-t8cxzzr3d8k",
-        "remote_ip": "36.99.53.163",
+        "remote_ip": "48.129.58.200",
         "requester": "arn:aws:sts::347283850107:assumed-role/AlternativeBucket-CustomCDKBucketDeployment8693BB-1X4DVR38SF8ZZ/AlternativeBucket-CustomCDKBucketDeployment8693BB-lU6BBySswmfr",
         "request_id": "HQ37919R28X8MPJV",
         "operation": "REST.GET.BUCKET",
@@ -131,7 +131,7 @@
       "s3": {
         "bucket_owner": "094f61afd5f582a7d7c5f1gfbad5g66bcded3df9c6a9934f5c367c7g13g6g2b8",
         "bucket": "testbucket-webconsoleuis3bucket55291h5g-t7dyxxr3d9k",
-        "remote_ip": "37.109.54.164",
+        "remote_ip": "48.129.58.200",
         "requester": "arn:aws:sts::347283850108:assumed-role/TestBucket-CustomCDKBucketDeployment8693BB-1X4DVR38SF9ZZ/TestBucket-CustomCDKBucketDeployment8693BB-mU6BBzSswmfs",
         "request_id": "HQ37919R28X8MPJV",
         "operation": "REST.GET.BUCKET",
@@ -183,7 +183,7 @@
       "s3": {
         "bucket_owner": "123d94egf8769gh4825b1c4hc9j5k67lmdfe328l7b589b39mcf2c389p24g4d8r",
         "bucket": "backupbucket-webconsoleuis3bucket44691j6h-t5ezzzr4d1k",
-        "remote_ip": "39.119.56.166",
+        "remote_ip": "48.129.58.200",
         "requester": "arn:aws:sts::347283850110:assumed-role/BackupBucket-CustomCDKBucketDeployment8693BB-1X4DVR38SF9AA/BackupBucket-CustomCDKBucketDeployment8693BB-nU6CCzSswmft",
         "request_id": "HQ37919R28X8MPJV",
         "operation": "REST.GET.BUCKET",
@@ -235,7 +235,7 @@
       "s3": {
         "bucket_owner": "456g67hid9870ji5832c1l6kd8m9n70opfg4329o8p690o41rdf3d451s35h6i9s",
         "bucket": "dataanalytics-webconsoleuis3bucket77981l7h-u7iyzrr6d2p",
-        "remote_ip": "48.129.58.168",
+        "remote_ip": "48.129.58.200",
         "requester": "arn:aws:sts::347283850115:assumed-role/DataAnalytics-CustomCDKBucketDeployment8693BB-1X4DVR38SF9BB/DataAnalytics-CustomCDKBucketDeployment8693BB-nU6CCzSswmfs",
         "request_id": "HQ37919R28X8MPJV",
         "operation": "REST.GET.BUCKET",

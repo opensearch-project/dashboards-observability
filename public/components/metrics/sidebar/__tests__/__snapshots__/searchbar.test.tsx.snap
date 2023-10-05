@@ -28,6 +28,7 @@ exports[`Search Bar Component Search Side Bar Component with available metrics 1
         }
         defaultQuery=""
         onChange={[Function]}
+        query=""
       >
         <EuiFlexGroup
           alignItems="center"
@@ -180,6 +181,7 @@ exports[`Search Bar Component Search Side Bar Component with no available metric
         }
         defaultQuery=""
         onChange={[Function]}
+        query=""
       >
         <EuiFlexGroup
           alignItems="center"

@@ -277,6 +277,7 @@ describe('Testing switch mode to jaeger', () => {
     setTimeFilter();
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='jaeger-mode']").click();
+    //cy.get('.euiButtonEmpty__text').should('contain', 'Jaeger');
   });
 
   it('Verifies columns and data', () => {

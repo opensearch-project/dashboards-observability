@@ -27,7 +27,7 @@
       "cloudfront":   {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/",
@@ -83,7 +83,7 @@
       "cloudfront":  {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/static/css/main.3c74189a.css",
@@ -139,7 +139,7 @@
       "cloudfront":   {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 677,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/manifest.json",
@@ -199,7 +199,7 @@
       "cloudfront":{
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 501279,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/static/js/main.1fce72cf.js",
@@ -259,7 +259,7 @@
       "cloudfront":   {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/locales/en/home.json",
@@ -319,7 +319,7 @@
       "cloudfront":    {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 675,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/locales/en/ekslog.json",
@@ -379,7 +379,7 @@
       "cloudfront": {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 674,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/locales/en/cluster.json",
@@ -439,7 +439,7 @@
       "cloudfront": {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 677,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/locales/en/servicelog.json",
@@ -500,7 +500,7 @@
         "@timestamp": "2023-02-22T03:22:41",
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 703,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/locales/en-US/home.json",
@@ -556,7 +556,7 @@
       "cloudfront": {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 703,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/locales/en-US/info.json",
@@ -612,7 +612,7 @@
       "cloudfront": {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 162423,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/static/media/elbArch.dbcdcea16ace81a05c28.png",
@@ -670,7 +670,7 @@
       "cloudfront": {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 161053,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/static/media/wafArch.9cdccd95c4eb308461a2.png",
@@ -728,7 +728,7 @@
       "cloudfront": {
         "x-edge-location": "HKG62-C2",
         "sc-bytes": 150993,
-        "c-ip": "13.248.48.9",
+        "c-ip": "67.183.58.10",
         "cs-method": "GET",
         "cs-host": "d2wusnbjo8x1w7.cloudfront.net",
         "cs-uri-stem": "/static/media/rdsArch.aa17197fc8ed28ace19f.png",

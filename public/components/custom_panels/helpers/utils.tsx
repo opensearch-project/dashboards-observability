@@ -3,19 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import dateMath from '@elastic/datemath';
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { castArray, forEach, isEmpty } from 'lodash';
+import _, { forEach, isEmpty } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { CoreStart } from '../../../../../../src/core/public';
-import {
-  PPL_DATE_FORMAT,
-  PPL_INDEX_REGEX,
-  PPL_WHERE_CLAUSE_REGEX,
-} from '../../../../common/constants/shared';
+import { PPL_INDEX_REGEX, PPL_WHERE_CLAUSE_REGEX } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
   SavedVisualizationType,
@@ -31,12 +26,12 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
+import { convertDateTime } from '../../common/query_utils';
 
 /*
- * "Utils" This file contains different reused functions in Observability Dashboards
+ * "Utils" This file contains different reused functions in operational panels
  *
  * isNameValid - Validates string to length > 0 and < 50
- * convertDateTime - Converts input datetime string to required format
  * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
  * getQueryResponse - Get response of PPL query to load visualizations
  * renderSavedVisualization - Fetches savedVisualization by Id and runs getQueryResponse
@@ -48,29 +43,7 @@ import { MetricType } from '../../../../common/types/metrics';
 
 // Name validation 0>Name<=50
 export const isNameValid = (name: string) => {
-  return name.length >= 50 || name.length === 0 ? false : true;
-};
-
-// DateTime convertor to required format
-export const convertDateTime = (
-  datetime: string,
-  isStart = true,
-  formatted = true,
-  isMetrics: boolean = false
-) => {
-  let returnTime: undefined | Moment;
-  if (isStart) {
-    returnTime = dateMath.parse(datetime);
-  } else {
-    returnTime = dateMath.parse(datetime, { roundUp: true });
-  }
-  if (isMetrics) {
-    const myDate = new Date(returnTime._d); // Your timezone!
-    const epochTime = myDate.getTime() / 1000.0;
-    return Math.round(epochTime);
-  }
-  if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
-  return returnTime;
+  return !(name.length >= 50 || name.length === 0);
 };
 
 // Merges new layout into visualizations
@@ -142,8 +115,7 @@ const queryAccumulator = (
   )}' and ${timestampField} <= '${convertDateTime(endTime, false)}'`;
   const pplFilterQuery = panelFilterQuery === '' ? '' : ` | ${panelFilterQuery}`;
 
-  const finalQuery = indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
-  return finalQuery;
+  return indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
 };
 
 // PPL Service requestor
@@ -256,7 +228,7 @@ export const renderSavedVisualization = async (
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  let visualization = {} as SavedVisualizationType;
+  let visualization: SavedVisualizationType = {};
   let updatedVisualizationQuery = '';
 
   visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
@@ -347,10 +319,12 @@ const updateCatalogVisualizationQuery = ({
   const attributesGroupString = attributesGroupBy.toString();
   const startEpochTime = convertDateTime(startTime, true, false, true);
   const endEpochTime = convertDateTime(endTime, false, false, true);
-  const promQuery =
-    attributesGroupBy.length === 0
-      ? catalogTableName
-      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+  // const promQuery =
+  //   attributesGroupBy.length === 0
+  //     ? `${aggregation} (${catalogTableName})`
+  //     : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+
+  const promQuery = `${aggregation} (${catalogTableName})`;
 
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
 };
@@ -422,7 +396,7 @@ export const renderCatalogVisualization = async ({
     layoutConfig: {
       height: 390,
       margin: { t: 5 },
-      legend: { orientation: 'h', yanchor: 'top', x: 0.0, y: -0.4 },
+      legend: { visible: false },
     },
   };
 
@@ -460,7 +434,6 @@ export const prependRecentlyUsedRange = (
 const rejectRecentRange = (rangeList, toReject) => {
   return rangeList.filter((r) => !(r.start === toReject.start && r.end === toReject.end));
 };
-
 /**
  * Convert an ObservabilitySavedVisualization into SavedVisualizationType,
  * which is used in panels.
@@ -572,7 +545,7 @@ export const prepareMetricsData = (schema: any, dataConfig: any) => {
 
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
-  if (metaData === undefined || _.isEmpty(metaData)) {
+  if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
 

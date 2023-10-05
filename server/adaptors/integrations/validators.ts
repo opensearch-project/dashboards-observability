@@ -5,8 +5,6 @@
 
 import Ajv, { JSONSchemaType } from 'ajv';
 
-export type ValidationResult<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
-
 const ajv = new Ajv();
 
 const staticAsset: JSONSchemaType<StaticAsset> = {
@@ -19,7 +17,7 @@ const staticAsset: JSONSchemaType<StaticAsset> = {
   additionalProperties: false,
 };
 
-const templateSchema: JSONSchemaType<IntegrationTemplate> = {
+const templateSchema: JSONSchemaType<IntegrationConfig> = {
   type: 'object',
   properties: {
     name: { type: 'string' },
@@ -65,6 +63,19 @@ const templateSchema: JSONSchemaType<IntegrationTemplate> = {
           required: ['name', 'version'],
           nullable: true,
           additionalProperties: false,
+        },
+        queries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              version: { type: 'string' },
+              language: { type: 'string' },
+            },
+            required: ['name', 'version', 'language'],
+          },
+          nullable: true,
         },
       },
       additionalProperties: false,
@@ -118,11 +129,11 @@ const instanceValidator = ajv.compile(instanceSchema);
  * this is a more conventional wrapper that simplifies calling.
  *
  * @param data The data to be validated as an IntegrationTemplate.
- * @return A ValidationResult indicating whether the validation was successful or not.
+ * @return A Result indicating whether the validation was successful or not.
  *         If validation succeeds, returns an object with 'ok' set to true and the validated data.
  *         If validation fails, returns an object with 'ok' set to false and an Error object describing the validation error.
  */
-export const validateTemplate = (data: unknown): ValidationResult<IntegrationTemplate> => {
+export const validateTemplate = (data: unknown): Result<IntegrationConfig> => {
   if (!templateValidator(data)) {
     return { ok: false, error: new Error(ajv.errorsText(templateValidator.errors)) };
   }
@@ -143,11 +154,11 @@ export const validateTemplate = (data: unknown): ValidationResult<IntegrationTem
  * Validates an integration instance against a predefined schema using the AJV library.
  *
  * @param data The data to be validated as an IntegrationInstance.
- * @return A ValidationResult indicating whether the validation was successful or not.
+ * @return A Result indicating whether the validation was successful or not.
  *         If validation succeeds, returns an object with 'ok' set to true and the validated data.
  *         If validation fails, returns an object with 'ok' set to false and an Error object describing the validation error.
  */
-export const validateInstance = (data: unknown): ValidationResult<IntegrationInstance> => {
+export const validateInstance = (data: unknown): Result<IntegrationInstance> => {
   if (!instanceValidator(data)) {
     return {
       ok: false,
