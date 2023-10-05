@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { JOBS_ENDPOINT_BASE, OPENSEARCH_DATASOURCES_API, OPENSEARCH_PANELS_API } from '../../common/constants/shared';
+import { JOBS_ENDPOINT_BASE, OPENSEARCH_PANELS_API } from '../../common/constants/shared';
 
 export function OpenSearchObservabilityPlugin(Client: any, config: any, components: any) {
   const clientAction = components.clientAction.factory;

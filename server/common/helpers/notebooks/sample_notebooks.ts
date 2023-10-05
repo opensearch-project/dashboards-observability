@@ -18,8 +18,7 @@ const getDemoNotebook = (dateString: string, visId: string) => {
       {
         output: [
           {
-            result:
-              `An OpenSearch Dashboards notebook is an interface that lets you easily combine code snippets, live visualizations, and narrative text in a single notebook interface.
+            result: `An OpenSearch Dashboards notebook is an interface that lets you easily combine code snippets, live visualizations, and narrative text in a single notebook interface.
 
 Notebooks let you interactively explore data by running different visualizations that you can share with team members to collaborate on a project.
 
@@ -56,7 +55,8 @@ For more information, refer to the [documentation](https://opensearch.org/docs/d
       {
         output: [
           {
-            result: 'Notebooks combine code blocks and visualizations for describing data. Code blocks support markdown, SQL, and PPL languages. Specify the input language on the first line using %\[language type\] syntax. For example, type %md for markdown, %sql for SQL, and %ppl for PPL. A sample visualization is shown below:',
+            result:
+              'Notebooks combine code blocks and visualizations for describing data. Code blocks support markdown, SQL, and PPL languages. Specify the input language on the first line using %[language type] syntax. For example, type %md for markdown, %sql for SQL, and %ppl for PPL. A sample visualization is shown below:',
             outputType: 'MARKDOWN',
             execution_time: '0 ms',
           },
@@ -125,7 +125,7 @@ You can also reorder, duplicate, or delete paragraphs from these menus.`,
         output: [
           {
             result:
-              'To execute a paragraph, choose **Run**. To make changes to the input block, choose the downward arrow that\'s next to the paragraph title.',
+              "To execute a paragraph, choose **Run**. To make changes to the input block, choose the downward arrow that's next to the paragraph title.",
             outputType: 'MARKDOWN',
             execution_time: '0 ms',
           },
@@ -341,7 +341,7 @@ Check for any error log with response code 404 or 503 (filter).`,
       {
         output: [
           {
-            result: 'We see too many events. Let\'s quickly check which host has the issue (dedup).',
+            result: "We see too many events. Let's quickly check which host has the issue (dedup).",
             outputType: 'MARKDOWN',
             execution_time: '0.014 ms',
           },
@@ -380,7 +380,7 @@ We see too many events. Let's quickly check which host has the issue (dedup).`,
       {
         output: [
           {
-            result: 'We get too few events. Let\'s dedup in consecutive mode (dedup).',
+            result: "We get too few events. Let's dedup in consecutive mode (dedup).",
             outputType: 'MARKDOWN',
             execution_time: '0.006 ms',
           },
@@ -462,7 +462,7 @@ How many IP addresses for each response (stats).`,
       {
         output: [
           {
-            result: 'To dive deep, let\'s group by host and response, count, and sum (stats).',
+            result: "To dive deep, let's group by host and response, count, and sum (stats).",
             outputType: 'MARKDOWN',
             execution_time: '0.006 ms',
           },
@@ -552,7 +552,8 @@ We don't see a meaningful response. Let's change to resp_code (rename).`,
       {
         output: [
           {
-            result: 'The data looks better now. Let\'s sort by `DESC count` and `ASC sum_bytes` (sort).',
+            result:
+              "The data looks better now. Let's sort by `DESC count` and `ASC sum_bytes` (sort).",
             outputType: 'MARKDOWN',
             execution_time: '0.006 ms',
           },
@@ -599,7 +600,7 @@ The data looks better now. Let's sort by \`DESC count\` and \`ASC sum_bytes\` (s
       {
         output: [
           {
-            result: 'Let\'s check if we can perform aggregations after stats (eval).',
+            result: "Let's check if we can perform aggregations after stats (eval).",
             outputType: 'MARKDOWN',
             execution_time: '0.006 ms',
           },
@@ -710,8 +711,7 @@ const getSQLNotebook = (dateString: string) => {
       {
         output: [
           {
-            result:
-              `OpenSearch SQL lets you write queries in SQL rather than the [OpenSearch query domain-specific language (DSL)](https://opensearch.org/docs/opensearch/query-dsl/full-text/). If you’re already familiar with SQL and don’t want to learn the query DSL, this feature is a great option.
+            result: `OpenSearch SQL lets you write queries in SQL rather than the [OpenSearch query domain-specific language (DSL)](https://opensearch.org/docs/opensearch/query-dsl/full-text/). If you’re already familiar with SQL and don’t want to learn the query DSL, this feature is a great option.
 
 For more information, please refer to the [documentation](https://opensearch.org/docs/search-plugins/sql/index/).`,
             outputType: 'MARKDOWN',
@@ -786,7 +786,7 @@ Select * from opensearch_dashboards_sample_data_flights limit 20;`,
         output: [
           {
             result:
-              'You can specify fields in the `SELECT` clause and use the `WHERE` clause to filter results. The following query finds flights heading to countries that start with \'A\' that are more than 5000 miles away.',
+              "You can specify fields in the `SELECT` clause and use the `WHERE` clause to filter results. The following query finds flights heading to countries that start with 'A' that are more than 5000 miles away.",
             outputType: 'MARKDOWN',
             execution_time: '0.006 ms',
           },
@@ -820,8 +820,7 @@ SELECT FlightNum,OriginCountry,OriginCityName,DestCountry,DestCityName,DistanceM
       {
         output: [
           {
-            result:
-              'OpenSearch SQL also supports subqueries:',
+            result: 'OpenSearch SQL also supports subqueries:',
             outputType: 'MARKDOWN',
             execution_time: '0.007 ms',
           },

@@ -195,6 +195,13 @@ export const createBarTypeDefinition = (params: any) => ({
               },
             ],
           },
+          {
+            id: 'color-theme',
+            name: 'Color theme',
+            editor: ConfigColorTheme,
+            mapTo: 'colorTheme',
+            schemas: [],
+          },
         ],
       },
       {

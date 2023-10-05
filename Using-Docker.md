@@ -12,7 +12,7 @@ Once this build was completed - the expected zip location of the plugin is `./bu
 Once the build is completed, make sure to overide the [Dockerfile](Dockerfile) target zip file with the exact name 
 ```
 # Install updated plugin
-RUN /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/observabilityDashboards-3.0.0.zip
+RUN /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/observabilityDashboards-2.11.0.zip
 ```
 
 ## Docker imageVersion

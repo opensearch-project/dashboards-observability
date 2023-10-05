@@ -16,7 +16,6 @@ import {
   SAVED_QUERY,
   SAVED_VISUALIZATION,
 } from '../../../common/constants/shared';
-import { addRequestToMetric } from '../../common/metrics/metrics_helper';
 import SavedObjectFacet from '../../services/facets/saved_objects';
 
 export const registerEventAnalyticsRouter = ({
@@ -32,7 +31,6 @@ export const registerEventAnalyticsRouter = ({
       validate: {},
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'get', 'count');
       const savedRes = await savedObjectFacet.getSavedObject(req);
       const result: any = {
         body: {
@@ -44,7 +42,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'get', result);
       return res.custom(result);
     }
   );
@@ -59,7 +56,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'get', 'count');
       const savedRes = await savedObjectFacet.getSavedObjectById(req, req.params.objectId);
       const result: any = {
         body: {
@@ -71,7 +67,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'get', result);
       return res.custom(result);
     }
   );
@@ -103,7 +98,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'create', 'count');
       const savedRes = await savedObjectFacet.createSavedQuery(req);
       const result: any = {
         body: {
@@ -115,7 +109,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'create', result);
       return res.custom(result);
     }
   );
@@ -157,7 +150,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'create', 'count');
       const savedRes = await savedObjectFacet.createSavedVisualization(req);
       const result: any = {
         body: {
@@ -169,7 +161,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'create', result);
       return res.custom(result);
     }
   );
@@ -202,7 +193,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'update', 'count');
       const savedRes = await savedObjectFacet.updateSavedQuery(req);
       const result: any = {
         body: {
@@ -212,7 +202,6 @@ export const registerEventAnalyticsRouter = ({
       if (savedRes.success) return res.ok(result);
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'update', result);
       return res.custom(result);
     }
   );
@@ -255,7 +244,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'update', 'count');
       const updateRes = await savedObjectFacet.updateSavedVisualization(req);
       const result: any = {
         body: {
@@ -265,7 +253,6 @@ export const registerEventAnalyticsRouter = ({
       if (updateRes.success) return res.ok(result);
       result.statusCode = updateRes?.data?.statusCode || 500;
       result.message = updateRes?.data || '';
-      addRequestToMetric('event_analytics', 'update', result);
       return res.custom(result);
     }
   );
@@ -283,7 +270,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'create', 'count');
       const savedRes = await savedObjectFacet.createSavedTimestamp(req);
       const result: any = {
         body: {
@@ -295,7 +281,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'create', result);
       return res.custom(result);
     }
   );
@@ -316,7 +301,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'update', 'count');
       const savedRes = await savedObjectFacet.updateSavedTimestamp(req);
       const result: any = {
         body: {
@@ -328,7 +312,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'update', result);
       return res.custom(result);
     }
   );
@@ -343,7 +326,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'delete', 'count');
       const deleteResponse = await savedObjectFacet.deleteSavedObject(req);
       const result: any = {
         body: {
@@ -353,7 +335,6 @@ export const registerEventAnalyticsRouter = ({
       if (deleteResponse.success) return res.ok(result);
       result.statusCode = deleteResponse?.data?.statusCode || 500;
       result.message = deleteResponse?.data || '';
-      addRequestToMetric('event_analytics', 'delete', result);
       return res.custom(result);
     }
   );
@@ -368,7 +349,6 @@ export const registerEventAnalyticsRouter = ({
       },
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      addRequestToMetric('event_analytics', 'add_samples', 'count');
       const savedRes = await savedObjectFacet.createSampleSavedObjects(req);
       const result: any = {
         body: {
@@ -380,7 +360,6 @@ export const registerEventAnalyticsRouter = ({
 
       result.statusCode = savedRes?.data?.statusCode || 500;
       result.message = savedRes?.data || '';
-      addRequestToMetric('event_analytics', 'add_samples', result);
       return res.custom(result);
     }
   );

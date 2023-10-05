@@ -5,8 +5,8 @@ on: [pull_request, push]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_VERSION: '2.x'
-  OPENSEARCH_PLUGIN_VERSION: 2.8.0.0
+  OPENSEARCH_VERSION: 'main'
+  OPENSEARCH_PLUGIN_VERSION: 3.0.0.0
 
 jobs:
 
@@ -14,6 +14,8 @@ jobs:
     strategy: 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+      # Since Windows is inconsistent, we want to let other OSes run on a fail
+      fail-fast: false
     runs-on: ${{ matrix.os }}
 
     steps:

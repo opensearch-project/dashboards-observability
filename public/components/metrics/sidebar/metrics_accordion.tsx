@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { min } from 'lodash';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {
@@ -23,11 +24,14 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
       id={`${headerName}Selector`}
       buttonContent={
         <EuiTitle size="xxxs">
-          <span>{headerName}</span>
+          <span>
+            {headerName} {min([metricsList.length, 100])} of {metricsList.length}
+          </span>
         </EuiTitle>
       }
       paddingSize="none"
     >
+      {metricsList.length > 100 && <p>Use search bar to focus listed Metrics.</p>}
       <ul className="metricsList">
         {metricsList.slice(0, 100).map((metric: any) => (
           <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>
@@ -35,7 +39,6 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
           </li>
         ))}
       </ul>
-      {metricsList.length > 100 && <p>Use search bar for searching through all metrics.</p>}
     </EuiAccordion>
   );
 };

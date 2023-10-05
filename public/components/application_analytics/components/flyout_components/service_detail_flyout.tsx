@@ -19,7 +19,10 @@ import {
   handleServiceMapRequest,
   handleServiceViewRequest,
 } from '../../../../../public/components/trace_analytics/requests/services_request_handler';
-import { filtersToDsl, processTimeStamp } from '../../../../../public/components/trace_analytics/components/common/helper_functions';
+import {
+  filtersToDsl,
+  processTimeStamp,
+} from '../../../../../public/components/trace_analytics/components/common/helper_functions';
 import { ServiceMap } from '../../../../../public/components/trace_analytics/components/services';
 import { ServiceObject } from '../../../../../public/components/trace_analytics/components/common/plots/service_map';
 import { SpanDetailTable } from '../../../../../public/components/trace_analytics/components/traces/span_detail_table';
