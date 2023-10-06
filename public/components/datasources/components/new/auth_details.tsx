@@ -47,7 +47,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
         <>
           <EuiFormRow label="Username">
             <EuiFieldText
-              placeholder={'Username placeholder'}
+              placeholder={'Username'}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onBlur={(e) => setUsernameForRequest(e.target.value)}

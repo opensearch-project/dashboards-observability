@@ -86,11 +86,11 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h4>{`Configure Prometheus Data Source`}</h4>
+          <h4>{`Configure Prometheus data source`}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          {`Connect to Prometheus with OpenSearch and OpenSearch Dashboards `}
+          {`Connect to Prometheus with OpenSearch and OpenSearch Dashboards. `}
           <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
             Learn more
           </EuiLink>
@@ -105,9 +105,8 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             <>
               <EuiText size="xs">
                 <p>
-                  This is the name the connection will be referenced by in OpenSearch Dashboards. It
-                  is recommended to make this short yet descriptive to help users when selecting a
-                  connection.
+                  Connection name that OpenSearch Dashboards references. This name should be
+                  descriptive and concise.
                 </p>
               </EuiText>
               <EuiFieldText
@@ -146,7 +145,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           <EuiFormRow label="Prometheus URI">
             <>
               <EuiText size="xs">
-                <p>Provide the Prometheus URI endpoint to connect to.</p>
+                <p>Enter the Prometheus URI endpoint.</p>
               </EuiText>
               <EuiFieldText
                 data-test-subj="Prometheus-URI"
@@ -168,7 +167,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           </EuiText>
           <EuiSpacer />
 
-          <EuiFormRow label="Authentication Method">
+          <EuiFormRow label="Authentication method">
             <EuiSelect
               id="selectAuthMethod"
               options={authOptions}

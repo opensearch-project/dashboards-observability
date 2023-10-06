@@ -77,11 +77,11 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Configure S3 Data Source`}</h1>
+          <h1>{`Configure Amazon S3 data source`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          {`Connect to S3with OpenSearch and OpenSearch Dashboards `}
+          {`Connect to S3 with OpenSearch and OpenSearch Dashboards. `}
           <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
             Learn more
           </EuiLink>
@@ -95,9 +95,8 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           <>
             <EuiText size="xs">
               <p>
-                This is the name the connection will be referenced by in OpenSearch Dashboards. It
-                is recommended to make this short yet descriptive to help users when selecting a
-                connection.
+                Connection name that OpenSearch Dashboards references. This name should be
+                descriptive and concise.
               </p>
             </EuiText>
             <EuiFieldText
@@ -115,7 +114,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         </EuiFormRow>
         <EuiFormRow label="Description - Optional">
           <EuiTextArea
-            placeholder="Placeholder"
+            placeholder="Describe data source"
             value={details}
             onBlur={(e) => {
               setDetailsForRequest(e.target.value);
@@ -128,7 +127,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiSpacer />
 
         <EuiText>
-          <h3>Glue authentication details</h3>
+          <h3>AWS Glue authentication details</h3>
         </EuiText>
         <EuiSpacer />
 
@@ -136,15 +135,15 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           <>
             <EuiText size="xs">
               <p>
-                This parameters provides the authentication type information required for execution
-                engine to connect to glue.
+                This parameter provides the authentication type information required for execution
+                engine to connect to AWS Glue.
               </p>
             </EuiText>
             <EuiFieldText data-test-subj="authentication-method" value="IAM role" disabled />
           </>
         </EuiFormRow>
 
-        <EuiFormRow label="Glue authenticaiton ARN">
+        <EuiFormRow label="AWS Glue authentication ARN">
           <>
             <EuiText size="xs">
               <p>This should be the IAM role ARN</p>
@@ -166,15 +165,15 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiSpacer />
 
         <EuiText>
-          <h3>Glue index store details</h3>
+          <h3>AWS Glue index store details</h3>
         </EuiText>
         <EuiSpacer />
 
-        <EuiFormRow label="Glue index store URI">
+        <EuiFormRow label="AWS Glue index store URI">
           <>
             <EuiText size="xs">
               <p>
-                This parameters provides the OpenSearch cluster host information for glue. This
+                This parameter provides the OpenSearch cluster host information for AWS Glue. This
                 OpenSearch instance is used for writing index data back.
               </p>
             </EuiText>
@@ -192,7 +191,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           </>
         </EuiFormRow>
 
-        <EuiFormRow label="Glue index store authentication">
+        <EuiFormRow label="AWS Glue index store authentication">
           <>
             <EuiText size="xs">
               <p>Authentication settings to access the index store.</p>

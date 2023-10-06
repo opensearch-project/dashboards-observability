@@ -20,7 +20,7 @@ import { OPENSEARCH_DOCUMENTATION_URL } from '../../../../common/constants/data_
 const tabs = [
   {
     id: 'manage',
-    name: 'Manage data source',
+    name: 'Manage data sources',
     disabled: false,
   },
   {
@@ -65,7 +65,7 @@ export const DataConnectionsHeader = () => {
       </EuiPageHeader>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Connect and manage compatible OpenSearch and OpenSearch Dashboard data sources.{' '}
+        Connect and manage compatible OpenSearch and OpenSearch Dashboards data sources.{' '}
         <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
           Learn more
         </EuiLink>
