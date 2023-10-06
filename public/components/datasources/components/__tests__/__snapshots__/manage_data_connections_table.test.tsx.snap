@@ -32,7 +32,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            Connect and manage compatible OpenSearch and OpenSearch Dashboard data sources.
+            Connect and manage compatible OpenSearch and OpenSearch Dashboards data sources.
              
             <a
               class="euiLink euiLink--primary"
@@ -72,7 +72,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
             <span
               class="euiTab__content"
             >
-              Manage data source
+              Manage data sources
             </span>
           </button>
           <button
@@ -108,7 +108,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
               <h2
                 class="euiTitle euiTitle--small"
               >
-                Manage existing data sources
+                Manage data sources
               </h2>
               <div
                 class="euiSpacer euiSpacer--s"
@@ -119,7 +119,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
                 <div
                   class="euiTextColor euiTextColor--subdued"
                 >
-                  Manage already created data sources or
+                  Manage existing data sources or
                    
                   <a
                     class="euiLink euiLink--primary"

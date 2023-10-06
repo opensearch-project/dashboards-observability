@@ -67,7 +67,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
           <EuiText size="s">
             <p>
               Control which OpenSearch roles have permission to query and index data from this data
-              source
+              source.
             </p>
           </EuiText>
         </EuiFlexItem>

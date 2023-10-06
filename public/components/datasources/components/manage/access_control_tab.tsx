@@ -49,7 +49,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiText size="m">
-            <h2 className="panel-title">Access Control</h2>
+            <h2 className="panel-title">Access control</h2>
             Control which OpenSearch users have access to this data source.
           </EuiText>
         </EuiFlexItem>

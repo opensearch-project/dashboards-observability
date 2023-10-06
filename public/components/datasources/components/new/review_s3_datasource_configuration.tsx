@@ -42,7 +42,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Review S3 Data Source Configuration`}</h1>
+          <h1>{`Review Amazon S3 data source configuration`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiSpacer />
@@ -78,13 +78,13 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Glue authentication ARN</EuiText>
+                <EuiText className="overview-title">AWS Glue authentication ARN</EuiText>
                 <EuiText size="s" className="overview-content">
                   {currentArn}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Glue index store URI</EuiText>
+                <EuiText className="overview-title">AWS Glue index store URI</EuiText>
                 <EuiText size="s" className="overview-content">
                   {currentStore}
                 </EuiText>
@@ -94,7 +94,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query Permissions</EuiText>
+                <EuiText className="overview-title">Query permissions</EuiText>
                 <EuiText size="s" className="overview-content">
                   {selectedQueryPermissionRoles && selectedQueryPermissionRoles.length
                     ? `Restricted - ${selectedQueryPermissionRoles
