@@ -132,7 +132,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
             <span
               class="euiIEFlexWrapFix"
             >
-              Ways to use in Dashboards
+              Use cases for Prometheus in OpenSearch Dashboards
             </span>
           </button>
         </div>
@@ -495,7 +495,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             <span
               class="euiIEFlexWrapFix"
             >
-              Ways to use in Dashboards
+              Use cases for Amazon S3 in OpenSearch Dashboards
             </span>
           </button>
         </div>
