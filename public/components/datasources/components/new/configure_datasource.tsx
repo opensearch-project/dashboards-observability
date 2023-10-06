@@ -55,11 +55,11 @@ export function Configure(props: ConfigureDatasourceProps) {
   const [page, setPage] = useState<'configure' | 'review'>('configure');
   const ConfigureDatasourceSteps = [
     {
-      title: 'Configure Data Source',
+      title: 'Configure data source',
       status: page === 'review' ? 'complete' : undefined,
     },
     {
-      title: 'Review Configuration',
+      title: 'Review configuration',
     },
   ];
 

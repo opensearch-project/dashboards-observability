@@ -69,7 +69,7 @@ export const DataConnection = (props: any) => {
           <EuiCard
             icon={<EuiIcon size="xxl" type="discoverApp" />}
             title={'Query data'}
-            description="Query your data in Data Explorer or Observability Logs."
+            description="Query your data in Data Explorer or Observability Logs"
             onClick={() => application!.navigateToApp(observabilityLogsID)}
           />
         </EuiFlexItem>
@@ -77,7 +77,7 @@ export const DataConnection = (props: any) => {
           <EuiCard
             icon={<EuiIcon size="xxl" type="bolt" />}
             title={'Accelerate performance'}
-            description="Accelerate performance through OpenSearch indexing."
+            description="Accelerate performance by using OpenSearch indexing"
             onClick={() =>
               application!.navigateToApp(queryWorkbenchPluginID, {
                 path: `#/accelerate/${dataSource}`,
@@ -88,8 +88,8 @@ export const DataConnection = (props: any) => {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="database" />}
-            title={'Tables'}
-            description="Manually Define Tables"
+            title={'Define tables'}
+            description="Manually define tables"
             onClick={() =>
               application!.navigateToApp(queryWorkbenchPluginID, {
                 path: `#/${dataSource}`,
@@ -100,7 +100,7 @@ export const DataConnection = (props: any) => {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-            title={'Integrations data'}
+            title={'Integrate data'}
             description="Explore data faster through integrations"
             onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
           />
