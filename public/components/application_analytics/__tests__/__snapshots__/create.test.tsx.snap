@@ -311,6 +311,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     >
                                       source = openserach_dashboard_sample_logs
@@ -1564,6 +1565,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   >
                                     source = openserach_dashboard_sample_logs
@@ -2758,6 +2760,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     />
                                   </div>
@@ -3925,6 +3928,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   />
                                 </div>
@@ -5151,6 +5155,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     />
                                   </div>
@@ -6318,6 +6323,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   />
                                 </div>
@@ -7537,6 +7543,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     />
                                   </div>
@@ -8641,6 +8648,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   />
                                 </div>
@@ -9807,6 +9815,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     >
                                       source = openserach_dashboard_sample_logs
@@ -10940,6 +10949,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   >
                                     source = openserach_dashboard_sample_logs
@@ -12132,6 +12142,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     />
                                   </div>
@@ -13299,6 +13310,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   />
                                 </div>
@@ -14525,6 +14537,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     />
                                   </div>
@@ -15692,6 +15705,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   />
                                 </div>
@@ -16920,6 +16934,7 @@ Object {
                                       placeholder="Enter PPL query"
                                       rows="6"
                                       spellcheck="false"
+                                      style="margin-top: 0px; height: 18px; padding: 8px;"
                                       type="search"
                                     >
                                       source = openserach_dashboard_sample_logs
@@ -18169,6 +18184,7 @@ Object {
                                     placeholder="Enter PPL query"
                                     rows="6"
                                     spellcheck="false"
+                                    style="margin-top: 0px; height: 18px; padding: 8px;"
                                     type="search"
                                   >
                                     source = openserach_dashboard_sample_logs

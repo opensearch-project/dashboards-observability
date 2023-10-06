@@ -4,15 +4,15 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import './search.scss';
-import $ from 'jquery';
-import React, { useEffect, useMemo, useState } from 'react';
 import { AutocompleteState, createAutocomplete } from '@algolia/autocomplete-core';
 import { EuiFieldText, EuiTextArea } from '@elastic/eui';
+import $ from 'jquery';
 import DSLService from 'public/services/requests/dsl';
-import { IQueryBarProps } from './search';
-import { uiSettingsService } from '../../../../common/utils';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AutocompleteItem } from '../../../../common/constants/autocomplete';
+import { uiSettingsService } from '../../../../common/utils';
+import { IQueryBarProps } from './search';
+import './search.scss';
 
 interface AutocompleteProps extends IQueryBarProps {
   getSuggestions: (
@@ -136,6 +136,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
   return (
     <div className="aa-Autocomplete" {...autocomplete.getRootProps({ id: 'autocomplete-root' })}>
       <TextArea
+        style={{ marginTop: '0px', height: '18px', padding: '8px' }}
         {...autocomplete.getInputProps({
           id: 'autocomplete-textarea',
           'data-test-subj': 'searchAutocompleteTextArea',
