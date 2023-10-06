@@ -5,37 +5,36 @@
 
 import './search.scss';
 
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { isEqual, lowerCase } from 'lodash';
+import '@algolia/autocomplete-theme-classic';
 import {
-  EuiFlexGroup,
+  EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiButtonEmpty,
   EuiPopoverFooter,
-  EuiBadge,
   EuiToolTip,
-  EuiComboBox,
-  EuiTextArea,
 } from '@elastic/eui';
-import { DatePicker } from './date_picker';
-import '@algolia/autocomplete-theme-classic';
-import { Autocomplete } from './autocomplete';
-import { SavePanel } from '../../event_analytics/explorer/save_panel';
-import { PPLReferenceFlyout } from '../helpers';
-import { uiSettingsService } from '../../../../common/utils';
-import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
+import { isEqual, lowerCase } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { coreRefs } from '../../../framework/core_refs';
+import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
-import { SQLService } from '../../../services/requests/sql';
 import { usePolling } from '../../../components/hooks/use_polling';
+import { coreRefs } from '../../../framework/core_refs';
+import { SQLService } from '../../../services/requests/sql';
+import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { PPLReferenceFlyout } from '../helpers';
+import { Autocomplete } from './autocomplete';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -100,7 +99,8 @@ export const DirectSearch = (props: any) => {
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [queryLang, setQueryLang] = useState([]);
+  const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
+  const [queryLang, setQueryLang] = useState('SQL');
   const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
@@ -149,20 +149,44 @@ export const DirectSearch = (props: any) => {
     </EuiButton>
   );
 
-  const handleQueryLanguageChange = (lang) => {
-    if (lang[0].label === 'DQL') {
-      return application.navigateToUrl(
+  const handleQueryLanguageChange = (lang: string) => {
+    if (lang === 'DQL') {
+      return application!.navigateToUrl(
         `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
       );
     }
     dispatch(
       updateSearchMetaData({
         tabId,
-        data: { lang: lang[0].label },
+        data: { lang },
       })
     );
     setQueryLang(lang);
+    closeLanguagePopover();
   };
+
+  const onLanguagePopoverClick = () => {
+    setLanguagePopoverOpen(!isLanguagePopoverOpen);
+  };
+
+  const closeLanguagePopover = () => {
+    setLanguagePopoverOpen(false);
+  };
+
+  const languagePopOverItems = [
+    <EuiContextMenuItem key="SQL" onClick={() => handleQueryLanguageChange('SQL')}>
+      SQL
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="PPL" onClick={() => handleQueryLanguageChange('PPL')}>
+      PPL
+    </EuiContextMenuItem>,
+  ];
+
+  const languagePopOverButton = (
+    <EuiButton iconType="arrowDown" iconSide="right" onClick={onLanguagePopoverClick} color="text">
+      {queryLang}
+    </EuiButton>
+  );
 
   const onQuerySearch = (lang) => {
     setIsQueryRunning(true);
@@ -176,7 +200,7 @@ export const DirectSearch = (props: any) => {
     );
     sqlService
       .fetch({
-        lang: lowerCase(lang[0].label),
+        lang: lowerCase(lang),
         query: tempQuery || query,
         datasource: explorerSearchMetadata.datasources[0].name,
       })
@@ -235,14 +259,17 @@ export const DirectSearch = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        <EuiFlexItem key="lang-selector" className="search-area" grow={1}>
-          <EuiComboBox
-            placeholder="No language selected yet"
-            options={[{ label: 'SQL' }, { label: 'PPL' }]}
-            selectedOptions={queryLang}
-            onChange={handleQueryLanguageChange}
-            singleSelection={{ asPlainText: true }}
-          />
+        <EuiFlexItem key="lang-selector" className="search-area" grow={false}>
+          <EuiPopover
+            id="smallContextMenuExample"
+            button={languagePopOverButton}
+            isOpen={isLanguagePopoverOpen}
+            closePopover={closeLanguagePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel size="s" items={languagePopOverItems} />
+          </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem key="search-bar" className="search-area" grow={5}>
           <Autocomplete
@@ -258,9 +285,9 @@ export const DirectSearch = (props: any) => {
             getSuggestions={getSuggestions}
             onItemSelect={onItemSelect}
             tabId={tabId}
-            isSuggestionDisabled={queryLang[0]?.label === 'SQL'}
+            isSuggestionDisabled={queryLang === 'SQL'}
           />
-          {queryLang[0]?.label && (
+          {queryLang === 'PPL' && (
             <EuiBadge
               className={`ppl-link ${
                 uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
