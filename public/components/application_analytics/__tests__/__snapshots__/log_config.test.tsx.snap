@@ -516,6 +516,13 @@ exports[`Log Config component renders empty log config 1`] = `
                                         onKeyDown={[Function]}
                                         placeholder="Enter PPL query"
                                         spellCheck="false"
+                                        style={
+                                          Object {
+                                            "height": "18px",
+                                            "marginTop": "0px",
+                                            "padding": "8px",
+                                          }
+                                        }
                                         type="search"
                                         value=""
                                       >
@@ -541,6 +548,13 @@ exports[`Log Config component renders empty log config 1`] = `
                                             placeholder="Enter PPL query"
                                             rows={6}
                                             spellCheck="false"
+                                            style={
+                                              Object {
+                                                "height": "18px",
+                                                "marginTop": "0px",
+                                                "padding": "8px",
+                                              }
+                                            }
                                             type="search"
                                             value=""
                                           />
@@ -1126,6 +1140,13 @@ exports[`Log Config component renders with query 1`] = `
                                         onKeyDown={[Function]}
                                         placeholder="Enter PPL query"
                                         spellCheck="false"
+                                        style={
+                                          Object {
+                                            "height": "18px",
+                                            "marginTop": "0px",
+                                            "padding": "8px",
+                                          }
+                                        }
                                         type="search"
                                         value="source = openserach_dashboard_sample_logs"
                                       >
@@ -1151,6 +1172,13 @@ exports[`Log Config component renders with query 1`] = `
                                             placeholder="Enter PPL query"
                                             rows={6}
                                             spellCheck="false"
+                                            style={
+                                              Object {
+                                                "height": "18px",
+                                                "marginTop": "0px",
+                                                "padding": "8px",
+                                              }
+                                            }
                                             type="search"
                                             value="source = openserach_dashboard_sample_logs"
                                           />
