@@ -954,6 +954,13 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 onKeyDown={[Function]}
                                 placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                 spellCheck="false"
+                                style={
+                                  Object {
+                                    "height": "18px",
+                                    "marginTop": "0px",
+                                    "padding": "8px",
+                                  }
+                                }
                                 type="search"
                                 value=""
                               >
@@ -1001,6 +1008,13 @@ exports[`Panels View Component renders panel view container with visualizations 
                                           onKeyDown={[Function]}
                                           placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                           spellCheck="false"
+                                          style={
+                                            Object {
+                                              "height": "18px",
+                                              "marginTop": "0px",
+                                              "padding": "8px",
+                                            }
+                                          }
                                           type="search"
                                           value=""
                                         />
@@ -3157,6 +3171,13 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 onKeyDown={[Function]}
                                 placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                 spellCheck="false"
+                                style={
+                                  Object {
+                                    "height": "18px",
+                                    "marginTop": "0px",
+                                    "padding": "8px",
+                                  }
+                                }
                                 type="search"
                                 value=""
                               >
@@ -3204,6 +3225,13 @@ exports[`Panels View Component renders panel view container without visualizatio
                                           onKeyDown={[Function]}
                                           placeholder="Use PPL 'where' clauses to add filters on all visualizations [where Carrier = 'OpenSearch-Air']"
                                           spellCheck="false"
+                                          style={
+                                            Object {
+                                              "height": "18px",
+                                              "marginTop": "0px",
+                                              "padding": "8px",
+                                            }
+                                          }
                                           type="search"
                                           value=""
                                         />

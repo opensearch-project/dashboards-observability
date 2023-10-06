@@ -2,21 +2,22 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useCallback, useEffect, useState, useContext } from 'react';
+
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { LogExplorerRouterContext } from '../..';
 import { DataSourceSelectable } from '../../../../../../../src/plugins/data/public';
+import { coreRefs } from '../../../../framework/core_refs';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../../../event_analytics/redux/slices/search_meta_data_slice';
-import { coreRefs } from '../../../../framework/core_refs';
+import { reset as resetCountDistribution } from '../../redux/slices/count_distribution_slice';
 import { reset as resetFields } from '../../redux/slices/field_slice';
 import { reset as resetPatterns } from '../../redux/slices/patterns_slice';
 import { reset as resetQueryResults } from '../../redux/slices/query_result_slice';
-import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
-import { reset as resetCountDistribution } from '../../redux/slices/count_distribution_slice';
-import { LogExplorerRouterContext } from '../..';
+import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
 
 export const DataSourceSelection = ({ tabId }) => {
   const { dataSources } = coreRefs;
@@ -117,6 +118,7 @@ export const DataSourceSelection = ({ tabId }) => {
 
   return (
     <DataSourceSelectable
+      className="dsc-selector"
       dataSources={activeDataSources}
       dataSourceOptionList={dataSourceOptionList}
       setDataSourceOptionList={setDataSourceOptionList}

@@ -3,26 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useContext } from 'react';
-import { batch, useDispatch } from 'react-redux';
-import { isEmpty } from 'lodash';
 import {
-  EuiTitle,
-  EuiSpacer,
-  EuiFieldSearch,
   EuiAccordion,
-  EuiHorizontalRule,
   EuiDragDropContext,
-  EuiDroppable,
   EuiDraggable,
+  EuiDroppable,
+  EuiFieldSearch,
+  EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
-import { Field } from './field';
-import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useContext, useState } from 'react';
+import { batch, useDispatch } from 'react-redux';
 import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constants/explorer';
-import { sortFields, updateFields } from '../../redux/slices/field_slice';
+import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { TabContext } from '../../hooks/use_tab_context';
+import { sortFields, updateFields } from '../../redux/slices/field_slice';
+import { Field } from './field';
 
 interface ISidebarProps {
   query: string;
@@ -314,27 +314,20 @@ export const Sidebar = (props: ISidebarProps) => {
                               index={index}
                               draggableId=""
                             >
-                              <EuiPanel
-                                data-attr-field={field.name}
-                                paddingSize="s"
-                                className="dscSidebar__item"
-                                data-test-subj={`fieldList-field`}
-                              >
-                                <Field
-                                  query={query}
-                                  field={field}
-                                  selectedPattern={selectedPattern}
-                                  isOverridingPattern={isOverridingPattern}
-                                  handleOverridePattern={handleOverridePattern}
-                                  selectedTimestamp={selectedTimestamp}
-                                  isOverridingTimestamp={isOverridingTimestamp}
-                                  handleOverrideTimestamp={handleOverrideTimestamp}
-                                  onToggleField={handleAddField}
-                                  selected={false}
-                                  isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
-                                  showTimestampOverrideButton={true}
-                                />
-                              </EuiPanel>
+                              <Field
+                                query={query}
+                                field={field}
+                                selectedPattern={selectedPattern}
+                                isOverridingPattern={isOverridingPattern}
+                                handleOverridePattern={handleOverridePattern}
+                                selectedTimestamp={selectedTimestamp}
+                                isOverridingTimestamp={isOverridingTimestamp}
+                                handleOverrideTimestamp={handleOverrideTimestamp}
+                                onToggleField={handleAddField}
+                                selected={false}
+                                isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
+                                showTimestampOverrideButton={true}
+                              />
                             </EuiDraggable>
                           );
                         })}
