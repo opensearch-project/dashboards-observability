@@ -42,7 +42,7 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Review Prometheus Data Source Configuration`}</h1>
+          <h1>{`Review Prometheus data source configuration`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiSpacer />
@@ -96,7 +96,7 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query Permissions</EuiText>
+                <EuiText className="overview-title">Query permissions</EuiText>
                 <EuiText size="s" className="overview-content">
                   {selectedQueryPermissionRoles && selectedQueryPermissionRoles.length
                     ? `Restricted - ${selectedQueryPermissionRoles

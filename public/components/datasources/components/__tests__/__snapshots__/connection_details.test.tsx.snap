@@ -79,7 +79,7 @@ exports[`Connection Details test Renders connection details for prometheus datas
               <div
                 className="euiTextColor euiTextColor--default"
               >
-                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
               </div>
             </EuiTextColor>
           </div>
@@ -338,7 +338,7 @@ exports[`Connection Details test Renders connection details for s3 datasource 1`
               <div
                 className="euiTextColor euiTextColor--default"
               >
-                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
               </div>
             </EuiTextColor>
           </div>

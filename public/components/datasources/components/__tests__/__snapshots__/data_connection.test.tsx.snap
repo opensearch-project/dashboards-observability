@@ -132,7 +132,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
             <span
               class="euiIEFlexWrapFix"
             >
-              Ways to use in Dashboards
+              Use cases for Prometheus in OpenSearch Dashboards
             </span>
           </button>
         </div>
@@ -270,7 +270,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
               <div
                 class="euiTextColor euiTextColor--default"
               >
-                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
               </div>
             </div>
           </div>
@@ -292,7 +292,7 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                   <h2
                     class="panel-title"
                   >
-                    Access Control
+                    Access control
                   </h2>
                   Control which OpenSearch users have access to this data source.
                 </div>
@@ -495,7 +495,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
             <span
               class="euiIEFlexWrapFix"
             >
-              Ways to use in Dashboards
+              Use cases for Amazon S3 in OpenSearch Dashboards
             </span>
           </button>
         </div>
@@ -560,7 +560,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                         id="random_html_idDescription"
                       >
                         <p>
-                          Query your data in Data Explorer or Observability Logs.
+                          Query your data in Data Explorer or Observability Logs
                         </p>
                       </div>
                     </div>
@@ -605,7 +605,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                         id="random_html_idDescription"
                       >
                         <p>
-                          Accelerate performance through OpenSearch indexing.
+                          Accelerate performance by using OpenSearch indexing
                         </p>
                       </div>
                     </div>
@@ -642,7 +642,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           aria-describedby=" random_html_idDescription"
                           class="euiCard__titleButton"
                         >
-                          Tables
+                          Define tables
                         </button>
                       </span>
                       <div
@@ -650,7 +650,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                         id="random_html_idDescription"
                       >
                         <p>
-                          Manually Define Tables
+                          Manually define tables
                         </p>
                       </div>
                     </div>
@@ -687,7 +687,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                           aria-describedby=" random_html_idDescription"
                           class="euiCard__titleButton"
                         >
-                          Integrations data
+                          Integrate data
                         </button>
                       </span>
                       <div
@@ -781,7 +781,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
               <div
                 class="euiTextColor euiTextColor--default"
               >
-                Access to data can be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+                Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
               </div>
             </div>
           </div>
@@ -803,7 +803,7 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                   <h2
                     class="panel-title"
                   >
-                    Access Control
+                    Access control
                   </h2>
                   Control which OpenSearch users have access to this data source.
                 </div>
