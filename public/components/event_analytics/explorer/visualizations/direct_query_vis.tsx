@@ -3,16 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiLink, EuiTitle } from '@elastic/eui';
+import { queryWorkbenchPluginID } from '../../../../../common/constants/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 
-export const DirectQueryVisualization = () => {
+interface DirectQueryVisualizationProps {
+  currentDataSource: string;
+}
+
+export const DirectQueryVisualization = ({ currentDataSource }: DirectQueryVisualizationProps) => {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         <EuiCallOut title="Data source can't be visualized." color="danger" iconType="alert">
           <p>
-            <EuiLink href="#">Index data to visualize</EuiLink>.
+            <EuiLink
+              onClick={() =>
+                coreRefs?.application!.navigateToApp(queryWorkbenchPluginID, {
+                  path: `#/${currentDataSource}`,
+                })
+              }
+            >
+              Index data to visualize
+            </EuiLink>
           </p>
         </EuiCallOut>
       </EuiFlexItem>

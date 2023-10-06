@@ -10,9 +10,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSideBar,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
@@ -20,8 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import classNames from 'classnames';
-import { isEmpty, isEqual, reduce } from 'lodash';
+import _, { isEmpty, isEqual, reduce } from 'lodash';
 import React, {
   ReactElement,
   useCallback,
@@ -32,14 +28,15 @@ import React, {
   useState,
 } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash';
 import { LogExplorerRouterContext } from '..';
 import {
   CREATE_TAB_PARAM,
   CREATE_TAB_PARAM_KEY,
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
+  DEFAULT_EMPTY_EXPLORER_FIELDS,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
+  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -56,7 +53,6 @@ import {
   TAB_EVENT_ID,
   TAB_EVENT_TITLE,
   TIME_INTERVAL_OPTIONS,
-  DEFAULT_EMPTY_EXPLORER_FIELDS,
 } from '../../../../common/constants/explorer';
 import {
   LIVE_END_TIME,
@@ -83,8 +79,8 @@ import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fet
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import {
-  PanelSavedObjectClient,
   PPLSavedQueryClient,
+  PanelSavedObjectClient,
 } from '../../../services/saved_objects/saved_object_client/ppl';
 import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 import {
@@ -96,6 +92,7 @@ import { SaveAsNewQuery } from '../../../services/saved_objects/saved_object_sav
 import { sleep } from '../../common/live_tail/live_tail_button';
 import { onItemSelect, parseGetSuggestions } from '../../common/search/autocomplete_logic';
 import { Search } from '../../common/search/search';
+import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import { selectCountDistribution } from '../redux/slices/count_distribution_slice';
@@ -107,15 +104,13 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  change as updateVizConfig,
   selectVisualizationConfig,
+  change as updateVizConfig,
 } from '../redux/slices/viualization_config_slice';
-import {
-  update as updateSearchMetaData,
-  selectSearchMetaData,
-} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
+import { DataSourceSelection } from './datasources/datasources_selection';
+import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { LogPatterns } from './log_patterns/log_patterns';
@@ -124,8 +119,6 @@ import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
-import { DataSourceSelection } from './datasources/datasources_selection';
-import { DirectQueryRunning } from './direct_query_running';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 
 export const Explorer = ({
@@ -430,10 +423,19 @@ export const Explorer = ({
     }
   };
 
-  const mainSectionClassName = classNames({
-    'col-md-8': !isSidebarClosed,
-    'col-md-12': isSidebarClosed,
-  });
+  useEffect(() => {
+    if (explorerSearchMeta.datasources?.[0]?.type !== 'DEFAULT_INDEX_PATTERNS') {
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            [RAW_QUERY]: '',
+            [FINAL_QUERY]: '',
+          },
+        })
+      );
+    }
+  }, [explorerSearchMeta.datasources]);
 
   const handleOverrideTimestamp = async (timestamp: IField) => {
     setIsOverridingTimestamp(true);
@@ -484,56 +486,58 @@ export const Explorer = ({
 
   const mainContent = useMemo(() => {
     return (
-      <div className={`dscWrapper ${mainSectionClassName}`}>
+      <div className="dscWrapper col-md-12">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                {/* <EuiPanel paddingSize="s" style={{ height: '100%' }}> */}
-                {countDistribution?.data && !isLiveTailOnRef.current && (
-                  <>
-                    <HitsCounter
-                      hits={_.sum(countDistribution.data['count()'])}
-                      showResetButton={false}
-                      onResetQuery={() => {}}
-                    />
-                    <TimechartHeader
-                      options={timeIntervalOptions}
-                      onChangeInterval={(selectedIntrv) => {
-                        const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                          (item) => item.value === selectedIntrv
-                        );
-                        const intrv = selectedIntrv.replace(/^auto_/, '');
-                        getCountVisualizations(intrv);
-                        selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                        getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                      }}
-                      stateInterval={selectedIntervalRef.current?.value}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                    />
-                    <CountDistribution
-                      countDistribution={countDistribution}
-                      selectedInterval={selectedIntervalRef.current?.value}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                    />
-                  </>
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-                  <LogPatterns
-                    selectedIntervalUnit={selectedIntervalRef.current}
-                    handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-                  />
+            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                  {/* <EuiPanel paddingSize="s" style={{ height: '100%' }}> */}
+                  {countDistribution?.data && !isLiveTailOnRef.current && (
+                    <>
+                      <HitsCounter
+                        hits={_.sum(countDistribution.data['count()'])}
+                        showResetButton={false}
+                        onResetQuery={() => {}}
+                      />
+                      <TimechartHeader
+                        options={timeIntervalOptions}
+                        onChangeInterval={(selectedIntrv) => {
+                          const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                            (item) => item.value === selectedIntrv
+                          );
+                          const intrv = selectedIntrv.replace(/^auto_/, '');
+                          getCountVisualizations(intrv);
+                          selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                          getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                        }}
+                        stateInterval={selectedIntervalRef.current?.value}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                      <CountDistribution
+                        countDistribution={countDistribution}
+                        selectedInterval={selectedIntervalRef.current?.value}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                    </>
+                  )}
                 </EuiPanel>
-              </EuiPanel>
-            </EuiFlexItem>
-
+              </EuiFlexItem>
+            )}
+            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                  <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                    <LogPatterns
+                      selectedIntervalUnit={selectedIntervalRef.current}
+                      handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                    />
+                  </EuiPanel>
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                 <section
@@ -648,7 +652,11 @@ export const Explorer = ({
         queryManager={queryManager}
       />
     ) : (
-      <DirectQueryVisualization />
+      <DirectQueryVisualization
+        currentDataSource={
+          explorerSearchMeta.datasources ? explorerSearchMeta.datasources?.[0]?.label : ''
+        }
+      />
     );
   }, [
     query,
@@ -912,9 +920,14 @@ export const Explorer = ({
       >
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <DataSourceSelection tabId={tabId} />
+                <div
+                  className="dscSelector"
+                  style={{ width: '300px', marginTop: '8px', marginLeft: '10px' }}
+                >
+                  <DataSourceSelection tabId={tabId} />
+                </div>
               </EuiFlexItem>
               <EuiFlexItem>
                 <div className="explorerFieldSelector">
