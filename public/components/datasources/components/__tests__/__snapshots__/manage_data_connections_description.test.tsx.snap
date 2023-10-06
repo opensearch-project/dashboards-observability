@@ -23,7 +23,7 @@ exports[`Manage Data Connections Description test Renders manage data connection
               <h2
                 className="euiTitle euiTitle--small"
               >
-                Manage existing data sources
+                Manage data sources
               </h2>
             </EuiTitle>
             <EuiSpacer
@@ -47,7 +47,7 @@ exports[`Manage Data Connections Description test Renders manage data connection
                   <div
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    Manage already created data sources or
+                    Manage existing data sources or
                      
                     <EuiLink
                       href="#/new"
