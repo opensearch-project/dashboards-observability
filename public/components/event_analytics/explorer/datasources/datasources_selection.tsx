@@ -18,7 +18,6 @@ import { reset as resetPatterns } from '../../redux/slices/patterns_slice';
 import { reset as resetQueryResults } from '../../redux/slices/query_result_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
-import './datasource.scss';
 
 export const DataSourceSelection = ({ tabId }) => {
   const { dataSources } = coreRefs;

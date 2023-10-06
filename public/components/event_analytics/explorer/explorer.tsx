@@ -36,6 +36,7 @@ import {
   DEFAULT_AVAILABILITY_QUERY,
   DEFAULT_EMPTY_EXPLORER_FIELDS,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
+  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -97,12 +98,7 @@ import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } 
 import { selectCountDistribution } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
-import {
-  changeDateRange,
-  changeQuery,
-  reset as resetQuery,
-  selectQueries,
-} from '../redux/slices/query_slice';
+import { changeDateRange, changeQuery, selectQueries } from '../redux/slices/query_slice';
 import { updateTabName } from '../redux/slices/query_tab_slice';
 import { selectExplorerVisualization } from '../redux/slices/visualization_slice';
 import {
@@ -428,10 +424,14 @@ export const Explorer = ({
   };
 
   useEffect(() => {
-    if (explorerSearchMeta.datasources?.[0]?.type === 'S3GLUE') {
-      await dispatch(
-        resetQuery({
+    if (explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS') {
+      dispatch(
+        changeQuery({
           tabId,
+          query: {
+            [RAW_QUERY]: '',
+            [FINAL_QUERY]: '',
+          },
         })
       );
     }
