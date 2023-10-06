@@ -4,7 +4,7 @@
  */
 
 export const panelBreadCrumbs = [
-  { text: 'Observability Dashboards', href: '#/operational_panels/' },
+  { text: 'Operational panels', href: '#/operational_panels/' },
   { text: 'Observability', href: 'observability#/' },
 ];
 

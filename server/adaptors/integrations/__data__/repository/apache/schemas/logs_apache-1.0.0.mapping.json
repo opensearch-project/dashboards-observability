@@ -216,9 +216,23 @@
       }
     }
   },
-  "composed_of": [
-    "communication",
-    "http"
-  ],
-  "version": 1
+  "composed_of": ["communication", "http"],
+  "version": 1,
+  "_meta": {
+    "description": "Simple Schema For Observability",
+    "catalog": "observability",
+    "type": "logs",
+    "correlations": [
+      {
+        "field": "spanId",
+        "foreign-schema": "traces",
+        "foreign-field": "spanId"
+      },
+      {
+        "field": "traceId",
+        "foreign-schema": "traces",
+        "foreign-field": "traceId"
+      }
+    ]
+  }
 }

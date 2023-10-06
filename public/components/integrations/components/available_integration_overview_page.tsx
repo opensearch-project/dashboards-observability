@@ -117,8 +117,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
       setData(exists.data);
 
-      let newItems = exists.data.hits
-        .flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
+      let newItems = exists.data.hits.flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
       newItems = [...new Set(newItems)].sort().map((newItem) => {
         return {
           name: newItem,

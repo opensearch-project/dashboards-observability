@@ -92,6 +92,7 @@ describe('Siderbar component', () => {
           handleOverrideTimestamp={handleOverrideTimestamp}
           isFieldToggleButtonDisabled={false}
           isOverridingTimestamp={false}
+          storedExplorerFields={explorerFields}
         />
       </Provider>
     );

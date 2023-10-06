@@ -108,7 +108,8 @@ describe('Open flyout for a data row to see details', () => {
   });
 });
 
-describe('Add/delete/switch explorer top level tabs', () => {
+// skip for now due to tab removals
+describe.skip('Add/delete/switch explorer top level tabs', () => {
   beforeEach(() => {
     landOnEventExplorer();
   });
@@ -406,7 +407,7 @@ describe('Live tail stop automatically', () => {
     landOnEventExplorer();
   });
 
-  it('Moving to other tab should stop live tail automatically', () => {
+  it.skip('Moving to other tab should stop live tail automatically', () => {
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[1].query);
     cy.get('[data-test-subj=eventLiveTail]').click();
@@ -414,7 +415,7 @@ describe('Live tail stop automatically', () => {
     cy.get('.euiToastHeader__title').contains('On').should('exist');
   });
 
-  it('Add a new tab', () => {
+  it.skip('Add a new tab', () => {
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
       .then((lists) => {
@@ -426,7 +427,7 @@ describe('Live tail stop automatically', () => {
       });
   });
 
-  it('Click to switch to another tab', () => {
+  it.skip('Click to switch to another tab', () => {
     cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).click();
@@ -441,7 +442,7 @@ describe('Live tail stop automatically', () => {
       .should('have.class', 'euiTab-isSelected');
   });
 
-  it('Close current selected tab', () => {
+  it.skip('Close current selected tab', () => {
     cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
       timeout: COMMAND_TIMEOUT_LONG,
     }).click();

@@ -50,7 +50,6 @@ import { DeleteModal } from '../common/helpers/delete_modal';
 import {
   createPanel,
   deletePanels,
-  doesNameExist,
   fetchPanels,
   isUuid,
   newPanelTemplate,
@@ -121,9 +120,7 @@ export const CustomPanelTable = ({
   };
 
   const onCreate = async (newCustomPanelName: string) => {
-    if (await doesNameExist(newCustomPanelName)) {
-      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
-    } else if (!isNameValid(newCustomPanelName)) {
+    if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
       const newPanel = newPanelTemplate(newCustomPanelName);
@@ -133,9 +130,7 @@ export const CustomPanelTable = ({
   };
 
   const onRename = async (newCustomPanelName: string) => {
-    if (await doesNameExist(newCustomPanelName)) {
-      setToast(`Observability Dashboard with name "${newCustomPanelName}" already exists`, 'danger');
-    } else if (!isNameValid(newCustomPanelName)) {
+    if (!isNameValid(newCustomPanelName)) {
       setToast('Invalid Dashboard name', 'danger');
     } else {
       dispatch(renameCustomPanel(newCustomPanelName, selectedCustomPanels[0].id));
@@ -144,10 +139,8 @@ export const CustomPanelTable = ({
   };
 
   const onClone = async (newName: string) => {
-    if (await doesNameExist(newName)) {
-      setToast(`Observability Dashboard with name "${newName}" already exists`, 'danger');
-    } else if (!isNameValid(newName)) {
-      setToast('Invalid Observability Dashboard name', 'danger');
+    if (!isNameValid(newName)) {
+      setToast('Invalid Operational Panel name', 'danger');
     } else {
       let sourcePanel = selectedCustomPanels[0];
       try {

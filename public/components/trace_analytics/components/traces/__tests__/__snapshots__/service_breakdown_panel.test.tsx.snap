@@ -220,6 +220,9 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                       "yaxis": Object {
                         "rangemode": "normal",
                         "showgrid": true,
+                        "title": Object {
+                          "text": "Count",
+                        },
                         "zeroline": false,
                       },
                     }

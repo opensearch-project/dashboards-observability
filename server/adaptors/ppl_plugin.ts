@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PPL_ENDPOINT, SQL_ENDPOINT } from '../../common/constants/shared';
+import {
+  OPENSEARCH_DATACONNECTIONS_API,
+  PPL_ENDPOINT,
+  SQL_ENDPOINT,
+} from '../../common/constants/shared';
 
 export const PPLPlugin = function (Client, config, components) {
   const ca = components.clientAction.factory;
@@ -36,5 +40,54 @@ export const PPLPlugin = function (Client, config, components) {
     },
     needBody: true,
     method: 'POST',
+  });
+
+  ppl.getDataConnectionById = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}/<%=dataconnection%>`,
+      req: {
+        dataconnection: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
+    method: 'GET',
+  });
+
+  ppl.deleteDataConnection = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}/<%=dataconnection%>`,
+      req: {
+        dataconnection: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
+    method: 'DELETE',
+  });
+
+  ppl.createDataSource = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
+    },
+    needBody: true,
+    method: 'POST',
+  });
+
+  ppl.modifyDataConnection = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
+    },
+    needBody: true,
+    method: 'PUT',
+  });
+
+  ppl.getDataConnections = ca({
+    url: {
+      fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
+    },
+    method: 'GET',
   });
 };

@@ -221,28 +221,28 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
         //   if (renamedCustomPanel) renamedCustomPanel.name = editedCustomPanelName;
         //   return newCustomPanelData;
         // });
-        setToast(`Observability Dashboard successfully renamed into "${editedCustomPanelName}"`);
+        setToast(`Operational Panel successfully renamed into "${editedCustomPanelName}"`);
       })
       .catch((err) => {
         setToast(
-          'Error renaming Observability Dashboard, please make sure you have the correct permission.',
+          'Error renaming Operational Panel, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err.body.message);
       });
   };
 
-  // Deletes an existing Observability Dashboard
+  // Deletes an existing Operational Panel
   const deleteCustomPanel = (customPanelId: string, customPanelName: string) => {
     return coreRefs
       .http!.delete(`${CUSTOM_PANELS_API_PREFIX}/panels/` + customPanelId)
       .then((res) => {
-        setToast(`Observability Dashboard "${customPanelName}" successfully deleted!`);
+        setToast(`Operational Panel "${customPanelName}" successfully deleted!`);
         return res;
       })
       .catch((err) => {
         setToast(
-          'Error deleting Observability Dashboard, please make sure you have the correct permission.',
+          'Error deleting Operational Panel, please make sure you have the correct permission.',
           'danger'
         );
         console.error(err.body.message);
@@ -315,7 +315,7 @@ export const CustomPanelView = (props: CustomPanelViewProps) => {
 
   const onClone = async (newCustomPanelName: string) => {
     if (!isNameValid(newCustomPanelName)) {
-      setToast('Invalid Observability Dashboard name', 'danger');
+      setToast('Invalid Operational Panel name', 'danger');
     } else {
       dispatch(clonePanel(panel, newCustomPanelName));
     }

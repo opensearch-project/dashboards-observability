@@ -4,7 +4,7 @@
  */
 
 import Wreck from '@hapi/wreck';
-import { optionsType } from "../../../../common/types/notebooks";
+import { optionsType } from '../../../../common/types/notebooks';
 
 export const requestor = async function (
   requestType: string,

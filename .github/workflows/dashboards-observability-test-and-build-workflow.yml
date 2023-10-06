@@ -1,19 +1,18 @@
-
 name: Test and Build Observability Dashboards Plugin
 
-on: [pull_request, push]
+on: [ pull_request, push ]
 
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_VERSION: '2.x'
-  OPENSEARCH_PLUGIN_VERSION: 2.8.0.0
+  OPENSEARCH_PLUGIN_VERSION: 2.11.0.0
 
 jobs:
 
   build:
-    strategy: 
+    strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -51,11 +50,15 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-
       - name: Plugin Bootstrap
-        run: |
-          cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn osd bootstrap
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 20
+          max_attempts: 2
+          command: |
+            cd OpenSearch-Dashboards
+            yarn config set network-timeout 1000000 -g
+            yarn osd bootstrap
 
       - name: Test all dashboards-observability modules
         run: |

@@ -1,0 +1,900 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Manage Data Connections Table test Renders manage data connections table with data 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div>
+        <header
+          class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+        >
+          <div
+            class="euiPageHeaderSection"
+          >
+            <h1
+              class="euiTitle euiTitle--large"
+              data-test-subj="dataconnections-header"
+            >
+              Data sources
+            </h1>
+          </div>
+        </header>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiText euiText--small"
+        >
+          <div
+            class="euiTextColor euiTextColor--subdued"
+          >
+            Connect and manage compatible OpenSearch and OpenSearch Dashboard data sources.
+             
+            <a
+              class="euiLink euiLink--primary"
+              href="https://opensearch.org/docs/latest/data-sources/index"
+              rel="noreferrer"
+              target="blank"
+            >
+              Learn more
+              <svg
+                aria-hidden="true"
+                aria-label="External link"
+                class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </a>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiTabs euiTabs--condensed"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
+            data-test-subj="manage"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Manage data source
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab"
+            data-test-subj="new"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              New data source
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+      </div>
+      <div
+        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+        data-test-subj="manageDataConnectionsarea"
+        role="main"
+      >
+        <div>
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <h2
+                class="euiTitle euiTitle--small"
+              >
+                Manage existing data sources
+              </h2>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--small"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  Manage already created data sources or
+                   
+                  <a
+                    class="euiLink euiLink--primary"
+                    href="#/new"
+                    rel="noreferrer"
+                  >
+                    create a new data source
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    class="euiButton__text"
+                  >
+                    Refresh
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+          <hr
+            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+          />
+        </div>
+        <div>
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          >
+            <div
+              class="euiFlexItem euiSearchBar__searchHolder"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                    class="euiFieldSearch euiFieldSearch--fullWidth"
+                    placeholder="Search..."
+                    type="search"
+                    value=""
+                  />
+                  <div
+                    class="euiFormControlLayoutIcons"
+                  >
+                    <span
+                      class="euiFormControlLayoutCustomIcon"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiBasicTable"
+          >
+            <div>
+              <div
+                class="euiTableHeaderMobile"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                </div>
+              </div>
+              <table
+                class="euiTable euiTable--responsive euiTable--auto"
+                id="random_html_id"
+                tabindex="-1"
+              >
+                <caption
+                  class="euiScreenReaderOnly euiTableCaption"
+                />
+                <thead>
+                  <tr>
+                    <th
+                      class="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_name_0"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <span
+                        class="euiTableCellContent"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Name"
+                        >
+                          Name
+                        </span>
+                      </span>
+                    </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <span
+                        class="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                  >
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          />
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <a
+                              class="euiLink euiLink--primary"
+                              data-test-subj="my_spark3DataConnectionsLink"
+                              href="#/manage/my_spark3"
+                              rel="noreferrer"
+                            >
+                              my_spark3
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-query"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="0-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                  >
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          />
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <a
+                              class="euiLink euiLink--primary"
+                              data-test-subj="my_spark4DataConnectionsLink"
+                              href="#/manage/my_spark4"
+                              rel="noreferrer"
+                            >
+                              my_spark4
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-query"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="1-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                  >
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          />
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <a
+                              class="euiLink euiLink--primary"
+                              data-test-subj="my_sparkDataConnectionsLink"
+                              href="#/manage/my_spark"
+                              rel="noreferrer"
+                            >
+                              my_spark
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-query"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="2-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                  >
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          />
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <a
+                              class="euiLink euiLink--primary"
+                              data-test-subj="my_spark2DataConnectionsLink"
+                              href="#/manage/my_spark2"
+                              rel="noreferrer"
+                            >
+                              my_spark2
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-edit"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Edit
+                        </span>
+                        <button
+                          aria-labelledby="random_html_id"
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem expandedItemActions__completelyHide"
+                          data-test-subj="action-query"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="random_html_id"
+                        >
+                          Query in Observability Logs
+                        </span>
+                        <div
+                          class="euiTableCellContent__hoverItem"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorLeftCenter"
+                            id="3-actions"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <span
+                                class="euiToolTipAnchor"
+                              >
+                                <button
+                                  aria-label="All actions"
+                                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                  data-test-subj="euiCollapsedItemActionsButton"
+                                  type="button"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorUpRight"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    >
+                      <button
+                        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                        data-test-subj="tablePaginationPopoverButton"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            Rows per page
+                            : 
+                            10
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <nav
+                    class="euiPagination"
+                  >
+                    <button
+                      aria-label="Previous page"
+                      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                      data-test-subj="pagination-button-previous"
+                      disabled=""
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </button>
+                    <ul
+                      class="euiPagination__list"
+                    >
+                      <li
+                        class="euiPagination__item"
+                      >
+                        <button
+                          aria-controls="random_html_id"
+                          aria-current="true"
+                          aria-label="Page 1 of 1"
+                          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                          data-test-subj="pagination-button-0"
+                          disabled=""
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <span
+                              class="euiButtonEmpty__text"
+                            >
+                              1
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    </ul>
+                    <button
+                      aria-label="Next page"
+                      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                      data-test-subj="pagination-button-next"
+                      disabled=""
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
