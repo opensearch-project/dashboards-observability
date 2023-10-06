@@ -187,6 +187,28 @@ export const createPrometheusMetricById = (metricId: string) => {
   };
 };
 
+export const updatePrometheusMetric = (
+  metric: MetricType,
+  startTime: ShortDate,
+  endTime: ShortDate,
+  spanValue: string
+) => {
+  console.log('updatePrometheusMetric', { metric });
+  return {
+    query: metric.query,
+    fields: metric.attributesGroupBy.map((attr) => ({ name: attr, label: attr, type: 'number' })),
+    dateRange: [startTime, endTime],
+    timestamp: '@timestamp',
+    name: metric.name,
+    description: '',
+    type: 'line',
+    subType: 'metric',
+    userConfigs: metric.user_configs,
+    unitsOfMeasure: '',
+    applicationId: '',
+    selectedLabels: metric.attributesGroupBy,
+  };
+};
 export const updateMetricsWithSelections = (
   savedVisualization: any,
   startTime: ShortDate,

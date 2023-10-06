@@ -378,8 +378,8 @@ export const renderCatalogVisualization = async ({
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
-    aggregation: defaultAggregation,
-    attributesGroupBy: attributes,
+    aggregation: queryMetaData.aggregation ?? 'avg',
+    attributesGroupBy: queryMetaData.attributesGroupBy ?? [],
     startTime,
     endTime,
     spanParam,

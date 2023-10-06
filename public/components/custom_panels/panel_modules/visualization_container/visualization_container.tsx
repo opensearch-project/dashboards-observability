@@ -33,6 +33,7 @@ import {
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { metricSelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
 
 /*
@@ -103,6 +104,7 @@ export const VisualizationContainer = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
 
+  const queryMetaData = useSelector(metricSelector(visualizationId));
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {
     if (modalType === 'catalogModal')
@@ -216,7 +218,7 @@ export const VisualizationContainer = ({
       await renderCatalogVisualization({
         http,
         pplService,
-        catalogSource: savedVisualizationId,
+        catalogSource: visualizationId,
         startTime: fromTime,
         endTime: toTime,
         filterQuery: pplFilterValue,
@@ -276,12 +278,26 @@ export const VisualizationContainer = ({
         )}
       </div>
     ),
-    [onRefresh, isLoading, isError, visualizationData, visualizationType, visualizationMetaData]
+    [
+      onRefresh,
+      isLoading,
+      isError,
+      visualizationData,
+      visualizationType,
+      visualizationMetaData,
+      queryMetaData,
+    ]
   );
 
   useEffect(() => {
     loadVisaulization();
   }, [onRefresh]);
+  //
+  // useEffect(() => {
+  //   if (catalogVisualization) loadVisaulization();
+  // }, [queryMetaData]);
+
+  const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 
   return (
     <>

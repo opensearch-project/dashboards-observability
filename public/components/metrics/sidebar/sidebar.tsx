@@ -15,6 +15,8 @@ import {
   selectMetric,
   loadMetrics,
   selectedMetricsSelector,
+  addSelectedMetric,
+  removeSelectedMetric,
 } from '../redux/slices/metrics_slice';
 import { CoreStart } from '../../../../../../src/core/public';
 import PPLService from '../../../services/requests/ppl';
@@ -28,15 +30,15 @@ export const Sidebar = () => {
   const selectedMetrics = useSelector(selectedMetricsSelector);
 
   useEffect(() => {
-    batch(() => {
-      dispatch(loadMetrics());
-    });
-  }, [dispatch]);
+    dispatch(loadMetrics());
+  }, []);
 
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
-
+  const handleAddMetric = (metric: any) => {
+    console.log('handleAddMetric', metric);
+    dispatch(addSelectedMetric(metric.id));
+  };
   const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
+    dispatch(removeSelectedMetric(metric.id));
   };
 
   return (
@@ -50,6 +52,7 @@ export const Sidebar = () => {
           headerName="Selected Metrics"
           handleClick={handleRemoveMetric}
           dataTestSubj="metricsListItems_selectedMetrics"
+          showRemoveIcon={true}
         />
         <EuiSpacer size="s" />
         <MetricsAccordion

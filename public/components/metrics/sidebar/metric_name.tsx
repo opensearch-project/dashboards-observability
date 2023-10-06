@@ -4,7 +4,18 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiFacetButton, EuiIcon } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButton,
+  EuiFacetButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiSchemaItem,
+  EuiToken,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { metricIconsSelector } from '../redux/slices/metrics_slice';
 import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
@@ -14,16 +25,47 @@ const MetricIcon = ({ metric }) => {
   const iconMeta = metricIcons[metric.catalog];
   if (metric.catalog === OBSERVABILITY_CUSTOM_METRIC)
     return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
-  else return <EuiAvatar name={metric.catalog} size="s" type="space" {...iconMeta} />;
+  else
+    return (
+      <EuiToken
+        iconType="tokenConstant"
+        title={metric.catalog}
+        iconSize="s"
+        size="s"
+        fill="none"
+        {...iconMeta}
+      />
+    );
 };
 
 interface IMetricNameProps {
   metric: any;
   handleClick: (props: any) => void;
+  showRemoveIcon: boolean;
 }
 
 export const MetricName = (props: IMetricNameProps) => {
-  const { metric, handleClick } = props;
+  const { metric, handleClick, showRemoveIcon } = props;
+
+  const actions = showRemoveIcon
+    ? [
+        {
+          iconType: 'minusInCircle',
+          onClick: () => handleClick(metric),
+          'aria-label': 'Remove from Selected',
+        },
+      ]
+    : [
+        {
+          iconType: 'plusInCircle',
+          onClick: () => handleClick(metric),
+          'aria-label': 'Add to Selected',
+        },
+      ];
+  const logo =
+    metric.catalog === OBSERVABILITY_CUSTOM_METRIC
+      ? 'logoOpenSearch'
+      : () => <MetricIcon metric={metric} />;
 
   const name = () => {
     if (metric.catalog === 'CUSTOM_METRICS') return metric.name;
@@ -31,13 +73,13 @@ export const MetricName = (props: IMetricNameProps) => {
   };
 
   return (
-    <EuiFacetButton
-      className="obsMetric-Name eui-textTruncate"
-      title={metric.name}
-      onClick={() => handleClick(metric)}
-      icon={<MetricIcon metric={metric} />}
-    >
-      {name(metric)}
-    </EuiFacetButton>
+    <EuiSchemaItem
+      className="obsMetric-Name eui-textTruncate readonly"
+      iconType={logo}
+      label={name()}
+      withPanel={false}
+      actions={actions}
+      compressed
+    />
   );
 };

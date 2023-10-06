@@ -18,5 +18,10 @@ export interface MetricType extends VisualizationType {
   y: number;
   w: number;
   h: number;
-  metricType: 'savedCustomMetric' | 'prometheusMetric';
+  query: string;
+  type: 'savedCustomMetric' | 'prometheusMetric';
+  aggregation: string;
+  attributesGroupBy: string[];
+  catalog: string;
+  availableAttributes?: string[];
 }

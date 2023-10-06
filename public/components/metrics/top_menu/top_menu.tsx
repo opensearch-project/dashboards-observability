@@ -30,9 +30,10 @@ import { getSavedObjectsClient } from '../../../services/saved_objects/saved_obj
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import { metricsLayoutSelector } from '../redux/slices/metrics_slice';
+import { metricsLayoutSelector, selectedMetricsSelector } from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
+import { MetricsExport } from './metrics_export';
 
 interface TopMenuProps {
   IsTopPanelDisabled: boolean;
@@ -73,8 +74,7 @@ export const TopMenu = ({
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
-  const metricsLayout = useSelector(metricsLayoutSelector);
-  const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
+  const selectedMetrics = useSelector(selectedMetricsSelector);
 
   const [visualizationsMetaData, setVisualizationsMetaData] = useState<any>([]);
   const [originalPanelVisualizations, setOriginalPanelVisualizations] = useState<MetricType[]>([]);
@@ -140,70 +140,6 @@ export const TopMenu = ({
     </EuiButton>
   );
 
-  const Savebutton = (
-    <EuiButton
-      iconSide="right"
-      onClick={() => {
-        setIsSavePanelOpen((staleState) => !staleState);
-      }}
-      data-test-subj="metrics__saveManagementPopover"
-      iconType="arrowDown"
-      isDisabled={IsTopPanelDisabled}
-    >
-      Save
-    </EuiButton>
-  );
-
-  const handleSavingObjects = async () => {
-    let savedMetricIds = [];
-
-    try {
-      savedMetricIds = await Promise.all(
-        sortedMetricsLayout.map(async (metricLayout, index) => {
-          const updatedMetric = updateMetricsWithSelections(
-            visualizationsMetaData[index],
-            startTime,
-            endTime,
-            spanValue + resolutionValue
-          );
-
-          if (metricLayout.metricType === 'prometheusMetric') {
-            return OSDSavedVisualizationClient.getInstance().create(updatedMetric);
-          } else {
-            return getSavedObjectsClient({
-              objectId: metricLayout.id,
-              objectType: 'savedVisualization',
-            }).update({
-              ...updatedMetric,
-              objectId: metricLayout.id,
-            });
-          }
-        })
-      );
-    } catch (e) {
-      const message = 'Issue in saving metrics';
-      console.error(message, e);
-      setToast(message, 'danger');
-      return;
-    }
-
-    setToast('Saved metrics successfully!');
-
-    if (selectedPanelOptions.length > 0) {
-      try {
-        const allMetricIds = savedMetricIds.map((metric) => metric.objectId);
-        const soPanels = selectedPanelOptions.filter((panel) => uuidRx.test(panel.panel.id));
-
-        dispatch(addMultipleVizToPanels(soPanels, allMetricIds));
-      } catch (e) {
-        const message = 'Issue in saving metrics to panels';
-        console.error(message, e);
-        setToast('Issue in saving metrics', 'danger');
-      }
-      setToast('Saved metrics to Dashboards successfully!');
-    }
-  };
-
   return (
     <>
       <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
@@ -243,56 +179,13 @@ export const TopMenu = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={Savebutton}
-            isOpen={isSavePanelOpen}
-            closePopover={() => setIsSavePanelOpen(false)}
-          >
-            <MetricsExportPanel
-              visualizationsMetaData={visualizationsMetaData}
-              setVisualizationsMetaData={setVisualizationsMetaData}
-              sortedMetricsLayout={sortedMetricsLayout}
-              selectedPanelOptions={selectedPanelOptions}
-              setSelectedPanelOptions={setSelectedPanelOptions}
-            />
-            <EuiPopoverFooter>
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    onClick={() => setIsSavePanelOpen(false)}
-                    data-test-subj="metrics__SaveCancel"
-                  >
-                    Cancel
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    fill
-                    onClick={() => {
-                      handleSavingObjects().then(() => setIsSavePanelOpen(false));
-                    }}
-                    data-test-subj="metrics__SaveConfirm"
-                  >
-                    Save
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverFooter>
-          </EuiPopover>
+          <MetricsExport
+            start={startTime}
+            end={endTime}
+            spanValue={spanValue}
+            resolutionValue={resolutionValue}
+          />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-        {editMode ? (
-          <>
-            <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
-            <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
-          </>
-        ) : (
-          <EuiFlexItem grow={false}>{editButton}</EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </>
   );

@@ -23,7 +23,11 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
         Object {
           "h": 2,
           "id": "Y4muP4QBiaYaSxpXk7r8",
-          "metricType": "savedCustomMetric",
+          "query": Object {
+            "aggregation": "avg",
+            "attributesGroupBy": Array [],
+            "type": "savedCustomMetric",
+          },
           "savedVisualizationId": "Y4muP4QBiaYaSxpXk7r8",
           "w": 12,
           "x": 0,
@@ -41,7 +45,11 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
         Object {
           "h": 2,
           "id": "prometheus.process_resident_memory_bytes",
-          "metricType": "prometheusMetric",
+          "query": Object {
+            "aggregation": "avg",
+            "attributesGroupBy": Array [],
+            "type": "prometheusMetric",
+          },
           "savedVisualizationId": "prometheus.process_resident_memory_bytes",
           "w": 12,
           "x": 0,
@@ -2307,7 +2315,11 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
         Object {
           "h": 2,
           "id": "Y4muP4QBiaYaSxpXk7r8",
-          "metricType": "savedCustomMetric",
+          "query": Object {
+            "aggregation": "avg",
+            "attributesGroupBy": Array [],
+            "type": "savedCustomMetric",
+          },
           "savedVisualizationId": "Y4muP4QBiaYaSxpXk7r8",
           "w": 12,
           "x": 0,
@@ -2325,7 +2337,11 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
         Object {
           "h": 2,
           "id": "prometheus.process_resident_memory_bytes",
-          "metricType": "prometheusMetric",
+          "query": Object {
+            "aggregation": "avg",
+            "attributesGroupBy": Array [],
+            "type": "prometheusMetric",
+          },
           "savedVisualizationId": "prometheus.process_resident_memory_bytes",
           "w": 12,
           "x": 0,
