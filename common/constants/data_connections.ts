@@ -14,7 +14,7 @@ export const QUERY_ALL = 'query-all';
 
 export const DatasourceTypeToDisplayName: { [key in DatasourceType]: string } = {
   PROMETHEUS: 'Prometheus',
-  S3GLUE: 'S3',
+  S3GLUE: 'Amazon S3',
 };
 
 export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';

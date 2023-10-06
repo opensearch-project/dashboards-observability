@@ -32,6 +32,7 @@ import { NoAccess } from '../no_access';
 import { AccessControlTab } from './access_control_tab';
 import { ConnectionDetails } from './connection_details';
 import { DatasourceType } from '../../../../../common/types/data_connections';
+import { DatasourceTypeToDisplayName } from '../../../../../common/constants/data_connections';
 
 interface DatasourceDetails {
   allowedRoles: string[];
@@ -303,7 +304,9 @@ export const DataConnection = (props: any) => {
         <EuiSpacer />
         <EuiAccordion
           id="queryOrAccelerateAccordion"
-          buttonContent="Ways to use in Dashboards"
+          buttonContent={`Use cases for ${
+            DatasourceTypeToDisplayName[datasourceDetails.connector]
+          } in OpenSearch Dashboards`}
           initialIsOpen={true}
         >
           <QueryOrAccelerateData />
