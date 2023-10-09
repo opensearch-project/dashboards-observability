@@ -40,6 +40,7 @@ export function Configure(props: ConfigureDatasourceProps) {
   const { type, notifications } = props;
   const { http, chrome } = coreRefs;
   const { setToast } = useToast();
+  const [error, setError] = useState<string>('');
   const [authMethod, setAuthMethod] = useState<AuthMethod>('basicauth');
   const [name, setName] = useState('');
   const [details, setDetails] = useState('');
@@ -115,6 +116,8 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentAuthMethod={authMethod}
             setAuthMethodForRequest={setAuthMethod}
             hasSecurityAccess={hasSecurityAccess}
+            error={error}
+            setError={setError}
           />
         );
       case 'PROMETHEUS':
@@ -142,6 +145,8 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentAuthMethod={authMethod}
             setAuthMethodForRequest={setAuthMethod}
             hasSecurityAccess={hasSecurityAccess}
+            error={error}
+            setError={setError}
           />
         );
       default:
