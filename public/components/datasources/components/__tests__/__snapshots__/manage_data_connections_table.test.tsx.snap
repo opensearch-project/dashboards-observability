@@ -36,7 +36,7 @@ exports[`Manage Data Connections Table test Renders manage data connections tabl
              
             <a
               class="euiLink euiLink--primary"
-              href="https://opensearch.org/docs/latest/data-sources/index"
+              href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
               rel="noreferrer"
               target="blank"
             >
