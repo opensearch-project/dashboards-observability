@@ -7,21 +7,17 @@ import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiFormRow,
   EuiRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import {
-  OPENSEARCH_DOCUMENTATION_URL,
-  QUERY_ALL,
-  QUERY_RESTRICTED,
-} from '../../../../../common/constants/data_connections';
+import { QUERY_ALL, QUERY_RESTRICTED } from '../../../../../common/constants/data_connections';
 import { PermissionsConfigurationProps } from '../../../../../common/types/data_connections';
 
 export const QueryPermissionsConfiguration = (props: PermissionsConfigurationProps) => {
-  const { roles, selectedRoles, setSelectedRoles, layout } = props;
+  const { roles, selectedRoles, setSelectedRoles, layout, hasSecurityAccess } = props;
 
   const [selectedAccessLevel, setSelectedAccessLevel] = useState(
     selectedRoles.length ? QUERY_RESTRICTED : QUERY_ALL
@@ -30,6 +26,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
     {
       id: QUERY_RESTRICTED,
       label: 'Restricted - accessible by users with specific OpenSearch roles',
+      disabled: !hasSecurityAccess,
     },
     {
       id: QUERY_ALL,
@@ -45,14 +42,24 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
         <EuiText size="xs">
           Select one or more OpenSearch roles that can query this data connection.
         </EuiText>
-        <EuiComboBox
-          placeholder="Select one or more options"
-          options={roles}
-          selectedOptions={selectedRoles}
-          onChange={setSelectedRoles}
-          isClearable={true}
-          data-test-subj="query-permissions-combo-box"
-        />
+        <EuiFormRow
+          isInvalid={selectedRoles.length === 0}
+          error={
+            selectedRoles.length === 0
+              ? 'Select an OpenSearch role or roles that will have query access to this data source'
+              : undefined
+          }
+        >
+          <EuiComboBox
+            placeholder="Select one or more options"
+            options={roles}
+            selectedOptions={selectedRoles}
+            onChange={setSelectedRoles}
+            isClearable={true}
+            data-test-subj="query-permissions-combo-box"
+            isInvalid={selectedRoles.length === 0}
+          />
+        </EuiFormRow>
       </div>
     );
   };

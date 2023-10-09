@@ -24,6 +24,7 @@ import {
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
 import { AuthDetails } from './auth_details';
+import { NameRow } from './name_row';
 
 interface ConfigurePrometheusDatasourceProps {
   roles: Role[];
@@ -38,6 +39,9 @@ interface ConfigurePrometheusDatasourceProps {
   currentSecretKey: string;
   currentRegion: string;
   currentAuthMethod: AuthMethod;
+  hasSecurityAccess: boolean;
+  error: string;
+  setError: React.Dispatch<React.SetStateAction<string>>;
   setAuthMethodForRequest: React.Dispatch<React.SetStateAction<AuthMethod>>;
   setRegionForRequest: React.Dispatch<React.SetStateAction<string>>;
   setAccessKeyForRequest: React.Dispatch<React.SetStateAction<string>>;
@@ -72,9 +76,11 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
     setRegionForRequest,
     currentAuthMethod,
     setAuthMethodForRequest,
+    hasSecurityAccess,
+    error,
+    setError,
   } = props;
 
-  const [name, setName] = useState(currentName);
   const [details, setDetails] = useState(currentDetails);
   const [store, setStore] = useState(currentStore);
   const authOptions = [
@@ -101,27 +107,12 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             <h3>Data source details</h3>
           </EuiText>
           <EuiSpacer />
-          <EuiFormRow label="Data source name">
-            <>
-              <EuiText size="xs">
-                <p>
-                  Connection name that OpenSearch Dashboards references. This name should be
-                  descriptive and concise.
-                </p>
-              </EuiText>
-              <EuiFieldText
-                data-test-subj="name"
-                placeholder="Title"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                }}
-                onBlur={(e) => {
-                  setNameForRequest(e.target.value);
-                }}
-              />
-            </>
-          </EuiFormRow>
+          <NameRow
+            currentName={currentName}
+            setNameForRequest={setNameForRequest}
+            currentError={error}
+            setErrorForForm={setError}
+          />
           <EuiFormRow label="Description - Optional">
             <EuiTextArea
               data-test-subj="data-source-description"
@@ -199,6 +190,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             selectedRoles={selectedQueryPermissionRoles}
             setSelectedRoles={setSelectedQueryPermissionRoles}
             layout={'vertical'}
+            hasSecurityAccess={hasSecurityAccess}
           />
         </EuiForm>
       </EuiPanel>
