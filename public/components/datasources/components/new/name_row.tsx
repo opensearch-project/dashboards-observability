@@ -16,7 +16,6 @@ interface ConfigureNameProps {
 
 export const NameRow = (props: ConfigureNameProps) => {
   const { setNameForRequest, currentName, currentError, setErrorForForm } = props;
-  console.log(currentError, currentName);
   const { pplService } = coreRefs;
 
   const [name, setName] = useState<string>(currentName);
@@ -33,11 +32,9 @@ export const NameRow = (props: ConfigureNameProps) => {
   }, []);
 
   const onBlur = (e) => {
-    console.log(e.target.value, existingNames, existingNames.includes(e.target.value));
     if (e.target.value === '') {
       setErrorForForm('Name is a required parameter.');
     } else if (existingNames.includes(e.target.value)) {
-      console.log(999);
       setErrorForForm('Name must be unique across data sources.');
     } else {
       setErrorForForm('');
