@@ -94,7 +94,7 @@ export const fetchSurroundingData = async (
   eventTime: string,
   numDocs: number,
   typeOfDocs: 'new' | 'old',
-  setEventsData: React.Dispatch<React.SetStateAction<JSX.Element[][]>>,
+  setEventsData: React.Dispatch<React.SetStateAction<JSX.Element[]>>,
   setIsError: React.Dispatch<React.SetStateAction<string>>,
   setLoadingData: React.Dispatch<React.SetStateAction<boolean>>,
   selectedCols: IField[],
@@ -123,7 +123,7 @@ export const fetchSurroundingData = async (
     .then((res) => {
       const resuleData = typeOfDocs === 'new' ? res.jsonData.reverse() : res.jsonData;
       resultCount = resuleData.length;
-      setEventsData(createTds(resuleData, selectedCols, getTds));
+      setEventsData(resuleData);
     })
     .catch((error: Error) => {
       setIsError(error.message);

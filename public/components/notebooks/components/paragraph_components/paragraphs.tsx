@@ -256,6 +256,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
     <ParaOutput
       http={http}
       pplService={pplService}
+      key={para.uniqueId}
       para={para}
       visInput={visInput}
       setVisInput={setVisInput}

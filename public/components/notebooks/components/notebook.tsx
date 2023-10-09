@@ -30,7 +30,11 @@ import { RouteComponentProps } from 'react-router-dom';
 import PPLService from '../../../services/requests/ppl';
 import { ChromeBreadcrumb, CoreStart } from '../../../../../../src/core/public';
 import { DashboardStart } from '../../../../../../src/plugins/dashboard/public';
-import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/constants/notebooks';
+import {
+  CREATE_NOTE_MESSAGE,
+  NOTEBOOKS_API_PREFIX,
+  NOTEBOOKS_SELECTED_BACKEND,
+} from '../../../../common/constants/notebooks';
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
@@ -41,6 +45,7 @@ import {
   contextMenuViewReports,
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
+import { zeppelinParagraphParser } from './helpers/zeppelin_parser';
 import { Paragraphs } from './paragraph_components/paragraphs';
 const panelStyles: CSS.Properties = {
   float: 'left',
@@ -85,6 +90,7 @@ interface NotebookState {
   dateModified: string;
   paragraphs: any; // notebook paragraphs fetched from API
   parsedPara: ParaType[]; // paragraphs parsed to a common format
+  vizPrefix: string; // prefix for visualizations in Zeppelin Adaptor
   isAddParaPopoverOpen: boolean;
   isParaActionsPopoverOpen: boolean;
   isNoteActionsPopoverOpen: boolean;
@@ -106,6 +112,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       dateModified: '',
       paragraphs: [],
       parsedPara: [],
+      vizPrefix: '',
       isAddParaPopoverOpen: false,
       isParaActionsPopoverOpen: false,
       isNoteActionsPopoverOpen: false,
@@ -131,12 +138,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // parse paragraphs based on backend
   parseParagraphs = (paragraphs: any[]): ParaType[] => {
     try {
-      return defaultParagraphParser(paragraphs).map((para) => ({
-        ...para,
-        isInputExpanded: this.state.selectedViewId === 'input_only',
-        paraRef: React.createRef(),
-        paraDivRef: React.createRef<HTMLDivElement>(),
-      }));
+      let parsedPara;
+      // @ts-ignore
+      if (NOTEBOOKS_SELECTED_BACKEND === 'ZEPPELIN') {
+        parsedPara = zeppelinParagraphParser(paragraphs);
+        this.setState({ vizPrefix: '%sh #vizobject:' });
+      } else {
+        parsedPara = defaultParagraphParser(paragraphs);
+      }
+      parsedPara.forEach((para: ParaType) => {
+        para.isInputExpanded = this.state.selectedViewId === 'input_only';
+        para.paraRef = React.createRef();
+        para.paraDivRef = React.createRef<HTMLDivElement>();
+      });
+      return parsedPara;
     } catch (err) {
       this.props.setToast(
         'Error parsing paragraphs, please make sure you have the correct permission.',
@@ -169,7 +184,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   paragraphSelector = (index: number) => {
     const parsedPara = this.state.parsedPara;
     this.state.parsedPara.map((_: ParaType, idx: number) => {
-      parsedPara[idx].isSelected = index === idx;
+      if (index === idx) parsedPara[idx].isSelected = true;
+      else parsedPara[idx].isSelected = false;
     });
     this.setState({ parsedPara });
   };
@@ -455,13 +471,22 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   // Backend call to update and run contents of paragraph
-  updateRunParagraph = (para: ParaType, index: number) => {
+  updateRunParagraph = (
+    para: ParaType,
+    index: number,
+    vizObjectInput?: string,
+    paraType?: string
+  ) => {
     this.showParagraphRunning(index);
+    if (vizObjectInput) {
+      para.inp = this.state.vizPrefix + vizObjectInput; // "%sh check"
+    }
 
     const paraUpdateObject = {
       noteId: this.props.openedNoteId,
       paragraphId: para.uniqueId,
       paragraphInput: para.inp,
+      paragraphType: paraType || '',
     };
 
     return this.props.http
