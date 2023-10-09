@@ -4,7 +4,7 @@
  */
 
 import './docView.scss';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,25 +19,23 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiDataGrid,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
+import moment from 'moment';
 import { FlyoutContainers } from '../../../common/flyout_containers';
 import { IDocType } from './docViewRow';
-import { IExplorerFields, IField } from '../../../../../common/types/explorer';
-import { getHeaders, fetchSurroundingData, rangeNumDocs, populateDataGrid } from '../../utils';
-import { DEFAULT_COLUMNS } from '../../../../../common/constants/explorer';
-import { HttpSetup } from '../../../../../../../src/core/public';
+import { IField } from '../../../../../common/types/explorer';
+import { fetchSurroundingData, rangeNumDocs } from '../../utils';
+import { DATE_DISPLAY_FORMAT } from '../../../../../common/constants/explorer';
 import PPLService from '../../../../services/requests/ppl';
 
 interface Props {
-  http: HttpSetup;
-  detailsOpen: boolean;
   setDetailsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   doc: IDocType;
   timeStampField: string;
-  memorizedTds: JSX.Element[];
-  explorerFields: IExplorerFields;
-  openTraces: boolean;
   setOpenTraces: React.Dispatch<React.SetStateAction<boolean>>;
   setSurroundingEventsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   pplService: PPLService;
@@ -46,17 +44,17 @@ interface Props {
   getTds: (doc: IDocType, selectedCols: IField[], isFlyout: boolean) => JSX.Element[];
   toggleSize: boolean;
   setToggleSize: React.Dispatch<React.SetStateAction<boolean>>;
+  dataGridColumns: any;
+  dataGridColumnVisibility: any;
+  sortingFields: any;
+  rowHeightsOptions: any;
+  rows: any;
 }
 
 export const SurroundingFlyout = ({
-  http,
-  detailsOpen,
   setDetailsOpen,
   doc,
   timeStampField,
-  memorizedTds,
-  explorerFields,
-  openTraces,
   setOpenTraces,
   setSurroundingEventsOpen,
   pplService,
@@ -65,6 +63,10 @@ export const SurroundingFlyout = ({
   getTds,
   toggleSize,
   setToggleSize,
+  dataGridColumns,
+  dataGridColumnVisibility,
+  sortingFields,
+  rowHeightsOptions,
 }: Props) => {
   const [numNewEvents, setNumNewEvents] = useState(5);
   const [valueOldEvents, setNumOldEvents] = useState(5);
@@ -72,8 +74,8 @@ export const SurroundingFlyout = ({
   const [loadingOldEvents, setLoadingOldEvents] = useState(false);
   const [oldEventsError, setOldEventsError] = useState('');
   const [newEventsError, setNewEventsError] = useState('');
-  const [newEventsData, setNewEventsData] = useState<JSX.Element[][]>([[]]);
-  const [oldEventsData, setOldEventsData] = useState<JSX.Element[][]>([[]]);
+  const [newEventsData, setNewEventsData] = useState<any[]>([]);
+  const [oldEventsData, setOldEventsData] = useState<any[]>([]);
 
   const closeFlyout = () => {
     setDetailsOpen(false);
@@ -121,6 +123,46 @@ export const SurroundingFlyout = ({
       );
       setNumOldEvents(resultCount);
     }
+  };
+
+  const renderCells = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+    let actualIndex: number;
+    let rowDoc: any;
+
+    if (rowIndex < newEventsData.length) {
+      // within newEvents section of table, pull data from there
+      actualIndex = rowIndex;
+      rowDoc = newEventsData[rowIndex];
+    } else if (rowIndex === newEventsData.length) {
+      // is the selected row
+      actualIndex = rowIndex;
+      rowDoc = doc;
+    } else if (rowIndex > newEventsData.length) {
+      // within oldEvents section of table
+      actualIndex = rowIndex - (newEventsData.length + 1);
+      rowDoc = oldEventsData[actualIndex];
+    } else {
+      throw Error();
+    }
+
+    if (columnId === '_source') {
+      return (
+        <EuiDescriptionList type="inline" compressed>
+          {Object.keys(rowDoc).map((key) => (
+            <Fragment key={key}>
+              <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
+                {key}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>{rowDoc[key]}</EuiDescriptionListDescription>
+            </Fragment>
+          ))}
+        </EuiDescriptionList>
+      );
+    }
+    if (columnId === 'timestamp') {
+      return `${moment(rowDoc[columnId]).format(DATE_DISPLAY_FORMAT)}`;
+    }
+    return `${rowDoc[columnId]}`;
   };
 
   const loadButton = (typeOfDocs: 'new' | 'old') => {
@@ -237,21 +279,21 @@ export const SurroundingFlyout = ({
             <EuiCallOut iconType="bolt" title={newEventsError} color="warning" />
           )}
         </div>
-        {populateDataGrid(
-          explorerFields,
-          getHeaders(explorerFields.queriedFields, DEFAULT_COLUMNS.slice(1), true),
-          <>
-            {newEventsData}
-            <tr className="osdDocTable__row selected-event-row">{memorizedTds}</tr>
-            {oldEventsData}
-          </>,
-          getHeaders(explorerFields.selectedFields, DEFAULT_COLUMNS.slice(1), true),
-          <>
-            {newEventsData}
-            <tr className="osdDocTable__row selected-event-row">{memorizedTds}</tr>
-            {oldEventsData}
-          </>
-        )}
+        <EuiDataGrid
+          aria-labelledby="aria-labelledby"
+          data-test-subj="docTable"
+          columns={dataGridColumns}
+          columnVisibility={dataGridColumnVisibility}
+          rowCount={newEventsData.length + oldEventsData.length + 1}
+          renderCellValue={renderCells}
+          sorting={{
+            columns: sortingFields.current, // TODO: change this to only have timestamp from new to old
+            onSort: () => {},
+          }}
+          toolbarVisibility={false}
+          rowHeightsOptions={rowHeightsOptions}
+          height={800}
+        />
         <div>
           {oldEventsError !== '' && (
             <EuiCallOut iconType="bolt" title={oldEventsError} color="warning" />

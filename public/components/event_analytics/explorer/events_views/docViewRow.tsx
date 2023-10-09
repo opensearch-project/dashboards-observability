@@ -34,6 +34,12 @@ interface FlyoutButtonProps {
   pplService: PPLService;
   rawQuery: string;
   onFlyoutOpen: (docId: string) => void;
+  dataGridColumns: any;
+  dataGridColumnVisibility: any;
+  selectedIndex: any;
+  sortingFields: any;
+  rowHeightsOptions: any;
+  rows: any;
 }
 
 export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
@@ -47,6 +53,12 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
     pplService,
     rawQuery,
     onFlyoutOpen,
+    dataGridColumns,
+    dataGridColumnVisibility,
+    selectedIndex,
+    sortingFields,
+    rowHeightsOptions,
+    rows,
   } = props;
 
   const [detailsOpen, setDetailsOpen] = useState<boolean>(false);
@@ -237,6 +249,12 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
         getTds={getTds}
         toggleSize={flyoutToggleSize}
         setToggleSize={setFlyoutToggleSize}
+        dataGridColumns={dataGridColumns}
+        dataGridColumnVisibility={dataGridColumnVisibility}
+        selectedIndex={selectedIndex}
+        sortingFields={sortingFields}
+        rowHeightsOptions={rowHeightsOptions}
+        rows={rows}
       />
     );
   }, [

@@ -142,7 +142,13 @@ export function DataGrid(props: DataGridProps) {
               explorerFields={explorerFields}
               pplService={pplService}
               rawQuery={rawQuery}
-              onFlyoutOpen={() => {}}
+              onFlyoutOpen={() => {}} // TODO: change this button to a minimize icon
+              dataGridColumns={dataGridColumns}
+              dataGridColumnVisibility={dataGridColumnVisibility}
+              selectedIndex={rowIndex}
+              sortingFields={sortingFields}
+              rowHeightsOptions={rowHeightsOptions}
+              rows={rows}
             />
           );
         },
