@@ -34,6 +34,7 @@ interface ConfigureS3DatasourceProps {
   currentAuthMethod: AuthMethod;
   currentUsername: string;
   currentPassword: string;
+  hasSecurityAccess: boolean;
   setAuthMethodForRequest: React.Dispatch<React.SetStateAction<AuthMethod>>;
   setPasswordForRequest: React.Dispatch<React.SetStateAction<string>>;
   setUsernameForRequest: React.Dispatch<React.SetStateAction<string>>;
@@ -62,6 +63,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
     currentUsername,
     setPasswordForRequest,
     setUsernameForRequest,
+    hasSecurityAccess,
   } = props;
 
   const [name, setName] = useState(currentName);
@@ -221,6 +223,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
           layout={'vertical'}
+          hasSecurityAccess={hasSecurityAccess}
         />
       </EuiPanel>
     </div>

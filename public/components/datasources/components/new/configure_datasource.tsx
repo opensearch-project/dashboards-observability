@@ -51,6 +51,7 @@ export function Configure(props: ConfigureDatasourceProps) {
   const [secretKey, setSecretKey] = useState('');
   const [region, setRegion] = useState('');
   const [roles, setRoles] = useState<Role[]>([]);
+  const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
   const [page, setPage] = useState<'configure' | 'review'>('configure');
   const ConfigureDatasourceSteps = [
@@ -64,13 +65,16 @@ export function Configure(props: ConfigureDatasourceProps) {
   ];
 
   useEffect(() => {
-    http!.get('/api/v1/configuration/roles').then((data) =>
-      setRoles(
-        Object.keys(data.data).map((key) => {
-          return { label: key };
-        })
+    http!
+      .get('/api/v1/configuration/roles')
+      .then((data) =>
+        setRoles(
+          Object.keys(data.data).map((key) => {
+            return { label: key };
+          })
+        )
       )
-    );
+      .catch((err) => setHasSecurityAccess(false));
     chrome!.setBreadcrumbs([
       {
         text: 'Data sources',
@@ -110,6 +114,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             setPasswordForRequest={setPassword}
             currentAuthMethod={authMethod}
             setAuthMethodForRequest={setAuthMethod}
+            hasSecurityAccess={hasSecurityAccess}
           />
         );
       case 'PROMETHEUS':
@@ -136,6 +141,7 @@ export function Configure(props: ConfigureDatasourceProps) {
             setRegionForRequest={setRegion}
             currentAuthMethod={authMethod}
             setAuthMethodForRequest={setAuthMethod}
+            hasSecurityAccess={hasSecurityAccess}
           />
         );
       default:

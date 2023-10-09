@@ -38,6 +38,7 @@ interface ConfigurePrometheusDatasourceProps {
   currentSecretKey: string;
   currentRegion: string;
   currentAuthMethod: AuthMethod;
+  hasSecurityAccess: boolean;
   setAuthMethodForRequest: React.Dispatch<React.SetStateAction<AuthMethod>>;
   setRegionForRequest: React.Dispatch<React.SetStateAction<string>>;
   setAccessKeyForRequest: React.Dispatch<React.SetStateAction<string>>;
@@ -72,6 +73,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
     setRegionForRequest,
     currentAuthMethod,
     setAuthMethodForRequest,
+    hasSecurityAccess,
   } = props;
 
   const [name, setName] = useState(currentName);
@@ -199,6 +201,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
             selectedRoles={selectedQueryPermissionRoles}
             setSelectedRoles={setSelectedQueryPermissionRoles}
             layout={'vertical'}
+            hasSecurityAccess={hasSecurityAccess}
           />
         </EuiForm>
       </EuiPanel>
