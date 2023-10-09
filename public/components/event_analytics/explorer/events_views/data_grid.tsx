@@ -142,7 +142,7 @@ export function DataGrid(props: DataGridProps) {
               explorerFields={explorerFields}
               pplService={pplService}
               rawQuery={rawQuery}
-              onFlyoutOpen={() => {}} // TODO: change this button to a minimize icon
+              onFlyoutOpen={() => {}}
               dataGridColumns={dataGridColumns}
               dataGridColumnVisibility={dataGridColumnVisibility}
               selectedIndex={rowIndex}

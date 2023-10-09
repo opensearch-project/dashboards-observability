@@ -271,7 +271,7 @@ export const SurroundingFlyout = ({
 
   const flyoutBody = (
     <EuiFlyoutBody>
-      <div className="obsExplorer">
+      <div>
         {getInputForm('arrowUp', onChangeNewEvents, numNewEvents, 'new')}
         <EuiSpacer size="s" />
         <div>
@@ -286,13 +286,9 @@ export const SurroundingFlyout = ({
           columnVisibility={dataGridColumnVisibility}
           rowCount={newEventsData.length + oldEventsData.length + 1}
           renderCellValue={renderCells}
-          sorting={{
-            columns: sortingFields.current, // TODO: change this to only have timestamp from new to old
-            onSort: () => {},
-          }}
           toolbarVisibility={false}
           rowHeightsOptions={rowHeightsOptions}
-          height={800}
+          height={'60vh'}
         />
         <div>
           {oldEventsError !== '' && (

@@ -290,7 +290,7 @@ export const FlyoutButton = forwardRef((props: FlyoutButtonProps, ref) => {
     <>
       <EuiButtonIcon
         onClick={() => toggleDetailOpen()}
-        iconType={'inspect'}
+        iconType={detailsOpen || surroundingEventsOpen ? 'minimize' : 'inspect'}
         aria-label="inspect document details"
       />
       {flyout}
