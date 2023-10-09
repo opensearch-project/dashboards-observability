@@ -3,13 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ParaType } from '../../../../../common/types/notebooks';
+
 // Get the type of output and result in a default notebook paragraph
 // Param: Default Backend Paragraph
 const parseOutput = (paraObject: any) => {
   try {
+    let outputType = [];
+    let result = [];
+    paraObject.output.map((output: { outputType: string; result: string }) => {
+      outputType.push(output.outputType);
+      result.push(output.result);
+    });
     return {
-      outputType: paraObject.output.map(({ outputType }) => outputType),
-      outputData: paraObject.output.map(({ result }) => result),
+      outputType: outputType,
+      outputData: result,
     };
   } catch (error) {
     return {
@@ -38,7 +46,7 @@ const parseInputType = (paraObject: any) => {
 const parseVisualization = (paraObject: any) => {
   try {
     if (paraObject.input.inputType.includes('VISUALIZATION')) {
-      const vizContent = paraObject.input.inputText;
+      let vizContent = paraObject.input.inputText;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
       let visStartTime = startDate.toISOString();
@@ -68,42 +76,43 @@ const parseVisualization = (paraObject: any) => {
   }
 };
 
-const parseBackendParagraph = (paraObject, index) => {
-  const codeLanguage = parseInputType(paraObject);
-  const vizParams = parseVisualization(paraObject);
-  const message = parseOutput(paraObject);
-
-  return {
-    uniqueId: paraObject.id,
-    isRunning: false,
-    inQueue: false,
-    isSelected: false,
-    isInputHidden: false,
-    isOutputHidden: false,
-    showAddPara: false,
-    isVizualisation: vizParams.isViz,
-    vizObjectInput: vizParams.VizObject,
-    id: index + 1,
-    inp: paraObject.input.inputText || '',
-    lang: 'text/x-' + codeLanguage,
-    editorLanguage: codeLanguage,
-    typeOut: message.outputType,
-    out: message.outputData,
-    isInputExpanded: false,
-    isOutputStale: false,
-    paraRef: undefined,
-    paraDivRef: undefined,
-    visStartTime: vizParams.visStartTime,
-    visEndTime: vizParams.visEndTime,
-    visSavedObjId: vizParams.visSavedObjId,
-  };
-};
-
 // Placeholder for default parser
 // Param: Default Backend Paragraph
 export const defaultParagraphParser = (defaultBackendParagraphs: any) => {
+  let parsedPara: Array<ParaType> = [];
   try {
-    return defaultBackendParagraphs.map(parseBackendParagraph);
+    defaultBackendParagraphs.map((paraObject: any, index: number) => {
+      const codeLanguage = parseInputType(paraObject);
+      const vizParams = parseVisualization(paraObject);
+      const message = parseOutput(paraObject);
+
+      let tempPara: ParaType = {
+        uniqueId: paraObject.id,
+        isRunning: false,
+        inQueue: false,
+        isSelected: false,
+        isInputHidden: false,
+        isOutputHidden: false,
+        showAddPara: false,
+        isVizualisation: vizParams.isViz,
+        vizObjectInput: vizParams.VizObject,
+        id: index + 1,
+        inp: paraObject.input.inputText || '',
+        lang: 'text/x-' + codeLanguage,
+        editorLanguage: codeLanguage,
+        typeOut: message.outputType,
+        out: message.outputData,
+        isInputExpanded: false,
+        isOutputStale: false,
+        paraRef: undefined,
+        paraDivRef: undefined,
+        visStartTime: vizParams.visStartTime,
+        visEndTime: vizParams.visEndTime,
+        visSavedObjId: vizParams.visSavedObjId,
+      };
+      parsedPara.push(tempPara);
+    });
+    return parsedPara;
   } catch (error) {
     throw new Error('Parsing Paragraph Issue ' + error);
   }
