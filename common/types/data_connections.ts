@@ -10,6 +10,7 @@ export interface PermissionsConfigurationProps {
   selectedRoles: Role[];
   setSelectedRoles: React.Dispatch<React.SetStateAction<Role[]>>;
   layout: 'horizontal' | 'vertical';
+  hasSecurityAccess: boolean;
 }
 
 export type Role = EuiComboBoxOptionOption;

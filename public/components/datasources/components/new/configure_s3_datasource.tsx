@@ -22,6 +22,7 @@ import {
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
 import { AuthDetails } from './auth_details';
+import { NameRow } from './name_row';
 
 interface ConfigureS3DatasourceProps {
   roles: Role[];
@@ -34,6 +35,9 @@ interface ConfigureS3DatasourceProps {
   currentAuthMethod: AuthMethod;
   currentUsername: string;
   currentPassword: string;
+  hasSecurityAccess: boolean;
+  error: string;
+  setError: React.Dispatch<React.SetStateAction<string>>;
   setAuthMethodForRequest: React.Dispatch<React.SetStateAction<AuthMethod>>;
   setPasswordForRequest: React.Dispatch<React.SetStateAction<string>>;
   setUsernameForRequest: React.Dispatch<React.SetStateAction<string>>;
@@ -62,9 +66,11 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
     currentUsername,
     setPasswordForRequest,
     setUsernameForRequest,
+    hasSecurityAccess,
+    error,
+    setError,
   } = props;
 
-  const [name, setName] = useState(currentName);
   const [details, setDetails] = useState(currentDetails);
   const [arn, setArn] = useState(currentArn);
   const [store, setStore] = useState(currentStore);
@@ -91,27 +97,13 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           <h3>Data source details</h3>
         </EuiText>
         <EuiSpacer />
-        <EuiFormRow label="Data source name">
-          <>
-            <EuiText size="xs">
-              <p>
-                Connection name that OpenSearch Dashboards references. This name should be
-                descriptive and concise.
-              </p>
-            </EuiText>
-            <EuiFieldText
-              data-test-subj="data-source-name"
-              placeholder="Title"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-              onBlur={(e) => {
-                setNameForRequest(e.target.value);
-              }}
-            />
-          </>
-        </EuiFormRow>
+        <NameRow
+          key={error}
+          currentName={currentName}
+          setNameForRequest={setNameForRequest}
+          currentError={error}
+          setErrorForForm={setError}
+        />
         <EuiFormRow label="Description - Optional">
           <EuiTextArea
             placeholder="Describe data source"
@@ -221,6 +213,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
           layout={'vertical'}
+          hasSecurityAccess={hasSecurityAccess}
         />
       </EuiPanel>
     </div>
