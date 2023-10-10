@@ -44,6 +44,14 @@ const initialState = {
   dataSources: [OBSERVABILITY_CUSTOM_METRIC],
   dataSourceTitles: ['Observability Custom Metrics'],
   dataSourceIcons: coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC]),
+  dateSpanFilter: {
+    start: 'now-1d',
+    end: 'now',
+    span: 1,
+    resolution: 'h',
+    recentlyUsedRanges: [],
+  },
+  refresh: 0, // set to new Date() to trigger
 };
 
 export const loadMetrics = () => async (dispatch) => {
@@ -168,19 +176,29 @@ export const metricSlice = createSlice({
     setDataSourceIcons: (state, { payload }) => {
       state.dataSourceIcons = payload;
     },
+    setDateSpan: (state, { payload }) => {
+      state.dateSpanFilter = { ...state.dateSpanFilter, ...payload };
+    },
+    setRefresh: (state) => {
+      state.refresh = Date.now();
+    },
   },
 });
 
 export const {
-  setMetrics,
   deSelectMetric,
   selectMetric,
-  updateMetricsLayout,
-  setSearch,
-  setDataSources,
-  setDataSourceTitles,
   setDataSourceIcons,
+  setDataSourceTitles,
+  setDataSources,
+  setMetrics,
+  setRefresh,
+  setSearch,
+  updateMetricsLayout,
 } = metricSlice.actions;
+
+/** private actions */
+const { setDateSpan } = metricSlice.actions;
 
 export const availableMetricsSelector = (state) =>
   state.metrics.metrics
@@ -189,6 +207,22 @@ export const availableMetricsSelector = (state) =>
       (metric) =>
         state.metrics.search === '' || metric.name.match(new RegExp(state.metrics.search, 'i'))
     );
+
+export const updateStartEndDate = ({ start, end }) => (dispatch, getState) => {
+  const currentDateSpanFilter = getState().metrics.dateSpanFilter;
+  const recentlyUsedRange = currentDateSpanFilter.recentlyUsedRanges.filter((r) => {
+    const isDuplicate = r.start === start && r.end === end;
+    return !isDuplicate;
+  });
+  recentlyUsedRange.unshift({ start, end });
+
+  dispatch(setDateSpan({ start, end, recentlyUsedRanges: recentlyUsedRange.slice(0, 9) }));
+  dispatch(setRefresh());
+};
+
+export const updateDateSpan = (props: { span?: string; resolution?: string }) => (dispatch) => {
+  dispatch(setDateSpan(props)); // specifically use props variable to partial update
+};
 
 export const selectedMetricsSelector = (state) =>
   state.metrics.selected.map((id) => state.metrics.metrics.find((metric) => metric.id === id));
@@ -200,5 +234,9 @@ export const metricIconsSelector = (state) => state.metrics.dataSourceIcons;
 export const metricsLayoutSelector = (state) => state.metrics.metricsLayout;
 
 export const dataSourcesSelector = (state) => state.metrics.dataSources;
+
+export const dateSpanFilterSelector = (state) => state.metrics.dateSpanFilter;
+
+export const refreshSelector = (state) => state.metrics.refresh;
 
 export const metricsReducers = metricSlice.reducer;

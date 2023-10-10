@@ -13,13 +13,11 @@ import {
   OnTimeChangeProps,
   ShortDate,
 } from '@elastic/eui';
-import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { ReactChild, useEffect, useState } from 'react';
 import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
 import { StaticContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ChromeBreadcrumb, Toast } from '../../../../../src/core/public';
-import { onTimeChange } from './helpers/utils';
 import { Sidebar } from './sidebar/sidebar';
 import { EmptyMetricsView } from './view/empty_view';
 import PPLService from '../../services/requests/ppl';
@@ -44,19 +42,10 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const metricsLayout = useSelector(metricsLayoutSelector);
 
-  // Date picker constants
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
-  const [startTime, setStartTime] = useState<ShortDate>('now-1d');
-  const [endTime, setEndTime] = useState<ShortDate>('now');
-
   // Top panel
   const [IsTopPanelDisabled, setIsTopPanelDisabled] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [onRefresh, setOnRefresh] = useState(false);
   const [editActionType, setEditActionType] = useState('');
-  const [resolutionValue, setResolutionValue] = useState(resolutionOptions[2].value);
-  const [spanValue, setSpanValue] = useState(1);
-  const resolutionSelectId = htmlIdGenerator('resolutionSelect')();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
 
@@ -67,26 +56,6 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
     if (!text) text = '';
     setToastRightSide(!side);
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
-
-  const onRefreshFilters = () => {
-    if (spanValue < 1) {
-      setToast('Please add a valid span interval', 'danger');
-      return;
-    }
-    setOnRefresh(!onRefresh);
-  };
-
-  const onDatePickerChange = (props: OnTimeChangeProps) => {
-    onTimeChange(
-      props.start,
-      props.end,
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStartTime,
-      setEndTime
-    );
-    onRefreshFilters();
   };
 
   const onEditClick = (savedVisualizationId: string) => {
@@ -135,20 +104,11 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                 <EuiPageBody component="div">
                   <TopMenu
                     IsTopPanelDisabled={IsTopPanelDisabled}
-                    startTime={startTime}
-                    endTime={endTime}
-                    onDatePickerChange={onDatePickerChange}
-                    recentlyUsedRanges={recentlyUsedRanges}
                     editMode={editMode}
                     setEditMode={setEditMode}
                     setEditActionType={setEditActionType}
                     panelVisualizations={panelVisualizations}
                     setPanelVisualizations={setPanelVisualizations}
-                    resolutionValue={resolutionValue}
-                    setResolutionValue={setResolutionValue}
-                    spanValue={spanValue}
-                    setSpanValue={setSpanValue}
-                    resolutionSelectId={resolutionSelectId}
                     setToast={setToast}
                   />
                   <div className="dscAppContainer">
@@ -168,13 +128,9 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                                 panelVisualizations={panelVisualizations}
                                 setPanelVisualizations={setPanelVisualizations}
                                 editMode={editMode}
-                                startTime={startTime}
-                                endTime={endTime}
                                 moveToEvents={onEditClick}
-                                onRefresh={onRefresh}
                                 editActionType={editActionType}
                                 setEditActionType={setEditActionType}
-                                spanParam={spanValue + resolutionValue}
                               />
                             ) : (
                               <EmptyMetricsView />

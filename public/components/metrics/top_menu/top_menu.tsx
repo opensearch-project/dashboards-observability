@@ -30,51 +30,40 @@ import { getSavedObjectsClient } from '../../../services/saved_objects/saved_obj
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
 import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import { metricsLayoutSelector } from '../redux/slices/metrics_slice';
+import {
+  dateSpanFilterSelector,
+  metricsLayoutSelector,
+  setRefresh,
+  updateDateSpan,
+  updateStartEndDate,
+} from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
 
 interface TopMenuProps {
   IsTopPanelDisabled: boolean;
-  startTime: ShortDate;
-  endTime: ShortDate;
-  onDatePickerChange: (props: OnTimeChangeProps) => void;
-  recentlyUsedRanges: DurationRange[];
   editMode: boolean;
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   setEditActionType: React.Dispatch<React.SetStateAction<string>>;
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
-  resolutionValue: string;
-  setResolutionValue: React.Dispatch<React.SetStateAction<string>>;
-  spanValue: number;
-  setSpanValue: React.Dispatch<React.SetStateAction<number>>;
-  resolutionSelectId: string;
   setToast: (title: string, color?: string, text?: any, side?: string) => void;
 }
 
 export const TopMenu = ({
   IsTopPanelDisabled,
-  startTime,
-  endTime,
-  onDatePickerChange,
-  recentlyUsedRanges,
   editMode,
   setEditActionType,
   setEditMode,
   panelVisualizations,
   setPanelVisualizations,
-  resolutionValue,
-  setResolutionValue,
-  spanValue,
-  setSpanValue,
-  resolutionSelectId,
   setToast,
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
   const metricsLayout = useSelector(metricsLayoutSelector);
   const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
+  const dateSpanFilter = useSelector(dateSpanFilterSelector);
 
   const [visualizationsMetaData, setVisualizationsMetaData] = useState<any>([]);
   const [originalPanelVisualizations, setOriginalPanelVisualizations] = useState<MetricType[]>([]);
@@ -105,10 +94,6 @@ export const TopMenu = ({
       }
     }
     setEditActionType(editType);
-  };
-
-  const onResolutionChange = (e) => {
-    setResolutionValue(e.target.value);
   };
 
   const cancelButton = (
@@ -162,9 +147,9 @@ export const TopMenu = ({
         sortedMetricsLayout.map(async (metricLayout, index) => {
           const updatedMetric = updateMetricsWithSelections(
             visualizationsMetaData[index],
-            startTime,
-            endTime,
-            spanValue + resolutionValue
+            dateSpanFilter.start,
+            dateSpanFilter.end,
+            dateSpanFilter.span + dateSpanFilter.resolution
           );
 
           if (metricLayout.metricType === 'prometheusMetric') {
@@ -212,17 +197,16 @@ export const TopMenu = ({
             <EuiFieldText
               className="resolutionSelectText"
               prepend="Span Interval"
-              value={spanValue}
-              isInvalid={spanValue < 1}
-              onChange={(e) => setSpanValue(e.target.value)}
+              value={dateSpanFilter.span}
+              isInvalid={dateSpanFilter.span < 1}
+              onChange={(e) => dispatch(updateDateSpan({ span: e.target.value }))}
               data-test-subj="metrics__spanValue"
               append={
                 <EuiSelect
                   className="resolutionSelectOption"
-                  id={resolutionSelectId}
                   options={resolutionOptions}
-                  value={resolutionValue}
-                  onChange={(e) => onResolutionChange(e)}
+                  value={dateSpanFilter.resolution}
+                  onChange={(e) => dispatch(updateDateSpan({ resolution: e.target.value }))}
                   aria-label="resolutionSelect"
                   data-test-subj="metrics__spanResolutionSelect"
                 />
@@ -235,10 +219,10 @@ export const TopMenu = ({
         <EuiFlexItem className="metrics-search-bar-datepicker">
           <EuiSuperDatePicker
             dateFormat={uiSettingsService.get('dateFormat')}
-            start={startTime}
-            end={endTime}
-            onTimeChange={onDatePickerChange}
-            recentlyUsedRanges={recentlyUsedRanges}
+            start={dateSpanFilter.start}
+            end={dateSpanFilter.end}
+            onTimeChange={(e) => dispatch(updateStartEndDate(e))}
+            recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
             isDisabled={IsTopPanelDisabled}
           />
         </EuiFlexItem>
