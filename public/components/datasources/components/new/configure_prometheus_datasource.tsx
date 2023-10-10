@@ -13,7 +13,6 @@ import {
   EuiFieldText,
   EuiTextArea,
   EuiSelect,
-  EuiFieldPassword,
   EuiForm,
 } from '@elastic/eui';
 import React, { useState } from 'react';

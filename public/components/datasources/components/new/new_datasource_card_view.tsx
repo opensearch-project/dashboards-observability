@@ -8,6 +8,7 @@ import React from 'react';
 import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
 import prometheusSvg from '../../icons/prometheus-logo.svg';
+import cloudWatchSvg from '../../icons/amazon_cloudwatch-icon.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
 
 export interface DatasourceCard {
@@ -33,6 +34,13 @@ export function NewDatasourceCardView() {
       description: 'Connect to Prometheus',
       displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
       onClick: () => (window.location.hash = `#/configure/PROMETHEUS`),
+    },
+    {
+      name: 'CLOUDWATCHLOGS',
+      displayName: 'Cloud Watch Logs',
+      description: 'Connect to CloudWatch Logs',
+      displayIcon: <EuiIcon type={cloudWatchSvg} size="xl" />,
+      onClick: () => (window.location.hash = `#/configure/CLOUDWATCHLOGS`),
     },
   ];
 

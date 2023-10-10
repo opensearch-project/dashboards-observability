@@ -30,6 +30,11 @@ import {
 } from '../../../../../common/constants/data_connections';
 import { formatError } from '../../../../../public/components/event_analytics/utils';
 import { NotificationsStart } from '../../../../../../../src/core/public';
+import {
+  ConfigureCloudWatchDatasource,
+  ConfigureCloudWatchDatasourceProps,
+} from './configure_cloudwatch_datasource';
+import { ReviewCloudWatchDatasource } from './review_cloudwatch_datasource_configuration';
 
 interface ConfigureDatasourceProps {
   type: DatasourceType;
@@ -149,6 +154,33 @@ export function Configure(props: ConfigureDatasourceProps) {
             setError={setError}
           />
         );
+      case 'CLOUDWATCHLOGS':
+        const configureCloudWatchProps: ConfigureCloudWatchDatasourceProps = {
+          currentName: name,
+          currentDetails: details,
+          setNameForRequest: setName,
+          setDetailsForRequest: setDetails,
+          currentArn: arn,
+          setArnForRequest: setArn,
+          currentStore: storeURI,
+          setStoreForRequest: setStoreURI,
+          roles,
+          selectedQueryPermissionRoles,
+          setSelectedQueryPermissionRoles,
+          currentUsername: username,
+          setUsernameForRequest: setUsername,
+          currentPassword: password,
+          setPasswordForRequest: setPassword,
+          currentAuthMethod: authMethod,
+          setAuthMethodForRequest: setAuthMethod,
+          hasSecurityAccess,
+          error,
+          setError,
+          currentRegion: region,
+          setRegionForRequest: setRegion,
+        };
+        return <ConfigureCloudWatchDatasource {...configureCloudWatchProps} />;
+
       default:
         return <></>;
     }
@@ -177,6 +209,19 @@ export function Configure(props: ConfigureDatasourceProps) {
             currentArn={arn}
             currentStore={storeURI}
             currentUsername={username}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
+            goBack={() => setPage('configure')}
+          />
+        );
+      case 'CLOUDWATCHLOGS':
+        return (
+          <ReviewCloudWatchDatasource
+            currentName={name}
+            currentDetails={details}
+            currentArn={arn}
+            currentStore={storeURI}
+            currentRegion={region}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
             currentAuthMethod={authMethod}
             goBack={() => setPage('configure')}
@@ -281,6 +326,34 @@ export function Configure(props: ConfigureDatasourceProps) {
             allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
             connector: 'prometheus',
             properties: prometheusProperties,
+          }),
+        });
+        break;
+      case 'CLOUDWATCHLOGS':
+        const cloudWatchProperties =
+          authMethod === 'basicauth'
+            ? {
+                'cloudwatchlog.auth.type': 'iam_role',
+                'cloudwatchlog.auth.role_arn': arn,
+                'cloudwatchlog.region': region,
+                'cloudwatchlog.indexstore.opensearch.uri': storeURI,
+                'cloudwatchlog.indexstore.opensearch.auth': authMethod,
+                'cloudwatchlog.indexstore.opensearch.auth.username': username,
+                'cloudwatchlog.indexstore.opensearch.auth.password': password,
+              }
+            : {
+                'cloudwatchlog.auth.type': 'iam_role',
+                'cloudwatchlog.auth.role_arn': arn,
+                'cloudwatchlog.region': region,
+                'cloudwatchlog.indexstore.opensearch.uri': storeURI,
+                'cloudwatchlog.indexstore.opensearch.auth': authMethod,
+              };
+        response = http!.post(`${DATACONNECTIONS_BASE}`, {
+          body: JSON.stringify({
+            name,
+            allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
+            connector: 'cloudwatchlog',
+            properties: cloudWatchProperties,
           }),
         });
         break;
