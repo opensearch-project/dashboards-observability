@@ -88,7 +88,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
                     data-test-subj="metrics__spanResolutionSelect"
-                    id="select_123"
                     onChange={[Function]}
                     options={
                       Array [
@@ -132,7 +131,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
-                      id="select_123"
                       onChange={[Function]}
                       options={
                         Array [
@@ -198,7 +196,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                       aria-label="resolutionSelect"
                       className="euiFormControlLayout__append resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
-                      id="select_123"
                       key="0/.0"
                       onChange={[Function]}
                       options={
@@ -236,7 +233,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                             "type": "arrowDown",
                           }
                         }
-                        inputId="select_123"
                         isLoading={false}
                       >
                         <div
@@ -250,7 +246,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                                 aria-label="resolutionSelect"
                                 className="euiSelect euiFormControlLayout__append resolutionSelectOption"
                                 data-test-subj="metrics__spanResolutionSelect"
-                                id="select_123"
                                 onChange={[Function]}
                                 onMouseUp={[Function]}
                                 value="h"
@@ -408,7 +403,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
               isAutoRefreshOnly={false}
               isDisabled={true}
               isPaused={true}
-              onTimeChange={[MockFunction]}
+              onTimeChange={[Function]}
               recentlyUsedRanges={Array []}
               refreshInterval={0}
               showUpdateButton={true}
@@ -1255,7 +1250,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
                     data-test-subj="metrics__spanResolutionSelect"
-                    id="select_123"
                     onChange={[Function]}
                     options={
                       Array [
@@ -1299,7 +1293,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
-                      id="select_123"
                       onChange={[Function]}
                       options={
                         Array [
@@ -1365,7 +1358,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                       aria-label="resolutionSelect"
                       className="euiFormControlLayout__append resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
-                      id="select_123"
                       key="0/.0"
                       onChange={[Function]}
                       options={
@@ -1403,7 +1395,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                             "type": "arrowDown",
                           }
                         }
-                        inputId="select_123"
                         isLoading={false}
                       >
                         <div
@@ -1417,7 +1408,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                                 aria-label="resolutionSelect"
                                 className="euiSelect euiFormControlLayout__append resolutionSelectOption"
                                 data-test-subj="metrics__spanResolutionSelect"
-                                id="select_123"
                                 onChange={[Function]}
                                 onMouseUp={[Function]}
                                 value="h"
@@ -1575,7 +1565,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
               isAutoRefreshOnly={false}
               isDisabled={true}
               isPaused={true}
-              onTimeChange={[MockFunction]}
+              onTimeChange={[Function]}
               recentlyUsedRanges={Array []}
               refreshInterval={0}
               showUpdateButton={true}
@@ -2372,7 +2362,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                     aria-label="resolutionSelect"
                     className="resolutionSelectOption"
                     data-test-subj="metrics__spanResolutionSelect"
-                    id="select_123"
                     onChange={[Function]}
                     options={
                       Array [
@@ -2416,7 +2405,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                       aria-label="resolutionSelect"
                       className="resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
-                      id="select_123"
                       onChange={[Function]}
                       options={
                         Array [
@@ -2482,7 +2470,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                       aria-label="resolutionSelect"
                       className="euiFormControlLayout__append resolutionSelectOption"
                       data-test-subj="metrics__spanResolutionSelect"
-                      id="select_123"
                       key="0/.0"
                       onChange={[Function]}
                       options={
@@ -2520,7 +2507,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                             "type": "arrowDown",
                           }
                         }
-                        inputId="select_123"
                         isLoading={false}
                       >
                         <div
@@ -2534,7 +2520,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                                 aria-label="resolutionSelect"
                                 className="euiSelect euiFormControlLayout__append resolutionSelectOption"
                                 data-test-subj="metrics__spanResolutionSelect"
-                                id="select_123"
                                 onChange={[Function]}
                                 onMouseUp={[Function]}
                                 value="h"
@@ -2687,7 +2672,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
               isAutoRefreshOnly={false}
               isDisabled={false}
               isPaused={true}
-              onTimeChange={[MockFunction]}
+              onTimeChange={[Function]}
               recentlyUsedRanges={Array []}
               refreshInterval={0}
               showUpdateButton={true}

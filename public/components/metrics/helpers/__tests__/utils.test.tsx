@@ -34,26 +34,6 @@ import _ from 'lodash';
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
 
-  it('validates onTimeChange function', () => {
-    const setRecentlyUsedRanges = jest.fn((x) => x);
-    const setStart = jest.fn();
-    const setEnd = jest.fn();
-    const recentlyUsedRanges: DurationRange[] = [];
-    onTimeChange(
-      '2022-01-30T18:44:40.577Z',
-      '2022-02-25T19:18:33.075Z',
-      recentlyUsedRanges,
-      setRecentlyUsedRanges,
-      setStart,
-      setEnd
-    );
-    expect(setRecentlyUsedRanges).toHaveBeenCalledWith([
-      { start: '2022-01-30T18:44:40.577Z', end: '2022-02-25T19:18:33.075Z' },
-    ]);
-    expect(setStart).toHaveBeenCalledWith('2022-01-30T18:44:40.577Z');
-    expect(setEnd).toHaveBeenCalledWith('2022-02-25T19:18:33.075Z');
-  });
-
   it('validates getNewVizDimensions function', () => {
     expect(getNewVizDimensions([])).toMatchObject({
       x: 0,

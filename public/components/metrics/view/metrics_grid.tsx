@@ -7,12 +7,17 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
 import _ from 'lodash';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import { MetricType } from '../../../../common/types/metrics';
 import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
-import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
+import {
+  updateMetricsLayout,
+  deSelectMetric,
+  dateSpanFilterSelector,
+  refreshSelector,
+} from '../redux/slices/metrics_slice';
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
@@ -25,13 +30,9 @@ interface MetricsGridProps {
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
   editMode: boolean;
-  startTime: string;
-  endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
-  onRefresh: boolean;
   editActionType: string;
   setEditActionType: React.Dispatch<React.SetStateAction<string>>;
-  spanParam: string;
 }
 
 export const MetricsGrid = ({
@@ -39,16 +40,15 @@ export const MetricsGrid = ({
   panelVisualizations,
   setPanelVisualizations,
   editMode,
-  startTime,
-  endTime,
   moveToEvents,
-  onRefresh,
   editActionType,
   setEditActionType,
-  spanParam,
 }: MetricsGridProps) => {
   // Redux tools
   const dispatch = useDispatch();
+  const dateSpanFilter = useSelector(dateSpanFilterSelector);
+  const refresh = useSelector(refreshSelector);
+
   const updateLayout = (metric: any) => dispatch(updateMetricsLayout(metric));
   const handleRemoveMetric = (metric: any) => {
     dispatch(deSelectMetric(metric));
@@ -73,9 +73,9 @@ export const MetricsGrid = ({
         editMode={editMode}
         visualizationId={panelVisualization.id}
         savedVisualizationId={panelVisualization.savedVisualizationId}
-        fromTime={startTime}
-        toTime={endTime}
-        onRefresh={onRefresh}
+        fromTime={dateSpanFilter.start}
+        toTime={dateSpanFilter.end}
+        onRefresh={refresh}
         onEditClick={moveToEvents}
         usedInNotebooks={true}
         pplFilterValue=""
@@ -83,7 +83,7 @@ export const MetricsGrid = ({
         catalogVisualization={
           panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
         }
-        spanParam={spanParam}
+        spanParam={`${dateSpanFilter.span}${dateSpanFilter.resolution}`}
       />
     ));
     setGridData(gridDataComps);
@@ -149,7 +149,7 @@ export const MetricsGrid = ({
 
   useEffect(() => {
     loadVizComponents();
-  }, [onRefresh]);
+  }, [refresh]);
 
   useEffect(() => {
     loadVizComponents();
