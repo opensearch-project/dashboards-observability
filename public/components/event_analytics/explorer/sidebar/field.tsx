@@ -88,7 +88,6 @@ export const Field = (props: IFieldProps) => {
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  className="explorerSidebarItem__action"
                   size="s"
                   color="text"
                   iconType="inputOutput"
@@ -113,7 +112,6 @@ export const Field = (props: IFieldProps) => {
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_timestamp"
-                  className="explorerSidebarItem__action"
                   size="s"
                   color="text"
                   iconType="inputOutput"
@@ -125,6 +123,28 @@ export const Field = (props: IFieldProps) => {
               )
             ) : null}
           </>
+        </EuiToolTip>
+        <EuiToolTip delay="long" content="inspect">
+          <EuiPopover
+            ownFocus
+            display="block"
+            isOpen={isFieldDetailsOpen}
+            closePopover={() => setIsFieldDetailsOpen(false)}
+            anchorPosition="rightUp"
+            panelClassName="explorerSidebarItem__fieldPopoverPanel"
+            button={<EuiButtonIcon iconType="inspect" size="xs" onClick={togglePopover} />}
+          >
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h4>{toUpper(field.name)}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{upperFirst(field.type)}</EuiFlexItem>
+            </EuiFlexGroup>
+
+            <FieldInsights field={field} query={query} />
+          </EuiPopover>
         </EuiToolTip>
         <EuiToolTip
           delay="long"
@@ -139,11 +159,9 @@ export const Field = (props: IFieldProps) => {
           <>
             {isFieldToggleButtonDisabled ? (
               <EuiButtonIcon
-                className="explorerSidebarItem__action"
-                color="ghost"
-                display="fill"
-                isDisabled
+                color={selected ? 'danger' : 'primary'}
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
+                isDisabled
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={selected ? removeLabelAria : addLabelAria}
               />
@@ -151,7 +169,6 @@ export const Field = (props: IFieldProps) => {
               <EuiButtonIcon
                 color={selected ? 'danger' : 'primary'}
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
-                className="explorerSidebarItem__action"
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   if (e.type === 'click') {
                     e.currentTarget.focus();
@@ -164,7 +181,6 @@ export const Field = (props: IFieldProps) => {
                 aria-label={selected ? removeLabelAria : addLabelAria}
               />
             )}
-            <EuiButtonIcon iconType="inspect" size="xs" />
           </>
         </EuiToolTip>
       </>
@@ -172,44 +188,23 @@ export const Field = (props: IFieldProps) => {
   };
 
   return (
-    <EuiPopover
-      ownFocus
-      display="block"
-      isOpen={isFieldDetailsOpen}
-      closePopover={() => setIsFieldDetailsOpen(false)}
-      anchorPosition="rightUp"
-      panelClassName="explorerSidebarItem__fieldPopoverPanel"
-      button={
-        <FieldButton
-          size="s"
-          className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
-          isActive={isFieldDetailsOpen}
-          dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}
-          fieldName={
-            <span
-              data-test-subj={`field-${field.name}`}
-              title={field.name}
-              className="dscSidebarField__name"
-            >
-              <EuiText size="xs">{field.name}</EuiText>
-            </span>
-          }
-          fieldAction={getFieldActionDOM()}
-          onClick={togglePopover}
-        />
+    <FieldButton
+      size="s"
+      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
+      isActive={false}
+      dataTestSubj={`field-${field.name}-showDetails`}
+      fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}
+      fieldName={
+        <span
+          data-test-subj={`field-${field.name}`}
+          title={field.name}
+          className="dscSidebarField__name"
+        >
+          <EuiText size="xs">{field.name}</EuiText>
+        </span>
       }
-    >
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{toUpper(field.name)}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{upperFirst(field.type)}</EuiFlexItem>
-      </EuiFlexGroup>
-
-      <FieldInsights field={field} query={query} />
-    </EuiPopover>
+      fieldAction={getFieldActionDOM()}
+      onClick={togglePopover}
+    />
   );
 };
