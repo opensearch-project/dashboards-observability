@@ -18,7 +18,7 @@ import {
 import React, { useState } from 'react';
 import {
   AuthMethod,
-  OPENSEARCH_DOCUMENTATION_URL,
+  OPENSEARCH_S3_DOCUMENTATION_URL,
 } from '../../../../../common/constants/data_connections';
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../../../common/types/data_connections';
@@ -89,7 +89,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           {`Connect to Amazon S3 via AWS Glue with Amazon EMR as an execution engine. `}
-          <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+          <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
             Learn more
           </EuiLink>
         </EuiText>
@@ -97,7 +97,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
           <EuiText size="s" color="subdued">
             {`Connect to Amazon S3 via AWS Glue with Amazon EMR as an execution engine. `}
-            <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+            <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
               Learn more
             </EuiLink>
           </EuiText>
