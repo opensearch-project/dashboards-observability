@@ -8,6 +8,9 @@ import { DatasourceType } from '../../common/types/data_connections';
 export const OPENSEARCH_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/dashboards/management/data-sources/';
 
+export const OPENSEARCH_S3_DOCUMENTATION_URL =
+  'https://opensearch.org/docs/latest/dashboards/management/S3-data-source/';
+
 export const OPENSEARCH_ACC_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/data-acceleration/index';
 export const QUERY_RESTRICTED = 'query-restricted';
