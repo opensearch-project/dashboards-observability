@@ -43,7 +43,7 @@ export const Autocomplete = (props: AutocompleteProps) => {
     isDisabled,
     baseQuery,
     tabId = '',
-    placeholder = 'Enter PPL query',
+    placeholder = 'Enter query',
     possibleCommands,
     append,
     isSuggestionDisabled = false,
