@@ -145,6 +145,9 @@ export const Autocomplete = (props: AutocompleteProps) => {
         })}
         {...(panelsFilter && { append, fullWidth: true })}
         disabled={isDisabled}
+        onBlur={() => {
+          setAutocompleteState({ ...autocompleteState, isOpen: false });
+        }}
       />
       {autocompleteState.isOpen && !isSuggestionDisabled && (
         <div
