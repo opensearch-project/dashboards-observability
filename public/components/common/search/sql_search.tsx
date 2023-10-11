@@ -95,7 +95,6 @@ export const DirectSearch = (props: any) => {
   } = props;
 
   const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
-  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
@@ -189,7 +188,7 @@ export const DirectSearch = (props: any) => {
       iconSide="right"
       onClick={onLanguagePopoverClick}
       color="text"
-      isDisabled={explorerSearchMeta.isPolling}
+      isDisabled={explorerSearchMetadata.isPolling}
     >
       {queryLang}
     </EuiButton>
@@ -293,7 +292,7 @@ export const DirectSearch = (props: any) => {
             onItemSelect={onItemSelect}
             tabId={tabId}
             isSuggestionDisabled={queryLang === 'SQL'}
-            isDisabled={explorerSearchMeta.isPolling}
+            isDisabled={explorerSearchMetadata.isPolling}
           />
           {queryLang === 'PPL' && (
             <EuiBadge
@@ -316,7 +315,7 @@ export const DirectSearch = (props: any) => {
               onQuerySearch(queryLang);
             }}
             fill
-            isDisabled={explorerSearchMeta.isPolling}
+            isDisabled={explorerSearchMetadata.isPolling}
           >
             Search
           </EuiButton>
