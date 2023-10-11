@@ -13,6 +13,7 @@ import {
   EuiFieldText,
   EuiTextArea,
   EuiSelect,
+  EuiCallOut,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
@@ -87,11 +88,20 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          {`Connect to S3 with OpenSearch and OpenSearch Dashboards. `}
+          {`Connect to Amazon S3 via AWS Glue with Amazon EMR as an execution engine. `}
           <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
             Learn more
           </EuiLink>
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
+          <EuiText size="s" color="subdued">
+            {`Connect to Amazon S3 via AWS Glue with Amazon EMR as an execution engine. `}
+            <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+              Learn more
+            </EuiLink>
+          </EuiText>
+        </EuiCallOut>
         <EuiSpacer />
         <EuiText>
           <h3>Data source details</h3>
