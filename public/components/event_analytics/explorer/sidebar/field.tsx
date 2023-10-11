@@ -151,7 +151,6 @@ export const Field = (props: IFieldProps) => {
               <EuiButtonIcon
                 color={selected ? 'danger' : 'primary'}
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
-                className="explorerSidebarItem__action"
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   if (e.type === 'click') {
                     e.currentTarget.focus();
@@ -164,7 +163,13 @@ export const Field = (props: IFieldProps) => {
                 aria-label={selected ? removeLabelAria : addLabelAria}
               />
             )}
-            <EuiButtonIcon iconType="inspect" size="xs" />
+            <EuiButtonIcon
+              iconType="inspect"
+              size="xs"
+              onClick={() => {
+                return alert('helo');
+              }}
+            />
           </>
         </EuiToolTip>
       </>
@@ -172,44 +177,65 @@ export const Field = (props: IFieldProps) => {
   };
 
   return (
-    <EuiPopover
-      ownFocus
-      display="block"
-      isOpen={isFieldDetailsOpen}
-      closePopover={() => setIsFieldDetailsOpen(false)}
-      anchorPosition="rightUp"
-      panelClassName="explorerSidebarItem__fieldPopoverPanel"
-      button={
-        <FieldButton
-          size="s"
-          className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
-          isActive={isFieldDetailsOpen}
-          dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}
-          fieldName={
-            <span
-              data-test-subj={`field-${field.name}`}
-              title={field.name}
-              className="dscSidebarField__name"
-            >
-              <EuiText size="xs">{field.name}</EuiText>
-            </span>
-          }
-          fieldAction={getFieldActionDOM()}
-          onClick={togglePopover}
-        />
+    <FieldButton
+      size="s"
+      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
+      isActive={false}
+      dataTestSubj={`field-${field.name}-showDetails`}
+      fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}
+      fieldName={
+        <span
+          data-test-subj={`field-${field.name}`}
+          title={field.name}
+          className="dscSidebarField__name"
+        >
+          <EuiText size="xs">{field.name}</EuiText>
+        </span>
       }
-    >
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{toUpper(field.name)}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{upperFirst(field.type)}</EuiFlexItem>
-      </EuiFlexGroup>
-
-      <FieldInsights field={field} query={query} />
-    </EuiPopover>
+      fieldAction={getFieldActionDOM()}
+      onClick={togglePopover}
+    />
   );
+
+  // return (
+  //   <EuiPopover
+  //     ownFocus
+  //     display="block"
+  //     isOpen={isFieldDetailsOpen}
+  //     closePopover={() => setIsFieldDetailsOpen(false)}
+  //     anchorPosition="rightUp"
+  //     panelClassName="explorerSidebarItem__fieldPopoverPanel"
+  //     button={
+  //       <FieldButton
+  //         size="s"
+  //         className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
+  //         isActive={isFieldDetailsOpen}
+  //         dataTestSubj={`field-${field.name}-showDetails`}
+  //         fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}
+  //         fieldName={
+  //           <span
+  //             data-test-subj={`field-${field.name}`}
+  //             title={field.name}
+  //             className="dscSidebarField__name"
+  //           >
+  //             <EuiText size="xs">{field.name}</EuiText>
+  //           </span>
+  //         }
+  //         fieldAction={getFieldActionDOM()}
+  //         onClick={togglePopover}
+  //       />
+  //     }
+  //   >
+  //     <EuiFlexGroup justifyContent="spaceBetween">
+  //       <EuiFlexItem>
+  //         <EuiTitle size="xs">
+  //           <h4>{toUpper(field.name)}</h4>
+  //         </EuiTitle>
+  //       </EuiFlexItem>
+  //       <EuiFlexItem grow={false}>{upperFirst(field.type)}</EuiFlexItem>
+  //     </EuiFlexGroup>
+
+  //     <FieldInsights field={field} query={query} />
+  //   </EuiPopover>
+  // );
 };
