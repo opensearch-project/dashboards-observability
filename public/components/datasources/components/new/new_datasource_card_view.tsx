@@ -23,7 +23,7 @@ export function NewDatasourceCardView() {
     {
       name: 'S3GLUE',
       displayName: 'S3',
-      description: 'Connect to Amazon S3 via AWS Glue',
+      description: 'Connect to Amazon S3 via AWS Glue Data Catalog',
       displayIcon: <EuiIcon type={s3Svg} size="xl" />,
       onClick: () => (window.location.hash = `#/configure/S3GLUE`),
     },
