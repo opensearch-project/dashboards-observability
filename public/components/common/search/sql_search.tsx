@@ -183,7 +183,13 @@ export const DirectSearch = (props: any) => {
   ];
 
   const languagePopOverButton = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onLanguagePopoverClick} color="text">
+    <EuiButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onLanguagePopoverClick}
+      color="text"
+      isDisabled={explorerSearchMetadata.isPolling}
+    >
       {queryLang}
     </EuiButton>
   );
@@ -286,6 +292,7 @@ export const DirectSearch = (props: any) => {
             onItemSelect={onItemSelect}
             tabId={tabId}
             isSuggestionDisabled={queryLang === 'SQL'}
+            isDisabled={explorerSearchMetadata.isPolling}
           />
           {queryLang === 'PPL' && (
             <EuiBadge
@@ -308,6 +315,7 @@ export const DirectSearch = (props: any) => {
               onQuerySearch(queryLang);
             }}
             fill
+            isDisabled={explorerSearchMetadata.isPolling}
           >
             Search
           </EuiButton>
