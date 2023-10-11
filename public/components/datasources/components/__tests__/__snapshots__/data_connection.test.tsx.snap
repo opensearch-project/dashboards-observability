@@ -656,51 +656,6 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                     </div>
                   </div>
                 </div>
-                <div
-                  class="euiFlexItem"
-                >
-                  <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable euiCard--hasIcon"
-                  >
-                    <div
-                      class="euiCard__top"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--xxLarge euiIcon-isLoading euiCard__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
-                    </div>
-                    <div
-                      class="euiCard__content"
-                    >
-                      <span
-                        class="euiTitle euiTitle--small euiCard__title"
-                        id="random_html_idTitle"
-                      >
-                        <button
-                          aria-describedby=" random_html_idDescription"
-                          class="euiCard__titleButton"
-                        >
-                          Integrate data
-                        </button>
-                      </span>
-                      <div
-                        class="euiText euiText--small euiCard__description"
-                        id="random_html_idDescription"
-                      >
-                        <p>
-                          Explore data faster through integrations
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
