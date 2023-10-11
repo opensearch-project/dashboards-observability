@@ -161,11 +161,11 @@ export const Field = (props: IFieldProps) => {
           <>
             {isFieldToggleButtonDisabled ? (
               <EuiButtonIcon
-                className="explorerSidebarItem__action"
-                color="ghost"
-                display="fill"
-                isDisabled
+                // className="explorerSidebarItem__action"
+                color={selected ? 'danger' : 'primary'}
+                // display="fill"
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
+                isDisabled
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={selected ? removeLabelAria : addLabelAria}
               />
