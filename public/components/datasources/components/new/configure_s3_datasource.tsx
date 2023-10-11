@@ -88,7 +88,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          {`Connect to Amazon S3 via AWS Glue with Amazon EMR as an execution engine. `}
+          {`Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
           <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
             Learn more
           </EuiLink>
@@ -96,7 +96,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiSpacer size="s" />
         <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
           <EuiText size="s" color="subdued">
-            {`Connect to Amazon S3 via AWS Glue with Amazon EMR as an execution engine. `}
+            {`Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
             <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
               Learn more
             </EuiLink>
@@ -129,7 +129,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiSpacer />
 
         <EuiText>
-          <h3>AWS Glue authentication details</h3>
+          <h3>AWS Glue Data Catalog authentication details</h3>
         </EuiText>
         <EuiSpacer />
 
@@ -138,14 +138,14 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiText size="xs">
               <p>
                 This parameter provides the authentication type information required for execution
-                engine to connect to AWS Glue.
+                engine to connect to AWS Glue Data Catalog.
               </p>
             </EuiText>
             <EuiFieldText data-test-subj="authentication-method" value="IAM role" disabled />
           </>
         </EuiFormRow>
 
-        <EuiFormRow label="AWS Glue authentication ARN">
+        <EuiFormRow label="AWS Glue Data Catalog authentication ARN">
           <>
             <EuiText size="xs">
               <p>This should be the IAM role ARN</p>
@@ -167,16 +167,16 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiSpacer />
 
         <EuiText>
-          <h3>AWS Glue index store details</h3>
+          <h3>AWS Glue Data Catalog index store details</h3>
         </EuiText>
         <EuiSpacer />
 
-        <EuiFormRow label="AWS Glue index store URI">
+        <EuiFormRow label="AWS Glue Data Catalog index store URI">
           <>
             <EuiText size="xs">
               <p>
-                This parameter provides the OpenSearch cluster host information for AWS Glue. This
-                OpenSearch instance is used for writing index data back.
+                This parameter provides the OpenSearch cluster host information for AWS Glue Data
+                Catalog. This OpenSearch instance is used for writing index data back.
               </p>
             </EuiText>
             <EuiFieldText
@@ -193,7 +193,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
           </>
         </EuiFormRow>
 
-        <EuiFormRow label="AWS Glue index store authentication">
+        <EuiFormRow label="AWS Glue Data Catalog index store authentication">
           <>
             <EuiText size="xs">
               <p>Authentication settings to access the index store.</p>
