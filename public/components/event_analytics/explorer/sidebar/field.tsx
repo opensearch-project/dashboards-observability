@@ -88,7 +88,6 @@ export const Field = (props: IFieldProps) => {
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  className="explorerSidebarItem__action"
                   size="s"
                   color="text"
                   iconType="inputOutput"
@@ -113,7 +112,6 @@ export const Field = (props: IFieldProps) => {
               ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_timestamp"
-                  className="explorerSidebarItem__action"
                   size="s"
                   color="text"
                   iconType="inputOutput"
@@ -161,9 +159,7 @@ export const Field = (props: IFieldProps) => {
           <>
             {isFieldToggleButtonDisabled ? (
               <EuiButtonIcon
-                // className="explorerSidebarItem__action"
                 color={selected ? 'danger' : 'primary'}
-                // display="fill"
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
                 isDisabled
                 data-test-subj={`fieldToggle-${field.name}`}
