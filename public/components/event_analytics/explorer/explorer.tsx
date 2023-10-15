@@ -34,7 +34,6 @@ import {
   CREATE_TAB_PARAM_KEY,
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
-  DEFAULT_EMPTY_EXPLORER_FIELDS,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
   FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
@@ -46,7 +45,6 @@ import {
   SAVED_VISUALIZATION,
   SELECTED_DATE_RANGE,
   SELECTED_FIELDS,
-  SELECTED_PATTERN_FIELD,
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
   TAB_CHART_TITLE,
@@ -58,7 +56,6 @@ import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_NEWLINE_REGEX,
-  PPL_STATS_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
@@ -95,7 +92,10 @@ import { Search } from '../../common/search/search';
 import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
-import { selectCountDistribution } from '../redux/slices/count_distribution_slice';
+import {
+  selectCountDistribution,
+  render as updateCountDistribution,
+} from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { changeDateRange, changeQuery, selectQueries } from '../redux/slices/query_slice';
@@ -109,13 +109,11 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
-import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { LogPatterns } from './log_patterns/log_patterns';
 import { NoResults } from './no_results';
-import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
@@ -179,10 +177,8 @@ export const Explorer = ({
   const [selectedPanelName, setSelectedPanelName] = useState('');
   const [curVisId, setCurVisId] = useState('bar');
   const [isPanelTextFieldInvalid, setIsPanelTextFieldInvalid] = useState(false);
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [timeIntervalOptions, setTimeIntervalOptions] = useState(TIME_INTERVAL_OPTIONS);
   const [isOverridingTimestamp, setIsOverridingTimestamp] = useState(false);
-  const [isOverridingPattern, setIsOverridingPattern] = useState(false);
   const [tempQuery, setTempQuery] = useState(query[RAW_QUERY]);
   const [isLiveTailPopoverOpen, setIsLiveTailPopoverOpen] = useState(false);
   const [isLiveTailOn, setIsLiveTailOn] = useState(false);
@@ -451,20 +447,6 @@ export const Explorer = ({
     handleQuerySearch();
   };
 
-  const handleOverridePattern = async (pattern: IField) => {
-    setIsOverridingPattern(true);
-    await setDefaultPatternsField(
-      '',
-      pattern.name,
-      getErrorHandler('Error overriding default pattern')
-    );
-    setIsOverridingPattern(false);
-    await getPatterns(
-      selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
-      getErrorHandler('Error fetching patterns')
-    );
-  };
-
   const totalHits: number = useMemo(() => {
     if (isLiveTailOn && countDistribution?.data) {
       const hits = reduce(
@@ -482,8 +464,6 @@ export const Explorer = ({
 
   const dateRange = getDateRange(startTime, endTime, query);
 
-  const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
-
   const mainContent = useMemo(() => {
     return (
       <div className="dscWrapper col-md-12">
@@ -492,7 +472,6 @@ export const Explorer = ({
             {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                  {/* <EuiPanel paddingSize="s" style={{ height: '100%' }}> */}
                   {countDistribution?.data && !isLiveTailOnRef.current && (
                     <>
                       <HitsCounter
@@ -507,6 +486,14 @@ export const Explorer = ({
                             (item) => item.value === selectedIntrv
                           );
                           const intrv = selectedIntrv.replace(/^auto_/, '');
+                          dispatch(
+                            updateCountDistribution({
+                              tabId,
+                              data: {
+                                selectedInterval: intrv,
+                              },
+                            })
+                          );
                           getCountVisualizations(intrv);
                           selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
                           getPatterns(intrv, getErrorHandler('Error fetching patterns'));
@@ -568,7 +555,6 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-
                     <DataGrid
                       http={http}
                       pplService={pplService}
@@ -581,11 +567,6 @@ export const Explorer = ({
                       requestParams={requestParams}
                       startTime={appLogEvents ? startTime : dateRange[0]}
                       endTime={appLogEvents ? endTime : dateRange[1]}
-                      storedSelectedColumns={
-                        storedExplorerFields.selectedFields.length > 0
-                          ? storedExplorerFields.selectedFields
-                          : DEFAULT_EMPTY_EXPLORER_FIELDS
-                      }
                     />
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;
@@ -604,13 +585,11 @@ export const Explorer = ({
     isPanelTextFieldInvalid,
     explorerData,
     explorerFields,
-    isSidebarClosed,
     countDistribution,
     explorerVisualizations,
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
-    isOverridingPattern,
     isQueryRunning,
   ]);
 
@@ -919,43 +898,6 @@ export const Explorer = ({
         }`}
       >
         <EuiFlexGroup direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <div
-                  className="dscSelector"
-                  style={{ width: '300px', marginTop: '8px', marginLeft: '10px' }}
-                >
-                  <DataSourceSelection tabId={tabId} />
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <div className="explorerFieldSelector">
-                  <Sidebar
-                    query={query}
-                    explorerFields={explorerFields}
-                    explorerData={explorerData}
-                    selectedTimestamp={query[SELECTED_TIMESTAMP]}
-                    selectedPattern={query[SELECTED_PATTERN_FIELD]}
-                    handleOverrideTimestamp={handleOverrideTimestamp}
-                    handleOverridePattern={handleOverridePattern}
-                    isOverridingTimestamp={isOverridingTimestamp}
-                    isOverridingPattern={isOverridingPattern}
-                    isFieldToggleButtonDisabled={
-                      isEmpty(explorerData.jsonData) ||
-                      !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
-                    }
-                    storedExplorerFields={
-                      storedExplorerFields.availableFields.length > 0
-                        ? storedExplorerFields
-                        : explorerFields
-                    }
-                    setStoredExplorerFields={setStoredExplorerFields}
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
           <EuiFlexItem>
             <SearchBar
               key="search-component"

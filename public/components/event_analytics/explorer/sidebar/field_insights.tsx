@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useContext, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { indexOf, last } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
 import { getIndexPatternFromRawQuery } from '../../../common/query_utils';
-import { TabContext } from '../../hooks/use_tab_context';
+import { coreRefs } from '../../../../framework/core_refs';
 
 interface IInsightsReq {
   id: string;
@@ -19,7 +19,7 @@ interface IInsightsReq {
 type IInsightsReqParams = Pick<IInsightsReq, 'format' | 'query'>;
 
 export const FieldInsights = ({ field, query }: any) => {
-  const { pplService } = useContext(TabContext);
+  const { pplService } = coreRefs;
   const { rawQuery } = query;
   const index = getIndexPatternFromRawQuery(rawQuery);
   const generalReports = [
@@ -115,11 +115,11 @@ export const FieldInsights = ({ field, query }: any) => {
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  }, [query]);
 
   const getInsights = async (insightParams: IInsightsReqParams) => {
     try {
-      return await pplService.fetch(insightParams);
+      return await pplService?.fetch(insightParams);
     } catch (error) {
       console.error(error);
     }

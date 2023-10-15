@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useRef, RefObject, Fragment, useCallback } from 'react';
+import React, { useMemo, useState, useRef, Fragment, useCallback } from 'react';
 import {
   EuiDataGrid,
   EuiDescriptionList,
@@ -13,24 +13,18 @@ import {
   EuiDataGridSorting,
 } from '@elastic/eui';
 import moment from 'moment';
-import dompurify from 'dompurify';
-import datemath from '@elastic/datemath';
 import { MutableRefObject } from 'react';
-import { GridSortingColumn, IExplorerFields, IField } from '../../../../../common/types/explorer';
+import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import {
   DATE_DISPLAY_FORMAT,
-  DATE_PICKER_FORMAT,
+  DEFAULT_EMPTY_EXPLORER_FIELDS,
   DEFAULT_SOURCE_COLUMN,
   DEFAULT_TIMESTAMP_COLUMN,
 } from '../../../../../common/constants/explorer';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
-import { FlyoutButton, IDocType } from './docViewRow';
+import { FlyoutButton } from './docViewRow';
 import { useFetchEvents } from '../../hooks';
-import {
-  PPL_INDEX_INSERT_POINT_REGEX,
-  PPL_NEWLINE_REGEX,
-} from '../../../../../common/constants/shared';
 import { redoQuery } from '../../utils/utils';
 
 interface DataGridProps {
@@ -61,12 +55,15 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
-    storedSelectedColumns,
   } = props;
   const { getEvents } = useFetchEvents({
     pplService,
     requestParams,
   });
+  const storedSelectedColumns =
+    explorerFields.selectedFields.length > 0
+      ? explorerFields.selectedFields
+      : DEFAULT_EMPTY_EXPLORER_FIELDS;
   // useRef instead of useState somehow solves the issue of user triggered sorting not
   // having any delays
   const sortingFields: MutableRefObject<EuiDataGridSorting['columns']> = useRef([]);
