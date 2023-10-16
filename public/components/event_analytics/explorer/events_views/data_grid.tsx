@@ -11,6 +11,7 @@ import {
   EuiDescriptionListTitle,
   EuiDataGridColumn,
   EuiDataGridSorting,
+  EuiPanel,
 } from '@elastic/eui';
 import moment from 'moment';
 import { MutableRefObject } from 'react';
@@ -220,7 +221,7 @@ export function DataGrid(props: DataGridProps) {
   // TODO: memoize the expensive table below
 
   return (
-    <>
+    <EuiPanel paddingSize="s">
       <div className="dscTable dscTableFixedScroll">
         <EuiDataGrid
           aria-labelledby="aria-labelledby"
@@ -251,6 +252,6 @@ export function DataGrid(props: DataGridProps) {
           rowHeightsOptions={rowHeightsOptions}
         />
       </div>
-    </>
+    </EuiPanel>
   );
 }
