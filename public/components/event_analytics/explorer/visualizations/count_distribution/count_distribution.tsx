@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { BarOrientation, LONG_CHART_COLOR } from '../../../../../../common/constants/shared';
 import { Plt } from '../../../../visualizations/plotly/plot';
 import { fillTimeDataWithEmpty } from '../../../utils/utils';
@@ -61,20 +62,22 @@ export const CountDistribution = ({
   }
 
   return (
-    <Plt
-      data={fillWithEmpty(finalData)}
-      layout={{
-        showlegend: true,
-        margin: {
-          l: 60,
-          r: 10,
-          b: 15,
-          t: 30,
-          pad: 0,
-        },
-        height: 220,
-        colorway: [LONG_CHART_COLOR],
-      }}
-    />
+    <EuiPanel paddingSize="s">
+      <Plt
+        data={fillWithEmpty(finalData)}
+        layout={{
+          showlegend: true,
+          margin: {
+            l: 60,
+            r: 10,
+            b: 15,
+            t: 30,
+            pad: 0,
+          },
+          height: 220,
+          colorway: [LONG_CHART_COLOR],
+        }}
+      />
+    </EuiPanel>
   );
 };

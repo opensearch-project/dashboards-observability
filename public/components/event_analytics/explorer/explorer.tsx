@@ -466,7 +466,7 @@ export const Explorer = ({
 
   const mainContent = useMemo(() => {
     return (
-      <div className="dscWrapper col-md-12">
+      <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
             {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (

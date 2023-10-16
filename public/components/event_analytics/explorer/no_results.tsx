@@ -5,14 +5,13 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPage, EuiSpacer, EuiText } from '@elastic/eui';
 
 export const NoResults = () => {
   return (
     <I18nProvider>
-      <>
+      <EuiPage paddingSize="s">
         <EuiSpacer size="xl" />
-
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} className="dscNoResults">
             <EuiCallOut
@@ -45,7 +44,7 @@ export const NoResults = () => {
             </>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </EuiPage>
     </I18nProvider>
   );
 };
