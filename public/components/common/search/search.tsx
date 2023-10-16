@@ -232,7 +232,7 @@ export const Search = (props: any) => {
 
   return (
     <div className="globalQueryBar">
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart" wrap>
         {appLogEvents && (
           <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
             <EuiToolTip position="top" content={baseQuery}>
@@ -254,7 +254,7 @@ export const Search = (props: any) => {
             <EuiContextMenuPanel size="s" items={languagePopOverItems} />
           </EuiPopover>
         </EuiFlexItem>
-        <EuiFlexItem key="search-bar" className="search-area" grow={5}>
+        <EuiFlexItem key="search-bar" className="search-area" grow={5} style={{ minWidth: 400 }}>
           <Autocomplete
             key={'autocomplete-search-bar'}
             query={query}
