@@ -137,6 +137,7 @@
 }
 
 .deSidebar {
+  height: calc(100vh - 98px);
   max-width: 462px;
   min-width: 400px;
 }
