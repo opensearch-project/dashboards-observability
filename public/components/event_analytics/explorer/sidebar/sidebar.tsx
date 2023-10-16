@@ -10,6 +10,7 @@ import {
   EuiFieldSearch,
   EuiTitle,
   EuiSplitPanel,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
@@ -173,25 +174,30 @@ export const Sidebar = (props: ISidebarProps) => {
                             <EuiDraggable
                               spacing="m"
                               key={`field${field.name}`}
-                              data-attr-field={field.name}
-                              className="dscSidebar__item sidebar_content"
                               index={index}
                               draggableId={field.name}
                             >
-                              <Field
-                                query={query}
-                                field={field}
-                                selectedPattern={selectedPattern}
-                                isOverridingPattern={isOverridingPattern}
-                                handleOverridePattern={handleOverridePattern}
-                                isOverridingTimestamp={isOverridingTimestamp}
-                                selectedTimestamp={selectedTimestamp}
-                                handleOverrideTimestamp={handleOverrideTimestamp}
-                                selected={true}
-                                isFieldToggleButtonDisabled={true}
-                                showTimestampOverrideButton={false}
-                                onToggleField={handleRemoveField}
-                              />
+                              <EuiPanel
+                                data-attr-field={field.name}
+                                paddingSize="s"
+                                className="dscSidebar__item"
+                                data-test-subj={`fieldList-field`}
+                              >
+                                <Field
+                                  query={query}
+                                  field={field}
+                                  selectedPattern={selectedPattern}
+                                  isOverridingPattern={isOverridingPattern}
+                                  handleOverridePattern={handleOverridePattern}
+                                  isOverridingTimestamp={isOverridingTimestamp}
+                                  selectedTimestamp={selectedTimestamp}
+                                  handleOverrideTimestamp={handleOverrideTimestamp}
+                                  selected={true}
+                                  isFieldToggleButtonDisabled={true}
+                                  showTimestampOverrideButton={false}
+                                  onToggleField={handleRemoveField}
+                                />
+                              </EuiPanel>
                             </EuiDraggable>
                           );
                         })}
@@ -214,7 +220,7 @@ export const Sidebar = (props: ISidebarProps) => {
                   className="dscSidebarList explorerFieldList--selected"
                   aria-labelledby="selected_fields"
                   data-test-subj={`fieldList-selected`}
-                  droppableId=""
+                  droppableId="SELECTED FIELDS"
                   spacing="m"
                 >
                   {explorerData &&
@@ -225,25 +231,30 @@ export const Sidebar = (props: ISidebarProps) => {
                         <EuiDraggable
                           spacing="m"
                           key={`field${field.name}`}
-                          data-attr-field={field.name}
-                          className="dscSidebar__item sidebar_content"
                           index={index}
-                          draggableId=""
+                          draggableId={field.name}
                         >
-                          <Field
-                            query={query}
-                            field={field}
-                            selectedPattern={selectedPattern}
-                            isOverridingPattern={isOverridingPattern}
-                            handleOverridePattern={handleOverridePattern}
-                            selectedTimestamp={selectedTimestamp}
-                            isOverridingTimestamp={isOverridingTimestamp}
-                            handleOverrideTimestamp={handleOverrideTimestamp}
-                            selected={true}
-                            isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
-                            showTimestampOverrideButton={true}
-                            onToggleField={handleRemoveField}
-                          />
+                          <EuiPanel
+                            data-attr-field={field.name}
+                            paddingSize="s"
+                            className="dscSidebar__item"
+                            data-test-subj={`fieldList-field`}
+                          >
+                            <Field
+                              query={query}
+                              field={field}
+                              selectedPattern={selectedPattern}
+                              isOverridingPattern={isOverridingPattern}
+                              handleOverridePattern={handleOverridePattern}
+                              selectedTimestamp={selectedTimestamp}
+                              isOverridingTimestamp={isOverridingTimestamp}
+                              handleOverrideTimestamp={handleOverrideTimestamp}
+                              selected={true}
+                              isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
+                              showTimestampOverrideButton={true}
+                              onToggleField={handleRemoveField}
+                            />
+                          </EuiPanel>
                         </EuiDraggable>
                       );
                     })}
@@ -266,7 +277,7 @@ export const Sidebar = (props: ISidebarProps) => {
                   }`}
                   aria-labelledby="available_fields"
                   data-test-subj={`fieldList-unpopular`}
-                  droppableId=""
+                  droppableId="AVAILABLE FIELDS"
                   spacing="m"
                 >
                   {explorerFields?.availableFields &&
@@ -277,25 +288,30 @@ export const Sidebar = (props: ISidebarProps) => {
                           <EuiDraggable
                             spacing="m"
                             key={`field${field.name}`}
-                            data-attr-field={field.name}
-                            className="dscSidebar__item sidebar_content"
                             index={index}
-                            draggableId=""
+                            draggableId={field.name}
                           >
-                            <Field
-                              query={query}
-                              field={field}
-                              selectedPattern={selectedPattern}
-                              isOverridingPattern={isOverridingPattern}
-                              handleOverridePattern={handleOverridePattern}
-                              selectedTimestamp={selectedTimestamp}
-                              isOverridingTimestamp={isOverridingTimestamp}
-                              handleOverrideTimestamp={handleOverrideTimestamp}
-                              onToggleField={handleAddField}
-                              selected={false}
-                              isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
-                              showTimestampOverrideButton={true}
-                            />
+                            <EuiPanel
+                              data-attr-field={field.name}
+                              paddingSize="s"
+                              className="dscSidebar__item"
+                              data-test-subj={`fieldList-field`}
+                            >
+                              <Field
+                                query={query}
+                                field={field}
+                                selectedPattern={selectedPattern}
+                                isOverridingPattern={isOverridingPattern}
+                                handleOverridePattern={handleOverridePattern}
+                                selectedTimestamp={selectedTimestamp}
+                                isOverridingTimestamp={isOverridingTimestamp}
+                                handleOverrideTimestamp={handleOverrideTimestamp}
+                                onToggleField={handleAddField}
+                                selected={false}
+                                isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
+                                showTimestampOverrideButton={true}
+                              />
+                            </EuiPanel>
                           </EuiDraggable>
                         );
                       })}
