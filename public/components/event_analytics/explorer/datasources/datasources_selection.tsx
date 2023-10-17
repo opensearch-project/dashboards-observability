@@ -19,6 +19,30 @@ import { reset as resetQueryResults } from '../../redux/slices/query_result_slic
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
 
+const getDataSourceFromState = (selectedSourceState) => {
+  if (selectedSourceState.length === 0) return [];
+  return [
+    {
+      label: selectedSourceState[0].label,
+      value: selectedSourceState[0].value,
+      type: selectedSourceState[0].type,
+      name: selectedSourceState[0].name,
+    },
+  ];
+};
+
+const getDataSourceStateFromOrigin = (selectedSourceState) => {
+  if (selectedSourceState.length === 0) return [];
+  return [
+    {
+      label: selectedSourceState[0].label,
+      value: selectedSourceState[0].value,
+      type: selectedSourceState[0].type,
+      name: selectedSourceState[0].name,
+    },
+  ];
+};
+
 export const DataSourceSelection = ({ tabId }) => {
   const { dataSources } = coreRefs;
   const dispatch = useDispatch();
@@ -26,7 +50,9 @@ export const DataSourceSelection = ({ tabId }) => {
   const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
   const [activeDataSources, setActiveDataSources] = useState([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
-  const [selectedSources, setSelectedSources] = useState([...explorerSearchMetadata.datasources]);
+  const [selectedSources, setSelectedSources] = useState(
+    getDataSourceFromState(explorerSearchMetadata.datasources)
+  );
 
   const resetStateOnDatasourceChange = () => {
     dispatch(
@@ -62,13 +88,14 @@ export const DataSourceSelection = ({ tabId }) => {
   };
 
   const handleSourceChange = (selectedSource) => {
+    console.log();
     batch(() => {
       resetStateOnDatasourceChange();
       dispatch(
         updateSearchMetaData({
           tabId,
           data: {
-            datasources: selectedSource,
+            datasources: getDataSourceStateFromOrigin(selectedSource),
           },
         })
       );
@@ -77,7 +104,7 @@ export const DataSourceSelection = ({ tabId }) => {
   };
 
   useEffect(() => {
-    setSelectedSources([...(explorerSearchMetadata.datasources || [])]);
+    setSelectedSources(getDataSourceFromState(explorerSearchMetadata.datasources));
     return () => {};
   }, [explorerSearchMetadata.datasources]);
 
