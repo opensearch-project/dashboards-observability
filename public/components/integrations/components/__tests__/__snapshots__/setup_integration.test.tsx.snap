@@ -60,13 +60,15 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               className="euiSpacer euiSpacer--l"
                             />
                           </EuiSpacer>
-                          <EuiTitle>
-                            <h2
-                              className="euiTitle euiTitle--medium"
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
                             >
-                              Integration Details
-                            </h2>
-                          </EuiTitle>
+                              <h3>
+                                Integration Details
+                              </h3>
+                            </div>
+                          </EuiText>
                           <EuiSpacer>
                             <div
                               className="euiSpacer euiSpacer--l"
@@ -148,13 +150,15 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               className="euiSpacer euiSpacer--l"
                             />
                           </EuiSpacer>
-                          <EuiTitle>
-                            <h2
-                              className="euiTitle euiTitle--medium"
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
                             >
-                              Integration Connection
-                            </h2>
-                          </EuiTitle>
+                              <h3>
+                                Integration Connection
+                              </h3>
+                            </div>
+                          </EuiText>
                           <EuiSpacer>
                             <div
                               className="euiSpacer euiSpacer--l"
@@ -1041,13 +1045,15 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           className="euiSpacer euiSpacer--l"
         />
       </EuiSpacer>
-      <EuiTitle>
-        <h2
-          className="euiTitle euiTitle--medium"
+      <EuiText>
+        <div
+          className="euiText euiText--medium"
         >
-          Integration Details
-        </h2>
-      </EuiTitle>
+          <h3>
+            Integration Details
+          </h3>
+        </div>
+      </EuiText>
       <EuiSpacer>
         <div
           className="euiSpacer euiSpacer--l"
@@ -1129,13 +1135,15 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           className="euiSpacer euiSpacer--l"
         />
       </EuiSpacer>
-      <EuiTitle>
-        <h2
-          className="euiTitle euiTitle--medium"
+      <EuiText>
+        <div
+          className="euiText euiText--medium"
         >
-          Integration Connection
-        </h2>
-      </EuiTitle>
+          <h3>
+            Integration Connection
+          </h3>
+        </div>
+      </EuiText>
       <EuiSpacer>
         <div
           className="euiSpacer euiSpacer--l"
