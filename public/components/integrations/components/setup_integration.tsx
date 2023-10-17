@@ -194,9 +194,9 @@ export function SetupIntegrationForm({
         <h1>Set Up Integration</h1>
       </EuiTitle>
       <EuiSpacer />
-      <EuiTitle>
-        <h2>Integration Details</h2>
-      </EuiTitle>
+      <EuiText>
+        <h3>Integration Details</h3>
+      </EuiText>
       <EuiSpacer />
       <EuiFormRow label="Display Name">
         <EuiFieldText
@@ -206,9 +206,9 @@ export function SetupIntegrationForm({
         />
       </EuiFormRow>
       <EuiSpacer />
-      <EuiTitle>
-        <h2>Integration Connection</h2>
-      </EuiTitle>
+      <EuiText>
+        <h3>Integration Connection</h3>
+      </EuiText>
       <EuiSpacer />
       <EuiFormRow label="Data Source" helpText="Select a data source to connect to.">
         <EuiSelect
