@@ -4,7 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { isEmpty } from 'lodash';
-import { EuiPage, EuiSplitPanel, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
+import { EuiPage } from '@elastic/eui';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -20,9 +20,6 @@ import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { selectQueries } from '../redux/slices/query_slice';
 import { selectQueryTabs } from '../redux/slices/query_tab_slice';
 import { Explorer } from './explorer';
-import { DataSourceSelection } from './datasources/datasources_selection';
-import { initialTabId } from '../../../framework/redux/store/shared_state';
-import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 
 const searchBarConfigs = {
   [TAB_EVENT_ID]: {
@@ -94,40 +91,24 @@ export const LogExplorer = ({
   return (
     <>
       <EuiPage className="deLayout" paddingSize="none">
-        <EuiPageSideBar className="deSidebar" sticky>
-          <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-            <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-              <DataSourceSelection tabId={initialTabId} />
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
-              <ObservabilitySideBar
-                tabId={initialTabId}
-                pplService={pplService}
-                notifications={notifications}
-              />
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
-        </EuiPageSideBar>
-        <EuiPageBody className="deLayout__canvas">
-          <Explorer
-            key={`explorer_${tabIds[0]}`}
-            pplService={pplService}
-            dslService={dslService}
-            tabId={tabIds[0]}
-            savedObjects={savedObjects}
-            timestampUtils={timestampUtils}
-            setToast={setToast}
-            history={history}
-            notifications={notifications}
-            savedObjectId={savedObjectId}
-            tabCreatedTypes={tabCreatedTypes}
-            curSelectedTabId={curSelectedTabIdRef}
-            http={http}
-            searchBarConfigs={searchBarConfigs}
-            queryManager={queryManager}
-            dataSourcePluggables={dataSourcePluggables}
-          />
-        </EuiPageBody>
+        <Explorer
+          key={`explorer_${tabIds[0]}`}
+          pplService={pplService}
+          dslService={dslService}
+          tabId={tabIds[0]}
+          savedObjects={savedObjects}
+          timestampUtils={timestampUtils}
+          setToast={setToast}
+          history={history}
+          notifications={notifications}
+          savedObjectId={savedObjectId}
+          tabCreatedTypes={tabCreatedTypes}
+          curSelectedTabId={curSelectedTabIdRef}
+          http={http}
+          searchBarConfigs={searchBarConfigs}
+          queryManager={queryManager}
+          dataSourcePluggables={dataSourcePluggables}
+        />
       </EuiPage>
     </>
   );

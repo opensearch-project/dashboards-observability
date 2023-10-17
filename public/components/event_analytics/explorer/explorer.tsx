@@ -15,6 +15,10 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
+  EuiPage,
+  EuiSplitPanel,
+  EuiPageSideBar,
+  EuiPageBody,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import _, { isEmpty, isEqual, reduce } from 'lodash';
@@ -118,6 +122,9 @@ import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
+import { DataSourceSelection } from './datasources/datasources_selection';
+import { initialTabId } from '../../../framework/redux/store/shared_state';
+import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 
 export const Explorer = ({
   pplService,
@@ -892,67 +899,85 @@ export const Explorer = ({
         handleQueryChange,
       }}
     >
-      <div
-        className={`obsExplorer dscAppContainer${
-          uiSettingsService.get('theme:darkMode') && ' explorer-dark'
-        }`}
-      >
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem>
-            <SearchBar
-              key="search-component"
-              query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
-              tempQuery={tempQuery}
-              handleQueryChange={handleQueryChange}
-              handleQuerySearch={handleQuerySearch}
-              dslService={dslService}
-              startTime={appLogEvents ? startTime : dateRange[0]}
-              endTime={appLogEvents ? endTime : dateRange[1]}
-              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              selectedPanelName={selectedPanelNameRef.current}
-              selectedCustomPanelOptions={selectedCustomPanelOptions}
-              setSelectedPanelName={setSelectedPanelName}
-              setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
-              handleSavingObject={handleSavingObject}
-              isPanelTextFieldInvalid={isPanelTextFieldInvalid}
-              savedObjects={savedObjects}
-              showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
-              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-              isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-              closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
-              popoverItems={popoverItems}
-              isLiveTailOn={isLiveTailOnRef.current}
-              selectedSubTabId={selectedContentTabId}
-              searchBarConfigs={searchBarConfigs}
-              getSuggestions={parseGetSuggestions}
-              onItemSelect={onItemSelect}
-              tabId={tabId}
-              baseQuery={appBaseQuery}
-              stopLive={stopLive}
-              setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-              liveTailName={liveTailNameRef.current}
-              curVisId={curVisId}
-              setSubType={setSubType}
-              http={http}
-              setIsQueryRunning={setIsQueryRunning}
+      <EuiPageSideBar className="deSidebar" sticky>
+        <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
+          {!appLogEvents && (
+            <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+              <DataSourceSelection tabId={initialTabId} />
+            </EuiSplitPanel.Inner>
+          )}
+          <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
+            <ObservabilitySideBar
+              tabId={initialTabId}
+              pplService={pplService}
+              notifications={notifications}
             />
-            {explorerSearchMeta.isPolling ? (
-              <DirectQueryRunning tabId={tabId} />
-            ) : (
-              <EuiTabbedContent
-                className="mainContentTabs"
-                initialSelectedTab={contentTabs[0]}
-                selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-                onTabClick={(selectedTab: EuiTabbedContentTab) =>
-                  handleContentTabClick(selectedTab)
-                }
-                tabs={contentTabs}
-                size="s"
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      </EuiPageSideBar>
+      <EuiPageBody className="deLayout__canvas">
+        <div
+          className={`obsExplorer dscAppContainer${
+            uiSettingsService.get('theme:darkMode') && ' explorer-dark'
+          }`}
+        >
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem>
+              <SearchBar
+                key="search-component"
+                query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
+                tempQuery={tempQuery}
+                handleQueryChange={handleQueryChange}
+                handleQuerySearch={handleQuerySearch}
+                dslService={dslService}
+                startTime={appLogEvents ? startTime : dateRange[0]}
+                endTime={appLogEvents ? endTime : dateRange[1]}
+                handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
+                selectedPanelName={selectedPanelNameRef.current}
+                selectedCustomPanelOptions={selectedCustomPanelOptions}
+                setSelectedPanelName={setSelectedPanelName}
+                setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
+                handleSavingObject={handleSavingObject}
+                isPanelTextFieldInvalid={isPanelTextFieldInvalid}
+                savedObjects={savedObjects}
+                showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
+                handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                isLiveTailPopoverOpen={isLiveTailPopoverOpen}
+                closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
+                popoverItems={popoverItems}
+                isLiveTailOn={isLiveTailOnRef.current}
+                selectedSubTabId={selectedContentTabId}
+                searchBarConfigs={searchBarConfigs}
+                getSuggestions={parseGetSuggestions}
+                onItemSelect={onItemSelect}
+                tabId={tabId}
+                baseQuery={appBaseQuery}
+                stopLive={stopLive}
+                setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
+                liveTailName={liveTailNameRef.current}
+                curVisId={curVisId}
+                setSubType={setSubType}
+                http={http}
+                setIsQueryRunning={setIsQueryRunning}
               />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+              {explorerSearchMeta.isPolling ? (
+                <DirectQueryRunning tabId={tabId} />
+              ) : (
+                <EuiTabbedContent
+                  className="mainContentTabs"
+                  initialSelectedTab={contentTabs[0]}
+                  selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+                  onTabClick={(selectedTab: EuiTabbedContentTab) =>
+                    handleContentTabClick(selectedTab)
+                  }
+                  tabs={contentTabs}
+                  size="s"
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </EuiPageBody>
     </TabContext.Provider>
   );
 };

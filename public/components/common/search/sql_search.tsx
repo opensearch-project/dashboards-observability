@@ -265,18 +265,20 @@ export const DirectSearch = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        <EuiFlexItem key="lang-selector" className="search-area" grow={false}>
-          <EuiPopover
-            id="smallContextMenuExample"
-            button={languagePopOverButton}
-            isOpen={isLanguagePopoverOpen}
-            closePopover={closeLanguagePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel size="s" items={languagePopOverItems} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {!appLogEvents && (
+          <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
+            <EuiPopover
+              id="smallContextMenuExample"
+              button={languagePopOverButton}
+              isOpen={isLanguagePopoverOpen}
+              closePopover={closeLanguagePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel size="s" items={languagePopOverItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem key="search-bar" className="search-area" grow={5} style={{ minWidth: 400 }}>
           <Autocomplete
             key={'autocomplete-search-bar'}
