@@ -90,26 +90,24 @@ export const LogExplorer = ({
 
   return (
     <>
-      <EuiPage className="deLayout" paddingSize="none">
-        <Explorer
-          key={`explorer_${tabIds[0]}`}
-          pplService={pplService}
-          dslService={dslService}
-          tabId={tabIds[0]}
-          savedObjects={savedObjects}
-          timestampUtils={timestampUtils}
-          setToast={setToast}
-          history={history}
-          notifications={notifications}
-          savedObjectId={savedObjectId}
-          tabCreatedTypes={tabCreatedTypes}
-          curSelectedTabId={curSelectedTabIdRef}
-          http={http}
-          searchBarConfigs={searchBarConfigs}
-          queryManager={queryManager}
-          dataSourcePluggables={dataSourcePluggables}
-        />
-      </EuiPage>
+      <Explorer
+        key={`explorer_${tabIds[0]}`}
+        pplService={pplService}
+        dslService={dslService}
+        tabId={tabIds[0]}
+        savedObjects={savedObjects}
+        timestampUtils={timestampUtils}
+        setToast={setToast}
+        history={history}
+        notifications={notifications}
+        savedObjectId={savedObjectId}
+        tabCreatedTypes={tabCreatedTypes}
+        curSelectedTabId={curSelectedTabIdRef}
+        http={http}
+        searchBarConfigs={searchBarConfigs}
+        queryManager={queryManager}
+        dataSourcePluggables={dataSourcePluggables}
+      />
     </>
   );
 };

@@ -178,7 +178,7 @@ export const Explorer = ({
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const explorerVisualizations = useSelector(selectExplorerVisualization)[tabId];
   const userVizConfigs = useSelector(selectVisualizationConfig)[tabId] || {};
-  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
+  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
   const [selectedContentTabId, setSelectedContentTab] = useState(TAB_EVENT_ID);
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
@@ -197,10 +197,9 @@ export const Explorer = ({
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
   const currentPluggable = useMemo(() => {
-    return (
-      dataSourcePluggables[explorerSearchMeta.datasources[0]?.type] ||
-      dataSourcePluggables.DEFAULT_INDEX_PATTERNS
-    );
+    return explorerSearchMeta.datasources?.[0]?.type
+      ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
+      : dataSourcePluggables.DEFAULT_INDEX_PATTERNS;
   }, [explorerSearchMeta.datasources]);
   const { ui } =
     currentPluggable?.getComponentSetForVariation('languages', explorerSearchMeta.lang || 'SQL') ||
@@ -476,62 +475,64 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
-              <EuiFlexItem grow={false}>
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                  {countDistribution?.data && !isLiveTailOnRef.current && (
-                    <>
-                      <HitsCounter
-                        hits={_.sum(countDistribution.data['count()'])}
-                        showResetButton={false}
-                        onResetQuery={() => {}}
-                      />
-                      <TimechartHeader
-                        options={timeIntervalOptions}
-                        onChangeInterval={(selectedIntrv) => {
-                          const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                            (item) => item.value === selectedIntrv
-                          );
-                          const intrv = selectedIntrv.replace(/^auto_/, '');
-                          dispatch(
-                            updateCountDistribution({
-                              tabId,
-                              data: {
-                                selectedInterval: intrv,
-                              },
-                            })
-                          );
-                          getCountVisualizations(intrv);
-                          selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                          getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                        }}
-                        stateInterval={selectedIntervalRef.current?.value}
-                        startTime={appLogEvents ? startTime : dateRange[0]}
-                        endTime={appLogEvents ? endTime : dateRange[1]}
-                      />
-                      <CountDistribution
-                        countDistribution={countDistribution}
-                        selectedInterval={selectedIntervalRef.current?.value}
-                        startTime={appLogEvents ? startTime : dateRange[0]}
-                        endTime={appLogEvents ? endTime : dateRange[1]}
-                      />
-                    </>
-                  )}
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
-            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
-              <EuiFlexItem grow={false}>
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                  <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-                    <LogPatterns
-                      selectedIntervalUnit={selectedIntervalRef.current}
-                      handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-                    />
+            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
+              (appLogEvents && (
+                <EuiFlexItem grow={false}>
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                    {countDistribution?.data && !isLiveTailOnRef.current && (
+                      <>
+                        <HitsCounter
+                          hits={_.sum(countDistribution.data['count()'])}
+                          showResetButton={false}
+                          onResetQuery={() => {}}
+                        />
+                        <TimechartHeader
+                          options={timeIntervalOptions}
+                          onChangeInterval={(selectedIntrv) => {
+                            const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                              (item) => item.value === selectedIntrv
+                            );
+                            const intrv = selectedIntrv.replace(/^auto_/, '');
+                            dispatch(
+                              updateCountDistribution({
+                                tabId,
+                                data: {
+                                  selectedInterval: intrv,
+                                },
+                              })
+                            );
+                            getCountVisualizations(intrv);
+                            selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                            getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                          }}
+                          stateInterval={selectedIntervalRef.current?.value}
+                          startTime={appLogEvents ? startTime : dateRange[0]}
+                          endTime={appLogEvents ? endTime : dateRange[1]}
+                        />
+                        <CountDistribution
+                          countDistribution={countDistribution}
+                          selectedInterval={selectedIntervalRef.current?.value}
+                          startTime={appLogEvents ? startTime : dateRange[0]}
+                          endTime={appLogEvents ? endTime : dateRange[1]}
+                        />
+                      </>
+                    )}
                   </EuiPanel>
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
+                </EuiFlexItem>
+              ))}
+            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
+              (appLogEvents && (
+                <EuiFlexItem grow={false}>
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                      <LogPatterns
+                        selectedIntervalUnit={selectedIntervalRef.current}
+                        handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                      />
+                    </EuiPanel>
+                  </EuiPanel>
+                </EuiFlexItem>
+              ))}
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                 <section
@@ -624,7 +625,8 @@ export const Explorer = ({
   };
 
   const explorerVis = useMemo(() => {
-    return explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ? (
+    return explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
+      appLogEvents ? (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -899,85 +901,89 @@ export const Explorer = ({
         handleQueryChange,
       }}
     >
-      <EuiPageSideBar className="deSidebar" sticky>
-        <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-          {!appLogEvents && (
-            <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-              <DataSourceSelection tabId={initialTabId} />
-            </EuiSplitPanel.Inner>
-          )}
-          <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
-            <ObservabilitySideBar
-              tabId={initialTabId}
-              pplService={pplService}
-              notifications={notifications}
-            />
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
-      </EuiPageSideBar>
-      <EuiPageBody className="deLayout__canvas">
-        <div
-          className={`obsExplorer dscAppContainer${
-            uiSettingsService.get('theme:darkMode') && ' explorer-dark'
-          }`}
-        >
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem>
-              <SearchBar
-                key="search-component"
-                query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
-                tempQuery={tempQuery}
-                handleQueryChange={handleQueryChange}
-                handleQuerySearch={handleQuerySearch}
-                dslService={dslService}
-                startTime={appLogEvents ? startTime : dateRange[0]}
-                endTime={appLogEvents ? endTime : dateRange[1]}
-                handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-                selectedPanelName={selectedPanelNameRef.current}
-                selectedCustomPanelOptions={selectedCustomPanelOptions}
-                setSelectedPanelName={setSelectedPanelName}
-                setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
-                handleSavingObject={handleSavingObject}
-                isPanelTextFieldInvalid={isPanelTextFieldInvalid}
-                savedObjects={savedObjects}
-                showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
-                handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-                isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-                closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
-                popoverItems={popoverItems}
-                isLiveTailOn={isLiveTailOnRef.current}
-                selectedSubTabId={selectedContentTabId}
-                searchBarConfigs={searchBarConfigs}
-                getSuggestions={parseGetSuggestions}
-                onItemSelect={onItemSelect}
-                tabId={tabId}
-                baseQuery={appBaseQuery}
-                stopLive={stopLive}
-                setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-                liveTailName={liveTailNameRef.current}
-                curVisId={curVisId}
-                setSubType={setSubType}
-                http={http}
-                setIsQueryRunning={setIsQueryRunning}
+      <EuiPage className="deLayout" paddingSize="none">
+        <EuiPageSideBar className="deSidebar" sticky>
+          <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
+            {!appLogEvents && (
+              <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+                <DataSourceSelection tabId={initialTabId} />
+              </EuiSplitPanel.Inner>
+            )}
+            <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
+              <ObservabilitySideBar
+                tabId={initialTabId}
+                pplService={pplService}
+                notifications={notifications}
               />
-              {explorerSearchMeta.isPolling ? (
-                <DirectQueryRunning tabId={tabId} />
-              ) : (
-                <EuiTabbedContent
-                  className="mainContentTabs"
-                  initialSelectedTab={contentTabs[0]}
-                  selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-                  onTabClick={(selectedTab: EuiTabbedContentTab) =>
-                    handleContentTabClick(selectedTab)
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiPageSideBar>
+        <EuiPageBody className="deLayout__canvas">
+          <div
+            className={`obsExplorer dscAppContainer${
+              uiSettingsService.get('theme:darkMode') && ' explorer-dark'
+            }`}
+          >
+            <EuiFlexGroup direction="row">
+              <EuiFlexItem>
+                <SearchBar
+                  key="search-component"
+                  query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
+                  tempQuery={tempQuery}
+                  handleQueryChange={handleQueryChange}
+                  handleQuerySearch={handleQuerySearch}
+                  dslService={dslService}
+                  startTime={appLogEvents ? startTime : dateRange[0]}
+                  endTime={appLogEvents ? endTime : dateRange[1]}
+                  handleTimePickerChange={(timeRange: string[]) =>
+                    handleTimePickerChange(timeRange)
                   }
-                  tabs={contentTabs}
-                  size="s"
+                  selectedPanelName={selectedPanelNameRef.current}
+                  selectedCustomPanelOptions={selectedCustomPanelOptions}
+                  setSelectedPanelName={setSelectedPanelName}
+                  setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
+                  handleSavingObject={handleSavingObject}
+                  isPanelTextFieldInvalid={isPanelTextFieldInvalid}
+                  savedObjects={savedObjects}
+                  showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
+                  handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                  isLiveTailPopoverOpen={isLiveTailPopoverOpen}
+                  closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
+                  popoverItems={popoverItems}
+                  isLiveTailOn={isLiveTailOnRef.current}
+                  selectedSubTabId={selectedContentTabId}
+                  searchBarConfigs={searchBarConfigs}
+                  getSuggestions={parseGetSuggestions}
+                  onItemSelect={onItemSelect}
+                  tabId={tabId}
+                  baseQuery={appBaseQuery}
+                  stopLive={stopLive}
+                  setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
+                  liveTailName={liveTailNameRef.current}
+                  curVisId={curVisId}
+                  setSubType={setSubType}
+                  http={http}
+                  setIsQueryRunning={setIsQueryRunning}
                 />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </EuiPageBody>
+                {explorerSearchMeta.isPolling ? (
+                  <DirectQueryRunning tabId={tabId} />
+                ) : (
+                  <EuiTabbedContent
+                    className="mainContentTabs"
+                    initialSelectedTab={contentTabs[0]}
+                    selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+                    onTabClick={(selectedTab: EuiTabbedContentTab) =>
+                      handleContentTabClick(selectedTab)
+                    }
+                    tabs={contentTabs}
+                    size="s"
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </EuiPageBody>
+      </EuiPage>
     </TabContext.Provider>
   );
 };

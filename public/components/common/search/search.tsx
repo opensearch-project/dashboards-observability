@@ -97,7 +97,7 @@ export const Search = (props: any) => {
     setIsQueryRunning,
   } = props;
 
-  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId] || {};
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
