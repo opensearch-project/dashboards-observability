@@ -70,15 +70,13 @@ export function registerDataConnectionsRoute(router: IRouter) {
     }
   );
 
-  router.put(
+  router.patch(
     {
       path: `${DATACONNECTIONS_BASE}`,
       validate: {
         body: schema.object({
           name: schema.string(),
-          connector: schema.string(),
           allowedRoles: schema.arrayOf(schema.string()),
-          properties: schema.any(),
         }),
       },
     },
@@ -89,7 +87,6 @@ export function registerDataConnectionsRoute(router: IRouter) {
           .callAsCurrentUser('ppl.modifyDataConnection', {
             body: {
               name: request.body.name,
-              connector: request.body.connector,
               allowedRoles: request.body.allowedRoles,
               properties: request.body.properties,
             },
