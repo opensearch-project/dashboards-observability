@@ -15,6 +15,7 @@ export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
 export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const PATCH = '/patch';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';

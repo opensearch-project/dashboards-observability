@@ -17,7 +17,7 @@ import { ConnectionManagementCallout } from './connection_management_callout';
 import { Role } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 import { QueryPermissionsConfiguration } from '../new/query_permissions';
-import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { DATACONNECTIONS_BASE, PATCH } from '../../../../../common/constants/shared';
 import { SaveOrCancel } from '../save_or_cancel';
 
 interface AccessControlTabProps {
@@ -88,7 +88,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
   };
 
   const saveChanges = () => {
-    http!.patch(`${DATACONNECTIONS_BASE}`, {
+    http!.post(`${DATACONNECTIONS_BASE}/${PATCH}`, {
       body: JSON.stringify({
         name: props.dataConnection,
         allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
