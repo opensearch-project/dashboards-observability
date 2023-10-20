@@ -780,6 +780,28 @@ export const Explorer = ({
           }
         );
       } else {
+        console.log('creating SaveAsNewVisualization', [
+          {
+            tabId,
+            history,
+            notifications,
+            showPermissionErrorToast,
+            appLogEvents,
+            addVisualizationToPanel,
+          },
+          { batch, dispatch, changeQuery, updateTabName },
+          OSDSavedVisualizationClient.getInstance(),
+          new PanelSavedObjectClient(http),
+          {
+            ...commonParams,
+            type: curVisId,
+            applicationId: appId,
+            userConfigs: JSON.stringify(userVizConfigs[curVisId]),
+            description: userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '',
+            subType,
+            selectedPanels: selectedCustomPanelOptions,
+          },
+        ]);
         soClient = new SaveAsNewVisualization(
           {
             tabId,
