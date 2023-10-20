@@ -496,7 +496,7 @@ export const Explorer = ({
                   {countDistribution?.data && !isLiveTailOnRef.current && (
                     <>
                       <HitsCounter
-                        hits={_.sum(countDistribution.data['count()'])}
+                        hits={_.sum(countDistribution.data?.['count()'])}
                         showResetButton={false}
                         onResetQuery={() => {}}
                       />
@@ -577,7 +577,7 @@ export const Explorer = ({
                       explorerFields={explorerFields}
                       timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
                       rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
-                      totalHits={_.sum(countDistribution.data['count()'])}
+                      totalHits={_.sum(countDistribution.data?.['count()'])}
                       requestParams={requestParams}
                       startTime={appLogEvents ? startTime : dateRange[0]}
                       endTime={appLogEvents ? endTime : dateRange[1]}
@@ -780,6 +780,28 @@ export const Explorer = ({
           }
         );
       } else {
+        console.log('creating SaveAsNewVisualization', [
+          {
+            tabId,
+            history,
+            notifications,
+            showPermissionErrorToast,
+            appLogEvents,
+            addVisualizationToPanel,
+          },
+          { batch, dispatch, changeQuery, updateTabName },
+          OSDSavedVisualizationClient.getInstance(),
+          new PanelSavedObjectClient(http),
+          {
+            ...commonParams,
+            type: curVisId,
+            applicationId: appId,
+            userConfigs: JSON.stringify(userVizConfigs[curVisId]),
+            description: userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '',
+            subType,
+            selectedPanels: selectedCustomPanelOptions,
+          },
+        ]);
         soClient = new SaveAsNewVisualization(
           {
             tabId,

@@ -191,7 +191,7 @@ export const Sidebar = (props: ISidebarProps) => {
                               data-attr-field={field.name}
                               className="dscSidebar__item sidebar_content"
                               index={index}
-                              draggableId={field.name}
+                              draggableId={`queriedField-${field.name}`}
                             >
                               <Field
                                 query={query}
@@ -229,7 +229,7 @@ export const Sidebar = (props: ISidebarProps) => {
                     className="dscSidebarList explorerFieldList--selected"
                     aria-labelledby="selected_fields"
                     data-test-subj={`fieldList-selected`}
-                    droppableId=""
+                    droppableId="selectedFields-drop"
                     spacing="m"
                   >
                     {explorerData &&
@@ -243,7 +243,7 @@ export const Sidebar = (props: ISidebarProps) => {
                             data-attr-field={field.name}
                             className="dscSidebar__item sidebar_content"
                             index={index}
-                            draggableId=""
+                            draggableId={`selectedField-${field.name}`}
                           >
                             <Field
                               query={query}
@@ -282,7 +282,7 @@ export const Sidebar = (props: ISidebarProps) => {
                     }`}
                     aria-labelledby="available_fields"
                     data-test-subj={`fieldList-unpopular`}
-                    droppableId=""
+                    droppableId="unpopularFields-drop"
                     spacing="m"
                   >
                     {storedExplorerFields?.availableFields &&
@@ -298,7 +298,7 @@ export const Sidebar = (props: ISidebarProps) => {
                               data-attr-field={field.name}
                               className="dscSidebar__item sidebar_content"
                               index={index}
-                              draggableId=""
+                              draggableId={`availableField-field${field.name}`}
                             >
                               <Field
                                 query={query}
