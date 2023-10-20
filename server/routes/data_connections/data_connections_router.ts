@@ -9,7 +9,7 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import { DATACONNECTIONS_BASE, PATCH } from '../../../common/constants/shared';
+import { DATACONNECTIONS_BASE, EDIT } from '../../../common/constants/shared';
 
 export function registerDataConnectionsRoute(router: IRouter) {
   router.get(
@@ -72,7 +72,7 @@ export function registerDataConnectionsRoute(router: IRouter) {
 
   router.post(
     {
-      path: `${DATACONNECTIONS_BASE}/${PATCH}`,
+      path: `${DATACONNECTIONS_BASE}${EDIT}`,
       validate: {
         body: schema.object({
           name: schema.string(),
