@@ -53,7 +53,6 @@ export const Home = (props: HomeProps) => {
           path={['/', '/manage']}
           render={(routerProps) => <ManageDataConnectionsTable {...commonProps} />}
         />
-        <Route exact path={['/new']} render={(routerProps) => <NewDatasource {...commonProps} />} />
 
         <Route
           exact

@@ -47,22 +47,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
-  const deleteConnection = (connectionName: string) => {
-    http!
-      .delete(`${DATACONNECTIONS_BASE}/${connectionName}`)
-      .then(() => {
-        setToast(`Data connection ${connectionName} deleted successfully`);
-        setData(
-          data.filter((connection) => {
-            return !(connection.name === connectionName);
-          })
-        );
-      })
-      .catch((err) => {
-        setToast(`Data connection $${connectionName} not deleted. See output for more details.`);
-      });
-  };
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
@@ -82,23 +66,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
       )
     );
   }
-
-  const displayDeleteModal = (connectionName: string) => {
-    setModalLayout(
-      <DeleteModal
-        onConfirm={() => {
-          setIsModalVisible(false);
-          deleteConnection(connectionName);
-        }}
-        onCancel={() => {
-          setIsModalVisible(false);
-        }}
-        title={`Delete ${connectionName}`}
-        message={`Are you sure you want to delete ${connectionName}?`}
-      />
-    );
-    setIsModalVisible(true);
-  };
 
   const actions = [
     {
@@ -136,16 +103,6 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         application!.navigateToApp('opensearch-query-workbench');
       },
       'data-test-subj': 'action-accelerate',
-    },
-    {
-      name: 'Delete',
-      description: 'Delete this data source',
-      icon: 'trash',
-      color: 'danger',
-      type: 'icon',
-      onClick: (datasource: DataConnection) => displayDeleteModal(datasource.name),
-      isPrimary: false,
-      'data-test-subj': 'action-delete',
     },
   ];
 
