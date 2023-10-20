@@ -47,6 +47,7 @@ export const visualizationSavedObject: SavedObjectsType = {
 
 export const searchSavedObject: SavedObjectsType = {
   name: SEARCH_SAVED_OBJECT,
+  icon: 'editorCodeBlock',
   hidden: false,
   namespaceType: 'single',
   management: {
