@@ -478,7 +478,7 @@ export const Explorer = ({
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   {countDistribution?.data && !isLiveTailOnRef.current && (
-                    <>
+                    <EuiPanel>
                       <HitsCounter
                         hits={_.sum(countDistribution.data['count()'])}
                         showResetButton={false}
@@ -513,7 +513,7 @@ export const Explorer = ({
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
-                    </>
+                    </EuiPanel>
                   )}
                 </EuiPanel>
               </EuiFlexItem>
