@@ -413,7 +413,8 @@ export const redoQuery = (
   timeStampField: string,
   sortingFields: MutableRefObject<EuiDataGridSorting['columns']>,
   pageFields: MutableRefObject<number[]>,
-  getEvents: any
+  fetchEvents: any,
+  setData: React.Dispatch<React.SetStateAction<any[]>>
 ) => {
   let finalQuery = '';
 
@@ -436,5 +437,8 @@ export const redoQuery = (
   finalQuery =
     finalQuery +
     ` | head ${pageFields.current[1]} from ${pageFields.current[0] * pageFields.current[1]}`;
-  getEvents(finalQuery);
+
+  fetchEvents({ query: finalQuery }, 'jdbc', (res: any) => {
+    setData(res.jsonData);
+  });
 };

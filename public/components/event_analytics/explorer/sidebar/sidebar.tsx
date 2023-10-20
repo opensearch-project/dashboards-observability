@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { batch, useDispatch } from 'react-redux';
 import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constants/explorer';
 import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
@@ -53,6 +53,18 @@ export const Sidebar = (props: ISidebarProps) => {
   const dispatch = useDispatch();
   const [showFields, setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // method to return the type of a field from its name
+  const getFieldTypes = (newFieldName: string) => {
+    let fieldType: string = '';
+    explorerFields.availableFields.map((field) => {
+      if (field.name === newFieldName) fieldType = field.type;
+    });
+    explorerFields.selectedFields.map((field) => {
+      if (field.name === newFieldName) fieldType = field.type;
+    });
+    return fieldType;
+  };
 
   /**
    * Toggle fields between selected and unselected sets
@@ -117,8 +129,24 @@ export const Sidebar = (props: ISidebarProps) => {
     [explorerFields, tabId]
   );
 
-  const onDragEnd = ({}) => {
-    console.log('source, destination');
+  const onDragEnd = ({
+    destination,
+    source,
+    draggableId,
+  }: {
+    destination: any;
+    source: any;
+    draggableId: string;
+  }) => {
+    // check if the destination and source are the same area
+    if (destination.droppableId !== source.droppableId) {
+      // if dropped into the selected fields: add, if dropped into available: remove
+      if (destination.droppableId === 'SELECTED FIELDS') {
+        handleAddField({ name: draggableId, type: getFieldTypes(draggableId) });
+      } else if (destination.droppableId === 'AVAILABLE FIELDS') {
+        handleRemoveField({ name: draggableId, type: getFieldTypes(draggableId) });
+      }
+    }
   };
 
   return (
