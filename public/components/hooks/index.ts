@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { usePolling } from './use_polling';
+export { usePolling, PollingConfigurations } from './use_polling';

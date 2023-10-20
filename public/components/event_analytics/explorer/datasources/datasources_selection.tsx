@@ -18,8 +18,9 @@ import { reset as resetPatterns } from '../../redux/slices/patterns_slice';
 import { reset as resetQueryResults } from '../../redux/slices/query_result_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
+import { SelectedDataSource } from '../../../../../common/types/explorer';
 
-const getDataSourceFromState = (selectedSourceState) => {
+const getDataSourceFromState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
   return [
     {
@@ -31,7 +32,7 @@ const getDataSourceFromState = (selectedSourceState) => {
   ];
 };
 
-const getDataSourceStateFromOrigin = (selectedSourceState) => {
+const getDataSourceStateFromOrigin = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
   return [
     {
@@ -87,7 +88,7 @@ export const DataSourceSelection = ({ tabId }) => {
     );
   };
 
-  const handleSourceChange = (selectedSource) => {
+  const handleSourceChange = (selectedSource: SelectedDataSource[]) => {
     console.log();
     batch(() => {
       resetStateOnDatasourceChange();

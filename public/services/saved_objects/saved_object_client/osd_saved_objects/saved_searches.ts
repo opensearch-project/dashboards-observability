@@ -7,8 +7,8 @@ import { SavedObjectsFindOptions } from '../../../../../../../src/core/public';
 import { IField } from '../../../../../common/types/explorer';
 import {
   SAVED_OBJECT_VERSION,
-  VisualizationSavedObjectAttributes,
-  VISUALIZATION_SAVED_OBJECT,
+  SearchSavedObjectAttributes,
+  SEARCH_SAVED_OBJECT,
 } from '../../../../../common/types/observability_saved_object_attributes';
 import { getOSDSavedObjectsClient } from '../../../../../common/utils';
 import {
@@ -41,45 +41,36 @@ interface CommonParams {
 type CreateParams = CommonParams & { applicationId: string };
 type UpdateParams = Partial<CommonParams> & { objectId: string };
 
-export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
-  private static instance: OSDSavedVisualizationClient;
+export class OSDSavedSearchClient extends OSDSavedObjectClient {
+  private static instance: OSDSavedSearchClient;
 
   protected prependTypeToId(objectId: string) {
-    return `${VISUALIZATION_SAVED_OBJECT}:${objectId}`;
+    return `${SEARCH_SAVED_OBJECT}:${objectId}`;
   }
 
   async create(
     params: CreateParams
-  ): Promise<OSDSavedObjectCreateResponse<VisualizationSavedObjectAttributes>> {
+  ): Promise<OSDSavedObjectCreateResponse<SearchSavedObjectAttributes>> {
     const body = this.buildRequestBody({
       query: params.query,
       fields: params.fields,
       dateRange: params.dateRange,
-      chartType: params.type,
       name: params.name,
       timestamp: params.timestamp,
-      applicationId: params.applicationId,
-      userConfigs: params.userConfigs,
       description: params.description,
-      subType: params.subType,
-      unitsOfMeasure: params.unitsOfMeasure,
-      selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
       queryLang: params.queryLang,
     });
 
-    const response = await this.client.create<VisualizationSavedObjectAttributes>(
-      VISUALIZATION_SAVED_OBJECT,
-      {
-        title: params.name,
-        description: params.description,
-        version: SAVED_OBJECT_VERSION,
-        createdTimeMs: new Date().getTime(),
-        savedVisualization: {
-          ...body.object,
-        },
-      }
-    );
+    const response = await this.client.create<SearchSavedObjectAttributes>(SEARCH_SAVED_OBJECT, {
+      title: params.name,
+      description: params.description,
+      version: SAVED_OBJECT_VERSION,
+      createdTimeMs: new Date().getTime(),
+      savedQuery: {
+        ...body.object,
+      },
+    });
 
     return {
       objectId: this.prependTypeToId(response.id),
@@ -89,32 +80,26 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
 
   async update(
     params: UpdateParams
-  ): Promise<OSDSavedObjectUpdateResponse<VisualizationSavedObjectAttributes>> {
+  ): Promise<OSDSavedObjectUpdateResponse<SearchSavedObjectAttributes>> {
     const body = this.buildRequestBody({
       query: params.query,
       fields: params.fields,
       dateRange: params.dateRange,
-      chartType: params.type,
       name: params.name,
       timestamp: params.timestamp,
-      applicationId: params.applicationId,
-      userConfigs: params.userConfigs,
       description: params.description,
-      subType: params.subType,
-      unitsOfMeasure: params.unitsOfMeasure,
-      selectedLabels: params.selectedLabels,
       dataSources: params.dataSources,
       queryLang: params.queryLang,
     });
 
-    const response = await this.client.update<Partial<VisualizationSavedObjectAttributes>>(
-      VISUALIZATION_SAVED_OBJECT,
+    const response = await this.client.update<Partial<SearchSavedObjectAttributes>>(
+      SEARCH_SAVED_OBJECT,
       OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid,
       {
         title: params.name,
         description: params.description,
         version: SAVED_OBJECT_VERSION,
-        savedVisualization: body.object,
+        savedQuery: body.object,
       }
     );
 
@@ -129,8 +114,8 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
   }
 
   async get(params: SavedObjectsGetParams): Promise<SavedObjectsGetResponse> {
-    const response = await this.client.get<VisualizationSavedObjectAttributes>(
-      VISUALIZATION_SAVED_OBJECT,
+    const response = await this.client.get<SearchSavedObjectAttributes>(
+      SEARCH_SAVED_OBJECT,
       OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid
     );
     return {
@@ -139,7 +124,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
           objectId: this.prependTypeToId(response.id),
           createdTimeMs: response.attributes.createdTimeMs,
           lastUpdatedTimeMs: OSDSavedObjectClient.convertToLastUpdatedMs(response.updated_at),
-          savedVisualization: response.attributes.savedVisualization,
+          savedQuery: response.attributes.savedQuery,
         },
       ],
     };
@@ -147,16 +132,16 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
 
   async getBulk(params: Partial<SavedObjectsFindOptions> = {}): Promise<SavedObjectsGetResponse> {
     const observabilityObjectList = await this.client
-      .find<VisualizationSavedObjectAttributes>({
+      .find<SearchSavedObjectAttributes>({
         ...params,
-        type: VISUALIZATION_SAVED_OBJECT,
+        type: SEARCH_SAVED_OBJECT,
       })
       .then((findRes) =>
         findRes.savedObjects.map((o) => ({
           objectId: this.prependTypeToId(o.id),
           createdTimeMs: o.attributes.createdTimeMs,
           lastUpdatedTimeMs: OSDSavedObjectClient.convertToLastUpdatedMs(o.updated_at),
-          savedVisualization: o.attributes.savedVisualization,
+          savedQuery: o.attributes.savedQuery,
         }))
       );
     return { totalHits: observabilityObjectList.length, observabilityObjectList };
@@ -165,7 +150,7 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
   async delete(params: SavedObjectsDeleteParams): Promise<SavedObjectsDeleteResponse> {
     const uuid = OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid;
     return this.client
-      .delete(VISUALIZATION_SAVED_OBJECT, uuid)
+      .delete(SEARCH_SAVED_OBJECT, uuid)
       .then(() => ({ deleteResponseList: { [params.objectId]: 'OK' } }))
       .catch((res) => ({ deleteResponseList: { [params.objectId]: res } }));
   }

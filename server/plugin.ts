@@ -15,7 +15,10 @@ import {
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { setupRoutes } from './routes/index';
-import { visualizationSavedObject } from './saved_objects/observability_saved_object';
+import {
+  searchSavedObject,
+  visualizationSavedObject,
+} from './saved_objects/observability_saved_object';
 import { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 
 export class ObservabilityPlugin
@@ -111,6 +114,7 @@ export class ObservabilityPlugin
     setupRoutes({ router, client: openSearchObservabilityClient });
 
     core.savedObjects.registerType(visualizationSavedObject);
+    core.savedObjects.registerType(searchSavedObject);
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,

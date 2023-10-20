@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { isEqual, lowerCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
-import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import { batch, useDispatch, useSelector } from 'react-redux';
+import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
+import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
@@ -35,6 +35,7 @@ import {
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
+import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -94,13 +95,13 @@ export const DirectSearch = (props: any) => {
     setIsQueryRunning,
   } = props;
 
-  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId] || {};
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
-  const [queryLang, setQueryLang] = useState('SQL');
+  const [queryLang, setQueryLang] = useState(explorerSearchMetadata.lang || 'PPL');
   const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
@@ -196,11 +197,22 @@ export const DirectSearch = (props: any) => {
 
   const onQuerySearch = (lang) => {
     setIsQueryRunning(true);
+    batch(() => {
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, ''),
+          },
+        })
+      );
+    });
     dispatch(
       updateSearchMetaData({
         tabId,
         data: {
           isPolling: true,
+          lang: queryLang,
         },
       })
     );

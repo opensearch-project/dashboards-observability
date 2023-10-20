@@ -63,7 +63,6 @@ import {
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
-  IExplorerFields,
   IExplorerProps,
   IField,
   IQuery,
@@ -72,17 +71,15 @@ import {
 } from '../../../../common/types/explorer';
 import {
   buildQuery,
-  buildRawQuery,
   getIndexPatternFromRawQuery,
   uiSettingsService,
+  getSavingCommonParams,
 } from '../../../../common/utils';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
-import {
-  PPLSavedQueryClient,
-  PanelSavedObjectClient,
-} from '../../../services/saved_objects/saved_object_client/ppl';
+import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
+import { PanelSavedObjectClient } from '../../../services/saved_objects/saved_object_client/ppl';
 import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 import {
   SaveAsCurrentQuery,
@@ -125,6 +122,7 @@ import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 import { DataSourceSelection } from './datasources/datasources_selection';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
+import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
 
 export const Explorer = ({
   pplService,
@@ -154,7 +152,7 @@ export const Explorer = ({
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
   const requestParams = { tabId };
-  const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
+  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
     pplService,
     requestParams,
   });
@@ -313,7 +311,7 @@ export const Explorer = ({
     !isEqual(getIndexPatternFromRawQuery(currentQuery), getIndexPatternFromRawQuery(prevTabQuery));
 
   const updateTabData = async (objectId: string) => {
-    await new PPLSavedObjectLoader(
+    await new ExplorerSavedObjectLoader(
       getSavedObjectsClient({ objectId, objectType: 'savedQuery' }),
       notifications,
       {
@@ -340,6 +338,7 @@ export const Explorer = ({
         setSubType,
         setSelectedContentTab,
         fetchData,
+        dispatchOnGettingHis,
       }
     ).load();
   };
@@ -469,70 +468,69 @@ export const Explorer = ({
   }, [countDistribution?.data]);
 
   const dateRange = getDateRange(startTime, endTime, query);
-
   const mainContent = useMemo(() => {
     return (
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
-              (appLogEvents && (
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                    {countDistribution?.data && !isLiveTailOnRef.current && (
-                      <>
-                        <HitsCounter
-                          hits={_.sum(countDistribution.data['count()'])}
-                          showResetButton={false}
-                          onResetQuery={() => {}}
-                        />
-                        <TimechartHeader
-                          options={timeIntervalOptions}
-                          onChangeInterval={(selectedIntrv) => {
-                            const intervalOptionsIndex = timeIntervalOptions.findIndex(
-                              (item) => item.value === selectedIntrv
-                            );
-                            const intrv = selectedIntrv.replace(/^auto_/, '');
-                            dispatch(
-                              updateCountDistribution({
-                                tabId,
-                                data: {
-                                  selectedInterval: intrv,
-                                },
-                              })
-                            );
-                            getCountVisualizations(intrv);
-                            selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
-                            getPatterns(intrv, getErrorHandler('Error fetching patterns'));
-                          }}
-                          stateInterval={selectedIntervalRef.current?.value}
-                          startTime={appLogEvents ? startTime : dateRange[0]}
-                          endTime={appLogEvents ? endTime : dateRange[1]}
-                        />
-                        <CountDistribution
-                          countDistribution={countDistribution}
-                          selectedInterval={selectedIntervalRef.current?.value}
-                          startTime={appLogEvents ? startTime : dateRange[0]}
-                          endTime={appLogEvents ? endTime : dateRange[1]}
-                        />
-                      </>
-                    )}
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
-              (appLogEvents && (
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                    <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-                      <LogPatterns
-                        selectedIntervalUnit={selectedIntervalRef.current}
-                        handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+            {(explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
+              appLogEvents) && (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                  {countDistribution?.data && !isLiveTailOnRef.current && (
+                    <>
+                      <HitsCounter
+                        hits={_.sum(countDistribution.data['count()'])}
+                        showResetButton={false}
+                        onResetQuery={() => {}}
                       />
-                    </EuiPanel>
+                      <TimechartHeader
+                        options={timeIntervalOptions}
+                        onChangeInterval={(selectedIntrv) => {
+                          const intervalOptionsIndex = timeIntervalOptions.findIndex(
+                            (item) => item.value === selectedIntrv
+                          );
+                          const intrv = selectedIntrv.replace(/^auto_/, '');
+                          dispatch(
+                            updateCountDistribution({
+                              tabId,
+                              data: {
+                                selectedInterval: intrv,
+                              },
+                            })
+                          );
+                          getCountVisualizations(intrv);
+                          selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
+                          getPatterns(intrv, getErrorHandler('Error fetching patterns'));
+                        }}
+                        stateInterval={selectedIntervalRef.current?.value}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                      <CountDistribution
+                        countDistribution={countDistribution}
+                        selectedInterval={selectedIntervalRef.current?.value}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                    </>
+                  )}
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
+            {(explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
+              appLogEvents) && (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+                  <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+                    <LogPatterns
+                      selectedIntervalUnit={selectedIntervalRef.current}
+                      handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                    />
                   </EuiPanel>
-                </EuiFlexItem>
-              ))}
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                 <section
@@ -706,34 +704,28 @@ export const Explorer = ({
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
 
-  const getSavingCommonParams = (
-    queryState: IQuery,
-    fields: IExplorerFields,
-    savingTitle: string
-  ) => {
-    return {
-      query: buildRawQuery(query, appBaseQuery),
-      fields: fields[SELECTED_FIELDS],
-      dateRange: queryState[SELECTED_DATE_RANGE],
-      name: savingTitle,
-      timestamp: queryState[SELECTED_TIMESTAMP],
-    };
-  };
-
   const handleSavingObject = useCallback(() => {
     const isOnEventPage = isEqual(selectedContentTabId, TAB_EVENT_ID);
     const isObjTypeMatchQuery = isEqual(query[SAVED_OBJECT_TYPE], SAVED_QUERY);
     const isObjTypeMatchVis = isEqual(query[SAVED_OBJECT_TYPE], SAVED_VISUALIZATION);
     const isTabHasObjID = !isEmpty(query[SAVED_OBJECT_ID]);
-    const commonParams = getSavingCommonParams(query, explorerFields, selectedPanelNameRef.current);
-
+    const commonParams = getSavingCommonParams(
+      query,
+      appBaseQuery,
+      explorerFields,
+      selectedPanelNameRef.current,
+      explorerSearchMeta
+    );
     let soClient;
     if (isOnEventPage) {
       if (isTabHasObjID && isObjTypeMatchQuery) {
         soClient = new SaveAsCurrentQuery(
           { tabId, notifications },
           { dispatch, updateTabName },
-          PPLSavedQueryClient.getInstance(),
+          getSavedObjectsClient({
+            objectId: query[SAVED_OBJECT_ID],
+            objectType: 'savedQuery',
+          }),
           {
             ...commonParams,
             objectId: query[SAVED_OBJECT_ID],
@@ -743,7 +735,7 @@ export const Explorer = ({
         soClient = new SaveAsNewQuery(
           { tabId, history, notifications, showPermissionErrorToast },
           { batch, dispatch, changeQuery, updateTabName },
-          new PPLSavedQueryClient(http),
+          OSDSavedSearchClient.getInstance(),
           { ...commonParams }
         );
       }
@@ -801,6 +793,7 @@ export const Explorer = ({
     explorerFields,
     subType,
     selectedCustomPanelOptions,
+    explorerSearchMeta,
   ]);
 
   // live tail
