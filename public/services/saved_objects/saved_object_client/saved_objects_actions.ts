@@ -120,6 +120,16 @@ export class SavedObjectsActions {
       };
     }
 
+    if (idMap[SEARCH_SAVED_OBJECT]?.length) {
+      const searchDeleteResponses = await OSDSavedSearchClient.getInstance().deleteBulk({
+        objectIdList: idMap[SEARCH_SAVED_OBJECT],
+      });
+      responses.deleteResponseList = {
+        ...responses.deleteResponseList,
+        ...searchDeleteResponses.deleteResponseList,
+      };
+    }
+
     const remainingObjectIds = [
       ...new Set(
         idMap.non_osd?.concat(
