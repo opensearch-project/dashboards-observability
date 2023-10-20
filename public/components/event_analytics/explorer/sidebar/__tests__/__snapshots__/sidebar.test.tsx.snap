@@ -1048,21 +1048,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="double_per_ip_bytes"
-                                              draggableId="double_per_ip_bytes"
+                                              draggableId="queriedField-double_per_ip_bytes"
                                               index={0}
                                               key="fielddouble_per_ip_bytes"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="double_per_ip_bytes"
-                                                draggableId="double_per_ip_bytes"
+                                                draggableId="queriedField-double_per_ip_bytes"
                                                 index={0}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="double_per_ip_bytes"
-                                                  draggableId="double_per_ip_bytes"
+                                                  draggableId="queriedField-double_per_ip_bytes"
                                                   index={0}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -1072,7 +1072,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="double_per_ip_bytes"
-                                                    draggableId="double_per_ip_bytes"
+                                                    draggableId="queriedField-double_per_ip_bytes"
                                                     index={0}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -1082,7 +1082,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="double_per_ip_bytes"
-                                                      draggableId="double_per_ip_bytes"
+                                                      draggableId="queriedField-double_per_ip_bytes"
                                                       dropAnimationFinished={[Function]}
                                                       index={0}
                                                       isClone={false}
@@ -1115,9 +1115,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id="double_per_ip_bytes"
+                                                        data-rbd-drag-handle-draggable-id="queriedField-double_per_ip_bytes"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id="double_per_ip_bytes"
+                                                        data-rbd-draggable-id="queriedField-double_per_ip_bytes"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -1516,21 +1516,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="host"
-                                              draggableId="host"
+                                              draggableId="queriedField-host"
                                               index={1}
                                               key="fieldhost"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="host"
-                                                draggableId="host"
+                                                draggableId="queriedField-host"
                                                 index={1}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="host"
-                                                  draggableId="host"
+                                                  draggableId="queriedField-host"
                                                   index={1}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -1540,7 +1540,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="host"
-                                                    draggableId="host"
+                                                    draggableId="queriedField-host"
                                                     index={1}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -1550,7 +1550,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="host"
-                                                      draggableId="host"
+                                                      draggableId="queriedField-host"
                                                       dropAnimationFinished={[Function]}
                                                       index={1}
                                                       isClone={false}
@@ -1583,9 +1583,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id="host"
+                                                        data-rbd-drag-handle-draggable-id="queriedField-host"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id="host"
+                                                        data-rbd-draggable-id="queriedField-host"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -1984,21 +1984,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="ip_count"
-                                              draggableId="ip_count"
+                                              draggableId="queriedField-ip_count"
                                               index={2}
                                               key="fieldip_count"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="ip_count"
-                                                draggableId="ip_count"
+                                                draggableId="queriedField-ip_count"
                                                 index={2}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="ip_count"
-                                                  draggableId="ip_count"
+                                                  draggableId="queriedField-ip_count"
                                                   index={2}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -2008,7 +2008,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="ip_count"
-                                                    draggableId="ip_count"
+                                                    draggableId="queriedField-ip_count"
                                                     index={2}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -2018,7 +2018,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="ip_count"
-                                                      draggableId="ip_count"
+                                                      draggableId="queriedField-ip_count"
                                                       dropAnimationFinished={[Function]}
                                                       index={2}
                                                       isClone={false}
@@ -2051,9 +2051,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id="ip_count"
+                                                        data-rbd-drag-handle-draggable-id="queriedField-ip_count"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id="ip_count"
+                                                        data-rbd-draggable-id="queriedField-ip_count"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -2452,21 +2452,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="per_ip_bytes"
-                                              draggableId="per_ip_bytes"
+                                              draggableId="queriedField-per_ip_bytes"
                                               index={3}
                                               key="fieldper_ip_bytes"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="per_ip_bytes"
-                                                draggableId="per_ip_bytes"
+                                                draggableId="queriedField-per_ip_bytes"
                                                 index={3}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="per_ip_bytes"
-                                                  draggableId="per_ip_bytes"
+                                                  draggableId="queriedField-per_ip_bytes"
                                                   index={3}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -2476,7 +2476,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="per_ip_bytes"
-                                                    draggableId="per_ip_bytes"
+                                                    draggableId="queriedField-per_ip_bytes"
                                                     index={3}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -2486,7 +2486,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="per_ip_bytes"
-                                                      draggableId="per_ip_bytes"
+                                                      draggableId="queriedField-per_ip_bytes"
                                                       dropAnimationFinished={[Function]}
                                                       index={3}
                                                       isClone={false}
@@ -2519,9 +2519,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id="per_ip_bytes"
+                                                        data-rbd-drag-handle-draggable-id="queriedField-per_ip_bytes"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id="per_ip_bytes"
+                                                        data-rbd-draggable-id="queriedField-per_ip_bytes"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -2920,21 +2920,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="resp_code"
-                                              draggableId="resp_code"
+                                              draggableId="queriedField-resp_code"
                                               index={4}
                                               key="fieldresp_code"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="resp_code"
-                                                draggableId="resp_code"
+                                                draggableId="queriedField-resp_code"
                                                 index={4}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="resp_code"
-                                                  draggableId="resp_code"
+                                                  draggableId="queriedField-resp_code"
                                                   index={4}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -2944,7 +2944,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="resp_code"
-                                                    draggableId="resp_code"
+                                                    draggableId="queriedField-resp_code"
                                                     index={4}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -2954,7 +2954,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="resp_code"
-                                                      draggableId="resp_code"
+                                                      draggableId="queriedField-resp_code"
                                                       dropAnimationFinished={[Function]}
                                                       index={4}
                                                       isClone={false}
@@ -2987,9 +2987,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id="resp_code"
+                                                        data-rbd-drag-handle-draggable-id="queriedField-resp_code"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id="resp_code"
+                                                        data-rbd-draggable-id="queriedField-resp_code"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -3388,21 +3388,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="sum_bytes"
-                                              draggableId="sum_bytes"
+                                              draggableId="queriedField-sum_bytes"
                                               index={5}
                                               key="fieldsum_bytes"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="sum_bytes"
-                                                draggableId="sum_bytes"
+                                                draggableId="queriedField-sum_bytes"
                                                 index={5}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="sum_bytes"
-                                                  draggableId="sum_bytes"
+                                                  draggableId="queriedField-sum_bytes"
                                                   index={5}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -3412,7 +3412,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="sum_bytes"
-                                                    draggableId="sum_bytes"
+                                                    draggableId="queriedField-sum_bytes"
                                                     index={5}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -3422,7 +3422,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="sum_bytes"
-                                                      draggableId="sum_bytes"
+                                                      draggableId="queriedField-sum_bytes"
                                                       dropAnimationFinished={[Function]}
                                                       index={5}
                                                       isClone={false}
@@ -3455,9 +3455,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id="sum_bytes"
+                                                        data-rbd-drag-handle-draggable-id="queriedField-sum_bytes"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id="sum_bytes"
+                                                        data-rbd-draggable-id="queriedField-sum_bytes"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -3978,13 +3978,13 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       aria-labelledby="selected_fields"
                                       className="dscSidebarList explorerFieldList--selected"
                                       data-test-subj="fieldList-selected"
-                                      droppableId=""
+                                      droppableId="selectedFields-drop"
                                       spacing="m"
                                     >
                                       <Connect(Droppable)
                                         aria-labelledby="selected_fields"
                                         direction="vertical"
-                                        droppableId=""
+                                        droppableId="selectedFields-drop"
                                         getContainerForClone={[Function]}
                                         ignoreContainerClipping={false}
                                         isCombineEnabled={false}
@@ -3996,7 +3996,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         <Droppable
                                           aria-labelledby="selected_fields"
                                           direction="vertical"
-                                          droppableId=""
+                                          droppableId="selectedFields-drop"
                                           getContainerForClone={[Function]}
                                           ignoreContainerClipping={false}
                                           isCombineEnabled={false}
@@ -4020,7 +4020,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                           <div
                                             className="euiDroppable euiDroppable--noGrow euiDroppable--m dscSidebarList explorerFieldList--selected"
                                             data-rbd-droppable-context-id="1"
-                                            data-rbd-droppable-id=""
+                                            data-rbd-droppable-id="selectedFields-drop"
                                             data-test-subj="fieldList-selected"
                                           >
                                             <div
@@ -4148,13 +4148,13 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                       aria-labelledby="available_fields"
                                       className="explorerFieldList explorerFieldList--unpopular hidden-sm hidden-xs"
                                       data-test-subj="fieldList-unpopular"
-                                      droppableId=""
+                                      droppableId="unpopularFields-drop"
                                       spacing="m"
                                     >
                                       <Connect(Droppable)
                                         aria-labelledby="available_fields"
                                         direction="vertical"
-                                        droppableId=""
+                                        droppableId="unpopularFields-drop"
                                         getContainerForClone={[Function]}
                                         ignoreContainerClipping={false}
                                         isCombineEnabled={false}
@@ -4166,7 +4166,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                         <Droppable
                                           aria-labelledby="available_fields"
                                           direction="vertical"
-                                          droppableId=""
+                                          droppableId="unpopularFields-drop"
                                           getContainerForClone={[Function]}
                                           ignoreContainerClipping={false}
                                           isCombineEnabled={false}
@@ -4190,27 +4190,27 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                           <div
                                             className="euiDroppable euiDroppable--noGrow euiDroppable--m explorerFieldList explorerFieldList--unpopular hidden-sm hidden-xs"
                                             data-rbd-droppable-context-id="1"
-                                            data-rbd-droppable-id=""
+                                            data-rbd-droppable-id="unpopularFields-drop"
                                             data-test-subj="fieldList-unpopular"
                                           >
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="agent"
-                                              draggableId=""
+                                              draggableId="availableField-fieldagent"
                                               index={0}
                                               key="fieldagent"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="agent"
-                                                draggableId=""
+                                                draggableId="availableField-fieldagent"
                                                 index={0}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="agent"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldagent"
                                                   index={0}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -4220,7 +4220,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="agent"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldagent"
                                                     index={0}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -4230,7 +4230,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="agent"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldagent"
                                                       dropAnimationFinished={[Function]}
                                                       index={0}
                                                       isClone={false}
@@ -4263,9 +4263,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldagent"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldagent"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -4722,21 +4722,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="bytes"
-                                              draggableId=""
+                                              draggableId="availableField-fieldbytes"
                                               index={1}
                                               key="fieldbytes"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="bytes"
-                                                draggableId=""
+                                                draggableId="availableField-fieldbytes"
                                                 index={1}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="bytes"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldbytes"
                                                   index={1}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -4746,7 +4746,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="bytes"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldbytes"
                                                     index={1}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -4756,7 +4756,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="bytes"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldbytes"
                                                       dropAnimationFinished={[Function]}
                                                       index={1}
                                                       isClone={false}
@@ -4789,9 +4789,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldbytes"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldbytes"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -5191,21 +5191,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="clientip"
-                                              draggableId=""
+                                              draggableId="availableField-fieldclientip"
                                               index={2}
                                               key="fieldclientip"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="clientip"
-                                                draggableId=""
+                                                draggableId="availableField-fieldclientip"
                                                 index={2}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="clientip"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldclientip"
                                                   index={2}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -5215,7 +5215,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="clientip"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldclientip"
                                                     index={2}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -5225,7 +5225,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="clientip"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldclientip"
                                                       dropAnimationFinished={[Function]}
                                                       index={2}
                                                       isClone={false}
@@ -5258,9 +5258,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldclientip"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldclientip"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -5660,21 +5660,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="event"
-                                              draggableId=""
+                                              draggableId="availableField-fieldevent"
                                               index={3}
                                               key="fieldevent"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="event"
-                                                draggableId=""
+                                                draggableId="availableField-fieldevent"
                                                 index={3}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="event"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldevent"
                                                   index={3}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -5684,7 +5684,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="event"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldevent"
                                                     index={3}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -5694,7 +5694,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="event"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldevent"
                                                       dropAnimationFinished={[Function]}
                                                       index={3}
                                                       isClone={false}
@@ -5727,9 +5727,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldevent"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldevent"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -6129,21 +6129,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="extension"
-                                              draggableId=""
+                                              draggableId="availableField-fieldextension"
                                               index={4}
                                               key="fieldextension"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="extension"
-                                                draggableId=""
+                                                draggableId="availableField-fieldextension"
                                                 index={4}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="extension"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldextension"
                                                   index={4}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -6153,7 +6153,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="extension"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldextension"
                                                     index={4}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -6163,7 +6163,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="extension"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldextension"
                                                       dropAnimationFinished={[Function]}
                                                       index={4}
                                                       isClone={false}
@@ -6196,9 +6196,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldextension"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldextension"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -6655,21 +6655,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="geo"
-                                              draggableId=""
+                                              draggableId="availableField-fieldgeo"
                                               index={5}
                                               key="fieldgeo"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="geo"
-                                                draggableId=""
+                                                draggableId="availableField-fieldgeo"
                                                 index={5}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="geo"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldgeo"
                                                   index={5}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -6679,7 +6679,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="geo"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldgeo"
                                                     index={5}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -6689,7 +6689,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="geo"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldgeo"
                                                       dropAnimationFinished={[Function]}
                                                       index={5}
                                                       isClone={false}
@@ -6722,9 +6722,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldgeo"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldgeo"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -7124,21 +7124,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="host"
-                                              draggableId=""
+                                              draggableId="availableField-fieldhost"
                                               index={6}
                                               key="fieldhost"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="host"
-                                                draggableId=""
+                                                draggableId="availableField-fieldhost"
                                                 index={6}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="host"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldhost"
                                                   index={6}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -7148,7 +7148,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="host"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldhost"
                                                     index={6}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -7158,7 +7158,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="host"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldhost"
                                                       dropAnimationFinished={[Function]}
                                                       index={6}
                                                       isClone={false}
@@ -7191,9 +7191,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldhost"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldhost"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -7650,21 +7650,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="index"
-                                              draggableId=""
+                                              draggableId="availableField-fieldindex"
                                               index={7}
                                               key="fieldindex"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="index"
-                                                draggableId=""
+                                                draggableId="availableField-fieldindex"
                                                 index={7}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="index"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldindex"
                                                   index={7}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -7674,7 +7674,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="index"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldindex"
                                                     index={7}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -7684,7 +7684,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="index"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldindex"
                                                       dropAnimationFinished={[Function]}
                                                       index={7}
                                                       isClone={false}
@@ -7717,9 +7717,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldindex"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldindex"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -8176,21 +8176,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="ip"
-                                              draggableId=""
+                                              draggableId="availableField-fieldip"
                                               index={8}
                                               key="fieldip"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="ip"
-                                                draggableId=""
+                                                draggableId="availableField-fieldip"
                                                 index={8}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="ip"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldip"
                                                   index={8}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -8200,7 +8200,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="ip"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldip"
                                                     index={8}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -8210,7 +8210,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="ip"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldip"
                                                       dropAnimationFinished={[Function]}
                                                       index={8}
                                                       isClone={false}
@@ -8243,9 +8243,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldip"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldip"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -8645,21 +8645,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="machine"
-                                              draggableId=""
+                                              draggableId="availableField-fieldmachine"
                                               index={9}
                                               key="fieldmachine"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="machine"
-                                                draggableId=""
+                                                draggableId="availableField-fieldmachine"
                                                 index={9}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="machine"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldmachine"
                                                   index={9}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -8669,7 +8669,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="machine"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldmachine"
                                                     index={9}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -8679,7 +8679,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="machine"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldmachine"
                                                       dropAnimationFinished={[Function]}
                                                       index={9}
                                                       isClone={false}
@@ -8712,9 +8712,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldmachine"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldmachine"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -9114,21 +9114,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="memory"
-                                              draggableId=""
+                                              draggableId="availableField-fieldmemory"
                                               index={10}
                                               key="fieldmemory"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="memory"
-                                                draggableId=""
+                                                draggableId="availableField-fieldmemory"
                                                 index={10}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="memory"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldmemory"
                                                   index={10}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -9138,7 +9138,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="memory"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldmemory"
                                                     index={10}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -9148,7 +9148,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="memory"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldmemory"
                                                       dropAnimationFinished={[Function]}
                                                       index={10}
                                                       isClone={false}
@@ -9181,9 +9181,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldmemory"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldmemory"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -9583,21 +9583,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="message"
-                                              draggableId=""
+                                              draggableId="availableField-fieldmessage"
                                               index={11}
                                               key="fieldmessage"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="message"
-                                                draggableId=""
+                                                draggableId="availableField-fieldmessage"
                                                 index={11}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="message"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldmessage"
                                                   index={11}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -9607,7 +9607,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="message"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldmessage"
                                                     index={11}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -9617,7 +9617,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="message"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldmessage"
                                                       dropAnimationFinished={[Function]}
                                                       index={11}
                                                       isClone={false}
@@ -9650,9 +9650,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldmessage"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldmessage"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -10109,21 +10109,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="phpmemory"
-                                              draggableId=""
+                                              draggableId="availableField-fieldphpmemory"
                                               index={12}
                                               key="fieldphpmemory"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="phpmemory"
-                                                draggableId=""
+                                                draggableId="availableField-fieldphpmemory"
                                                 index={12}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="phpmemory"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldphpmemory"
                                                   index={12}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -10133,7 +10133,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="phpmemory"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldphpmemory"
                                                     index={12}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -10143,7 +10143,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="phpmemory"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldphpmemory"
                                                       dropAnimationFinished={[Function]}
                                                       index={12}
                                                       isClone={false}
@@ -10176,9 +10176,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldphpmemory"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldphpmemory"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -10578,21 +10578,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="referer"
-                                              draggableId=""
+                                              draggableId="availableField-fieldreferer"
                                               index={13}
                                               key="fieldreferer"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="referer"
-                                                draggableId=""
+                                                draggableId="availableField-fieldreferer"
                                                 index={13}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="referer"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldreferer"
                                                   index={13}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -10602,7 +10602,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="referer"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldreferer"
                                                     index={13}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -10612,7 +10612,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="referer"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldreferer"
                                                       dropAnimationFinished={[Function]}
                                                       index={13}
                                                       isClone={false}
@@ -10645,9 +10645,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldreferer"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldreferer"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -11104,21 +11104,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="request"
-                                              draggableId=""
+                                              draggableId="availableField-fieldrequest"
                                               index={14}
                                               key="fieldrequest"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="request"
-                                                draggableId=""
+                                                draggableId="availableField-fieldrequest"
                                                 index={14}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="request"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldrequest"
                                                   index={14}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -11128,7 +11128,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="request"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldrequest"
                                                     index={14}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -11138,7 +11138,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="request"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldrequest"
                                                       dropAnimationFinished={[Function]}
                                                       index={14}
                                                       isClone={false}
@@ -11171,9 +11171,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldrequest"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldrequest"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -11630,21 +11630,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="response"
-                                              draggableId=""
+                                              draggableId="availableField-fieldresponse"
                                               index={15}
                                               key="fieldresponse"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="response"
-                                                draggableId=""
+                                                draggableId="availableField-fieldresponse"
                                                 index={15}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="response"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldresponse"
                                                   index={15}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -11654,7 +11654,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="response"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldresponse"
                                                     index={15}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -11664,7 +11664,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="response"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldresponse"
                                                       dropAnimationFinished={[Function]}
                                                       index={15}
                                                       isClone={false}
@@ -11697,9 +11697,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldresponse"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldresponse"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -12156,21 +12156,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="tags"
-                                              draggableId=""
+                                              draggableId="availableField-fieldtags"
                                               index={16}
                                               key="fieldtags"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="tags"
-                                                draggableId=""
+                                                draggableId="availableField-fieldtags"
                                                 index={16}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="tags"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldtags"
                                                   index={16}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -12180,7 +12180,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="tags"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldtags"
                                                     index={16}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -12190,7 +12190,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="tags"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldtags"
                                                       dropAnimationFinished={[Function]}
                                                       index={16}
                                                       isClone={false}
@@ -12223,9 +12223,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldtags"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldtags"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -12682,21 +12682,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="timestamp"
-                                              draggableId=""
+                                              draggableId="availableField-fieldtimestamp"
                                               index={17}
                                               key="fieldtimestamp"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="timestamp"
-                                                draggableId=""
+                                                draggableId="availableField-fieldtimestamp"
                                                 index={17}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="timestamp"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldtimestamp"
                                                   index={17}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -12706,7 +12706,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="timestamp"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldtimestamp"
                                                     index={17}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -12716,7 +12716,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="timestamp"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldtimestamp"
                                                       dropAnimationFinished={[Function]}
                                                       index={17}
                                                       isClone={false}
@@ -12749,9 +12749,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldtimestamp"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldtimestamp"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -13168,21 +13168,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="url"
-                                              draggableId=""
+                                              draggableId="availableField-fieldurl"
                                               index={18}
                                               key="fieldurl"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="url"
-                                                draggableId=""
+                                                draggableId="availableField-fieldurl"
                                                 index={18}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="url"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldurl"
                                                   index={18}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -13192,7 +13192,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="url"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldurl"
                                                     index={18}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -13202,7 +13202,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="url"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldurl"
                                                       dropAnimationFinished={[Function]}
                                                       index={18}
                                                       isClone={false}
@@ -13235,9 +13235,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldurl"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldurl"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
@@ -13694,21 +13694,21 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                             <EuiDraggable
                                               className="dscSidebar__item sidebar_content"
                                               data-attr-field="utc_time"
-                                              draggableId=""
+                                              draggableId="availableField-fieldutc_time"
                                               index={19}
                                               key="fieldutc_time"
                                               spacing="m"
                                             >
                                               <PublicDraggable
                                                 data-attr-field="utc_time"
-                                                draggableId=""
+                                                draggableId="availableField-fieldutc_time"
                                                 index={19}
                                                 isDragDisabled={false}
                                               >
                                                 <PrivateDraggable
                                                   canDragInteractiveElements={false}
                                                   data-attr-field="utc_time"
-                                                  draggableId=""
+                                                  draggableId="availableField-fieldutc_time"
                                                   index={19}
                                                   isClone={false}
                                                   isDragDisabled={false}
@@ -13718,7 +13718,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                   <Connect(Draggable)
                                                     canDragInteractiveElements={false}
                                                     data-attr-field="utc_time"
-                                                    draggableId=""
+                                                    draggableId="availableField-fieldutc_time"
                                                     index={19}
                                                     isClone={false}
                                                     isDragDisabled={false}
@@ -13728,7 +13728,7 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                     <Draggable
                                                       canDragInteractiveElements={false}
                                                       data-attr-field="utc_time"
-                                                      draggableId=""
+                                                      draggableId="availableField-fieldutc_time"
                                                       dropAnimationFinished={[Function]}
                                                       index={19}
                                                       isClone={false}
@@ -13761,9 +13761,9 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                         aria-describedby="rbd-hidden-text-1-hidden-text-1"
                                                         className="euiDraggable euiDraggable--m dscSidebar__item sidebar_content"
                                                         data-rbd-drag-handle-context-id="1"
-                                                        data-rbd-drag-handle-draggable-id=""
+                                                        data-rbd-drag-handle-draggable-id="availableField-fieldutc_time"
                                                         data-rbd-draggable-context-id="1"
-                                                        data-rbd-draggable-id=""
+                                                        data-rbd-draggable-id="availableField-fieldutc_time"
                                                         data-test-subj="draggable"
                                                         draggable={false}
                                                         onDragStart={[Function]}
