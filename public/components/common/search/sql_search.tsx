@@ -213,13 +213,32 @@ export const DirectSearch = (props: any) => {
 
   useEffect(() => {
     // cancel direct query
-    if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
-      // stop polling
-      stopPolling();
-      setIsQueryRunning(false);
-      dispatch(updateSearchMetaData({ tabId, data: { isPolling: false } }));
-      // update page with data
-      dispatchOnGettingHis(pollingResult, '');
+    if (pollingResult) {
+      if (pollingResult.status === 'SUCCESS' || pollingResult.datarows) {
+        // stop polling
+        stopPolling();
+        setIsQueryRunning(false);
+        dispatch(
+          updateSearchMetaData({
+            tabId,
+            data: {
+              isPolling: false,
+              status: null,
+            },
+          })
+        );
+        // update page with data
+        dispatchOnGettingHis(pollingResult, '');
+      } else {
+        dispatch(
+          updateSearchMetaData({
+            tabId,
+            data: {
+              status: pollingResult.status,
+            },
+          })
+        );
+      }
     }
   }, [pollingResult, pollingError]);
 
