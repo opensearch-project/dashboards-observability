@@ -54,13 +54,13 @@ export const Sidebar = (props: ISidebarProps) => {
   const [showFields, setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // list of every single field object
-  const [allFields, setAllFields] = useState<IField[]>([]);
-
   // method to return the type of a field from its name
   const getFieldTypes = (newFieldName: string) => {
     let fieldType: string = '';
-    allFields.map((field) => {
+    explorerFields.availableFields.map((field) => {
+      if (field.name === newFieldName) fieldType = field.type;
+    });
+    explorerFields.selectedFields.map((field) => {
       if (field.name === newFieldName) fieldType = field.type;
     });
     return fieldType;
@@ -128,17 +128,6 @@ export const Sidebar = (props: ISidebarProps) => {
     },
     [explorerFields, tabId]
   );
-
-  // this useEffect will set allFields when the page is rendered
-  useEffect(() => {
-    if (
-      explorerFields.availableFields.length > 0 &&
-      explorerFields.selectedFields.length === 0 &&
-      allFields.length === 0
-    ) {
-      setAllFields(explorerFields.availableFields);
-    }
-  }, [explorerFields.availableFields]);
 
   const onDragEnd = ({
     destination,

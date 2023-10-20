@@ -577,7 +577,6 @@ export const DataConfigPanelItem = ({
             {getNumberField('bucketOffset')}
           </>
         )}
-        {/* <EuiSpacer size="m" /> */}
         <div className="vbConfig__content">
           <EuiFlexItem grow={false}>
             <EuiButton
