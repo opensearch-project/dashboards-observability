@@ -62,22 +62,20 @@ export const CountDistribution = ({
   }
 
   return (
-    <EuiPanel paddingSize="s">
-      <Plt
-        data={fillWithEmpty(finalData)}
-        layout={{
-          showlegend: true,
-          margin: {
-            l: 60,
-            r: 10,
-            b: 15,
-            t: 30,
-            pad: 0,
-          },
-          height: 220,
-          colorway: [LONG_CHART_COLOR],
-        }}
-      />
-    </EuiPanel>
+    <Plt
+      data={fillWithEmpty(finalData)}
+      layout={{
+        showlegend: true,
+        margin: {
+          l: 60,
+          r: 10,
+          b: 15,
+          t: 30,
+          pad: 0,
+        },
+        height: 220,
+        colorway: [LONG_CHART_COLOR],
+      }}
+    />
   );
 };
