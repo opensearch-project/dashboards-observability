@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { FieldButton } from '../../../common/field_button';
 import { FieldIcon } from '../../../common/field_icon';
@@ -88,9 +89,13 @@ export const Field = (props: IFieldProps) => {
               <EuiText size="xs">
                 {' '}
                 <EuiFlexItem grow={false}>
-                  <EuiMark data-test-subj="eventFields__default-timestamp-mark">
+                  <EuiBadge
+                    className="dscSidebarField__actionButton"
+                    color="hollow"
+                    data-test-subj="eventFields__default-pattern-mark"
+                  >
                     Default Pattern
-                  </EuiMark>
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiText>
             ) : isOverridingPattern ? (
@@ -122,9 +127,13 @@ export const Field = (props: IFieldProps) => {
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   {' '}
-                  <EuiMark data-test-subj="eventFields__default-timestamp-mark">
+                  <EuiBadge
+                    className="dscSidebarField__actionButton"
+                    color="hollow"
+                    data-test-subj="eventFields__default-timestamp-mark"
+                  >
                     Default Timestamp
-                  </EuiMark>
+                  </EuiBadge>
                 </EuiText>
               </EuiFlexItem>
             ) : isOverridingTimestamp ? (
