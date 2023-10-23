@@ -59,7 +59,7 @@ export const Home = (props: HomeProps) => {
           exact
           path={['/configure/:id+']}
           render={(routerProps) => (
-            <Configure {...commonProps} type={decodeURIComponent(routerProps.match.params.id)} />
+            <Configure {...commonProps} urlType={decodeURIComponent(routerProps.match.params.id)} />
           )}
         />
       </Switch>
