@@ -49,6 +49,7 @@ export class SaveAsNewQuery extends SavedQuerySaver {
             })
           );
         });
+        history.replace(`/explorer/${res.objectId}`);
         return res;
       })
       .catch((error: any) => {

@@ -97,14 +97,12 @@ export const Search = (props: any) => {
     setIsQueryRunning,
   } = props;
 
-  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId] || {};
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState('PPL');
-  const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -119,7 +117,7 @@ export const Search = (props: any) => {
   }, 5000);
 
   const requestParams = { tabId };
-  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
+  const { dispatchOnGettingHis } = useFetchEvents({
     pplService: new SQLService(coreRefs.http),
     requestParams,
   });
@@ -164,9 +162,8 @@ export const Search = (props: any) => {
 
   const handleQueryLanguageChange = (lang: string) => {
     if (lang === 'DQL') {
-      return application!.navigateToUrl(
-        `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
-      );
+      application!.navigateToUrl('../app/data-explorer/discover');
+      return;
     }
     dispatch(
       updateSearchMetaData({
@@ -214,21 +211,6 @@ export const Search = (props: any) => {
       setIsQueryRunning(false);
     }
   }, [pollingResult, pollingError]);
-
-  useEffect(() => {
-    if (explorerSearchMetadata.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS') {
-      const queryWithSelectedSource = `source = ${explorerSearchMetadata.datasources[0].label}`;
-      handleQueryChange(queryWithSelectedSource);
-      dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [RAW_QUERY]: queryWithSelectedSource,
-          },
-        })
-      );
-    }
-  }, [explorerSearchMetadata.datasources]);
 
   return (
     <div className="globalQueryBar">

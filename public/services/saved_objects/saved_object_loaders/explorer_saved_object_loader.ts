@@ -360,7 +360,6 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
 
   async loadDataFromSavedObject(objectData, tabId: string) {
     const dataSources = parseStringDataSource(objectData.data_sources, this.notifications);
-    console.log('dataSources: ', dataSources);
     if (dataSources.length > 0 && dataSources[0].type) {
       switch (dataSources[0].type) {
         case DIRECT_DATA_SOURCE_TYPES.DEFAULT_INDEX_PATTERNS:

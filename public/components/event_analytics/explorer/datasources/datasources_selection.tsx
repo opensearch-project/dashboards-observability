@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { LogExplorerRouterContext } from '../..';
-import { DataSourceSelectable } from '../../../../../../../src/plugins/data/public';
+import { DataSourceSelectable, DataSourceType } from '../../../../../../../src/plugins/data/public';
 import { coreRefs } from '../../../../framework/core_refs';
 import {
   selectSearchMetaData,
@@ -19,6 +19,7 @@ import { reset as resetQueryResults } from '../../redux/slices/query_result_slic
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
 import { SelectedDataSource } from '../../../../../common/types/explorer';
+import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
 
 const getDataSourceFromState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
@@ -89,7 +90,6 @@ export const DataSourceSelection = ({ tabId }) => {
   };
 
   const handleSourceChange = (selectedSource: SelectedDataSource[]) => {
-    console.log();
     batch(() => {
       resetStateOnDatasourceChange();
       dispatch(
@@ -116,7 +116,14 @@ export const DataSourceSelection = ({ tabId }) => {
   useEffect(() => {
     const subscription = dataSources.dataSourceService.dataSources$.subscribe(
       (currentDataSources) => {
-        setActiveDataSources([...Object.values(currentDataSources)]);
+        setActiveDataSources([
+          new ObservabilityDefaultDataSource({
+            name: 'Default cluster',
+            type: 'DEFAULT_INDEX_PATTERNS',
+            metadata: null,
+          }),
+          ...Object.values(currentDataSources).filter((ds) => ds.type !== 'DEFAULT_INDEX_PATTERNS'),
+        ]);
       }
     );
 
@@ -144,11 +151,20 @@ export const DataSourceSelection = ({ tabId }) => {
     }
   }, []);
 
+  const memorizedDataSourceOptionList = useMemo(() => {
+    return dataSourceOptionList.map((dsOption) => {
+      if (dsOption.label === 'Default Group') {
+        dsOption.label = 'OpenSearch';
+      }
+      return dsOption;
+    });
+  }, [dataSourceOptionList]);
+
   return (
     <DataSourceSelectable
       className="dsc-selector"
       dataSources={activeDataSources}
-      dataSourceOptionList={dataSourceOptionList}
+      dataSourceOptionList={memorizedDataSourceOptionList}
       setDataSourceOptionList={setDataSourceOptionList}
       selectedSources={selectedSources}
       onDataSourceSelect={handleSourceChange}
