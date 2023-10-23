@@ -552,8 +552,7 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    {((countDistribution.data && countDistribution.data['count()']) ||
-                      !(isDefaultDataSourceType || appLogEvents)) && (
+                    {(countDistribution.data?.['count()'] || explorerData?.datarows?.length) && (
                       <DataGrid
                         http={http}
                         pplService={pplService}
@@ -564,8 +563,9 @@ export const Explorer = ({
                         rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
                         totalHits={
                           isDefaultDataSourceType || appLogEvents
-                            ? _.sum(countDistribution.data?.['count()'])
-                            : explorerData?.datarows?.length || 0
+                            ? _.sum(countDistribution.data?.['count()']) ||
+                              explorerData.datarows.length
+                            : explorerData.datarows.length
                         }
                         requestParams={requestParams}
                         startTime={appLogEvents ? startTime : dateRange[0]}
