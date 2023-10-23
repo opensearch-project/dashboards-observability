@@ -90,7 +90,7 @@ export function DataGrid(props: DataGridProps) {
 
   const setPage = (page: number[]) => {
     pageFields.current = page;
-    const res = redoQuery(
+    redoQuery(
       startTime,
       endTime,
       rawQuery,
@@ -100,7 +100,6 @@ export function DataGrid(props: DataGridProps) {
       fetchEvents,
       setData
     );
-    console.log(res);
   };
 
   // creates the header for each column listing what that column is
@@ -242,7 +241,6 @@ export function DataGrid(props: DataGridProps) {
   return (
     <EuiPanel paddingSize="s">
       <div className="dscTable dscTableFixedScroll">
-        {console.log('trigger', totalHits)}
         <EuiDataGrid
           aria-labelledby="aria-labelledby"
           data-test-subj="docTable"
