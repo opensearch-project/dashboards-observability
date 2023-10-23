@@ -552,8 +552,7 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
-                    appLogEvents ? (
+                    {isDefaultDataSourceType || appLogEvents ? (
                       <>
                         {countDistribution.data && countDistribution.data['count()'] ? (
                           <DataGrid
