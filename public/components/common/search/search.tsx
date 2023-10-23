@@ -206,23 +206,12 @@ export const Search = (props: any) => {
   };
 
   useEffect(() => {
-    if (pollingResult) {
-      if (pollingResult.status === 'SUCCESS' || pollingResult.datarows) {
-        // update page with data
-        dispatchOnGettingHis(pollingResult, '');
-        // stop polling
-        stopPolling();
-        setIsQueryRunning(false);
-      } else {
-        dispatch(
-          updateSearchMetaData({
-            tabId,
-            data: {
-              status: pollingResult.status,
-            },
-          })
-        );
-      }
+    if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
+      // update page with data
+      dispatchOnGettingHis(pollingResult, '');
+      // stop polling
+      stopPolling();
+      setIsQueryRunning(false);
     }
   }, [pollingResult, pollingError]);
 

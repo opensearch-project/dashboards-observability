@@ -10,6 +10,7 @@ import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../redux/slices/search_meta_data_slice';
+import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 
 export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
@@ -20,7 +21,9 @@ export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
       title={<h2>Query Processing</h2>}
       body={
         <>
-          <EuiText>Status: {explorerSearchMeta.status ?? 'SCHEDULED'}</EuiText>
+          <EuiText>
+            Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
+          </EuiText>
           <EuiSpacer size="s" />
           <EuiButton
             color="success"
