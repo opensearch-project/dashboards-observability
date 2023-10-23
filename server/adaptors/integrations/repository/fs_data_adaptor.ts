@@ -48,6 +48,15 @@ function tryParseNDJson(content: string): object[] | null {
   }
 }
 
+// Check if a location is a directory without an exception if location not found
+const safeIsDirectory = async (maybeDirectory: string): Promise<boolean> => {
+  try {
+    return (await fs.lstat(maybeDirectory)).isDirectory();
+  } catch (_err: unknown) {
+    return false;
+  }
+};
+
 /**
  * A CatalogDataAdaptor that reads from the local filesystem.
  * Used to read Integration information when the user uploads their own catalog.
@@ -133,15 +142,13 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
   }
 
   async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
-    const isDir = (await fs.lstat(path.join(this.directory, dirname ?? '.'))).isDirectory();
+    const isDir = await safeIsDirectory(path.join(this.directory, dirname ?? '.'));
     if (!isDir) {
       return 'unknown';
     }
     // Sloppily just check for one mandatory integration directory to distinguish.
     // Improve if we need to distinguish a repository with an integration named "schemas".
-    const hasSchemas = (
-      await fs.lstat(path.join(this.directory, dirname ?? '.', 'schemas'))
-    ).isDirectory();
+    const hasSchemas = await safeIsDirectory(path.join(this.directory, dirname ?? '.', 'schemas'));
     return hasSchemas ? 'integration' : 'repository';
   }
 

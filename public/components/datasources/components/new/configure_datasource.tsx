@@ -27,17 +27,18 @@ import { ReviewPrometheusDatasource } from './review_prometheus_datasource_confi
 import {
   AuthMethod,
   DatasourceTypeToDisplayName,
+  UrlToDatasourceType,
 } from '../../../../../common/constants/data_connections';
 import { formatError } from '../../../../../public/components/event_analytics/utils';
 import { NotificationsStart } from '../../../../../../../src/core/public';
 
 interface ConfigureDatasourceProps {
-  type: DatasourceType;
+  urlType: string;
   notifications: NotificationsStart;
 }
 
 export function Configure(props: ConfigureDatasourceProps) {
-  const { type, notifications } = props;
+  const { urlType, notifications } = props;
   const { http, chrome } = coreRefs;
   const { setToast } = useToast();
   const [error, setError] = useState<string>('');
@@ -55,6 +56,7 @@ export function Configure(props: ConfigureDatasourceProps) {
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
   const [page, setPage] = useState<'configure' | 'review'>('configure');
+  const type = UrlToDatasourceType[urlType];
   const ConfigureDatasourceSteps = [
     {
       title: 'Configure data source',

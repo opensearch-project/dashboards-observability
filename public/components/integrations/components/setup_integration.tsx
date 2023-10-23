@@ -6,28 +6,29 @@
 import {
   EuiBottomBar,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiComboBox,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLoadingDashboards,
-  EuiModal,
+  EuiLoadingLogo,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { Color } from 'common/constants/integrations';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
-import { useToast } from '../../../../public/components/common/toast';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
@@ -38,10 +39,13 @@ export interface IntegrationSetupInputs {
   connectionLocation: string;
 }
 
+type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
+
 interface IntegrationConfigProps {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationTemplate;
+  setupCallout: SetupCallout;
 }
 
 // TODO support localization
@@ -156,7 +160,10 @@ const runQuery = async (
         trackProgress(3);
         return { ok: true, value: poll };
       } else if (poll.status === 'FAILURE') {
-        return { ok: false, error: new Error('FAILURE status', { cause: poll }) };
+        return {
+          ok: false,
+          error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
+        };
       }
       await sleep(3000);
     }
@@ -170,6 +177,7 @@ export function SetupIntegrationForm({
   config,
   updateConfig,
   integration,
+  setupCallout,
 }: IntegrationConfigProps) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
@@ -193,6 +201,12 @@ export function SetupIntegrationForm({
       <EuiTitle>
         <h1>Set Up Integration</h1>
       </EuiTitle>
+      <EuiSpacer />
+      {setupCallout.show ? (
+        <EuiCallOut title={setupCallout.title} color="danger">
+          <p>{setupCallout.text}</p>
+        </EuiCallOut>
+      ) : null}
       <EuiSpacer />
       <EuiText>
         <h3>Integration Details</h3>
@@ -260,24 +274,29 @@ export function SetupBottomBar({
   integration,
   loading,
   setLoading,
-  loadingProgress,
-  setProgress,
+  setSetupCallout,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationTemplate;
   loading: boolean;
   setLoading: (loading: boolean) => void;
-  loadingProgress: number;
-  setProgress: (updater: number | ((progress: number) => number)) => void;
+  setSetupCallout: (setupCallout: SetupCallout) => void;
 }) {
-  const { setToast } = useToast();
+  // Drop-in replacement for setToast
+  const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
+    setSetupCallout({
+      show: true,
+      title,
+      color,
+      text,
+    });
 
   return (
     <EuiBottomBar>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="secondary"
+          <EuiButtonEmpty
+            color="text"
             iconType="cross"
             onClick={() => {
               // TODO evil hack because props aren't set up
@@ -288,7 +307,7 @@ export function SetupBottomBar({
             }}
           >
             Discard
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -296,6 +315,7 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
+            disabled={config.displayName.length < 1 || config.connectionDataSource.length < 1}
             onClick={async () => {
               setLoading(true);
 
@@ -305,18 +325,16 @@ export function SetupBottomBar({
                   integration.name,
                   config.displayName,
                   integration,
-                  setToast,
+                  setCalloutLikeToast,
                   config.displayName,
                   config.connectionDataSource
                 );
-                setProgress((progress) => progress + 1);
               } else if (config.connectionType === 's3') {
                 const http = coreRefs.http!;
 
                 const assets = await http.get(
                   `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
                 );
-                setProgress((progress) => progress + 1);
 
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
@@ -326,14 +344,14 @@ export function SetupBottomBar({
                   );
                   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
                   queryStr = queryStr.replaceAll('{object_name}', integration.name);
-                  const currProgress = loadingProgress; // Need a frozen copy for getting accurate query steps
-                  const result = await runQuery(queryStr, (step) =>
-                    setProgress(currProgress + step)
-                  );
+                  const result = await runQuery(queryStr, (_) => {});
                   if (!result.ok) {
-                    console.error('Query failed', result.error);
                     setLoading(false);
-                    setToast('Something went wrong.', 'danger');
+                    setCalloutLikeToast(
+                      'Failed to add integration',
+                      'danger',
+                      result.error.message
+                    );
                     return;
                   }
                 }
@@ -344,11 +362,10 @@ export function SetupBottomBar({
                   integration.name,
                   config.displayName,
                   integration,
-                  setToast,
+                  setCalloutLikeToast,
                   config.displayName,
                   config.connectionDataSource
                 );
-                setProgress((progress) => progress + 1);
               } else {
                 console.error('Invalid data source type');
               }
@@ -363,27 +380,14 @@ export function SetupBottomBar({
   );
 }
 
-export function LoadingPage({ value, max }: { value: number; max: number }) {
+export function LoadingPage() {
   return (
     <>
-      <EuiSpacer size="xxl" />
-      <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingDashboards size="xxl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h3>Adding Integration</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            This may take a few minutes. The integration and assets are being added.
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiProgress value={value} max={max} size="m" />
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoOpenSearch" size="xl" />}
+        title={<h2>Setting Up the Integration</h2>}
+        body={<p>This can take several minutes.</p>}
+      />
     </>
   );
 }
@@ -402,8 +406,9 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     assets: {},
   } as IntegrationTemplate);
 
+  const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
+
   const [showLoading, setShowLoading] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     const getTemplate = async () => {
@@ -416,7 +421,6 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
 
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
-  const maxProgress = 2 + 3 * (template.assets?.queries?.length ?? 0);
 
   return (
     <EuiPage>
@@ -424,12 +428,13 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
         <EuiPageContent>
           <EuiPageContentBody>
             {showLoading ? (
-              <LoadingPage value={loadingProgress} max={maxProgress} />
+              <LoadingPage />
             ) : (
               <SetupIntegrationForm
                 config={integConfig}
                 updateConfig={updateConfig}
                 integration={template}
+                setupCallout={setupCallout}
               />
             )}
           </EuiPageContentBody>
@@ -439,8 +444,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
           integration={template}
           loading={showLoading}
           setLoading={setShowLoading}
-          loadingProgress={loadingProgress}
-          setProgress={setLoadingProgress}
+          setSetupCallout={setSetupCallout}
         />
       </EuiPageBody>
     </EuiPage>
