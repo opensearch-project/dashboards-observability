@@ -10773,16 +10773,29 @@ exports[`Siderbar component Renders sidebar component 1`] = `
                                                                           className="euiText euiText--extraSmall"
                                                                         >
                                                                            
-                                                                          <EuiMark
+                                                                          <EuiBadge
+                                                                            className="dscSidebarField__actionButton"
+                                                                            color="hollow"
                                                                             data-test-subj="eventFields__default-timestamp-mark"
                                                                           >
-                                                                            <mark
-                                                                              className="euiMark"
-                                                                              data-test-subj="eventFields__default-timestamp-mark"
-                                                                            >
-                                                                              Default Timestamp
-                                                                            </mark>
-                                                                          </EuiMark>
+                                                                            <EuiInnerText>
+                                                                              <span
+                                                                                className="euiBadge euiBadge--hollow euiBadge--iconLeft dscSidebarField__actionButton"
+                                                                                data-test-subj="eventFields__default-timestamp-mark"
+                                                                                title="Default Timestamp"
+                                                                              >
+                                                                                <span
+                                                                                  className="euiBadge__content"
+                                                                                >
+                                                                                  <span
+                                                                                    className="euiBadge__text"
+                                                                                  >
+                                                                                    Default Timestamp
+                                                                                  </span>
+                                                                                </span>
+                                                                              </span>
+                                                                            </EuiInnerText>
+                                                                          </EuiBadge>
                                                                         </div>
                                                                       </EuiText>
                                                                     </div>
