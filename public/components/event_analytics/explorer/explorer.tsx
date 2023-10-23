@@ -424,20 +424,6 @@ export const Explorer = ({
     }
   };
 
-  useEffect(() => {
-    if (explorerSearchMeta.datasources?.[0]?.type !== 'DEFAULT_INDEX_PATTERNS') {
-      dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [RAW_QUERY]: '',
-            [FINAL_QUERY]: '',
-          },
-        })
-      );
-    }
-  }, [explorerSearchMeta.datasources]);
-
   const handleOverrideTimestamp = async (timestamp: IField) => {
     setIsOverridingTimestamp(true);
     await dispatch(
