@@ -22,6 +22,7 @@ import { reset as resetPatterns } from '../../redux/slices/patterns_slice';
 import { reset as resetQueryResults } from '../../redux/slices/query_result_slice';
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
+import { reset as resetQuery } from '../../redux/slices/query_slice';
 import { SelectedDataSource } from '../../../../../common/types/explorer';
 import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
 import {
@@ -83,6 +84,8 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
    * Resets various states associated with data source changes.
    */
   const resetStateOnDataSourceChange = () => {
+    dispatch(resetQuery({ tabId }));
+    dispatch(resetFields({ tabId }));
     dispatch(resetFields({ tabId }));
     dispatch(resetPatterns({ tabId }));
     dispatch(resetQueryResults({ tabId }));
