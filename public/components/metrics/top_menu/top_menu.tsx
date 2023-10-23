@@ -151,13 +151,16 @@ export const TopMenu = ({
     const res = await client.get({ objectId: metricLayout.savedVisualizationId });
     const currentObject = res.observabilityObjectList[0];
 
-    await client.update({
-      object_id: metricLayout.savedVisualizationId,
-      object: {
-        ...currentObject.savedVisualization,
-        name,
+    await client.update(
+      {
+        object_id: metricLayout.savedVisualizationId,
+        object: {
+          ...currentObject.savedVisualization,
+          name,
+        },
       },
-    });
+      true
+    );
     return metricLayout.savedVisualizationId;
   };
 
