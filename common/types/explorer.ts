@@ -421,9 +421,9 @@ export interface GridSortingColumn {
 }
 
 export enum DirectQueryLoadingStatus {
-  SUCCESS,
-  FAILED,
-  RUNNING,
-  SCHEDULED,
-  CANCELED,
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  RUNNING = 'RUNNING',
+  SCHEDULED = 'SCHEDULED',
+  CANCELED = 'CANCELED',
 }
