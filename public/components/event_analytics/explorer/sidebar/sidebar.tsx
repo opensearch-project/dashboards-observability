@@ -203,7 +203,7 @@ export const Sidebar = (props: ISidebarProps) => {
                               spacing="m"
                               key={`field${field.name}`}
                               index={index}
-                              draggableId={field.name}
+                              draggableId={`queriedField-${field.name}`}
                             >
                               <EuiPanel
                                 data-attr-field={field.name}

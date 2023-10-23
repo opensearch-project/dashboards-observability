@@ -297,6 +297,25 @@ exports[`Data Connection Page test Renders Prometheus data connection page with 
                   Control which OpenSearch users have access to this data source.
                 </div>
               </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  class="euiButton euiButton--primary euiButton--fill"
+                  data-test-subj="createButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      class="euiButton__text"
+                    >
+                      Edit
+                    </span>
+                  </span>
+                </button>
+              </div>
             </div>
             <hr
               class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
@@ -762,6 +781,25 @@ exports[`Data Connection Page test Renders S3 data connection page with data 1`]
                   </h2>
                   Control which OpenSearch users have access to this data source.
                 </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  class="euiButton euiButton--primary euiButton--fill"
+                  data-test-subj="createButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      class="euiButton__text"
+                    >
+                      Edit
+                    </span>
+                  </span>
+                </button>
               </div>
             </div>
             <hr
