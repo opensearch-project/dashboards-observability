@@ -219,6 +219,7 @@ export const Explorer = ({
   const liveTailTabIdRef = useRef('');
   const liveTailNameRef = useRef('Live');
   const savedObjectLoader = useRef<ExplorerSavedObjectLoader | undefined>(undefined);
+  const isObjectIdUpdatedFromSave = useRef(false); // Flag to prevent reload when the current search's objectId changes due to a save operation.
   queryRef.current = query;
   selectedPanelNameRef.current = selectedPanelName;
   explorerFieldsRef.current = explorerFields;
@@ -387,8 +388,9 @@ export const Explorer = ({
   }, []);
 
   useEffect(() => {
-    if (savedObjectId) {
+    if (savedObjectId && !isObjectIdUpdatedFromSave.current) {
       updateTabData(savedObjectId);
+      isObjectIdUpdatedFromSave.current = false;
     }
   }, [savedObjectId]);
 
@@ -687,6 +689,10 @@ export const Explorer = ({
       selectedPanelNameRef.current,
       explorerSearchMeta
     );
+
+    // Set the flag to differentiate between an object save action and a load action
+    isObjectIdUpdatedFromSave.current = true;
+
     let soClient;
     if (isOnEventPage) {
       if (isTabHasObjID && isObjTypeMatchQuery) {
