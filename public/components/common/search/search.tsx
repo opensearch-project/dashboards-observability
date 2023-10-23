@@ -20,20 +20,16 @@ import {
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
+import { useDispatch } from 'react-redux';
+import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
-import {
-  selectSearchMetaData,
-  update as updateSearchMetaData,
-} from '../../event_analytics/redux/slices/search_meta_data_slice';
+import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';

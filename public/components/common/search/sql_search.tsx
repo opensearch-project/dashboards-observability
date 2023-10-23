@@ -60,13 +60,7 @@ export const DirectSearch = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
-    handleTimePickerChange,
     dslService,
-    startTime,
-    endTime,
-    setStartTime,
-    setEndTime,
-    setIsOutputStale,
     selectedPanelName,
     selectedCustomPanelOptions,
     setSelectedPanelName,
@@ -76,20 +70,12 @@ export const DirectSearch = (props: any) => {
     savedObjects,
     showSavePanelOptionsList,
     showSaveButton = true,
-    handleTimeRangePickerRefresh,
-    isLiveTailPopoverOpen,
-    closeLiveTailPopover,
-    popoverItems,
-    isLiveTailOn,
     selectedSubTabId,
     searchBarConfigs = {},
     getSuggestions,
     onItemSelect,
     tabId = '',
     baseQuery = '',
-    stopLive,
-    setIsLiveTailPopoverOpen,
-    liveTailName,
     curVisId,
     setSubType,
     setIsQueryRunning,
@@ -102,7 +88,6 @@ export const DirectSearch = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [queryLang, setQueryLang] = useState(explorerSearchMetadata.lang || 'PPL');
-  const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -117,7 +102,7 @@ export const DirectSearch = (props: any) => {
   }, 5000);
 
   const requestParams = { tabId };
-  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
+  const { dispatchOnGettingHis } = useFetchEvents({
     pplService: new SQLService(coreRefs.http),
     requestParams,
   });
@@ -152,16 +137,10 @@ export const DirectSearch = (props: any) => {
 
   const handleQueryLanguageChange = (lang: string) => {
     if (lang === 'DQL') {
-      return application!.navigateToUrl(
-        `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
-      );
+      application!.navigateToUrl('../app/data-explorer/discover');
+      return;
     }
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { lang },
-      })
-    );
+    dispatch(updateSearchMetaData({ tabId, data: { lang } }));
     setQueryLang(lang);
     closeLanguagePopover();
   };
@@ -195,27 +174,14 @@ export const DirectSearch = (props: any) => {
     </EuiButton>
   );
 
-  const onQuerySearch = (lang) => {
+  const onQuerySearch = (lang: string) => {
     setIsQueryRunning(true);
     batch(() => {
       dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, ''),
-          },
-        })
+        changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
       );
     });
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: {
-          isPolling: true,
-          lang: queryLang,
-        },
-      })
-    );
+    dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
     sqlService
       .fetch({
         lang: lowerCase(lang),
@@ -224,7 +190,6 @@ export const DirectSearch = (props: any) => {
       })
       .then((result) => {
         if (result.queryId) {
-          setJobId(result.queryId);
           startPolling({
             queryId: result.queryId,
           });
@@ -245,14 +210,7 @@ export const DirectSearch = (props: any) => {
       // stop polling
       stopPolling();
       setIsQueryRunning(false);
-      dispatch(
-        updateSearchMetaData({
-          tabId,
-          data: {
-            isPolling: false,
-          },
-        })
-      );
+      dispatch(updateSearchMetaData({ tabId, data: { isPolling: false } }));
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
     }

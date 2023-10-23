@@ -39,7 +39,6 @@ import {
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -48,7 +47,6 @@ import {
   SAVED_QUERY,
   SAVED_VISUALIZATION,
   SELECTED_DATE_RANGE,
-  SELECTED_FIELDS,
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
   TAB_CHART_TITLE,
@@ -80,7 +78,6 @@ import { getSavedObjectsClient } from '../../../services/saved_objects/saved_obj
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
 import { PanelSavedObjectClient } from '../../../services/saved_objects/saved_object_client/ppl';
-import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 import {
   SaveAsCurrentQuery,
   SaveAsCurrentVisualization,
@@ -123,6 +120,7 @@ import { DataSourceSelection } from './datasources/datasources_selection';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
+import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../common/constants/data_sources';
 
 export const Explorer = ({
   pplService,
@@ -203,7 +201,8 @@ export const Explorer = ({
     currentPluggable?.getComponentSetForVariation('languages', explorerSearchMeta.lang || 'SQL') ||
     {};
   const SearchBar = ui?.SearchBar || Search;
-
+  const isDefaultDataSourceType =
+    explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
   const selectedIntervalRef = useRef<{
     text: string;
     value: string;
@@ -385,10 +384,7 @@ export const Explorer = ({
     await dispatch(
       changeDateRange({
         tabId: requestParams.tabId,
-        data: {
-          [RAW_QUERY]: queryRef.current![RAW_QUERY],
-          [SELECTED_DATE_RANGE]: timeRange,
-        },
+        data: { [RAW_QUERY]: queryRef.current![RAW_QUERY], [SELECTED_DATE_RANGE]: timeRange },
       })
     );
   };
@@ -426,14 +422,7 @@ export const Explorer = ({
 
   const handleOverrideTimestamp = async (timestamp: IField) => {
     setIsOverridingTimestamp(true);
-    await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          [SELECTED_TIMESTAMP]: timestamp?.name || '',
-        },
-      })
-    );
+    await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: timestamp?.name || '' } }));
     setIsOverridingTimestamp(false);
     handleQuerySearch();
   };
@@ -459,8 +448,7 @@ export const Explorer = ({
       <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {(explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
-              appLogEvents) && (
+            {(isDefaultDataSourceType || appLogEvents) && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   {countDistribution?.data && !isLiveTailOnRef.current && (
@@ -478,12 +466,7 @@ export const Explorer = ({
                           );
                           const intrv = selectedIntrv.replace(/^auto_/, '');
                           dispatch(
-                            updateCountDistribution({
-                              tabId,
-                              data: {
-                                selectedInterval: intrv,
-                              },
-                            })
+                            updateCountDistribution({ tabId, data: { selectedInterval: intrv } })
                           );
                           getCountVisualizations(intrv);
                           selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
@@ -504,8 +487,7 @@ export const Explorer = ({
                 </EuiPanel>
               </EuiFlexItem>
             )}
-            {(explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
-              appLogEvents) && (
+            {(isDefaultDataSourceType || appLogEvents) && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   <EuiPanel paddingSize="s" style={{ height: '100%' }}>
@@ -609,8 +591,7 @@ export const Explorer = ({
   };
 
   const explorerVis = useMemo(() => {
-    return explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
-      appLogEvents ? (
+    return isDefaultDataSourceType || appLogEvents ? (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -657,12 +638,7 @@ export const Explorer = ({
 
   const updateQueryInStore = async (updateQuery: string) => {
     await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, ''),
-        },
-      })
+      changeQuery({ tabId, query: { [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
     );
   };
 
@@ -670,14 +646,7 @@ export const Explorer = ({
     async (availability?: boolean) => {
       // clear previous selected timestamp when index pattern changes
       if (isIndexPatternChanged(tempQuery, query[RAW_QUERY])) {
-        await dispatch(
-          changeQuery({
-            tabId,
-            query: {
-              [SELECTED_TIMESTAMP]: '',
-            },
-          })
-        );
+        await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: '' } }));
         await setDefaultPatternsField('', '');
       }
       if (availability !== true) {
@@ -781,8 +750,6 @@ export const Explorer = ({
     selectedCustomPanelOptions,
     explorerSearchMeta,
   ]);
-
-  // live tail
 
   const liveTailLoop = async (
     name: string,
