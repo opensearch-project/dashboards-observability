@@ -6,6 +6,7 @@
 import {
   EuiBottomBar,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiFieldText,
@@ -299,8 +300,8 @@ export function SetupBottomBar({
     <EuiBottomBar>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="secondary"
+          <EuiButtonEmpty
+            color="text"
             iconType="cross"
             onClick={() => {
               // TODO evil hack because props aren't set up
@@ -311,7 +312,7 @@ export function SetupBottomBar({
             }}
           >
             Discard
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
