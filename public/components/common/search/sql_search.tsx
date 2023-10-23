@@ -214,13 +214,16 @@ export const DirectSearch = (props: any) => {
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
     }
-    return () => {
-      stopPolling();
-    };
   }, [pollingResult, pollingError]);
 
   useEffect(() => {
-    if (explorerSearchMetadata.isPolling === false) {
+    return () => {
+      stopPolling();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!explorerSearchMetadata.isPolling) {
       stopPolling();
       setIsQueryRunning(false);
     }
