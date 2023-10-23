@@ -735,7 +735,8 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButton euiButton--primary euiButton--fill"
+                              class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                              disabled=""
                               type="button"
                             >
                               <span
@@ -889,6 +890,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButton
+                                disabled={true}
                                 fill={true}
                                 iconSide="right"
                                 iconType="arrowRight"
@@ -897,19 +899,19 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               >
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
-                                  disabled={false}
+                                  disabled={true}
                                   element="button"
                                   fill={true}
                                   iconSide="right"
                                   iconType="arrowRight"
-                                  isDisabled={false}
+                                  isDisabled={true}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
                                   <button
-                                    className="euiButton euiButton--primary euiButton--fill"
-                                    disabled={false}
+                                    className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                                    disabled={true}
                                     onClick={[Function]}
                                     style={
                                       Object {
