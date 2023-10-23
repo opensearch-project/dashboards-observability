@@ -156,14 +156,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
         dispatch(
           updateSearchMetaData({
             tabId,
-            data: {
-              datasources: [
-                {
-                  label: datasourceName,
-                  type: datasourceType,
-                },
-              ],
-            },
+            data: { datasources: [{ label: datasourceName, type: datasourceType }] },
           })
         );
       });
