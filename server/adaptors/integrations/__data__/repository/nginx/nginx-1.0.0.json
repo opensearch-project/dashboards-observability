@@ -38,7 +38,14 @@
     "savedObjects": {
       "name": "nginx",
       "version": "1.0.0"
-    }
+    },
+    "queries": [
+      {
+        "name": "create_table",
+        "version": "1.0.0",
+        "language": "sql"
+      }
+    ]
   },
   "sampleData": {
     "path": "sample.json"
