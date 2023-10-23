@@ -21,4 +21,12 @@ export const DatasourceTypeToDisplayName: { [key in DatasourceType]: string } = 
   S3GLUE: 'Amazon S3',
 };
 
+export const PrometheusURL = 'Prometheus';
+export const AmazonS3URL = 'AmazonS3AWSGlue';
+
+export const UrlToDatasourceType: { [key: string]: DatasourceType } = {
+  [PrometheusURL]: 'PROMETHEUS',
+  [AmazonS3URL]: 'S3GLUE',
+};
+
 export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
