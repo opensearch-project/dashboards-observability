@@ -47,19 +47,7 @@ exports[`Manage Data Connections Description test Renders manage data connection
                   <div
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    Manage existing data sources or
-                     
-                    <EuiLink
-                      href="#/new"
-                    >
-                      <a
-                        className="euiLink euiLink--primary"
-                        href="#/new"
-                        rel="noreferrer"
-                      >
-                        create a new data source
-                      </a>
-                    </EuiLink>
+                    Manage existing data sources
                   </div>
                 </EuiTextColor>
               </div>
