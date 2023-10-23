@@ -226,7 +226,7 @@ export const DirectSearch = (props: any) => {
           tabId,
           data: {
             isPolling: false,
-            status: null,
+            status: undefined,
           },
         })
       );
