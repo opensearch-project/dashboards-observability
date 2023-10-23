@@ -66,8 +66,8 @@ export const MetricsExportPanel = ({
   const fetchAllvisualizationsById = async () => {
     const tempVisualizationsMetaData = await Promise.all(
       sortedMetricsLayout.map(async (metricLayout) => {
-        return metricLayout.metricType === 'savedCustomMetric'
-          ? await fetchVisualizationById(http, metricLayout.id, setErrorResponse)
+        return metricLayout.savedVisualizationId
+          ? await fetchVisualizationById(http!, metricLayout.savedVisualizationId, setErrorResponse)
           : createPrometheusMetricById(metricLayout.id);
       })
     );
@@ -111,12 +111,12 @@ export const MetricsExportPanel = ({
         <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
           {visualizationsMetaData.map((metaData: any, index: number) => {
             return (
-              <EuiForm component="form">
+              <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiFormRow label={'Metric Name #' + (index + 1)}>
                       <EuiFieldText
-                        key={'save-panel-id'}
+                        key={`metric-name-input-id-${index}`}
                         value={visualizationsMetaData[index].name}
                         onChange={(e) => onNameChange(index, e.target.value)}
                         data-test-subj="metrics__querySaveName"

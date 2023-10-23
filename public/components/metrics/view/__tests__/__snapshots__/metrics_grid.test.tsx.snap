@@ -732,6 +732,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                 }
               >
                 <Component
+                  catalogVisualization={true}
                   editMode={false}
                   fromTime="now-1d"
                   key="Y4muP4QBiaYaSxpXk7r8"
@@ -975,6 +976,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                 }
               >
                 <Component
+                  catalogVisualization={true}
                   editMode={false}
                   fromTime="now-1d"
                   key="tomAP4QBiaYaSxpXALls"
@@ -1234,12 +1236,12 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                 >
                   <EuiPanel
                     className="panel-full-width"
-                    data-test-subj="prometheus.process_resident_memory_bytesVisualizationPanel"
+                    data-test-subj="VisualizationPanel"
                     grow={false}
                   >
                     <div
                       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
-                      data-test-subj="prometheus.process_resident_memory_bytesVisualizationPanel"
+                      data-test-subj="VisualizationPanel"
                     >
                       <div
                         className=""
@@ -1273,7 +1275,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                                     className="euiText euiText--medium panels-title-text euiText--constrainedWidth"
                                   >
                                     <EuiToolTip
-                                      content="prometheus.process_resident_memory_bytes"
+                                      content=""
                                       delay="long"
                                       position="top"
                                     >
@@ -1287,9 +1289,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                                           data-test-subj="visualizationHeader"
                                           onBlur={[Function]}
                                           onFocus={[Function]}
-                                        >
-                                          prometheus.process_resident_memory_bytes
-                                        </h5>
+                                        />
                                       </span>
                                     </EuiToolTip>
                                   </div>

@@ -84,22 +84,25 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
   }
 
   async update(
-    params: UpdateParams
+    params: UpdateParams,
+    raw: boolean = false
   ): Promise<OSDSavedObjectUpdateResponse<VisualizationSavedObjectAttributes>> {
-    const body = this.buildRequestBody({
-      query: params.query,
-      fields: params.fields,
-      dateRange: params.dateRange,
-      chartType: params.type,
-      name: params.name,
-      timestamp: params.timestamp,
-      applicationId: params.applicationId,
-      userConfigs: params.userConfigs,
-      description: params.description,
-      subType: params.subType,
-      unitsOfMeasure: params.unitsOfMeasure,
-      selectedLabels: params.selectedLabels,
-    });
+    const body = raw
+      ? params
+      : this.buildRequestBody({
+          query: params.query,
+          fields: params.fields,
+          dateRange: params.dateRange,
+          chartType: params.type,
+          name: params.name,
+          timestamp: params.timestamp,
+          applicationId: params.applicationId,
+          userConfigs: params.userConfigs,
+          description: params.description,
+          subType: params.subType,
+          unitsOfMeasure: params.unitsOfMeasure,
+          selectedLabels: params.selectedLabels,
+        });
 
     const response = await this.client.update<Partial<VisualizationSavedObjectAttributes>>(
       VISUALIZATION_SAVED_OBJECT,
@@ -123,9 +126,10 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
   }
 
   async get(params: SavedObjectsGetParams): Promise<SavedObjectsGetResponse> {
+    const uuid = OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid;
     const response = await this.client.get<VisualizationSavedObjectAttributes>(
       VISUALIZATION_SAVED_OBJECT,
-      OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid
+      uuid
     );
     return {
       observabilityObjectList: [

@@ -4,6 +4,7 @@
  */
 
 import { VisualizationType } from './custom_panels';
+import { OBSERVABILITY_CUSTOM_METRIC } from '../constants/metrics';
 
 export interface MetricData {
   metricId: string;
@@ -14,9 +15,10 @@ export interface MetricData {
 export interface MetricType extends VisualizationType {
   id: string;
   savedVisualizationId: string;
+  query: string;
   x: number;
   y: number;
   w: number;
   h: number;
-  metricType: 'savedCustomMetric' | 'prometheusMetric';
+  catalog: string;
 }

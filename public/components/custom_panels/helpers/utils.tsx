@@ -162,6 +162,7 @@ export const fetchVisualizationById = async (
       savedVisualization = {
         ...visualization,
         id: res.observabilityObjectList[0].objectId,
+        savedVisualizationId: res.observabilityObjectList[0].objectId,
         timeField: visualization.selected_timestamp.name,
       };
     })
@@ -210,28 +211,45 @@ export const getQueryResponse = (
 };
 
 // Fetches savedVisualization by Id and runs getQueryResponse
-export const renderSavedVisualization = async (
-  http: CoreStart['http'],
-  pplService: PPLService,
-  savedVisualizationId: string,
-  startTime: string,
-  endTime: string,
-  filterQuery: string,
-  spanParam: string | undefined,
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
-) => {
+export const renderSavedVisualization = async ({
+  http,
+  pplService,
+  savedVisualizationId,
+  inputMetaData,
+  startTime,
+  endTime,
+  filterQuery,
+  spanParam,
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+}: {
+  http: CoreStart['http'];
+  pplService: PPLService;
+  savedVisualizationId: string;
+  inputMetaData: SavedVisualization;
+  startTime: string;
+  endTime: string;
+  filterQuery: string;
+  spanParam: string | undefined;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+}) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  let visualization: SavedVisualizationType = {};
-  let updatedVisualizationQuery = '';
+  const visualization: SavedVisualizationType = isEmpty(inputMetaData)
+    ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
+    : inputMetaData;
 
-  visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
+  let updatedVisualizationQuery = '';
 
   if (_.isEmpty(visualization)) {
     setIsLoading(false);
@@ -269,154 +287,6 @@ export const renderSavedVisualization = async (
     setIsError,
     filterQuery,
     visualization.timeField
-  );
-};
-
-const createCatalogVisualizationMetaData = (
-  catalogSource: string,
-  visualizationQuery: string,
-  visualizationType: string,
-  visualizationTimeField: string
-) => {
-  return {
-    name: catalogSource,
-    description: '',
-    query: visualizationQuery,
-    type: visualizationType,
-    selected_date_range: {
-      start: 'now/y',
-      end: 'now',
-      text: '',
-    },
-    selected_timestamp: {
-      name: visualizationTimeField,
-      type: 'timestamp',
-    },
-    selected_fields: {
-      text: '',
-      tokens: [],
-    },
-  };
-};
-
-const updateCatalogVisualizationQuery = ({
-  catalogSourceName,
-  catalogTableName,
-  aggregation,
-  attributesGroupBy,
-  startTime,
-  endTime,
-  spanParam,
-}: {
-  catalogSourceName: string;
-  catalogTableName: string;
-  aggregation: string;
-  attributesGroupBy: string[];
-  startTime: string;
-  endTime: string;
-  spanParam: string | undefined;
-}) => {
-  const attributesGroupString = attributesGroupBy.toString();
-  const startEpochTime = convertDateTime(startTime, true, false, true);
-  const endEpochTime = convertDateTime(endTime, false, false, true);
-  // const promQuery =
-  //   attributesGroupBy.length === 0
-  //     ? `${aggregation} (${catalogTableName})`
-  //     : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
-
-  const promQuery = `${aggregation} (${catalogTableName})`;
-
-  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
-};
-
-// Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
-export const renderCatalogVisualization = async ({
-  http,
-  pplService,
-  catalogSource,
-  startTime,
-  endTime,
-  filterQuery,
-  spanParam,
-  setVisualizationTitle,
-  setVisualizationType,
-  setVisualizationData,
-  setVisualizationMetaData,
-  setIsLoading,
-  setIsError,
-  spanResolution,
-  queryMetaData,
-}: {
-  http: CoreStart['http'];
-  pplService: PPLService;
-  catalogSource: string;
-  startTime: string;
-  endTime: string;
-  filterQuery: string;
-  spanParam: string | undefined;
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
-  spanResolution?: string;
-  queryMetaData?: MetricType;
-}) => {
-  setIsLoading(true);
-  setIsError({} as VizContainerError);
-
-  const visualizationType = 'line';
-  const visualizationTimeField = '@timestamp';
-
-  const catalogSourceName = catalogSource.split('.')[0];
-  const catalogTableName = catalogSource.split('.')[1];
-
-  const defaultAggregation = 'avg'; // pass in attributes to this function
-  const attributes: string[] = [];
-
-  const visualizationQuery = updateCatalogVisualizationQuery({
-    catalogSourceName,
-    catalogTableName,
-    aggregation: defaultAggregation,
-    attributesGroupBy: attributes,
-    startTime,
-    endTime,
-    spanParam,
-  });
-
-  const visualizationMetaData = createCatalogVisualizationMetaData(
-    catalogSource,
-    visualizationQuery,
-    visualizationType,
-    visualizationTimeField
-  );
-
-  visualizationMetaData.user_configs = {
-    layoutConfig: {
-      height: 390,
-      margin: { t: 5 },
-      legend: { visible: false },
-    },
-  };
-
-  setVisualizationTitle(catalogSource);
-  setVisualizationType(visualizationType);
-
-  setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
-
-  getQueryResponse(
-    pplService,
-    visualizationQuery,
-    visualizationType,
-    startTime,
-    endTime,
-    setVisualizationData,
-    setIsLoading,
-    setIsError,
-    filterQuery,
-    visualizationTimeField,
-    true
   );
 };
 

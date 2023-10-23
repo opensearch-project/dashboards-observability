@@ -17,6 +17,7 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
+import { fetchVisualizationById } from '../../../custom_panels/helpers/utils';
 
 export interface IconAttributes {
   color: string;
@@ -80,8 +81,10 @@ const fetchCustomMetrics = async () => {
   );
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
+    savedVisualizationId: obj.objectId,
+    query: obj.savedVisualization.query,
     name: obj.savedVisualization.name,
-    catalog: 'CUSTOM_METRICS',
+    catalog: OBSERVABILITY_CUSTOM_METRIC,
     type: obj.savedVisualization.type,
     recentlyCreated: (Date.now() - obj.createdTimeMs) / 36e5 <= 12,
   }));
@@ -111,37 +114,69 @@ const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => 
   );
 };
 
-const updateLayoutBySelection = (state: any, newMetric: any) => {
-  const newDimensions = getNewVizDimensions(state.metricsLayout);
+const metricQueryFromId = (id: string) => {
+  return `source = ${id} | stats avg(@value) by span(@timestamp, 1d)`;
+};
+
+const loadMetric = async (metric) =>
+  metric.catalog === OBSERVABILITY_CUSTOM_METRIC
+    ? await fetchVisualizationById(coreRefs.http!, metric.savedVisualizationId, (err) =>
+        coreRefs.toasts?.addDanger({
+          title: `There was an issue loading metric ${metric.name}`,
+          text: err,
+        })
+      )
+    : metric;
+
+export const selectMetric = (metric) => async (dispatch, getState) => {
+  dispatch(updateLayoutBySelection(metric));
+};
+
+export const deSelectMetric = (metric) => (dispatch, getState) => {
+  dispatch(updateLayoutByDeSelection(metric));
+};
+
+const updateLayoutBySelection = (newMetric: any) => async (dispatch, getState) => {
+  const metric = await loadMetric(newMetric);
+
+  const metricsLayout = getState().metrics.metricsLayout;
+  const newDimensions = getNewVizDimensions(metricsLayout);
 
   const metricVisualization: MetricType = {
-    id: newMetric.id,
-    savedVisualizationId: newMetric.id,
+    id: metric.id,
+    savedVisualizationId: metric.savedVisualizationId,
+    query: metric.query || metricQueryFromId(metric.id),
     x: newDimensions.x,
     y: newDimensions.y,
     h: newDimensions.h,
     w: newDimensions.w,
-    metricType:
-      newMetric.catalog === OBSERVABILITY_CUSTOM_METRIC ? 'savedCustomMetric' : 'prometheusMetric',
+    type: 'line',
   };
-  state.metricsLayout = [...state.metricsLayout, metricVisualization];
+
+  dispatch(updateMetricsLayout([...metricsLayout, metricVisualization]));
 };
 
-const updateLayoutByDeSelection = (state: any, newMetric: any) => {
-  const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);
+const updateLayoutByDeSelection = (metric) => (dispatch, getState) => {
+  const metricsLayout = getState().metrics.metricsLayout;
 
-  const newMetricsLayout = [] as MetricType[];
+  const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
+
   let heightSubtract = 0;
 
-  sortedMetricsLayout.map((metricLayout: MetricType) => {
-    if (metricLayout.id !== newMetric.id) {
-      metricLayout.y = metricLayout.y - heightSubtract;
-      newMetricsLayout.push(metricLayout);
-    } else {
-      heightSubtract = metricLayout.h;
-    }
-  });
-  state.metricsLayout = newMetricsLayout;
+  const newMetricsLayout = sortedMetricsLayout
+    .map((metricLayout: MetricType) => {
+      if (metricLayout.id !== metric.id) {
+        return {
+          ...metricLayout,
+          y: metricLayout.y - heightSubtract,
+        };
+      } else {
+        heightSubtract = metricLayout.h;
+      }
+    })
+    .filter((item) => item);
+
+  dispatch(updateMetricsLayout(newMetricsLayout));
 };
 
 export const metricSlice = createSlice({
@@ -151,14 +186,6 @@ export const metricSlice = createSlice({
     setMetrics: (state, { payload }) => {
       state.metrics = payload;
     },
-    selectMetric: (state, { payload }) => {
-      state.selected.push(payload.id);
-      updateLayoutBySelection(state, payload);
-    },
-    deSelectMetric: (state, { payload }) => {
-      updateLayoutByDeSelection(state, payload);
-      state.selected = state.selected.filter((id) => id !== payload.id);
-    },
     setSearch: (state, { payload }) => {
       state.search = payload;
     },
@@ -167,6 +194,7 @@ export const metricSlice = createSlice({
       state.metricsLayout = payload;
       state.selected = sortBy(payload, ['x', 'y']).map(({ id }) => id);
     },
+
     setDataSources: (state, { payload }) => {
       state.dataSources = [OBSERVABILITY_CUSTOM_METRIC, ...payload];
     },
@@ -186,8 +214,6 @@ export const metricSlice = createSlice({
 });
 
 export const {
-  deSelectMetric,
-  selectMetric,
   setDataSourceIcons,
   setDataSourceTitles,
   setDataSources,

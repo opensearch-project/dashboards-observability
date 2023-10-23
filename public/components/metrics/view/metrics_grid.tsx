@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
 import _ from 'lodash';
@@ -21,6 +22,8 @@ import {
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
+import { SavedVisualizationType } from '../../../../common/types/custom_panels';
+import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -66,26 +69,44 @@ export const MetricsGrid = ({
     setPostEditLayout(currLayouts);
   };
 
+  const visualizationFromMetric = (metric): SavedVisualizationType => ({
+    ...metric,
+    timeField: '@timestamp',
+    selected_date_range: dateSpanFilter,
+    userConfigs: {
+      dataConfig: {
+        type: 'line',
+        fillOpacity: 0,
+        lineWidth: 2,
+      },
+    },
+  });
+
   const loadVizComponents = () => {
-    const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
-      <VisualizationContainer
-        key={panelVisualization.id}
-        editMode={editMode}
-        visualizationId={panelVisualization.id}
-        savedVisualizationId={panelVisualization.savedVisualizationId}
-        fromTime={dateSpanFilter.start}
-        toTime={dateSpanFilter.end}
-        onRefresh={refresh}
-        onEditClick={moveToEvents}
-        usedInNotebooks={true}
-        pplFilterValue=""
-        removeVisualization={removeVisualization}
-        catalogVisualization={
-          panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
-        }
-        spanParam={`${dateSpanFilter.span}${dateSpanFilter.resolution}`}
-      />
-    ));
+    const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => {
+      return (
+        <VisualizationContainer
+          key={panelVisualization.id}
+          editMode={editMode}
+          visualizationId={panelVisualization.id}
+          savedVisualizationId={panelVisualization.savedVisualizationId}
+          inputMetaData={
+            panelVisualization.savedVisualizationId
+              ? undefined
+              : visualizationFromMetric(panelVisualization)
+          }
+          fromTime={dateSpanFilter.start || 'now-1d'}
+          toTime={dateSpanFilter.end || 'now'}
+          onRefresh={refresh}
+          onEditClick={moveToEvents}
+          usedInNotebooks={true}
+          pplFilterValue=""
+          removeVisualization={removeVisualization}
+          catalogVisualization={panelVisualization.catalog !== OBSERVABILITY_CUSTOM_METRIC}
+          spanParam={`${dateSpanFilter.span}${dateSpanFilter.resolution}`}
+        />
+      );
+    });
     setGridData(gridDataComps);
   };
 

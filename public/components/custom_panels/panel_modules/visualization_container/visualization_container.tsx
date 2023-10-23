@@ -26,11 +26,8 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
-import {
-  displayVisualization,
-  renderCatalogVisualization,
-  renderSavedVisualization,
-} from '../../helpers/utils';
+import { SavedVisualization } from 'common/types/explorer';
+import { displayVisualization, renderSavedVisualization } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -60,6 +57,7 @@ interface Props {
   editMode: boolean;
   visualizationId: string;
   savedVisualizationId: string;
+  inputMetaData?: SavedVisualization;
   fromTime: string;
   toTime: string;
   onRefresh: boolean;
@@ -77,6 +75,7 @@ export const VisualizationContainer = ({
   editMode,
   visualizationId,
   savedVisualizationId,
+  inputMetaData,
   fromTime,
   toTime,
   onRefresh,
@@ -212,38 +211,22 @@ export const VisualizationContainer = ({
   }
 
   const loadVisaulization = async () => {
-    if (catalogVisualization)
-      await renderCatalogVisualization({
-        http,
-        pplService,
-        catalogSource: savedVisualizationId,
-        startTime: fromTime,
-        endTime: toTime,
-        filterQuery: pplFilterValue,
-        spanParam,
-        setVisualizationTitle,
-        setVisualizationType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError,
-      });
-    else
-      await renderSavedVisualization(
-        http,
-        pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
-        spanParam,
-        setVisualizationTitle,
-        setVisualizationType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError
-      );
+    await renderSavedVisualization({
+      http,
+      pplService,
+      savedVisualizationId,
+      inputMetaData,
+      startTime: fromTime,
+      endTime: toTime,
+      filterQuery: pplFilterValue,
+      spanParam,
+      setVisualizationTitle,
+      setVisualizationType,
+      setVisualizationData,
+      setVisualizationMetaData,
+      setIsLoading,
+      setIsError,
+    });
   };
 
   const memoisedVisualizationBox = useMemo(
