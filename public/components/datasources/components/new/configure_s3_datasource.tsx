@@ -106,7 +106,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiText>
           <h3>Data source details</h3>
         </EuiText>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         <NameRow
           key={error}
           currentName={currentName}
@@ -131,7 +131,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiText>
           <h3>AWS Glue Data Catalog authentication details</h3>
         </EuiText>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
 
         <EuiFormRow label="Authentication Method">
           <>
@@ -169,7 +169,7 @@ export const ConfigureS3Datasource = (props: ConfigureS3DatasourceProps) => {
         <EuiText>
           <h3>AWS Glue Data Catalog index store details</h3>
         </EuiText>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
 
         <EuiFormRow label="AWS Glue Data Catalog index store URI">
           <>
