@@ -110,7 +110,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           <EuiButton
             data-test-subj="createButton"
             onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
-            fill={mode === 'view' ? true : false}
+            fill={false}
           >
             {mode === 'view' ? 'Edit' : 'Cancel'}
           </EuiButton>
