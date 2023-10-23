@@ -53,14 +53,6 @@ export const Home = (props: HomeProps) => {
           path={['/', '/manage']}
           render={(routerProps) => <ManageDataConnectionsTable {...commonProps} />}
         />
-
-        <Route
-          exact
-          path={['/configure/:id+']}
-          render={(routerProps) => (
-            <Configure {...commonProps} type={decodeURIComponent(routerProps.match.params.id)} />
-          )}
-        />
       </Switch>
     </HashRouter>
   );
