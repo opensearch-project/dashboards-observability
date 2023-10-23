@@ -214,6 +214,9 @@ export const DirectSearch = (props: any) => {
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
     }
+    return () => {
+      stopPolling();
+    };
   }, [pollingResult, pollingError]);
 
   useEffect(() => {

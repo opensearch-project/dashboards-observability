@@ -6,9 +6,8 @@
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
 import { isEmpty } from 'lodash';
-import moment from 'moment';
+import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
 import {
-  DATE_PICKER_FORMAT,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
   SELECTED_FIELDS,
@@ -289,7 +288,7 @@ export const getSavingCommonParams = (
   appBaseQuery: string,
   fields: IExplorerFields,
   savingTitle: string,
-  explorerSearchMeta
+  explorerSearchMeta: SearchMetaData
 ) => {
   return {
     dataSources: JSON.stringify([

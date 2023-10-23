@@ -8,7 +8,7 @@ import { initialTabId } from '../../../../framework/redux/store/shared_state';
 import { REDUX_EXPL_SLICE_SEARCH_META_DATA } from '../../../../../common/constants/explorer';
 import { SelectedDataSource } from '../../../../../common/types/explorer';
 
-const cleanState = {
+const searchMetaInitialState = {
   lang: 'PPL',
   datasources: [],
   isPolling: false,
@@ -16,7 +16,7 @@ const cleanState = {
 
 const initialState = {
   [initialTabId]: {
-    ...cleanState,
+    ...searchMetaInitialState,
   } as SearchMetaData,
 };
 
@@ -48,11 +48,11 @@ export const searchMetaDataSlice = createSlice({
     },
     reset: (state, action: PayloadAction<{ tabId: string }>) => {
       const { tabId } = action.payload;
-      state[tabId] = { ...cleanState };
+      state[tabId] = { ...searchMetaInitialState };
     },
     init: (state, action: PayloadAction<{ tabId: string }>) => {
       const { tabId } = action.payload;
-      state[tabId] = { ...cleanState };
+      state[tabId] = { ...searchMetaInitialState };
     },
     remove: (state, action: PayloadAction<{ tabId: string }>) => {
       const { tabId } = action.payload;

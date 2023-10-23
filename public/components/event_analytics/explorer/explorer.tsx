@@ -218,6 +218,7 @@ export const Explorer = ({
   const isLiveTailOnRef = useRef(false);
   const liveTailTabIdRef = useRef('');
   const liveTailNameRef = useRef('Live');
+  const savedObjectLoader = useRef<ExplorerSavedObjectLoader | undefined>(undefined);
   queryRef.current = query;
   selectedPanelNameRef.current = selectedPanelName;
   explorerFieldsRef.current = explorerFields;
@@ -310,7 +311,7 @@ export const Explorer = ({
     !isEqual(getIndexPatternFromRawQuery(currentQuery), getIndexPatternFromRawQuery(prevTabQuery));
 
   const updateTabData = async (objectId: string) => {
-    await new ExplorerSavedObjectLoader(
+    savedObjectLoader.current = new ExplorerSavedObjectLoader(
       getSavedObjectsClient({ objectId, objectType: 'savedQuery' }),
       notifications,
       {
@@ -339,8 +340,23 @@ export const Explorer = ({
         fetchData,
         dispatchOnGettingHis,
       }
-    ).load();
+    );
+    savedObjectLoader.current.load();
   };
+
+  // stop polling when cancel or unmounts
+  useEffect(() => {
+    const sol: ExplorerSavedObjectLoader | undefined = savedObjectLoader.current;
+    if (!explorerSearchMeta.isPolling && sol !== undefined && sol.getPollingInstance) {
+      sol?.getPollingInstance()!.stopPolling();
+      savedObjectLoader.current = undefined;
+    }
+    return () => {
+      if (sol && sol.getPollingInstance) {
+        sol?.getPollingInstance()!.stopPolling();
+      }
+    };
+  }, [explorerSearchMeta.isPolling]);
 
   const prepareAvailability = async () => {
     setSelectedContentTab(TAB_CHART_ID);

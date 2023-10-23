@@ -122,6 +122,7 @@ const parseStringDataSource = (
 };
 
 export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
+  private pollingInstance: UsePolling<any, any> | undefined;
   constructor(
     protected readonly savedObjectClient: ISavedObjectsClient,
     protected readonly notifications: NotificationsStart,
@@ -319,7 +320,6 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     // Create an instance of UsePolling
     const polling = new UsePolling<any, any>(
       (params) => {
-        console.log('fetch function...');
         return sqlService.fetchWithJobId(params);
       },
       5000,
@@ -330,6 +330,8 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
 
     // Update your references from the destructured hook to direct properties of the polling instance
     const startPolling = polling.startPolling.bind(polling); // bind to ensure correct 'this' context
+
+    this.pollingInstance = polling;
 
     dispatch(
       updateSearchMetaData({
@@ -377,5 +379,9 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
           return;
       }
     }
+  }
+
+  getPollingInstance() {
+    return this.pollingInstance;
   }
 }
