@@ -36,6 +36,7 @@ import {
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
 import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
+import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -87,7 +88,7 @@ export const DirectSearch = (props: any) => {
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
-  const [queryLang, setQueryLang] = useState(explorerSearchMetadata.lang || 'PPL');
+  const [queryLang, setQueryLang] = useState(explorerSearchMetadata.lang || QUERY_LANGUAGE.SQL);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -154,10 +155,16 @@ export const DirectSearch = (props: any) => {
   };
 
   const languagePopOverItems = [
-    <EuiContextMenuItem key="SQL" onClick={() => handleQueryLanguageChange('SQL')}>
+    <EuiContextMenuItem
+      key={QUERY_LANGUAGE.SQL}
+      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.SQL)}
+    >
       SQL
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="PPL" onClick={() => handleQueryLanguageChange('PPL')}>
+    <EuiContextMenuItem
+      key={QUERY_LANGUAGE.PPL}
+      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
+    >
       PPL
     </EuiContextMenuItem>,
   ];
@@ -272,7 +279,7 @@ export const DirectSearch = (props: any) => {
             isSuggestionDisabled={queryLang === 'SQL'}
             isDisabled={explorerSearchMetadata.isPolling}
           />
-          {queryLang === 'PPL' && (
+          {queryLang === QUERY_LANGUAGE.PPL && (
             <EuiBadge
               className={`ppl-link ${
                 uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'

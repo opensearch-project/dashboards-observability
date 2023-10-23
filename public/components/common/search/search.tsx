@@ -34,6 +34,7 @@ import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
+import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -98,7 +99,7 @@ export const Search = (props: any) => {
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [queryLang, setQueryLang] = useState('PPL');
+  const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -157,7 +158,7 @@ export const Search = (props: any) => {
   );
 
   const handleQueryLanguageChange = (lang: string) => {
-    if (lang === 'DQL') {
+    if (lang === QUERY_LANGUAGE.DQL) {
       application!.navigateToUrl('../app/data-explorer/discover');
       return;
     }
@@ -180,10 +181,16 @@ export const Search = (props: any) => {
   };
 
   const languagePopOverItems = [
-    <EuiContextMenuItem key="PPL" onClick={() => handleQueryLanguageChange('PPL')}>
+    <EuiContextMenuItem
+      key={QUERY_LANGUAGE.PPL}
+      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
+    >
       PPL
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="DQL" onClick={() => handleQueryLanguageChange('DQL')}>
+    <EuiContextMenuItem
+      key={QUERY_LANGUAGE.DQL}
+      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.DQL)}
+    >
       DQL
     </EuiContextMenuItem>,
   ];

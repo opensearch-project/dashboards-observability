@@ -120,7 +120,10 @@ import { DataSourceSelection } from './datasources/datasources_selection';
 import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
-import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../common/constants/data_sources';
+import {
+  DEFAULT_DATA_SOURCE_TYPE,
+  QUERY_LANGUAGE,
+} from '../../../../common/constants/data_sources';
 
 export const Explorer = ({
   pplService,
@@ -198,8 +201,10 @@ export const Explorer = ({
       : dataSourcePluggables.DEFAULT_INDEX_PATTERNS;
   }, [explorerSearchMeta.datasources]);
   const { ui } =
-    currentPluggable?.getComponentSetForVariation('languages', explorerSearchMeta.lang || 'SQL') ||
-    {};
+    currentPluggable?.getComponentSetForVariation(
+      'languages',
+      explorerSearchMeta.lang || QUERY_LANGUAGE.SQL
+    ) || {};
   const SearchBar = ui?.SearchBar || Search;
   const isDefaultDataSourceType =
     explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
