@@ -120,7 +120,7 @@ export function DataGrid(props: DataGridProps) {
       }
     });
     return columns;
-  }, [explorerFields]);
+  }, [explorerFields, totalHits]);
 
   // used for which columns are visible and their order
   const dataGridColumnVisibility = useMemo(() => {
@@ -138,7 +138,7 @@ export function DataGrid(props: DataGridProps) {
     }
     // default shown fields
     throw new Error('explorer data grid stored columns empty');
-  }, [explorerFields]);
+  }, [explorerFields, totalHits]);
 
   // sets the very first column, which is the button used for the flyout of each row
   const dataGridLeadingColumns = useMemo(() => {
@@ -172,7 +172,7 @@ export function DataGrid(props: DataGridProps) {
         width: 40,
       },
     ];
-  }, [rows, http, explorerFields, pplService, rawQuery, timeStampField]);
+  }, [rows, http, explorerFields, pplService, rawQuery, timeStampField, totalHits]);
 
   // renders what is shown in each cell, i.e. the content of each row
   const dataGridCellRender = useCallback(
@@ -202,7 +202,7 @@ export function DataGrid(props: DataGridProps) {
       }
       return null;
     },
-    [data, rows, pageFields, explorerFields]
+    [data, rows, pageFields, explorerFields, totalHits]
   );
 
   // ** Pagination config
@@ -214,7 +214,7 @@ export function DataGrid(props: DataGridProps) {
         setPage([0, pageSize]);
         return { pageIndex: 0, pageSize };
       }),
-    [setPagination, setPage]
+    [setPagination, setPage, totalHits]
   );
   // changing the page index, keep page size constant
   const onChangePage = useCallback(
@@ -224,7 +224,7 @@ export function DataGrid(props: DataGridProps) {
         return { pageSize, pageIndex };
       });
     },
-    [setPagination, setPage]
+    [setPagination, setPage, totalHits]
   );
 
   const rowHeightsOptions = useMemo(
@@ -234,7 +234,7 @@ export function DataGrid(props: DataGridProps) {
         lineCount: selectedColumns.some((obj) => obj.name === '_source') ? 3 : 1,
       },
     }),
-    [explorerFields]
+    [explorerFields, totalHits]
   );
 
   // TODO: memoize the expensive table below
@@ -242,6 +242,7 @@ export function DataGrid(props: DataGridProps) {
   return (
     <EuiPanel paddingSize="s">
       <div className="dscTable dscTableFixedScroll">
+        {console.log('trigger', totalHits)}
         <EuiDataGrid
           aria-labelledby="aria-labelledby"
           data-test-subj="docTable"

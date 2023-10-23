@@ -552,19 +552,58 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    <DataGrid
-                      http={http}
-                      pplService={pplService}
-                      rows={explorerData.jsonData}
-                      rowsAll={explorerData.jsonDataAll}
-                      explorerFields={explorerFields}
-                      timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
-                      rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
-                      totalHits={_.sum(countDistribution.data?.['count()'])}
-                      requestParams={requestParams}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                    />
+                    {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ||
+                    appLogEvents ? (
+                      <>
+                        {countDistribution.data && countDistribution.data['count()'] ? (
+                          <DataGrid
+                            http={http}
+                            pplService={pplService}
+                            rows={explorerData.jsonData}
+                            rowsAll={explorerData.jsonDataAll}
+                            explorerFields={explorerFields}
+                            timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                            rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                            totalHits={_.sum(countDistribution.data?.['count()'])}
+                            requestParams={requestParams}
+                            startTime={appLogEvents ? startTime : dateRange[0]}
+                            endTime={appLogEvents ? endTime : dateRange[1]}
+                          />
+                        ) : (
+                          <EuiPanel paddingSize="s">
+                            <div style={{ padding: '20px' }}>
+                              <EuiFlexGroup
+                                direction="column"
+                                alignItems="center"
+                                gutterSize="none"
+                              >
+                                <EuiFlexItem>
+                                  <EuiLoadingSpinner size="xl" />
+                                </EuiFlexItem>
+                                <EuiSpacer size="s" />
+                                <EuiFlexItem>
+                                  <strong>Loading Documents</strong>
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiPanel>
+                        )}
+                      </>
+                    ) : (
+                      <DataGrid
+                        http={http}
+                        pplService={pplService}
+                        rows={explorerData.jsonData}
+                        rowsAll={explorerData.jsonDataAll}
+                        explorerFields={explorerFields}
+                        timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                        rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                        totalHits={explorerData?.datarows?.length || 0}
+                        requestParams={requestParams}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                    )}
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;
                     </a>
