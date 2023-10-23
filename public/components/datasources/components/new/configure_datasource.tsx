@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { ConfigureS3Datasource } from './configure_s3_datasource';
 import { coreRefs } from '../../../../../public/framework/core_refs';
-import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
+import { DATACONNECTIONS_BASE, SECURITY_ROLES } from '../../../../../common/constants/shared';
 import { ReviewS3Datasource } from './review_s3_datasource_configuration';
 import { useToast } from '../../../../../public/components/common/toast';
 import { DatasourceType, Role } from '../../../../../common/types/data_connections';
@@ -67,7 +67,7 @@ export function Configure(props: ConfigureDatasourceProps) {
 
   useEffect(() => {
     http!
-      .get('/api/v1/configuration/roles')
+      .get(SECURITY_ROLES)
       .then((data) =>
         setRoles(
           Object.keys(data.data).map((key) => {
