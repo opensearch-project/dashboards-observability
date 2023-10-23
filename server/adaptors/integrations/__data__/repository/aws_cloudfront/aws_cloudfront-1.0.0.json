@@ -5,7 +5,7 @@
   "description": "AWS cloudfront Object Store",
   "license": "Apache-2.0",
   "type": "logs-aws_cloudfront",
-  "labels": ["log", "aws", "s3", "cloud", "cloudfront"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_cloudfront/info",
   "statics": {
