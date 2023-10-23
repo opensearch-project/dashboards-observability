@@ -552,7 +552,8 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    {countDistribution.data && countDistribution.data['count()'] ? (
+                    {((countDistribution.data && countDistribution.data['count()']) ||
+                      !(isDefaultDataSourceType || appLogEvents)) && (
                       <DataGrid
                         http={http}
                         pplService={pplService}
@@ -570,20 +571,6 @@ export const Explorer = ({
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
-                    ) : (
-                      <EuiPanel paddingSize="s">
-                        <div style={{ padding: '20px' }}>
-                          <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
-                            <EuiFlexItem>
-                              <EuiLoadingSpinner size="xl" />
-                            </EuiFlexItem>
-                            <EuiSpacer size="s" />
-                            <EuiFlexItem>
-                              <strong>Loading Documents</strong>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </div>
-                      </EuiPanel>
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;
