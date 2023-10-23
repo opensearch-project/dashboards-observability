@@ -419,3 +419,11 @@ export interface GridSortingColumn {
   id: string;
   direction: 'asc' | 'desc';
 }
+
+export enum DirectQueryLoadingStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  RUNNING = 'RUNNING',
+  SCHEDULED = 'SCHEDULED',
+  CANCELED = 'CANCELED',
+}

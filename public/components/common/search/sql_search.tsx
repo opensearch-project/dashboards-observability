@@ -22,6 +22,7 @@ import { isEqual, lowerCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
+import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
@@ -213,14 +214,32 @@ export const DirectSearch = (props: any) => {
 
   useEffect(() => {
     // cancel direct query
-    if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
+    if (!pollingResult) return;
+    const { status, datarows } = pollingResult;
+
+    if (status === DirectQueryLoadingStatus.SUCCESS || datarows) {
       // stop polling
       stopPolling();
       setIsQueryRunning(false);
-      dispatch(updateSearchMetaData({ tabId, data: { isPolling: false } }));
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            isPolling: false,
+            status: undefined,
+          },
+        })
+      );
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
+      return;
     }
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: { status },
+      })
+    );
   }, [pollingResult, pollingError]);
 
   useEffect(() => {

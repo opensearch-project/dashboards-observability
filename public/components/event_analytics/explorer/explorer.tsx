@@ -552,19 +552,26 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-                    <DataGrid
-                      http={http}
-                      pplService={pplService}
-                      rows={explorerData.jsonData}
-                      rowsAll={explorerData.jsonDataAll}
-                      explorerFields={explorerFields}
-                      timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
-                      rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
-                      totalHits={_.sum(countDistribution.data?.['count()'])}
-                      requestParams={requestParams}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                    />
+                    {((countDistribution.data && countDistribution.data['count()']) ||
+                      !(isDefaultDataSourceType || appLogEvents)) && (
+                      <DataGrid
+                        http={http}
+                        pplService={pplService}
+                        rows={explorerData.jsonData}
+                        rowsAll={explorerData.jsonDataAll}
+                        explorerFields={explorerFields}
+                        timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                        rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                        totalHits={
+                          isDefaultDataSourceType || appLogEvents
+                            ? _.sum(countDistribution.data?.['count()'])
+                            : explorerData?.datarows?.length || 0
+                        }
+                        requestParams={requestParams}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                    )}
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;
                     </a>
