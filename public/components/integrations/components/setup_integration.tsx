@@ -9,17 +9,17 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLoadingDashboards,
+  EuiLoadingLogo,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -274,16 +274,12 @@ export function SetupBottomBar({
   integration,
   loading,
   setLoading,
-  loadingProgress,
-  setProgress,
   setSetupCallout,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationTemplate;
   loading: boolean;
   setLoading: (loading: boolean) => void;
-  loadingProgress: number;
-  setProgress: (updater: number | ((progress: number) => number)) => void;
   setSetupCallout: (setupCallout: SetupCallout) => void;
 }) {
   // Drop-in replacement for setToast
@@ -333,14 +329,12 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
-                setProgress((progress) => progress + 1);
               } else if (config.connectionType === 's3') {
                 const http = coreRefs.http!;
 
                 const assets = await http.get(
                   `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
                 );
-                setProgress((progress) => progress + 1);
 
                 // Queries must exist because we disable s3 if they're not present
                 for (const query of assets.data.queries!) {
@@ -350,10 +344,7 @@ export function SetupBottomBar({
                   );
                   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
                   queryStr = queryStr.replaceAll('{object_name}', integration.name);
-                  const currProgress = loadingProgress; // Need a frozen copy for getting accurate query steps
-                  const result = await runQuery(queryStr, (step) =>
-                    setProgress(currProgress + step)
-                  );
+                  const result = await runQuery(queryStr, (_) => {});
                   if (!result.ok) {
                     setLoading(false);
                     setCalloutLikeToast(
@@ -375,7 +366,6 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
-                setProgress((progress) => progress + 1);
               } else {
                 console.error('Invalid data source type');
               }
@@ -390,27 +380,14 @@ export function SetupBottomBar({
   );
 }
 
-export function LoadingPage({ value, max }: { value: number; max: number }) {
+export function LoadingPage() {
   return (
     <>
-      <EuiSpacer size="xxl" />
-      <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingDashboards size="xxl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h3>Adding Integration</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            This may take a few minutes. The integration and assets are being added.
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiProgress value={value} max={max} size="m" />
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoOpenSearch" size="xl" />}
+        title={<h2>Setting Up the Integration</h2>}
+        body={<p>This can take several minutes.</p>}
+      />
     </>
   );
 }
@@ -432,7 +409,6 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
   const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
 
   const [showLoading, setShowLoading] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     const getTemplate = async () => {
@@ -445,7 +421,6 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
 
   const updateConfig = (updates: Partial<IntegrationSetupInputs>) =>
     setConfig(Object.assign({}, integConfig, updates));
-  const maxProgress = 2 + 3 * (template.assets?.queries?.length ?? 0);
 
   return (
     <EuiPage>
@@ -453,7 +428,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
         <EuiPageContent>
           <EuiPageContentBody>
             {showLoading ? (
-              <LoadingPage value={loadingProgress} max={maxProgress} />
+              <LoadingPage />
             ) : (
               <SetupIntegrationForm
                 config={integConfig}
@@ -469,8 +444,6 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
           integration={template}
           loading={showLoading}
           setLoading={setShowLoading}
-          loadingProgress={loadingProgress}
-          setProgress={setLoadingProgress}
           setSetupCallout={setSetupCallout}
         />
       </EuiPageBody>
