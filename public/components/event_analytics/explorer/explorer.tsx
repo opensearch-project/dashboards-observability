@@ -840,7 +840,7 @@ export const Explorer = ({
     setLiveTailName(name);
     setLiveTailTabId((curSelectedTabId.current as unknown) as string);
     setIsLiveTailOn(true);
-    setToast('Live tail On', 'success');
+    setToast('Live tail On', 'success', '', 'right', 2000);
     setIsLiveTailPopoverOpen(false);
     setLiveTimestamp(
       dateMath.parse(endingTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT) || ''
@@ -865,7 +865,7 @@ export const Explorer = ({
     setIsLiveTailOn(false);
     setLiveHits(0);
     setIsLiveTailPopoverOpen(false);
-    if (isLiveTailOnRef.current) setToast('Live tail Off', 'danger');
+    if (isLiveTailOnRef.current) setToast('Live tail Off', 'danger', '', 'right', 2000);
   };
 
   useEffect(() => {

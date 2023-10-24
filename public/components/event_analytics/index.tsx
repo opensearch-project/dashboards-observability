@@ -33,15 +33,23 @@ export const EventAnalytics = ({
   ...props
 }: EventAnalyticsProps) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toastLifeTime, setToastLifeTime] = useState(6000);
 
   const eventAnalyticsBreadcrumb = {
     text: 'Logs',
     href: '#/',
   };
 
-  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
+  const setToast = (
+    title: string,
+    color = 'success',
+    text?: ReactChild,
+    side?: string,
+    toastLifeTimeMs?: number
+  ) => {
     if (!text) text = '';
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+    if (toastLifeTimeMs) setToastLifeTime(toastLifeTimeMs);
   };
 
   const getExistingEmptyTab = ({ tabIds, queries, explorerData }: EmptyTabParams) => {
@@ -63,7 +71,7 @@ export const EventAnalytics = ({
         dismissToast={(removedToast) => {
           setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
         }}
-        toastLifeTimeMs={6000}
+        toastLifeTimeMs={toastLifeTime}
       />
       <HashRouter>
         <Switch>
