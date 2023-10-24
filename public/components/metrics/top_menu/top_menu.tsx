@@ -103,19 +103,13 @@ export const TopMenu = ({
   );
 
   const saveButton = (
-    <EuiButton
-      // size="s"
-      iconType="save"
-      data-test-subj="metrics__saveView"
-      onClick={() => editPanel('save')}
-    >
+    <EuiButton iconType="save" data-test-subj="metrics__saveView" onClick={() => editPanel('save')}>
       Save view
     </EuiButton>
   );
 
   const editButton = (
     <EuiButton
-      // size="s"
       data-test-subj="metrics__editView"
       iconType="pencil"
       onClick={() => editPanel('edit')}
