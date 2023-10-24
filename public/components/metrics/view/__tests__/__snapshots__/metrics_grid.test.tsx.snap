@@ -357,6 +357,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "xxs": 1,
         }
       }
+      draggableHandle=".mouseGrabber"
       layouts={
         Object {
           "lg": Array [
@@ -480,6 +481,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
             "xxs": 1,
           }
         }
+        draggableHandle=".mouseGrabber"
         layouts={
           Object {
             "lg": Array [
@@ -592,7 +594,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           compactType="vertical"
           containerPadding={null}
           draggableCancel=""
-          draggableHandle=""
+          draggableHandle=".mouseGrabber"
           isDraggable={true}
           isResizable={true}
           layout={
@@ -685,7 +687,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
               }
               containerWidth={0}
               h={2}
-              handle=""
+              handle=".mouseGrabber"
               i="Y4muP4QBiaYaSxpXk7r8"
               isDraggable={false}
               isResizable={false}
@@ -754,9 +756,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
                       data-test-subj="VisualizationPanel"
                     >
-                      <div
-                        className=""
-                      >
+                      <div>
                         <EuiFlexGroup
                           justifyContent="spaceBetween"
                         >
@@ -764,6 +764,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                             className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
                             <EuiFlexItem
+                              className=""
                               style={
                                 Object {
                                   "width": "35%",
@@ -928,7 +929,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
               }
               containerWidth={0}
               h={2}
-              handle=""
+              handle=".mouseGrabber"
               i="tomAP4QBiaYaSxpXALls"
               isDraggable={false}
               isResizable={false}
@@ -997,9 +998,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
                       data-test-subj="VisualizationPanel"
                     >
-                      <div
-                        className=""
-                      >
+                      <div>
                         <EuiFlexGroup
                           justifyContent="spaceBetween"
                         >
@@ -1007,6 +1006,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                             className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
                             <EuiFlexItem
+                              className=""
                               style={
                                 Object {
                                   "width": "35%",
@@ -1171,7 +1171,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
               }
               containerWidth={0}
               h={2}
-              handle=""
+              handle=".mouseGrabber"
               i="prometheus.process_resident_memory_bytes"
               isDraggable={false}
               isResizable={false}
@@ -1241,9 +1241,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
                       data-test-subj="prometheus.process_resident_memory_bytesVisualizationPanel"
                     >
-                      <div
-                        className=""
-                      >
+                      <div>
                         <EuiFlexGroup
                           justifyContent="spaceBetween"
                         >
@@ -1251,6 +1249,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                             className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
                             <EuiFlexItem
+                              className=""
                               style={
                                 Object {
                                   "width": "35%",
