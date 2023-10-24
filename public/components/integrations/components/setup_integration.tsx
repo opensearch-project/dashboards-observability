@@ -13,7 +13,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLoadingDashboards,
-  EuiModal,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -296,6 +295,7 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
+            disabled={config.displayName.length < 1 || config.connectionDataSource.length < 1}
             onClick={async () => {
               setLoading(true);
 
