@@ -144,7 +144,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
         "filters": Array [
           Object {
             "field": "type",
-            "multiSelect": false,
+            "multiSelect": "or",
             "name": "Type",
             "options": Array [
               Object {
@@ -186,7 +186,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
           Array [
             Object {
               "field": "type",
-              "multiSelect": false,
+              "multiSelect": "or",
               "name": "Type",
               "options": Array [
                 Object {
@@ -334,7 +334,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                     Array [
                       Object {
                         "field": "type",
-                        "multiSelect": false,
+                        "multiSelect": "or",
                         "name": "Type",
                         "options": Array [
                           Object {
@@ -386,7 +386,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
                         config={
                           Object {
                             "field": "type",
-                            "multiSelect": false,
+                            "multiSelect": "or",
                             "name": "Type",
                             "options": Array [
                               Object {
