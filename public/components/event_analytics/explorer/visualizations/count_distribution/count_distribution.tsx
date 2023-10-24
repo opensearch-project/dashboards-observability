@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { BarOrientation, LONG_CHART_COLOR } from '../../../../../../common/constants/shared';
 import { Plt } from '../../../../visualizations/plotly/plot';
 import { fillTimeDataWithEmpty } from '../../../utils/utils';

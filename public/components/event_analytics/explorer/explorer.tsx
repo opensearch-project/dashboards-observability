@@ -15,6 +15,10 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
+  EuiPage,
+  EuiSplitPanel,
+  EuiPageSideBar,
+  EuiPageBody,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import _, { isEmpty, isEqual, reduce } from 'lodash';
@@ -34,9 +38,7 @@ import {
   CREATE_TAB_PARAM_KEY,
   DATE_PICKER_FORMAT,
   DEFAULT_AVAILABILITY_QUERY,
-  DEFAULT_EMPTY_EXPLORER_FIELDS,
   EVENT_ANALYTICS_DOCUMENTATION_URL,
-  FINAL_QUERY,
   PATTERNS_EXTRACTOR_REGEX,
   PATTERNS_REGEX,
   RAW_QUERY,
@@ -45,8 +47,6 @@ import {
   SAVED_QUERY,
   SAVED_VISUALIZATION,
   SELECTED_DATE_RANGE,
-  SELECTED_FIELDS,
-  SELECTED_PATTERN_FIELD,
   SELECTED_TIMESTAMP,
   TAB_CHART_ID,
   TAB_CHART_TITLE,
@@ -58,11 +58,9 @@ import {
   LIVE_END_TIME,
   LIVE_OPTIONS,
   PPL_NEWLINE_REGEX,
-  PPL_STATS_REGEX,
 } from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
-  IExplorerFields,
   IExplorerProps,
   IField,
   IQuery,
@@ -71,18 +69,15 @@ import {
 } from '../../../../common/types/explorer';
 import {
   buildQuery,
-  buildRawQuery,
   getIndexPatternFromRawQuery,
   uiSettingsService,
+  getSavingCommonParams,
 } from '../../../../common/utils';
 import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fetcher';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
-import {
-  PPLSavedQueryClient,
-  PanelSavedObjectClient,
-} from '../../../services/saved_objects/saved_object_client/ppl';
-import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
+import { OSDSavedSearchClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_searches';
+import { PanelSavedObjectClient } from '../../../services/saved_objects/saved_object_client/ppl';
 import {
   SaveAsCurrentQuery,
   SaveAsCurrentVisualization,
@@ -95,7 +90,10 @@ import { Search } from '../../common/search/search';
 import { selectSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
-import { selectCountDistribution } from '../redux/slices/count_distribution_slice';
+import {
+  selectCountDistribution,
+  render as updateCountDistribution,
+} from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
 import { changeDateRange, changeQuery, selectQueries } from '../redux/slices/query_slice';
@@ -109,17 +107,23 @@ import {
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
-import { DataSourceSelection } from './datasources/datasources_selection';
 import { DirectQueryRunning } from './direct_query_running';
 import { DataGrid } from './events_views/data_grid';
 import { HitsCounter } from './hits_counter/hits_counter';
 import { LogPatterns } from './log_patterns/log_patterns';
 import { NoResults } from './no_results';
-import { Sidebar } from './sidebar';
 import { TimechartHeader } from './timechart_header';
 import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
+import { DataSourceSelection } from './datasources/datasources_selection';
+import { initialTabId } from '../../../framework/redux/store/shared_state';
+import { ObservabilitySideBar } from './sidebar/observability_sidebar';
+import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
+import {
+  DEFAULT_DATA_SOURCE_TYPE,
+  QUERY_LANGUAGE,
+} from '../../../../common/constants/data_sources';
 
 export const Explorer = ({
   pplService,
@@ -149,7 +153,7 @@ export const Explorer = ({
   const routerContext = useContext(LogExplorerRouterContext);
   const dispatch = useDispatch();
   const requestParams = { tabId };
-  const { getLiveTail, getEvents, getAvailableFields } = useFetchEvents({
+  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
     pplService,
     requestParams,
   });
@@ -173,16 +177,14 @@ export const Explorer = ({
   const countDistribution = useSelector(selectCountDistribution)[tabId];
   const explorerVisualizations = useSelector(selectExplorerVisualization)[tabId];
   const userVizConfigs = useSelector(selectVisualizationConfig)[tabId] || {};
-  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId];
+  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
   const [selectedContentTabId, setSelectedContentTab] = useState(TAB_EVENT_ID);
   const [selectedCustomPanelOptions, setSelectedCustomPanelOptions] = useState([]);
   const [selectedPanelName, setSelectedPanelName] = useState('');
   const [curVisId, setCurVisId] = useState('bar');
   const [isPanelTextFieldInvalid, setIsPanelTextFieldInvalid] = useState(false);
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [timeIntervalOptions, setTimeIntervalOptions] = useState(TIME_INTERVAL_OPTIONS);
   const [isOverridingTimestamp, setIsOverridingTimestamp] = useState(false);
-  const [isOverridingPattern, setIsOverridingPattern] = useState(false);
   const [tempQuery, setTempQuery] = useState(query[RAW_QUERY]);
   const [isLiveTailPopoverOpen, setIsLiveTailPopoverOpen] = useState(false);
   const [isLiveTailOn, setIsLiveTailOn] = useState(false);
@@ -194,16 +196,18 @@ export const Explorer = ({
   const [triggerAvailability, setTriggerAvailability] = useState(false);
   const [isQueryRunning, setIsQueryRunning] = useState(false);
   const currentPluggable = useMemo(() => {
-    return (
-      dataSourcePluggables[explorerSearchMeta.datasources[0]?.type] ||
-      dataSourcePluggables.DEFAULT_INDEX_PATTERNS
-    );
+    return explorerSearchMeta.datasources?.[0]?.type
+      ? dataSourcePluggables[explorerSearchMeta?.datasources[0]?.type]
+      : dataSourcePluggables.DEFAULT_INDEX_PATTERNS;
   }, [explorerSearchMeta.datasources]);
   const { ui } =
-    currentPluggable?.getComponentSetForVariation('languages', explorerSearchMeta.lang || 'SQL') ||
-    {};
+    currentPluggable?.getComponentSetForVariation(
+      'languages',
+      explorerSearchMeta.lang || QUERY_LANGUAGE.SQL
+    ) || {};
   const SearchBar = ui?.SearchBar || Search;
-
+  const isDefaultDataSourceType =
+    explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
   const selectedIntervalRef = useRef<{
     text: string;
     value: string;
@@ -219,6 +223,8 @@ export const Explorer = ({
   const isLiveTailOnRef = useRef(false);
   const liveTailTabIdRef = useRef('');
   const liveTailNameRef = useRef('Live');
+  const savedObjectLoader = useRef<ExplorerSavedObjectLoader | undefined>(undefined);
+  const isObjectIdUpdatedFromSave = useRef(false); // Flag to prevent reload when the current search's objectId changes due to a save operation.
   queryRef.current = query;
   selectedPanelNameRef.current = selectedPanelName;
   explorerFieldsRef.current = explorerFields;
@@ -311,7 +317,7 @@ export const Explorer = ({
     !isEqual(getIndexPatternFromRawQuery(currentQuery), getIndexPatternFromRawQuery(prevTabQuery));
 
   const updateTabData = async (objectId: string) => {
-    await new PPLSavedObjectLoader(
+    savedObjectLoader.current = new ExplorerSavedObjectLoader(
       getSavedObjectsClient({ objectId, objectType: 'savedQuery' }),
       notifications,
       {
@@ -338,9 +344,25 @@ export const Explorer = ({
         setSubType,
         setSelectedContentTab,
         fetchData,
+        dispatchOnGettingHis,
       }
-    ).load();
+    );
+    savedObjectLoader.current.load();
   };
+
+  // stop polling when cancel or unmounts
+  useEffect(() => {
+    const sol: ExplorerSavedObjectLoader | undefined = savedObjectLoader.current;
+    if (!explorerSearchMeta.isPolling && sol !== undefined && sol.getPollingInstance) {
+      sol?.getPollingInstance()!.stopPolling();
+      savedObjectLoader.current = undefined;
+    }
+    return () => {
+      if (sol && sol.getPollingInstance) {
+        sol?.getPollingInstance()!.stopPolling();
+      }
+    };
+  }, [explorerSearchMeta.isPolling]);
 
   const prepareAvailability = async () => {
     setSelectedContentTab(TAB_CHART_ID);
@@ -371,8 +393,9 @@ export const Explorer = ({
   }, []);
 
   useEffect(() => {
-    if (savedObjectId) {
+    if (savedObjectId && !isObjectIdUpdatedFromSave.current) {
       updateTabData(savedObjectId);
+      isObjectIdUpdatedFromSave.current = false;
     }
   }, [savedObjectId]);
 
@@ -384,10 +407,7 @@ export const Explorer = ({
     await dispatch(
       changeDateRange({
         tabId: requestParams.tabId,
-        data: {
-          [RAW_QUERY]: queryRef.current![RAW_QUERY],
-          [SELECTED_DATE_RANGE]: timeRange,
-        },
+        data: { [RAW_QUERY]: queryRef.current![RAW_QUERY], [SELECTED_DATE_RANGE]: timeRange },
       })
     );
   };
@@ -423,46 +443,11 @@ export const Explorer = ({
     }
   };
 
-  useEffect(() => {
-    if (explorerSearchMeta.datasources?.[0]?.type !== 'DEFAULT_INDEX_PATTERNS') {
-      dispatch(
-        changeQuery({
-          tabId,
-          query: {
-            [RAW_QUERY]: '',
-            [FINAL_QUERY]: '',
-          },
-        })
-      );
-    }
-  }, [explorerSearchMeta.datasources]);
-
   const handleOverrideTimestamp = async (timestamp: IField) => {
     setIsOverridingTimestamp(true);
-    await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          [SELECTED_TIMESTAMP]: timestamp?.name || '',
-        },
-      })
-    );
+    await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: timestamp?.name || '' } }));
     setIsOverridingTimestamp(false);
     handleQuerySearch();
-  };
-
-  const handleOverridePattern = async (pattern: IField) => {
-    setIsOverridingPattern(true);
-    await setDefaultPatternsField(
-      '',
-      pattern.name,
-      getErrorHandler('Error overriding default pattern')
-    );
-    setIsOverridingPattern(false);
-    await getPatterns(
-      selectedIntervalRef.current?.value.replace(/^auto_/, '') || 'y',
-      getErrorHandler('Error fetching patterns')
-    );
   };
 
   const totalHits: number = useMemo(() => {
@@ -481,20 +466,16 @@ export const Explorer = ({
   }, [countDistribution?.data]);
 
   const dateRange = getDateRange(startTime, endTime, query);
-
-  const [storedExplorerFields, setStoredExplorerFields] = useState(explorerFields);
-
   const mainContent = useMemo(() => {
     return (
-      <div className="dscWrapper col-md-12">
+      <div className="dscWrapper">
         {explorerData && !isEmpty(explorerData.jsonData) ? (
           <EuiFlexGroup direction="column" gutterSize="none">
-            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
+            {(isDefaultDataSourceType || appLogEvents) && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-                  {/* <EuiPanel paddingSize="s" style={{ height: '100%' }}> */}
                   {countDistribution?.data && !isLiveTailOnRef.current && (
-                    <>
+                    <EuiPanel>
                       <HitsCounter
                         hits={_.sum(countDistribution.data?.['count()'])}
                         showResetButton={false}
@@ -507,6 +488,9 @@ export const Explorer = ({
                             (item) => item.value === selectedIntrv
                           );
                           const intrv = selectedIntrv.replace(/^auto_/, '');
+                          dispatch(
+                            updateCountDistribution({ tabId, data: { selectedInterval: intrv } })
+                          );
                           getCountVisualizations(intrv);
                           selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
                           getPatterns(intrv, getErrorHandler('Error fetching patterns'));
@@ -521,12 +505,12 @@ export const Explorer = ({
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
-                    </>
+                    </EuiPanel>
                   )}
                 </EuiPanel>
               </EuiFlexItem>
             )}
-            {explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' && (
+            {(isDefaultDataSourceType || appLogEvents) && (
               <EuiFlexItem grow={false}>
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
                   <EuiPanel paddingSize="s" style={{ height: '100%' }}>
@@ -568,25 +552,26 @@ export const Explorer = ({
                         <EuiSpacer size="m" />
                       </>
                     )}
-
-                    <DataGrid
-                      http={http}
-                      pplService={pplService}
-                      rows={explorerData.jsonData}
-                      rowsAll={explorerData.jsonDataAll}
-                      explorerFields={explorerFields}
-                      timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
-                      rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
-                      totalHits={_.sum(countDistribution.data?.['count()'])}
-                      requestParams={requestParams}
-                      startTime={appLogEvents ? startTime : dateRange[0]}
-                      endTime={appLogEvents ? endTime : dateRange[1]}
-                      storedSelectedColumns={
-                        storedExplorerFields.selectedFields.length > 0
-                          ? storedExplorerFields.selectedFields
-                          : DEFAULT_EMPTY_EXPLORER_FIELDS
-                      }
-                    />
+                    {(countDistribution.data?.['count()'] || explorerData?.datarows?.length) && (
+                      <DataGrid
+                        http={http}
+                        pplService={pplService}
+                        rows={explorerData.jsonData}
+                        rowsAll={explorerData.jsonDataAll}
+                        explorerFields={explorerFields}
+                        timeStampField={queryRef.current![SELECTED_TIMESTAMP]}
+                        rawQuery={appBasedRef.current || queryRef.current![RAW_QUERY]}
+                        totalHits={
+                          isDefaultDataSourceType || appLogEvents
+                            ? _.sum(countDistribution.data?.['count()']) ||
+                              explorerData.datarows.length
+                            : explorerData.datarows.length
+                        }
+                        requestParams={requestParams}
+                        startTime={appLogEvents ? startTime : dateRange[0]}
+                        endTime={appLogEvents ? endTime : dateRange[1]}
+                      />
+                    )}
                     <a tabIndex={0} id="discoverBottomMarker">
                       &#8203;
                     </a>
@@ -604,13 +589,11 @@ export const Explorer = ({
     isPanelTextFieldInvalid,
     explorerData,
     explorerFields,
-    isSidebarClosed,
     countDistribution,
     explorerVisualizations,
     isOverridingTimestamp,
     query,
     isLiveTailOnRef.current,
-    isOverridingPattern,
     isQueryRunning,
   ]);
 
@@ -638,7 +621,7 @@ export const Explorer = ({
   };
 
   const explorerVis = useMemo(() => {
-    return explorerSearchMeta.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS' ? (
+    return isDefaultDataSourceType || appLogEvents ? (
       <ExplorerVisualizations
         query={query}
         curVisId={curVisId}
@@ -685,12 +668,7 @@ export const Explorer = ({
 
   const updateQueryInStore = async (updateQuery: string) => {
     await dispatch(
-      changeQuery({
-        tabId,
-        query: {
-          [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, ''),
-        },
-      })
+      changeQuery({ tabId, query: { [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
     );
   };
 
@@ -698,14 +676,7 @@ export const Explorer = ({
     async (availability?: boolean) => {
       // clear previous selected timestamp when index pattern changes
       if (isIndexPatternChanged(tempQuery, query[RAW_QUERY])) {
-        await dispatch(
-          changeQuery({
-            tabId,
-            query: {
-              [SELECTED_TIMESTAMP]: '',
-            },
-          })
-        );
+        await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: '' } }));
         await setDefaultPatternsField('', '');
       }
       if (availability !== true) {
@@ -718,26 +689,21 @@ export const Explorer = ({
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);
 
-  const getSavingCommonParams = (
-    queryState: IQuery,
-    fields: IExplorerFields,
-    savingTitle: string
-  ) => {
-    return {
-      query: buildRawQuery(query, appBaseQuery),
-      fields: fields[SELECTED_FIELDS],
-      dateRange: queryState[SELECTED_DATE_RANGE],
-      name: savingTitle,
-      timestamp: queryState[SELECTED_TIMESTAMP],
-    };
-  };
-
   const handleSavingObject = useCallback(() => {
     const isOnEventPage = isEqual(selectedContentTabId, TAB_EVENT_ID);
     const isObjTypeMatchQuery = isEqual(query[SAVED_OBJECT_TYPE], SAVED_QUERY);
     const isObjTypeMatchVis = isEqual(query[SAVED_OBJECT_TYPE], SAVED_VISUALIZATION);
     const isTabHasObjID = !isEmpty(query[SAVED_OBJECT_ID]);
-    const commonParams = getSavingCommonParams(query, explorerFields, selectedPanelNameRef.current);
+    const commonParams = getSavingCommonParams(
+      query,
+      appBaseQuery,
+      explorerFields,
+      selectedPanelNameRef.current,
+      explorerSearchMeta
+    );
+
+    // Set the flag to differentiate between an object save action and a load action
+    isObjectIdUpdatedFromSave.current = true;
 
     let soClient;
     if (isOnEventPage) {
@@ -745,7 +711,10 @@ export const Explorer = ({
         soClient = new SaveAsCurrentQuery(
           { tabId, notifications },
           { dispatch, updateTabName },
-          PPLSavedQueryClient.getInstance(),
+          getSavedObjectsClient({
+            objectId: query[SAVED_OBJECT_ID],
+            objectType: 'savedQuery',
+          }),
           {
             ...commonParams,
             objectId: query[SAVED_OBJECT_ID],
@@ -755,7 +724,7 @@ export const Explorer = ({
         soClient = new SaveAsNewQuery(
           { tabId, history, notifications, showPermissionErrorToast },
           { batch, dispatch, changeQuery, updateTabName },
-          new PPLSavedQueryClient(http),
+          OSDSavedSearchClient.getInstance(),
           { ...commonParams }
         );
       }
@@ -813,9 +782,8 @@ export const Explorer = ({
     explorerFields,
     subType,
     selectedCustomPanelOptions,
+    explorerSearchMeta,
   ]);
-
-  // live tail
 
   const liveTailLoop = async (
     name: string,
@@ -913,104 +881,89 @@ export const Explorer = ({
         handleQueryChange,
       }}
     >
-      <div
-        className={`obsExplorer dscAppContainer${
-          uiSettingsService.get('theme:darkMode') && ' explorer-dark'
-        }`}
-      >
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <div
-                  className="dscSelector"
-                  style={{ width: '300px', marginTop: '8px', marginLeft: '10px' }}
-                >
-                  <DataSourceSelection tabId={tabId} />
-                </div>
-              </EuiFlexItem>
+      <EuiPage className="deLayout" paddingSize="none">
+        <EuiPageSideBar className="deSidebar" sticky>
+          <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
+            {!appLogEvents && (
+              <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+                <DataSourceSelection tabId={initialTabId} />
+              </EuiSplitPanel.Inner>
+            )}
+            <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
+              <ObservabilitySideBar
+                tabId={initialTabId}
+                pplService={pplService}
+                notifications={notifications}
+              />
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiPageSideBar>
+        <EuiPageBody className="deLayout__canvas">
+          <div
+            className={`obsExplorer dscAppContainer${
+              uiSettingsService.get('theme:darkMode') && ' explorer-dark'
+            }`}
+          >
+            <EuiFlexGroup direction="row">
               <EuiFlexItem>
-                <div className="explorerFieldSelector">
-                  <Sidebar
-                    query={query}
-                    explorerFields={explorerFields}
-                    explorerData={explorerData}
-                    selectedTimestamp={query[SELECTED_TIMESTAMP]}
-                    selectedPattern={query[SELECTED_PATTERN_FIELD]}
-                    handleOverrideTimestamp={handleOverrideTimestamp}
-                    handleOverridePattern={handleOverridePattern}
-                    isOverridingTimestamp={isOverridingTimestamp}
-                    isOverridingPattern={isOverridingPattern}
-                    isFieldToggleButtonDisabled={
-                      isEmpty(explorerData.jsonData) ||
-                      !isEmpty(queryRef.current![RAW_QUERY].match(PPL_STATS_REGEX))
+                <SearchBar
+                  key="search-component"
+                  query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
+                  tempQuery={tempQuery}
+                  handleQueryChange={handleQueryChange}
+                  handleQuerySearch={handleQuerySearch}
+                  dslService={dslService}
+                  startTime={appLogEvents ? startTime : dateRange[0]}
+                  endTime={appLogEvents ? endTime : dateRange[1]}
+                  handleTimePickerChange={(timeRange: string[]) =>
+                    handleTimePickerChange(timeRange)
+                  }
+                  selectedPanelName={selectedPanelNameRef.current}
+                  selectedCustomPanelOptions={selectedCustomPanelOptions}
+                  setSelectedPanelName={setSelectedPanelName}
+                  setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
+                  handleSavingObject={handleSavingObject}
+                  isPanelTextFieldInvalid={isPanelTextFieldInvalid}
+                  savedObjects={savedObjects}
+                  showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
+                  handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+                  isLiveTailPopoverOpen={isLiveTailPopoverOpen}
+                  closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
+                  popoverItems={popoverItems}
+                  isLiveTailOn={isLiveTailOnRef.current}
+                  selectedSubTabId={selectedContentTabId}
+                  searchBarConfigs={searchBarConfigs}
+                  getSuggestions={parseGetSuggestions}
+                  onItemSelect={onItemSelect}
+                  tabId={tabId}
+                  baseQuery={appBaseQuery}
+                  stopLive={stopLive}
+                  setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
+                  liveTailName={liveTailNameRef.current}
+                  curVisId={curVisId}
+                  setSubType={setSubType}
+                  http={http}
+                  setIsQueryRunning={setIsQueryRunning}
+                />
+                {explorerSearchMeta.isPolling ? (
+                  <DirectQueryRunning tabId={tabId} />
+                ) : (
+                  <EuiTabbedContent
+                    className="mainContentTabs"
+                    initialSelectedTab={contentTabs[0]}
+                    selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
+                    onTabClick={(selectedTab: EuiTabbedContentTab) =>
+                      handleContentTabClick(selectedTab)
                     }
-                    storedExplorerFields={
-                      storedExplorerFields.availableFields.length > 0
-                        ? storedExplorerFields
-                        : explorerFields
-                    }
-                    setStoredExplorerFields={setStoredExplorerFields}
+                    tabs={contentTabs}
+                    size="s"
                   />
-                </div>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <SearchBar
-              key="search-component"
-              query={appLogEvents ? processAppAnalyticsQuery(tempQuery) : query[RAW_QUERY]}
-              tempQuery={tempQuery}
-              handleQueryChange={handleQueryChange}
-              handleQuerySearch={handleQuerySearch}
-              dslService={dslService}
-              startTime={appLogEvents ? startTime : dateRange[0]}
-              endTime={appLogEvents ? endTime : dateRange[1]}
-              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              selectedPanelName={selectedPanelNameRef.current}
-              selectedCustomPanelOptions={selectedCustomPanelOptions}
-              setSelectedPanelName={setSelectedPanelName}
-              setSelectedCustomPanelOptions={setSelectedCustomPanelOptions}
-              handleSavingObject={handleSavingObject}
-              isPanelTextFieldInvalid={isPanelTextFieldInvalid}
-              savedObjects={savedObjects}
-              showSavePanelOptionsList={isEqual(selectedContentTabId, TAB_CHART_ID)}
-              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
-              isLiveTailPopoverOpen={isLiveTailPopoverOpen}
-              closeLiveTailPopover={() => setIsLiveTailPopoverOpen(false)}
-              popoverItems={popoverItems}
-              isLiveTailOn={isLiveTailOnRef.current}
-              selectedSubTabId={selectedContentTabId}
-              searchBarConfigs={searchBarConfigs}
-              getSuggestions={parseGetSuggestions}
-              onItemSelect={onItemSelect}
-              tabId={tabId}
-              baseQuery={appBaseQuery}
-              stopLive={stopLive}
-              setIsLiveTailPopoverOpen={setIsLiveTailPopoverOpen}
-              liveTailName={liveTailNameRef.current}
-              curVisId={curVisId}
-              setSubType={setSubType}
-              http={http}
-              setIsQueryRunning={setIsQueryRunning}
-            />
-            {explorerSearchMeta.isPolling ? (
-              <DirectQueryRunning tabId={tabId} />
-            ) : (
-              <EuiTabbedContent
-                className="mainContentTabs"
-                initialSelectedTab={contentTabs[0]}
-                selectedTab={contentTabs.find((tab) => tab.id === selectedContentTabId)}
-                onTabClick={(selectedTab: EuiTabbedContentTab) =>
-                  handleContentTabClick(selectedTab)
-                }
-                tabs={contentTabs}
-                size="s"
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+          </div>
+        </EuiPageBody>
+      </EuiPage>
     </TabContext.Provider>
   );
 };

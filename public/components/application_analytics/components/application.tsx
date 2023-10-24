@@ -116,6 +116,7 @@ export function Application(props: AppDetailProps) {
     callback,
     queryManager,
     mode,
+    dataSourcePluggables,
   } = props;
   const [application, setApplication] = useState<ApplicationType>({
     id: '',
@@ -371,6 +372,7 @@ export function Application(props: AppDetailProps) {
         callbackInApp={callbackInApp}
         queryManager={queryManager}
         curSelectedTabId={selectedTabId}
+        dataSourcePluggables={dataSourcePluggables}
       />
     );
   };
