@@ -14,10 +14,7 @@ import {
   EuiForm,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { CoreStart } from '../../../../../../src/core/public';
-import { createPrometheusMetricById } from '../helpers/utils';
 import { MetricType } from '../../../../common/types/metrics';
-import { fetchVisualizationById } from '../../custom_panels/helpers/utils';
 import {
   fetchPanels,
   selectPanelList,
@@ -25,10 +22,8 @@ import {
 import { coreRefs } from '../../../framework/core_refs';
 
 interface MetricsExportPanelProps {
-  http: CoreStart['http'];
-  visualizationsMetaData: any;
-  setVisualizationsMetaData: React.Dispatch<any>;
-  sortedMetricsLayout: MetricType[];
+  metricsToExport: MetricType[];
+  setMetricsToExport: React.Dispatch<React.SetStateAction<MetricType[]>>;
   selectedPanelOptions: Array<EuiComboBoxOptionOption<unknown>> | undefined;
   setSelectedPanelOptions: React.Dispatch<
     React.SetStateAction<Array<EuiComboBoxOptionOption<unknown>> | undefined>
@@ -43,45 +38,24 @@ interface CustomPanelOptions {
 }
 
 export const MetricsExportPanel = ({
-  visualizationsMetaData,
-  setVisualizationsMetaData,
-  sortedMetricsLayout,
+  metricsToExport,
+  setMetricsToExport,
   selectedPanelOptions,
   setSelectedPanelOptions,
 }: MetricsExportPanelProps) => {
-  const [options, setOptions] = useState([]);
-
-  const [errorResponse, setErrorResponse] = useState('');
-
   const customPanels = useSelector(selectPanelList);
 
   const dispatch = useDispatch();
-
-  const { http } = coreRefs;
 
   useEffect(() => {
     dispatch(fetchPanels());
   }, [dispatch]);
 
-  const fetchAllvisualizationsById = async () => {
-    const tempVisualizationsMetaData = await Promise.all(
-      sortedMetricsLayout.map(async (metricLayout) => {
-        return metricLayout.savedVisualizationId
-          ? await fetchVisualizationById(http!, metricLayout.savedVisualizationId, setErrorResponse)
-          : createPrometheusMetricById(metricLayout.id);
-      })
-    );
-    setVisualizationsMetaData(tempVisualizationsMetaData);
-  };
-
-  useEffect(() => {
-    fetchAllvisualizationsById();
-  }, []);
-
   const onNameChange = (index: number, name: string) => {
-    const tempVisualizationsMetaData = [...visualizationsMetaData];
-    tempVisualizationsMetaData[index].name = name;
-    setVisualizationsMetaData(tempVisualizationsMetaData);
+    const tempMetrics = metricsToExport.map((metric, idx) =>
+      idx === index ? { ...metric, name } : metric
+    );
+    setMetricsToExport(tempMetrics);
   };
 
   return (
@@ -107,9 +81,9 @@ export const MetricsExportPanel = ({
         />
       </EuiFormRow>
 
-      {visualizationsMetaData.length > 0 && (
+      {metricsToExport.length > 0 && (
         <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
-          {visualizationsMetaData.map((metaData: any, index: number) => {
+          {metricsToExport.map((metaData: any, index: number) => {
             return (
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
@@ -117,7 +91,7 @@ export const MetricsExportPanel = ({
                     <EuiFormRow label={'Metric Name #' + (index + 1)}>
                       <EuiFieldText
                         key={`metric-name-input-id-${index}`}
-                        value={visualizationsMetaData[index].name}
+                        value={metaData.name}
                         onChange={(e) => onNameChange(index, e.target.value)}
                         data-test-subj="metrics__querySaveName"
                       />

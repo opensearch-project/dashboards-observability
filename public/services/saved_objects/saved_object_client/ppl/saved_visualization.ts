@@ -59,25 +59,27 @@ export class PPLSavedVisualizationClient extends PPLSavedObjectClient {
     );
   }
 
-  async update(params: UpdateParams): Promise<SavedObjectsUpdateResponse> {
+  async update(params: UpdateParams, raw: boolean = false): Promise<SavedObjectsUpdateResponse> {
     return await this.client.put(
       `${OBSERVABILITY_BASE}${EVENT_ANALYTICS}${SAVED_OBJECTS}${SAVED_VISUALIZATION}`,
       {
         body: JSON.stringify(
-          this.buildRequestBody({
-            query: params.query,
-            fields: params.fields,
-            dateRange: params.dateRange,
-            chartType: params.type,
-            name: params.name,
-            timestamp: params.timestamp,
-            userConfigs: params.userConfigs,
-            description: params.description,
-            subType: params.subType,
-            unitsOfMeasure: params.unitsOfMeasure,
-            selectedLabels: params.selectedLabels,
-            objectId: params.objectId,
-          })
+          raw
+            ? params
+            : this.buildRequestBody({
+                query: params.query,
+                fields: params.fields,
+                dateRange: params.dateRange,
+                chartType: params.type,
+                name: params.name,
+                timestamp: params.timestamp,
+                userConfigs: params.userConfigs,
+                description: params.description,
+                subType: params.subType,
+                unitsOfMeasure: params.unitsOfMeasure,
+                selectedLabels: params.selectedLabels,
+                objectId: params.objectId,
+              })
         ),
       }
     );

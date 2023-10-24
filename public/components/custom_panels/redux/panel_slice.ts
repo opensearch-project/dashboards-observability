@@ -196,7 +196,7 @@ export const addMultipleVizToPanels = async (panels, vizIds) => {
       const updatedPanel = { ...oldPanel, visualizations: visualizationsWithNewPanel };
 
       if (isUuid(updatedPanel.id)) {
-        await await updateSavedObjectPanel(updatedPanel);
+        await updateSavedObjectPanel(updatedPanel);
       } else {
         await updateLegacyPanel(updatedPanel);
       }

@@ -42,6 +42,7 @@ describe('Export Metrics Panel Component', () => {
         <MetricsExportPanel
           http={http}
           visualizationsMetaData={visualizationsMetaData}
+          metricsToExport={[]}
           setVisualizationsMetaData={setVisualizationsMetaData}
           sortedMetricsLayout={sortedMetricsLayout}
           selectedPanelOptions={[]}

@@ -14,6 +14,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
 >
   <Component
     http={[MockFunction]}
+    metricsToExport={Array []}
     selectedPanelOptions={Array []}
     setSelectedPanelOptions={[MockFunction]}
     setVisualizationsMetaData={[MockFunction]}

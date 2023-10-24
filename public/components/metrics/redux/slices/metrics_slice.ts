@@ -4,7 +4,7 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import { sortBy } from 'lodash';
+import { keyBy, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PPL_DATASOURCES_REQUEST,
@@ -37,9 +37,9 @@ const coloredIconsFrom = (dataSources: string[]): { [dataSource: string]: IconAt
 };
 
 const initialState = {
-  metrics: [],
-  selected: [],
-  searched: [],
+  metrics: {},
+  selectedIds: [],
+  sortedIds: [],
   search: '',
   metricsLayout: [],
   dataSources: [OBSERVABILITY_CUSTOM_METRIC],
@@ -68,8 +68,15 @@ export const loadMetrics = () => async (dispatch) => {
   );
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
-  const dataResponses = await Promise.all([customDataRequest, ...remoteDataRequests]);
-  dispatch(setMetrics(dataResponses.flat()));
+  const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
+  const metricsResult = metricsResultSet.flat();
+
+  const metricsMapByName = keyBy(metricsResult.flat(), 'id');
+  dispatch(setMetrics(metricsMapByName));
+
+  const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
+  console.log('loadMetrics', { metricsMapByName, sortedIds });
+  dispatch(setSortedIds(sortedIds));
 };
 
 const fetchCustomMetrics = async () => {
@@ -107,15 +114,28 @@ const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => 
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         catalog: `${dataSource}`,
-        type: obj.TABLE_TYPE,
+        index: `${dataSource}.${obj.TABLE_NAME}`,
+        query: undefined,
+        aggregation: 'avg',
+        attributesGroupBy: [],
+        availableAttributes: [],
+        type: 'line',
         recentlyCreated: false,
       }))
     )
   );
 };
 
-const metricQueryFromId = (id: string) => {
-  return `source = ${id} | stats avg(@value) by span(@timestamp, 1d)`;
+export const metricQueryFromMetaData = ({
+  index,
+  aggregation,
+  attributesGroupBy,
+}: {
+  index: string;
+  aggregation: string;
+  attributesGroupBy: string[];
+}) => {
+  return `source = ${index} | stats ${aggregation}(@value) by span(@timestamp, 1d)`;
 };
 
 const loadMetric = async (metric) =>
@@ -128,57 +148,6 @@ const loadMetric = async (metric) =>
       )
     : metric;
 
-export const selectMetric = (metric) => async (dispatch, getState) => {
-  dispatch(updateLayoutBySelection(metric));
-};
-
-export const deSelectMetric = (metric) => (dispatch, getState) => {
-  dispatch(updateLayoutByDeSelection(metric));
-};
-
-const updateLayoutBySelection = (newMetric: any) => async (dispatch, getState) => {
-  const metric = await loadMetric(newMetric);
-
-  const metricsLayout = getState().metrics.metricsLayout;
-  const newDimensions = getNewVizDimensions(metricsLayout);
-
-  const metricVisualization: MetricType = {
-    id: metric.id,
-    savedVisualizationId: metric.savedVisualizationId,
-    query: metric.query || metricQueryFromId(metric.id),
-    x: newDimensions.x,
-    y: newDimensions.y,
-    h: newDimensions.h,
-    w: newDimensions.w,
-    type: 'line',
-  };
-
-  dispatch(updateMetricsLayout([...metricsLayout, metricVisualization]));
-};
-
-const updateLayoutByDeSelection = (metric) => (dispatch, getState) => {
-  const metricsLayout = getState().metrics.metricsLayout;
-
-  const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
-
-  let heightSubtract = 0;
-
-  const newMetricsLayout = sortedMetricsLayout
-    .map((metricLayout: MetricType) => {
-      if (metricLayout.id !== metric.id) {
-        return {
-          ...metricLayout,
-          y: metricLayout.y - heightSubtract,
-        };
-      } else {
-        heightSubtract = metricLayout.h;
-      }
-    })
-    .filter((item) => item);
-
-  dispatch(updateMetricsLayout(newMetricsLayout));
-};
-
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
   initialState,
@@ -186,11 +155,35 @@ export const metricSlice = createSlice({
     setMetrics: (state, { payload }) => {
       state.metrics = payload;
     },
+    setSortedIds: (state, { payload }) => {
+      state.sortedIds = payload;
+    },
+
+    selectMetric: (state, { payload: id }) => {
+      if (state.selectedIds.includes(id)) return;
+
+      state.selectedIds.push(id);
+    },
+
+    deSelectMetric: (state, { payload }) => {
+      state.selectedIds = state.selectedIds.filter((id) => id !== payload);
+    },
+
+    moveMetric: (state, { payload: { source, destination } }) => {
+      const movingId = state.selectedIds.splice(source.index, 1);
+      state.selectedIds.splice(destination.index, 0, movingId[0]);
+    },
+
     setSearch: (state, { payload }) => {
       state.search = payload;
     },
 
+    updateMetric: (state, { payload: { id, metric } }) => {
+      state.metrics[id] = metric;
+    },
+
     updateMetricsLayout: (state, { payload }) => {
+      console.log('updateMetricsLayout', payload);
       state.metricsLayout = payload;
       state.selected = sortBy(payload, ['x', 'y']).map(({ id }) => id);
     },
@@ -214,25 +207,87 @@ export const metricSlice = createSlice({
 });
 
 export const {
-  setDataSourceIcons,
-  setDataSourceTitles,
-  setDataSources,
-  setMetrics,
-  setRefresh,
+  deSelectMetric,
+  selectMetric,
+  moveMetric,
   setSearch,
-  updateMetricsLayout,
+  setDataSources,
+  setDataSourceTitles,
+  setDataSourceIcons,
+  updateMetric,
 } = metricSlice.actions;
 
 /** private actions */
-const { setDateSpan } = metricSlice.actions;
+const { setDateSpan, setRefresh } = metricSlice.actions;
 
-export const availableMetricsSelector = (state) =>
-  state.metrics.metrics
-    .filter((metric) => !state.metrics.selected.includes(metric.id))
-    .filter(
-      (metric) =>
-        state.metrics.search === '' || metric.name.match(new RegExp(state.metrics.search, 'i'))
-    );
+const { setMetrics, setSortedIds } = metricSlice.actions;
+
+const getAvailableAttributes = async (id) => {
+  const { pplService, toasts } = coreRefs;
+
+  try {
+    const columnSchema = await pplService.fetch({
+      query: 'describe ' + id + ' | fields COLUMN_NAME',
+      format: 'jdbc',
+    });
+    const columns = columnSchema.jsonData
+      .map((sch) => sch.COLUMN_NAME)
+      .filter((col) => col[0] !== '@');
+
+    return columns;
+  } catch (e) {
+    toasts?.addDanger(`An error occurred retrieving attributes for metric ${id} `);
+    console.error(`An error occurred retrieving attributes for metric ${id} `, e);
+  }
+};
+//
+// const updateLayoutBySelection = (metric: any, gridLayoutLength: number) => {
+//   metric.layout = getMetricVisDimensions(gridLayoutLength);
+// };
+
+const initializeMetricQuery = async (metric) => {
+  if (metric.query) return;
+
+  Object.assign(metric, {
+    query: metricQueryFromMetaData(metric.id),
+    aggregation: 'avg',
+    attributesGroupBy: [],
+    availableAttributes: [],
+  });
+};
+
+export const addSelectedMetric = ({ id }) => async (dispatch, getState) => {
+  console.log('addSelectedMetric state', getState());
+  const metric = { ...getState().metrics.metrics[id] };
+
+  console.log('addSelectedMetric', metric);
+
+  await initializeMetricQuery(metric);
+  // updateLayoutBySelection(metric, getState().metrics.selected.length);
+  console.log('addSelectedMetric initializedQuery', metric);
+  if (metric.catalog !== OBSERVABILITY_CUSTOM_METRIC) {
+    const availableAttributes = await getAvailableAttributes(metric.id);
+    metric.availableAttributes = availableAttributes;
+    metric.attributesGroupBy = availableAttributes;
+  }
+  dispatch(updateMetric(id, metric));
+  dispatch(selectMetric(id));
+};
+export const removeSelectedMetric = ({ id }) => async (dispatch, getState) => {
+  dispatch(deSelectMetric(id));
+};
+
+export const searchOrTrue = (search, metric) => {
+  if (search === '') return true;
+  return metric.name.match(new RegExp(search, 'i'));
+};
+
+export const availableMetricsSelector = (state) => {
+  return state.metrics.sortedIds
+    .filter((id) => !state.metrics.selectedIds.includes(id))
+    .filter((id) => searchOrTrue(state.metrics.search, state.metrics.metrics[id]))
+    .map((id) => state.metrics.metrics[id]);
+};
 
 export const updateStartEndDate = ({ start, end }) => (dispatch, getState) => {
   const currentDateSpanFilter = getState().metrics.dateSpanFilter;
@@ -251,15 +306,13 @@ export const updateDateSpan = (props: { span?: string; resolution?: string }) =>
 };
 
 export const selectedMetricsSelector = (state) =>
-  state.metrics.selected.map((id) => state.metrics.metrics.find((metric) => metric.id === id));
+  state.metrics.selectedIds.map((id) => state.metrics.metrics[id]);
 
 export const searchSelector = (state) => state.metrics.search;
 
 export const metricIconsSelector = (state) => state.metrics.dataSourceIcons;
 
 export const metricsLayoutSelector = (state) => state.metrics.metricsLayout;
-
-export const dataSourcesSelector = (state) => state.metrics.dataSources;
 
 export const dateSpanFilterSelector = (state) => state.metrics.dateSpanFilter;
 

@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { resolutionOptions } from '../../../../common/constants/metrics';
 import { MetricType } from '../../../../common/types/metrics';
@@ -24,10 +24,10 @@ import { uiSettingsService } from '../../../../common/utils';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels } from '../../custom_panels/redux/panel_slice';
-import { sortMetricLayout } from '../helpers/utils';
 import {
   dateSpanFilterSelector,
-  metricsLayoutSelector,
+  metricQueryFromMetaData,
+  selectedMetricsSelector,
   updateDateSpan,
   updateStartEndDate,
 } from '../redux/slices/metrics_slice';
@@ -56,16 +56,19 @@ export const TopMenu = ({
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
-  const metricsLayout = useSelector(metricsLayoutSelector);
-  const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
+  const selectedMetrics = useSelector(selectedMetricsSelector);
   const dateSpanFilter = useSelector(dateSpanFilterSelector);
 
-  const [visualizationsMetaData, setVisualizationsMetaData] = useState<any>([]);
+  const [metricsToExport, setMetricsToExport] = useState([]);
   const [originalPanelVisualizations, setOriginalPanelVisualizations] = useState<MetricType[]>([]);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [selectedPanelOptions, setSelectedPanelOptions] = useState<
     Array<EuiComboBoxOptionOption<unknown>> | undefined
   >([]);
+
+  useEffect(() => {
+    setMetricsToExport(selectedMetrics);
+  }, [selectedMetrics]);
 
   // toggle between panel edit mode
   const editPanel = (editType: string) => {
@@ -143,32 +146,32 @@ export const TopMenu = ({
     };
   };
 
-  const updateSavedVisualization = async (metricLayout: MetricType, name: string): string => {
+  const updateSavedVisualization = async (metric: MetricType): string => {
     const client = getSavedObjectsClient({
-      objectId: metricLayout.savedVisualizationId,
+      objectId: metric.savedVisualizationId,
       objectType: 'savedVisualization',
     });
-    const res = await client.get({ objectId: metricLayout.savedVisualizationId });
+    const res = await client.get({ objectId: metric.savedVisualizationId });
     const currentObject = res.observabilityObjectList[0];
 
     await client.update(
       {
-        object_id: metricLayout.savedVisualizationId,
+        object_id: metric.savedVisualizationId,
         object: {
           ...currentObject.savedVisualization,
-          name,
+          name: metric.name,
         },
       },
       true
     );
-    return metricLayout.savedVisualizationId;
+    return metric.savedVisualizationId;
   };
 
-  const createSavedVisualization = async (
-    metricLayout: MetricType,
-    name: string
-  ): Promise<string> => {
-    const savedVisualization = savedObjectInputFromObject({ ...metricLayout, name });
+  const createSavedVisualization = async (metric: MetricType): Promise<string> => {
+    const savedVisualization = savedObjectInputFromObject({
+      ...metric,
+      query: metricQueryFromMetaData(metric),
+    });
 
     const savedObject = await OSDSavedVisualizationClient.getInstance().create(savedVisualization);
     return savedObject.objectId;
@@ -179,11 +182,11 @@ export const TopMenu = ({
 
     try {
       savedMetricIds = await Promise.all(
-        sortedMetricsLayout.map(async (metricLayout, index) => {
-          if (metricLayout.savedVisualizationId === undefined) {
-            return createSavedVisualization(metricLayout, visualizationsMetaData[index].name);
+        metricsToExport.map(async (metric, index) => {
+          if (metric.savedVisualizationId === undefined) {
+            return createSavedVisualization(metric);
           } else {
-            return updateSavedVisualization(metricLayout, visualizationsMetaData[index].name);
+            return updateSavedVisualization(metric);
           }
         })
       );
@@ -252,9 +255,8 @@ export const TopMenu = ({
             closePopover={() => setIsSavePanelOpen(false)}
           >
             <MetricsExportPanel
-              visualizationsMetaData={visualizationsMetaData}
-              setVisualizationsMetaData={setVisualizationsMetaData}
-              sortedMetricsLayout={sortedMetricsLayout}
+              metricsToExport={metricsToExport}
+              setMetricsToExport={setMetricsToExport}
               selectedPanelOptions={selectedPanelOptions}
               setSelectedPanelOptions={setSelectedPanelOptions}
             />
