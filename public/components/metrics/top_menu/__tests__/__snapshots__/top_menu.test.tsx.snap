@@ -884,6 +884,173 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
+            <EuiButton
+              color="danger"
+              iconType="cross"
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                color="danger"
+                disabled={false}
+                element="button"
+                iconType="cross"
+                isDisabled={false}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--danger"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="cross"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="cross"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Cancel
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiButton
+              data-test-subj="metrics__saveView"
+              iconType="save"
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                data-test-subj="metrics__saveView"
+                disabled={false}
+                element="button"
+                iconType="save"
+                isDisabled={false}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--primary"
+                  data-test-subj="metrics__saveView"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="save"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="save"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Save view
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
             <EuiPopover
               anchorPosition="downCenter"
               button={
@@ -997,193 +1164,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
                 </div>
               </div>
             </EuiPopover>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="flexEnd"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiButton
-              color="danger"
-              iconType="cross"
-              onClick={[Function]}
-              size="s"
-            >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                color="danger"
-                disabled={false}
-                element="button"
-                iconType="cross"
-                isDisabled={false}
-                onClick={[Function]}
-                size="s"
-                type="button"
-              >
-                <button
-                  className="euiButton euiButton--danger euiButton--small"
-                  disabled={false}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="cross"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        color="inherit"
-                        size="m"
-                        type="cross"
-                      >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        Cancel
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiButton
-              data-test-subj="metrics__saveView"
-              iconType="save"
-              onClick={[Function]}
-              size="s"
-            >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                data-test-subj="metrics__saveView"
-                disabled={false}
-                element="button"
-                iconType="save"
-                isDisabled={false}
-                onClick={[Function]}
-                size="s"
-                type="button"
-              >
-                <button
-                  className="euiButton euiButton--primary euiButton--small"
-                  data-test-subj="metrics__saveView"
-                  disabled={false}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="save"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        color="inherit"
-                        size="m"
-                        type="save"
-                      >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        Save view
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
           </div>
         </EuiFlexItem>
       </div>
@@ -2046,6 +2026,95 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
+            <EuiButton
+              data-test-subj="metrics__editView"
+              iconType="pencil"
+              isDisabled={true}
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                data-test-subj="metrics__editView"
+                disabled={true}
+                element="button"
+                iconType="pencil"
+                isDisabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--primary euiButton-isDisabled"
+                  data-test-subj="metrics__editView"
+                  disabled={true}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="pencil"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="pencil"
+                      >
+                        <EuiIconPencil
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M12.148 3.148 11 2l-9 9v3h3l9-9-1.144-1.144-8.002 7.998a.502.502 0 0 1-.708 0 .502.502 0 0 1 0-.708l8.002-7.998ZM11 1c.256 0 .512.098.707.293l3 3a.999.999 0 0 1 0 1.414l-9 9A.997.997 0 0 1 5 15H2a1 1 0 0 1-1-1v-3c0-.265.105-.52.293-.707l9-9A.997.997 0 0 1 11 1ZM5 14H2v-3l3 3Z"
+                            />
+                          </svg>
+                        </EuiIconPencil>
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Edit view
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
             <EuiPopover
               anchorPosition="downCenter"
               button={
@@ -2159,113 +2228,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
                 </div>
               </div>
             </EuiPopover>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="flexEnd"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiButton
-              data-test-subj="metrics__editView"
-              iconType="pencil"
-              isDisabled={true}
-              onClick={[Function]}
-              size="s"
-            >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                data-test-subj="metrics__editView"
-                disabled={true}
-                element="button"
-                iconType="pencil"
-                isDisabled={true}
-                onClick={[Function]}
-                size="s"
-                type="button"
-              >
-                <button
-                  className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                  data-test-subj="metrics__editView"
-                  disabled={true}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="pencil"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        color="inherit"
-                        size="m"
-                        type="pencil"
-                      >
-                        <EuiIconPencil
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M12.148 3.148 11 2l-9 9v3h3l9-9-1.144-1.144-8.002 7.998a.502.502 0 0 1-.708 0 .502.502 0 0 1 0-.708l8.002-7.998ZM11 1c.256 0 .512.098.707.293l3 3a.999.999 0 0 1 0 1.414l-9 9A.997.997 0 0 1 5 15H2a1 1 0 0 1-1-1v-3c0-.265.105-.52.293-.707l9-9A.997.997 0 0 1 11 1ZM5 14H2v-3l3 3Z"
-                            />
-                          </svg>
-                        </EuiIconPencil>
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        Edit view
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
           </div>
         </EuiFlexItem>
       </div>
@@ -3133,6 +3095,91 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
+            <EuiButton
+              data-test-subj="metrics__editView"
+              iconType="pencil"
+              isDisabled={false}
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                data-test-subj="metrics__editView"
+                disabled={false}
+                element="button"
+                iconType="pencil"
+                isDisabled={false}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--primary"
+                  data-test-subj="metrics__editView"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="pencil"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="pencil"
+                      >
+                        <EuiIconEmpty
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                          focusable="false"
+                          role="img"
+                          style={null}
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Edit view
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
             <EuiPopover
               anchorPosition="downCenter"
               button={
@@ -3241,109 +3288,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
                 </div>
               </div>
             </EuiPopover>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-    </EuiSpacer>
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="flexEnd"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiButton
-              data-test-subj="metrics__editView"
-              iconType="pencil"
-              isDisabled={false}
-              onClick={[Function]}
-              size="s"
-            >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                data-test-subj="metrics__editView"
-                disabled={false}
-                element="button"
-                iconType="pencil"
-                isDisabled={false}
-                onClick={[Function]}
-                size="s"
-                type="button"
-              >
-                <button
-                  className="euiButton euiButton--primary euiButton--small"
-                  data-test-subj="metrics__editView"
-                  disabled={false}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="pencil"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        color="inherit"
-                        size="m"
-                        type="pencil"
-                      >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        Edit view
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
           </div>
         </EuiFlexItem>
       </div>

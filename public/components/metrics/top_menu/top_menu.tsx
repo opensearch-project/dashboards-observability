@@ -97,14 +97,14 @@ export const TopMenu = ({
   };
 
   const cancelButton = (
-    <EuiButton size="s" iconType="cross" color="danger" onClick={() => editPanel('cancel')}>
+    <EuiButton iconType="cross" color="danger" onClick={() => editPanel('cancel')}>
       Cancel
     </EuiButton>
   );
 
   const saveButton = (
     <EuiButton
-      size="s"
+      // size="s"
       iconType="save"
       data-test-subj="metrics__saveView"
       onClick={() => editPanel('save')}
@@ -115,7 +115,7 @@ export const TopMenu = ({
 
   const editButton = (
     <EuiButton
-      size="s"
+      // size="s"
       data-test-subj="metrics__editView"
       iconType="pencil"
       onClick={() => editPanel('edit')}
@@ -226,6 +226,16 @@ export const TopMenu = ({
             isDisabled={IsTopPanelDisabled}
           />
         </EuiFlexItem>
+
+        {editMode ? (
+          <>
+            <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
+          </>
+        ) : (
+          <EuiFlexItem grow={false}>{editButton}</EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={Savebutton}
@@ -266,17 +276,6 @@ export const TopMenu = ({
             </EuiPopoverFooter>
           </EuiPopover>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-        {editMode ? (
-          <>
-            <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
-            <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
-          </>
-        ) : (
-          <EuiFlexItem grow={false}>{editButton}</EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </>
   );
