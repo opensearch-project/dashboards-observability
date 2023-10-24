@@ -30,6 +30,7 @@ describe('Integration Setup Page', () => {
         config={TEST_INTEGRATION_SETUP_INPUTS}
         updateConfig={() => {}}
         integration={TEST_INTEGRATION_CONFIG}
+        setupCallout={{ show: false }}
       />
     );
 

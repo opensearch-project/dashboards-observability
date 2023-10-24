@@ -6,6 +6,8 @@
 import {
   EuiBottomBar,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -24,9 +26,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { Color } from 'common/constants/integrations';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationTemplate, addIntegrationRequest } from './create_integration_helpers';
-import { useToast } from '../../../../public/components/common/toast';
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
 
@@ -37,10 +39,13 @@ export interface IntegrationSetupInputs {
   connectionLocation: string;
 }
 
+type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
+
 interface IntegrationConfigProps {
   config: IntegrationSetupInputs;
   updateConfig: (updates: Partial<IntegrationSetupInputs>) => void;
   integration: IntegrationTemplate;
+  setupCallout: SetupCallout;
 }
 
 // TODO support localization
@@ -155,7 +160,10 @@ const runQuery = async (
         trackProgress(3);
         return { ok: true, value: poll };
       } else if (poll.status === 'FAILURE') {
-        return { ok: false, error: new Error('FAILURE status', { cause: poll }) };
+        return {
+          ok: false,
+          error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
+        };
       }
       await sleep(3000);
     }
@@ -169,6 +177,7 @@ export function SetupIntegrationForm({
   config,
   updateConfig,
   integration,
+  setupCallout,
 }: IntegrationConfigProps) {
   const connectionType = INTEGRATION_CONNECTION_DATA_SOURCE_TYPES.get(config.connectionType)!;
 
@@ -192,6 +201,12 @@ export function SetupIntegrationForm({
       <EuiTitle>
         <h1>Set Up Integration</h1>
       </EuiTitle>
+      <EuiSpacer />
+      {setupCallout.show ? (
+        <EuiCallOut title={setupCallout.title} color="danger">
+          <p>{setupCallout.text}</p>
+        </EuiCallOut>
+      ) : null}
       <EuiSpacer />
       <EuiText>
         <h3>Integration Details</h3>
@@ -261,6 +276,7 @@ export function SetupBottomBar({
   setLoading,
   loadingProgress,
   setProgress,
+  setSetupCallout,
 }: {
   config: IntegrationSetupInputs;
   integration: IntegrationTemplate;
@@ -268,15 +284,23 @@ export function SetupBottomBar({
   setLoading: (loading: boolean) => void;
   loadingProgress: number;
   setProgress: (updater: number | ((progress: number) => number)) => void;
+  setSetupCallout: (setupCallout: SetupCallout) => void;
 }) {
-  const { setToast } = useToast();
+  // Drop-in replacement for setToast
+  const setCalloutLikeToast = (title: string, color?: Color, text?: string) =>
+    setSetupCallout({
+      show: true,
+      title,
+      color,
+      text,
+    });
 
   return (
     <EuiBottomBar>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="secondary"
+          <EuiButtonEmpty
+            color="text"
             iconType="cross"
             onClick={() => {
               // TODO evil hack because props aren't set up
@@ -287,7 +311,7 @@ export function SetupBottomBar({
             }}
           >
             Discard
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -305,7 +329,7 @@ export function SetupBottomBar({
                   integration.name,
                   config.displayName,
                   integration,
-                  setToast,
+                  setCalloutLikeToast,
                   config.displayName,
                   config.connectionDataSource
                 );
@@ -331,9 +355,12 @@ export function SetupBottomBar({
                     setProgress(currProgress + step)
                   );
                   if (!result.ok) {
-                    console.error('Query failed', result.error);
                     setLoading(false);
-                    setToast('Something went wrong.', 'danger');
+                    setCalloutLikeToast(
+                      'Failed to add integration',
+                      'danger',
+                      result.error.message
+                    );
                     return;
                   }
                 }
@@ -344,7 +371,7 @@ export function SetupBottomBar({
                   integration.name,
                   config.displayName,
                   integration,
-                  setToast,
+                  setCalloutLikeToast,
                   config.displayName,
                   config.connectionDataSource
                 );
@@ -402,6 +429,8 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     assets: {},
   } as IntegrationTemplate);
 
+  const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
+
   const [showLoading, setShowLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -430,6 +459,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
                 config={integConfig}
                 updateConfig={updateConfig}
                 integration={template}
+                setupCallout={setupCallout}
               />
             )}
           </EuiPageContentBody>
@@ -441,6 +471,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
           setLoading={setShowLoading}
           loadingProgress={loadingProgress}
           setProgress={setLoadingProgress}
+          setSetupCallout={setSetupCallout}
         />
       </EuiPageBody>
     </EuiPage>
