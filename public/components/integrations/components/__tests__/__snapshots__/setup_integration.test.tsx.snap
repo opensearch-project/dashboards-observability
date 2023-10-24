@@ -692,9 +692,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
               }
             }
             loading={false}
-            loadingProgress={0}
             setLoading={[Function]}
-            setProgress={[Function]}
             setSetupCallout={[Function]}
           >
             <EuiBottomBar>
