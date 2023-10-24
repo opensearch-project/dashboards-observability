@@ -116,7 +116,7 @@ export function SavedQueryTable({
         type: 'field_value_selection',
         field: 'type',
         name: 'Type',
-        multiSelect: false,
+        multiSelect: 'or',
         options: FILTER_OPTIONS.map((i) => ({
           value: i,
           name: i,
