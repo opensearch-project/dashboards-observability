@@ -26,6 +26,7 @@ const templateSchema: JSONSchemaType<IntegrationConfig> = {
     license: { type: 'string' },
     type: { type: 'string' },
     labels: { type: 'array', items: { type: 'string' }, nullable: true },
+    tags: { type: 'array', items: { type: 'string' }, nullable: true },
     author: { type: 'string', nullable: true },
     description: { type: 'string', nullable: true },
     sourceUrl: { type: 'string', nullable: true },

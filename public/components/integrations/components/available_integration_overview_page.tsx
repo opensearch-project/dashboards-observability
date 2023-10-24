@@ -117,7 +117,9 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
       setData(exists.data);
 
-      let newItems = exists.data.hits.flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
+      let newItems = exists.data.hits.flatMap(
+        (hit: { labels?: string[] }) => hit.labels?.sort() ?? []
+      );
       newItems = [...new Set(newItems)].sort().map((newItem) => {
         return {
           name: newItem,
@@ -182,13 +184,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
         {isCardView
           ? AvailableIntegrationsCardView({
               data: {
-                hits: data.hits.filter((hit) =>
-                  helper.every((compon) =>
-                    hit.components
-                      .map((x) => x.name.split('_').findLast(() => true))
-                      .includes(compon)
-                  )
-                ),
+                hits: data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag))),
               },
               isCardView,
               setCardView,
@@ -200,13 +196,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
           : AvailableIntegrationsTable({
               loading: false,
               data: {
-                hits: data.hits.filter((hit) =>
-                  helper.every((compon) =>
-                    hit.components
-                      .map((x) => x.name.split('_').findLast(() => true))
-                      .includes(compon)
-                  )
-                ),
+                hits: data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag))),
               },
               isCardView,
               setCardView,
