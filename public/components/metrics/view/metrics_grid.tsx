@@ -62,6 +62,7 @@ export const MetricsGrid = ({
 
   // Reset Size of Visualizations when layout is changed
   const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
+    console.log('layoutChanged', currLayouts);
     window.dispatchEvent(new Event('resize'));
     setPostEditLayout(currLayouts);
   };
@@ -108,9 +109,11 @@ export const MetricsGrid = ({
 
   // remove visualization from panel in edit mode
   const removeVisualization = (visualizationId: string) => {
+    console.log('remoeVisualization', visualizationId);
     const newVisualizationList = _.reject(panelVisualizations, {
       id: visualizationId,
     });
+
     setRemoveMetricsList([...removeMetricsList, { id: visualizationId }]);
     mergeLayoutAndVisualizations(postEditLayout, newVisualizationList, setPanelVisualizations);
   };
@@ -162,6 +165,7 @@ export const MetricsGrid = ({
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
       cols={{ lg: 12, md: 12, sm: 12, xs: 1, xxs: 1 }}
       onLayoutChange={layoutChanged}
+      draggableHandle=".mouseGrabber"
     >
       {panelVisualizations.map((panelVisualization: MetricType, index) => (
         <div key={panelVisualization.id}>{gridData[index]}</div>
