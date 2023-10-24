@@ -5,7 +5,7 @@
   "description": "Apache web logs collector",
   "license": "Apache-2.0",
   "type": "logs_apache",
-  "labels": ["log", "communication", "http"],
+  "labels": ["Observability", "Logs"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/apache/info",
   "statics": {
