@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiButton, EuiEmptyPrompt, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiProgress, EuiEmptyPrompt, EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
+import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../redux/slices/search_meta_data_slice';
-import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 
 export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};

@@ -4,7 +4,6 @@
  */
 
 import { CoreStart } from '../../../../../src/core/public';
-import { PPL_BASE, PPL_SEARCH } from '../../../common/constants/shared';
 
 export class SQLService {
   private http;
@@ -34,6 +33,14 @@ export class SQLService {
   fetchWithJobId = async (params: { queryId: string }, errorHandler?: (error: any) => void) => {
     return this.http.get(`/api/observability/query/jobs/${params.queryId}`).catch((error) => {
       console.error('fetch error: ', error.body);
+      if (errorHandler) errorHandler(error);
+      throw error;
+    });
+  };
+
+  deleteWithJobId = async (params: { queryId: string }, errorHandler?: (error: any) => void) => {
+    return this.http.delete(`/api/observability/query/jobs/${params.queryId}`).catch((error) => {
+      console.error('delete error: ', error.body);
       if (errorHandler) errorHandler(error);
       throw error;
     });

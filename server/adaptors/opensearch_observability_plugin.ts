@@ -117,6 +117,7 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
     method: 'DELETE',
   });
 
+  // Get async job status
   observability.getJobStatus = clientAction({
     url: {
       fmt: `${JOBS_ENDPOINT_BASE}/<%=queryId%>`,
@@ -130,6 +131,21 @@ export function OpenSearchObservabilityPlugin(Client: any, config: any, componen
     method: 'GET',
   });
 
+  // Delete async job
+  observability.deleteJob = clientAction({
+    url: {
+      fmt: `${JOBS_ENDPOINT_BASE}/<%=queryId%>`,
+      req: {
+        queryId: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
+    method: 'DELETE',
+  });
+
+  // Run async job
   observability.runDirectQuery = clientAction({
     url: {
       fmt: `${JOBS_ENDPOINT_BASE}`,
