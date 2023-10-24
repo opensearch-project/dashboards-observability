@@ -79,8 +79,8 @@ import { PPLDataFetcher } from '../../../services/data_fetchers/ppl/ppl_data_fet
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import {
-  PPLSavedQueryClient,
   PanelSavedObjectClient,
+  PPLSavedQueryClient,
 } from '../../../services/saved_objects/saved_object_client/ppl';
 import { PPLSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/ppl/ppl_loader';
 import {
@@ -104,8 +104,8 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  selectVisualizationConfig,
   change as updateVizConfig,
+  selectVisualizationConfig,
 } from '../redux/slices/viualization_config_slice';
 import { formatError, getDefaultVisConfig } from '../utils';
 import { getContentTabTitle, getDateRange } from '../utils/utils';
@@ -780,28 +780,6 @@ export const Explorer = ({
           }
         );
       } else {
-        console.log('creating SaveAsNewVisualization', [
-          {
-            tabId,
-            history,
-            notifications,
-            showPermissionErrorToast,
-            appLogEvents,
-            addVisualizationToPanel,
-          },
-          { batch, dispatch, changeQuery, updateTabName },
-          OSDSavedVisualizationClient.getInstance(),
-          new PanelSavedObjectClient(http),
-          {
-            ...commonParams,
-            type: curVisId,
-            applicationId: appId,
-            userConfigs: JSON.stringify(userVizConfigs[curVisId]),
-            description: userVizConfigs[curVisId]?.dataConfig?.panelOptions?.description || '',
-            subType,
-            selectedPanels: selectedCustomPanelOptions,
-          },
-        ]);
         soClient = new SaveAsNewVisualization(
           {
             tabId,
