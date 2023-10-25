@@ -23,7 +23,7 @@ import { reset as resetQueryResults } from '../../redux/slices/query_result_slic
 import { reset as resetVisualization } from '../../redux/slices/visualization_slice';
 import { reset as resetVisConfig } from '../../redux/slices/viualization_config_slice';
 import { reset as resetQuery } from '../../redux/slices/query_slice';
-import { SelectedDataSource } from '../../../../../common/types/explorer';
+import { DirectQueryRequest, SelectedDataSource } from '../../../../../common/types/explorer';
 import { ObservabilityDefaultDataSource } from '../../../../framework/datasources/obs_opensearch_datasource';
 import {
   DATA_SOURCE_TYPE_URL_PARAM_KEY,
@@ -32,7 +32,16 @@ import {
   DEFAULT_DATA_SOURCE_TYPE,
   DEFAULT_DATA_SOURCE_TYPE_NAME,
   DEFAULT_DATA_SOURCE_OBSERVABILITY_DISPLAY_NAME,
+  DATA_SOURCE_TYPES,
+  QUERY_LANGUAGE,
 } from '../../../../../common/constants/data_sources';
+import { SQLService } from '../../../../services/requests/sql';
+import { get as getObjValue } from '../../../../../common/utils/shared';
+import {
+  setAsyncSessionId,
+  getAsyncSessionId,
+} from '../../../../../common/utils/query_session_utils';
+import { DIRECT_DUMMY_QUERY } from '../../../../../common/constants/shared';
 
 const getDataSourceState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
@@ -70,7 +79,8 @@ const removeDataSourceFromURLParams = (currURL: string) => {
 };
 
 export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
-  const { dataSources } = coreRefs;
+  const { dataSources, http } = coreRefs;
+  const sqlService = new SQLService(http!);
   const dispatch = useDispatch();
   const routerContext = useContext(LogExplorerRouterContext);
   const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
@@ -107,6 +117,23 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       );
     });
     setSelectedSources(selectedSource);
+  };
+
+  const runDummyQuery = (dataSource: string) => {
+    const requestPayload = {
+      lang: QUERY_LANGUAGE.SQL.toLowerCase(),
+      query: DIRECT_DUMMY_QUERY,
+      datasource: dataSource,
+    } as DirectQueryRequest;
+
+    sqlService
+      .fetch(requestPayload)
+      .then((result) => {
+        setAsyncSessionId(getObjValue(result, 'sessionId', null));
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   };
 
   useEffect(() => {
@@ -165,6 +192,19 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       });
     }
   }, []);
+
+  useEffect(() => {
+    // Execute a dummy query to initialize the cluster and obtain a sessionId for subsequent queries.
+    const dsType = explorerSearchMetadata.datasources?.[0]?.type;
+    const dsName = explorerSearchMetadata.datasources?.[0]?.label;
+    if (
+      !getAsyncSessionId() &&
+      [DATA_SOURCE_TYPES.SPARK, DATA_SOURCE_TYPES.S3Glue].includes(dsType) &&
+      dsName
+    ) {
+      runDummyQuery(dsName);
+    }
+  }, [explorerSearchMetadata.datasources]);
 
   /**
    * Process the data source options to display different than discover's group names.
