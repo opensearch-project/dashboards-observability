@@ -93,16 +93,7 @@ export const ExplorerVisualizations = ({
               paddingSize="none"
               className="vis__leftPanel"
             >
-              <div className="explorerFieldSelector">
-                {!isMarkDown && (
-                  <div
-                    className="explorer__vizDataConfig"
-                    data-test-subj="explorer__vizDataConfig-panel"
-                  >
-                    {renderDataConfigContainer()}
-                  </div>
-                )}
-              </div>
+              {!isMarkDown && <>{renderDataConfigContainer()}</>}
             </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel
