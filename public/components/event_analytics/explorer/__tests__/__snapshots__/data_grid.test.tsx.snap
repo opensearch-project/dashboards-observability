@@ -220,217 +220,225 @@ exports[`Datagrid component Renders data grid component 1`] = `
     timeStampField="timestamp"
     totalHits={1390}
   >
-    <div
-      className="dscTable dscTableFixedScroll"
+    <EuiPanel
+      paddingSize="s"
     >
-      <EuiDataGrid
-        aria-labelledby="aria-labelledby"
-        columnVisibility={
-          Object {
-            "setVisibleColumns": [Function],
-            "visibleColumns": Array [
-              "timestamp",
-              "_source",
-            ],
-          }
-        }
-        columns={
-          Array [
-            Object {
-              "display": "Time",
-              "id": "timestamp",
-              "initialWidth": 200,
-              "isSortable": true,
-              "schema": "datetime",
-            },
-            Object {
-              "display": "Source",
-              "id": "_source",
-              "isSortable": false,
-              "schema": "_source",
-            },
-          ]
-        }
-        data-test-subj="docTable"
-        leadingControlColumns={
-          Array [
-            Object {
-              "headerCellRender": [Function],
-              "id": "inspectCollapseColumn",
-              "rowCellRender": [Function],
-              "width": 40,
-            },
-          ]
-        }
-        pagination={
-          Object {
-            "onChangeItemsPerPage": [Function],
-            "onChangePage": [Function],
-            "pageIndex": 0,
-            "pageSize": 100,
-            "pageSizeOptions": Array [
-              25,
-              50,
-              100,
-            ],
-          }
-        }
-        renderCellValue={[Function]}
-        rowCount={1390}
-        rowHeightsOptions={
-          Object {
-            "defaultHeight": Object {
-              "lineCount": 3,
-            },
-          }
-        }
-        sorting={
-          Object {
-            "columns": Array [],
-            "onSort": [Function],
-          }
-        }
-        toolbarVisibility={
-          Object {
-            "showColumnSelector": Object {
-              "allowHide": false,
-              "allowReorder": true,
-            },
-            "showFullScreenSelector": false,
-            "showStyleSelector": false,
-          }
-        }
+      <div
+        className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
       >
-        <EuiFocusTrap
-          className="euiDataGrid__focusWrap"
-          clickOutsideDisables={false}
-          disabled={true}
-          noIsolation={true}
-          returnFocus={true}
-          scrollLock={false}
+        <div
+          className="dscTable dscTableFixedScroll"
         >
-          <ForwardRef
-            className="euiDataGrid__focusWrap"
-            enabled={false}
-            noIsolation={true}
-            onClickOutside={[Function]}
-            returnFocus={true}
-            scrollLock={false}
+          <EuiDataGrid
+            aria-labelledby="aria-labelledby"
+            columnVisibility={
+              Object {
+                "setVisibleColumns": [Function],
+                "visibleColumns": Array [
+                  "timestamp",
+                  "_source",
+                ],
+              }
+            }
+            columns={
+              Array [
+                Object {
+                  "display": "Time",
+                  "id": "timestamp",
+                  "initialWidth": 200,
+                  "isSortable": true,
+                  "schema": "datetime",
+                },
+                Object {
+                  "display": "Source",
+                  "id": "_source",
+                  "isSortable": false,
+                  "schema": "_source",
+                },
+              ]
+            }
+            data-test-subj="docTable"
+            leadingControlColumns={
+              Array [
+                Object {
+                  "headerCellRender": [Function],
+                  "id": "inspectCollapseColumn",
+                  "rowCellRender": [Function],
+                  "width": 40,
+                },
+              ]
+            }
+            pagination={
+              Object {
+                "onChangeItemsPerPage": [Function],
+                "onChangePage": [Function],
+                "pageIndex": 0,
+                "pageSize": 100,
+                "pageSizeOptions": Array [
+                  25,
+                  50,
+                  100,
+                ],
+              }
+            }
+            renderCellValue={[Function]}
+            rowCount={1390}
+            rowHeightsOptions={
+              Object {
+                "defaultHeight": Object {
+                  "lineCount": 3,
+                },
+              }
+            }
+            sorting={
+              Object {
+                "columns": Array [],
+                "onSort": [Function],
+              }
+            }
+            toolbarVisibility={
+              Object {
+                "showColumnSelector": Object {
+                  "allowHide": false,
+                  "allowReorder": true,
+                },
+                "showFullScreenSelector": false,
+                "showStyleSelector": false,
+              }
+            }
           >
-            <ForwardRef
+            <EuiFocusTrap
               className="euiDataGrid__focusWrap"
-              enabled={false}
+              clickOutsideDisables={false}
+              disabled={true}
               noIsolation={true}
-              onClickOutside={[Function]}
               returnFocus={true}
               scrollLock={false}
-              sideCar={[Function]}
             >
-              <ForwardRef(FocusLockUI)
-                as={
-                  Object {
-                    "$$typeof": Symbol(react.forward_ref),
-                    "classNames": Object {
-                      "fullWidth": "width-before-scroll-bar",
-                      "zeroRight": "right-scroll-bar-position",
-                    },
-                    "defaultProps": Object {
-                      "enabled": true,
-                      "inert": false,
-                      "removeScrollBar": true,
-                    },
-                    "render": [Function],
-                  }
-                }
-                autoFocus={true}
+              <ForwardRef
                 className="euiDataGrid__focusWrap"
-                crossFrame={true}
-                disabled={true}
-                lockProps={
-                  Object {
-                    "allowPinchZoom": undefined,
-                    "as": undefined,
-                    "enabled": false,
-                    "inert": undefined,
-                    "shards": undefined,
-                    "sideCar": [Function],
-                    "style": undefined,
-                  }
-                }
-                noFocusGuards={false}
-                persistentFocus={false}
+                enabled={false}
+                noIsolation={true}
+                onClickOutside={[Function]}
                 returnFocus={true}
-                sideCar={[Function]}
+                scrollLock={false}
               >
-                <div
-                  data-focus-guard={true}
-                  key="guard-first"
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
-                  }
-                  tabIndex={-1}
-                />
                 <ForwardRef
                   className="euiDataGrid__focusWrap"
-                  data-focus-lock-disabled="disabled"
                   enabled={false}
-                  inert={false}
-                  onBlur={[Function]}
-                  onFocus={[Function]}
-                  removeScrollBar={true}
+                  noIsolation={true}
+                  onClickOutside={[Function]}
+                  returnFocus={true}
+                  scrollLock={false}
                   sideCar={[Function]}
                 >
-                  <div
+                  <ForwardRef(FocusLockUI)
+                    as={
+                      Object {
+                        "$$typeof": Symbol(react.forward_ref),
+                        "classNames": Object {
+                          "fullWidth": "width-before-scroll-bar",
+                          "zeroRight": "right-scroll-bar-position",
+                        },
+                        "defaultProps": Object {
+                          "enabled": true,
+                          "inert": false,
+                          "removeScrollBar": true,
+                        },
+                        "render": [Function],
+                      }
+                    }
+                    autoFocus={true}
                     className="euiDataGrid__focusWrap"
-                    data-focus-lock-disabled="disabled"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
-                    onScrollCapture={[Function]}
-                    onTouchMoveCapture={[Function]}
-                    onWheelCapture={[Function]}
+                    crossFrame={true}
+                    disabled={true}
+                    lockProps={
+                      Object {
+                        "allowPinchZoom": undefined,
+                        "as": undefined,
+                        "enabled": false,
+                        "inert": undefined,
+                        "shards": undefined,
+                        "sideCar": [Function],
+                        "style": undefined,
+                      }
+                    }
+                    noFocusGuards={false}
+                    persistentFocus={false}
+                    returnFocus={true}
+                    sideCar={[Function]}
                   >
                     <div
-                      className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-                      data-test-subj="docTable"
-                      onKeyDown={[Function]}
+                      data-focus-guard={true}
+                      key="guard-first"
                       style={
                         Object {
-                          "height": undefined,
-                          "width": undefined,
+                          "height": "0px",
+                          "left": "1px",
+                          "overflow": "hidden",
+                          "padding": 0,
+                          "position": "fixed",
+                          "top": "1px",
+                          "width": "1px",
                         }
                       }
+                      tabIndex={-1}
                     />
-                  </div>
+                    <ForwardRef
+                      className="euiDataGrid__focusWrap"
+                      data-focus-lock-disabled="disabled"
+                      enabled={false}
+                      inert={false}
+                      onBlur={[Function]}
+                      onFocus={[Function]}
+                      removeScrollBar={true}
+                      sideCar={[Function]}
+                    >
+                      <div
+                        className="euiDataGrid__focusWrap"
+                        data-focus-lock-disabled="disabled"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        onScrollCapture={[Function]}
+                        onTouchMoveCapture={[Function]}
+                        onWheelCapture={[Function]}
+                      >
+                        <div
+                          className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+                          data-test-subj="docTable"
+                          onKeyDown={[Function]}
+                          style={
+                            Object {
+                              "height": undefined,
+                              "width": undefined,
+                            }
+                          }
+                        />
+                      </div>
+                    </ForwardRef>
+                    <div
+                      data-focus-guard={true}
+                      style={
+                        Object {
+                          "height": "0px",
+                          "left": "1px",
+                          "overflow": "hidden",
+                          "padding": 0,
+                          "position": "fixed",
+                          "top": "1px",
+                          "width": "1px",
+                        }
+                      }
+                      tabIndex={-1}
+                    />
+                  </ForwardRef(FocusLockUI)>
                 </ForwardRef>
-                <div
-                  data-focus-guard={true}
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
-                  }
-                  tabIndex={-1}
-                />
-              </ForwardRef(FocusLockUI)>
-            </ForwardRef>
-          </ForwardRef>
-        </EuiFocusTrap>
-      </EuiDataGrid>
-    </div>
+              </ForwardRef>
+            </EuiFocusTrap>
+          </EuiDataGrid>
+        </div>
+      </div>
+    </EuiPanel>
   </DataGrid>
 </Provider>
 `;

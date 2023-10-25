@@ -3,6 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+ .dscSidebarField {
+  &__actionButton {
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
+  }
+
+  &:hover &__actionButton,
+  &:focus &__actionButton {
+    opacity: 1;
+  }
+}
+
 .explorerIndexPattern__container {
   display: flex;
   align-items: center;
@@ -128,4 +144,16 @@
 .sidebar_content{
   white-space: nowrap;
   padding: 0.1px;
+}
+
+// align with discover 2.0 sidebar styling
+
+.dscSideBarFieldListHeader {
+  padding-left: 8px;
+}
+
+.deSidebar {
+  height: calc(100vh - 98px);
+  max-width: 462px;
+  min-width: 400px;
 }
