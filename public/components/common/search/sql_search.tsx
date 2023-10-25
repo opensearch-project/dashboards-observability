@@ -21,11 +21,13 @@ import {
 import { isEqual, lowerCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
+import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
+import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
+import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
@@ -36,8 +38,6 @@ import {
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
-import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -198,6 +198,7 @@ export const DirectSearch = (props: any) => {
       })
       .then((result) => {
         if (result.queryId) {
+          dispatch(updateSearchMetaData({ tabId, data: { queryId: result.queryId } }));
           startPolling({
             queryId: result.queryId,
           });
