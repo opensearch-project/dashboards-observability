@@ -38,6 +38,7 @@ import {
   SavedObjectsStart,
 } from '../../../../src/core/public/saved_objects';
 import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
+import { DataSourceType } from '../../../../src/plugins/data/public';
 
 export interface IQueryTab {
   id: string;
@@ -145,13 +146,23 @@ export interface IExplorerProps {
   queryManager?: QueryManager;
 }
 
-export interface SavedQuery {
+export interface SelectedDataSource {
+  label: string;
+  name: string;
+  value: string;
+  type: string;
+  ds?: DataSourceType;
+}
+
+export interface SavedQuery extends SavedObjectAttributes {
   description: string;
   name: string;
   query: string;
   selected_date_range: { start: string; end: string; text: string };
   selected_fields: { text: string; tokens: IField[] };
   selected_timestamp: IField;
+  dataSources: string; // list of type SelectedDataSources that is stringified
+  queryLang: string;
 }
 
 export interface SavedVisualization extends SavedObjectAttributes {
@@ -166,6 +177,8 @@ export interface SavedVisualization extends SavedObjectAttributes {
   user_configs?: string;
   units_of_measure?: string;
   application_id?: string;
+  dataSources: string; // list of type SelectedDataSources that is stringified
+  queryLang: string;
 }
 
 export interface ExplorerDataType {
@@ -405,4 +418,12 @@ export type MOMENT_UNIT_OF_TIME =
 export interface GridSortingColumn {
   id: string;
   direction: 'asc' | 'desc';
+}
+
+export enum DirectQueryLoadingStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  RUNNING = 'RUNNING',
+  SCHEDULED = 'SCHEDULED',
+  CANCELED = 'CANCELED',
 }

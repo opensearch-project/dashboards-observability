@@ -66,6 +66,8 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     fields,
     dateRange,
     timestamp,
+    dataSources,
+    queryLang,
     name = '',
     chartType = '',
     description = '',
@@ -94,6 +96,8 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
         },
         name: name || '',
         description: description || '',
+        data_sources: dataSources,
+        query_lang: queryLang,
       },
     };
 
