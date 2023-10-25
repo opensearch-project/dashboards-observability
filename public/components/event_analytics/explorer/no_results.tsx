@@ -30,15 +30,13 @@ export const NoResults = () => {
             <h2 data-test-subj="obsNoResultsTimefilter">
               <FormattedMessage
                 id="observability.noResults.expandYourTimeRangeTitle"
-                defaultMessage="Expand your time range or modify your query"
+                defaultMessage="Select a data source, expand your time range, or modify the query"
               />
             </h2>
             <p>
               <FormattedMessage
                 id="observability.noResults.queryMayNotMatchTitle"
-                defaultMessage="Your query may not match anything in the current time range, 
-                or there may not be any data at all in the currently selected time range. 
-                Try change time range, query filters or choose different time fields."
+                defaultMessage="After selection, check the time range, query filters, fields, and query"
               />
             </p>
           </EuiText>
