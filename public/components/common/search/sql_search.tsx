@@ -23,10 +23,11 @@ import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
 import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
+import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
 import { uiSettingsService } from '../../../../common/utils';
+import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
+import { get as getObjValue } from '../../../../common/utils/shared';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
@@ -39,10 +40,6 @@ import {
 } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
-import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
-import { get as getObjValue } from '../../../../common/utils/shared';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
