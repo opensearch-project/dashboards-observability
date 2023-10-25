@@ -499,9 +499,12 @@ export const Explorer = ({
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
+                      <EuiSpacer size="s" />
                       <CountDistribution
                         countDistribution={countDistribution}
-                        selectedInterval={selectedIntervalRef.current?.value}
+                        selectedInterval={
+                          countDistribution.selectedInterval || selectedIntervalRef.current?.value
+                        }
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
@@ -783,6 +786,8 @@ export const Explorer = ({
     subType,
     selectedCustomPanelOptions,
     explorerSearchMeta,
+    selectedIntervalRef.current,
+    countDistribution,
   ]);
 
   const liveTailLoop = async (
