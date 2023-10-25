@@ -71,4 +71,33 @@ export function registerDatasourcesRoute(router: IRouter) {
       }
     }
   );
+
+  router.delete(
+    {
+      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{queryId}`,
+      validate: {
+        params: schema.object({
+          queryId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      try {
+        const res = await context.observability_plugin.observabilityClient
+          .asScoped(request)
+          .callAsCurrentUser('observability.deleteJob', {
+            queryId: request.params.queryId,
+          });
+        return response.ok({
+          body: res,
+        });
+      } catch (error: any) {
+        console.error('Error in deleting job:', error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
 }
