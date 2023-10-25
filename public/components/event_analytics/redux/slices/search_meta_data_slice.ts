@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit';
-import { initialTabId } from '../../../../framework/redux/store/shared_state';
+import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit';
 import { REDUX_EXPL_SLICE_SEARCH_META_DATA } from '../../../../../common/constants/explorer';
 import { DirectQueryLoadingStatus, SelectedDataSource } from '../../../../../common/types/explorer';
+import { initialTabId } from '../../../../framework/redux/store/shared_state';
 
 const searchMetaInitialState = {
   lang: 'PPL',
   datasources: [],
+  queryId: '',
   isPolling: false,
 };
 
@@ -24,6 +25,7 @@ interface SearchMetaData {
   lang: string;
   datasources: SelectedDataSource[];
   isPolling: boolean;
+  queryId: string;
   status: DirectQueryLoadingStatus;
 }
 
