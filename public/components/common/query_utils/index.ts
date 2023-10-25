@@ -6,10 +6,12 @@
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
 import { isEmpty } from 'lodash';
-import moment from 'moment';
+import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
 import {
-  DATE_PICKER_FORMAT,
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
+  SELECTED_DATE_RANGE,
+  SELECTED_FIELDS,
+  SELECTED_TIMESTAMP,
 } from '../../../../common/constants/explorer';
 import {
   PPL_DATE_FORMAT,
@@ -17,6 +19,7 @@ import {
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
+import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -186,9 +189,6 @@ export const preprocessQuery = ({
 
   if (!start || !end) return finalQuery;
 
-  const formattedStart = moment(start).utc().format(DATE_PICKER_FORMAT);
-  const formattedEnd = moment(end).utc().format(DATE_PICKER_FORMAT);
-
   const promQLTokens = parsePromQLIntoKeywords(rawQuery);
 
   if (promQLTokens?.connection) {
@@ -245,24 +245,12 @@ export const buildPatternsQuery = (
   return finalQuery;
 };
 
-export const buildQuery = (baseQuery: string, currQuery: string) => {
-  let fullQuery: string;
-  if (baseQuery) {
-    fullQuery = baseQuery;
-    if (currQuery) {
-      fullQuery += '| ' + currQuery;
-    }
-  } else {
-    fullQuery = currQuery;
-  }
-  return fullQuery;
-};
+export const buildQuery = (baseQuery: string, currQuery: string) => baseQuery + '| ' + currQuery;
 
-export const buildRawQuery = (query: any, appBaseQuery: string) => {
-  const rawQueryStr = (query.rawQuery as string).includes(appBaseQuery)
-    ? query.rawQuery
-    : buildQuery(appBaseQuery, query.rawQuery);
-  return rawQueryStr;
+export const buildRawQuery = (query: IQuery, appBaseQuery: string) => {
+  if (appBaseQuery && !query.rawQuery.includes(appBaseQuery))
+    return buildQuery(appBaseQuery, query.rawQuery);
+  return query.rawQuery;
 };
 
 export const composeFinalQuery = (
@@ -293,4 +281,29 @@ export const composeFinalQuery = (
 export const removeBacktick = (stringContainsBacktick: string) => {
   if (!stringContainsBacktick) return '';
   return stringContainsBacktick.replace(/`/g, '');
+};
+
+export const getSavingCommonParams = (
+  queryState: IQuery,
+  appBaseQuery: string,
+  fields: IExplorerFields,
+  savingTitle: string,
+  explorerSearchMeta: SearchMetaData
+) => {
+  return {
+    dataSources: JSON.stringify([
+      {
+        name: explorerSearchMeta.datasources?.[0]?.name || '',
+        type: explorerSearchMeta.datasources?.[0]?.type || '',
+        label: explorerSearchMeta.datasources?.[0]?.label || '',
+        value: explorerSearchMeta.datasources?.[0]?.value || '',
+      },
+    ]),
+    queryLang: explorerSearchMeta.lang,
+    query: buildRawQuery(queryState, appBaseQuery),
+    fields: fields[SELECTED_FIELDS],
+    dateRange: queryState[SELECTED_DATE_RANGE],
+    name: savingTitle,
+    timestamp: queryState[SELECTED_TIMESTAMP],
+  };
 };

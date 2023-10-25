@@ -225,9 +225,6 @@
 
   // SASSTODO: replace the z-index value with a variable
   .dscWrapper {
-    padding-left: $euiSizeXL;
-    padding-right: $euiSizeS;
-    margin-top: $euiSizeM;
     z-index: 1;
     @include euiBreakpoint('xs', 's', 'm') {
       padding-left: $euiSizeS;
