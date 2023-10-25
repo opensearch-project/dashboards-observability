@@ -16,6 +16,7 @@ export function registerDatasourcesRoute(router: IRouter) {
           query: schema.string(),
           lang: schema.string(),
           datasource: schema.string(),
+          sessionId: schema.maybe(schema.string()),
         }),
       },
     },
