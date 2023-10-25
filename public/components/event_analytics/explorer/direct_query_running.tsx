@@ -3,18 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiButton, EuiEmptyPrompt, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiProgress, EuiEmptyPrompt, EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
+import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
+import { coreRefs } from '../../../framework/core_refs';
+import { SQLService } from '../../../services/requests/sql';
 import {
   selectSearchMetaData,
   update as updateSearchMetaData,
 } from '../redux/slices/search_meta_data_slice';
-import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 
 export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
   const dispatch = useDispatch();
+  const sqlService = new SQLService(coreRefs.http);
+
+  const cancelQuery = () => {
+    if (explorerSearchMeta.queryId !== '') {
+      sqlService
+        .deleteWithJobId({ queryId: explorerSearchMeta.queryId })
+        .catch((e) => {
+          console.error(e);
+        })
+        .finally(() => {
+          dispatch(
+            updateSearchMetaData({
+              tabId,
+              data: {
+                isPolling: false,
+              },
+            })
+          );
+        });
+    }
+  };
+
   return (
     <EuiEmptyPrompt
       icon={<EuiProgress size="xs" color="accent" />}
@@ -25,19 +49,7 @@ export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
             Status: {explorerSearchMeta.status ?? DirectQueryLoadingStatus.SCHEDULED}
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiButton
-            color="success"
-            onClick={() => {
-              dispatch(
-                updateSearchMetaData({
-                  tabId,
-                  data: {
-                    isPolling: false,
-                  },
-                })
-              );
-            }}
-          >
+          <EuiButton color="success" onClick={cancelQuery}>
             Cancel
           </EuiButton>
         </>
