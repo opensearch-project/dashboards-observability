@@ -245,7 +245,10 @@ export const buildPatternsQuery = (
   return finalQuery;
 };
 
-export const buildQuery = (baseQuery: string, currQuery: string) => baseQuery + '| ' + currQuery;
+export const buildQuery = (baseQuery: string, currQuery: string) => {
+  if (!currQuery) return baseQuery;
+  return `${baseQuery} | ${currQuery}`;
+};
 
 export const buildRawQuery = (query: IQuery, appBaseQuery: string) => {
   if (appBaseQuery && !query.rawQuery.includes(appBaseQuery))
