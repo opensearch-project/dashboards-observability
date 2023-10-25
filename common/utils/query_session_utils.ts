@@ -6,7 +6,6 @@
 import { ASYNC_QUERY_SESSION_ID } from '../constants/shared';
 
 export const setAsyncSessionId = (value: string | null) => {
-  console.log('value: ', value);
   if (value !== null) {
     sessionStorage.setItem(ASYNC_QUERY_SESSION_ID, value);
   }

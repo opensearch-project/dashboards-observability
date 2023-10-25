@@ -129,7 +129,6 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
     sqlService
       .fetch(requestPayload)
       .then((result) => {
-        console.log(result, getObjValue(result, 'sessionId', null));
         setAsyncSessionId(getObjValue(result, 'sessionId', null));
       })
       .catch((e) => {
