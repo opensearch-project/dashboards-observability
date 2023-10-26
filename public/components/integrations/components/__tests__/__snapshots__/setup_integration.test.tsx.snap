@@ -354,12 +354,14 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   aria-describedby="random_html_id-help-0"
                                   async={false}
                                   compressed={false}
+                                  customOptionText="Select {searchValue} as your index"
                                   fullWidth={false}
                                   id="random_html_id"
                                   isClearable={true}
                                   isLoading={true}
                                   onBlur={[Function]}
                                   onChange={[Function]}
+                                  onCreateOption={[Function]}
                                   onFocus={[Function]}
                                   options={Array []}
                                   selectedOptions={
@@ -817,6 +819,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             >
                               <EuiButtonEmpty
                                 color="text"
+                                disabled={false}
                                 iconType="cross"
                                 onClick={[Function]}
                               >
@@ -1354,12 +1357,14 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               aria-describedby="random_html_id-help-0"
               async={false}
               compressed={false}
+              customOptionText="Select {searchValue} as your index"
               fullWidth={false}
               id="random_html_id"
               isClearable={true}
               isLoading={true}
               onBlur={[Function]}
               onChange={[Function]}
+              onCreateOption={[Function]}
               onFocus={[Function]}
               options={Array []}
               selectedOptions={
