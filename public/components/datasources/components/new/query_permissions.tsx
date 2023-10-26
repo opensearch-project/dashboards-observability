@@ -82,12 +82,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
           <EuiRadioGroup
             options={accessLevelOptions}
             idSelected={selectedAccessLevel}
-            onChange={(id) => {
-              if (id === QUERY_ALL) {
-                setSelectedRoles([]);
-              }
-              setSelectedAccessLevel(id);
-            }}
+            onChange={(id) => setSelectedAccessLevel(id)}
             name="query-radio-group"
             legend={{
               children: <span>Query access level</span>,

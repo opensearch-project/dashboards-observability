@@ -10,17 +10,19 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiButton,
+  EuiFieldText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './connection_management_callout';
 import { Role } from '../../../../../common/types/data_connections';
 import { coreRefs } from '../../../../../public/framework/core_refs';
-import { QueryPermissionsConfiguration } from '../new/query_permissions';
 import { DATACONNECTIONS_BASE, EDIT, SECURITY_ROLES } from '../../../../../common/constants/shared';
 import { SaveOrCancel } from '../save_or_cancel';
+import { useToast } from '../../../../../public/components/common/toast';
+import { EditAccessControlDetails } from './edit_access_control_details';
 
-interface AccessControlTabProps {
+export interface AccessControlTabProps {
   dataConnection: string;
   connector: string;
   properties: unknown;
@@ -32,6 +34,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const { http } = coreRefs;
+  const { setToast } = useToast();
 
   useEffect(() => {
     http!
@@ -73,20 +76,6 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
     );
   };
 
-  const EditAccessControlDetails = () => {
-    return (
-      <EuiFlexGroup direction="column">
-        <QueryPermissionsConfiguration
-          roles={roles}
-          selectedRoles={selectedQueryPermissionRoles}
-          setSelectedRoles={setSelectedQueryPermissionRoles}
-          layout={'vertical'}
-          hasSecurityAccess={hasSecurityAccess}
-        />
-      </EuiFlexGroup>
-    );
-  };
-
   const saveChanges = () => {
     http!.post(`${DATACONNECTIONS_BASE}${EDIT}`, {
       body: JSON.stringify({
@@ -110,6 +99,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           <EuiButton
             data-test-subj="createButton"
             onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
+            fill={false}
           >
             {mode === 'view' ? 'Edit' : 'Cancel'}
           </EuiButton>
@@ -126,7 +116,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
       <EuiPanel>
         <AccessControlHeader />
         <EuiHorizontalRule />
-        {mode === 'view' ? <AccessControlDetails /> : <EditAccessControlDetails />}
+        {mode === 'view' ? <AccessControlDetails /> : <EditAccessControlDetails {...props} />}
       </EuiPanel>
       <EuiSpacer />
       {mode === 'edit' && (
