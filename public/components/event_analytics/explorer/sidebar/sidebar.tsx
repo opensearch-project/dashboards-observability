@@ -4,23 +4,20 @@
  */
 
 import {
-  EuiAccordion,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
   EuiFieldSearch,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
   EuiTitle,
+  EuiSplitPanel,
+  EuiPanel,
 } from '@elastic/eui';
-import { I18nProvider } from '@osd/i18n/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { batch, useDispatch } from 'react-redux';
 import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constants/explorer';
 import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
-import { TabContext } from '../../hooks/use_tab_context';
 import { sortFields, updateFields } from '../../redux/slices/field_slice';
 import { Field } from './field';
 
@@ -51,13 +48,23 @@ export const Sidebar = (props: ISidebarProps) => {
     isFieldToggleButtonDisabled,
     handleOverridePattern,
     handleOverrideTimestamp,
-    storedExplorerFields,
-    setStoredExplorerFields,
+    tabId,
   } = props;
   const dispatch = useDispatch();
-  const { tabId } = useContext<any>(TabContext);
   const [showFields, setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // method to return the type of a field from its name
+  const getFieldTypes = (newFieldName: string) => {
+    let fieldType: string = '';
+    explorerFields.availableFields.map((field) => {
+      if (field.name === newFieldName) fieldType = field.type;
+    });
+    explorerFields.selectedFields.map((field) => {
+      if (field.name === newFieldName) fieldType = field.type;
+    });
+    return fieldType;
+  };
 
   /**
    * Toggle fields between selected and unselected sets
@@ -100,81 +107,88 @@ export const Sidebar = (props: ISidebarProps) => {
     });
   };
 
-  const checkWithStoredFields = () => {
-    if (
-      explorerFields.selectedFields.length === 0 &&
-      storedExplorerFields.selectedFields.length !== 0
-    ) {
-      return storedExplorerFields;
-    }
-    return explorerFields;
-  };
-
   const handleAddField = useCallback(
     (field: IField) => {
-      const nextFields = toggleFields(
-        checkWithStoredFields(),
-        field,
-        AVAILABLE_FIELDS,
+      updateStoreFields(
+        toggleFields(explorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS),
+        tabId,
         SELECTED_FIELDS
       );
-      updateStoreFields(nextFields, tabId, SELECTED_FIELDS);
-      setStoredExplorerFields(nextFields);
     },
     [explorerFields, tabId]
   );
 
   const handleRemoveField = useCallback(
     (field: IField) => {
-      const nextFields = toggleFields(
-        checkWithStoredFields(),
-        field,
-        SELECTED_FIELDS,
+      updateStoreFields(
+        toggleFields(explorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS),
+        tabId,
         AVAILABLE_FIELDS
       );
-      updateStoreFields(nextFields, tabId, AVAILABLE_FIELDS);
-      setStoredExplorerFields(nextFields);
     },
     [explorerFields, tabId]
   );
 
-  const onDragEnd = ({}) => {
-    console.log('source, destination');
+  const onDragEnd = ({
+    destination,
+    source,
+    draggableId,
+  }: {
+    destination: any;
+    source: any;
+    draggableId: string;
+  }) => {
+    // check if the destination and source are the same area
+    if (destination.droppableId !== source.droppableId) {
+      // if dropped into the selected fields: add, if dropped into available: remove
+      if (destination.droppableId === 'SELECTED FIELDS') {
+        handleAddField({ name: draggableId, type: getFieldTypes(draggableId) });
+      } else if (destination.droppableId === 'AVAILABLE FIELDS') {
+        handleRemoveField({ name: draggableId, type: getFieldTypes(draggableId) });
+      }
+    }
   };
 
   return (
     <I18nProvider>
       <EuiDragDropContext onDragEnd={onDragEnd}>
-        <section className="sidebar-list">
-          <div className="dscSidebar__item">
-            <EuiFieldSearch
-              compressed
-              fullWidth
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-              }}
-              placeholder="Search field names"
-              value={searchTerm}
-              data-test-subj="eventExplorer__sidebarSearch"
-            />
-          </div>
-          <EuiSpacer size="s" />
-          <div className="sidebar-list">
+        <EuiSplitPanel.Outer
+          className="sidebar-list eui-yScroll"
+          borderRadius="none"
+          color="transparent"
+        >
+          <EuiSplitPanel.Inner grow={false} paddingSize="s">
+            <div className="dscSidebar__item">
+              <EuiFieldSearch
+                compressed
+                fullWidth
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }}
+                placeholder="Search field names"
+                value={searchTerm}
+                data-test-subj="eventExplorer__sidebarSearch"
+              />
+            </div>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
             {((explorerData && !isEmpty(explorerData.jsonData) && !isEmpty(explorerFields)) ||
               !isEmpty(explorerFields.availableFields)) && (
               <>
                 {explorerFields?.queriedFields && explorerFields.queriedFields?.length > 0 && (
-                  <EuiAccordion
-                    initialIsOpen
-                    id="fieldSelector__queriedFields"
-                    buttonContent={
-                      <EuiTitle size="xxs">
-                        <span>Query fields</span>
-                      </EuiTitle>
-                    }
-                    paddingSize="xs"
-                  >
-                    <EuiHorizontalRule margin="xs" />
+                  <>
+                    <EuiTitle
+                      size="xxxs"
+                      id="obs_queried_fields"
+                      className="dscSideBarFieldListHeader"
+                    >
+                      <h3>
+                        <FormattedMessage
+                          id="discover.fieldChooser.filter.selectedFieldsTitle"
+                          defaultMessage="Query fields"
+                        />
+                      </h3>
+                    </EuiTitle>
                     <EuiDroppable
                       className="dscSidebarList explorerFieldList--selected"
                       aria-labelledby="queried_fields"
@@ -188,62 +202,71 @@ export const Sidebar = (props: ISidebarProps) => {
                             <EuiDraggable
                               spacing="m"
                               key={`field${field.name}`}
-                              data-attr-field={field.name}
-                              className="dscSidebar__item sidebar_content"
                               index={index}
                               draggableId={`queriedField-${field.name}`}
                             >
-                              <Field
-                                query={query}
-                                field={field}
-                                selectedPattern={selectedPattern}
-                                isOverridingPattern={isOverridingPattern}
-                                handleOverridePattern={handleOverridePattern}
-                                isOverridingTimestamp={isOverridingTimestamp}
-                                selectedTimestamp={selectedTimestamp}
-                                handleOverrideTimestamp={handleOverrideTimestamp}
-                                selected={true}
-                                isFieldToggleButtonDisabled={true}
-                                showTimestampOverrideButton={false}
-                                onToggleField={handleRemoveField}
-                              />
+                              <EuiPanel
+                                data-attr-field={field.name}
+                                paddingSize="s"
+                                className="dscSidebar__item"
+                                data-test-subj={`fieldList-field`}
+                              >
+                                <Field
+                                  query={query}
+                                  field={field}
+                                  selectedPattern={selectedPattern}
+                                  isOverridingPattern={isOverridingPattern}
+                                  handleOverridePattern={handleOverridePattern}
+                                  isOverridingTimestamp={isOverridingTimestamp}
+                                  selectedTimestamp={selectedTimestamp}
+                                  handleOverrideTimestamp={handleOverrideTimestamp}
+                                  selected={true}
+                                  isFieldToggleButtonDisabled={true}
+                                  showTimestampOverrideButton={false}
+                                  onToggleField={handleRemoveField}
+                                />
+                              </EuiPanel>
                             </EuiDraggable>
                           );
                         })}
                     </EuiDroppable>
-                  </EuiAccordion>
+                  </>
                 )}
-                <EuiSpacer size="s" />
-                <EuiAccordion
-                  initialIsOpen
-                  id="fieldSelector__selectedFields"
-                  buttonContent={
-                    <EuiTitle size="xxs">
-                      <span>Selected Fields</span>
-                    </EuiTitle>
-                  }
-                  paddingSize="xs"
+                <EuiTitle
+                  size="xxxs"
+                  id="obs_selected_fields"
+                  className="dscSideBarFieldListHeader"
                 >
-                  <EuiHorizontalRule margin="xs" />
-                  <EuiDroppable
-                    className="dscSidebarList explorerFieldList--selected"
-                    aria-labelledby="selected_fields"
-                    data-test-subj={`fieldList-selected`}
-                    droppableId="selectedFields-drop"
-                    spacing="m"
-                  >
-                    {explorerData &&
-                      !isEmpty(explorerData?.jsonData) &&
-                      storedExplorerFields?.selectedFields &&
-                      storedExplorerFields?.selectedFields.map((field, index) => {
-                        return (
-                          <EuiDraggable
-                            spacing="m"
-                            key={`field${field.name}`}
+                  <h3>
+                    <FormattedMessage
+                      id="discover.fieldChooser.filter.selectedFieldsTitle"
+                      defaultMessage="Selected fields"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiDroppable
+                  className="dscSidebarList explorerFieldList--selected"
+                  aria-labelledby="selected_fields"
+                  data-test-subj={`fieldList-selected`}
+                  droppableId="SELECTED FIELDS"
+                  spacing="m"
+                >
+                  {explorerData &&
+                    !isEmpty(explorerData?.jsonData) &&
+                    explorerFields?.selectedFields &&
+                    explorerFields?.selectedFields.map((field, index) => {
+                      return (
+                        <EuiDraggable
+                          spacing="m"
+                          key={`field${field.name}`}
+                          index={index}
+                          draggableId={field.name}
+                        >
+                          <EuiPanel
                             data-attr-field={field.name}
-                            className="dscSidebar__item sidebar_content"
-                            index={index}
-                            draggableId={`selectedField-${field.name}`}
+                            paddingSize="s"
+                            className="dscSidebar__item"
+                            data-test-subj={`fieldList-field`}
                           >
                             <Field
                               query={query}
@@ -259,46 +282,48 @@ export const Sidebar = (props: ISidebarProps) => {
                               showTimestampOverrideButton={true}
                               onToggleField={handleRemoveField}
                             />
-                          </EuiDraggable>
-                        );
-                      })}
-                  </EuiDroppable>
-                </EuiAccordion>
-                <EuiSpacer size="s" />
-                <EuiAccordion
-                  initialIsOpen
-                  id="fieldSelector__availableFields"
-                  buttonContent={
-                    <EuiTitle size="xxs">
-                      <span>Available Fields</span>
-                    </EuiTitle>
-                  }
-                  paddingSize="xs"
+                          </EuiPanel>
+                        </EuiDraggable>
+                      );
+                    })}
+                </EuiDroppable>
+                <EuiTitle
+                  size="xxxs"
+                  id="obs_available_fields"
+                  className="dscSideBarFieldListHeader"
                 >
-                  <EuiHorizontalRule margin="xs" />
-                  <EuiDroppable
-                    className={`explorerFieldList explorerFieldList--unpopular ${
-                      !showFields ? 'hidden-sm hidden-xs' : ''
-                    }`}
-                    aria-labelledby="available_fields"
-                    data-test-subj={`fieldList-unpopular`}
-                    droppableId="unpopularFields-drop"
-                    spacing="m"
-                  >
-                    {storedExplorerFields?.availableFields &&
-                      storedExplorerFields?.availableFields
-                        .filter(
-                          (field) => searchTerm === '' || field.name.indexOf(searchTerm) !== -1
-                        )
-                        .map((field, index) => {
-                          return (
-                            <EuiDraggable
-                              spacing="m"
-                              key={`field${field.name}`}
+                  <h3>
+                    <FormattedMessage
+                      id="discover.fieldChooser.filter.availableFieldsTitle"
+                      defaultMessage="Available fields"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiDroppable
+                  className={`explorerFieldList explorerFieldList--unpopular ${
+                    !showFields ? 'hidden-sm hidden-xs' : ''
+                  }`}
+                  aria-labelledby="available_fields"
+                  data-test-subj={`fieldList-unpopular`}
+                  droppableId="AVAILABLE FIELDS"
+                  spacing="m"
+                >
+                  {explorerFields?.availableFields &&
+                    explorerFields?.availableFields
+                      .filter((field) => searchTerm === '' || field.name.indexOf(searchTerm) !== -1)
+                      .map((field, index) => {
+                        return (
+                          <EuiDraggable
+                            spacing="m"
+                            key={`field${field.name}`}
+                            index={index}
+                            draggableId={field.name}
+                          >
+                            <EuiPanel
                               data-attr-field={field.name}
-                              className="dscSidebar__item sidebar_content"
-                              index={index}
-                              draggableId={`availableField-field${field.name}`}
+                              paddingSize="s"
+                              className="dscSidebar__item"
+                              data-test-subj={`fieldList-field`}
                             >
                               <Field
                                 query={query}
@@ -314,15 +339,15 @@ export const Sidebar = (props: ISidebarProps) => {
                                 isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
                                 showTimestampOverrideButton={true}
                               />
-                            </EuiDraggable>
-                          );
-                        })}
-                  </EuiDroppable>
-                </EuiAccordion>
+                            </EuiPanel>
+                          </EuiDraggable>
+                        );
+                      })}
+                </EuiDroppable>
               </>
             )}
-          </div>
-        </section>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
       </EuiDragDropContext>
     </I18nProvider>
   );

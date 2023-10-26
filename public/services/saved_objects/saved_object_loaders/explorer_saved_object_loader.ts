@@ -4,14 +4,14 @@
  */
 
 import { isEmpty } from 'lodash';
+import { i18n } from '@osd/i18n';
 import { batch as Batch } from 'react-redux';
-import { update } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
-import { updateFields as updateFieldsAction } from '../../../../components/event_analytics/redux/slices/field_slice';
-import { changeQuery as changeQueryAction } from '../../../../components/event_analytics/redux/slices/query_slice';
-import { updateTabName as updateTabNameAction } from '../../../../components/event_analytics/redux/slices/query_tab_slice';
-import { change as updateVizConfigAction } from '../../../../components/event_analytics/redux/slices/viualization_config_slice';
-import { update as updateSearchMetaData } from '../../../../components/event_analytics/redux/slices/search_meta_data_slice';
-import { NotificationsStart } from '../../../../../../../src/core/public';
+import { updateFields as updateFieldsAction } from '../../../components/event_analytics/redux/slices/field_slice';
+import { changeQuery as changeQueryAction } from '../../../components/event_analytics/redux/slices/query_slice';
+import { updateTabName as updateTabNameAction } from '../../../components/event_analytics/redux/slices/query_tab_slice';
+import { change as updateVizConfigAction } from '../../../components/event_analytics/redux/slices/viualization_config_slice';
+import { update as updateSearchMetaData } from '../../../components/event_analytics/redux/slices/search_meta_data_slice';
+import { NotificationsStart } from '../../../../../../src/core/public';
 import {
   AGGREGATIONS,
   BREAKDOWNS,
@@ -25,15 +25,30 @@ import {
   SELECTED_FIELDS,
   SELECTED_TIMESTAMP,
   TYPE_TAB_MAPPING,
-} from '../../../../../common/constants/explorer';
-import { QueryManager } from '../../../../../common/query_manager';
-import { statsChunk } from '../../../../../common/query_manager/ast/types/stats';
-import { IField, SavedQuery, SavedVisualization } from '../../../../../common/types/explorer';
-import { AppDispatch } from '../../../../framework/redux/store';
-import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
-import { ObservabilitySavedObject, ObservabilitySavedQuery } from '../../saved_object_client/types';
-import { SavedObjectLoaderBase } from '../loader_base';
-import { ISavedObjectLoader } from '../loader_interface';
+} from '../../../../common/constants/explorer';
+import { QueryManager } from '../../../../common/query_manager';
+import { statsChunk } from '../../../../common/query_manager/ast/types/stats';
+import {
+  IField,
+  SavedQuery,
+  SavedVisualization,
+  SelectedDataSource,
+} from '../../../../common/types/explorer';
+import { AppDispatch } from '../../../framework/redux/store';
+import { ISavedObjectsClient } from '../saved_object_client/client_interface';
+import { ObservabilitySavedObject, ObservabilitySavedQuery } from '../saved_object_client/types';
+import { SavedObjectLoaderBase } from './loader_base';
+import { ISavedObjectLoader } from './loader_interface';
+import { PollingConfigurations } from '../../../components/hooks';
+import { SQLService } from '../../requests/sql';
+import { coreRefs } from '../../../framework/core_refs';
+import { UsePolling } from '../../../components/hooks/use_polling';
+
+enum DIRECT_DATA_SOURCE_TYPES {
+  DEFAULT_INDEX_PATTERNS = 'DEFAULT_INDEX_PATTERNS',
+  SPARK = 'spark',
+  S3GLUE = 's3glue',
+}
 
 interface LoadParams {
   objectId: string;
@@ -61,7 +76,7 @@ interface LoadContext {
   setSubType: (type: string) => void;
   setSelectedContentTab: (curTab: string) => void;
   fetchData: () => void;
-  dataSources: SelectedDataSource[];
+  dispatchOnGettingHis: (res: unknown, query: string) => void;
 }
 
 interface Dispatchers {
@@ -87,7 +102,27 @@ function isInnerObjectSavedVisualization(
   return 'type' in objectData;
 }
 
-export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
+const parseStringDataSource = (
+  dsInSavedObject: string,
+  notifications: NotificationsStart
+): SelectedDataSource[] => {
+  let selectedDataSources: SelectedDataSource[];
+  try {
+    selectedDataSources = JSON.parse(dsInSavedObject);
+  } catch (err: unknown) {
+    console.error(err);
+    notifications.toasts.addError(err as Error, {
+      title: i18n.translate('observability.notification.error.savedDataSourceParsingError', {
+        defaultMessage: 'Cannot parse datasources from saved object',
+      }),
+    });
+    return [] as SelectedDataSource[];
+  }
+  return selectedDataSources;
+};
+
+export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
+  private pollingInstance: UsePolling<any, any> | undefined;
   constructor(
     protected readonly savedObjectClient: ISavedObjectsClient,
     protected readonly notifications: NotificationsStart,
@@ -141,7 +176,8 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
     await this.updateUIState(objectData);
 
     // fetch data based on saved object data
-    await this.loadDataFromSavedObject();
+    const { tabId } = this.loadContext;
+    await this.loadDataFromSavedObject(objectData, tabId);
   }
 
   async updateReduxState(
@@ -186,7 +222,7 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
         updateSearchMetaData({
           tabId,
           data: {
-            datasources: [JSON.parse(objectData.data_sources)],
+            datasources: JSON.parse(objectData.data_sources),
             lang: objectData.query_lang,
           },
         })
@@ -247,8 +283,105 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
     setSelectedContentTab(tabToBeFocused);
   }
 
-  async loadDataFromSavedObject() {
+  handleDirectQuerySuccess = (pollingResult, configurations: PollingConfigurations) => {
+    const { tabId, dispatchOnGettingHis } = this.loadContext;
+    const { dispatch } = this.dispatchers;
+    if (pollingResult && pollingResult.status === 'SUCCESS') {
+      // stop polling
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            isPolling: false,
+          },
+        })
+      );
+      // update page with data
+      dispatchOnGettingHis(pollingResult, '');
+      return true;
+    }
+    return false;
+  };
+
+  handleDirectQueryError = (error: Error) => {
+    console.error(error);
+    return true;
+  };
+
+  loadDefaultIndexPattern = () => {
     const { fetchData } = this.loadContext;
-    await fetchData();
+    fetchData();
+  };
+
+  loadSparkGlue = ({ objectData, dataSources, tabId }) => {
+    const { dispatch } = this.dispatchers;
+    const sqlService = new SQLService(coreRefs.http);
+
+    // Create an instance of UsePolling
+    const polling = new UsePolling<any, any>(
+      (params) => {
+        return sqlService.fetchWithJobId(params);
+      },
+      5000,
+      this.handleDirectQuerySuccess,
+      this.handleDirectQueryError,
+      { tabId }
+    );
+
+    // Update your references from the destructured hook to direct properties of the polling instance
+    const startPolling = polling.startPolling.bind(polling); // bind to ensure correct 'this' context
+
+    this.pollingInstance = polling;
+
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: {
+          isPolling: true,
+        },
+      })
+    );
+
+    sqlService
+      .fetch({
+        lang: objectData.query_lang.toLowerCase(),
+        query: objectData.query,
+        datasource: dataSources[0].label,
+      })
+      .then((result) => {
+        if (result.queryId) {
+          startPolling({ queryId: result.queryId });
+        } else {
+          console.log('no query id found in response');
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  async loadDataFromSavedObject(objectData, tabId: string) {
+    const dataSources = parseStringDataSource(objectData.data_sources, this.notifications);
+    if (dataSources.length > 0 && dataSources[0].type) {
+      switch (dataSources[0].type) {
+        case DIRECT_DATA_SOURCE_TYPES.DEFAULT_INDEX_PATTERNS:
+          this.loadDefaultIndexPattern();
+          return;
+        case DIRECT_DATA_SOURCE_TYPES.SPARK:
+        case DIRECT_DATA_SOURCE_TYPES.S3GLUE:
+          this.loadSparkGlue({
+            objectData,
+            dataSources,
+            tabId,
+          });
+          return;
+        default:
+          return;
+      }
+    }
+  }
+
+  getPollingInstance() {
+    return this.pollingInstance;
   }
 }

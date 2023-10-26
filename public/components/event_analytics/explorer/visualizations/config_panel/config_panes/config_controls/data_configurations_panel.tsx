@@ -16,6 +16,9 @@ import {
   EuiSpacer,
   EuiTitle,
   htmlIdGenerator,
+  EuiForm,
+  EuiFlexGroup,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { filter, isEmpty, isEqual } from 'lodash';
 import {
@@ -340,7 +343,7 @@ export const DataConfigPanelItem = ({
     const selectedObj = isTimeStampSelected ? configList[SPAN] : configList[name][index];
     const isAggregations = name === AGGREGATIONS;
     return (
-      <>
+      <div className={'vbConfig__section vbConfig--secondary'}>
         <div className="services">
           <div className="first-division">
             <DataConfigItemClickPanel
@@ -390,7 +393,7 @@ export const DataConfigPanelItem = ({
             <EuiSpacer size="s" />
           </div>
         </div>
-      </>
+      </div>
     );
   };
 
@@ -535,49 +538,59 @@ export const DataConfigPanelItem = ({
   return isAddConfigClicked ? (
     getCommonUI(selectedConfigItem.name)
   ) : (
-    <>
-      <EuiTitle size="xxs">
-        <h3>Configuration</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      {visualizations.vis.name !== VIS_CHART_TYPES.Histogram ? (
-        <>
-          {DataConfigPanelFields(getRenderFieldsObj(AGGREGATIONS))}
-          <EuiSpacer size="s" />
-          {DataConfigPanelFields(getRenderFieldsObj(GROUPBY))}
-          <EuiSpacer size="s" />
-          {(visualizations.vis.name === VIS_CHART_TYPES.Bar ||
-            visualizations.vis.name === VIS_CHART_TYPES.HorizontalBar ||
-            visualizations.vis.name === VIS_CHART_TYPES.Line) && (
-            <>{DataConfigPanelFields(getRenderFieldsObj(BREAKDOWNS))}</>
-          )}
-        </>
-      ) : (
-        <>
-          <EuiTitle size="xxs">
-            <h3>Bucket Size</h3>
-          </EuiTitle>
-          {getNumberField('bucketSize')}
+    <EuiForm className={'vbConfig'}>
+      <div className="vbConfig__section">
+        <div className="vbConfig__title">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h2>Configuration</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        {visualizations.vis.name !== VIS_CHART_TYPES.Histogram ? (
+          <div className="vbConfig__content">
+            <EuiSpacer size="s" />
+            {DataConfigPanelFields(getRenderFieldsObj(AGGREGATIONS))}
+            <EuiHorizontalRule margin="m" />
+            {DataConfigPanelFields(getRenderFieldsObj(GROUPBY))}
+            <EuiHorizontalRule margin="m" />
+            {(visualizations.vis.name === VIS_CHART_TYPES.Bar ||
+              visualizations.vis.name === VIS_CHART_TYPES.HorizontalBar ||
+              visualizations.vis.name === VIS_CHART_TYPES.Line) && (
+              <>{DataConfigPanelFields(getRenderFieldsObj(BREAKDOWNS))}</>
+            )}
+            <EuiSpacer size="s" />
+          </div>
+        ) : (
+          <>
+            <EuiTitle size="xxs">
+              <h3>Bucket Size</h3>
+            </EuiTitle>
+            {getNumberField('bucketSize')}
 
-          <EuiSpacer size="s" />
-          <EuiTitle size="xxs">
-            <h3>Bucket Offset</h3>
-          </EuiTitle>
-          {getNumberField('bucketOffset')}
-        </>
-      )}
-      <EuiSpacer size="m" />
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="visualizeEditorRenderButton"
-          iconType="play"
-          onClick={() => updateChart()}
-          size="s"
-          isDisabled={isEmpty(configList[AGGREGATIONS])}
-        >
-          Update chart
-        </EuiButton>
-      </EuiFlexItem>
-    </>
+            <EuiSpacer size="s" />
+            <EuiTitle size="xxs">
+              <h3>Bucket Offset</h3>
+            </EuiTitle>
+            {getNumberField('bucketOffset')}
+          </>
+        )}
+        <div className="vbConfig__content">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="visualizeEditorRenderButton"
+              iconType="play"
+              onClick={() => updateChart()}
+              size="s"
+              isDisabled={isEmpty(configList[AGGREGATIONS])}
+            >
+              Update chart
+            </EuiButton>
+          </EuiFlexItem>
+        </div>
+      </div>
+    </EuiForm>
   );
 };

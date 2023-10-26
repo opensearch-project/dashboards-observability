@@ -80,7 +80,7 @@ export const queriesSlice = createSlice({
   extraReducers: (builder) => {},
 });
 
-export const { changeQuery, changeDateRange, remove, init } = queriesSlice.actions;
+export const { changeQuery, changeDateRange, remove, init, reset } = queriesSlice.actions;
 
 export const selectQueries = createSelector(
   (state) => state.queries,
