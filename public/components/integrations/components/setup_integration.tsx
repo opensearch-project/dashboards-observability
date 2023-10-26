@@ -145,14 +145,14 @@ const runQuery = async (
     });
     const [queryId, newSessionId] = [queryResponse.queryId, queryResponse.sessionId];
     while (true) {
-      const poll = await http.post(CONSOLE_PROXY, {
+      const poll: { status: string; error?: string } = await http.post(CONSOLE_PROXY, {
         body: '{}',
         query: {
           path: '_plugins/_async_query/' + queryId,
           method: 'GET',
         },
       });
-      if (poll.status === 'SUCCESS') {
+      if (poll.status.toLowerCase() === 'success') {
         return {
           ok: true,
           value: {
@@ -160,7 +160,8 @@ const runQuery = async (
             sessionId: newSessionId,
           },
         };
-      } else if (poll.status === 'FAILURE') {
+        // Fail status can inconsistently be "failed" or "failure"
+      } else if (poll.status.toLowerCase().startsWith('fail')) {
         return {
           ok: false,
           error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
@@ -333,7 +334,7 @@ export function SetupBottomBar({
               let sessionId: string | null = null;
 
               if (config.connectionType === 'index') {
-                await addIntegrationRequest(
+                const res = await addIntegrationRequest(
                   false,
                   integration.name,
                   config.displayName,
@@ -342,6 +343,9 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
+                if (!res) {
+                  setLoading(false);
+                }
               } else if (config.connectionType === 's3') {
                 const http = coreRefs.http!;
 
@@ -372,7 +376,7 @@ export function SetupBottomBar({
                 }
                 // Once everything is ready, add the integration to the new datasource as usual
                 // TODO determine actual values here after more about queries is known
-                await addIntegrationRequest(
+                const res = await addIntegrationRequest(
                   false,
                   integration.name,
                   config.displayName,
@@ -381,10 +385,12 @@ export function SetupBottomBar({
                   config.displayName,
                   `flint_${config.connectionDataSource}_default_${integration.name}_mview`
                 );
+                if (!res) {
+                  setLoading(false);
+                }
               } else {
                 console.error('Invalid data source type');
               }
-              setLoading(false);
             }}
           >
             Add Integration
