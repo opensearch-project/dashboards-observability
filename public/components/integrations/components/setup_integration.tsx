@@ -391,10 +391,10 @@ export function SetupBottomBar({
                 for (const query of assets.data.queries!) {
                   let queryStr = (query.query as string).replaceAll(
                     '{table_name}',
-                    `${config.connectionDataSource}.default.${integration.name}`
+                    `${config.connectionDataSource}.default.${config.connectionTableName}`
                   );
                   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
-                  queryStr = queryStr.replaceAll('{object_name}', integration.name);
+                  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
                   queryStr = queryStr.replaceAll(/\s+/g, ' ');
                   const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
                   if (!result.ok) {
@@ -417,7 +417,7 @@ export function SetupBottomBar({
                   integration,
                   setCalloutLikeToast,
                   config.displayName,
-                  `flint_${config.connectionDataSource}_default_${integration.name}_mview`
+                  `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
                 );
                 if (!res) {
                   setLoading(false);
