@@ -1,15 +1,15 @@
 CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   type string,
-  time string,
+  time timestamp,
   elb string,
   client_ip string,
-  client_port int,
+  client_port bigint,
   target_ip string,
-  target_port int,
+  target_port bigint,
   request_processing_time double,
   target_processing_time double,
   response_processing_time double,
-  elb_status_code int,
+  elb_status_code bigint,
   target_status_code string,
   received_bytes bigint,
   sent_bytes bigint,
@@ -32,9 +32,6 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   target_status_code_list string,
   classification string,
   classification_reason string
-) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
-WITH
-  SERDEPROPERTIES (
-    'serialization.format' = '1',
-    'input.regex' = '([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) \"([^ ]*) (.*) (- |[^ ]*)\" \"([^\"]*)\" ([A-Z0-9-_]+) ([A-Za-z0-9.-]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" ([-.0-9]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^ ]*)\" \"([^\s]+?)\" \"([^\s]+)\" \"([^ ]*)\" \"([^ ]*)\"'
-  ) LOCATION '{s3_bucket_location}';
+)
+USING parquet
+LOCATION '{s3_bucket_location}';

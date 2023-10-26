@@ -56,6 +56,16 @@
         "name": "create_table",
         "version": "1.0.0",
         "language": "sql"
+      },
+      {
+        "name": "create_mv",
+        "version": "1.0.0",
+        "language": "sql"
+      },
+      {
+        "name": "refresh_mv",
+        "version": "1.0.0",
+        "language": "sql"
       }
     ]
   },
