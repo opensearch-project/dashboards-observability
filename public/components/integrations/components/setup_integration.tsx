@@ -188,6 +188,7 @@ export function SetupIntegrationForm({
     [] as Array<{ label: string }>
   );
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
+  const [isBlurred, setIsBlurred] = useState(false);
   useEffect(() => {
     const updateDataSources = async () => {
       const data = await suggestDataSources(config.connectionType);
@@ -293,14 +294,17 @@ export function SetupIntegrationForm({
           </EuiFormRow>
           <EuiFormRow
             label="S3 Bucket Location"
-            isInvalid={!config.connectionLocation.startsWith('s3://')}
+            isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
             error={["Must be a URL starting with 's3://'."]}
           >
             <EuiFieldText
               value={config.connectionLocation}
               onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
               placeholder="s3://"
-              isInvalid={!config.connectionLocation.startsWith('s3://')}
+              isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsBlurred(true);
+              }}
             />
           </EuiFormRow>
         </>
