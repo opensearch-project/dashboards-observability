@@ -37,6 +37,7 @@ export interface IntegrationSetupInputs {
   connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
+  connectionTableName: string;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -214,11 +215,16 @@ export function SetupIntegrationForm({
         <h3>Integration Details</h3>
       </EuiText>
       <EuiSpacer />
-      <EuiFormRow label="Display Name">
+      <EuiFormRow
+        label="Display Name"
+        error={['Must be at least 1 character.']}
+        isInvalid={config.displayName.length === 0}
+      >
         <EuiFieldText
           value={config.displayName}
           onChange={(event) => updateConfig({ displayName: event.target.value })}
           placeholder={`${integration.name} Integration`}
+          isInvalid={config.displayName.length === 0}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -269,13 +275,35 @@ export function SetupIntegrationForm({
         />
       </EuiFormRow>
       {config.connectionType === 's3' ? (
-        <EuiFormRow label="S3 Bucket Location">
-          <EuiFieldText
-            value={config.connectionLocation}
-            onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
-            placeholder="s3://"
-          />
-        </EuiFormRow>
+        <>
+          <EuiFormRow
+            label="Flint Table Name"
+            helpText="Select a table name to associate with your data."
+            error={['Must be at least 1 character.']}
+            isInvalid={config.connectionTableName.length === 0}
+          >
+            <EuiFieldText
+              placeholder={integration.name}
+              value={config.connectionTableName}
+              onChange={(evt) => {
+                updateConfig({ connectionTableName: evt.target.value });
+              }}
+              isInvalid={config.connectionTableName.length === 0}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Bucket Location"
+            isInvalid={!config.connectionLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.connectionLocation}
+              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={!config.connectionLocation.startsWith('s3://')}
+            />
+          </EuiFormRow>
+        </>
       ) : null}
     </EuiForm>
   );
@@ -328,7 +356,13 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
-            disabled={config.displayName.length < 1 || config.connectionDataSource.length < 1}
+            disabled={
+              config.displayName.length < 1 ||
+              config.connectionDataSource.length < 1 ||
+              (config.connectionType === 's3' &&
+                (config.connectionTableName.length < 1 ||
+                  !config.connectionLocation.startsWith('s3://')))
+            }
             onClick={async () => {
               setLoading(true);
               let sessionId: string | null = null;
@@ -419,6 +453,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     connectionType: 'index',
     connectionDataSource: '',
     connectionLocation: '',
+    connectionTableName: integration,
   } as IntegrationSetupInputs);
 
   const [template, setTemplate] = useState({
