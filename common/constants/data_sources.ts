@@ -19,3 +19,4 @@ export enum DATA_SOURCE_TYPES {
   SPARK = 'spark',
   S3Glue = 's3glue',
 }
+export const ASYNC_POLLING_INTERVAL = 2000;
