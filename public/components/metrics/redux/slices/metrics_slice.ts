@@ -18,6 +18,7 @@ import { ObservabilitySavedVisualization } from '../../../../services/saved_obje
 import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { useToast } from '../../../common/toast';
+import { Metric } from '@osd/analytics/target/types/metrics';
 
 export interface IconAttributes {
   color: string;
@@ -171,10 +172,11 @@ export const metricSlice = createSlice({
     },
     setMetricSelectedAttributes: (state, { payload }) => {
       const { visualizationId, attributesGroupBy } = payload;
-      const metric: MetricType = state.metricsLayout.find(
-        (layout) => layout.id === visualizationId
+      state.metricsLayout = state.metricsLayout.map((layout) =>
+        layout.id === visualizationId
+          ? { ...layout, query: { ...layout.query, attributesGroupBy } }
+          : layout
       );
-      metric.query.attributesGroupBy = attributesGroupBy;
     },
 
     setDataSources: (state, { payload }) => {

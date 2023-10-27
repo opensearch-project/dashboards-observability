@@ -17,6 +17,7 @@ import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
 import { coreRefs } from '../../../framework/core_refs';
+import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -57,7 +58,7 @@ export const MetricsGrid = ({
   };
 
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
-  const [previousEditLayout, setPreviousEditLayout] = useState<Layout[]>([]);
+  const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
   const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
   const [removeMetricsList, setRemoveMetricsList] = useState<Array<{ id: string }>>([]);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
@@ -82,9 +83,7 @@ export const MetricsGrid = ({
         usedInNotebooks={true}
         pplFilterValue=""
         removeVisualization={removeVisualization}
-        catalogVisualization={
-          panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
-        }
+        catalogVisualization={panelVisualization.catalog !== OBSERVABILITY_CUSTOM_METRIC}
         spanParam={spanParam}
         contextMenuId="metrics"
       />
@@ -124,7 +123,7 @@ export const MetricsGrid = ({
       reloadLayout();
       loadVizComponents();
     }
-  }, [editMode, reloadLayout, loadVizComponents]);
+  }, [editMode]);
 
   useEffect(() => {
     if (editActionType === 'cancel') {
@@ -135,20 +134,13 @@ export const MetricsGrid = ({
       updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
       setEditActionType('');
     }
-  }, [
-    editActionType,
-    handleRemoveMetric,
-    postEditLayout,
-    removeMetricsList,
-    panelVisualizations,
-    setEditActionType,
-  ]);
+  }, [editActionType]);
 
   // Update layout whenever visualizations are updated
   useEffect(() => {
     reloadLayout();
     loadVizComponents();
-  }, [panelVisualizations, reloadLayout, loadVizComponents]);
+  }, [panelVisualizations]);
 
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {

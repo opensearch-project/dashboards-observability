@@ -316,15 +316,13 @@ const updateCatalogVisualizationQuery = ({
   endTime: string;
   spanParam: string | undefined;
 }) => {
-  const attributesGroupString = attributesGroupBy.toString();
+  const attributesGroupString = attributesGroupBy.join(',');
   const startEpochTime = convertDateTime(startTime, true, false, true);
   const endEpochTime = convertDateTime(endTime, false, false, true);
-  // const promQuery =
-  //   attributesGroupBy.length === 0
-  //     ? `${aggregation} (${catalogTableName})`
-  //     : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
-
-  const promQuery = `${aggregation} (${catalogTableName})`;
+  const promQuery =
+    attributesGroupBy.length === 0
+      ? `${aggregation} (${catalogTableName})`
+      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
 
   return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
 };
@@ -377,12 +375,14 @@ export const renderCatalogVisualization = async ({
   const visualizationQuery = updateCatalogVisualizationQuery({
     catalogSourceName,
     catalogTableName,
-    aggregation: queryMetaData.aggregation,
-    attributesGroupBy: queryMetaData.attributesGroupBy,
+    aggregation: queryMetaData.aggregation ?? 'avg',
+    attributesGroupBy: queryMetaData.attributesGroupBy ?? [],
     startTime,
     endTime,
     spanParam,
   });
+
+  console.log('renderCatalogVisualilzation', { queryMetaData, visualizationQuery });
 
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
