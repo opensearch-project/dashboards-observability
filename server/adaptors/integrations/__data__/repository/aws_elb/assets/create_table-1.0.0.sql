@@ -3,19 +3,15 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   time timestamp,
   elb string,
   client_ip string,
-  client_port bigint,
   target_ip string,
-  target_port bigint,
   request_processing_time double,
   target_processing_time double,
   response_processing_time double,
-  elb_status_code bigint,
+  elb_status_code int,
   target_status_code string,
   received_bytes bigint,
   sent_bytes bigint,
-  request_verb string,
-  request_url string,
-  request_proto string,
+  request string,
   user_agent string,
   ssl_cipher string,
   ssl_protocol string,
@@ -24,7 +20,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   domain_name string,
   chosen_cert_arn string,
   matched_rule_priority string,
-  request_creation_time string,
+  request_creation_time timestamp,
   actions_executed string,
   redirect_url string,
   lambda_error_reason string,
@@ -33,5 +29,8 @@ CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
   classification string,
   classification_reason string
 )
-USING parquet
-LOCATION '{s3_bucket_location}';
+USING csv
+LOCATION '{s3_bucket_location}'
+OPTIONS (
+  sep=' '
+);
