@@ -31,6 +31,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                         Object {
                           "connectionDataSource": "",
                           "connectionLocation": "",
+                          "connectionTableName": "sample",
                           "connectionType": "index",
                           "displayName": "sample Integration",
                         }
@@ -87,9 +88,15 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           <EuiFormRow
                             describedByIds={Array []}
                             display="row"
+                            error={
+                              Array [
+                                "Must be at least 1 character.",
+                              ]
+                            }
                             fullWidth={false}
                             hasChildLabel={true}
                             hasEmptyLabelSpace={false}
+                            isInvalid={false}
                             label="Display Name"
                             labelType="label"
                           >
@@ -101,12 +108,15 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 className="euiFormRow__labelWrapper"
                               >
                                 <EuiFormLabel
+                                  aria-invalid={false}
                                   className="euiFormRow__label"
                                   htmlFor="random_html_id"
                                   isFocused={false}
+                                  isInvalid={false}
                                   type="label"
                                 >
                                   <label
+                                    aria-invalid={false}
                                     className="euiFormLabel euiFormRow__label"
                                     htmlFor="random_html_id"
                                   >
@@ -119,6 +129,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               >
                                 <EuiFieldText
                                   id="random_html_id"
+                                  isInvalid={false}
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
@@ -135,7 +146,9 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                       <div
                                         className="euiFormControlLayout__childrenWrapper"
                                       >
-                                        <EuiValidatableControl>
+                                        <EuiValidatableControl
+                                          isInvalid={false}
+                                        >
                                           <input
                                             className="euiFieldText"
                                             id="random_html_id"
@@ -354,12 +367,14 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   aria-describedby="random_html_id-help-0"
                                   async={false}
                                   compressed={false}
+                                  customOptionText="Select {searchValue} as your index"
                                   fullWidth={false}
                                   id="random_html_id"
                                   isClearable={true}
                                   isLoading={true}
                                   onBlur={[Function]}
                                   onChange={[Function]}
+                                  onCreateOption={[Function]}
                                   onFocus={[Function]}
                                   options={Array []}
                                   selectedOptions={
@@ -680,6 +695,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
               Object {
                 "connectionDataSource": "",
                 "connectionLocation": "",
+                "connectionTableName": "sample",
                 "connectionType": "index",
                 "displayName": "sample Integration",
               }
@@ -817,6 +833,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             >
                               <EuiButtonEmpty
                                 color="text"
+                                disabled={false}
                                 iconType="cross"
                                 onClick={[Function]}
                               >
@@ -1068,9 +1085,15 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error={
+          Array [
+            "Must be at least 1 character.",
+          ]
+        }
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label="Display Name"
         labelType="label"
       >
@@ -1082,12 +1105,15 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
             className="euiFormRow__labelWrapper"
           >
             <EuiFormLabel
+              aria-invalid={false}
               className="euiFormRow__label"
               htmlFor="random_html_id"
               isFocused={false}
+              isInvalid={false}
               type="label"
             >
               <label
+                aria-invalid={false}
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="random_html_id"
               >
@@ -1100,6 +1126,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           >
             <EuiFieldText
               id="random_html_id"
+              isInvalid={false}
               onBlur={[Function]}
               onChange={[Function]}
               onFocus={[Function]}
@@ -1116,7 +1143,9 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                   <div
                     className="euiFormControlLayout__childrenWrapper"
                   >
-                    <EuiValidatableControl>
+                    <EuiValidatableControl
+                      isInvalid={false}
+                    >
                       <input
                         className="euiFieldText"
                         id="random_html_id"
@@ -1354,12 +1383,14 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               aria-describedby="random_html_id-help-0"
               async={false}
               compressed={false}
+              customOptionText="Select {searchValue} as your index"
               fullWidth={false}
               id="random_html_id"
               isClearable={true}
               isLoading={true}
               onBlur={[Function]}
               onChange={[Function]}
+              onCreateOption={[Function]}
               onFocus={[Function]}
               options={Array []}
               selectedOptions={
