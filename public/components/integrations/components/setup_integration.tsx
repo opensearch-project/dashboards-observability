@@ -37,6 +37,7 @@ export interface IntegrationSetupInputs {
   connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
+  connectionTableName: string;
 }
 
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
@@ -60,9 +61,9 @@ const INTEGRATION_CONNECTION_DATA_SOURCE_TYPES: Map<
   [
     's3',
     {
-      title: 'Table',
-      lower: 'table',
-      help: 'Select a table to pull the data from.',
+      title: 'Catalog',
+      lower: 'catalog',
+      help: 'Select a catalog to pull the data from.',
     },
   ],
   [
@@ -126,8 +127,9 @@ const suggestDataSources = async (type: string): Promise<Array<{ label: string }
 
 const runQuery = async (
   query: string,
-  trackProgress: (step: number) => void
-): Promise<Result<object>> => {
+  datasource: string,
+  sessionId: string | null
+): Promise<Result<{ poll: object; sessionId: string }>> => {
   // Used for polling
   const sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -135,31 +137,32 @@ const runQuery = async (
 
   try {
     const http = coreRefs.http!;
-    const queryId = (
-      await http.post(CONSOLE_PROXY, {
-        body: JSON.stringify({ query, lang: 'sql' }),
-        query: {
-          path: '_plugins/_async_query',
-          method: 'POST',
-        },
-      })
-    ).queryId;
+    const queryResponse: { queryId: string; sessionId: string } = await http.post(CONSOLE_PROXY, {
+      body: JSON.stringify({ query, datasource, lang: 'sql', sessionId }),
+      query: {
+        path: '_plugins/_async_query',
+        method: 'POST',
+      },
+    });
+    const [queryId, newSessionId] = [queryResponse.queryId, queryResponse.sessionId];
     while (true) {
-      const poll = await http.post(CONSOLE_PROXY, {
+      const poll: { status: string; error?: string } = await http.post(CONSOLE_PROXY, {
         body: '{}',
         query: {
           path: '_plugins/_async_query/' + queryId,
           method: 'GET',
         },
       });
-      if (poll.status === 'PENDING') {
-        trackProgress(1);
-      } else if (poll.status === 'RUNNING') {
-        trackProgress(2);
-      } else if (poll.status === 'SUCCESS') {
-        trackProgress(3);
-        return { ok: true, value: poll };
-      } else if (poll.status === 'FAILURE') {
+      if (poll.status.toLowerCase() === 'success') {
+        return {
+          ok: true,
+          value: {
+            poll,
+            sessionId: newSessionId,
+          },
+        };
+        // Fail status can inconsistently be "failed" or "failure"
+      } else if (poll.status.toLowerCase().startsWith('fail')) {
         return {
           ok: false,
           error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
@@ -185,6 +188,7 @@ export function SetupIntegrationForm({
     [] as Array<{ label: string }>
   );
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(true);
+  const [isBlurred, setIsBlurred] = useState(false);
   useEffect(() => {
     const updateDataSources = async () => {
       const data = await suggestDataSources(config.connectionType);
@@ -212,11 +216,16 @@ export function SetupIntegrationForm({
         <h3>Integration Details</h3>
       </EuiText>
       <EuiSpacer />
-      <EuiFormRow label="Display Name">
+      <EuiFormRow
+        label="Display Name"
+        error={['Must be at least 1 character.']}
+        isInvalid={config.displayName.length === 0}
+      >
         <EuiFieldText
           value={config.displayName}
           onChange={(event) => updateConfig({ displayName: event.target.value })}
           placeholder={`${integration.name} Integration`}
+          isInvalid={config.displayName.length === 0}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -254,16 +263,51 @@ export function SetupIntegrationForm({
           }}
           selectedOptions={[{ label: config.connectionDataSource }]}
           singleSelection={{ asPlainText: true }}
+          onCreateOption={(searchValue) => {
+            const normalizedSearchValue = searchValue.trim();
+            if (!normalizedSearchValue) {
+              return;
+            }
+            const newOption = { label: normalizedSearchValue };
+            setDataSourceSuggestions((ds) => ds.concat([newOption]));
+            updateConfig({ connectionDataSource: newOption.label });
+          }}
+          customOptionText={`Select {searchValue} as your ${connectionType.lower}`}
         />
       </EuiFormRow>
       {config.connectionType === 's3' ? (
-        <EuiFormRow label="S3 Bucket Location">
-          <EuiFieldText
-            value={config.connectionLocation}
-            onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
-            placeholder="s3://"
-          />
-        </EuiFormRow>
+        <>
+          <EuiFormRow
+            label="Flint Table Name"
+            helpText="Select a table name to associate with your data."
+            error={['Must be at least 1 character.']}
+            isInvalid={config.connectionTableName.length === 0}
+          >
+            <EuiFieldText
+              placeholder={integration.name}
+              value={config.connectionTableName}
+              onChange={(evt) => {
+                updateConfig({ connectionTableName: evt.target.value });
+              }}
+              isInvalid={config.connectionTableName.length === 0}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="S3 Bucket Location"
+            isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+            error={["Must be a URL starting with 's3://'."]}
+          >
+            <EuiFieldText
+              value={config.connectionLocation}
+              onChange={(event) => updateConfig({ connectionLocation: event.target.value })}
+              placeholder="s3://"
+              isInvalid={isBlurred && !config.connectionLocation.startsWith('s3://')}
+              onBlur={() => {
+                setIsBlurred(true);
+              }}
+            />
+          </EuiFormRow>
+        </>
       ) : null}
     </EuiForm>
   );
@@ -305,6 +349,7 @@ export function SetupBottomBar({
               hash = hash.substring(0, hash.lastIndexOf('/setup'));
               window.location.hash = hash;
             }}
+            disabled={loading}
           >
             Discard
           </EuiButtonEmpty>
@@ -315,12 +360,19 @@ export function SetupBottomBar({
             iconType="arrowRight"
             iconSide="right"
             isLoading={loading}
-            disabled={config.displayName.length < 1 || config.connectionDataSource.length < 1}
+            disabled={
+              config.displayName.length < 1 ||
+              config.connectionDataSource.length < 1 ||
+              (config.connectionType === 's3' &&
+                (config.connectionTableName.length < 1 ||
+                  !config.connectionLocation.startsWith('s3://')))
+            }
             onClick={async () => {
               setLoading(true);
+              let sessionId: string | null = null;
 
               if (config.connectionType === 'index') {
-                await addIntegrationRequest(
+                const res = await addIntegrationRequest(
                   false,
                   integration.name,
                   config.displayName,
@@ -329,6 +381,9 @@ export function SetupBottomBar({
                   config.displayName,
                   config.connectionDataSource
                 );
+                if (!res) {
+                  setLoading(false);
+                }
               } else if (config.connectionType === 's3') {
                 const http = coreRefs.http!;
 
@@ -340,11 +395,12 @@ export function SetupBottomBar({
                 for (const query of assets.data.queries!) {
                   let queryStr = (query.query as string).replaceAll(
                     '{table_name}',
-                    `${config.connectionDataSource}.default.${integration.name}`
+                    `${config.connectionDataSource}.default.${config.connectionTableName}`
                   );
                   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
-                  queryStr = queryStr.replaceAll('{object_name}', integration.name);
-                  const result = await runQuery(queryStr, (_) => {});
+                  queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+                  queryStr = queryStr.replaceAll(/\s+/g, ' ');
+                  const result = await runQuery(queryStr, config.connectionDataSource, sessionId);
                   if (!result.ok) {
                     setLoading(false);
                     setCalloutLikeToast(
@@ -354,22 +410,25 @@ export function SetupBottomBar({
                     );
                     return;
                   }
+                  sessionId = result.value.sessionId ?? sessionId;
                 }
                 // Once everything is ready, add the integration to the new datasource as usual
                 // TODO determine actual values here after more about queries is known
-                await addIntegrationRequest(
+                const res = await addIntegrationRequest(
                   false,
                   integration.name,
                   config.displayName,
                   integration,
                   setCalloutLikeToast,
                   config.displayName,
-                  config.connectionDataSource
+                  `flint_${config.connectionDataSource}_default_${config.connectionTableName}_mview`
                 );
+                if (!res) {
+                  setLoading(false);
+                }
               } else {
                 console.error('Invalid data source type');
               }
-              setLoading(false);
             }}
           >
             Add Integration
@@ -398,6 +457,7 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
     connectionType: 'index',
     connectionDataSource: '',
     connectionLocation: '',
+    connectionTableName: integration,
   } as IntegrationSetupInputs);
 
   const [template, setTemplate] = useState({
@@ -407,7 +467,6 @@ export function SetupIntegrationPage({ integration }: { integration: string }) {
   } as IntegrationTemplate);
 
   const [setupCallout, setSetupCallout] = useState({ show: false } as SetupCallout);
-
   const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
