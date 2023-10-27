@@ -106,27 +106,23 @@ exports[`No result component Renders No result component 1`] = `
                     data-test-subj="obsNoResultsTimefilter"
                   >
                     <FormattedMessage
-                      defaultMessage="Expand your time range or modify your query"
+                      defaultMessage="Select a data source, expand your time range, or modify the query"
                       id="observability.noResults.expandYourTimeRangeTitle"
                       values={Object {}}
                     >
                       <span>
-                        Expand your time range or modify your query
+                        Select a data source, expand your time range, or modify the query
                       </span>
                     </FormattedMessage>
                   </h2>
                   <p>
                     <FormattedMessage
-                      defaultMessage="Your query may not match anything in the current time range, 
-                or there may not be any data at all in the currently selected time range. 
-                Try change time range, query filters or choose different time fields."
+                      defaultMessage="After selection, check the time range, query filters, fields, and query"
                       id="observability.noResults.queryMayNotMatchTitle"
                       values={Object {}}
                     >
                       <span>
-                        Your query may not match anything in the current time range, 
-                or there may not be any data at all in the currently selected time range. 
-                Try change time range, query filters or choose different time fields.
+                        After selection, check the time range, query filters, fields, and query
                       </span>
                     </FormattedMessage>
                   </p>

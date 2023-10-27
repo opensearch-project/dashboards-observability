@@ -258,6 +258,12 @@ export const Explorer = ({
       ...TIME_INTERVAL_OPTIONS,
     ]);
     selectedIntervalRef.current = { text: 'Auto', value: 'auto_' + minInterval };
+    dispatch(
+      updateCountDistribution({
+        tabId,
+        data: { selectedInterval: selectedIntervalRef.current.value.replace(/^auto_/, '') },
+      })
+    );
   };
 
   useEffect(() => {
@@ -495,13 +501,18 @@ export const Explorer = ({
                           selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
                           getPatterns(intrv, getErrorHandler('Error fetching patterns'));
                         }}
-                        stateInterval={selectedIntervalRef.current?.value}
+                        stateInterval={
+                          countDistribution.selectedInterval || selectedIntervalRef.current?.value
+                        }
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
+                      <EuiSpacer size="s" />
                       <CountDistribution
                         countDistribution={countDistribution}
-                        selectedInterval={selectedIntervalRef.current?.value}
+                        selectedInterval={
+                          countDistribution.selectedInterval || selectedIntervalRef.current?.value
+                        }
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
                       />
@@ -783,6 +794,8 @@ export const Explorer = ({
     subType,
     selectedCustomPanelOptions,
     explorerSearchMeta,
+    selectedIntervalRef.current,
+    countDistribution,
   ]);
 
   const liveTailLoop = async (
@@ -794,7 +807,7 @@ export const Explorer = ({
     setLiveTailName(name);
     setLiveTailTabId((curSelectedTabId.current as unknown) as string);
     setIsLiveTailOn(true);
-    setToast('Live tail On', 'success');
+    setToast('Live tail On', 'success', '', 'right', 2000);
     setIsLiveTailPopoverOpen(false);
     setLiveTimestamp(
       dateMath.parse(endingTime, { roundUp: true })?.utc().format(DATE_PICKER_FORMAT) || ''
@@ -819,7 +832,7 @@ export const Explorer = ({
     setIsLiveTailOn(false);
     setLiveHits(0);
     setIsLiveTailPopoverOpen(false);
-    if (isLiveTailOnRef.current) setToast('Live tail Off', 'danger');
+    if (isLiveTailOnRef.current) setToast('Live tail Off', 'danger', '', 'right', 2000);
   };
 
   useEffect(() => {
