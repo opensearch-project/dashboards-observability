@@ -42,8 +42,8 @@ export const DataSourcePermissionsConfiguration = (props: {
   ];
 
   const automaticallyCreateBackendRoleAndMapping = async () => {
-    await http!
-      .post(`/api/v1/configuration/roles/${backendRole}`, {
+    try {
+      await http!.post(`/api/v1/configuration/roles/${backendRole}`, {
         body: JSON.stringify({
           cluster_permissions: [],
           index_permissions: [
@@ -71,29 +71,25 @@ export const DataSourcePermissionsConfiguration = (props: {
           ],
           tenant_permissions: [],
         }),
-      })
-      .then(() => {
-        setToast(`${backendRole} successfully created`);
-      })
-      .catch(() => {
-        setToast(
-          `Error in automatically creating ${backendRole}. Please proceed to security plugin to manually create this role.`
-        );
       });
-    await http!
-      .post(`/api/v1/configuration/rolesmapping/${backendRole}`, {
+      setToast(`${backendRole} successfully created`);
+    } catch (err) {
+      setToast(
+        `Error in automatically creating ${backendRole}. Please proceed to security plugin to manually create this role.`
+      );
+    }
+    try {
+      await http!.post(`/api/v1/configuration/rolesmapping/${backendRole}`, {
         body: JSON.stringify({
           backend_roles: [`${props.properties['glue.auth.role_arn']}`],
         }),
-      })
-      .then(() => {
-        setToast(`${backendRole} successfully mapped to ${props.properties['glue.auth.role_arn']}`);
-      })
-      .catch(() => {
-        setToast(
-          `Error in automatically mapping role_arn to ${backendRole}. Please proceed to security plugin to manually map the role_arn to the ${backendRole} role.`
-        );
       });
+      setToast(`${backendRole} successfully mapped to ${props.properties['glue.auth.role_arn']}`);
+    } catch (err) {
+      setToast(
+        `Error in automatically mapping role_arn to ${backendRole}. Please proceed to security plugin to manually map the role_arn to the ${backendRole} role.`
+      );
+    }
   };
 
   return (

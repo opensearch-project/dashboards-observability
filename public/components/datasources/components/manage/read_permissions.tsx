@@ -35,8 +35,8 @@ export const ReadPermissionsConfiguration = (props: { DataSourceName: string }) 
   ];
 
   const automaticallyCreateReadRole = async () => {
-    await http!
-      .post(`/api/v1/configuration/roles/${readRole}`, {
+    try {
+      await http!.post(`/api/v1/configuration/roles/${readRole}`, {
         body: JSON.stringify({
           cluster_permissions: [],
           index_permissions: [
@@ -50,15 +50,13 @@ export const ReadPermissionsConfiguration = (props: { DataSourceName: string }) 
           ],
           tenant_permissions: [],
         }),
-      })
-      .then(() => {
-        setToast(`${readRole} successfully created`);
-      })
-      .catch(() => {
-        setToast(
-          `Error in automatically creating ${readRole}. Please proceed to security plugin to manually create this role.`
-        );
       });
+      setToast(`${readRole} successfully created`);
+    } catch (err) {
+      setToast(
+        `Error in automatically creating ${readRole}. Please proceed to security plugin to manually create this role.`
+      );
+    }
   };
 
   return (

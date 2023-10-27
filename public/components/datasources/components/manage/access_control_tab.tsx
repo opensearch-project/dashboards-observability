@@ -10,7 +10,6 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiButton,
-  EuiFieldText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
@@ -99,7 +98,6 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           <EuiButton
             data-test-subj="createButton"
             onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
-            fill={false}
           >
             {mode === 'view' ? 'Edit' : 'Cancel'}
           </EuiButton>
