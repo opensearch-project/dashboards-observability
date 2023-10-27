@@ -296,7 +296,7 @@ export async function addIntegrationRequest(
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
   name?: string,
   dataSource?: string
-) {
+): Promise<boolean> {
   const http = coreRefs.http!;
   if (addSample) {
     createDataSourceMappings(
@@ -309,7 +309,7 @@ export async function addIntegrationRequest(
     dataSource = `ss4o_${integration.type}-${integrationTemplateId}-sample-sample`;
   }
 
-  const response: boolean = await http
+  let response: boolean = await http
     .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
       body: JSON.stringify({ name, dataSource }),
     })
@@ -323,7 +323,7 @@ export async function addIntegrationRequest(
       return false;
     });
   if (!addSample || !response) {
-    return;
+    return response;
   }
   const data: { sampleData: unknown[] } = await http
     .get(`${INTEGRATIONS_BASE}/repository/${templateName}/data`)
@@ -337,7 +337,7 @@ export async function addIntegrationRequest(
     data.sampleData
       .map((record) => `{"create": { "_index": "${dataSource}" } }\n${JSON.stringify(record)}`)
       .join('\n') + '\n';
-  http
+  response = await http
     .post(CONSOLE_PROXY, {
       body: requestBody,
       query: {
@@ -345,8 +345,13 @@ export async function addIntegrationRequest(
         method: 'POST',
       },
     })
+    .then((_) => {
+      return true;
+    })
     .catch((err) => {
       console.error(err);
       setToast('Failed to load sample data', 'danger');
+      return false;
     });
+  return response;
 }
