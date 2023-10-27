@@ -46,6 +46,7 @@ import { coreRefs } from '../../../framework/core_refs';
 import { UsePolling } from '../../../components/hooks/use_polling';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
 import { get as getObjValue } from '../../../../common/utils/shared';
+import { ASYNC_POLLING_INTERVAL } from '../../../../common/constants/data_sources';
 
 enum DIRECT_DATA_SOURCE_TYPES {
   DEFAULT_INDEX_PATTERNS = 'DEFAULT_INDEX_PATTERNS',
@@ -303,6 +304,12 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
       dispatchOnGettingHis(pollingResult, '');
       return true;
     }
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: { status: pollingResult.status },
+      })
+    );
     return false;
   };
 
@@ -335,7 +342,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
       (params) => {
         return sqlService.fetchWithJobId(params);
       },
-      5000,
+      ASYNC_POLLING_INTERVAL,
       this.handleDirectQuerySuccess,
       this.handleDirectQueryError,
       { tabId }
