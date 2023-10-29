@@ -26,13 +26,25 @@ import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_pa
 import { resolutionOptions } from '../../../../common/constants/metrics';
 import { MetricType } from '../../../../common/types/metrics';
 import { uiSettingsService } from '../../../../common/utils';
+import { coreRefs } from '../../../framework/core_refs';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { addMultipleVizToPanels, uuidRx } from '../../custom_panels/redux/panel_slice';
-import { sortMetricLayout, updateMetricsWithSelections } from '../helpers/utils';
-import { metricsLayoutSelector } from '../redux/slices/metrics_slice';
+import {
+  sortMetricLayout,
+  updateMetricsWithSelections,
+  visualizationFromMetric,
+} from '../helpers/utils';
+import {
+  metricsLayoutSelector,
+  selectMetric,
+  selectedMetricsSelector,
+} from '../redux/slices/metrics_slice';
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
+import { SavedVisualization } from '../../../../common/types/explorer';
+import { SAVED_VISUALIZATION } from '../../../../common/constants/shared';
+import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 
 interface TopMenuProps {
   IsTopPanelDisabled: boolean;
@@ -73,6 +85,7 @@ export const TopMenu = ({
 }: TopMenuProps) => {
   // Redux tools
   const dispatch = useDispatch();
+  const selectedMetrics = useSelector(selectedMetricsSelector);
   const metricsLayout = useSelector(metricsLayoutSelector);
   const sortedMetricsLayout = sortMetricLayout([...metricsLayout]);
 
@@ -82,6 +95,8 @@ export const TopMenu = ({
   const [selectedPanelOptions, setSelectedPanelOptions] = useState<
     Array<EuiComboBoxOptionOption<unknown>> | undefined
   >([]);
+
+  const { toasts } = coreRefs;
 
   // toggle between panel edit mode
   const editPanel = (editType: string) => {
@@ -153,6 +168,85 @@ export const TopMenu = ({
       Save
     </EuiButton>
   );
+  const osdSavedVisFromMetric = (metric) => ({
+    ...metric,
+    fields: '',
+    timestamp: '@timestamp',
+    type: SAVED_VISUALIZATION,
+    dateRange: [],
+    subType: 'metric',
+    userConfigs: {
+      dateConfig: {
+        type: 'line',
+        fillOpacity: 0,
+        lineWidth: 2,
+      },
+    },
+  });
+
+  const savedObjectInputFromObject = (currentObject: SavedVisualization) => {
+    return {
+      ...currentObject,
+      dateRange: ['now-1d', 'now'],
+      fields: '',
+      timestamp: '@timestamp',
+    };
+  };
+
+  const updateSavedVisualization = async (metric: MetricType): string => {
+    const client = getSavedObjectsClient({
+      objectId: metric.savedVisualizationId,
+      objectType: 'savedVisualization',
+    });
+    const res = await client.get({ objectId: metric.savedVisualizationId });
+    const currentObject = res.observabilityObjectList[0];
+
+    await client.update({
+      object_id: metric.savedVisualizationId,
+      object: {
+        ...currentObject.savedVisualization,
+        name: metric.name,
+      },
+    });
+    return metric.savedVisualizationId;
+  };
+
+  const datasourceMetaFrom = (catalog) =>
+    JSON.stringify([
+      { name: catalog, title: catalog, id: catalog, label: catalog, type: 'prometheus' },
+    ]);
+
+  const createSavedVisualization = async (
+    metric,
+    metaData,
+    metricLayout: MetricType
+  ): Promise<string> => {
+    const [ds, index] = metric.index.split('.');
+    const visMetaData = visualizationFromMetric(
+      {
+        ...metricLayout,
+        dataSources: datasourceMetaFrom(metric.catalog),
+        query: updateCatalogVisualizationQuery({
+          catalogSourceName: ds,
+          catalogTableName: index,
+          aggregation: metric.aggregation,
+          attributesGroupBy: metric.attributesGroupBy,
+          startTime: 'now-1d',
+          endTime: 'now',
+          spanParam: '1d',
+        }),
+        name: metaData.name,
+        dateRange: ['now-1d', 'now'],
+        fields: '',
+        timestamp: '@timestamp',
+      },
+      spanValue,
+      resolutionValue
+    );
+
+    const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
+    return savedObject.objectId;
+  };
 
   const handleSavingObjects = async () => {
     let savedMetricIds = [];
@@ -160,47 +254,32 @@ export const TopMenu = ({
     try {
       savedMetricIds = await Promise.all(
         sortedMetricsLayout.map(async (metricLayout, index) => {
-          const updatedMetric = updateMetricsWithSelections(
-            visualizationsMetaData[index],
-            startTime,
-            endTime,
-            spanValue + resolutionValue
-          );
-
-          if (metricLayout.metricType === 'prometheusMetric') {
-            return OSDSavedVisualizationClient.getInstance().create(updatedMetric);
+          const metric = selectedMetrics[index];
+          const metaData = visualizationsMetaData[index];
+          if (metricLayout.savedVisualizationId === undefined) {
+            return createSavedVisualization(metric, metaData, metricLayout);
           } else {
-            return getSavedObjectsClient({
-              objectId: metricLayout.id,
-              objectType: 'savedVisualization',
-            }).update({
-              ...updatedMetric,
-              objectId: metricLayout.id,
-            });
+            return updateSavedVisualization(metricLayout);
           }
         })
       );
     } catch (e) {
       const message = 'Issue in saving metrics';
       console.error(message, e);
-      setToast(message, 'danger');
+      toasts!.addDanger(message);
       return;
     }
+    toasts!.add('Saved metrics successfully!');
 
-    setToast('Saved metrics successfully!');
-
-    if (selectedPanelOptions.length > 0) {
+    if (selectedPanelOptions?.length ?? 0 > 0) {
       try {
-        const allMetricIds = savedMetricIds.map((metric) => metric.objectId);
-        const soPanels = selectedPanelOptions.filter((panel) => uuidRx.test(panel.panel.id));
-
-        dispatch(addMultipleVizToPanels(soPanels, allMetricIds));
+        addMultipleVizToPanels(selectedPanelOptions, savedMetricIds);
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);
-        setToast('Issue in saving metrics', 'danger');
+        toasts!.addDanger('Issue in saving metrics');
       }
-      setToast('Saved metrics to Dashboards successfully!');
+      toasts!.add('Saved metrics to Dashboards successfully!');
     }
   };
 

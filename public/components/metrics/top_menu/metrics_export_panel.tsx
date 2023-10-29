@@ -25,7 +25,6 @@ import {
 import { coreRefs } from '../../../framework/core_refs';
 
 interface MetricsExportPanelProps {
-  http: CoreStart['http'];
   visualizationsMetaData: any;
   setVisualizationsMetaData: React.Dispatch<any>;
   sortedMetricsLayout: MetricType[];

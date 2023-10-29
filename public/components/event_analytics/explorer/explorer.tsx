@@ -207,8 +207,10 @@ export const Explorer = ({
       explorerSearchMeta.lang || QUERY_LANGUAGE.SQL
     ) || {};
   const SearchBar = ui?.SearchBar || Search;
-  const isDefaultDataSourceType =
-    explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
+  const isDefaultDataSourceType = [DEFAULT_DATA_SOURCE_TYPE, 'prometheus'].includes(
+    explorerSearchMeta.datasources?.[0]?.type
+  );
+
   const selectedIntervalRef = useRef<{
     text: string;
     value: string;

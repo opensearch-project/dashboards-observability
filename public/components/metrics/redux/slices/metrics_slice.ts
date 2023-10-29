@@ -75,8 +75,10 @@ const fetchCustomMetrics = async () => {
   );
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
+    savedVisualizationId: obj.objectId,
+    query: obj.savedVisualization.query,
     name: obj.savedVisualization.name,
-    catalog: 'CUSTOM_METRICS',
+    catalog: OBSERVABILITY_CUSTOM_METRIC,
     type: obj.savedVisualization.type,
     recentlyCreated: (Date.now() - obj.createdTimeMs) / 36e5 <= 12,
   }));
@@ -99,7 +101,12 @@ const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => 
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         catalog: `${dataSource}`,
-        type: obj.TABLE_TYPE,
+        index: `${dataSource}.${obj.TABLE_NAME}`,
+        query: undefined,
+        aggregation: 'avg',
+        attributesGroupBy: [],
+        availableAttributes: [],
+        type: 'line',
         recentlyCreated: false,
       }))
     )
@@ -111,7 +118,6 @@ const updateLayoutBySelection = (state: any, newMetric: any) => {
 
   const metricVisualization: MetricType = {
     id: newMetric.id,
-    savedVisualizationId: newMetric.id,
     x: newDimensions.x,
     y: newDimensions.y,
     h: newDimensions.h,

@@ -222,7 +222,7 @@ export const VisualizationContainer = ({
       await renderCatalogVisualization({
         http,
         pplService,
-        catalogSource: savedVisualizationId,
+        catalogSource: visualizationId,
         startTime: fromTime,
         endTime: toTime,
         filterQuery: pplFilterValue,

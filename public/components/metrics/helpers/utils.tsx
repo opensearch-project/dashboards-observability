@@ -209,3 +209,29 @@ export const updateMetricsWithSelections = (
     userConfigs: savedVisualization.user_configs,
   };
 };
+
+export const visualizationFromMetric = (metric, span, resolution): SavedVisualizationType => {
+  const userConfigs = JSON.stringify({
+    dataConfig: {
+      chartStyles: {
+        lineWidth: '2',
+        fillOpacity: '0',
+      },
+    },
+  });
+
+  return {
+    ...metric,
+    timeField: '@timestamp',
+    selected_date_range: {
+      start: 'now-1d',
+      end: 'now',
+      span: span,
+      resolution: resolution,
+    },
+    type: 'line',
+    sub_type: 'metric',
+    user_configs: userConfigs,
+    userConfigs, // this is necessary to save configs with OSDSavedObjectClient.create()
+  };
+};

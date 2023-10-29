@@ -299,7 +299,7 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
-const updateCatalogVisualizationQuery = ({
+export const updateCatalogVisualizationQuery = ({
   catalogSourceName,
   catalogTableName,
   aggregation,
@@ -324,7 +324,22 @@ const updateCatalogVisualizationQuery = ({
       ? `${aggregation} (${catalogTableName})`
       : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
 
-  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
+  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
+  console.log('updateCatalogVisualizationQuery', {
+    newQuery,
+    catalogSourceName,
+    catalogTableName,
+    aggregation,
+    attributesGroupBy,
+    startTime,
+    endTime,
+    spanParam,
+    attributesGroupString,
+    startEpochTime,
+    endEpochTime,
+    promQuery,
+  });
+  return newQuery;
 };
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
