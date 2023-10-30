@@ -18,10 +18,13 @@ import {
   EuiText,
   EuiBadge,
 } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { FieldButton } from '../../../common/field_button';
 import { FieldIcon } from '../../../common/field_icon';
 import { IField } from '../../../../../common/types/explorer';
 import { FieldInsights } from './field_insights';
+import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../../common/constants/data_sources';
+import { selectSearchMetaData } from '../../../event_analytics/redux/slices/search_meta_data_slice';
 
 interface IFieldProps {
   query: string;
@@ -37,6 +40,7 @@ interface IFieldProps {
   showTimestampOverrideButton: boolean;
   isFieldToggleButtonDisabled: boolean;
   onToggleField: (field: IField) => void;
+  tabId: string;
 }
 
 export const Field = (props: IFieldProps) => {
@@ -53,9 +57,14 @@ export const Field = (props: IFieldProps) => {
     isFieldToggleButtonDisabled = false,
     showTimestampOverrideButton = true,
     onToggleField,
+    tabId,
   } = props;
 
   const [isFieldDetailsOpen, setIsFieldDetailsOpen] = useState(false);
+  const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
+  const isDefaultDataSourceType =
+    explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
+  const appLogEvents = tabId.startsWith('application-analytics-tab');
 
   const addLabelAria = i18n.translate('addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -112,6 +121,7 @@ export const Field = (props: IFieldProps) => {
                   onClick={() => handleOverridePattern(field)}
                   data-test-subj="eventExplorer__overrideDefaultPattern"
                   className="dscSidebarField__actionButton"
+                  isDisabled={!(isDefaultDataSourceType || appLogEvents)}
                 >
                   Override
                 </EuiButtonIcon>
@@ -150,6 +160,7 @@ export const Field = (props: IFieldProps) => {
                   onClick={() => handleOverrideTimestamp(field)}
                   data-test-subj="eventExplorer__overrideDefaultTimestamp"
                   className="dscSidebarField__actionButton"
+                  isDisabled={!(isDefaultDataSourceType || appLogEvents)}
                 >
                   Override
                 </EuiButtonIcon>
@@ -174,6 +185,7 @@ export const Field = (props: IFieldProps) => {
                 onClick={togglePopover}
                 aria-label={'inspect'}
                 className="dscSidebarField__actionButton"
+                isDisabled={!(isDefaultDataSourceType || appLogEvents)}
               />
             }
           >

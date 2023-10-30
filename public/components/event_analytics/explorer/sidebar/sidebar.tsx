@@ -34,6 +34,7 @@ interface ISidebarProps {
   handleOverrideTimestamp: (timestamp: IField) => void;
   storedExplorerFields: IExplorerFields;
   setStoredExplorerFields: (explorer: IExplorerFields) => void;
+  tabId: string;
 }
 
 export const Sidebar = (props: ISidebarProps) => {
@@ -224,6 +225,7 @@ export const Sidebar = (props: ISidebarProps) => {
                                   isFieldToggleButtonDisabled={true}
                                   showTimestampOverrideButton={false}
                                   onToggleField={handleRemoveField}
+                                  tabId={tabId}
                                 />
                               </EuiPanel>
                             </EuiDraggable>
@@ -281,6 +283,7 @@ export const Sidebar = (props: ISidebarProps) => {
                               isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
                               showTimestampOverrideButton={true}
                               onToggleField={handleRemoveField}
+                              tabId={tabId}
                             />
                           </EuiPanel>
                         </EuiDraggable>
@@ -338,6 +341,7 @@ export const Sidebar = (props: ISidebarProps) => {
                                 selected={false}
                                 isFieldToggleButtonDisabled={isFieldToggleButtonDisabled}
                                 showTimestampOverrideButton={true}
+                                tabId={tabId}
                               />
                             </EuiPanel>
                           </EuiDraggable>
