@@ -190,8 +190,8 @@ export const DirectSearch = (props: any) => {
       dispatch(
         changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
       );
+      dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
     });
-    dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
     const sessionId = getAsyncSessionId();
     const requestPayload = {
       lang: lang.toLowerCase(),
