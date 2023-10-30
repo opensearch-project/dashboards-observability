@@ -46,7 +46,11 @@ import { coreRefs } from '../../../framework/core_refs';
 import { UsePolling } from '../../../components/hooks/use_polling';
 import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
 import { get as getObjValue } from '../../../../common/utils/shared';
-import { ASYNC_POLLING_INTERVAL } from '../../../../common/constants/data_sources';
+import {
+  ASYNC_POLLING_INTERVAL,
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../common/constants/data_sources';
 
 enum DIRECT_DATA_SOURCE_TYPES {
   DEFAULT_INDEX_PATTERNS = 'DEFAULT_INDEX_PATTERNS',
@@ -318,6 +322,31 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     return true;
   };
 
+  loadWODataSource = ({ tabId }: { tabId: string }) => {
+    const { dispatch, batch } = this.dispatchers;
+    const { fetchData } = this.loadContext;
+
+    // default datasource
+    batch(() => {
+      dispatch(
+        updateSearchMetaData({
+          tabId,
+          data: {
+            datasources: [
+              {
+                name: DEFAULT_DATA_SOURCE_NAME,
+                type: DEFAULT_DATA_SOURCE_TYPE,
+                label: DEFAULT_DATA_SOURCE_NAME,
+                value: DEFAULT_DATA_SOURCE_NAME,
+              },
+            ],
+          },
+        })
+      );
+      fetchData();
+    });
+  };
+
   loadDefaultIndexPattern = () => {
     const { fetchData } = this.loadContext;
     fetchData();
@@ -380,7 +409,15 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
 
   async loadDataFromSavedObject(objectData, tabId: string) {
     const dataSources = parseStringDataSource(objectData.data_sources, this.notifications);
-    if (dataSources.length > 0 && dataSources[0].type) {
+
+    // backward compatibility for saved object that doesn't contain datasource
+    if (dataSources.length === 0) {
+      this.loadWODataSource({ tabId });
+      return;
+    }
+
+    // saved object contains data source information
+    if (dataSources[0].type) {
       switch (dataSources[0].type) {
         case DIRECT_DATA_SOURCE_TYPES.DEFAULT_INDEX_PATTERNS:
           this.loadDefaultIndexPattern();
