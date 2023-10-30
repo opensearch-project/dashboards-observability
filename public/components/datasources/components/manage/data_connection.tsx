@@ -98,6 +98,14 @@ export const DataConnection = (props: any) => {
             }
           />
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+            title={'Integrate data'}
+            description="Explore data faster through integrations"
+            onClick={() => application!.navigateToApp(observabilityIntegrationsID)}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
