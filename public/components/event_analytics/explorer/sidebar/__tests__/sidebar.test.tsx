@@ -22,6 +22,10 @@ import {
   JSON_DATA,
   JSON_DATA_ALL,
 } from '../../../../../../test/event_analytics_constants';
+import { applyMiddleware, createStore } from 'redux';
+import { rootReducer } from '../../../../../framework/redux/reducers';
+import thunk from 'redux-thunk';
+import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../../../common/constants/data_sources';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -82,9 +86,10 @@ describe('Siderbar component', () => {
       jsonData: JSON_DATA,
       jsonDataAll: JSON_DATA_ALL,
     };
+    const astore = createStore(rootReducer, applyMiddleware(thunk));
 
     const wrapper = mount(
-      <Provider store={store}>
+      <Provider store={astore}>
         <Sidebar
           explorerFields={explorerFields}
           explorerData={explorerData}
@@ -93,6 +98,7 @@ describe('Siderbar component', () => {
           isFieldToggleButtonDisabled={false}
           isOverridingTimestamp={false}
           storedExplorerFields={explorerFields}
+          tabId={DEFAULT_DATA_SOURCE_TYPE}
         />
       </Provider>
     );
