@@ -34,7 +34,7 @@ interface ISidebarProps {
   handleOverrideTimestamp: (timestamp: IField) => void;
   storedExplorerFields: IExplorerFields;
   setStoredExplorerFields: (explorer: IExplorerFields) => void;
-  tabId: any;
+  tabId: string;
 }
 
 export const Sidebar = (props: ISidebarProps) => {

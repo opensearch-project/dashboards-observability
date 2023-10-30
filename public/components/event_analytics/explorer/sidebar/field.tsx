@@ -40,7 +40,7 @@ interface IFieldProps {
   showTimestampOverrideButton: boolean;
   isFieldToggleButtonDisabled: boolean;
   onToggleField: (field: IField) => void;
-  tabId: any;
+  tabId: string;
 }
 
 export const Field = (props: IFieldProps) => {
@@ -64,6 +64,7 @@ export const Field = (props: IFieldProps) => {
   const explorerSearchMeta = useSelector(selectSearchMetaData)[tabId] || {};
   const isDefaultDataSourceType =
     explorerSearchMeta.datasources?.[0]?.type === DEFAULT_DATA_SOURCE_TYPE;
+  const appLogEvents = tabId.startsWith('application-analytics-tab');
 
   const addLabelAria = i18n.translate('addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -120,7 +121,7 @@ export const Field = (props: IFieldProps) => {
                   onClick={() => handleOverridePattern(field)}
                   data-test-subj="eventExplorer__overrideDefaultPattern"
                   className="dscSidebarField__actionButton"
-                  isDisabled={!isDefaultDataSourceType}
+                  isDisabled={!(isDefaultDataSourceType || appLogEvents)}
                 >
                   Override
                 </EuiButtonIcon>
@@ -159,7 +160,7 @@ export const Field = (props: IFieldProps) => {
                   onClick={() => handleOverrideTimestamp(field)}
                   data-test-subj="eventExplorer__overrideDefaultTimestamp"
                   className="dscSidebarField__actionButton"
-                  isDisabled={!isDefaultDataSourceType}
+                  isDisabled={!(isDefaultDataSourceType || appLogEvents)}
                 >
                   Override
                 </EuiButtonIcon>
@@ -184,7 +185,7 @@ export const Field = (props: IFieldProps) => {
                 onClick={togglePopover}
                 aria-label={'inspect'}
                 className="dscSidebarField__actionButton"
-                isDisabled={!isDefaultDataSourceType}
+                isDisabled={!(isDefaultDataSourceType || appLogEvents)}
               />
             }
           >
