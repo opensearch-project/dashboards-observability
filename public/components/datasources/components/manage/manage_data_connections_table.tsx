@@ -22,6 +22,7 @@ import { HomeProps } from '../../home';
 import { DataConnectionsDescription } from './manage_data_connections_description';
 import {
   DATACONNECTIONS_BASE,
+  observabilityIntegrationsID,
   observabilityLogsID,
   observabilityMetricsID,
 } from '../../../../../common/constants/shared';
@@ -136,6 +137,17 @@ export const ManageDataConnectionsTable = (props: HomeProps) => {
         application!.navigateToApp('opensearch-query-workbench');
       },
       'data-test-subj': 'action-accelerate',
+    },
+    {
+      name: 'Integrate data',
+      isPrimary: false,
+      icon: 'integrationGeneral',
+      type: 'icon',
+      available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
+      onClick: () => {
+        application!.navigateToApp(observabilityIntegrationsID);
+      },
+      'data-test-subj': 'action-integrate',
     },
     {
       name: 'Delete',
