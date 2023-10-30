@@ -15,4 +15,4 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.9.0
 - Remove deprecated layout editor ([#646](https://github.com/opensearch-project/dashboards-observability/pull/646))
 
 ### Documentation
-- Integraions Plugin Design RFC ([#644](https://github.com/opensearch-project/dashboards-observability/issues/644))
+- Integrations Plugin Design RFC ([#644](https://github.com/opensearch-project/dashboards-observability/issues/644))
