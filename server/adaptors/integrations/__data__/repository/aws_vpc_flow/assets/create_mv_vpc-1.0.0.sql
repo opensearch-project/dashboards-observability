@@ -10,7 +10,7 @@ CREATE MATERIALIZED VIEW {table_name}_mview AS
         protocol as `aws.vpc.protocol`,
         CAST(packets AS LONG) as `aws.vpc.packets`,
         CAST(bytes AS LONG) as `aws.vpc.bytes`,
-        FROM_UNIXTIME(start) as `aws.vpc.start`,
+        FROM_UNIXTIME(start) as `@timestamp`,
         FROM_UNIXTIME(end) as `aws.vpc.end`,
         action as `aws.vpc.action`,
         log_status as `aws.vpc.log-status`
