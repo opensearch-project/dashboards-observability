@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const METRIC_EXPLORER_BASE_PATH = 'observability-metrics#/';
+
 // requests constants
 export const VISUALIZATION = 'viz';
 export const SAVED_VISUALIZATION = 'savedVisualization';

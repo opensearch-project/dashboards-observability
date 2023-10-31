@@ -15,15 +15,22 @@ import {
   selectedMetricsSelector,
   addSelectedMetric,
   removeSelectedMetric,
+  selectMetricByIdSelector,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 
-export const Sidebar = () => {
+export const Sidebar = ({
+  additionalSelectedMetricId,
+}: {
+  additionalSelectedMetricId?: string;
+}) => {
   const dispatch = useDispatch();
 
   const availableMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
+
+  const additionalMetric = useSelector(selectMetricByIdSelector(additionalSelectedMetricId));
 
   useEffect(() => {
     batch(() => {
@@ -32,8 +39,9 @@ export const Sidebar = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log({ selectedMetrics, availableMetrics });
-  }, [selectedMetrics, availableMetrics]);
+    if (additionalMetric) handleAddMetric(additionalMetric);
+  }, [additionalMetric]);
+
   const handleAddMetric = (metric: any) => dispatch(addSelectedMetric(metric));
 
   const handleRemoveMetric = (metric: any) => {

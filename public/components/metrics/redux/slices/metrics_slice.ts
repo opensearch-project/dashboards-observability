@@ -17,10 +17,7 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
-import { useToast } from '../../../common/toast';
-import { Metric } from '@osd/analytics/target/types/metrics';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
-import { Metrics } from '../../../visualizations/charts/metrics/metrics';
 import { fetchVisualizationById } from '../../../custom_panels/helpers/utils';
 
 export interface IconAttributes {
@@ -273,10 +270,11 @@ const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) =
   }
 };
 
-export const addSelectedMetric = (metric: MetricType) => async (dispatch) => {
-  console.log('addSelectedMetric', metric);
+export const addSelectedMetric = (metric: MetricType) => async (dispatch, getState) => {
+  const currentSelectedIds = getState().metrics.selectedIds;
+  if (currentSelectedIds.includes(metric.id)) return;
+
   if (metric.sub_type === PROMQL_METRIC_SUBTYPE) {
-    console.log('promql subtype, calling getAvailableAttributes');
     dispatch(getAvailableAttributes(metric.id, metric.index));
   }
   dispatch(selectMetric(metric));
@@ -314,14 +312,20 @@ export const searchOrTrue = (search, metric) => {
   return metric.name.match(new RegExp(search, 'i'));
 };
 
+export const selectMetricByIdSelector = (id) => (state) => {
+  return state.metrics.metrics[id];
+};
+
 export const availableMetricsSelector = (state) => {
-  return state.metrics.sortedIds
-    .filter((id) => !state.metrics.selectedIds.includes(id))
-    .filter((id) => searchOrTrue(state.metrics.search, state.metrics.metrics[id]))
-    .map((id) => state.metrics.metrics[id]);
+  return (
+    state.metrics.sortedIds
+      ?.filter((id) => !state.metrics.selectedIds?.includes(id))
+      .filter((id) => searchOrTrue(state.metrics.search, state.metrics.metrics[id]))
+      .map((id) => state.metrics.metrics[id]) ?? []
+  );
 };
 export const selectedMetricsSelector = (state) =>
-  state.metrics.selectedIds.map((id) => state.metrics.metrics[id]).filter((id) => id);
+  state.metrics.selectedIds?.map((id) => state.metrics.metrics[id]).filter((id) => id) ?? [];
 
 export const searchSelector = (state) => state.metrics.search;
 

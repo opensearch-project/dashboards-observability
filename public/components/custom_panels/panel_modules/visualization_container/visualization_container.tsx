@@ -80,6 +80,7 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
+  actionsMenu?: JSX.Element;
 }
 
 export const VisualizationContainer = ({
@@ -100,6 +101,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   inlineEditor,
+  actionsMenu,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -206,11 +208,10 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  const showModelPanel = [
+  const showPPLQueryPanel = [
     <EuiContextMenuItem
       data-test-subj="showCatalogPPLQuery"
       key="view_query"
-      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         showModal('catalogModal');
@@ -220,8 +221,10 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
+  if (visualizationMetaData?.sub_type === PROMQL_METRIC_SUBTYPE) {
+    popoverPanel = [showPPLQueryPanel];
+  } else if (usedInNotebooks) {
+    popoverPanel = [popoverPanel[0]];
   }
 
   const fetchVisualization = async () => {
@@ -238,7 +241,6 @@ export const VisualizationContainer = ({
     if (!visualization && !savedVisualizationId) return;
 
     if (visualization.sub_type === PROMQL_METRIC_SUBTYPE) {
-      console.log('calling recnderCatalogVisualization', visualization);
       renderCatalogVisualization({
         visualization,
         http,

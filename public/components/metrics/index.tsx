@@ -26,7 +26,11 @@ import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
-import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
+import {
+  availableMetricsSelector,
+  metricsLayoutSelector,
+  selectedMetricsSelector,
+} from './redux/slices/metrics_slice';
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import { observabilityLogsID } from '../../../common/constants/shared';
@@ -128,8 +132,8 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
       <HashRouter>
         <Route
           exact
-          path="/"
-          render={() => (
+          path={['/:id', '/']}
+          render={(routerProps) => (
             <div>
               <EuiPage>
                 <EuiPageBody component="div">
@@ -156,7 +160,7 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                       {(EuiResizablePanel, EuiResizableButton) => (
                         <>
                           <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
-                            <Sidebar />
+                            <Sidebar additionalSelectedMetricId={routerProps.match.params.id} />
                           </EuiResizablePanel>
 
                           <EuiResizableButton />

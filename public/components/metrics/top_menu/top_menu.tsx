@@ -28,44 +28,46 @@ export const TopMenu = () => {
   const dateSpanFilter = useSelector(dateSpanFilterSelector);
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
-        <EuiFlexItem grow={false}>
-          <div className="resolutionSelect">
-            <EuiFieldText
-              className="resolutionSelectText"
-              prepend="Span Interval"
-              value={dateSpanFilter.span}
-              isInvalid={dateSpanFilter.span < 1}
-              onChange={(e) => dispatch(updateDateSpan({ span: e.target.value }))}
-              data-test-subj="metrics__spanValue"
-              append={
-                <EuiSelect
-                  className="resolutionSelectOption"
-                  options={resolutionOptions}
-                  value={dateSpanFilter.resolution}
-                  onChange={(e) => dispatch(updateDateSpan({ resolution: e.target.value }))}
-                  aria-label="resolutionSelect"
-                  data-test-subj="metrics__spanResolutionSelect"
-                />
-              }
-              aria-label="resolutionField"
+    dateSpanFilter && (
+      <>
+        <EuiFlexGroup gutterSize="s" justifyContent={'flexEnd'}>
+          <EuiFlexItem grow={false}>
+            <div className="resolutionSelect">
+              <EuiFieldText
+                className="resolutionSelectText"
+                prepend="Span Interval"
+                value={dateSpanFilter.span}
+                isInvalid={dateSpanFilter.span < 1}
+                onChange={(e) => dispatch(updateDateSpan({ span: e.target.value }))}
+                data-test-subj="metrics__spanValue"
+                append={
+                  <EuiSelect
+                    className="resolutionSelectOption"
+                    options={resolutionOptions}
+                    value={dateSpanFilter.resolution}
+                    onChange={(e) => dispatch(updateDateSpan({ resolution: e.target.value }))}
+                    aria-label="resolutionSelect"
+                    data-test-subj="metrics__spanResolutionSelect"
+                  />
+                }
+                aria-label="resolutionField"
+              />
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem className="metrics-search-bar-datepicker">
+            <EuiSuperDatePicker
+              dateFormat={uiSettingsService.get('dateFormat')}
+              start={dateSpanFilter.start}
+              end={dateSpanFilter.end}
+              onTimeChange={(e) => dispatch(updateStartEndDate(e))}
+              recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
             />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem className="metrics-search-bar-datepicker">
-          <EuiSuperDatePicker
-            dateFormat={uiSettingsService.get('dateFormat')}
-            start={dateSpanFilter.start}
-            end={dateSpanFilter.end}
-            onTimeChange={(e) => dispatch(updateStartEndDate(e))}
-            recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MetricsExport />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MetricsExport />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    )
   );
 };

@@ -400,8 +400,6 @@ export const renderCatalogVisualization = async ({
     resolution,
   });
 
-  console.log('renderCatalogVisualilzation', { visualization, visualizationQuery });
-
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
     visualizationQuery,
@@ -420,7 +418,7 @@ export const renderCatalogVisualization = async ({
   setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
 
-  // setVisualizationMetaData();
+  setVisualizationMetaData(visualization);
 
   getQueryResponse(
     pplService,
