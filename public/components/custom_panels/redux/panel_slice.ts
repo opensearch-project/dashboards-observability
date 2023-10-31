@@ -84,7 +84,7 @@ const normalizedPanel = (panel: CustomPanelType): CustomPanelType => ({
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
 
-const {setToast} = useToast();
+const { setToast } = useToast();
 
 /*
  ** ASYNC DISPATCH FUNCTIONS
@@ -141,19 +141,23 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
-export const updatePanel = (panel: CustomPanelType, successMsg: string, failureMsg: string) => async (dispatch, getState) => {
+export const updatePanel = (
+  panel: CustomPanelType,
+  successMsg: string,
+  failureMsg: string
+) => async (dispatch, getState) => {
   try {
     if (isUuid(panel.id)) await updateSavedObjectPanel(panel);
     else await updateLegacyPanel(panel);
     if (successMsg) {
-      setToast(successMsg)
+      setToast(successMsg);
     }
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
-  } catch (e) {    
+  } catch (e) {
     if (failureMsg) {
-      setToast(failureMsg, 'danger')
+      setToast(failureMsg, 'danger');
     }
     console.error(e);
   }
@@ -172,20 +176,39 @@ export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
   });
 };
 
-export const addMultipleVizToPanels = (panels, vizIds) => async (dispatch, getState) => {
-  forEach(panels, (oldPanel) => {
-    const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.panel.id);
+export const addMultipleVizToPanels = async (panels, vizIds) => {
+  await Promise.all(
+    panels.map(async ({ panel: { id } }) => {
+      const soPanel = await savedObjectPanelsClient.get(id);
+      const oldPanel = savedObjectToCustomPanel(soPanel);
 
-    const allVisualizations = panel!.visualizations;
+      const allVisualizations = oldPanel!.visualizations;
 
-    const visualizationsWithNewPanel = addMultipleVisualizations(vizIds, allVisualizations);
+      let visualizationsWithNewPanel = allVisualizations;
 
-    const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    dispatch(updatePanel(updatedPanel, '', ''));
-  });
+      forEach(vizIds, (vizId) => {
+        visualizationsWithNewPanel = addVisualizationPanel(
+          vizId,
+          undefined,
+          visualizationsWithNewPanel
+        );
+      });
+
+      const updatedPanel = { ...oldPanel, visualizations: visualizationsWithNewPanel };
+
+      if (isUuid(updatedPanel.id)) {
+        await updateSavedObjectPanel(updatedPanel);
+      } else {
+        await updateLegacyPanel(updatedPanel);
+      }
+    })
+  );
 };
 
-export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTitle) => async (dispatch, getState) => {
+export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTitle) => async (
+  dispatch,
+  getState
+) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.id);
 
   const allVisualizations = panel!.visualizations;
@@ -193,8 +216,14 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTit
   const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
 
   const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-  
-  dispatch(updatePanel(updatedPanel, `Visualization ${newVisualizationTitle} successfully added!`, `Error in adding ${newVisualizationTitle} visualization to the panel`));
+
+  dispatch(
+    updatePanel(
+      updatedPanel,
+      `Visualization ${newVisualizationTitle} successfully added!`,
+      `Error in adding ${newVisualizationTitle} visualization to the panel`
+    )
+  );
 };
 
 const deletePanelSO = (customPanelIdList: string[]) => {
@@ -315,7 +344,13 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
 ) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === id);
   const updatedPanel = { ...panel, title: editedCustomPanelName };
-  dispatch(updatePanel(updatedPanel, `Operational Panel successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Operational Panel, please make sure you have the correct permission.'))
+  dispatch(
+    updatePanel(
+      updatedPanel,
+      `Operational Panel successfully renamed into "${editedCustomPanelName}"`,
+      'Error renaming Operational Panel, please make sure you have the correct permission.'
+    )
+  );
 };
 
 /*

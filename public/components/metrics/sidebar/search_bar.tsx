@@ -21,7 +21,7 @@ export const SearchBar = () => {
     <div className="metrics-search-bar-input" data-test-subj="metricsSearch">
       <EuiSearchBar
         box={{
-          placeholder: 'Search for metrics',
+          placeholder: 'Search to filter Available Metrics',
           incremental: true,
         }}
         defaultQuery={''}

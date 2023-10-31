@@ -69,6 +69,8 @@ interface Props {
   inputMetaData: object;
   fromTime: string;
   toTime: string;
+  span?: number | string;
+  resolution?: string;
   onRefresh: boolean;
   pplFilterValue: string;
   usedInNotebooks?: boolean;
@@ -77,7 +79,6 @@ interface Props {
   showFlyout?: (isReplacement?: boolean | undefined, replaceVizId?: string | undefined) => void;
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
-  spanParam?: string;
   inlineEditor?: JSX.Element;
 }
 
@@ -88,6 +89,8 @@ export const VisualizationContainer = ({
   inputMetaData,
   fromTime,
   toTime,
+  span,
+  resolution,
   onRefresh,
   pplFilterValue,
   usedInNotebooks,
@@ -96,7 +99,6 @@ export const VisualizationContainer = ({
   showFlyout,
   removeVisualization,
   catalogVisualization,
-  spanParam,
   inlineEditor,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -244,8 +246,9 @@ export const VisualizationContainer = ({
         catalogSource: visualizationId,
         startTime: fromTime,
         endTime: toTime,
+        span,
+        resolution,
         filterQuery: pplFilterValue,
-        spanParam,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
@@ -260,10 +263,11 @@ export const VisualizationContainer = ({
         http,
         pplService,
         savedVisualizationId,
-        fromTime,
-        toTime,
+        startTime: fromTime,
+        endTime: toTime,
         pplFilterValue,
-        spanParam,
+        span,
+        resolution,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,

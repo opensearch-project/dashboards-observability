@@ -80,11 +80,12 @@ export const mergeLayoutAndVisualizations = (
 export const updateQuerySpanInterval = (
   query: string,
   timestampField: string,
-  spanParam: string
+  span: number | string = '1',
+  resolution: string = 'h'
 ) => {
   return query.replace(
     new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`),
-    `span(${timestampField},${spanParam})`
+    `span(${timestampField},${span}${resolution})`
   );
 };
 
@@ -217,7 +218,8 @@ export const renderSavedVisualization = async ({
   startTime,
   endTime,
   filterQuery,
-  spanParam,
+  span = '1',
+  resolution = 'h',
   setVisualizationTitle,
   setVisualizationType,
   setVisualizationData,
@@ -232,7 +234,8 @@ export const renderSavedVisualization = async ({
   startTime: string;
   endTime: string;
   filterQuery: string;
-  spanParam: string | undefined;
+  span?: number | string;
+  resolution?: string;
   setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
@@ -262,15 +265,10 @@ export const renderSavedVisualization = async ({
     setVisualizationType(visualization.type);
   }
 
-  if (spanParam !== undefined) {
-    updatedVisualizationQuery = updateQuerySpanInterval(
-      visualization.query,
-      visualization.timeField,
-      spanParam
-    );
-  } else {
-    updatedVisualizationQuery = visualization.query;
-  }
+  const updatedVisualizationQuery =
+    span !== undefined
+      ? updateQuerySpanInterval(visualization.query, visualization.timeField, span, resolution)
+      : visualization.query;
 
   setVisualizationMetaData({ ...visualization, query: updatedVisualizationQuery });
 
@@ -320,41 +318,29 @@ export const updateCatalogVisualizationQuery = ({
   catalogTableName,
   aggregation,
   attributesGroupBy,
-  startTime,
-  endTime,
-  spanParam = '1h',
+  start,
+  end,
+  span = '1',
+  resolution = 'h',
 }: {
   catalogSourceName: string;
   catalogTableName: string;
   aggregation: string;
   attributesGroupBy: string[];
-  startTime: string;
-  endTime: string;
-  spanParam: string | undefined;
+  start: string;
+  end: string;
+  span: string;
+  resolution: string;
 }) => {
   const attributesGroupString = attributesGroupBy.join(',');
-  const startEpochTime = convertDateTime(startTime, true, false, true);
-  const endEpochTime = convertDateTime(endTime, false, false, true);
+  const startEpochTime = convertDateTime(start, true, false, true);
+  const endEpochTime = convertDateTime(end, false, false, true);
   const promQuery =
     attributesGroupBy.length === 0
       ? `${aggregation} (${catalogTableName})`
       : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
 
-  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
-  console.log('updateCatalogVisualizationQuery', {
-    newQuery,
-    catalogSourceName,
-    catalogTableName,
-    aggregation,
-    attributesGroupBy,
-    startTime,
-    endTime,
-    spanParam,
-    attributesGroupString,
-    startEpochTime,
-    endEpochTime,
-    promQuery,
-  });
+  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${span}${resolution}')`;
   return newQuery;
 };
 
@@ -366,7 +352,8 @@ export const renderCatalogVisualization = async ({
   startTime,
   endTime,
   filterQuery,
-  spanParam,
+  span,
+  resolution,
   setVisualizationTitle,
   setVisualizationType,
   setVisualizationData,
@@ -382,7 +369,8 @@ export const renderCatalogVisualization = async ({
   startTime: string;
   endTime: string;
   filterQuery: string;
-  spanParam: string | undefined;
+  span?: number | string;
+  resolution?: string;
   setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
@@ -406,9 +394,10 @@ export const renderCatalogVisualization = async ({
 
   const visualizationQuery = updateCatalogVisualizationQuery({
     ...visualization.query_meta_data,
-    startTime,
-    endTime,
-    spanParam,
+    start: startTime,
+    end: endTime,
+    span,
+    resolution,
   });
 
   console.log('renderCatalogVisualilzation', { visualization, visualizationQuery });

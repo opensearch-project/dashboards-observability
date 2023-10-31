@@ -12,7 +12,6 @@ import {
   mergeLayoutAndMetrics,
   onTimeChange,
   sortMetricLayout,
-  updateMetricsWithSelections,
 } from '../utils';
 import {
   samplePanelVisualizations1,
@@ -85,16 +84,6 @@ describe('Utils helper functions', () => {
   it('validates createPrometheusMetricById function', () => {
     expect(createPrometheusMetricById(samplePrometheusVisualizationId)).toStrictEqual(
       samplePrometheusVisualizationComponent
-    );
-  });
-
-  it('validates updateMetricsWithSelections function', () => {
-    expect(
-      updateMetricsWithSelections(samplePrometheusVisualizationComponent, 'now-1d', 'now', '1h')
-    ).toStrictEqual(samplePrometheusSampleUpdateWithSelections);
-
-    expect(updateMetricsWithSelections(sampleSavedMetric, 'now-30m', 'now', '1m')).toStrictEqual(
-      sampleSavedMetricUpdate
     );
   });
 });

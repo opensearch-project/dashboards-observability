@@ -31,7 +31,6 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
       }
       paddingSize="none"
     >
-      {metricsList.length > 100 && <p>Use search bar to focus listed Metrics.</p>}
       <ul className="metricsList">
         {metricsList.slice(0, 100).map((metric: any) => (
           <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>

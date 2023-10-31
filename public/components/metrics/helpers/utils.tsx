@@ -20,7 +20,6 @@ import { CoreStart } from '../../../../../../src/core/public';
 import { MetricType } from '../../../../common/types/metrics';
 import { VisualizationType } from '../../../../common/types/custom_panels';
 import { DEFAULT_METRIC_HEIGHT, DEFAULT_METRIC_WIDTH } from '../../../../common/constants/metrics';
-import { updateQuerySpanInterval } from '../../custom_panels/helpers/utils';
 
 export const onTimeChange = (
   start: ShortDate,
@@ -187,29 +186,6 @@ export const createPrometheusMetricById = (metricId: string) => {
   };
 };
 
-export const updateMetricsWithSelections = (
-  savedVisualization: any,
-  startTime: ShortDate,
-  endTime: ShortDate,
-  spanValue: string
-) => {
-  return {
-    query: updateQuerySpanInterval(
-      savedVisualization.query,
-      savedVisualization.timeField,
-      spanValue
-    ),
-    fields: savedVisualization.selected_fields.tokens,
-    dateRange: [startTime, endTime],
-    timestamp: savedVisualization.timeField,
-    name: savedVisualization.name,
-    description: savedVisualization.description,
-    type: 'line',
-    subType: 'metric',
-    userConfigs: savedVisualization.user_configs,
-  };
-};
-
 export const visualizationFromMetric = (metric, span, resolution): SavedVisualizationType => {
   const userConfigs = JSON.stringify({
     dataConfig: {
@@ -226,8 +202,8 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
     selected_date_range: {
       start: 'now-1d',
       end: 'now',
-      span: span,
-      resolution: resolution,
+      span,
+      resolution,
     },
     type: 'line',
     sub_type: 'metric',

@@ -11,14 +11,11 @@ import { I18nProvider } from '@osd/i18n/react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
   availableMetricsSelector,
-  deSelectMetric,
-  selectMetric,
   loadMetrics,
   selectedMetricsSelector,
   addSelectedMetric,
+  removeSelectedMetric,
 } from '../redux/slices/metrics_slice';
-import { CoreStart } from '../../../../../../src/core/public';
-import PPLService from '../../../services/requests/ppl';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 
@@ -34,10 +31,13 @@ export const Sidebar = () => {
     });
   }, [dispatch]);
 
+  useEffect(() => {
+    console.log({ selectedMetrics, availableMetrics });
+  }, [selectedMetrics, availableMetrics]);
   const handleAddMetric = (metric: any) => dispatch(addSelectedMetric(metric));
 
   const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
+    dispatch(removeSelectedMetric(metric));
   };
 
   return (
