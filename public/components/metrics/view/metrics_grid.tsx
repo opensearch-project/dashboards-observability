@@ -26,6 +26,8 @@ import { mergeLayoutAndMetrics } from '../helpers/utils';
 import './metrics_grid.scss';
 import { coreRefs } from '../../../framework/core_refs';
 import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metrics';
+import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
+import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 
 // HOC container to provide dynamic width for Grid layout
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -120,6 +122,11 @@ export const MetricsGrid = ({
           // catalogVisualization={panelVisualization.catalog !== OBSERVABILITY_CUSTOM_METRIC}
           spanParam={spanParam}
           contextMenuId="metrics"
+          inlineEditor={
+            metric.sub_type === PROMQL_METRIC_SUBTYPE && (
+              <MetricsEditInline visualization={metric} />
+            )
+          }
         />
       );
     });
@@ -175,7 +182,7 @@ export const MetricsGrid = ({
   useEffect(() => {
     reloadLayout();
     loadVizComponents();
-  }, [panelVisualizations]);
+  }, [panelVisualizations, selectedMetrics]);
 
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {

@@ -20,6 +20,7 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { useToast } from '../../../common/toast';
 import { Metric } from '@osd/analytics/target/types/metrics';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import { Metrics } from '../../../visualizations/charts/metrics/metrics';
 
 export interface IconAttributes {
   color: string;
@@ -203,27 +204,21 @@ export const {
   setMetricSelectedAttributes,
 } = metricSlice.actions;
 
-const getAvailableAttributes = (id) => async (dispatch, getState) => {
+const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
   const { pplService } = coreRefs;
   const { setToast } = useToast();
 
   try {
     const columnSchema = await pplService.fetch({
-      query: 'describe ' + id + ' | fields COLUMN_NAME',
+      query: 'describe ' + metricIndex + ' | fields COLUMN_NAME',
       format: 'jdbc',
     });
-    const columns = columnSchema.jsonData
+    const availableAttributes = columnSchema.jsonData
       .map((sch) => sch.COLUMN_NAME)
       .filter((col) => col[0] !== '@');
 
-    const state = getState();
-    const updatedLayout = state.metrics.metricsLayout.map((metricLayout) =>
-      metricLayout.id === id
-        ? { ...metricLayout, query: { ...metricLayout.query, availableAttributes: columns } }
-        : metricLayout
-    );
-
-    dispatch(updateMetricsLayout(updatedLayout));
+    console.log('getAvailableAttributes', { id, metricIndex, columnSchema, availableAttributes });
+    dispatch(updateMetricQuery(id, { availableAttributes }));
   } catch (e) {
     setToast(`An error occurred retrieving attributes for metric ${id} `, 'danger');
     console.error(`An error occurred retrieving attributes for metric ${id} `, e);
@@ -231,29 +226,37 @@ const getAvailableAttributes = (id) => async (dispatch, getState) => {
 };
 
 export const addSelectedMetric = (metric: MetricType) => async (dispatch) => {
-  await dispatch(selectMetric(metric));
-  if (metric.catalog !== OBSERVABILITY_CUSTOM_METRIC)
-    await dispatch(getAvailableAttributes(metric.id));
+  console.log('addSelectedMetric', metric);
+  if (metric.sub_type === PROMQL_METRIC_SUBTYPE) {
+    console.log('promql subtype, calling getAvailableAttributes');
+    dispatch(getAvailableAttributes(metric.id, metric.index));
+  }
+  dispatch(selectMetric(metric));
 };
 
-export const updateMetricQuery = (visualizationId, { aggregation, attributesGroupBy }) => (
-  dispatch,
-  getState
-) => {
+export const updateMetricQuery = (
+  visualizationId,
+  { availableAttributes, aggregation, attributesGroupBy }
+) => (dispatch, getState) => {
   const state = getState();
-  const updatedLayout = state.metrics.metricsLayout.map((metricLayout) =>
-    metricLayout.id === visualizationId
+  const updatedMetrics = state.metrics.metrics.map((metric) =>
+    metric.id === visualizationId
       ? {
-          ...metricLayout,
-          query: {
-            ...metricLayout.query,
-            aggregation: aggregation || metricLayout.query.aggregation,
-            attributesGroupBy: attributesGroupBy || metricLayout.query.attributesGroupBy,
-          },
+          ...metric,
+          aggregation: aggregation || metric.aggregation || 'avg',
+          attributesGroupBy: attributesGroupBy || metric.attributesGroupBy || [],
+          availableAttributes: availableAttributes || metric.availableAttributes || [],
         }
-      : metricLayout
+      : metric
   );
-  dispatch(updateMetricsLayout(updatedLayout));
+  console.log('updateMetricQuery', {
+    visualizationId,
+    updatedMetrics,
+    availableAttributes,
+    aggregation,
+    attributesGroupBy,
+  });
+  dispatch(setMetrics(updatedMetrics));
 };
 
 export const availableMetricsSelector = (state) =>
@@ -266,6 +269,9 @@ export const availableMetricsSelector = (state) =>
 
 export const selectedMetricsSelector = (state) =>
   state.metrics.selected.map((id) => state.metrics.metrics.find((metric) => metric.id === id));
+
+export const metricByIdSelector = (id) => (state) =>
+  state.metrics.metrics.find((metric) => metric.id === id);
 
 export const searchSelector = (state) => state.metrics.search;
 

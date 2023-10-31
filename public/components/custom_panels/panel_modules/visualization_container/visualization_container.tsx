@@ -78,7 +78,7 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   spanParam?: string;
-  contextMenuId: 'visualization' | 'notebook' | 'metrics';
+  inlineEditor?: JSX.Element;
 }
 
 export const VisualizationContainer = ({
@@ -97,7 +97,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   spanParam,
-  contextMenuId,
+  inlineEditor,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -308,7 +308,7 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh]);
+  }, [onRefresh, inputMetaData]);
 
   const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 
@@ -362,7 +362,7 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-          {catalogVisualization && <MetricsEditInline visualizationId={visualizationId} />}
+          {inlineEditor}
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>
