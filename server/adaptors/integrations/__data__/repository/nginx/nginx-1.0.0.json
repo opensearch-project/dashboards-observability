@@ -5,7 +5,7 @@
   "description": "Nginx HTTP server collector",
   "license": "Apache-2.0",
   "type": "logs",
-  "labels": ["Observability", "Logs"],
+  "labels": ["Observability", "Logs", "Flint S3"],
   "author": "OpenSearch",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
   "statics": {
@@ -38,7 +38,24 @@
     "savedObjects": {
       "name": "nginx",
       "version": "1.0.0"
-    }
+    },
+    "queries": [
+      {
+        "name": "create_table",
+        "version": "1.0.0",
+        "language": "sql"
+      },
+      {
+        "name": "create_mv",
+        "version": "1.0.0",
+        "language": "sql"
+      },
+      {
+        "name": "refresh_mv",
+        "version": "1.0.0",
+        "language": "sql"
+      }
+    ]
   },
   "sampleData": {
     "path": "sample.json"

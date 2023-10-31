@@ -5,7 +5,7 @@
   "description": "AWS VPC Flow log collector",
   "license": "Apache-2.0",
   "type": "logs_vpc",
-  "labels": ["Observability", "Logs", "AWS", "Cloud"],
+  "labels": ["Observability", "Logs", "AWS", "Cloud", "Flint S3"],
   "author": "Haidong Wang",
   "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/aws_vpc_flow/info",
   "statics": {
@@ -46,7 +46,24 @@
     "savedObjects": {
       "name": "aws_vpc_flow",
       "version": "1.0.0"
-    }
+    },
+    "queries": [
+      {
+        "name": "create_table_vpc",
+        "version": "1.0.0",
+        "language": "sql"
+      },
+      {
+        "name": "create_mv_vpc",
+        "version": "1.0.0",
+        "language": "sql"
+      },
+      {
+        "name": "refresh_mv_vpc",
+        "version": "1.0.0",
+        "language": "sql"
+      }
+    ]
   },
   "sampleData": {
     "path": "sample.json"
