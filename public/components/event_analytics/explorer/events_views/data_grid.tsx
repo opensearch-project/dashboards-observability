@@ -28,7 +28,7 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import { FlyoutButton } from './docViewRow';
 import { useFetchEvents } from '../../hooks';
-import { redoQuery } from '../../utils/utils';
+import { redoQuery, getFieldTypes } from '../../utils/utils';
 import { updateFields } from '../../redux/slices/field_slice';
 
 interface DataGridProps {
@@ -77,18 +77,6 @@ export function DataGrid(props: DataGridProps) {
   const pageFields = useRef([0, 100]);
 
   const [data, setData] = useState(rows);
-
-  // method to return the type of a field from its name
-  const getFieldTypes = (newFieldName: string) => {
-    let fieldType: string = '';
-    explorerFields.availableFields.map((field) => {
-      if (field.name === newFieldName) fieldType = field.type;
-    });
-    explorerFields.selectedFields.map((field) => {
-      if (field.name === newFieldName) fieldType = field.type;
-    });
-    return fieldType;
-  };
 
   // setSort and setPage are used to change the query and send a direct request to get data
   const setSort = (sort: EuiDataGridSorting['columns']) => {
@@ -151,7 +139,7 @@ export function DataGrid(props: DataGridProps) {
         setVisibleColumns: (visibleColumns: string[]) => {
           const fields: IField[] = [];
           visibleColumns.map((col) => {
-            fields.push({ name: col, type: getFieldTypes(col) });
+            fields.push({ name: col, type: getFieldTypes(col, explorerFields) });
           });
           dispatch(
             updateFields({

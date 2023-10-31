@@ -20,6 +20,7 @@ import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constan
 import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { sortFields, updateFields } from '../../redux/slices/field_slice';
 import { Field } from './field';
+import { getFieldTypes } from '../../utils/utils';
 
 interface ISidebarProps {
   query: string;
@@ -54,18 +55,6 @@ export const Sidebar = (props: ISidebarProps) => {
   const dispatch = useDispatch();
   const [showFields, setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-
-  // method to return the type of a field from its name
-  const getFieldTypes = (newFieldName: string) => {
-    let fieldType: string = '';
-    explorerFields.availableFields.map((field) => {
-      if (field.name === newFieldName) fieldType = field.type;
-    });
-    explorerFields.selectedFields.map((field) => {
-      if (field.name === newFieldName) fieldType = field.type;
-    });
-    return fieldType;
-  };
 
   /**
    * Toggle fields between selected and unselected sets
@@ -143,9 +132,9 @@ export const Sidebar = (props: ISidebarProps) => {
     if (destination.droppableId !== source.droppableId) {
       // if dropped into the selected fields: add, if dropped into available: remove
       if (destination.droppableId === 'SELECTED FIELDS') {
-        handleAddField({ name: draggableId, type: getFieldTypes(draggableId) });
+        handleAddField({ name: draggableId, type: getFieldTypes(draggableId, explorerFields) });
       } else if (destination.droppableId === 'AVAILABLE FIELDS') {
-        handleRemoveField({ name: draggableId, type: getFieldTypes(draggableId) });
+        handleRemoveField({ name: draggableId, type: getFieldTypes(draggableId, explorerFields) });
       }
     }
   };
