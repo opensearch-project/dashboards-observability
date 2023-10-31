@@ -43,7 +43,7 @@ import {
 import { MetricsExportPanel } from './metrics_export_panel';
 import './top_menu.scss';
 import { SavedVisualization } from '../../../../common/types/explorer';
-import { SAVED_VISUALIZATION } from '../../../../common/constants/shared';
+import { PROMQL_METRIC_SUBTYPE, SAVED_VISUALIZATION } from '../../../../common/constants/shared';
 import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 
 interface TopMenuProps {
@@ -222,20 +222,25 @@ export const TopMenu = ({
     metricLayout: MetricType
   ): Promise<string> => {
     const [ds, index] = metric.index.split('.');
+    const queryMetaData = {
+      catalogSourceName: ds,
+      catalogTableName: index,
+      aggregation: metric.aggregation,
+      attributesGroupBy: metric.attributesGroupBy,
+    };
     const visMetaData = visualizationFromMetric(
       {
         ...metricLayout,
         dataSources: datasourceMetaFrom(metric.catalog),
         query: updateCatalogVisualizationQuery({
-          catalogSourceName: ds,
-          catalogTableName: index,
-          aggregation: metric.aggregation,
-          attributesGroupBy: metric.attributesGroupBy,
+          ...queryMetaData,
           startTime: 'now-1d',
           endTime: 'now',
           spanParam: '1d',
         }),
+        queryMetaData,
         name: metaData.name,
+        subType: PROMQL_METRIC_SUBTYPE,
         dateRange: ['now-1d', 'now'],
         fields: '',
         timestamp: '@timestamp',
@@ -243,6 +248,13 @@ export const TopMenu = ({
       spanValue,
       resolutionValue
     );
+    console.log('createSavedVisualization', {
+      metric,
+      metaData,
+      metricLayout,
+      queryMetaData,
+      visMetaData,
+    });
 
     const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
     return savedObject.objectId;
@@ -273,7 +285,7 @@ export const TopMenu = ({
 
     if (selectedPanelOptions?.length ?? 0 > 0) {
       try {
-        addMultipleVizToPanels(selectedPanelOptions, savedMetricIds);
+        dispatch(addMultipleVizToPanels(selectedPanelOptions, savedMetricIds));
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);

@@ -25,10 +25,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
+import { SavedVisualization } from 'common/types/explorer';
 import { useSelector } from 'react-redux';
 import {
   displayVisualization,
+  fetchVisualizationById,
   renderCatalogVisualization,
   renderSavedVisualization,
 } from '../../helpers/utils';
@@ -37,6 +39,7 @@ import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { MetricsEditInline } from '../../../metrics/sidebar/metrics_edit_inline';
 import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
+import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -63,6 +66,7 @@ interface Props {
   editMode: boolean;
   visualizationId: string;
   savedVisualizationId: string;
+  inputMetaData: object;
   fromTime: string;
   toTime: string;
   onRefresh: boolean;
@@ -81,6 +85,7 @@ export const VisualizationContainer = ({
   editMode,
   visualizationId,
   savedVisualizationId,
+  inputMetaData,
   fromTime,
   toTime,
   onRefresh,
@@ -217,9 +222,23 @@ export const VisualizationContainer = ({
     popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
   }
 
+  const fetchVisualization = async () => {
+    return savedVisualizationId
+      ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
+      : inputMetaData;
+  };
+
   const loadVisaulization = async () => {
-    if (catalogVisualization)
-      await renderCatalogVisualization({
+    const visualization = await fetchVisualization();
+    setVisualizationMetaData(visualization);
+
+    console.log('loadVisualization', { visualization, savedVisualizationId });
+    if (!visualization && !savedVisualizationId) return;
+
+    if (visualization.sub_type === PROMQL_METRIC_SUBTYPE) {
+      console.log('calling recnderCatalogVisualization', visualization);
+      renderCatalogVisualization({
+        visualization,
         http,
         pplService,
         catalogSource: visualizationId,
@@ -235,8 +254,9 @@ export const VisualizationContainer = ({
         setIsError,
         queryMetaData,
       });
-    else
-      await renderSavedVisualization(
+    } else
+      await renderSavedVisualization({
+        visualization,
         http,
         pplService,
         savedVisualizationId,
@@ -249,8 +269,8 @@ export const VisualizationContainer = ({
         setVisualizationData,
         setVisualizationMetaData,
         setIsLoading,
-        setIsError
-      );
+        setIsError,
+      });
   };
 
   const memoisedVisualizationBox = useMemo(
@@ -289,10 +309,6 @@ export const VisualizationContainer = ({
   useEffect(() => {
     loadVisaulization();
   }, [onRefresh]);
-
-  useEffect(() => {
-    if (catalogVisualization) loadVisaulization();
-  }, [queryMetaData]);
 
   const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 

@@ -77,6 +77,7 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     unitsOfMeasure = '',
     selectedLabels,
     objectId = '',
+    queryMetaData = {},
   }: any) {
     const objRequest: any = {
       object: {
@@ -127,6 +128,10 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
 
     if (!isEmpty(objectId)) {
       objRequest.object_id = objectId;
+    }
+
+    if (!isEmpty(queryMetaData)) {
+      objRequest.object.query_meta_data = queryMetaData;
     }
 
     return objRequest;

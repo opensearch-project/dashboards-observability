@@ -20,39 +20,35 @@ import {
   updateMetricQuery,
 } from '../redux/slices/metrics_slice';
 
-const useObservable = (observable, observer, deps) => {
-  // useEffect with empty deps will call this only once
-  useEffect(() => {
-    const sub = observable.subscribe(observer); // connect
-    return () => sub.unsubscribe(); // < unsub on unmount
-  }, deps);
-};
+const availableAttributesLabels = (attributes) =>
+  attributes.map((a) => ({
+    label: a,
+    name: a,
+  }));
 
-export const MetricsEditInline = ({ visualizationId }: { visualizationId: string }) => {
+export const MetricsEditInline = ({ visualization }: { visualizationId: string }) => {
   const [aggregationIsOpen, setAggregationIsOpen] = useState(false);
   const [attributesGroupByIsOpen, setAttributesGroupByIsOpen] = useState(false);
 
   const dispatch = useDispatch();
 
-  const query = useSelector(metricQuerySelector(visualizationId));
-  useEffect(() => {
-    console.log({ visualizationId, query });
-  }, [query, visualizationId]);
-
-  const availableAttributesLabels = query.availableAttributes.map((attribute) => ({
-    label: attribute,
-    name: attribute,
-  }));
+  // const availableAttributesLabels =
+  //   visualization.availableAttributes?.map((attribute) => ({
+  //     label: attribute,
+  //     name: attribute,
+  //   })) ?? [];
 
   const onChangeAggregation = (e) => {
-    dispatch(updateMetricQuery(visualizationId, { aggregation: e.target.value }));
+    console.log('onChangeAggregation', e.target.value);
+
+    dispatch(updateMetricQuery(visualization.id, { aggregation: e.target.value }));
     setAggregationIsOpen(false);
   };
 
   const onChangeAttributesGroupBy = async (selectedAttributes) => {
     console.log('onChangeAttributes', selectedAttributes);
     const attributesGroupBy = selectedAttributes.map(({ label }) => label);
-    dispatch(setMetricSelectedAttributes({ visualizationId, attributesGroupBy }));
+    dispatch(updateMetricQuery(visualization.id, { attributesGroupBy }));
 
     setAttributesGroupByIsOpen(false);
   };
@@ -62,7 +58,7 @@ export const MetricsEditInline = ({ visualizationId }: { visualizationId: string
       <EuiFlexItem id="aggregation__field">
         <EuiSelect
           compressed
-          value={query.aggregation}
+          value={visualization?.aggregation ?? 'avg'}
           onChange={onChangeAggregation}
           options={AGGREGATION_OPTIONS}
           prepend="AGGREGATION"
@@ -82,9 +78,11 @@ export const MetricsEditInline = ({ visualizationId }: { visualizationId: string
         className={'attributesGroupBy'}
         compressed
         fullWidth
-        selectedOptions={query.attributesGroupBy.map((label) => ({ label, value: label }))}
+        selectedOptions={
+          visualization?.attributesGroupBy?.map((label) => ({ label, value: label })) ?? []
+        }
         onChange={onChangeAttributesGroupBy}
-        options={availableAttributesLabels}
+        options={availableAttributesLabels(visualization?.availableAttributes ?? [])}
         prepend={'ATTRIBUTES GROUP BY'}
       />
     </EuiFormControlLayout>

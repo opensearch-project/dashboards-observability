@@ -7,12 +7,20 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { useObservable } from 'react-use';
 import _ from 'lodash';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
 import { MetricType } from '../../../../common/types/metrics';
-import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
-import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
+import {
+  mergeLayoutAndVisualizations,
+  updateCatalogVisualizationQuery,
+} from '../../custom_panels/helpers/utils';
+import {
+  updateMetricsLayout,
+  deSelectMetric,
+  metricQueryFromMetaData,
+  selectedMetricsSelector,
+} from '../redux/slices/metrics_slice';
 import { mergeLayoutAndMetrics } from '../helpers/utils';
 
 import './metrics_grid.scss';
@@ -26,6 +34,7 @@ interface MetricsGridProps {
   chrome: CoreStart['chrome'];
   panelVisualizations: MetricType[];
   setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
+  selectedMetrics: MetricType[];
   editMode: boolean;
   startTime: string;
   endTime: string;
@@ -58,7 +67,8 @@ export const MetricsGrid = ({
   };
 
   const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
-  const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
+  const [previousEditLayout, setPreviousEditLayout] = useState<Layout[]>([]);
+  const selectedMetrics = useSelector(selectedMetricsSelector);
   const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
   const [removeMetricsList, setRemoveMetricsList] = useState<Array<{ id: string }>>([]);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
@@ -66,28 +76,53 @@ export const MetricsGrid = ({
   // Reset Size of Visualizations when layout is changed
   const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
     window.dispatchEvent(new Event('resize'));
-    setPostEditLayout(currLayouts);
   };
+  const visualizationFromMetric = (metric): SavedVisualizationType => ({
+    ...metric,
+    query: updateCatalogVisualizationQuery({ ...metric, startTime, endTime, spanParam }),
+    query_meta_data: {
+      catalogSourceName: metric.catalogSourceName,
+      catalogTableName: metric.catalogTableName,
+      aggregation: metric.aggregation,
+      attributesGroupBy: metric.attributesGroupBy,
+    },
+
+    timeField: '@timestamp',
+    selected_date_range: [startTime, endTime],
+    sub_type: 'promqlmetric',
+    userConfigs: {
+      dataConfig: {
+        type: 'line',
+        fillOpacity: 0,
+        lineWidth: 2,
+      },
+    },
+  });
 
   const loadVizComponents = () => {
-    const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
-      <VisualizationContainer
-        key={panelVisualization.id}
-        editMode={editMode}
-        visualizationId={panelVisualization.id}
-        savedVisualizationId={panelVisualization.savedVisualizationId}
-        fromTime={startTime}
-        toTime={endTime}
-        onRefresh={onRefresh}
-        onEditClick={moveToEvents}
-        usedInNotebooks={true}
-        pplFilterValue=""
-        removeVisualization={removeVisualization}
-        catalogVisualization={panelVisualization.catalog !== OBSERVABILITY_CUSTOM_METRIC}
-        spanParam={spanParam}
-        contextMenuId="metrics"
-      />
-    ));
+    const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => {
+      const metric = selectedMetrics[index];
+      console.log('loadVizComponents', { panelVisualization, metric });
+      return (
+        <VisualizationContainer
+          key={panelVisualization.id}
+          editMode={editMode}
+          visualizationId={metric.id}
+          savedVisualizationId={metric.savedVisualizationId}
+          inputMetaData={metric.savedVisualizationId ? undefined : visualizationFromMetric(metric)}
+          fromTime={startTime}
+          toTime={endTime}
+          onRefresh={onRefresh}
+          onEditClick={moveToEvents}
+          usedInNotebooks={true}
+          pplFilterValue=""
+          removeVisualization={removeVisualization}
+          // catalogVisualization={panelVisualization.catalog !== OBSERVABILITY_CUSTOM_METRIC}
+          spanParam={spanParam}
+          contextMenuId="metrics"
+        />
+      );
+    });
     setGridData(gridDataComps);
   };
 
@@ -114,7 +149,7 @@ export const MetricsGrid = ({
       id: visualizationId,
     });
     setRemoveMetricsList([...removeMetricsList, { id: visualizationId }]);
-    mergeLayoutAndVisualizations(postEditLayout, newVisualizationList, setPanelVisualizations);
+    mergeLayoutAndVisualizations(previousEditLayout, newVisualizationList, setPanelVisualizations);
   };
 
   // Update layout whenever user edit gets completed
@@ -131,7 +166,7 @@ export const MetricsGrid = ({
     }
     if (editActionType === 'save') {
       removeMetricsList.map((value) => handleRemoveMetric(value));
-      updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
+      updateLayout(mergeLayoutAndMetrics(previousEditLayout, panelVisualizations));
       setEditActionType('');
     }
   }, [editActionType]);

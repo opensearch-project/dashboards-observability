@@ -210,28 +210,44 @@ export const getQueryResponse = (
 };
 
 // Fetches savedVisualization by Id and runs getQueryResponse
-export const renderSavedVisualization = async (
-  http: CoreStart['http'],
-  pplService: PPLService,
-  savedVisualizationId: string,
-  startTime: string,
-  endTime: string,
-  filterQuery: string,
-  spanParam: string | undefined,
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
-) => {
+export const renderSavedVisualization = async ({
+  http,
+  pplService,
+  savedVisualizationId,
+  startTime,
+  endTime,
+  filterQuery,
+  spanParam,
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  visualization,
+}: {
+  http: CoreStart['http'];
+  pplService: PPLService;
+  savedVisualizationId: string;
+  startTime: string;
+  endTime: string;
+  filterQuery: string;
+  spanParam: string | undefined;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  visualization: SavedVisualizationType;
+}) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
 
-  let visualization: SavedVisualizationType = {};
-  let updatedVisualizationQuery = '';
+  // let visualization: SavedVisualizationType = {};
+  // let updatedVisualizationQuery = '';
 
-  visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
+  // visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
 
   if (_.isEmpty(visualization)) {
     setIsLoading(false);
@@ -306,7 +322,7 @@ export const updateCatalogVisualizationQuery = ({
   attributesGroupBy,
   startTime,
   endTime,
-  spanParam,
+  spanParam = '1h',
 }: {
   catalogSourceName: string;
   catalogTableName: string;
@@ -358,7 +374,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading,
   setIsError,
   spanResolution,
-  queryMetaData,
+  visualization,
 }: {
   http: CoreStart['http'];
   pplService: PPLService;
@@ -375,6 +391,7 @@ export const renderCatalogVisualization = async ({
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   spanResolution?: string;
   queryMetaData?: MetricType;
+  visualization: SavedVisualizationType;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -388,16 +405,13 @@ export const renderCatalogVisualization = async ({
   const defaultAggregation = 'avg';
 
   const visualizationQuery = updateCatalogVisualizationQuery({
-    catalogSourceName,
-    catalogTableName,
-    aggregation: queryMetaData.aggregation ?? 'avg',
-    attributesGroupBy: queryMetaData.attributesGroupBy ?? [],
+    ...visualization.query_meta_data,
     startTime,
     endTime,
     spanParam,
   });
 
-  console.log('renderCatalogVisualilzation', { queryMetaData, visualizationQuery });
+  console.log('renderCatalogVisualilzation', { visualization, visualizationQuery });
 
   const visualizationMetaData = createCatalogVisualizationMetaData(
     catalogSource,
@@ -406,7 +420,7 @@ export const renderCatalogVisualization = async ({
     visualizationTimeField
   );
 
-  visualizationMetaData.user_configs = {
+  visualization.user_configs = {
     layoutConfig: {
       height: 390,
       margin: { t: 5 },
@@ -414,10 +428,10 @@ export const renderCatalogVisualization = async ({
     },
   };
 
-  setVisualizationTitle(catalogSource);
+  setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
 
-  setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
+  // setVisualizationMetaData();
 
   getQueryResponse(
     pplService,

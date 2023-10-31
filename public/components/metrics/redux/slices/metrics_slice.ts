@@ -19,6 +19,7 @@ import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../.
 import { coreRefs } from '../../../../framework/core_refs';
 import { useToast } from '../../../common/toast';
 import { Metric } from '@osd/analytics/target/types/metrics';
+import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
 
 export interface IconAttributes {
   color: string;
@@ -71,7 +72,7 @@ const fetchCustomMetrics = async () => {
     objectType: [SAVED_VISUALIZATION],
   });
   const savedMetrics = dataSet.observabilityObjectList.filter(
-    (obj) => obj.savedVisualization.sub_type === 'metric'
+    (obj) => obj.savedVisualization.sub_type === PROMQL_METRIC_SUBTYPE
   );
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
@@ -101,12 +102,15 @@ const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => 
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         name: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
         catalog: `${dataSource}`,
+        catalogSourceName: dataSource,
+        catalogTableName: obj.TABLE_NAME,
         index: `${dataSource}.${obj.TABLE_NAME}`,
         query: undefined,
         aggregation: 'avg',
         attributesGroupBy: [],
         availableAttributes: [],
         type: 'line',
+        sub_type: PROMQL_METRIC_SUBTYPE,
         recentlyCreated: false,
       }))
     )
@@ -122,16 +126,6 @@ const updateLayoutBySelection = (state: any, newMetric: any) => {
     y: newDimensions.y,
     h: newDimensions.h,
     w: newDimensions.w,
-    query: {
-      type:
-        newMetric.catalog === OBSERVABILITY_CUSTOM_METRIC
-          ? 'savedCustomMetric'
-          : 'prometheusMetric',
-      catalog: newMetric.id,
-      aggregation: 'avg',
-      attributesGroupBy: [],
-      availableAttributes: [],
-    },
   };
   state.metricsLayout = [...state.metricsLayout, metricVisualization];
 };
