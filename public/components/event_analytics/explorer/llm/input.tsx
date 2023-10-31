@@ -127,6 +127,9 @@ export const LLMInput: React.FC<Props> = (props) => {
             Predict
           </EuiButton>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={() => setIsFeedbackOpen(true)}>Feedback</EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       {isFeedbackOpen && (
         <EuiModal onClose={() => setIsFeedbackOpen(false)}>

@@ -81,7 +81,7 @@ interface FeedbackModalContentProps {
 export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props) => {
   const labels: NonNullable<Required<typeof props.displayLabels>> = Object.assign(
     {
-      formHeader: 'LLM Feedback',
+      formHeader: 'Olly Skills Feedback',
       inputPlaceholder: 'Your input question',
       input: 'Input question',
       outputPlaceholder: 'The LLM response',
