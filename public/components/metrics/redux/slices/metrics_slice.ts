@@ -72,6 +72,7 @@ const fetchCustomMetrics = async () => {
   const dataSet = await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
     objectType: [SAVED_VISUALIZATION],
   });
+  console.log('fetchCustomMetrics', dataSet.observabilityObjectList);
   const savedMetrics = dataSet.observabilityObjectList.filter(
     (obj) => obj.savedVisualization.sub_type === PROMQL_METRIC_SUBTYPE
   );
