@@ -581,6 +581,7 @@ export const Explorer = ({
                         requestParams={requestParams}
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
+                        tabId={tabId}
                       />
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
