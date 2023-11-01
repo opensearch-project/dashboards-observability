@@ -337,6 +337,10 @@ export const DEFAULT_TIMESTAMP_COLUMN = {
   display: 'Time',
   schema: 'datetime',
   initialWidth: 200,
+  actions: {
+    showMoveLeft: false,
+    showMoveRight: false,
+  },
 };
 
 export const DEFAULT_SOURCE_COLUMN = {
@@ -344,4 +348,8 @@ export const DEFAULT_SOURCE_COLUMN = {
   isSortable: false,
   display: 'Source',
   schema: '_source',
+  actions: {
+    showMoveLeft: false,
+    showMoveRight: false,
+  },
 };

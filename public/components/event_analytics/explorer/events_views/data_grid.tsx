@@ -137,20 +137,22 @@ export function DataGrid(props: DataGridProps) {
       return {
         visibleColumns: columns,
         setVisibleColumns: (visibleColumns: string[]) => {
-          const fields: IField[] = [];
-          // fields within visibleColumns are re-created to be of type IField
-          visibleColumns.map((col) => {
-            fields.push({ name: col, type: getFieldTypes(col, explorerFields) });
-          });
-          dispatch(
-            updateFields({
-              tabId,
-              data: {
-                ...explorerFields,
-                [SELECTED_FIELDS]: fields,
-              },
-            })
-          );
+          if (explorerFields.selectedFields.length > 0) {
+            const fields: IField[] = [];
+            // fields within visibleColumns are re-created to be of type IField
+            visibleColumns.map((col) => {
+              fields.push({ name: col, type: getFieldTypes(col, explorerFields) });
+            });
+            dispatch(
+              updateFields({
+                tabId,
+                data: {
+                  ...explorerFields,
+                  [SELECTED_FIELDS]: fields,
+                },
+              })
+            );
+          }
         },
       };
     }
