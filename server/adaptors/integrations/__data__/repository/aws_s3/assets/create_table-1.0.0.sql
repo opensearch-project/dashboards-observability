@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE IF NOT EXISTS {table_name} (
+CREATE EXTERNAL TABLE {table_name} (
   bucket_owner STRING,
   bucket_name STRING,
   request_datetime_1 STRING,
