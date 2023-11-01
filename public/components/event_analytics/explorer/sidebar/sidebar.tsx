@@ -87,25 +87,31 @@ export const Sidebar = (props: ISidebarProps) => {
     return nextFields;
   };
 
-  const updateStoreFields = (fieldsData: ExplorerFields) => {
-    dispatch(
-      updateFields({
-        tabId,
-        data: {
-          ...fieldsData,
-        },
-      })
-    );
-  };
+  const updateStoreFields = useCallback(
+    (fieldsData: ExplorerFields) => {
+      dispatch(
+        updateFields({
+          tabId,
+          data: {
+            ...fieldsData,
+          },
+        })
+      );
+    },
+    [explorerFields, tabId]
+  );
 
-  const sortStoreFields = (fieldName: string) => {
-    dispatch(
-      sortFields({
-        tabId,
-        data: [fieldName],
-      })
-    );
-  };
+  const sortStoreFields = useCallback(
+    (fieldName: string) => {
+      dispatch(
+        sortFields({
+          tabId,
+          data: [fieldName],
+        })
+      );
+    },
+    [explorerFields, tabId]
+  );
 
   // handling moving a field from available to selected
   const handleAddField = useCallback(
@@ -135,7 +141,6 @@ export const Sidebar = (props: ISidebarProps) => {
     source: any;
     draggableId: string;
   }) => {
-    console.log(destination);
     // check if the destination and source are the same area
     if (destination.droppableId !== source.droppableId) {
       // if dropped into the selected fields: add, if dropped into available: remove

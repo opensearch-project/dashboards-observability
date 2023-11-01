@@ -140,7 +140,7 @@ export function DataGrid(props: DataGridProps) {
           if (explorerFields.selectedFields.length > 0) {
             const fields: IField[] = [];
             // fields within visibleColumns are re-created to be of type IField
-            visibleColumns.map((col) => {
+            visibleColumns.forEach((col) => {
               fields.push({ name: col, type: getFieldTypes(col, explorerFields) });
             });
             dispatch(

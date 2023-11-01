@@ -445,12 +445,11 @@ export const redoQuery = (
 
 // method to return the type of a field from its name
 export const getFieldTypes = (newFieldName: string, explorerFields: IExplorerFields) => {
-  let fieldType: string = '';
-  explorerFields.availableFields.map((field) => {
-    if (field.name === newFieldName) fieldType = field.type;
+  explorerFields.availableFields.forEach((field) => {
+    if (field.name === newFieldName) return field.type;
   });
-  explorerFields.selectedFields.map((field) => {
-    if (field.name === newFieldName) fieldType = field.type;
+  explorerFields.selectedFields.forEach((field) => {
+    if (field.name === newFieldName) return field.type;
   });
-  return fieldType;
+  return '';
 };
