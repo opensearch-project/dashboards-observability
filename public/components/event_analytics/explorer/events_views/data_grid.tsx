@@ -138,6 +138,7 @@ export function DataGrid(props: DataGridProps) {
         visibleColumns: columns,
         setVisibleColumns: (visibleColumns: string[]) => {
           const fields: IField[] = [];
+          // fields within visibleColumns are re-created to be of type IField
           visibleColumns.map((col) => {
             fields.push({ name: col, type: getFieldTypes(col, explorerFields) });
           });
@@ -280,7 +281,7 @@ export function DataGrid(props: DataGridProps) {
           toolbarVisibility={{
             showColumnSelector: {
               allowHide: false,
-              allowReorder: true,
+              allowReorder: explorerFields.selectedFields.length > 0,
             },
             showFullScreenSelector: false,
             showStyleSelector: false,
