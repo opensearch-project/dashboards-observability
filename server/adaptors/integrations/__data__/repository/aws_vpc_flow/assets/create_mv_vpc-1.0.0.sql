@@ -21,4 +21,10 @@ CREATE MATERIALIZED VIEW {table_name}_mview AS
           ELSE 'egress'
         END AS `aws.vpc.flow-direction`
 FROM
-    {table_name};
+    {table_name}
+WITH (
+    auto_refresh = 'true',
+    checkpoint_location = '{s3_bucket_location}/checkpoint',
+    watermark_delay = '1 Minute',
+    extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
+)
