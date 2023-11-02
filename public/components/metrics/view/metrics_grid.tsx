@@ -16,6 +16,7 @@ import {
   selectedMetricsSelector,
   dateSpanFilterSelector,
   refreshSelector,
+  moveMetric,
 } from '../redux/slices/metrics_slice';
 
 import './metrics_grid.scss';
@@ -28,96 +29,31 @@ import { useRef } from 'react';
 
 interface MetricsGridProps {
   chrome: CoreStart['chrome'];
-  panelVisualizations: MetricType[];
-  setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
-  selectedMetrics: MetricType[];
-  editMode: boolean;
-  startTime: string;
-  endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
-  onRefresh: boolean;
-  editActionType: string;
-  setEditActionType: React.Dispatch<React.SetStateAction<string>>;
-  spanParam: string;
 }
 
-export const AutoScrollingDraggableVisualizationContainer = ({
-  metric,
-  idx,
-  dateSpanFilter,
-  refresh,
-  moveToEvents,
-}) => {
-  const ref = useRef();
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-  }, []);
+const visualizationFromMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
+  ...metric,
+  query: updateCatalogVisualizationQuery({ ...metric, ...dateSpanFilter }),
+  query_meta_data: {
+    catalogSourceName: metric.catalogSourceName,
+    catalogTableName: metric.catalogTableName,
+    aggregation: metric.aggregation,
+    attributesGroupBy: metric.attributesGroupBy,
+  },
 
-  const id = metric.id;
-
-  const visualizationFromMetric = (metric): SavedVisualizationType => ({
-    ...metric,
-    query: updateCatalogVisualizationQuery({ ...metric, ...dateSpanFilter }),
-    query_meta_data: {
-      catalogSourceName: metric.catalogSourceName,
-      catalogTableName: metric.catalogTableName,
-      aggregation: metric.aggregation,
-      attributesGroupBy: metric.attributesGroupBy,
+  timeField: '@timestamp',
+  selected_date_range: dateSpanFilter,
+  userConfigs: {
+    dataConfig: {
+      type: 'line',
+      fillOpacity: 0,
+      lineWidth: 2,
     },
+  },
+});
 
-    timeField: '@timestamp',
-    selected_date_range: dateSpanFilter,
-    userConfigs: {
-      dataConfig: {
-        type: 'line',
-        fillOpacity: 0,
-        lineWidth: 2,
-      },
-    },
-  });
-
-  return (
-    <div ref={ref}>
-      <EuiDraggable key={id} index={idx} draggableId={id}>
-        <VisualizationContainer
-          key={id}
-          visualizationId={id}
-          savedVisualizationId={metric.savedVisualizationId}
-          inputMetaData={metric.savedVisualizationId ? undefined : visualizationFromMetric(metric)}
-          fromTime={dateSpanFilter.start}
-          toTime={dateSpanFilter.end}
-          onRefresh={refresh}
-          onEditClick={moveToEvents}
-          // usedInNotebooks={true}
-          pplFilterValue=""
-          spanParam={`${dateSpanFilter.span}${dateSpanFilter.resolution}`}
-          contextMenuId="metrics"
-          inlineEditor={
-            metric.sub_type === PROMQL_METRIC_SUBTYPE && (
-              <MetricsEditInline visualization={metric} />
-            )
-          }
-        />
-      </EuiDraggable>
-    </div>
-  );
-};
-
-export const MetricsGrid = ({
-  chrome,
-  panelVisualizations,
-  setPanelVisualizations,
-  editMode,
-  startTime,
-  endTime,
-  moveToEvents,
-  onRefresh,
-  editActionType,
-  setEditActionType,
-  spanParam,
-}: MetricsGridProps) => {
+export const MetricsGrid = ({ chrome, moveToEvents }: MetricsGridProps) => {
   const { http, pplService } = coreRefs;
   // Redux tools
   const dispatch = useDispatch();
@@ -129,7 +65,6 @@ export const MetricsGrid = ({
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   const onDragEnd = ({ source, destination }) => {
-    console.log(source, destination);
     dispatch(moveMetric({ source, destination }));
   };
 
@@ -138,13 +73,31 @@ export const MetricsGrid = ({
       const id = metric.id;
       // console.log('visualizationComponents metricPanel', { metricPanel, idx });
       return (
-        <AutoScrollingDraggableVisualizationContainer
-          metric={metric}
-          idx={idx}
-          dateSpanFilter={dateSpanFilter}
-          refresh={refresh}
-          moveToEvents={moveToEvents}
-        />
+        <EuiDraggable key={id} index={idx} draggableId={id}>
+          <VisualizationContainer
+            key={id}
+            visualizationId={id}
+            savedVisualizationId={metric.savedVisualizationId}
+            inputMetaData={
+              metric.savedVisualizationId
+                ? undefined
+                : visualizationFromMetric(metric, dateSpanFilter)
+            }
+            fromTime={dateSpanFilter.start}
+            toTime={dateSpanFilter.end}
+            onRefresh={refresh}
+            onEditClick={moveToEvents}
+            // usedInNotebooks={true}
+            pplFilterValue=""
+            spanParam={`${dateSpanFilter.span}${dateSpanFilter.resolution}`}
+            contextMenuId="metrics"
+            inlineEditor={
+              metric.sub_type === PROMQL_METRIC_SUBTYPE && (
+                <MetricsEditInline visualization={metric} />
+              )
+            }
+          />
+        </EuiDraggable>
       );
     });
   }, [selectedMetrics, refresh]);
@@ -155,14 +108,6 @@ export const MetricsGrid = ({
       window.dispatchEvent(new Event('resize'));
     }, 300);
   }, [isLocked]);
-
-  // useEffect(() => {
-  //   loadVizComponents();
-  // }, [onRefresh]);
-
-  // useEffect(() => {
-  //   loadVizComponents();
-  // }, []);
 
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
