@@ -900,12 +900,12 @@ export const Explorer = ({
           <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
             {!appLogEvents && (
               <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-                <DataSourceSelection tabId={initialTabId} />
+                <DataSourceSelection tabId={tabId} />
               </EuiSplitPanel.Inner>
             )}
             <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
               <ObservabilitySideBar
-                tabId={initialTabId}
+                tabId={tabId}
                 pplService={pplService}
                 notifications={notifications}
               />
