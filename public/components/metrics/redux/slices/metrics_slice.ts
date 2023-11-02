@@ -85,7 +85,6 @@ export const loadMetrics = () => async (dispatch) => {
   dispatch(setMetrics(metricsMapByName));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  console.log('loadMetrics', { metricsMapByName, sortedIds });
   dispatch(setSortedIds(sortedIds));
 };
 
@@ -93,7 +92,6 @@ const fetchCustomMetrics = async () => {
   const dataSet = await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
     objectType: [SAVED_VISUALIZATION],
   });
-  console.log('fetchCustomMetrics', dataSet.observabilityObjectList);
   const savedMetrics = dataSet.observabilityObjectList.filter(
     (obj) => obj.savedVisualization.sub_type === PROMQL_METRIC_SUBTYPE
   );
@@ -239,6 +237,7 @@ export const {
   selectMetric,
   moveMetric,
   setSearch,
+  setDateSpan,
   setDataSources,
   setDataSourceTitles,
   setDataSourceIcons,
@@ -246,7 +245,6 @@ export const {
 } = metricSlice.actions;
 
 /** private actions */
-const { setDateSpan, setRefresh } = metricSlice.actions;
 
 const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
@@ -262,7 +260,6 @@ const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) =
       .map((sch) => sch.COLUMN_NAME)
       .filter((col) => col[0] !== '@');
 
-    console.log('getAvailableAttributes', { id, metricIndex, columnSchema, availableAttributes });
     dispatch(updateMetricQuery(id, { availableAttributes }));
   } catch (e) {
     toasts?.addDanger(`An error occurred retrieving attributes for metric ${id} `);
@@ -296,14 +293,6 @@ export const updateMetricQuery = (id, { availableAttributes, aggregation, attrib
     attributesGroupBy: attributesGroupBy || staticMetric.attributesGroupBy || [],
     availableAttributes: availableAttributes || staticMetric.availableAttributes || [],
   };
-  console.log('updateMetricQuery', {
-    id,
-    staticMetric,
-    metric,
-    availableAttributes,
-    aggregation,
-    attributesGroupBy,
-  });
   dispatch(setMetric(metric));
 };
 

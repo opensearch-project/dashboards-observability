@@ -14,11 +14,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { resolutionOptions } from '../../../../common/constants/metrics';
 import { uiSettingsService } from '../../../../common/utils';
-import {
-  dateSpanFilterSelector,
-  updateDateSpan,
-  updateStartEndDate,
-} from '../redux/slices/metrics_slice';
+import { dateSpanFilterSelector, setDateSpan } from '../redux/slices/metrics_slice';
 import { MetricsExport } from './metrics_export';
 import './top_menu.scss';
 
@@ -38,14 +34,14 @@ export const TopMenu = () => {
                 prepend="Span Interval"
                 value={dateSpanFilter.span}
                 isInvalid={dateSpanFilter.span < 1}
-                onChange={(e) => dispatch(updateDateSpan({ span: e.target.value }))}
+                onChange={(e) => dispatch(setDateSpan({ span: e.target.value }))}
                 data-test-subj="metrics__spanValue"
                 append={
                   <EuiSelect
                     className="resolutionSelectOption"
                     options={resolutionOptions}
                     value={dateSpanFilter.resolution}
-                    onChange={(e) => dispatch(updateDateSpan({ resolution: e.target.value }))}
+                    onChange={(e) => dispatch(setDateSpan({ resolution: e.target.value }))}
                     aria-label="resolutionSelect"
                     data-test-subj="metrics__spanResolutionSelect"
                   />
@@ -59,7 +55,7 @@ export const TopMenu = () => {
               dateFormat={uiSettingsService.get('dateFormat')}
               start={dateSpanFilter.start}
               end={dateSpanFilter.end}
-              onTimeChange={(e) => dispatch(updateStartEndDate(e))}
+              onTimeChange={(dateSpan) => dispatch(setDateSpan(dateSpan))}
               recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
             />
           </EuiFlexItem>

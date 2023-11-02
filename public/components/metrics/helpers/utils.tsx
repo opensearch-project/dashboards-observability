@@ -178,7 +178,7 @@ export const createPrometheusMetricById = (metricId: string) => {
     type: 'line',
     timeField: '@timestamp',
     selected_fields: {
-      text: '',
+      text: '@value',
       tokens: [],
     },
     sub_type: 'metric',
@@ -193,6 +193,7 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
         lineWidth: '2',
         fillOpacity: '0',
       },
+      series: ['@value'],
     },
   });
 

@@ -246,6 +246,7 @@ export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
   NO_SERIES: 'Add a field to start',
+  NO_METRIC: 'Invalid Metric MetaData',
 };
 
 export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';

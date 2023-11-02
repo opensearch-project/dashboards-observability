@@ -39,6 +39,7 @@ import {
 } from '../../../../src/core/public/saved_objects';
 import { ChromeBreadcrumb } from '../../../../src/core/public/chrome';
 import { DataSourceType } from '../../../../src/plugins/data/public';
+import { PROMQL_METRIC_SUBTYPE } from '../constants/shared';
 
 export interface IQueryTab {
   id: string;
@@ -173,7 +174,7 @@ export interface SavedVisualization extends SavedObjectAttributes {
   selected_fields: { text: string; tokens: [] };
   selected_timestamp: IField;
   type: string;
-  sub_type?: 'metric' | 'visualization'; // exists if sub type is metric
+  sub_type?: 'metric' | 'visualization' | typeof PROMQL_METRIC_SUBTYPE; // exists if sub type is metric
   user_configs?: string;
   units_of_measure?: string;
   application_id?: string;

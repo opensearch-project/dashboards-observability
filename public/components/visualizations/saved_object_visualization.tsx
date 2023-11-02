@@ -13,6 +13,8 @@ import { getPPLService, preprocessQuery, removeBacktick } from '../../../common/
 import { getDefaultVisConfig } from '../event_analytics/utils';
 import { getVizContainerProps } from './charts/helpers';
 import { Visualization } from './visualization';
+import { PROMQL_METRIC_SUBTYPE } from '../../../common/constants/shared';
+import { getMetricVisConfig } from '../event_analytics/utils/utils';
 
 interface SavedObjectVisualizationProps {
   savedVisualization: SavedVisualization;
@@ -30,13 +32,22 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
 
   useEffect(() => {
     const pplService = getPPLService();
-    const metaData = { ...props.savedVisualization, query: props.savedVisualization.query };
+    const isMetric = props.savedVisualization?.sub_type === PROMQL_METRIC_SUBTYPE;
+    const metaData = {
+      ...props.savedVisualization,
+      query: props.savedVisualization.query,
+      queryMetaData: props.savedVisualization.queryMetaData,
+      isMetric,
+    };
     const userConfigs = metaData.user_configs ? JSON.parse(metaData.user_configs) : {};
     const dataConfig = { ...(userConfigs.dataConfig || {}) };
     const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
-    const realTimeParsedStats = {
-      ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
-    };
+    const realTimeParsedStats = isMetric
+      ? getMetricVisConfig(metaData)
+      : {
+          ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
+        };
+
     let finalDimensions = [...(realTimeParsedStats.dimensions || [])];
     const breakdowns = [...(dataConfig.breakdowns || [])];
 

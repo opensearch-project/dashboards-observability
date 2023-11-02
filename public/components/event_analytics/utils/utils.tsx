@@ -270,6 +270,23 @@ export const getPropName = (queriedVizObj: {
   }
 };
 
+export const getMetricVisConfig = (metric) => {
+  const { aggregation } = metric;
+  return {
+    [AGGREGATIONS]: [
+      {
+        name: aggregation,
+        aggregation,
+        label: aggregation + '()',
+      },
+    ],
+    [BREAKDOWNS]: [],
+    query_meta_data: metric.query_meta_data,
+    sub_type: metric.sub_type,
+    legend: { showLegend: 'hidden' }, // force no-legend in dashboard displays
+  };
+};
+
 export const getDefaultVisConfig = (statsToken: statsChunk) => {
   if (statsToken === null) {
     return {

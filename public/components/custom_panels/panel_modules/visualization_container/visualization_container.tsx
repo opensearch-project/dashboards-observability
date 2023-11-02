@@ -237,7 +237,6 @@ export const VisualizationContainer = ({
     const visualization = await fetchVisualization();
     setVisualizationMetaData(visualization);
 
-    console.log('loadVisualization', { visualization, savedVisualizationId });
     if (!visualization && !savedVisualizationId) return;
 
     if (visualization.sub_type === PROMQL_METRIC_SUBTYPE) {
