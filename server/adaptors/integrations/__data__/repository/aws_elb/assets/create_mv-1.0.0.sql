@@ -38,4 +38,10 @@ SELECT
     classification as `aws.elb.classification`,
     classification_reason as `aws.elb.classification_reason`
 FROM
-    {table_name};
+    {table_name}
+WITH (
+    auto_refresh = 'true',
+    checkpoint_location = '{s3_bucket_location}/checkpoint',
+    watermark_delay = '1 Minute',
+    extra_options = '{ "{table_name}": { "maxFilesPerTrigger": "10" }}'
+);
