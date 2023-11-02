@@ -56,7 +56,7 @@ jobs:
             chown -R 1000:1000 `pwd`
             cd ./OpenSearch-Dashboards/
             su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
-                                 cd dashboards-observability &&
+                                 cd plugins/dashboards-observability &&
                                  yarn osd bootstrap && yarn test --coverage --maxWorkers=100%"
 
       - name: Upload coverage
@@ -68,9 +68,11 @@ jobs:
 
       - name: Build Artifact
         run: |
-          cd OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn build
-          mv ./build/*.zip ./build/${{ env.PLUGIN_NAME }}-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip
+            chown -R 1000:1000 `pwd`
+            cd ./OpenSearch-Dashboards/
+            su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+                                 cd plugins/dashboards-observability &&
+                                 yarn build && mv ./build/*.zip ./build/${{ env.PLUGIN_NAME }}-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
