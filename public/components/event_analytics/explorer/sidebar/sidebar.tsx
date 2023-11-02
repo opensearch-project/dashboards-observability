@@ -20,6 +20,7 @@ import { AVAILABLE_FIELDS, SELECTED_FIELDS } from '../../../../../common/constan
 import { ExplorerFields, IExplorerFields, IField } from '../../../../../common/types/explorer';
 import { sortFields, updateFields } from '../../redux/slices/field_slice';
 import { Field } from './field';
+import { getFieldTypes } from '../../utils/utils';
 
 interface ISidebarProps {
   query: string;
@@ -55,79 +56,80 @@ export const Sidebar = (props: ISidebarProps) => {
   const [showFields, setShowFields] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // method to return the type of a field from its name
-  const getFieldTypes = (newFieldName: string) => {
-    let fieldType: string = '';
-    explorerFields.availableFields.map((field) => {
-      if (field.name === newFieldName) fieldType = field.type;
-    });
-    explorerFields.selectedFields.map((field) => {
-      if (field.name === newFieldName) fieldType = field.type;
-    });
-    return fieldType;
-  };
-
   /**
    * Toggle fields between selected and unselected sets
    * @param fieldState all fields in store
    * @param field field to be toggled
    * @param FieldSetToRemove the set where this field to be removed from
    * @param FieldSetToAdd the set where this field to be added to
-   * returns new fields state
+   * @param indexPos position in which field should be added, default value is 0
+   * @returns new fields state
    */
   const toggleFields = (
     fieldState: ExplorerFields,
     field: IField,
     fieldSetToRemove: string,
-    fieldSetToAdd: string
+    fieldSetToAdd: string,
+    indexPos: number = 0
   ): ExplorerFields => {
     const nextFields = { ...fieldState };
+
+    // find and remove field
     nextFields[fieldSetToRemove] = nextFields[fieldSetToRemove].filter(
       (fd: IField) => fd.name !== field.name
     );
-    nextFields[fieldSetToAdd] = [...nextFields[fieldSetToAdd], field];
+
+    // add field at specified index, will resolve to 0 if not specified
+    const addedFieldSet = [...nextFields[fieldSetToAdd]]; // copies value, not reference
+    addedFieldSet.splice(indexPos, 0, field);
+    nextFields[fieldSetToAdd] = addedFieldSet;
+
     return nextFields;
   };
 
-  const updateStoreFields = (fieldsData: ExplorerFields, tabID: string, modifiedField: string) => {
-    batch(() => {
+  const updateStoreFields = useCallback(
+    (fieldsData: ExplorerFields) => {
       dispatch(
         updateFields({
-          tabId: tabID,
+          tabId,
           data: {
             ...fieldsData,
           },
         })
       );
+    },
+    [explorerFields, tabId]
+  );
+
+  const sortStoreFields = useCallback(
+    (fieldName: string) => {
       dispatch(
         sortFields({
-          tabId: tabID,
-          data: [modifiedField],
+          tabId,
+          data: [fieldName],
         })
-      );
-    });
-  };
-
-  const handleAddField = useCallback(
-    (field: IField) => {
-      updateStoreFields(
-        toggleFields(explorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS),
-        tabId,
-        SELECTED_FIELDS
       );
     },
     [explorerFields, tabId]
   );
 
-  const handleRemoveField = useCallback(
-    (field: IField) => {
+  // handling moving a field from available to selected
+  const handleAddField = useCallback(
+    (field: IField, indexPos?: number) => {
       updateStoreFields(
-        toggleFields(explorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS),
-        tabId,
-        AVAILABLE_FIELDS
+        toggleFields(explorerFields, field, AVAILABLE_FIELDS, SELECTED_FIELDS, indexPos)
       );
     },
-    [explorerFields, tabId]
+    [explorerFields, tabId, updateStoreFields]
+  );
+
+  const handleRemoveField = useCallback(
+    (field: IField) => {
+      // update to remove from selected fields and sort available fields
+      updateStoreFields(toggleFields(explorerFields, field, SELECTED_FIELDS, AVAILABLE_FIELDS));
+      sortStoreFields(AVAILABLE_FIELDS);
+    },
+    [explorerFields, tabId, updateStoreFields, sortStoreFields]
   );
 
   const onDragEnd = ({
@@ -143,10 +145,27 @@ export const Sidebar = (props: ISidebarProps) => {
     if (destination.droppableId !== source.droppableId) {
       // if dropped into the selected fields: add, if dropped into available: remove
       if (destination.droppableId === 'SELECTED FIELDS') {
-        handleAddField({ name: draggableId, type: getFieldTypes(draggableId) });
+        handleAddField(
+          { name: draggableId, type: getFieldTypes(draggableId, explorerFields) },
+          destination.index
+        );
       } else if (destination.droppableId === 'AVAILABLE FIELDS') {
-        handleRemoveField({ name: draggableId, type: getFieldTypes(draggableId) });
+        handleRemoveField({ name: draggableId, type: getFieldTypes(draggableId, explorerFields) });
       }
+    } else if (
+      destination.droppableId === 'SELECTED FIELDS' &&
+      source.droppableId === 'SELECTED FIELDS'
+    ) {
+      // removes from selected and adds back into selected at specified index position
+      updateStoreFields(
+        toggleFields(
+          explorerFields,
+          { name: draggableId, type: getFieldTypes(draggableId, explorerFields) },
+          SELECTED_FIELDS,
+          SELECTED_FIELDS,
+          destination.index
+        )
+      );
     }
   };
 

@@ -117,7 +117,6 @@ import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 import { DataSourceSelection } from './datasources/datasources_selection';
-import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
 import {
@@ -581,6 +580,7 @@ export const Explorer = ({
                         requestParams={requestParams}
                         startTime={appLogEvents ? startTime : dateRange[0]}
                         endTime={appLogEvents ? endTime : dateRange[1]}
+                        tabId={tabId}
                       />
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
@@ -899,12 +899,12 @@ export const Explorer = ({
           <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
             {!appLogEvents && (
               <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-                <DataSourceSelection tabId={initialTabId} />
+                <DataSourceSelection tabId={tabId} />
               </EuiSplitPanel.Inner>
             )}
             <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
               <ObservabilitySideBar
-                tabId={initialTabId}
+                tabId={tabId}
                 pplService={pplService}
                 notifications={notifications}
               />

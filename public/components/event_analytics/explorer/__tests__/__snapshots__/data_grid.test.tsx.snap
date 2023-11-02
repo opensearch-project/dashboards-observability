@@ -243,6 +243,10 @@ exports[`Datagrid component Renders data grid component 1`] = `
             columns={
               Array [
                 Object {
+                  "actions": Object {
+                    "showMoveLeft": false,
+                    "showMoveRight": false,
+                  },
                   "display": "Time",
                   "id": "timestamp",
                   "initialWidth": 200,
@@ -250,6 +254,10 @@ exports[`Datagrid component Renders data grid component 1`] = `
                   "schema": "datetime",
                 },
                 Object {
+                  "actions": Object {
+                    "showMoveLeft": false,
+                    "showMoveRight": false,
+                  },
                   "display": "Source",
                   "id": "_source",
                   "isSortable": false,
@@ -300,7 +308,7 @@ exports[`Datagrid component Renders data grid component 1`] = `
               Object {
                 "showColumnSelector": Object {
                   "allowHide": false,
-                  "allowReorder": true,
+                  "allowReorder": false,
                 },
                 "showFullScreenSelector": false,
                 "showStyleSelector": false,

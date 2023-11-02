@@ -15,18 +15,21 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import { MutableRefObject } from 'react';
+import { useDispatch } from 'react-redux';
 import { IExplorerFields, IField } from '../../../../../common/types/explorer';
 import {
   DATE_DISPLAY_FORMAT,
   DEFAULT_EMPTY_EXPLORER_FIELDS,
   DEFAULT_SOURCE_COLUMN,
   DEFAULT_TIMESTAMP_COLUMN,
+  SELECTED_FIELDS,
 } from '../../../../../common/constants/explorer';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import PPLService from '../../../../services/requests/ppl';
 import { FlyoutButton } from './docViewRow';
 import { useFetchEvents } from '../../hooks';
-import { redoQuery } from '../../utils/utils';
+import { redoQuery, getFieldTypes } from '../../utils/utils';
+import { updateFields } from '../../redux/slices/field_slice';
 
 interface DataGridProps {
   http: HttpSetup;
@@ -41,6 +44,7 @@ interface DataGridProps {
   startTime: string;
   endTime: string;
   storedSelectedColumns: IField[];
+  tabId: string;
 }
 
 export function DataGrid(props: DataGridProps) {
@@ -56,11 +60,13 @@ export function DataGrid(props: DataGridProps) {
     requestParams,
     startTime,
     endTime,
+    tabId,
   } = props;
   const { fetchEvents } = useFetchEvents({
     pplService,
     requestParams,
   });
+  const dispatch = useDispatch();
   const selectedColumns =
     explorerFields.selectedFields.length > 0
       ? explorerFields.selectedFields
@@ -131,7 +137,22 @@ export function DataGrid(props: DataGridProps) {
       return {
         visibleColumns: columns,
         setVisibleColumns: (visibleColumns: string[]) => {
-          // TODO: implement with sidebar field order (dragability) changes
+          if (explorerFields.selectedFields.length > 0) {
+            const fields: IField[] = [];
+            // fields within visibleColumns are re-created to be of type IField
+            visibleColumns.forEach((col) => {
+              fields.push({ name: col, type: getFieldTypes(col, explorerFields) });
+            });
+            dispatch(
+              updateFields({
+                tabId,
+                data: {
+                  ...explorerFields,
+                  [SELECTED_FIELDS]: fields,
+                },
+              })
+            );
+          }
         },
       };
     }
@@ -262,7 +283,7 @@ export function DataGrid(props: DataGridProps) {
           toolbarVisibility={{
             showColumnSelector: {
               allowHide: false,
-              allowReorder: true,
+              allowReorder: explorerFields.selectedFields.length > 0,
             },
             showFullScreenSelector: false,
             showStyleSelector: false,

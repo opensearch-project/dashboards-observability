@@ -442,3 +442,14 @@ export const redoQuery = (
     setData(res.jsonData);
   });
 };
+
+// method to return the type of a field from its name
+export const getFieldTypes = (newFieldName: string, explorerFields: IExplorerFields) => {
+  for (const field of explorerFields.availableFields) {
+    if (field.name === newFieldName) return field.type;
+  }
+  for (const field of explorerFields.selectedFields) {
+    if (field.name === newFieldName) return field.type;
+  }
+  return '';
+};
