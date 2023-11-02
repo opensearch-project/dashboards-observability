@@ -117,7 +117,6 @@ import { ExplorerVisualizations } from './visualizations';
 import { CountDistribution } from './visualizations/count_distribution';
 import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 import { DataSourceSelection } from './datasources/datasources_selection';
-import { initialTabId } from '../../../framework/redux/store/shared_state';
 import { ObservabilitySideBar } from './sidebar/observability_sidebar';
 import { ExplorerSavedObjectLoader } from '../../../services/saved_objects/saved_object_loaders/explorer_saved_object_loader';
 import {
