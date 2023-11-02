@@ -14,10 +14,9 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPopover,
   EuiPopoverFooter,
-  EuiText,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';

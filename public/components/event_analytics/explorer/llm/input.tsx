@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -11,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
+  EuiSpacer,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
@@ -61,7 +63,7 @@ export const LLMInput: React.FC<Props> = (props) => {
   }, []);
 
   // hide if not in a tab
-  if (props.tabId === '') return null;
+  if (props.tabId === '') return props.children;
 
   const request = async () => {
     if (!selectedIndex.length) return;
@@ -101,36 +103,52 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false} style={{ width: 300 }}>
-          <EuiComboBox
-            placeholder="Select an index"
-            isClearable={false}
-            prepend={['Index']}
-            singleSelection={{ asPlainText: true }}
-            isLoading={loading}
-            options={data}
-            selectedOptions={selectedIndex}
-            onChange={(index) => setSelectedIndex(index)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldText
-            placeholder="What are the longest flights in the past day"
-            prepend={['Question']}
-            fullWidth
-            inputRef={questionRef}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton isLoading={generating} onClick={request}>
-            Predict
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setIsFeedbackOpen(true)}>Feedback</EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiComboBox
+        placeholder="Select an index"
+        isClearable={false}
+        prepend={['Index']}
+        singleSelection={{ asPlainText: true }}
+        isLoading={loading}
+        options={data}
+        selectedOptions={selectedIndex}
+        onChange={(index) => setSelectedIndex(index)}
+      />
+      <EuiSpacer size="s" />
+      {props.children}
+      <EuiAccordion id="ppl-assistant" buttonContent="Query assist" initialIsOpen={true}>
+        <EuiFlexGroup gutterSize="s" style={{ paddingTop: 10 }}>
+          <EuiFlexItem grow={false} style={{ width: 20 }} />
+          <EuiFlexItem>
+            <EuiFieldText
+              placeholder="What are the longest flights in the past day"
+              prepend={['Question']}
+              fullWidth
+              inputRef={questionRef}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              isLoading={generating}
+              onClick={request}
+              iconType="returnKey"
+              iconSide="right"
+              fill
+              style={{ width: 100 }}
+            >
+              Go
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => setIsFeedbackOpen(true)}
+              iconType="faceHappy"
+              iconSide="right"
+            >
+              Feedback
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
       {isFeedbackOpen && (
         <EuiModal onClose={() => setIsFeedbackOpen(false)}>
           <FeedbackModalContent
