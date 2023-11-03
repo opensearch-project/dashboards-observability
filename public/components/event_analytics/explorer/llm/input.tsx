@@ -38,7 +38,7 @@ export const LLMInput: React.FC<Props> = (props) => {
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
   const [generating, setGenerating] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: 'opensearch_dashboards_sample_data_flights' },
+    { label: 'sso_logs-*-*' },
   ]);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackFormData, setFeedbackFormData] = useState<FeedbackFormData>({
@@ -58,7 +58,7 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (questionRef.current) {
-      questionRef.current.value = 'what are the longest flights in the past day';
+      questionRef.current.value = 'Are there any errors in my logs?';
     }
   }, []);
 
@@ -120,7 +120,7 @@ export const LLMInput: React.FC<Props> = (props) => {
           <EuiFlexItem grow={false} style={{ width: 20 }} />
           <EuiFlexItem>
             <EuiFieldText
-              placeholder="What are the longest flights in the past day"
+              placeholder="Ask a question"
               prepend={['Question']}
               fullWidth
               inputRef={questionRef}
