@@ -65,7 +65,6 @@ import {
 import { useToast } from '../common/toast';
 import PPLService from '../../services/requests/ppl';
 import DSLService from '../../services/requests/dsl';
-import { convertDateTime } from '../common/query_utils';
 
 /*
  * "CustomPanelsView" module used to render an Observability Dashboard
@@ -331,7 +330,6 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
   };
 
   const onRefreshFilters = async (start: ShortDate, end: ShortDate) => {
-    console.log('onRefreshFilters', { start, end });
     if (!isDateValid(convertDateTime(start), convertDateTime(end, false), setToast)) {
       return;
     }
