@@ -5,7 +5,7 @@
 
 import './sidebar.scss';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { batch, useDispatch, useSelector } from 'react-redux';
@@ -16,9 +16,11 @@ import {
   addSelectedMetric,
   removeSelectedMetric,
   selectMetricByIdSelector,
+  selectedMetricsIdsSelector,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
+import { selected } from '../../../../../../src/core/server/saved_objects/export/get_sorted_objects_for_export.test';
 
 export const Sidebar = ({
   additionalSelectedMetricId,
@@ -29,6 +31,7 @@ export const Sidebar = ({
 
   const availableMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
+  const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
 
   const additionalMetric = useSelector(selectMetricByIdSelector(additionalSelectedMetricId));
 
@@ -41,6 +44,10 @@ export const Sidebar = ({
   useEffect(() => {
     if (additionalMetric) handleAddMetric(additionalMetric);
   }, [additionalMetric]);
+
+  const selectedMetricsList = useMemo(() => {
+    return selectedMetricsIds.map((id) => selectedMetrics[id]).filter((m) => m); // filter away null entries
+  }, [selectedMetrics, selectedMetricsIds]);
 
   const handleAddMetric = (metric: any) => dispatch(addSelectedMetric(metric));
 
@@ -55,7 +62,7 @@ export const Sidebar = ({
         <EuiSpacer size="s" />
 
         <MetricsAccordion
-          metricsList={selectedMetrics}
+          metricsList={selectedMetricsList}
           headerName="Selected Metrics"
           handleClick={handleRemoveMetric}
           dataTestSubj="metricsListItems_selectedMetrics"

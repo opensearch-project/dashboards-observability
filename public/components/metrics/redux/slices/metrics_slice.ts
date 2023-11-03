@@ -4,7 +4,7 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import { keyBy, sortBy } from 'lodash';
+import { keyBy, pick, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PPL_DATASOURCES_REQUEST,
@@ -65,6 +65,12 @@ const initialState = {
   refresh: 0, // set to new Date() to trigger
 };
 
+export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
+  const { metrics } = getState().metrics;
+  const mergedMetrics = { ...metrics, ...newMetricMap };
+  dispatch(setMetrics(mergedMetrics));
+};
+
 export const loadMetrics = () => async (dispatch) => {
   const { http, pplService } = coreRefs;
   const customDataRequest = fetchCustomMetrics(http);
@@ -81,8 +87,8 @@ export const loadMetrics = () => async (dispatch) => {
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
   const metricsResult = metricsResultSet.flat();
 
-  const metricsMapByName = keyBy(metricsResult.flat(), 'id');
-  dispatch(setMetrics(metricsMapByName));
+  const metricsMapById = keyBy(metricsResult.flat(), 'id');
+  dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
   dispatch(setSortedIds(sortedIds));
@@ -138,46 +144,6 @@ const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => 
   );
 };
 
-const updateLayoutBySelection = (state: any, newMetric: any) => {
-  const newDimensions = getNewVizDimensions(state.metricsLayout);
-
-  const metricVisualization: MetricType = {
-    id: newMetric.id,
-    x: newDimensions.x,
-    y: newDimensions.y,
-    h: newDimensions.h,
-    w: newDimensions.w,
-  };
-  state.metricsLayout = [...state.metricsLayout, metricVisualization];
-};
-
-const loadMetric = async (metric) =>
-  metric.sub_type === PROMQL_METRIC_SUBTYPE
-    ? await fetchVisualizationById(coreRefs.http!, metric.savedVisualizationId, (err) =>
-        coreRefs.toasts?.addDanger({
-          title: `There was an issue loading metric ${metric.name}`,
-          text: err,
-        })
-      )
-    : metric;
-
-const updateLayoutByDeSelection = (state: any, newMetric: any) => {
-  const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);
-
-  const newMetricsLayout = [] as MetricType[];
-  let heightSubtract = 0;
-
-  sortedMetricsLayout.map((metricLayout: MetricType) => {
-    if (metricLayout.id !== newMetric.id) {
-      metricLayout.y = metricLayout.y - heightSubtract;
-      newMetricsLayout.push(metricLayout);
-    } else {
-      heightSubtract = metricLayout.h;
-    }
-  });
-  state.metricsLayout = newMetricsLayout;
-};
-
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
   initialState,
@@ -194,7 +160,6 @@ export const metricSlice = createSlice({
 
     selectMetric: (state, { payload }) => {
       state.selectedIds.push(payload.id);
-      // updateLayoutBySelection(state, payload);
     },
 
     deSelectMetric: (state, { payload }) => {
@@ -305,6 +270,8 @@ export const selectMetricByIdSelector = (id) => (state) => {
   return state.metrics.metrics[id];
 };
 
+export const allMetricsSelector = (state) => state.metrics.metrics;
+
 export const availableMetricsSelector = (state) => {
   return (
     state.metrics.sortedIds
@@ -314,7 +281,11 @@ export const availableMetricsSelector = (state) => {
   );
 };
 export const selectedMetricsSelector = (state) =>
-  state.metrics.selectedIds?.map((id) => state.metrics.metrics[id]).filter((id) => id) ?? [];
+  pick(state.metrics.metrics, state.metrics.selectedIds) ?? {};
+
+export const selectedMetricByIdSelector = (id) => (state) => state.metrics.metrics[id];
+
+export const selectedMetricsIdsSelector = (state) => state.metrics.selectedIds ?? [];
 
 export const searchSelector = (state) => state.metrics.search;
 

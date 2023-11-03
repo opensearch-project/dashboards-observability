@@ -29,6 +29,7 @@ import { MetricsGrid } from './view/metrics_grid';
 import {
   availableMetricsSelector,
   metricsLayoutSelector,
+  selectedMetricsIdsSelector,
   selectedMetricsSelector,
 } from './redux/slices/metrics_slice';
 import { resolutionOptions } from '../../../common/constants/metrics';
@@ -64,8 +65,7 @@ export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: Met
   }, [dashboardsLoader]);
 
   // Redux tools
-  const selectedMetrics = useSelector(selectedMetricsSelector);
-  const metricsLayout = useSelector(metricsLayoutSelector);
+  const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
 
   // Date picker constants
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
@@ -126,18 +126,6 @@ export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: Met
     ]);
   }, [chrome, parentBreadcrumb]);
 
-  useEffect(() => {
-    if (!editMode) {
-      selectedMetrics.length > 0 ? setIsTopPanelDisabled(false) : setIsTopPanelDisabled(true); // eslint-disable-line
-    } else {
-      setIsTopPanelDisabled(true);
-    }
-  }, [selectedMetrics, editMode]);
-
-  useEffect(() => {
-    setPanelVisualizations(metricsLayout);
-  }, [metricsLayout]);
-
   return (
     <>
       <EuiGlobalToastList
@@ -185,23 +173,7 @@ export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: Met
                           <EuiResizableButton />
 
                           <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
-                            {selectedMetrics.length > 0 ? (
-                              <MetricsGrid
-                                chrome={chrome}
-                                panelVisualizations={panelVisualizations}
-                                setPanelVisualizations={setPanelVisualizations}
-                                editMode={editMode}
-                                startTime={startTime}
-                                endTime={endTime}
-                                moveToEvents={onEditClick}
-                                onRefresh={onRefresh}
-                                editActionType={editActionType}
-                                setEditActionType={setEditActionType}
-                                spanParam={spanValue + resolutionValue}
-                              />
-                            ) : (
-                              <EmptyMetricsView />
-                            )}
+                            <MetricsGrid chrome={chrome} moveToEvents={onEditClick} />
                           </EuiResizablePanel>
                         </>
                       )}

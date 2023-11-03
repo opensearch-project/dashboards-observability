@@ -32,7 +32,7 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
       paddingSize="none"
     >
       <ul className="metricsList">
-        {metricsList.slice(0, 100).map((metric: any) => (
+        {metricsList.map((metric: any) => (
           <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>
             <MetricName metric={metric} handleClick={handleClick} />
           </li>
