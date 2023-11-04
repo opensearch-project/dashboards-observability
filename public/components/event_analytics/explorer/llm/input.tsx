@@ -11,6 +11,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiModal,
   EuiSpacer,
 } from '@elastic/eui';
@@ -116,38 +117,49 @@ export const LLMInput: React.FC<Props> = (props) => {
       <EuiSpacer size="s" />
       {props.children}
       <EuiAccordion id="ppl-assistant" buttonContent="Query assist" initialIsOpen={true}>
-        <EuiFlexGroup gutterSize="s" style={{ paddingTop: 10 }}>
-          <EuiFlexItem grow={false} style={{ width: 20 }} />
-          <EuiFlexItem>
-            <EuiFieldText
-              placeholder="Ask a question"
-              prepend={['Question']}
-              fullWidth
-              inputRef={questionRef}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isLoading={generating}
-              onClick={request}
-              iconType="returnKey"
-              iconSide="right"
-              fill
-              style={{ width: 100 }}
-            >
-              Go
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => setIsFeedbackOpen(true)}
-              iconType="faceHappy"
-              iconSide="right"
-            >
-              Feedback
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiForm
+          component="form"
+          id="nlq-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            request();
+          }}
+        >
+          <EuiFlexGroup gutterSize="s" style={{ paddingTop: 10 }}>
+            <EuiFlexItem grow={false} style={{ width: 20 }} />
+            <EuiFlexItem>
+              <EuiFieldText
+                placeholder="Ask a question"
+                prepend={['Question']}
+                disabled={generating}
+                fullWidth
+                inputRef={questionRef}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isLoading={generating}
+                onClick={request}
+                type="submit"
+                iconType="returnKey"
+                iconSide="right"
+                fill
+                style={{ width: 100 }}
+              >
+                Go
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => setIsFeedbackOpen(true)}
+                iconType="faceHappy"
+                iconSide="right"
+              >
+                Feedback
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
       </EuiAccordion>
       {isFeedbackOpen && (
         <EuiModal onClose={() => setIsFeedbackOpen(false)}>
