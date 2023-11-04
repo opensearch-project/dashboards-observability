@@ -49,9 +49,9 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
         });
       }
     } catch (error) {
-      this.notifications.toasts.addError(error, {
+      /* this.notifications.toasts.addError(error, {
         title: 'Unable to get default timestamp',
-      });
+      }); */
     }
   }
 
