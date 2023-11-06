@@ -22,6 +22,7 @@ export function DatePicker(props: IDatePickerProps) {
       onTimeChange={handleTimeChange}
       onRefresh={handleTimeRangePickerRefresh}
       className="osdQueryBar__datePicker"
+      showUpdateButton={false}
     />
   );
 }

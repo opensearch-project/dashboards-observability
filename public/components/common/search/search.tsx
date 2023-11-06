@@ -101,6 +101,7 @@ export const Search = (props: any) => {
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
+  const [timePicker, setTimePicker] = useState(['now', 'now']); // TODO: make sure this default value won't interfere with anything
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -274,14 +275,24 @@ export const Search = (props: any) => {
                   setIsOutputStale={setIsOutputStale}
                   liveStreamChecked={props.liveStreamChecked}
                   onLiveStreamChange={props.onLiveStreamChange}
-                  handleTimePickerChange={(timeRange: string[]) =>
-                    handleTimePickerChange(timeRange)
-                  }
+                  handleTimePickerChange={(timeRange: string[]) => setTimePicker(timeRange)}
                   handleTimeRangePickerRefresh={() => {
                     onQuerySearch(queryLang);
                   }}
                 />
               )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType={'play'}
+                fill={true}
+                onClick={() => {
+                  onQuerySearch(queryLang);
+                  handleTimePickerChange(timePicker);
+                }}
+              >
+                Run
+              </EuiButton>
             </EuiFlexItem>
             {showSaveButton && !showSavePanelOptionsList && (
               <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
