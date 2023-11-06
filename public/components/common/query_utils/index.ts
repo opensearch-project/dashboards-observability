@@ -20,6 +20,8 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
+import { findAutoInterval } from '../../event_analytics/utils/utils';
+import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -157,6 +159,23 @@ export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
 };
 
+export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
+  // convert to moment
+  const start = convertDateTime(startTime, true);
+  const end = convertDateTime(endTime, false);
+
+  const resolution = findAutoInterval(start, end);
+
+  const visualizationQuery = updateCatalogVisualizationQuery({
+    ...metaData.query_meta_data,
+    start,
+    end,
+    span: '1',
+    resolution,
+  });
+
+  return visualizationQuery;
+};
 // insert time filter command and additional commands based on raw query
 export const preprocessQuery = ({
   rawQuery,

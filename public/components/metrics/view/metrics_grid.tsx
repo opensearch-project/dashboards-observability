@@ -88,7 +88,8 @@ export const InnerGridVisualization = ({
         onEditClick={moveToEvents}
         // usedInNotebooks={true}
         pplFilterValue=""
-        spanParam={`${dateSpanFilter.span}${dateSpanFilter.resolution}`}
+        span={dateSpanFilter.span}
+        resolution={dateSpanFilter.resolution}
         contextMenuId="metrics"
         inlineEditor={
           metric.sub_type === PROMQL_METRIC_SUBTYPE && <MetricsEditInline visualization={metric} />
@@ -146,7 +147,7 @@ export const InnerMetricsGrid = ({
         />
       );
     });
-  }, [selectedMetrics, refresh]);
+  }, [selectedMetrics, refresh, dateSpanFilter]);
 
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {

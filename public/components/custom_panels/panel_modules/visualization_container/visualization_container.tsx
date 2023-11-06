@@ -313,7 +313,7 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh, inputMetaData]);
+  }, [onRefresh, inputMetaData, span, resolution, fromTime, toTime]);
 
   const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 
