@@ -117,7 +117,5 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
       });
   }, [props]);
 
-  return visContainerProps ? (
-    <SizeMe>{({ size }) => <Visualization visualizations={visContainerProps} />}</SizeMe>
-  ) : null;
+  return visContainerProps ? <Visualization visualizations={visContainerProps} /> : null;
 };
