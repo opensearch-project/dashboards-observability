@@ -10,7 +10,6 @@ import { useDispatch, batch } from 'react-redux';
 import { StaticContext } from 'react-router';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { CoreStart, SavedObjectsStart } from '../../../../../src/core/public';
-import { CUSTOM_PANELS_API_PREFIX } from '../../../common/constants/custom_panels';
 import {
   EVENT_ANALYTICS,
   observabilityLogsID,
@@ -23,15 +22,7 @@ import PPLService from '../../services/requests/ppl';
 import { CustomPanelTable } from './custom_panel_table';
 import { CustomPanelView } from './custom_panel_view';
 import { CustomPanelViewSO } from './custom_panel_view_so';
-import {
-  createPanel,
-  createPanelSample,
-  createPanelWithVizs,
-  deletePanel,
-  fetchPanels,
-  newPanelTemplate,
-  uuidRx,
-} from './redux/panel_slice';
+import { createPanelSample, uuidRx } from './redux/panel_slice';
 import { REDIRECT_TAB, TAB_CREATED_TYPE, TAB_ID_TXT_PFX } from '../../../common/constants/explorer';
 import { init as initFields } from '../event_analytics/redux/slices/field_slice';
 import { init as initPatterns } from '../event_analytics/redux/slices/patterns_slice';

@@ -15,6 +15,7 @@ import { getVizContainerProps } from './charts/helpers';
 import { Visualization } from './visualization';
 import { PROMQL_METRIC_SUBTYPE } from '../../../common/constants/shared';
 import { getMetricVisConfig } from '../event_analytics/utils/utils';
+import { preprocessMetricQuery } from '../common/query_utils';
 
 interface SavedObjectVisualizationProps {
   savedVisualization: SavedVisualization;
@@ -36,7 +37,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
     const metaData = {
       ...props.savedVisualization,
       query: props.savedVisualization.query,
-      queryMetaData: props.savedVisualization.queryMetaData,
+      queryMetaData: props.savedVisualization.query_meta_data,
       isMetric,
     };
     const userConfigs = metaData.user_configs ? JSON.parse(metaData.user_configs) : {};
@@ -80,14 +81,22 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
     let query = metaData.query;
 
     if (props.timeRange) {
-      query = preprocessQuery({
-        rawQuery: metaData.query,
-        startTime: props.timeRange.from,
-        endTime: props.timeRange.to,
-        timeField: props.savedVisualization.selected_timestamp.name,
-        isLiveQuery: false,
-        whereClause: props.whereClause,
-      });
+      if (isMetric) {
+        query = preprocessMetricQuery({
+          metaData,
+          startTime: props.timeRange.from,
+          endTime: props.timeRange.to,
+        });
+      } else {
+        query = preprocessQuery({
+          rawQuery: metaData.query,
+          startTime: props.timeRange.from,
+          endTime: props.timeRange.to,
+          timeField: props.savedVisualization.selected_timestamp.name,
+          isLiveQuery: false,
+          whereClause: props.whereClause,
+        });
+      }
     }
 
     pplService

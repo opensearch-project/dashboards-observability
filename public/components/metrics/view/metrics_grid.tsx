@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import _ from 'lodash';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
-import { MetricType } from '../../../../common/types/metrics';
 import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 import {
   selectedMetricsSelector,
@@ -25,9 +24,7 @@ import './metrics_grid.scss';
 import { coreRefs } from '../../../framework/core_refs';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
-import { useRef } from 'react';
 import { EmptyMetricsView } from './empty_view';
-import { selectedMetricByIdSelector } from '../redux/slices/metrics_slice';
 
 // HOC container to provide dynamic width for Grid layout
 
@@ -66,10 +63,6 @@ export const InnerGridVisualization = ({
   // metric,
   allMetrics,
 }) => {
-  useEffect(() => {
-    console.log('GridVisualization', { id, metric });
-  });
-
   const metric = allMetrics[id];
   if (!metric) return <></>;
 
@@ -112,17 +105,6 @@ export const InnerMetricsGrid = ({
   moveMetric,
   allMetrics,
 }: MetricsGridProps) => {
-  const { http, pplService } = coreRefs;
-  // Redux tools
-  const dispatch = useDispatch();
-  // const dateSpanFilter = useSelector(dateSpanFilterSelector);
-  // const refresh = useSelector(refreshSelector);
-
-  // const selectedMetrics = useSelector(selectedMetricsSelector);
-  // const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
-  // useEffect(() => {
-  //   console.log('Metrics Grid', { selectedMetrics, selectedMetricsIds });
-  // }, [selectedMetrics, selectedMetricsIds]);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
 
   const onDragEnd = ({ source, destination }) => {

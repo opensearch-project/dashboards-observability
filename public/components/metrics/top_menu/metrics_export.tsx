@@ -12,7 +12,7 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { dispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { MetricsExportPanel } from './metrics_export_panel';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
@@ -23,7 +23,11 @@ import {
   uuidRx,
 } from '../../custom_panels/redux/panel_slice';
 import { MetricType } from '../../../../common/types/metrics';
-import { dateSpanFilterSelector, selectedMetricsSelector } from '../redux/slices/metrics_slice';
+import {
+  dateSpanFilterSelector,
+  selectedMetricsIdsSelector,
+  selectedMetricsSelector,
+} from '../redux/slices/metrics_slice';
 import { coreRefs } from '../../../framework/core_refs';
 import { selectPanelList } from '../../../../public/components/custom_panels/redux/panel_slice';
 import { SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
@@ -57,6 +61,8 @@ const MetricsExportPopOver = () => {
   const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
   const selectedMetrics = useSelector(selectedMetricsSelector);
+  const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
+
   const dateSpanFilter = useSelector(dateSpanFilterSelector);
   const [metricsToExport, setMetricsToExport] = React.useState<MetricType[]>([]);
 
@@ -65,24 +71,11 @@ const MetricsExportPopOver = () => {
   const { toasts } = coreRefs;
 
   useEffect(() => {
-    setMetricsToExport(selectedMetrics);
-  }, [selectedMetrics]);
-
-  const osdSavedVisFromMetric = (metric) => ({
-    ...metric,
-    fields: '',
-    timestamp: '@timestamp',
-    type: SAVED_VISUALIZATION,
-    dateRange: [],
-    subType: 'metric',
-    userConfigs: {
-      dateConfig: {
-        type: 'line',
-        fillOpacity: 0,
-        lineWidth: 2,
-      },
-    },
-  });
+    if (selectedMetrics && selectedMetricsIds) {
+      const metricsArray = selectedMetricsIds.map((id) => selectedMetrics[id]);
+      setMetricsToExport(metricsArray);
+    }
+  }, [selectedMetrics, selectedMetricsIds]);
 
   const savedObjectInputFromObject = (currentObject: SavedVisualization) => {
     return {
@@ -101,16 +94,11 @@ const MetricsExportPopOver = () => {
     const res = await client.get({ objectId: metric.savedVisualizationId });
     const currentObject = res.observabilityObjectList[0];
 
-    await client.update(
-      {
-        object_id: metric.savedVisualizationId,
-        object: {
-          ...currentObject.savedVisualization,
-          name: metric.name,
-        },
-      },
-      true
-    );
+    await client.update({
+      objectId: metric.savedVisualizationId,
+      ...savedObjectInputFromObject(currentObject.savedVisualization),
+      name: metric.name,
+    });
     return metric.savedVisualizationId;
   };
 
@@ -144,24 +132,10 @@ const MetricsExportPopOver = () => {
       dateSpanFilter.span,
       dateSpanFilter.reoslution
     );
-    console.log('createSavedVisualization', {
-      metric,
-      visMetaData,
-    });
 
     const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
     return savedObject.objectId;
   };
-
-  // const createSavedVisualization = async (metric: MetricType): Promise<string> => {
-  //   const visMetaData = visualizationFromMetric(
-  //     { ...metric, dateRange: ['now-1d', 'now'], fields: '', timestamp: '@timestamp' },
-  //     dateSpanFilter
-  //   );
-
-  //   const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
-  //   return savedObject.objectId;
-  // };
 
   const handleSavingObjects = async () => {
     let savedMetricIds = [];
@@ -185,7 +159,6 @@ const MetricsExportPopOver = () => {
 
     toasts!.add('Saved metrics successfully!');
 
-    console.log('metrics export', { selectedPanelOptions });
     if (selectedPanelOptions.length > 0) {
       try {
         await addMultipleVizToPanels(selectedPanelOptions, savedMetricIds);
