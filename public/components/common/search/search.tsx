@@ -35,6 +35,7 @@ import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
+import { QueryArea } from './query_area';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -217,145 +218,154 @@ export const Search = (props: any) => {
 
   return (
     <div className="globalQueryBar">
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart" wrap>
-        {appLogEvents && (
-          <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
-            <EuiToolTip position="top" content={baseQuery}>
-              <EuiBadge className="base-query-popover" color="hollow">
-                Base Query
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {!appLogEvents && (
-          <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
-            <EuiPopover
-              id="smallContextMenuExample"
-              button={languagePopOverButton}
-              isOpen={isLanguagePopoverOpen}
-              closePopover={closeLanguagePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel size="s" items={languagePopOverItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem key="search-bar" className="search-area" grow={5} style={{ minWidth: 400 }}>
-          <Autocomplete
-            key={'autocomplete-search-bar'}
-            query={query}
-            tempQuery={tempQuery}
-            baseQuery={baseQuery}
-            handleQueryChange={handleQueryChange}
-            handleQuerySearch={() => {
-              onQuerySearch(queryLang);
-            }}
-            dslService={dslService}
-            getSuggestions={getSuggestions}
-            onItemSelect={onItemSelect}
-            tabId={tabId}
-          />
-          <EuiBadge
-            className={`ppl-link ${
-              uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
-            }`}
-            color="hollow"
-            onClick={() => showFlyout()}
-            onClickAriaLabel={'pplLinkShowFlyout'}
-          >
-            PPL
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} />
-        <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
-          {!isLiveTailOn && (
-            <DatePicker
-              startTime={startTime}
-              endTime={endTime}
-              setStartTime={setStartTime}
-              setEndTime={setEndTime}
-              setIsOutputStale={setIsOutputStale}
-              liveStreamChecked={props.liveStreamChecked}
-              onLiveStreamChange={props.onLiveStreamChange}
-              handleTimePickerChange={(timeRange: string[]) => handleTimePickerChange(timeRange)}
-              handleTimeRangePickerRefresh={() => {
-                onQuerySearch(queryLang);
-              }}
-            />
-          )}
-        </EuiFlexItem>
-        {showSaveButton && !showSavePanelOptionsList && (
-          <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
-            <EuiPopover
-              panelPaddingSize="none"
-              button={liveButton}
-              isOpen={isLiveTailPopoverOpen}
-              closePopover={closeLiveTailPopover}
-            >
-              <EuiContextMenuPanel items={popoverItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-        {isLiveTailOn && (
-          <EuiFlexItem grow={false}>
-            <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
-          </EuiFlexItem>
-        )}
-        {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
-          <>
-            <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">
-              <EuiPopover
-                button={Savebutton}
-                isOpen={isSavePanelOpen}
-                closePopover={() => setIsSavePanelOpen(false)}
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="flexStart" wrap>
+            {appLogEvents && (
+              <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
+                <EuiToolTip position="top" content={baseQuery}>
+                  <EuiBadge className="base-query-popover" color="hollow">
+                    Base Query
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {appLogEvents && (
+              <EuiFlexItem
+                key="search-bar"
+                className="search-area"
+                grow={5}
+                style={{ minWidth: 400 }}
               >
-                <SavePanel
-                  selectedOptions={selectedCustomPanelOptions}
-                  handleNameChange={setSelectedPanelName}
-                  handleOptionChange={setSelectedCustomPanelOptions}
-                  savedObjects={savedObjects}
-                  isTextFieldInvalid={isPanelTextFieldInvalid}
-                  savePanelName={selectedPanelName}
-                  showOptionList={
-                    showSavePanelOptionsList &&
-                    searchBarConfigs[selectedSubTabId]?.showSavePanelOptionsList
-                  }
-                  curVisId={curVisId}
-                  setSubType={setSubType}
-                  isSaveAsMetricEnabled={
-                    isEqual(curVisId, 'line') && tempQuery.match(PPL_SPAN_REGEX) !== null
-                  }
+                <Autocomplete
+                  key={'autocomplete-search-bar'}
+                  query={query}
+                  tempQuery={tempQuery}
+                  baseQuery={baseQuery}
+                  handleQueryChange={handleQueryChange}
+                  handleQuerySearch={() => {
+                    onQuerySearch(queryLang);
+                  }}
+                  dslService={dslService}
+                  getSuggestions={getSuggestions}
+                  onItemSelect={onItemSelect}
+                  tabId={tabId}
                 />
-                <EuiPopoverFooter>
-                  <EuiFlexGroup justifyContent="flexEnd">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="s"
-                        onClick={() => setIsSavePanelOpen(false)}
-                        data-test-subj="eventExplorer__querySaveCancel"
-                      >
-                        Cancel
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        fill
-                        onClick={() => {
-                          handleSavingObject();
-                          setIsSavePanelOpen(false);
-                        }}
-                        data-test-subj="eventExplorer__querySaveConfirm"
-                      >
-                        Save
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPopoverFooter>
-              </EuiPopover>
+                <EuiBadge
+                  className={`ppl-link ${
+                    uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+                  }`}
+                  color="hollow"
+                  onClick={() => showFlyout()}
+                  onClickAriaLabel={'pplLinkShowFlyout'}
+                >
+                  PPL
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} />
+            <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
+              {!isLiveTailOn && (
+                <DatePicker
+                  startTime={startTime}
+                  endTime={endTime}
+                  setStartTime={setStartTime}
+                  setEndTime={setEndTime}
+                  setIsOutputStale={setIsOutputStale}
+                  liveStreamChecked={props.liveStreamChecked}
+                  onLiveStreamChange={props.onLiveStreamChange}
+                  handleTimePickerChange={(timeRange: string[]) =>
+                    handleTimePickerChange(timeRange)
+                  }
+                  handleTimeRangePickerRefresh={() => {
+                    onQuerySearch(queryLang);
+                  }}
+                />
+              )}
             </EuiFlexItem>
-          </>
+            {showSaveButton && !showSavePanelOptionsList && (
+              <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
+                <EuiPopover
+                  panelPaddingSize="none"
+                  button={liveButton}
+                  isOpen={isLiveTailPopoverOpen}
+                  closePopover={closeLiveTailPopover}
+                >
+                  <EuiContextMenuPanel items={popoverItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+            {isLiveTailOn && (
+              <EuiFlexItem grow={false}>
+                <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
+              </EuiFlexItem>
+            )}
+            {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
+              <>
+                <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">
+                  <EuiPopover
+                    button={Savebutton}
+                    isOpen={isSavePanelOpen}
+                    closePopover={() => setIsSavePanelOpen(false)}
+                  >
+                    <SavePanel
+                      selectedOptions={selectedCustomPanelOptions}
+                      handleNameChange={setSelectedPanelName}
+                      handleOptionChange={setSelectedCustomPanelOptions}
+                      savedObjects={savedObjects}
+                      isTextFieldInvalid={isPanelTextFieldInvalid}
+                      savePanelName={selectedPanelName}
+                      showOptionList={
+                        showSavePanelOptionsList &&
+                        searchBarConfigs[selectedSubTabId]?.showSavePanelOptionsList
+                      }
+                      curVisId={curVisId}
+                      setSubType={setSubType}
+                      isSaveAsMetricEnabled={
+                        isEqual(curVisId, 'line') && tempQuery.match(PPL_SPAN_REGEX) !== null
+                      }
+                    />
+                    <EuiPopoverFooter>
+                      <EuiFlexGroup justifyContent="flexEnd">
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="s"
+                            onClick={() => setIsSavePanelOpen(false)}
+                            data-test-subj="eventExplorer__querySaveCancel"
+                          >
+                            Cancel
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            fill
+                            onClick={() => {
+                              handleSavingObject();
+                              setIsSavePanelOpen(false);
+                            }}
+                            data-test-subj="eventExplorer__querySaveConfirm"
+                          >
+                            Save
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPopoverFooter>
+                  </EuiPopover>
+                </EuiFlexItem>
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {!appLogEvents && (
+          <EuiFlexItem>
+            <QueryArea
+              languagePopOverButton={languagePopOverButton}
+              isLanguagePopoverOpen={isLanguagePopoverOpen}
+              closeLanguagePopover={closeLanguagePopover}
+              languagePopOverItems={languagePopOverItems}
+            />
+          </EuiFlexItem>
         )}
       </EuiFlexGroup>
       {flyout}

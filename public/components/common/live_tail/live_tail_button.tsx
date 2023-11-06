@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-//Define pop over interval options for live tail button in your plugin
+// Define pop over interval options for live tail button in your plugin
 
-import { EuiButton } from "@elastic/eui";
-import React, { useMemo } from "react";
-import { LiveTailProps } from "common/types/explorer";
+import { EuiButton } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { LiveTailProps } from 'common/types/explorer';
 
-//Live Tail Button
+// Live Tail Button
 export const LiveTailButton = ({
   isLiveTailOn,
   isLiveTailPopoverOpen,
@@ -20,7 +20,7 @@ export const LiveTailButton = ({
   const liveButton = useMemo(() => {
     return (
       <EuiButton
-        iconType={isLiveTailOn ? "stop" : "play"}
+        iconType={isLiveTailOn ? 'stop' : 'clock'}
         iconSide="left"
         onClick={() => setIsLiveTailPopoverOpen(!isLiveTailPopoverOpen)}
         data-test-subj={dataTestSubj}
