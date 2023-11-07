@@ -158,6 +158,10 @@ export const metricSlice = createSlice({
       state.sortedIds = payload;
     },
 
+    clearSelectedMetrics: (state) => {
+      state.selectedIds = [];
+    },
+
     selectMetric: (state, { payload }) => {
       state.selectedIds.push(payload.id);
     },
@@ -199,6 +203,7 @@ export const metricSlice = createSlice({
 
 export const {
   deSelectMetric,
+  clearSelectedMetrics,
   selectMetric,
   moveMetric,
   setSearch,

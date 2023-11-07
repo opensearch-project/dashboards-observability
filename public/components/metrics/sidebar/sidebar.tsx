@@ -17,6 +17,7 @@ import {
   removeSelectedMetric,
   selectMetricByIdSelector,
   selectedMetricsIdsSelector,
+  clearSelectedMetrics,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
@@ -42,7 +43,10 @@ export const Sidebar = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (additionalMetric) handleAddMetric(additionalMetric);
+    if (additionalMetric) {
+      dispatch(clearSelectedMetrics());
+      dispatch(addSelectedMetric(additionalMetric));
+    }
   }, [additionalMetric]);
 
   const selectedMetricsList = useMemo(() => {
