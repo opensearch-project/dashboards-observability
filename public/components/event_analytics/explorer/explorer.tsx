@@ -240,7 +240,7 @@ export const Explorer = ({
     const momentStart = dateMath.parse(start)!;
     const momentEnd = dateMath.parse(end, { roundUp: true })!;
     const diffSeconds = momentEnd.unix() - momentStart.unix();
-    let minInterval = findMinInterval(start, end)
+    let minInterval = findMinInterval(start, end);
 
     setTimeIntervalOptions([
       { text: 'Auto', value: 'auto_' + minInterval },
@@ -734,7 +734,7 @@ export const Explorer = ({
         );
       }
     } else {
-      if (isTabHasObjID && isObjTypeMatchVis) {
+      if (isTabHasObjID && isObjTypeMatchVis && !metricChecked) {
         soClient = new SaveAsCurrentVisualization(
           { tabId, history, notifications, showPermissionErrorToast },
           { batch, dispatch, changeQuery, updateTabName },

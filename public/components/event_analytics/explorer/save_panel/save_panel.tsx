@@ -20,6 +20,7 @@ import {
   fetchPanels,
   selectPanelList,
 } from '../../../../../public/components/custom_panels/redux/panel_slice';
+import { PPL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
 
 interface ISavedPanelProps {
   selectedOptions: any;
@@ -64,7 +65,7 @@ export const SavePanel = ({
   const onToggleChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setChecked(e.target.checked);
     if (e.target.checked) {
-      setSubType('metric');
+      setSubType(PPL_METRIC_SUBTYPE);
     } else {
       setSubType('visualization');
     }

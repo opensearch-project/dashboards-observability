@@ -17,7 +17,7 @@ import { SavedObjectsActions } from '../../../../services/saved_objects/saved_ob
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
 import { fetchVisualizationById } from '../../../custom_panels/helpers/utils';
 
 export interface IconAttributes {
@@ -98,8 +98,8 @@ const fetchCustomMetrics = async () => {
   const dataSet = await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
     objectType: [SAVED_VISUALIZATION],
   });
-  const savedMetrics = dataSet.observabilityObjectList.filter(
-    (obj) => obj.savedVisualization.sub_type === PROMQL_METRIC_SUBTYPE
+  const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
+    [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization.sub_type)
   );
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,

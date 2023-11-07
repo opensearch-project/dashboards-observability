@@ -108,7 +108,11 @@ const parseStringDataSource = (
 ): SelectedDataSource[] => {
   let selectedDataSources: SelectedDataSource[];
   try {
-    selectedDataSources = JSON.parse(dsInSavedObject);
+    if (isEmpty(dsInSavedObject)) {
+      return [] as SelectedDataSource[];
+    }
+
+    return JSON.parse(dsInSavedObject);
   } catch (err: unknown) {
     console.error(err);
     notifications.toasts.addError(err as Error, {
@@ -118,7 +122,6 @@ const parseStringDataSource = (
     });
     return [] as SelectedDataSource[];
   }
-  return selectedDataSources;
 };
 
 export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
@@ -376,6 +379,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
           });
           return;
         default:
+          this.loadDefaultIndexPattern();
           return;
       }
     }

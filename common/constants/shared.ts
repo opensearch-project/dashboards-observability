@@ -80,6 +80,7 @@ export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
 export const SPAN_REGEX = /span/;
 
 export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
+export const PPL_METRIC_SUBTYPE = 'metric';
 
 export const PPL_SPAN_REGEX = /by\s*span/i;
 export const PPL_STATS_REGEX = /\|\s*stats/i;
