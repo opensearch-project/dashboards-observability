@@ -5,10 +5,7 @@
 
 export const overview = `## Overview
 ---
-Piped Processing Language (PPL), powered by OpenSearch, enables
-OpenSearch users with exploration and discovery of, and finding search
-patterns in data stored in OpenSearch, using a set of commands delimited
-by pipes (\|). These are essentially read-only requests to process data
+Piped Processing Language (PPL) is a query language that focuses on processing data in a sequential, step-by-step manner. PPL uses the pipe (|) operator to combine commands to find and retrieve data. It is the primary language used with observability in OpenSearch and supports multi-data queries. These are read-only requests to process data
 and return results.
 
 Currently, OpenSearch users can query data using either Query DSL or
@@ -23,7 +20,7 @@ developers, DevOps engineers, support engineers, site reliability
 engineers (SREs), and IT managers to effectively discover and explore
 log, monitoring and observability data stored in OpenSearch.
 
-We expand the capabilities of our Workbench, a comprehensive and
+The capabilities of [Query Workbench](https://opensearch.org/docs/latest/dashboards/query-workbench/), a comprehensive and
 integrated visual query tool currently supporting only SQL, to run
 on-demand PPL commands, and view and save results as text and JSON. We
 also add a new interactive standalone command line tool, the PPL CLI, to
