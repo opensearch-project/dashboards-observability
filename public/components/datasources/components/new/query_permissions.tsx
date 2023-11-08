@@ -30,8 +30,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
     },
     {
       id: QUERY_ALL,
-      label: 'Admin only - only accessible by the admin',
-      disabled: !hasSecurityAccess,
+      label: 'Everyone - accessible by all users on this cluster',
     },
   ];
 
