@@ -6,6 +6,7 @@
 import { CoreStart } from '../../../../../src/core/public';
 import { DirectQueryRequest } from '../../../common/types/explorer';
 
+
 export class SQLService {
   private http;
   constructor(http: CoreStart['http']) {
