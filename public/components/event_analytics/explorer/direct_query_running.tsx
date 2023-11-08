@@ -20,22 +20,23 @@ export const DirectQueryRunning = ({ tabId }: { tabId: string }) => {
   const sqlService = new SQLService(coreRefs.http);
 
   const cancelQuery = () => {
-    if (explorerSearchMeta.queryId) {
-      sqlService.deleteWithJobId({ queryId: explorerSearchMeta.queryId }).catch((e) => {
-        console.error(e);
-      });
+    if (explorerSearchMeta.queryId !== '') {
+      sqlService
+        .deleteWithJobId({ queryId: explorerSearchMeta.queryId })
+        .catch((e) => {
+          console.error(e);
+        })
+        .finally(() => {
+          dispatch(
+            updateSearchMetaData({
+              tabId,
+              data: {
+                isPolling: false,
+              },
+            })
+          );
+        });
     }
-
-    // reset isPolling flag to remove loading page and queryId to empty
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: {
-          isPolling: false,
-          queryId: '',
-        },
-      })
-    );
   };
 
   return (

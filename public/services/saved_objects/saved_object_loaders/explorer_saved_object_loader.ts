@@ -29,7 +29,6 @@ import {
 import { QueryManager } from '../../../../common/query_manager';
 import { statsChunk } from '../../../../common/query_manager/ast/types/stats';
 import {
-  DirectQueryRequest,
   IField,
   SavedQuery,
   SavedVisualization,
@@ -44,9 +43,6 @@ import { PollingConfigurations } from '../../../components/hooks';
 import { SQLService } from '../../requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { UsePolling } from '../../../components/hooks/use_polling';
-import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
-import { get as getObjValue } from '../../../../common/utils/shared';
-import { ASYNC_POLLING_INTERVAL } from '../../../../common/constants/data_sources';
 
 enum DIRECT_DATA_SOURCE_TYPES {
   DEFAULT_INDEX_PATTERNS = 'DEFAULT_INDEX_PATTERNS',
@@ -304,12 +300,6 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
       dispatchOnGettingHis(pollingResult, '');
       return true;
     }
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { status: pollingResult.status },
-      })
-    );
     return false;
   };
 
@@ -326,23 +316,13 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
   loadSparkGlue = ({ objectData, dataSources, tabId }) => {
     const { dispatch } = this.dispatchers;
     const sqlService = new SQLService(coreRefs.http);
-    const sessionId = getAsyncSessionId();
-    const requestPayload = {
-      lang: objectData.query_lang.toLowerCase(),
-      query: objectData.query,
-      datasource: dataSources[0].label,
-    } as DirectQueryRequest;
-
-    if (sessionId) {
-      requestPayload.sessionId = sessionId;
-    }
 
     // Create an instance of UsePolling
     const polling = new UsePolling<any, any>(
       (params) => {
         return sqlService.fetchWithJobId(params);
       },
-      ASYNC_POLLING_INTERVAL,
+      5000,
       this.handleDirectQuerySuccess,
       this.handleDirectQueryError,
       { tabId }
@@ -363,11 +343,13 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     );
 
     sqlService
-      .fetch(requestPayload)
+      .fetch({
+        lang: objectData.query_lang.toLowerCase(),
+        query: objectData.query,
+        datasource: dataSources[0].label,
+      })
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
         if (result.queryId) {
-          dispatch(updateSearchMetaData({ tabId, data: { queryId: result.queryId } }));
           startPolling({ queryId: result.queryId });
         } else {
           console.log('no query id found in response');

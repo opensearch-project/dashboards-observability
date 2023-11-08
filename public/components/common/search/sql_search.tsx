@@ -21,7 +21,7 @@ import {
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
-import { ASYNC_POLLING_INTERVAL, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
+import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
 import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
@@ -103,7 +103,7 @@ export const DirectSearch = (props: any) => {
     stopPolling,
   } = usePolling<any, any>((params) => {
     return sqlService.fetchWithJobId(params);
-  }, ASYNC_POLLING_INTERVAL);
+  }, 2000);
 
   const requestParams = { tabId };
   const { dispatchOnGettingHis } = useFetchEvents({
