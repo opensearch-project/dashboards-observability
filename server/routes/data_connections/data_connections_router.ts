@@ -9,7 +9,7 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import { DATACONNECTIONS_BASE, EDIT } from '../../../common/constants/shared';
+import { DATACONNECTIONS_BASE } from '../../../common/constants/shared';
 
 export function registerDataConnectionsRoute(router: IRouter) {
   router.get(
@@ -70,13 +70,15 @@ export function registerDataConnectionsRoute(router: IRouter) {
     }
   );
 
-  router.post(
+  router.put(
     {
-      path: `${DATACONNECTIONS_BASE}${EDIT}`,
+      path: `${DATACONNECTIONS_BASE}`,
       validate: {
         body: schema.object({
           name: schema.string(),
+          connector: schema.string(),
           allowedRoles: schema.arrayOf(schema.string()),
+          properties: schema.any(),
         }),
       },
     },
@@ -87,7 +89,9 @@ export function registerDataConnectionsRoute(router: IRouter) {
           .callAsCurrentUser('ppl.modifyDataConnection', {
             body: {
               name: request.body.name,
+              connector: request.body.connector,
               allowedRoles: request.body.allowedRoles,
+              properties: request.body.properties,
             },
           });
         return response.ok({

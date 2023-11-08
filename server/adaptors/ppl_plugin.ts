@@ -81,7 +81,7 @@ export const PPLPlugin = function (Client, config, components) {
       fmt: `${OPENSEARCH_DATACONNECTIONS_API.DATACONNECTION}`,
     },
     needBody: true,
-    method: 'PATCH',
+    method: 'PUT',
   });
 
   ppl.getDataConnections = ca({
