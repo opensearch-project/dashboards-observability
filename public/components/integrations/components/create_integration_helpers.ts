@@ -313,13 +313,16 @@ export async function addIntegrationRequest(
     .post(`${INTEGRATIONS_BASE}/store/${templateName}`, {
       body: JSON.stringify({ name, dataSource }),
     })
-    .then((res) => {
+    .then((_res) => {
       setToast(`${name} integration successfully added!`, 'success');
-      window.location.hash = `#/installed/${res.data?.id}`;
+      window.location.hash = `#/installed/${_res.data?.id}`;
       return true;
     })
-    .catch((err) => {
-      setToast('Failed to load integration', 'danger', err.message);
+    .catch((_err) => {
+      setToast(
+        'Failed to load integration. Check Added Integrations table for more details',
+        'danger'
+      );
       return false;
     });
   if (!addSample || !response) {
@@ -330,7 +333,7 @@ export async function addIntegrationRequest(
     .then((res) => res.data)
     .catch((err) => {
       console.error(err);
-      setToast('Failed to load integration', 'danger', 'The sample data could not be retrieved.');
+      setToast('The sample data could not be retrieved', 'danger');
       return { sampleData: [] };
     });
   const requestBody =

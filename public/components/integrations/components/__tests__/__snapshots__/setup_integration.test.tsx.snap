@@ -42,11 +42,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           "type": "",
                         }
                       }
-                      setupCallout={
-                        Object {
-                          "show": false,
-                        }
-                      }
                       updateConfig={[Function]}
                     >
                       <EuiForm>
@@ -60,11 +55,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               Set Up Integration
                             </h1>
                           </EuiTitle>
-                          <EuiSpacer>
-                            <div
-                              className="euiSpacer euiSpacer--l"
-                            />
-                          </EuiSpacer>
                           <EuiSpacer>
                             <div
                               className="euiSpacer euiSpacer--l"
@@ -695,7 +685,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
             loadingProgress={0}
             setLoading={[Function]}
             setProgress={[Function]}
-            setSetupCallout={[Function]}
           >
             <EuiBottomBar>
               <EuiPortal>
@@ -718,11 +707,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButtonEmpty euiButtonEmpty--text"
+                              class="euiButton euiButton--secondary"
                               type="button"
                             >
                               <span
-                                class="euiButtonContent euiButtonEmpty__content"
+                                class="euiButtonContent euiButton__content"
                               >
                                 <svg
                                   aria-hidden="true"
@@ -735,7 +724,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   xmlns="http://www.w3.org/2000/svg"
                                 />
                                 <span
-                                  class="euiButtonEmpty__text"
+                                  class="euiButton__text"
                                 >
                                   Discard
                                 </span>
@@ -817,66 +806,81 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiButtonEmpty
-                                color="text"
+                              <EuiButton
+                                color="secondary"
                                 iconType="cross"
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--text"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="secondary"
                                   disabled={false}
+                                  element="button"
+                                  iconType="cross"
+                                  isDisabled={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="m"
-                                    iconType="cross"
-                                    textProps={
+                                  <button
+                                    className="euiButton euiButton--secondary"
+                                    disabled={false}
+                                    onClick={[Function]}
+                                    style={
                                       Object {
-                                        "className": "euiButtonEmpty__text",
+                                        "minWidth": undefined,
                                       }
                                     }
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      iconType="cross"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <EuiIcon
-                                        className="euiButtonContent__icon"
-                                        color="inherit"
-                                        size="m"
-                                        type="cross"
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
+                                        <EuiIcon
+                                          className="euiButtonContent__icon"
+                                          color="inherit"
+                                          size="m"
+                                          type="cross"
                                         >
-                                          <svg
+                                          <EuiIconEmpty
                                             aria-hidden={true}
                                             className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                             focusable="false"
-                                            height={16}
                                             role="img"
                                             style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        Discard
+                                          >
+                                            <svg
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                              focusable="false"
+                                              height={16}
+                                              role="img"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                          </EuiIconEmpty>
+                                        </EuiIcon>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          Discard
+                                        </span>
                                       </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
+                              </EuiButton>
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
@@ -1025,11 +1029,6 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
       "version": "2.0.0",
     }
   }
-  setupCallout={
-    Object {
-      "show": false,
-    }
-  }
   updateConfig={[Function]}
 >
   <EuiForm>
@@ -1043,11 +1042,6 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           Set Up Integration
         </h1>
       </EuiTitle>
-      <EuiSpacer>
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiSpacer>
         <div
           className="euiSpacer euiSpacer--l"

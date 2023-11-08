@@ -32,9 +32,9 @@ export interface AvailableIntegrationType {
   version?: string | undefined;
   displayName?: string;
   integrationType: string;
-  statics: unknown;
-  components: Array<{ name: string }>;
-  displayAssets: unknown[];
+  statics: any;
+  components: any[];
+  displayAssets: any[];
 }
 
 export interface AvailableIntegrationsTableProps {
@@ -183,11 +183,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
           ? AvailableIntegrationsCardView({
               data: {
                 hits: data.hits.filter((hit) =>
-                  helper.every((compon) =>
-                    hit.components
-                      .map((x) => x.name.split('_').findLast(() => true))
-                      .includes(compon)
-                  )
+                  helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
                 ),
               },
               isCardView,
@@ -201,11 +197,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
               loading: false,
               data: {
                 hits: data.hits.filter((hit) =>
-                  helper.every((compon) =>
-                    hit.components
-                      .map((x) => x.name.split('_').findLast(() => true))
-                      .includes(compon)
-                  )
+                  helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
                 ),
               },
               isCardView,
