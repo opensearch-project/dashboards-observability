@@ -1,82 +1,154 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Field component Renders a sidebar field 1`] = `
-<Provider
-  store={
+<Component
+  field={
     Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
+      "name": "agent",
+      "type": "string",
     }
   }
+  handleOverrideTimestamp={[MockFunction]}
+  isFieldToggleButtonDisabled={false}
+  isOverridingTimestamp={false}
+  onToggleField={[MockFunction]}
+  selected={true}
+  selectedTimestamp="timestamp"
+  showTimestampOverrideButton={true}
+  showToggleButton={true}
 >
-  <Component
-    field={
-      Object {
-        "name": "agent",
-        "type": "string",
-      }
-    }
-    handleOverrideTimestamp={[MockFunction]}
-    isFieldToggleButtonDisabled={false}
-    isOverridingTimestamp={false}
-    onToggleField={[MockFunction]}
-    selected={true}
-    selectedTimestamp="timestamp"
-    showTimestampOverrideButton={true}
-    showToggleButton={true}
-    tabId="DEFAULT_INDEX_PATTERNS"
+  <EuiFlexGroup
+    alignItems="center"
+    className="dscSidebarField"
+    gutterSize="s"
+    responsive={false}
   >
-    <EuiFlexGroup
-      alignItems="center"
-      className="dscSidebarField"
-      gutterSize="s"
-      responsive={false}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscSidebarField"
     >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscSidebarField"
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+          <FieldIcon
+            type="string"
           >
-            <FieldIcon
-              type="string"
+            <EuiToken
+              aria-label="string"
+              className="osdFieldIcon"
+              iconType="tokenString"
+              size="s"
+              title="string"
             >
-              <EuiToken
-                aria-label="string"
-                className="osdFieldIcon"
-                iconType="tokenString"
-                size="s"
-                title="string"
+              <span
+                className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small osdFieldIcon"
+                style={Object {}}
               >
-                <span
-                  className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small osdFieldIcon"
-                  style={Object {}}
+                <EuiIcon
+                  aria-label="string"
+                  size="m"
+                  title="string"
+                  type="tokenString"
                 >
-                  <EuiIcon
+                  <EuiIconEmpty
+                    aria-hidden={true}
                     aria-label="string"
-                    size="m"
+                    className="euiIcon euiIcon--medium euiIcon-isLoading"
+                    focusable="false"
+                    role="img"
+                    style={null}
                     title="string"
-                    type="tokenString"
                   >
-                    <EuiIconEmpty
+                    <svg
                       aria-hidden={true}
                       aria-label="string"
                       className="euiIcon euiIcon--medium euiIcon-isLoading"
                       focusable="false"
+                      height={16}
                       role="img"
                       style={null}
-                      title="string"
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </EuiIconEmpty>
+                </EuiIcon>
+              </span>
+            </EuiToken>
+          </FieldIcon>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={true}
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <EuiText
+            size="xs"
+          >
+            <div
+              className="euiText euiText--extraSmall"
+            >
+              agent
+            </div>
+          </EuiText>
+        </div>
+      </EuiFlexItem>
+      <EuiToolTip
+        content="Override default pattern"
+        delay="long"
+        id="override-pattern"
+        position="top"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiButtonIcon
+                aria-labelledby="override_pattern"
+                className="dscSidebarField__actionButton"
+                color="text"
+                data-test-subj="eventExplorer__overrideDefaultPattern"
+                iconType="inputOutput"
+                onClick={[Function]}
+                size="xs"
+              >
+                <button
+                  aria-labelledby="override_pattern"
+                  className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                  data-test-subj="eventExplorer__overrideDefaultPattern"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <EuiIcon
+                    aria-hidden="true"
+                    className="euiButtonIcon__icon"
+                    color="inherit"
+                    size="m"
+                    type="inputOutput"
+                  >
+                    <EuiIconEmpty
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
                     >
                       <svg
                         aria-hidden={true}
-                        aria-label="string"
-                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                         focusable="false"
                         height={16}
                         role="img"
@@ -87,276 +159,188 @@ exports[`Field component Renders a sidebar field 1`] = `
                       />
                     </EuiIconEmpty>
                   </EuiIcon>
-                </span>
-              </EuiToken>
-            </FieldIcon>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={true}
+                </button>
+              </EuiButtonIcon>
+            </div>
+          </EuiFlexItem>
+        </span>
+      </EuiToolTip>
+      <EuiToolTip
+        content="Override default timestamp"
+        delay="long"
+        id="override-timestamp"
+        position="top"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        />
+      </EuiToolTip>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            className="euiFlexItem"
+          <EuiToolTip
+            content="inspect"
+            delay="long"
+            position="top"
           >
-            <EuiText
-              size="xs"
+            <span
+              className="euiToolTipAnchor"
+              onKeyUp={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
             >
-              <div
-                className="euiText euiText--extraSmall"
-              >
-                agent
-              </div>
-            </EuiText>
-          </div>
-        </EuiFlexItem>
-        <EuiToolTip
-          content="Override default pattern"
-          delay="long"
-          id="override-pattern"
-          position="top"
-        >
-          <span
-            className="euiToolTipAnchor"
-            onKeyUp={[Function]}
-            onMouseOut={[Function]}
-            onMouseOver={[Function]}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiButtonIcon
-                  aria-labelledby="override_pattern"
-                  className="dscSidebarField__actionButton"
-                  color="text"
-                  data-test-subj="eventExplorer__overrideDefaultPattern"
-                  iconType="inputOutput"
-                  isDisabled={true}
-                  onClick={[Function]}
-                  size="xs"
-                >
-                  <button
-                    aria-labelledby="override_pattern"
-                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                    data-test-subj="eventExplorer__overrideDefaultPattern"
-                    disabled={true}
+              <EuiPopover
+                anchorPosition="rightUp"
+                button={
+                  <EuiButtonIcon
+                    aria-label="inspect"
+                    className="dscSidebarField__actionButton"
+                    iconType="inspect"
                     onClick={[Function]}
-                    type="button"
-                  >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiButtonIcon__icon"
-                      color="inherit"
-                      size="m"
-                      type="inputOutput"
-                    >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
-                    </EuiIcon>
-                  </button>
-                </EuiButtonIcon>
-              </div>
-            </EuiFlexItem>
-          </span>
-        </EuiToolTip>
-        <EuiToolTip
-          content="Override default timestamp"
-          delay="long"
-          id="override-timestamp"
-          position="top"
-        >
-          <span
-            className="euiToolTipAnchor"
-            onKeyUp={[Function]}
-            onMouseOut={[Function]}
-            onMouseOver={[Function]}
-          />
-        </EuiToolTip>
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiToolTip
-              content="inspect"
-              delay="long"
-              position="top"
-            >
-              <span
-                className="euiToolTipAnchor"
-                onKeyUp={[Function]}
-                onMouseOut={[Function]}
-                onMouseOver={[Function]}
+                    size="xs"
+                  />
+                }
+                closePopover={[Function]}
+                display="block"
+                hasArrow={true}
+                isOpen={false}
+                onBlur={[Function]}
+                onFocus={[Function]}
+                ownFocus={true}
+                panelClassName="explorerSidebarItem__fieldPopoverPanel"
+                panelPaddingSize="m"
               >
-                <EuiPopover
-                  anchorPosition="rightUp"
-                  button={
+                <div
+                  className="euiPopover euiPopover--anchorRightUp euiPopover--displayBlock"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
                     <EuiButtonIcon
                       aria-label="inspect"
                       className="dscSidebarField__actionButton"
                       iconType="inspect"
-                      isDisabled={true}
                       onClick={[Function]}
                       size="xs"
-                    />
-                  }
-                  closePopover={[Function]}
-                  display="block"
-                  hasArrow={true}
-                  isOpen={false}
-                  onBlur={[Function]}
-                  onFocus={[Function]}
-                  ownFocus={true}
-                  panelClassName="explorerSidebarItem__fieldPopoverPanel"
-                  panelPaddingSize="m"
-                >
-                  <div
-                    className="euiPopover euiPopover--anchorRightUp euiPopover--displayBlock"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
-                  >
-                    <div
-                      className="euiPopover__anchor"
                     >
-                      <EuiButtonIcon
+                      <button
                         aria-label="inspect"
-                        className="dscSidebarField__actionButton"
-                        iconType="inspect"
-                        isDisabled={true}
+                        className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
+                        disabled={false}
                         onClick={[Function]}
-                        size="xs"
+                        type="button"
                       >
-                        <button
-                          aria-label="inspect"
-                          className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                          disabled={true}
-                          onClick={[Function]}
-                          type="button"
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="inspect"
                         >
-                          <EuiIcon
-                            aria-hidden="true"
-                            className="euiButtonIcon__icon"
-                            color="inherit"
-                            size="m"
-                            type="inspect"
+                          <EuiIconEmpty
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            role="img"
+                            style={null}
                           >
-                            <EuiIconEmpty
+                            <svg
                               aria-hidden={true}
                               className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
+                              height={16}
                               role="img"
                               style={null}
-                            >
-                              <svg
-                                aria-hidden={true}
-                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                focusable="false"
-                                height={16}
-                                role="img"
-                                style={null}
-                                viewBox="0 0 16 16"
-                                width={16}
-                                xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </EuiIconEmpty>
-                          </EuiIcon>
-                        </button>
-                      </EuiButtonIcon>
-                    </div>
+                              viewBox="0 0 16 16"
+                              width={16}
+                              xmlns="http://www.w3.org/2000/svg"
+                            />
+                          </EuiIconEmpty>
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
-                </EuiPopover>
-              </span>
-            </EuiToolTip>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
+                </div>
+              </EuiPopover>
+            </span>
+          </EuiToolTip>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+          <EuiToolTip
+            content="Remove field from table"
+            delay="long"
+            position="top"
           >
-            <EuiToolTip
-              content="Remove field from table"
-              delay="long"
-              position="top"
+            <span
+              className="euiToolTipAnchor"
+              onKeyUp={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
             >
-              <span
-                className="euiToolTipAnchor"
-                onKeyUp={[Function]}
-                onMouseOut={[Function]}
-                onMouseOver={[Function]}
+              <EuiButtonIcon
+                aria-label="Remove agent from table"
+                className="dscSidebarField__actionButton"
+                color="danger"
+                data-test-subj="fieldToggle-agent"
+                iconType="cross"
+                onClick={[Function]}
               >
-                <EuiButtonIcon
+                <button
                   aria-label="Remove agent from table"
-                  className="dscSidebarField__actionButton"
-                  color="danger"
+                  className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
                   data-test-subj="fieldToggle-agent"
-                  iconType="cross"
+                  disabled={false}
                   onClick={[Function]}
+                  type="button"
                 >
-                  <button
-                    aria-label="Remove agent from table"
-                    className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall dscSidebarField__actionButton"
-                    data-test-subj="fieldToggle-agent"
-                    disabled={false}
-                    onClick={[Function]}
-                    type="button"
+                  <EuiIcon
+                    aria-hidden="true"
+                    className="euiButtonIcon__icon"
+                    color="inherit"
+                    size="m"
+                    type="cross"
                   >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiButtonIcon__icon"
-                      color="inherit"
-                      size="m"
-                      type="cross"
+                    <EuiIconEmpty
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      role="img"
+                      style={null}
                     >
-                      <EuiIconEmpty
+                      <svg
                         aria-hidden={true}
                         className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                         focusable="false"
+                        height={16}
                         role="img"
                         style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
-                    </EuiIcon>
-                  </button>
-                </EuiButtonIcon>
-              </span>
-            </EuiToolTip>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </Component>
-</Provider>
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </EuiIconEmpty>
+                  </EuiIcon>
+                </button>
+              </EuiButtonIcon>
+            </span>
+          </EuiToolTip>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</Component>
 `;
