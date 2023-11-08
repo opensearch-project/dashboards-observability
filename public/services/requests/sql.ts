@@ -4,7 +4,7 @@
  */
 
 import { CoreStart } from '../../../../../src/core/public';
-import { DirectQueryRequest } from '../../../common/types/explorer';
+import { PPL_BASE, PPL_SEARCH } from '../../../common/constants/shared';
 
 export class SQLService {
   private http;
@@ -12,7 +12,14 @@ export class SQLService {
     this.http = http;
   }
 
-  fetch = async (params: DirectQueryRequest, errorHandler?: (error: any) => void) => {
+  fetch = async (
+    params: {
+      query: string;
+      lang: string;
+      datasource: string;
+    },
+    errorHandler?: (error: any) => void
+  ) => {
     return this.http
       .post('/api/observability/query/jobs', {
         body: JSON.stringify(params),

@@ -427,10 +427,3 @@ export enum DirectQueryLoadingStatus {
   SCHEDULED = 'SCHEDULED',
   CANCELED = 'CANCELED',
 }
-
-export interface DirectQueryRequest {
-  query: string;
-  lang: string;
-  datasource: string;
-  sessionId?: string;
-}

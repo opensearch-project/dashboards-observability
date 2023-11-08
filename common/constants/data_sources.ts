@@ -14,8 +14,3 @@ export const enum QUERY_LANGUAGE {
   SQL = 'SQL',
   DQL = 'DQL',
 }
-export enum DATA_SOURCE_TYPES {
-  DEFAULT_CLUSTER_TYPE = DEFAULT_DATA_SOURCE_TYPE,
-  SPARK = 'spark',
-  S3Glue = 's3glue',
-}

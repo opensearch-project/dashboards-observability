@@ -18,11 +18,11 @@ import {
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEqual, lowerCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
+import { DirectQueryLoadingStatus } from '../../../../common/types/explorer';
 import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
@@ -38,8 +38,6 @@ import { PPLReferenceFlyout } from '../helpers';
 import { Autocomplete } from './autocomplete';
 import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
-import { get as getObjValue } from '../../../../common/utils/shared';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -103,7 +101,7 @@ export const DirectSearch = (props: any) => {
     stopPolling,
   } = usePolling<any, any>((params) => {
     return sqlService.fetchWithJobId(params);
-  }, 2000);
+  }, 5000);
 
   const requestParams = { tabId };
   const { dispatchOnGettingHis } = useFetchEvents({
@@ -192,21 +190,13 @@ export const DirectSearch = (props: any) => {
       );
     });
     dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
-    const sessionId = getAsyncSessionId();
-    const requestPayload = {
-      lang: lang.toLowerCase(),
-      query: tempQuery || query,
-      datasource: explorerSearchMetadata.datasources[0].label,
-    } as DirectQueryRequest;
-
-    if (sessionId) {
-      requestPayload.sessionId = sessionId;
-    }
-
     sqlService
-      .fetch(requestPayload)
+      .fetch({
+        lang: lowerCase(lang),
+        query: tempQuery || query,
+        datasource: explorerSearchMetadata.datasources[0].name,
+      })
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
         if (result.queryId) {
           startPolling({
             queryId: result.queryId,
@@ -218,7 +208,8 @@ export const DirectSearch = (props: any) => {
       .catch((e) => {
         setIsQueryRunning(false);
         console.error(e);
-      });
+      })
+      .finally(() => {});
   };
 
   useEffect(() => {
