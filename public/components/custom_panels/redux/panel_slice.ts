@@ -100,7 +100,12 @@ const fetchObservabilityPanels$ = () =>
   of(coreRefs.http.get(`${CUSTOM_PANELS_API_PREFIX}/panels`)).pipe(
     mergeMap((res) => res),
     mergeMap((res) => res.panels as ObservabilityPanelAttrs[]),
-    map((p: ObservabilityPanelAttrs) => ({ ...p, title: p.name, savedObject: false }))
+    map((p: ObservabilityPanelAttrs) => ({
+      ...p,
+      title: p.name,
+      savedObject: false,
+      type: 'observability-savedObject',
+    }))
   );
 
 // Fetches all saved Custom Panels
@@ -358,6 +363,8 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
  */
 const savedObjectToCustomPanel = (so: SimpleSavedObject<PanelType>): CustomPanelType => ({
   id: so.id,
+  type: so.type,
+  objectId: so.type + ':' + so.id,
   ...so.attributes,
   savedObject: true,
 });

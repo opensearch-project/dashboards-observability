@@ -30,11 +30,13 @@ import {
 } from '../redux/slices/metrics_slice';
 import { coreRefs } from '../../../framework/core_refs';
 import { selectPanelList } from '../../../../public/components/custom_panels/redux/panel_slice';
-import { SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
 import { SavedVisualization } from '../../../../common/types/explorer';
 import { visualizationFromMetric } from '../helpers/utils';
 import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { max } from 'lodash';
+import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
+import semver from 'semver';
 
 const Savebutton = ({
   setIsPanelOpen,
@@ -56,7 +58,9 @@ const Savebutton = ({
 };
 
 const MetricsExportPopOver = () => {
-  const availableDashboards = useSelector(selectPanelList);
+  const availableObservabilityDashboards = useSelector(selectPanelList);
+  const [availableDashboards, setAvailableDashboards] = React.useState([]);
+  const [osdCoreDashboards, setOsdCoreDashboards] = React.useState([]);
 
   const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
@@ -69,6 +73,32 @@ const MetricsExportPopOver = () => {
   const [selectedPanelOptions, setSelectedPanelOptions] = React.useState<any[]>([]);
 
   const { toasts } = coreRefs;
+
+  const getCoreDashboards = async () => {
+    if (!coreRefs.dashboard) return [];
+
+    const dashboardsLoader = coreRefs.dashboard.getSavedDashboardLoader();
+
+    const client = dashboardsLoader.savedObjectsClient;
+    const ds = await client.find({ type: 'dashboard' });
+
+    return ds?.savedObjects.map((so) => ({
+      ...so,
+      objectId: so.type + ':' + so.id,
+      title: so.attributes?.title,
+      panelConfig: JSON.parse(so.attributes?.panelsJSON || '[]'),
+    }));
+  };
+
+  useEffect(() => {
+    (async function () {
+      setOsdCoreDashboards(await getCoreDashboards());
+    })();
+  }, []);
+
+  useEffect(() => {
+    setAvailableDashboards([...osdCoreDashboards, ...availableObservabilityDashboards]);
+  }, [osdCoreDashboards, availableObservabilityDashboards]);
 
   useEffect(() => {
     if (selectedMetrics && selectedMetricsIds) {
@@ -94,12 +124,12 @@ const MetricsExportPopOver = () => {
     const res = await client.get({ objectId: metric.savedVisualizationId });
     const currentObject = res.observabilityObjectList[0];
 
-    await client.update({
+    const savedObject = await client.update({
       objectId: metric.savedVisualizationId,
       ...savedObjectInputFromObject(currentObject.savedVisualization),
       name: metric.name,
     });
-    return metric.savedVisualizationId;
+    return savedObject;
   };
 
   const datasourceMetaFrom = (catalog) =>
@@ -107,7 +137,7 @@ const MetricsExportPopOver = () => {
       { name: catalog, title: catalog, id: catalog, label: catalog, type: 'prometheus' },
     ]);
 
-  const createSavedVisualization = async (metric): Promise<string> => {
+  const createSavedVisualization = async (metric): Promise<any> => {
     const [ds, index] = metric.index.split('.');
     const queryMetaData = {
       catalogSourceName: ds,
@@ -134,14 +164,97 @@ const MetricsExportPopOver = () => {
     );
 
     const savedObject = await OSDSavedVisualizationClient.getInstance().create(visMetaData);
-    return savedObject.objectId;
+    return savedObject;
+  };
+
+  const panelXYorGreaterThanValue = (value, panel) => {
+    const sum = panel.gridData.y + panel.gridData.h;
+    return sum > value ? sum : value;
+  };
+
+  const panelVersionOrGreaterThanValue = (value, panel) => {
+    return semver.compare(value, panel.version) < 0 ? panel.version : value;
+  };
+
+  const defaultPanelHeight = 12;
+  const defaultPanelWidth = 24;
+  const panelGutter = 1;
+
+  const pushNewPanelToDashboardForMetricWith = ({
+    dashboard,
+    referenceCount,
+    maxPanelY,
+    maxPanelVersion,
+    maxPanelIndex,
+  }) => (metric, index) => {
+    const { type, id } = metric.object;
+    const panelIndex = maxPanelIndex + 1 + index;
+    const newPanelConfig = {
+      gridData: {
+        x: 0,
+        y: maxPanelY + panelGutter + index * (panelGutter + defaultPanelHeight),
+        w: defaultPanelWidth,
+        h: defaultPanelHeight,
+        i: `${panelIndex}`,
+      },
+      panelIndex: `${panelIndex}`,
+      version: maxPanelVersion,
+      panelRefName: `panel_${referenceCount + index}`,
+      embeddableConfig: {},
+    };
+
+    const newPanel = {
+      name: `panel_${referenceCount + index}`,
+      type,
+      id,
+    };
+    dashboard.panelConfig.push(newPanelConfig);
+    dashboard.references.push(newPanel);
+  };
+  const addMultipleVizToODSCoreDashbaords = (osdCoreSelectedDashboards, metricsToExport) => {
+    const dashboardsLoader: SavedObjectLoader = coreRefs.dashboard!.getSavedDashboardLoader();
+
+    const client = dashboardsLoader.savedObjectsClient;
+
+    Promise.all(
+      osdCoreSelectedDashboards.map(async ({ panel: dashboard }, index) => {
+        const referenceCount = dashboard.references.length;
+        const maxPanelY = dashboard.panelConfig.reduce(panelXYorGreaterThanValue, 0);
+        const maxPanelVersion = dashboard.panelConfig.reduce(
+          panelVersionOrGreaterThanValue,
+          '0.0.0'
+        );
+        const maxPanelIndex = max(dashboard.panelConfig.map((p) => parseInt(p.panelIndex)));
+
+        metricsToExport.forEach(
+          pushNewPanelToDashboardForMetricWith({
+            dashboard,
+            referenceCount,
+            maxPanelY,
+            maxPanelVersion,
+            maxPanelIndex,
+          })
+        );
+
+        const panelsJSON = JSON.stringify(dashboard.panelConfig);
+
+        const updateRes = await client.update(
+          dashboard.type,
+          dashboard.id,
+          { ...dashboard.attributes, panelsJSON },
+          {
+            references: dashboard.references,
+          }
+        );
+      })
+    );
   };
 
   const handleSavingObjects = async () => {
-    let savedMetricIds = [];
+    let savedMetrics = [];
 
     try {
-      savedMetricIds = await Promise.all(
+      savedMetrics = await Promise.all(
         metricsToExport.map(async (metric, index) => {
           if (metric.savedVisualizationId === undefined) {
             return createSavedVisualization(metric);
@@ -160,14 +273,28 @@ const MetricsExportPopOver = () => {
     toasts!.add('Saved metrics successfully!');
 
     if (selectedPanelOptions.length > 0) {
+      const osdCoreSelectedDashboards = selectedPanelOptions.filter(
+        (panel) => panel.panel?.type === 'dashboard'
+      );
+      const observabilityDashboards = selectedPanelOptions.filter(
+        (panel) => panel.panel?.type !== 'dashboard'
+      );
+
       try {
-        await addMultipleVizToPanels(selectedPanelOptions, savedMetricIds);
+        if (observabilityDashboards.length > 0) {
+          const savedVisualizationIds = savedMetrics.map((p) => p.objectId);
+          console.log(savedMetrics);
+          await addMultipleVizToPanels(observabilityDashboards, savedVisualizationIds);
+        }
+        if (osdCoreSelectedDashboards.length > 0)
+          await addMultipleVizToODSCoreDashbaords(osdCoreSelectedDashboards, savedMetrics);
+
+        toasts!.add('Saved metrics to Dashboards successfully!');
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);
         toasts!.addDanger('Issue in saving metrics');
       }
-      toasts!.add('Saved metrics to Dashboards successfully!');
     }
   };
 

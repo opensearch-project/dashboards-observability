@@ -5,6 +5,7 @@
 
 import { ApplicationStart, ChromeStart, HttpStart, IToasts } from '../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../src/core/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
@@ -16,6 +17,8 @@ class CoreRefs {
   public toasts?: IToasts;
   public chrome?: ChromeStart;
   public application?: ApplicationStart;
+  public dashboard?: DashboardStart;
+  public dashboardProviders?: unknown;
   private constructor() {
     // ...
   }

@@ -44,25 +44,8 @@ interface MetricsProps {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-const getCoreDashboards = async (client) => {
-  const ds = await client.find({ type: 'dashboard', fields: ['title'] });
-  return ds?.savedObjects.map((so) => ({
-    objectid: so.type + ':' + so.id,
-    title: so.attributes?.title,
-  }));
-};
-
 export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: MetricsProps) => {
   const dashboardsLoader = dashboard.getSavedDashboardLoader();
-  useEffect(() => {
-    if (!dashboardsLoader) return;
-
-    (async function () {
-      const dashboards = await getCoreDashboards(dashboardsLoader.savedObjectsClient);
-
-      console.log({ dashboards });
-    })();
-  }, [dashboardsLoader]);
 
   // Redux tools
   const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
