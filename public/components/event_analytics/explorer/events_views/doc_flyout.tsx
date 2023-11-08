@@ -85,7 +85,7 @@ export const DocFlyout = ({
           <EuiButtonIcon
             className="events-flyout-resize"
             color="text"
-            size="xs"
+            size="m"
             aria-label="Resize"
             title="Resize"
             iconType={toggleSize ? 'menuLeft' : 'menuRight'}

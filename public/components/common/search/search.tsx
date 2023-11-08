@@ -20,21 +20,24 @@ import {
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
+import { useDispatch, useSelector } from 'react-redux';
+import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
+import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
-import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import {
+  selectSearchMetaData,
+  update as updateSearchMetaData,
+} from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
-import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -94,12 +97,14 @@ export const Search = (props: any) => {
     setIsQueryRunning,
   } = props;
 
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
+  const [queryLang, setQueryLang] = useState('PPL');
+  const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -114,7 +119,7 @@ export const Search = (props: any) => {
   }, 5000);
 
   const requestParams = { tabId };
-  const { dispatchOnGettingHis } = useFetchEvents({
+  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
     pplService: new SQLService(coreRefs.http),
     requestParams,
   });
@@ -158,9 +163,10 @@ export const Search = (props: any) => {
   );
 
   const handleQueryLanguageChange = (lang: string) => {
-    if (lang === QUERY_LANGUAGE.DQL) {
-      application!.navigateToUrl('../app/data-explorer/discover');
-      return;
+    if (lang === 'DQL') {
+      return application!.navigateToUrl(
+        `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
+      );
     }
     dispatch(
       updateSearchMetaData({
@@ -181,16 +187,10 @@ export const Search = (props: any) => {
   };
 
   const languagePopOverItems = [
-    <EuiContextMenuItem
-      key={QUERY_LANGUAGE.PPL}
-      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
-    >
+    <EuiContextMenuItem key="PPL" onClick={() => handleQueryLanguageChange('PPL')}>
       PPL
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key={QUERY_LANGUAGE.DQL}
-      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.DQL)}
-    >
+    <EuiContextMenuItem key="DQL" onClick={() => handleQueryLanguageChange('DQL')}>
       DQL
     </EuiContextMenuItem>,
   ];
@@ -215,9 +215,24 @@ export const Search = (props: any) => {
     }
   }, [pollingResult, pollingError]);
 
+  useEffect(() => {
+    if (explorerSearchMetadata.datasources?.[0]?.type === 'DEFAULT_INDEX_PATTERNS') {
+      const queryWithSelectedSource = `source = ${explorerSearchMetadata.datasources[0].label}`;
+      handleQueryChange(queryWithSelectedSource);
+      dispatch(
+        changeQuery({
+          tabId,
+          query: {
+            [RAW_QUERY]: queryWithSelectedSource,
+          },
+        })
+      );
+    }
+  }, [explorerSearchMetadata.datasources]);
+
   return (
     <div className="globalQueryBar">
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart" wrap>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
         {appLogEvents && (
           <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
             <EuiToolTip position="top" content={baseQuery}>
@@ -227,21 +242,19 @@ export const Search = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {!appLogEvents && (
-          <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
-            <EuiPopover
-              id="smallContextMenuExample"
-              button={languagePopOverButton}
-              isOpen={isLanguagePopoverOpen}
-              closePopover={closeLanguagePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel size="s" items={languagePopOverItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem key="search-bar" className="search-area" grow={5} style={{ minWidth: 400 }}>
+        <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
+          <EuiPopover
+            id="smallContextMenuExample"
+            button={languagePopOverButton}
+            isOpen={isLanguagePopoverOpen}
+            closePopover={closeLanguagePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel size="s" items={languagePopOverItems} />
+          </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem key="search-bar" className="search-area" grow={5}>
           <Autocomplete
             key={'autocomplete-search-bar'}
             query={query}

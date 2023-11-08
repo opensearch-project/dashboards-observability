@@ -50,7 +50,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
 export function FieldIcon({
   type,
   label,
-  size = 's',
+  size = 'l',
   scripted,
   className,
   ...rest

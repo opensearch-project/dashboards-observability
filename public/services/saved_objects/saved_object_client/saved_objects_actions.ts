@@ -3,14 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  SEARCH_SAVED_OBJECT,
-  VISUALIZATION_SAVED_OBJECT,
-} from '../../../../common/types/observability_saved_object_attributes';
+import { VISUALIZATION_SAVED_OBJECT } from '../../../../common/types/observability_saved_object_attributes';
 import { ISavedObjectRequestParams } from '../event_analytics/saved_objects';
 import { OSDSavedObjectClient } from './osd_saved_objects/osd_saved_object_client';
 import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualization';
-import { OSDSavedSearchClient } from './osd_saved_objects/saved_searches';
 import { ObservabilitySavedObjectsType } from './osd_saved_objects/types';
 import { PPLSavedQueryClient } from './ppl';
 import {
@@ -33,8 +29,6 @@ export class SavedObjectsActions {
     switch (type) {
       case VISUALIZATION_SAVED_OBJECT:
         return OSDSavedVisualizationClient.getInstance().get(params);
-      case SEARCH_SAVED_OBJECT:
-        return OSDSavedSearchClient.getInstance().get(params);
 
       default:
         // for non-osd objects it does not matter which client implementation
@@ -58,17 +52,6 @@ export class SavedObjectsActions {
       ];
     }
 
-    if (params.objectType?.includes('savedQuery')) {
-      const osdSearchObjects = await OSDSavedSearchClient.getInstance().getBulk();
-      if (objects.totalHits && osdSearchObjects.totalHits) {
-        objects.totalHits += osdSearchObjects.totalHits;
-      }
-      objects.observabilityObjectList = [
-        ...objects.observabilityObjectList,
-        ...osdSearchObjects.observabilityObjectList,
-      ];
-    }
-
     if (params.sortOrder === 'asc') {
       objects.observabilityObjectList.sort((a, b) => a.lastUpdatedTimeMs - b.lastUpdatedTimeMs);
     } else {
@@ -82,8 +65,6 @@ export class SavedObjectsActions {
     switch (type) {
       case VISUALIZATION_SAVED_OBJECT:
         return OSDSavedVisualizationClient.getInstance().delete(params);
-      case SEARCH_SAVED_OBJECT:
-        return OSDSavedSearchClient.getInstance().delete(params);
 
       default:
         return PPLSavedQueryClient.getInstance().delete(params);
@@ -117,16 +98,6 @@ export class SavedObjectsActions {
       responses.deleteResponseList = {
         ...responses.deleteResponseList,
         ...visualizationDeleteResponses.deleteResponseList,
-      };
-    }
-
-    if (idMap[SEARCH_SAVED_OBJECT]?.length) {
-      const searchDeleteResponses = await OSDSavedSearchClient.getInstance().deleteBulk({
-        objectIdList: idMap[SEARCH_SAVED_OBJECT],
-      });
-      responses.deleteResponseList = {
-        ...responses.deleteResponseList,
-        ...searchDeleteResponses.deleteResponseList,
       };
     }
 

@@ -2,141 +2,211 @@
 
 exports[`No result component Renders No result component 1`] = `
 <Component>
-  <EuiPage
-    paddingSize="s"
-  >
-    <div
-      className="euiPage euiPage--paddingSmall euiPage--grow"
+  <I18nProvider>
+    <IntlProvider
+      defaultLocale="en"
+      formats={
+        Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        }
+      }
+      locale="en"
+      messages={Object {}}
+      textComponent={Symbol(react.fragment)}
     >
-      <EuiFlexGroup
-        direction="column"
-        justifyContent="center"
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      <PseudoLocaleWrapper>
+        <EuiSpacer
+          size="xl"
         >
-          <EuiFlexItem
-            grow={false}
+          <div
+            className="euiSpacer euiSpacer--xl"
+          />
+        </EuiSpacer>
+        <EuiFlexGroup
+          justifyContent="center"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
+            <EuiFlexItem
+              className="dscNoResults"
+              grow={false}
             >
-              <EuiCallOut
-                color="warning"
-                data-test-subj="observabilityNoResultsCallout"
-                iconType="help"
-                title={
-                  <FormattedMessage
-                    defaultMessage="No results match your search criteria"
-                    id="observability.noResults.noResultsMatchSearchCriteriaTitle"
-                    values={Object {}}
-                  />
-                }
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
               >
-                <div
-                  className="euiCallOut euiCallOut--warning"
-                  data-test-subj="observabilityNoResultsCallout"
+                <EuiCallOut
+                  color="warning"
+                  data-test-subj="discoverNoResults"
+                  iconType="help"
+                  title={
+                    <FormattedMessage
+                      defaultMessage="No results match your search criteria"
+                      id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+                      values={Object {}}
+                    />
+                  }
                 >
                   <div
-                    className="euiCallOutHeader"
+                    className="euiCallOut euiCallOut--warning"
+                    data-test-subj="discoverNoResults"
                   >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiCallOutHeader__icon"
-                      color="inherit"
-                      size="m"
-                      type="help"
+                    <div
+                      className="euiCallOutHeader"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiCallOutHeader__icon"
+                        color="inherit"
+                        size="m"
+                        type="help"
                       >
-                        <svg
+                        <EuiIconEmpty
                           aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
                           focusable="false"
-                          height={16}
                           role="img"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
-                    </EuiIcon>
-                    <span
-                      className="euiCallOutHeader__title"
+                        >
+                          <svg
+                            aria-hidden={true}
+                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+                            focusable="false"
+                            height={16}
+                            role="img"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <span
+                        className="euiCallOutHeader__title"
+                      >
+                        <FormattedMessage
+                          defaultMessage="No results match your search criteria"
+                          id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+                          values={Object {}}
+                        >
+                          No results match your search criteria
+                        </FormattedMessage>
+                      </span>
+                    </div>
+                  </div>
+                </EuiCallOut>
+                <EuiSpacer
+                  size="xl"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--xl"
+                  />
+                </EuiSpacer>
+                <EuiText>
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <h2
+                      data-test-subj="discoverNoResultsTimefilter"
                     >
                       <FormattedMessage
-                        defaultMessage="No results match your search criteria"
-                        id="observability.noResults.noResultsMatchSearchCriteriaTitle"
+                        defaultMessage="Expand your time range or modify your query"
+                        id="discover.noResults.expandYourTimeRangeTitle"
                         values={Object {}}
                       >
-                        <span>
-                          No results match your search criteria
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </div>
-                </div>
-              </EuiCallOut>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiText>
-                <div
-                  className="euiText euiText--medium"
-                >
-                  <h2
-                    data-test-subj="obsNoResultsTimefilter"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Expand your time range or modify your query"
-                      id="observability.noResults.expandYourTimeRangeTitle"
-                      values={Object {}}
-                    >
-                      <span>
                         Expand your time range or modify your query
-                      </span>
-                    </FormattedMessage>
-                  </h2>
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="Your query may not match anything in the current time range, 
-                or there may not be any data at all in the currently selected time range. 
-                Try change time range, query filters or choose different time fields."
-                      id="observability.noResults.queryMayNotMatchTitle"
-                      values={Object {}}
-                    >
-                      <span>
-                        Your query may not match anything in the current time range, 
-                or there may not be any data at all in the currently selected time range. 
-                Try change time range, query filters or choose different time fields.
-                      </span>
-                    </FormattedMessage>
-                  </p>
-                </div>
-              </EuiText>
-            </div>
-          </EuiFlexItem>
-        </div>
-      </EuiFlexGroup>
-    </div>
-  </EuiPage>
+                      </FormattedMessage>
+                    </h2>
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. Try change time range, query filters or choose different time fields"
+                        id="discover.noResults.queryMayNotMatchTitle"
+                        values={Object {}}
+                      >
+                        Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. Try change time range, query filters or choose different time fields
+                      </FormattedMessage>
+                    </p>
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </PseudoLocaleWrapper>
+    </IntlProvider>
+  </I18nProvider>
 </Component>
 `;

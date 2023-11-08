@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiBadge,
 } from '@elastic/eui';
 import { FieldButton } from '../../../common/field_button';
 import { FieldIcon } from '../../../common/field_icon';
@@ -74,91 +73,57 @@ export const Field = (props: IFieldProps) => {
     onToggleField(fields);
   };
 
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} className="dscSidebarField">
-      <EuiFlexItem grow={false}>
-        <FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiText size="xs">{field.name}</EuiText>
-      </EuiFlexItem>
-      <EuiToolTip id="override-pattern" delay="long" content="Override default pattern">
-        <>
-          {isEqual(field.type, 'string') ? (
-            isEqual(selectedPattern, field.name) ? (
-              <EuiText size="xs">
-                {' '}
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    className="dscSidebarField__actionButton"
-                    color="hollow"
-                    data-test-subj="eventFields__default-pattern-mark"
-                  >
-                    Default Pattern
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiText>
-            ) : isOverridingPattern ? (
-              <EuiFlexItem grow={false}>
+  const getFieldActionDOM = () => {
+    return (
+      <>
+        <EuiToolTip id="override-pattern" delay="long" content="Override default pattern">
+          <>
+            {isEqual(field.type, 'string') ? (
+              isEqual(selectedPattern, field.name) ? (
+                <EuiMark data-test-subj="eventFields__default-pattern-mark">
+                  Default Pattern
+                </EuiMark>
+              ) : isOverridingPattern ? (
                 <EuiLoadingSpinner className="override_pattern_loading" size="s" />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
+              ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_pattern"
-                  size="xs"
+                  size="s"
                   color="text"
                   iconType="inputOutput"
                   onClick={() => handleOverridePattern(field)}
                   data-test-subj="eventExplorer__overrideDefaultPattern"
-                  className="dscSidebarField__actionButton"
                 >
                   Override
                 </EuiButtonIcon>
-              </EuiFlexItem>
-            )
-          ) : null}
-        </>
-      </EuiToolTip>
-      <EuiToolTip id="override-timestamp" delay="long" content="Override default timestamp">
-        <>
-          {showTimestampOverrideButton && isEqual(field.type, 'timestamp') ? (
-            isEqual(selectedTimestamp, field.name) ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  {' '}
-                  <EuiBadge
-                    className="dscSidebarField__actionButton"
-                    color="hollow"
-                    data-test-subj="eventFields__default-timestamp-mark"
-                  >
-                    Default Timestamp
-                  </EuiBadge>
-                </EuiText>
-              </EuiFlexItem>
-            ) : isOverridingTimestamp ? (
-              <EuiFlexItem grow={false}>
+              )
+            ) : null}
+          </>
+        </EuiToolTip>
+        <EuiToolTip id="override-timestamp" delay="long" content="Override default timestamp">
+          <>
+            {showTimestampOverrideButton && isEqual(field.type, 'timestamp') ? (
+              isEqual(selectedTimestamp, field.name) ? (
+                <EuiMark data-test-subj="eventFields__default-timestamp-mark">
+                  Default Timestamp
+                </EuiMark>
+              ) : isOverridingTimestamp ? (
                 <EuiLoadingSpinner className="override_timestamp_loading" size="s" />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
+              ) : (
                 <EuiButtonIcon
                   aria-labelledby="override_timestamp"
-                  size="xs"
+                  size="s"
                   color="text"
                   iconType="inputOutput"
                   onClick={() => handleOverrideTimestamp(field)}
                   data-test-subj="eventExplorer__overrideDefaultTimestamp"
-                  className="dscSidebarField__actionButton"
                 >
                   Override
                 </EuiButtonIcon>
-              </EuiFlexItem>
-            )
-          ) : null}
-        </>
-      </EuiToolTip>
-      <EuiFlexItem grow={false}>
+              )
+            ) : null}
+          </>
+        </EuiToolTip>
         <EuiToolTip delay="long" content="inspect">
           <EuiPopover
             ownFocus
@@ -167,15 +132,7 @@ export const Field = (props: IFieldProps) => {
             closePopover={() => setIsFieldDetailsOpen(false)}
             anchorPosition="rightUp"
             panelClassName="explorerSidebarItem__fieldPopoverPanel"
-            button={
-              <EuiButtonIcon
-                iconType="inspect"
-                size="xs"
-                onClick={togglePopover}
-                aria-label={'inspect'}
-                className="dscSidebarField__actionButton"
-              />
-            }
+            button={<EuiButtonIcon iconType="inspect" size="xs" onClick={togglePopover} />}
           >
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
@@ -189,8 +146,6 @@ export const Field = (props: IFieldProps) => {
             <FieldInsights field={field} query={query} />
           </EuiPopover>
         </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
         <EuiToolTip
           delay="long"
           content={
@@ -209,7 +164,6 @@ export const Field = (props: IFieldProps) => {
                 isDisabled
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={selected ? removeLabelAria : addLabelAria}
-                className="dscSidebarField__actionButton"
               />
             ) : (
               <EuiButtonIcon
@@ -225,12 +179,32 @@ export const Field = (props: IFieldProps) => {
                 }}
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={selected ? removeLabelAria : addLabelAria}
-                className="dscSidebarField__actionButton"
               />
             )}
           </>
         </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </>
+    );
+  };
+
+  return (
+    <FieldButton
+      size="s"
+      className="shard__fieldSelectorField explorer__fieldSelectorField vbFieldButton"
+      isActive={false}
+      dataTestSubj={`field-${field.name}-showDetails`}
+      fieldIcon={<FieldIcon type={isEqual(field.type, 'timestamp') ? 'date' : field.type} />}
+      fieldName={
+        <span
+          data-test-subj={`field-${field.name}`}
+          title={field.name}
+          className="dscSidebarField__name"
+        >
+          <EuiText size="xs">{field.name}</EuiText>
+        </span>
+      }
+      fieldAction={getFieldActionDOM()}
+      onClick={togglePopover}
+    />
   );
 };

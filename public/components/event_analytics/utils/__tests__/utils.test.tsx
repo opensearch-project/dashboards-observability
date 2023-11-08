@@ -118,9 +118,7 @@ describe('Utils event analytics helper functions', () => {
   });
 
   it('validates redoQuery function', () => {
-    const fetchEvents = jest.fn();
-    const setData = jest.fn();
-
+    const getEvents = jest.fn();
     redoQuery(
       '2023-01-01 00:00:00',
       '2023-09-28 23:19:10',
@@ -137,14 +135,10 @@ describe('Utils event analytics helper functions', () => {
       {
         current: [0, 100],
       },
-      fetchEvents,
-      setData
+      getEvents
     );
-    const expectedFinalQuery = {
-      query:
-        "source=opensearch_dashboards_sample_data_logs | where timestamp >= '2023-01-01 00:00:00' and timestamp <= '2023-09-28 23:19:10' | where match(request,'filebeat') | sort + timestamp | head 100 from 0",
-    };
-    // final query is the only thing being tested here
-    expect(fetchEvents).toBeCalledWith(expectedFinalQuery, 'jdbc', expect.anything());
+    const expectedFinalQuery =
+      "source=opensearch_dashboards_sample_data_logs | where timestamp >= '2023-01-01 00:00:00' and timestamp <= '2023-09-28 23:19:10' | where match(request,'filebeat') | sort + timestamp | head 100 from 0";
+    expect(getEvents).toBeCalledWith(expectedFinalQuery);
   });
 });
