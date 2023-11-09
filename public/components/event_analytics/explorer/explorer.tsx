@@ -736,11 +736,6 @@ export const Explorer = ({
       }
     } else {
       if (isTabHasObjID && isObjTypeMatchVis && subType !== PPL_METRIC_SUBTYPE) {
-        console.log('savingAsCurrentVisualization', {
-          isTabHasObjID,
-          isObjTypeMatchVis,
-          subType,
-        });
         soClient = new SaveAsCurrentVisualization(
           { tabId, history, notifications, showPermissionErrorToast },
           { batch, dispatch, changeQuery, updateTabName },
@@ -760,12 +755,6 @@ export const Explorer = ({
           }
         );
       } else {
-        console.log('savingAsNewVisualization', {
-          isTabHasObjID,
-          isObjTypeMatchVis,
-          subType,
-        });
-
         soClient = new SaveAsNewVisualization(
           {
             tabId,

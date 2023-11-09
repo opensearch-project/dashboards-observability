@@ -15,10 +15,9 @@ import {
 import { MetricType } from '../../../../../common/types/metrics';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
-import { getNewVizDimensions, pplServiceRequestor, sortMetricLayout } from '../../helpers/utils';
+import { pplServiceRequestor } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
-import { fetchVisualizationById } from '../../../custom_panels/helpers/utils';
 
 export interface IconAttributes {
   color: string;
@@ -99,7 +98,7 @@ const fetchCustomMetrics = async () => {
     objectType: [SAVED_VISUALIZATION],
   });
   const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
-    [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization.sub_type)
+    [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization?.sub_type)
   );
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,

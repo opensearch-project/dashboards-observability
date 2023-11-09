@@ -188,6 +188,12 @@ const MetricsExportPopOver = () => {
     maxPanelY,
     maxPanelVersion,
     maxPanelIndex,
+  }: {
+    dashboard: unknown;
+    referenceCount: number;
+    maxPanelY: number;
+    maxPanelVersion: string;
+    maxPanelIndex: number;
   }) => (metric, index) => {
     const { type, id } = metric.object;
     const panelIndex = maxPanelIndex + 1 + index;
@@ -226,7 +232,7 @@ const MetricsExportPopOver = () => {
           panelVersionOrGreaterThanValue,
           '0.0.0'
         );
-        const maxPanelIndex = max(dashboard.panelConfig.map((p) => parseInt(p.panelIndex)));
+        const maxPanelIndex = max(dashboard.panelConfig.map((p) => parseInt(p.panelIndex))) ?? 0;
 
         metricsToExport.forEach(
           pushNewPanelToDashboardForMetricWith({
@@ -286,7 +292,6 @@ const MetricsExportPopOver = () => {
     const label = dashboards.length > 1 ? 'Dashboards ' : 'Dashboard ';
 
     const links = dashboards.map((d) => euiLinkFor(d));
-    console.log('linkedDashboardsList', { dashboards, links, label });
     return [label, ...links];
   };
 
