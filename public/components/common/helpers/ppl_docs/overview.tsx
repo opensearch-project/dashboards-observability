@@ -21,7 +21,7 @@ PPL is the primary language used with observability in OpenSearch, and it suppor
 PPL is availble in OpenSearch Dashboards and in a standalone command-line tool. Within OpenSearch Dashboards, you can use [Query Workbench](https://opensearch.org/docs/latest/dashboards/query-workbench/) to run
 on-demand PPL commands and view and save the results as text and JSON. The [PPL command line interface (CLI)](https://opensearch.org/docs/latest/search-plugins/sql/cli/) is a standalone Python application that you can launch with the `opensearchsql` command. The PPL CLI is useful for running on-demand PPL commands and viewing and saving the results as text and JSON.
 
-Here's an example of a PPL query. This query will retrieve the first and last names of all account where the age is greater than 18.
+Here's an example of a PPL query. This query will retrieve the first and last names of all accounts where the age is greater than 18.
 
 \`\`\` 
 source=accounts
