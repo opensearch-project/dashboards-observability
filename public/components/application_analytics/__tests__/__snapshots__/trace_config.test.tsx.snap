@@ -386,7 +386,6 @@ exports[`Trace Config component renders empty trace config 1`] = `
                           aria-label="Select trace groups"
                           className="euiComboBox"
                           data-test-subj="traceGroupsComboBox"
-                          onFocus={[Function]}
                           onKeyDown={[Function]}
                           role="combobox"
                         >
@@ -1243,7 +1242,6 @@ exports[`Trace Config component renders with one trace selected 1`] = `
                           aria-label="Select trace groups"
                           className="euiComboBox"
                           data-test-subj="traceGroupsComboBox"
-                          onFocus={[Function]}
                           onKeyDown={[Function]}
                           role="combobox"
                         >
