@@ -177,8 +177,9 @@ export const Home = ({
           }}
         />
         <Route
-          path={`${parentPath}/:id`}
+          path={[`${parentPath}/view/:id`, `${parentPath}/:id`]}
           render={(props) => {
+            console.log('custompanel router match view', { parentPath, props });
             const isSavedObject = !!props.match.params.id.match(uuidRx);
 
             return isSavedObject ? (

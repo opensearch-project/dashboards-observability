@@ -8,6 +8,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiPopoverFooter,
 } from '@elastic/eui';
@@ -16,10 +17,7 @@ import { useSelector } from 'react-redux';
 import { MetricsExportPanel } from './metrics_export_panel';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
-import {
-  addMultipleVizToPanels,
-  isUuid,
-} from '../../custom_panels/redux/panel_slice';
+import { addMultipleVizToPanels, isUuid } from '../../custom_panels/redux/panel_slice';
 import { MetricType } from '../../../../common/types/metrics';
 import {
   dateSpanFilterSelector,
@@ -31,10 +29,13 @@ import { selectPanelList } from '../../../../public/components/custom_panels/red
 import { SavedVisualization } from '../../../../common/types/explorer';
 import { visualizationFromMetric } from '../helpers/utils';
 import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { PROMQL_METRIC_SUBTYPE, queryWorkbenchPluginID } from '../../../../common/constants/shared';
 import { max } from 'lodash';
 import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import semver from 'semver';
+import { MountPoint } from '../../../../../../src/core/public';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '../../../../../../packages/osd-i18n/src/react/provider';
 
 const Savebutton = ({
   setIsPanelOpen,
@@ -251,6 +252,44 @@ const MetricsExportPopOver = () => {
     );
   };
 
+  const mountableToastElement = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
+    render(<I18nProvider>{node}</I18nProvider>, element);
+    return () => unmountComponentAtNode(element);
+  };
+
+  const appFor = (objectType) => {
+    switch (objectType) {
+      case 'dashboard':
+        return 'dashboards';
+      case 'observability-panel':
+        return 'observability-dashboards';
+      default:
+        return 'observability-visualization';
+    }
+  };
+
+  const euiLinkFor = ({ panel: dashboard }) => {
+    return (
+      <EuiLink
+        onClick={() =>
+          coreRefs?.application!.navigateToApp(appFor(dashboard.type), {
+            path: `#/view/${dashboard.id}`,
+          })
+        }
+      >
+        {dashboard.title}
+      </EuiLink>
+    );
+  };
+
+  const linkedDashboardsList = (dashboards) => {
+    const label = dashboards.length > 1 ? 'Dashboards ' : 'Dashboard ';
+
+    const links = dashboards.map((d) => euiLinkFor(d));
+    console.log('linkedDashboardsList', { dashboards, links, label });
+    return [label, ...links];
+  };
+
   const handleSavingObjects = async () => {
     let savedMetrics = [];
 
@@ -294,7 +333,11 @@ const MetricsExportPopOver = () => {
         if (osdCoreSelectedDashboards.length > 0)
           await addMultipleVizToODSCoreDashbaords(osdCoreSelectedDashboards, savedMetrics);
 
-        toasts!.add('Saved metrics to Dashboards successfully!');
+        toasts!.add({
+          text: mountableToastElement(
+            <div>Saved metrics to {linkedDashboardsList(selectedPanelOptions)} successfully!</div>
+          ),
+        });
       } catch (e) {
         const message = 'Issue in saving metrics to panels';
         console.error(message, e);
