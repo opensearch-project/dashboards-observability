@@ -6,7 +6,7 @@
 import { Criteria, EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { FILTER_OPTIONS, LOG_EXPLORER_BASE_PATH } from '../../../../common/constants/explorer';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 import { METRIC_EXPLORER_BASE_PATH } from '../../../../common/constants/metrics';
 
 interface SavedQueryTableProps {
@@ -95,7 +95,7 @@ export function SavedQueryTable({
     const curType = isSavedVisualization ? 'savedVisualization' : 'savedQuery';
     const displayType = !isSavedVisualization
       ? 'Query'
-      : savedObject?.sub_type === PROMQL_METRIC_SUBTYPE
+      : [PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE].includes(savedObject?.sub_type)
       ? 'Metric'
       : 'Visualization';
     const record = {

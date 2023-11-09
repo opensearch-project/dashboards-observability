@@ -18,9 +18,7 @@ import { OSDSavedVisualizationClient } from '../../../services/saved_objects/sav
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
 import {
   addMultipleVizToPanels,
-  fetchPanels,
   isUuid,
-  uuidRx,
 } from '../../custom_panels/redux/panel_slice';
 import { MetricType } from '../../../../common/types/metrics';
 import {
@@ -97,7 +95,10 @@ const MetricsExportPopOver = () => {
   }, []);
 
   useEffect(() => {
-    setAvailableDashboards([...osdCoreDashboards, ...availableObservabilityDashboards]);
+    setAvailableDashboards([
+      ...osdCoreDashboards,
+      ...availableObservabilityDashboards.filter((d) => isUuid(d.id)),
+    ]);
   }, [osdCoreDashboards, availableObservabilityDashboards]);
 
   useEffect(() => {
@@ -111,8 +112,8 @@ const MetricsExportPopOver = () => {
     return {
       ...currentObject,
       dateRange: ['now-1d', 'now'],
-      fields: '',
-      timestamp: '@timestamp',
+      fields: [],
+      timestamp: 'timestamp',
     };
   };
 
@@ -123,12 +124,12 @@ const MetricsExportPopOver = () => {
     });
     const res = await client.get({ objectId: metric.savedVisualizationId });
     const currentObject = res.observabilityObjectList[0];
-
-    const savedObject = await client.update({
+    const updateParams = {
       objectId: metric.savedVisualizationId,
       ...savedObjectInputFromObject(currentObject.savedVisualization),
       name: metric.name,
-    });
+    };
+    const savedObject = await client.update(updateParams);
     return savedObject;
   };
 
@@ -156,7 +157,7 @@ const MetricsExportPopOver = () => {
         queryMetaData,
         subType: PROMQL_METRIC_SUBTYPE,
         dateRange: ['now-1d', 'now'],
-        fields: '',
+        fields: ['@value'],
         timestamp: '@timestamp',
       },
       dateSpanFilter.span,
@@ -257,8 +258,12 @@ const MetricsExportPopOver = () => {
       savedMetrics = await Promise.all(
         metricsToExport.map(async (metric, index) => {
           if (metric.savedVisualizationId === undefined) {
+            console.log('createSavedVisualization', metric);
+
             return createSavedVisualization(metric);
           } else {
+            console.log('updateSavedVisualization', metric);
+
             return updateSavedVisualization(metric);
           }
         })
