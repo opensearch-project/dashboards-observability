@@ -29,7 +29,6 @@ import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
-import { LLMInput, SubmitPPLButton } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
@@ -379,6 +378,10 @@ export const Search = (props: any) => {
               isLanguagePopoverOpen={isLanguagePopoverOpen}
               closeLanguagePopover={closeLanguagePopover}
               languagePopOverItems={languagePopOverItems}
+              tabId={tabId}
+              handleQueryChange={handleQueryChange}
+              handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              tempQuery={tempQuery}
             />
           </EuiFlexItem>
         )}

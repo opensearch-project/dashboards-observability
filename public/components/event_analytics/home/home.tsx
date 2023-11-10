@@ -25,7 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { HttpStart } from '../../../../../../src/core/public';
 import { CUSTOM_PANELS_API_PREFIX } from '../../../../common/constants/custom_panels';

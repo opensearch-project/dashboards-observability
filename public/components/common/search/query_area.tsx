@@ -6,6 +6,7 @@
 import {
   EuiButton,
   EuiCodeEditor,
+  EuiComboBox,
   EuiContextMenuPanel,
   EuiFieldText,
   EuiFlexGroup,
@@ -14,6 +15,7 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
+import { LLMInput, SubmitPPLButton } from '../../event_analytics/explorer/llm/input';
 import React from 'react';
 
 export function QueryArea({
@@ -21,11 +23,34 @@ export function QueryArea({
   isLanguagePopoverOpen,
   closeLanguagePopover,
   languagePopOverItems,
+  tabId,
+  handleQueryChange,
+  handleTimeRangePickerRefresh,
+  tempQuery,
 }: any) {
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFlexItem>
+        <LLMInput
+          tabId={tabId}
+          handleQueryChange={handleQueryChange}
+          handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+        >
+          <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
+            <EuiPopover
+              id="smallContextMenuExample"
+              button={languagePopOverButton}
+              isOpen={isLanguagePopoverOpen}
+              closePopover={closeLanguagePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel size="s" items={languagePopOverItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}></EuiFlexItem>
+        </LLMInput>
+        {/* <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="flexStart">
             <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
               <EuiPopover
@@ -40,21 +65,18 @@ export function QueryArea({
               </EuiPopover>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton>index name here</EuiButton>
+              <EuiComboBox
+                placeholder="Select an index"
+                isClearable={false}
+                prepend={['Index']}
+                singleSelection={{ asPlainText: true }}
+                isLoading={loading}
+                options={data}
+                selectedOptions={selectedIndex}
+                onChange={(index) => setSelectedIndex(index)}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCodeEditor
-            theme="textmate"
-            width="100%"
-            height="10rem"
-            showPrintMargin={false}
-            setOptions={{
-              fontSize: '14px',
-            }}
-            aria-label="Code Editor"
-          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -70,6 +92,22 @@ export function QueryArea({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem> */}
+        <EuiFlexItem>
+          <EuiCodeEditor
+            theme="textmate"
+            width="100%"
+            height="10rem"
+            showPrintMargin={false}
+            setOptions={{
+              fontSize: '14px',
+            }}
+            aria-label="Code Editor"
+            onChange={(query) => {
+              handleQueryChange(query);
+            }}
+            value={tempQuery}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

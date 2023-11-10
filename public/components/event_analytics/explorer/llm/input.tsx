@@ -5,6 +5,7 @@
 
 import {
   EuiAccordion,
+  EuiBadge,
   EuiButton,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -12,8 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiIcon,
   EuiModal,
+  EuiPanel,
   EuiSpacer,
+  EuiToken,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
@@ -25,6 +29,7 @@ import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
+import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 
 interface Props {
   handleQueryChange: (query: string) => void;
@@ -70,6 +75,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     if (!selectedIndex.length) return;
     try {
       setGenerating(true);
+      // const response = 'source = opensearch_dashboards_sample_data_logs';
       const response = await getOSDHttp().post('/api/assistant/generate_ppl', {
         body: JSON.stringify({
           question: questionRef.current?.value,
@@ -104,76 +110,90 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   return (
     <>
-      <EuiComboBox
-        placeholder="Select an index"
-        isClearable={false}
-        prepend={['Index']}
-        singleSelection={{ asPlainText: true }}
-        isLoading={loading}
-        options={data}
-        selectedOptions={selectedIndex}
-        onChange={(index) => setSelectedIndex(index)}
-      />
-      <EuiSpacer size="s" />
-      {props.children}
-      <EuiAccordion id="ppl-assistant" buttonContent="Query assist" initialIsOpen={true}>
-        <EuiForm
-          component="form"
-          id="nlq-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            request();
-          }}
-        >
-          <EuiFlexGroup gutterSize="s" style={{ paddingTop: 10 }}>
-            <EuiFlexItem grow={false} style={{ width: 20 }} />
-            <EuiFlexItem>
-              <EuiFieldText
-                placeholder="Ask a question"
-                prepend={['Question']}
-                disabled={generating}
-                fullWidth
-                inputRef={questionRef}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={generating}
-                onClick={request}
-                type="submit"
-                iconType="returnKey"
-                iconSide="right"
-                fill
-                style={{ width: 100 }}
-              >
-                Go
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={() => setIsFeedbackOpen(true)}
-                iconType="faceHappy"
-                iconSide="right"
-              >
-                Feedback
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
-      </EuiAccordion>
-      {isFeedbackOpen && (
-        <EuiModal onClose={() => setIsFeedbackOpen(false)}>
-          <FeedbackModalContent
-            metadata={{ type: 'event_analytics', selectedIndex: selectedIndex[0].label }}
-            formData={feedbackFormData}
-            setFormData={setFeedbackFormData}
-            onClose={() => setIsFeedbackOpen(false)}
-            displayLabels={{
-              correct: 'Did the results from the generated query answer your question?',
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+          {props.children}
+          <EuiFlexItem>
+            <EuiComboBox
+              placeholder="Select an index"
+              isClearable={false}
+              prepend={['Index']}
+              singleSelection={{ asPlainText: true }}
+              isLoading={loading}
+              options={data}
+              selectedOptions={selectedIndex}
+              onChange={(index) => setSelectedIndex(index)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel paddingSize="s">
+          {/* <EuiAccordion id="ppl-assistant" buttonContent="Query assist" initialIsOpen={true}> */}
+          <EuiForm
+            component="form"
+            id="nlq-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              request();
             }}
-          />
-        </EuiModal>
-      )}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={chatLogo} size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge>New!</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldText
+                  placeholder="Ask a question"
+                  // prepend={['Question']}
+                  disabled={generating}
+                  fullWidth
+                  inputRef={questionRef}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  isLoading={generating}
+                  onClick={request}
+                  type="submit"
+                  iconType="returnKey"
+                  iconSide="right"
+                  fill
+                  style={{ width: 100 }}
+                >
+                  Go
+                </EuiButton>
+              </EuiFlexItem>
+              {/* <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => setIsFeedbackOpen(true)}
+                  iconType="faceHappy"
+                  iconSide="right"
+                >
+                  Feedback
+                </EuiButton>
+              </EuiFlexItem> */}
+            </EuiFlexGroup>
+          </EuiForm>
+          {/* </EuiAccordion> */}
+          {isFeedbackOpen && (
+            <EuiModal onClose={() => setIsFeedbackOpen(false)}>
+              <FeedbackModalContent
+                metadata={{ type: 'event_analytics', selectedIndex: selectedIndex[0].label }}
+                formData={feedbackFormData}
+                setFormData={setFeedbackFormData}
+                onClose={() => setIsFeedbackOpen(false)}
+                displayLabels={{
+                  correct: 'Did the results from the generated query answer your question?',
+                }}
+              />
+            </EuiModal>
+          )}
+        </EuiPanel>
+      </EuiFlexItem>
     </>
   );
 };
