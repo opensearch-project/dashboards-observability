@@ -24,7 +24,9 @@ export class TemplateManager {
       return [];
     }
     const integrations = await Promise.all(
-      folders.value.map((i) => this.getIntegration(path.basename(i)))
+      folders.value.map((i) =>
+        this.getIntegration(path.relative(this.directory, path.join(this.directory, i)))
+      )
     );
     return integrations.filter((x) => x !== null) as IntegrationReader[];
   }

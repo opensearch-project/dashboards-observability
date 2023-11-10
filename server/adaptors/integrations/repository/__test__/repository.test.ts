@@ -18,6 +18,10 @@ describe('Repository', () => {
     repository = new TemplateManager('path/to/directory');
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('getIntegrationList', () => {
     it('should return an array of Integration instances', async () => {
       jest.spyOn(fs, 'readdir').mockResolvedValue((['folder1', 'folder2'] as unknown) as Dirent[]);
