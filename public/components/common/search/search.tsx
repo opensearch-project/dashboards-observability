@@ -285,18 +285,6 @@ export const Search = (props: any) => {
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType={'play'}
-                fill={true}
-                onClick={() => {
-                  onQuerySearch(queryLang);
-                  handleTimePickerChange(timePicker);
-                }}
-              >
-                Run
-              </EuiButton>
-            </EuiFlexItem>
             {showSaveButton && !showSavePanelOptionsList && (
               <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
                 <EuiPopover

@@ -31,7 +31,7 @@ export function DatePicker(props: IDatePickerProps) {
       onTimeChange={handleTimeChange}
       onRefresh={handleTimeRangePickerRefresh}
       className="osdQueryBar__datePicker"
-      showUpdateButton={false}
+      // showUpdateButton={false}
     />
   ) : (
     <>
@@ -47,7 +47,7 @@ export function DatePicker(props: IDatePickerProps) {
           onTimeChange={handleTimeChange}
           onRefresh={handleTimeRangePickerRefresh}
           className="osdQueryBar__datePicker"
-          showUpdateButton={false}
+          // showUpdateButton={false}
           isDisabled={true}
         />
       </EuiToolTip>
