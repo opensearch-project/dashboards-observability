@@ -16,16 +16,12 @@ command can only be used as the first command in a PPL query.
 search source=&lt;index&gt; \[boolean-expression\]
 
 -   \`search\`: Search keywords, which can be ignored.
--   index: mandatory. search command must specify which index to query
-    from.
--   bool-expression: optional. any expression which could be evaluated
-    to boolean value.
+-   \`index\`: Requires. Search commands must specify the index to query.
+-   \`bool-expression\`: Optional. Any expression that can be evaluated to a Boolean value.
 
-### Example 1: Fetch all the data
+#### Example 1: Fetch all data from an index
 
-The example show fetch all the document from accounts index.
-
-PPL query:
+The following PPL query example shows how to fetch all documents from the \`accounts\` index.
 
     os> source=accounts;
     fetched rows / total rows = 4/4
@@ -38,11 +34,9 @@ PPL query:
     | 18             | Dale      | 467 Hutchinson Court | 4180    | M      | Orick  | null     | MD    | 33  | daleadams@boink.com   | Adams    |
     +----------------+-----------+----------------------+---------+--------+--------+----------+-------+-----+-----------------------+----------+
 
-### Example 2: Fetch data with condition
+#### Example 2: Fetch data with condition
 
-The example show fetch all the document from accounts index with .
-
-PPL query:
+The following PPL query example shows how to fetch all documents from the \`accounts\` index by using an \`or\` condition.
 
     os> source=accounts account_number=1 or gender="F";
     fetched rows / total rows = 2/2
