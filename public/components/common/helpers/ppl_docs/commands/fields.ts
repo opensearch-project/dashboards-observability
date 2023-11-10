@@ -7,23 +7,18 @@ export const fieldsCmd = `## fields
 ---
 ### Description
 
-Using \`fields\` command to keep or remove fields from the search result.
+Use the \`fields\` command to specify the fields that should be included or excluded in the search results.
 
 ### Syntax
 
 fields \[+\|-\] &lt;field-list&gt;
 
--   index: optional. if the plus (+) is used, only the fields specified
-    in the field list will be keep. if the minus (-) is used, all the
-    fields specified in the field list will be removed. **Default** +
--   field list: mandatory. comma-delimited keep or remove fields.
+-   \`field list\`: Required. Comma-separated list of fields to keep or remove.
+-   \`index\`: Optional. If the plus sign \`+\` is used, only the fields specified in the field list will be included. If the minus \`-\` is used, all the fields specified in the field list will be excluded. **Default** \`+\`
 
-### Example 1: Select specified fields from result
+#### Example 1: Select specified fields from the search result
 
-The example show fetch account\_number, firstname and lastname fields
-from search results.
-
-PPL query:
+The following PPL query example shows how to retrieve the \`account\_number\`,\`firstname\`, and \`lastname\` fields\` from the search results.
 
     os> source=accounts | fields account_number, firstname, lastname;
     fetched rows / total rows = 4/4
@@ -36,11 +31,9 @@ PPL query:
     | 18               | Dale        | Adams      |
     +------------------+-------------+------------+
 
-### Example 2: Remove specified fields from result
+#### Example 2: Remove specified fields from the search results
 
-The example show fetch remove account\_number field from search results.
-
-PPL query:
+The following PPL query example shows how to remove the \`account\_number\` field from the search results.
 
     os> source=accounts | fields account_number, firstname, lastname | fields - account_number ;
     fetched rows / total rows = 4/4
