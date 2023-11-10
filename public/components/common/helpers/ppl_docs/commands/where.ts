@@ -8,22 +8,17 @@ export const whereCmd = `## where
 
 ### Description
 
-The \`where\` command bool-expression to filter the search result. The
-\`where\` command only return the result when bool-expression evaluated to
-true.
+Use the \`where\` command to filter search results. The \`where\` command only returns the result when the \`bool-expression\` is \`true\`.
 
 ### Syntax
 
 where &lt;boolean-expression&gt;
 
--   bool-expression: optional. any expression which could be evaluated
-    to boolean value.
+-   \`bool-expression\`: Optional. Any expression that can be evaluated to a Boolean expression.
 
-### Example 1: Filter result set with condition
+#### Example 1: Filter result set with condition
 
-The example show fetch all the document from accounts index with .
-
-PPL query:
+The following PPL query example fetches all documents from the \`accounts\` index using an \`or\ condition.
 
     os> source=accounts | where account_number=1 or gender="F" | fields account_number, gender;
     fetched rows / total rows = 2/2

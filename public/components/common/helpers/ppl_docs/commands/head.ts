@@ -14,7 +14,7 @@ Use the \`head\` command to return the first N number of lines from a search res
 
 head \[N\]
 
--   \`N\`: Optional. The number of results you want to see. **Default:** 10
+-   \`N\`: Optional. The number of results you want to see. Default is 10.
 
 #### Example 1: Get first 10 results
 

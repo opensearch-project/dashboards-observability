@@ -15,11 +15,11 @@ rename &lt;source-field&gt; AS &lt;target-field&gt;\[","
 &lt;source-field&gt; AS &lt;target-field&gt;\]...
 
 -   \`source-field\`: Required. The field to rename.
--   \`field list\`: Required. The field's new name.
+-   \`target-field\`: Required. The new field.
 
 #### Example 1: Rename one field
 
-The following PPL query example shows how to rename a field.
+The following PPL query example renames a field.
 
     os> source=accounts | rename account_number as an | fields an;
     fetched rows / total rows = 4/4
@@ -34,7 +34,7 @@ The following PPL query example shows how to rename a field.
 
 #### Example 2: Rename two or more fields
 
-The following PPL query example shows how to rename two or more fields.
+The following PPL query example renames two or more fields.
 
     os> source=accounts | rename account_number as an, employer as emp | fields an, emp;
     fetched rows / total rows = 4/4
