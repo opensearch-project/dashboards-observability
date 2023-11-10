@@ -104,7 +104,6 @@ export const Search = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isQueryBarVisible, setIsQueryBarVisible] = useState(!coreRefs.assistantEnabled);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
-  const [timePicker, setTimePicker] = useState(['now', 'now']); // TODO: make sure this default value won't interfere with anything
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -268,7 +267,7 @@ export const Search = (props: any) => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} />
-            <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
+            {/* <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
               {!isLiveTailOn && (
                 <DatePicker
                   startTime={startTime}
@@ -284,6 +283,18 @@ export const Search = (props: any) => {
                   }}
                 />
               )}
+            </EuiFlexItem> */}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType={'play'}
+                fill={true}
+                onClick={() => {
+                  onQuerySearch(queryLang);
+                  handleTimePickerChange(['now-5y', 'now']);
+                }}
+              >
+                Run
+              </EuiButton>
             </EuiFlexItem>
             {showSaveButton && !showSavePanelOptionsList && (
               <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">

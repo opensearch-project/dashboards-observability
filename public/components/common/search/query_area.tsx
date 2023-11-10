@@ -104,6 +104,7 @@ export function QueryArea({
             }}
             aria-label="Code Editor"
             onChange={(query) => {
+              console.log(query);
               handleQueryChange(query);
             }}
             value={tempQuery}

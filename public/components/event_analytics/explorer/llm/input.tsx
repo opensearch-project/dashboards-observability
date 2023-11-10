@@ -44,7 +44,7 @@ export const LLMInput: React.FC<Props> = (props) => {
   const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
   const [generating, setGenerating] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: 'sso_logs-*-*' },
+    { label: 'opensearch_dashboards_sample_data_logs' },
   ]);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackFormData, setFeedbackFormData] = useState<FeedbackFormData>({
@@ -116,9 +116,9 @@ export const LLMInput: React.FC<Props> = (props) => {
           <EuiFlexItem>
             <EuiComboBox
               placeholder="Select an index"
-              isClearable={false}
+              isClearable={true}
               prepend={['Index']}
-              singleSelection={{ asPlainText: true }}
+              singleSelection={true}
               isLoading={loading}
               options={data}
               selectedOptions={selectedIndex}
