@@ -7,22 +7,19 @@ export const renameCmd = `## rename
 ---
 ### Description
 
-Using \`rename\` command to rename one or more fields in the search
-result.
+Use the \`rename\` command to rename one or more fields in the search result.
 
 ### Syntax
 
 rename &lt;source-field&gt; AS &lt;target-field&gt;\[","
 &lt;source-field&gt; AS &lt;target-field&gt;\]...
 
--   source-field: mandatory. The name of the field you want to rename.
--   field list: mandatory. The name you want to rename to.
+-   \`source-field\`: Required. The field to rename.
+-   \`field list\`: Required. The field's new name.
 
-### Example 1: Rename one field
+#### Example 1: Rename one field
 
-The example show rename one field.
-
-PPL query:
+The following PPL query example shows how to rename a field.
 
     os> source=accounts | rename account_number as an | fields an;
     fetched rows / total rows = 4/4
@@ -35,11 +32,9 @@ PPL query:
     | 18   |
     +------+
 
-### Example 2: Rename multiple fields
+#### Example 2: Rename two or more fields
 
-The example show rename multiple fields.
-
-PPL query:
+The following PPL query example shows how to rename two or more fields.
 
     os> source=accounts | rename account_number as an, employer as emp | fields an, emp;
     fetched rows / total rows = 4/4
@@ -53,5 +48,5 @@ PPL query:
     +------+---------+
 
 #### Limitation
-The \`rename\` command is not rewritten to OpenSearch DSL, it is only executed on the coordination node.
+The \`rename\` command is not rewritten to Query DSL. It's only run on the coordinating node.
 `;

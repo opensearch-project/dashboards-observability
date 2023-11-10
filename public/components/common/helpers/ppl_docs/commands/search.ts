@@ -8,14 +8,14 @@ export const searchCmd = `## search
 
 ### Description
 
-Using \`search\` command to retrieve document from the index. \`search\`
-command could be only used as the first command in the PPL query.
+Use the \`search\` command to retrieve document from the index. The \`search\`
+command can only be used as the first command in a PPL query.
 
 ### Syntax
 
 search source=&lt;index&gt; \[boolean-expression\]
 
--   search: search keywords, which could be ignore.
+-   \`search\`: Search keywords, which can be ignored.
 -   index: mandatory. search command must specify which index to query
     from.
 -   bool-expression: optional. any expression which could be evaluated

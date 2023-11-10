@@ -89,5 +89,5 @@ The following PPL query example shows how to use \`dedup\` to remove duplicate d
     +------------------+----------+
 
 ### Limitation
-The \`dedup\` command is not rewritten to OpenSearch DSL. It's only executed on the coordination node.
+The \`dedup\` command is not rewritten to Query DSL. It's only run on the coordinating node.
 `;
