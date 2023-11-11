@@ -73,9 +73,7 @@ export function DataGrid(props: DataGridProps) {
   const [data, setData] = useState(rows);
 
   useEffect(() => {
-    if (rows.length > 0) {
-      setData(rows);
-    }
+    setData(rows);
   }, [rows]);
 
   // setSort and setPage are used to change the query and send a direct request to get data
