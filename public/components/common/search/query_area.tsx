@@ -98,7 +98,7 @@ export function QueryArea({
           <EuiCodeEditor
             theme="textmate"
             width="100%"
-            height="10rem"
+            height="4rem"
             showPrintMargin={false}
             setOptions={{
               fontSize: '14px',
@@ -109,6 +109,7 @@ export function QueryArea({
               handleQueryChange(query);
             }}
             value={tempQuery}
+            wrapEnabled={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
