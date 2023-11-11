@@ -5,6 +5,7 @@
 
 import {
   EuiAccordion,
+  EuiCallOut,
   EuiCodeEditor,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -29,6 +30,7 @@ export function QueryArea({
 }: any) {
   const [summarizedText, setSummarizedText] = useState('');
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [isPPLError, setIsPPLError] = useState(false);
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup gutterSize="m" direction="column">
@@ -38,6 +40,7 @@ export function QueryArea({
           handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
           setSummarizedText={setSummarizedText}
           setSummaryLoading={setSummaryLoading}
+          setIsPPLError={setIsPPLError}
         >
           <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
             <EuiPopover
@@ -125,9 +128,15 @@ export function QueryArea({
       >
         {summarizedText.length > 0 && (
           <>
-            <EuiPanel color="subdued" style={{ marginLeft: 16, marginRight: 16 }}>
-              <EuiMarkdownFormat>{summarizedText}</EuiMarkdownFormat>
-            </EuiPanel>
+            {isPPLError ? (
+              <EuiCallOut title="There was an error" color="danger" iconType="alert">
+                <EuiMarkdownFormat>{summarizedText}</EuiMarkdownFormat>
+              </EuiCallOut>
+            ) : (
+              <EuiPanel color="subdued" style={{ marginLeft: 16, marginRight: 16 }}>
+                <EuiMarkdownFormat>{summarizedText}</EuiMarkdownFormat>
+              </EuiPanel>
+            )}
           </>
         )}
       </EuiAccordion>

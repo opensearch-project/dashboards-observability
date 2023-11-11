@@ -33,6 +33,7 @@ interface Props {
   handleTimeRangePickerRefresh: () => void;
   setSummarizedText: React.Dispatch<React.SetStateAction<string>>;
   setSummaryLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsPPLError: React.Dispatch<React.SetStateAction<boolean>>;
   tabId: string;
 }
 export const LLMInput: React.FC<Props> = (props) => {
@@ -106,7 +107,14 @@ export const LLMInput: React.FC<Props> = (props) => {
             method: 'POST',
           },
         })
-        .catch((error) => String(JSON.parse(error.body).error.details));
+        .then((resp) => {
+          props.setIsPPLError(false);
+          return resp;
+        })
+        .catch((error) => {
+          props.setIsPPLError(true);
+          return String(JSON.parse(error.body).error.details);
+        });
       const summarized = await getOSDHttp().post('/api/assistant/summarize', {
         body: JSON.stringify({
           question: questionRef.current?.value,
