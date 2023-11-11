@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiComboBox,
@@ -16,24 +15,24 @@ import {
   EuiIcon,
   EuiModal,
   EuiPanel,
-  EuiSpacer,
-  EuiToken,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
-import { DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
+import { CONSOLE_PROXY, DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
+import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
-import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 
 interface Props {
   handleQueryChange: (query: string) => void;
   handleTimeRangePickerRefresh: () => void;
+  setSummarizedText: React.Dispatch<React.SetStateAction<string>>;
+  setSummaryLoading: React.Dispatch<React.SetStateAction<boolean>>;
   tabId: string;
 }
 export const LLMInput: React.FC<Props> = (props) => {
@@ -97,14 +96,33 @@ export const LLMInput: React.FC<Props> = (props) => {
         })
       );
       await props.handleTimeRangePickerRefresh();
+      setGenerating(false);
+      props.setSummaryLoading(true);
+      const queryResponse = await getOSDHttp()
+        .post(CONSOLE_PROXY, {
+          body: JSON.stringify({ query: response }),
+          query: {
+            path: '_plugins/_ppl',
+            method: 'POST',
+          },
+        })
+        .catch((error) => String(JSON.parse(error.body).error.details));
+      const summarized = await getOSDHttp().post('/api/assistant/summarize', {
+        body: JSON.stringify({
+          question: questionRef.current?.value,
+          text: JSON.stringify(queryResponse),
+        }),
+      });
+      props.setSummarizedText(summarized);
     } catch (error) {
       setFeedbackFormData({
         ...feedbackFormData,
         input: questionRef.current?.value || '',
       });
-      coreRefs.toasts?.addError(error, { title: 'Failed to generate PPL query' });
+      coreRefs.toasts?.addError(error.body, { title: 'Failed to generate PPL query' });
     } finally {
       setGenerating(false);
+      props.setSummaryLoading(false);
     }
   };
 

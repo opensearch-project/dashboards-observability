@@ -4,20 +4,18 @@
  */
 
 import {
-  EuiButton,
+  EuiAccordion,
   EuiCodeEditor,
-  EuiComboBox,
   EuiContextMenuPanel,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiPopover,
-  EuiSuperSelect,
+  EuiSpacer,
 } from '@elastic/eui';
-import { LLMInput, SubmitPPLButton } from '../../event_analytics/explorer/llm/input';
-import React from 'react';
+import React, { useState } from 'react';
+import { LLMInput } from '../../event_analytics/explorer/llm/input';
 
 export function QueryArea({
   languagePopOverButton,
@@ -29,6 +27,8 @@ export function QueryArea({
   handleTimeRangePickerRefresh,
   tempQuery,
 }: any) {
+  const [summarizedText, setSummarizedText] = useState('');
+  const [summaryLoading, setSummaryLoading] = useState(false);
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup gutterSize="m" direction="column">
@@ -36,6 +36,8 @@ export function QueryArea({
           tabId={tabId}
           handleQueryChange={handleQueryChange}
           handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+          setSummarizedText={setSummarizedText}
+          setSummaryLoading={setSummaryLoading}
         >
           <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
             <EuiPopover
@@ -49,7 +51,7 @@ export function QueryArea({
               <EuiContextMenuPanel size="s" items={languagePopOverItems} />
             </EuiPopover>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}></EuiFlexItem>
+          <EuiFlexItem grow={false} />
         </LLMInput>
         {/* <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -113,6 +115,22 @@ export function QueryArea({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        id="summarization-accordion"
+        buttonContent="Summary"
+        initialIsOpen
+        isLoading={summaryLoading}
+        isLoadingMessage="Loading summary.."
+      >
+        {summarizedText.length > 0 && (
+          <>
+            <EuiPanel color="subdued" style={{ marginLeft: 16, marginRight: 16 }}>
+              <EuiMarkdownFormat>{summarizedText}</EuiMarkdownFormat>
+            </EuiPanel>
+          </>
+        )}
+      </EuiAccordion>
     </EuiPanel>
   );
 }

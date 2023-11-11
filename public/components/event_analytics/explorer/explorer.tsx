@@ -281,10 +281,10 @@ export const Explorer = ({
 
   const getErrorHandler = (title: string) => {
     return (error: any) => {
-      const formattedError = formatError(error.name, error.message, error.body.message);
-      notifications.toasts.addError(formattedError, {
-        title,
-      });
+      // const formattedError = formatError(error.name, error.message, error.body.message);
+      // notifications.toasts.addError(formattedError, {
+      //   title,
+      // });
     };
   };
 
