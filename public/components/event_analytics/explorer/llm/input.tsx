@@ -117,7 +117,7 @@ export const LLMInput: React.FC<Props> = (props) => {
             <EuiComboBox
               placeholder="Select an index"
               isClearable={true}
-              prepend={['Index']}
+              prepend={<EuiButton color="text">Index</EuiButton>}
               singleSelection={true}
               isLoading={loading}
               options={data}

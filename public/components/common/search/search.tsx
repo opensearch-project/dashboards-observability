@@ -62,6 +62,7 @@ export const Search = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
+    handleQuerySearch,
     handleTimePickerChange,
     dslService,
     startTime,
@@ -289,8 +290,11 @@ export const Search = (props: any) => {
                 iconType={'play'}
                 fill={true}
                 onClick={() => {
-                  onQuerySearch(queryLang);
-                  handleTimePickerChange(['now-5y', 'now']);
+                  // onQuerySearch(queryLang);
+                  // handleTimeRangePickerRefresh();
+                  // console.log(tempQuery);
+                  handleQuerySearch();
+                  // handleTimePickerChange(['now-5y', 'now']);
                 }}
               >
                 Run

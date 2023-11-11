@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiPopover,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { LLMInput, SubmitPPLButton } from '../../event_analytics/explorer/llm/input';
 import React from 'react';
