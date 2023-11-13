@@ -69,14 +69,15 @@ export const LLMInput: React.FC<Props> = (props) => {
   }, []);
 
   // hide if not in a tab
-  if (props.tabId === '') return props.children;
+  if (props.tabId === '') return <>{props.children}</>;
 
   const request = async () => {
     if (!selectedIndex.length) return;
+    let response;
     try {
       setGenerating(true);
       // const response = 'source = opensearch_dashboards_sample_data_logs';
-      const response = await getOSDHttp().post('/api/assistant/generate_ppl', {
+      response = await getOSDHttp().post('/api/assistant/generate_ppl', {
         body: JSON.stringify({
           question: questionRef.current?.value,
           index: selectedIndex[0].label,
@@ -97,7 +98,17 @@ export const LLMInput: React.FC<Props> = (props) => {
         })
       );
       await props.handleTimeRangePickerRefresh();
+    } catch (error) {
+      setFeedbackFormData({
+        ...feedbackFormData,
+        input: questionRef.current?.value || '',
+      });
+      coreRefs.toasts?.addError(error.body, { title: 'Failed to generate PPL query' });
+      return;
+    } finally {
       setGenerating(false);
+    }
+    try {
       props.setSummaryLoading(true);
       const queryResponse = await getOSDHttp()
         .post(CONSOLE_PROXY, {
@@ -123,13 +134,8 @@ export const LLMInput: React.FC<Props> = (props) => {
       });
       props.setSummarizedText(summarized);
     } catch (error) {
-      setFeedbackFormData({
-        ...feedbackFormData,
-        input: questionRef.current?.value || '',
-      });
-      coreRefs.toasts?.addError(error.body, { title: 'Failed to generate PPL query' });
+      coreRefs.toasts?.addError(error.body, { title: 'Failed to summarize results' });
     } finally {
-      setGenerating(false);
       props.setSummaryLoading(false);
     }
   };
