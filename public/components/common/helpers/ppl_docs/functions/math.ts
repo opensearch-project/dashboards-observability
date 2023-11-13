@@ -6,17 +6,15 @@
 export const mathFunction = `## Math
 ---
 
-### ABS
+### Absolute value function
 
-**Description**
-
-Usage: abs(x) calculate the abs x.
+The absolute va;ue funtion, denoted by \`abs\`, converts a negative number to its positive counterpart while leaving the positive number unchanged, for example, abs(-1)=1 and abs(3)=3. 
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
 Return type: INTEGER/LONG/FLOAT/DOUBLE
 
-Example:
+PPL query example:
 
     os> source=people | eval \`ABS(-1)\` = ABS(-1) | fields \`ABS(-1)\`
     fetched rows / total rows = 1/1
