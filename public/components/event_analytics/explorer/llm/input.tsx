@@ -73,11 +73,11 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   const request = async () => {
     if (!selectedIndex.length) return;
-    let response;
+    let generatedPPL;
     try {
       setGenerating(true);
       // const response = 'source = opensearch_dashboards_sample_data_logs';
-      response = await getOSDHttp().post('/api/assistant/generate_ppl', {
+      generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
         body: JSON.stringify({
           question: questionRef.current?.value,
           index: selectedIndex[0].label,
@@ -86,14 +86,14 @@ export const LLMInput: React.FC<Props> = (props) => {
       setFeedbackFormData({
         ...feedbackFormData,
         input: questionRef.current?.value || '',
-        output: response,
+        output: generatedPPL,
       });
-      await props.handleQueryChange(response);
+      await props.handleQueryChange(generatedPPL);
       await dispatch(
         changeQuery({
           tabId: props.tabId,
           data: {
-            [RAW_QUERY]: response,
+            [RAW_QUERY]: generatedPPL,
           },
         })
       );
@@ -112,7 +112,7 @@ export const LLMInput: React.FC<Props> = (props) => {
       props.setSummaryLoading(true);
       const queryResponse = await getOSDHttp()
         .post(CONSOLE_PROXY, {
-          body: JSON.stringify({ query: response }),
+          body: JSON.stringify({ query: generatedPPL }),
           query: {
             path: '_plugins/_ppl',
             method: 'POST',
@@ -129,7 +129,8 @@ export const LLMInput: React.FC<Props> = (props) => {
       const summarized = await getOSDHttp().post('/api/assistant/summarize', {
         body: JSON.stringify({
           question: questionRef.current?.value,
-          text: JSON.stringify(queryResponse),
+          response: JSON.stringify(queryResponse),
+          query: generatedPPL,
         }),
       });
       props.setSummarizedText(summarized);
