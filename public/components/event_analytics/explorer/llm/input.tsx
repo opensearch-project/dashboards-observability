@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiModal,
   EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
@@ -144,13 +145,13 @@ export const LLMInput: React.FC<Props> = (props) => {
   return (
     <>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           {props.children}
           <EuiFlexItem>
             <EuiComboBox
               placeholder="Select an index"
               isClearable={true}
-              prepend={<EuiButton color="text">Index</EuiButton>}
+              prepend={<EuiText>Index</EuiText>}
               singleSelection={true}
               isLoading={loading}
               options={data}

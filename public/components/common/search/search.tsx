@@ -385,6 +385,8 @@ export const Search = (props: any) => {
               handleQueryChange={handleQueryChange}
               handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
               tempQuery={tempQuery}
+              showFlyout={showFlyout}
+              handleQueryLanguageChange={handleQueryLanguageChange}
             />
           </EuiFlexItem>
         )}

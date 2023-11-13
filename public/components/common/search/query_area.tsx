@@ -14,9 +14,14 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { LLMInput } from '../../event_analytics/explorer/llm/input';
+import { uiSettingsService } from '../../../../common/utils';
+import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 
 export function QueryArea({
   languagePopOverButton,
@@ -27,10 +32,26 @@ export function QueryArea({
   handleQueryChange,
   handleTimeRangePickerRefresh,
   tempQuery,
+  showFlyout,
+  handleQueryLanguageChange,
 }: any) {
   const [summarizedText, setSummarizedText] = useState('');
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [isPPLError, setIsPPLError] = useState(false);
+
+  // TODO: REMOVE ALL BELOW
+  const options = [
+    { value: 'PPL', inputDisplay: <EuiText>PPL</EuiText> },
+    { value: 'DQL', inputDisplay: <EuiText>DQL</EuiText> },
+  ];
+
+  const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
+
+  const onChange = (lang: string) => {
+    handleQueryLanguageChange(lang);
+    setQueryLang(lang);
+  };
+
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup gutterSize="m" direction="column">
@@ -43,7 +64,8 @@ export function QueryArea({
           setIsPPLError={setIsPPLError}
         >
           <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
-            <EuiPopover
+            <EuiSuperSelect options={options} valueOfSelected={queryLang} onChange={onChange} />
+            {/* <EuiPopover
               id="smallContextMenuExample"
               button={languagePopOverButton}
               isOpen={isLanguagePopoverOpen}
@@ -52,9 +74,20 @@ export function QueryArea({
               anchorPosition="downLeft"
             >
               <EuiContextMenuPanel size="s" items={languagePopOverItems} />
-            </EuiPopover>
+            </EuiPopover> */}
           </EuiFlexItem>
-          <EuiFlexItem grow={false} />
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              className={`${
+                uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+              }`}
+              type="questionInCircle"
+              size="l"
+              onClick={() => showFlyout()}
+              color="#159D8D"
+              // onClickAriaLabel={'pplLinkShowFlyout'}
+            />
+          </EuiFlexItem>
         </LLMInput>
         {/* <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="flexStart">
