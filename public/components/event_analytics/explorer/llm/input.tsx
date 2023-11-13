@@ -29,6 +29,14 @@ import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
 
+interface SummarizationContext {
+  question: string;
+  query?: string;
+  response: string;
+  index: string;
+  isError: boolean;
+}
+
 interface Props {
   handleQueryChange: (query: string) => void;
   handleTimeRangePickerRefresh: () => void;
@@ -74,10 +82,10 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   const request = async () => {
     if (!selectedIndex.length) return;
-    let generatedPPL;
+    let generatedPPL: string = '';
+    let generatePPLError: string | undefined;
     try {
       setGenerating(true);
-      // const response = 'source = opensearch_dashboards_sample_data_logs';
       generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
         body: JSON.stringify({
           question: questionRef.current?.value,
@@ -104,35 +112,41 @@ export const LLMInput: React.FC<Props> = (props) => {
         ...feedbackFormData,
         input: questionRef.current?.value || '',
       });
-      coreRefs.toasts?.addError(error.body, { title: 'Failed to generate PPL query' });
-      return;
+      generatePPLError = String(error.body);
     } finally {
       setGenerating(false);
     }
     try {
+      const summarizationContext: SummarizationContext = {
+        question: questionRef.current?.value || 'unable to retrieve question',
+        index: selectedIndex[0].label,
+        isError: false,
+        response: '',
+      };
       props.setSummaryLoading(true);
-      const queryResponse = await getOSDHttp()
-        .post(CONSOLE_PROXY, {
-          body: JSON.stringify({ query: generatedPPL }),
-          query: {
-            path: '_plugins/_ppl',
-            method: 'POST',
-          },
-        })
-        .then((resp) => {
-          props.setIsPPLError(false);
-          return resp;
-        })
-        .catch((error) => {
-          props.setIsPPLError(true);
-          return String(JSON.parse(error.body).error.details);
-        });
+      if (generatePPLError === undefined) {
+        const queryResponse = await getOSDHttp()
+          .post(CONSOLE_PROXY, {
+            body: JSON.stringify({ query: generatedPPL }),
+            query: { path: '_plugins/_ppl', method: 'POST' },
+          })
+          .then((resp) => {
+            props.setIsPPLError(false);
+            return resp;
+          })
+          .catch((error) => {
+            props.setIsPPLError(true);
+            summarizationContext.isError = true;
+            return String(JSON.parse(error.body).error.details);
+          });
+        summarizationContext.response = JSON.stringify(queryResponse);
+        summarizationContext.query = generatedPPL;
+      } else {
+        summarizationContext.isError = true;
+        summarizationContext.response = generatePPLError;
+      }
       const summarized = await getOSDHttp().post('/api/assistant/summarize', {
-        body: JSON.stringify({
-          question: questionRef.current?.value,
-          response: JSON.stringify(queryResponse),
-          query: generatedPPL,
-        }),
+        body: JSON.stringify(summarizationContext),
       });
       props.setSummarizedText(summarized);
     } catch (error) {
