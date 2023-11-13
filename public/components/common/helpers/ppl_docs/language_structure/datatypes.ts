@@ -5,226 +5,142 @@
 
 export const pplDatatypes = `## Data Types
 ---
-### **Overview**
 
-### PPL Data Types
+### Data Types
 
-The PPL support the following data types.
+A data type defines a collection of data type values and a set of predefined operations on those values. The data types supported PPL are listed in the following table:
 
-| PPL Data Type |
-|---------------|
-| boolean       |
-| byte          |
-| short         |
-| integer       |
-| long          |
-| float         |
-| double        |
-| string        |
-| text          |
-| timestamp     |
-| datetime      |
-| date          |
-| time          |
-| interval      |
-| ip            |
-| geo\_point    |
-| binary        |
-| struct        |
-| array         |
+| Data type |
+|------------|-----------|
+| array      | interval  | 
+| binary     | ip        | 
+| boolean    | long      | 
+| byte       | short     | 
+| date       | string    |
+| datetime   | struct    |
+| double     | text      |  
+| float      | time      | 
+| geo\_point | timestammp|
+| integer    |           | 
 
-### Data Types Mapping
 
-The table below list the mapping between OpenSearch Data Type, PPL Data
-Type and SQL Type.
+### Data type mapping
 
-| OpenSearch Type | PPL Type  | SQL Type  |
+The following table is a reference guide for the mapping between an OpenSearch data type, a PPL data type, and a SQL type.
+
+| OpenSearch type | PPL type  | SQL type  |
 |-----------------|-----------|-----------|
+| binary          | binary    | VARBINARY |
 | boolean         | boolean   | BOOLEAN   |
 | byte            | byte      | TINYINT   |
-| short           | byte      | SMALLINT  |
-| integer         | integer   | INTEGER   |
-| long            | long      | BIGINT    |
+| date            | timestamp | TIMESTAMP |
+| double          | double    | DOUBLE    |
 | float           | float     | REAL      |
 | half\_float     | float     | FLOAT     |
-| scaled\_float   | float     | DOUBLE    |
-| double          | double    | DOUBLE    |
-| keyword         | string    | VARCHAR   |
-| text            | text      | VARCHAR   |
-| date            | timestamp | TIMESTAMP |
+| integer         | integer   | INTEGER   |
 | ip              | ip        | VARCHAR   |
-| date            | timestamp | TIMESTAMP |
-| binary          | binary    | VARBINARY |
-| object          | struct    | STRUCT    |
+| keyword         | string    | VARCHAR   |
+| long            | long      | BIGINT    |
 | nested          | array     | STRUCT    |
+| object          | struct    | STRUCT    |
+| scaled\_float   | float     | DOUBLE    |
+| short           | byte      | SMALLINT  |
+| text            | text      | VARCHAR   |
 
-Notes: Not all the PPL Type has correspond OpenSearch Type. e.g. data
-and time. To use function which required such data type, user should
-explict convert the data type.
+Some PPL types do not correspond with an OpenSearch type, for example, date and time. To use functions that require these data types, data type conversion must be performed.
 
-### **Numeric Data Types**
+### Numeric data types
 
-Numeric values ranged from -2147483648 to +2147483647 are recognized as
-integer with type name \`INTEGER\`. For others outside the range, \`LONG\`
-integer will be the data type after parsed.
+Numeric values ranging from -2147483648 to +2147483647 are recognized as
+integers, with data type name \`INTEGER\`. For values that fall beyond the specified range, the data type \`LONG\` integer is assigned during parsing.
 
-### **Date and Time Data Types**
+### Date and time data types
 
-The date and time data types are the types that represent temporal
-values and PPL plugin supports types including DATE, TIME, DATETIME,
-TIMESTAMP and INTERVAL. By default, the OpenSearch DSL uses date type as
-the only date and time related type, which has contained all information
-about an absolute time point. To integrate with PPL language, each of
-the types other than timestamp is holding part of temporal or timezone
-information, and the usage to explicitly clarify the date and time types
-is reflected in the datetime functions (see [Functions](functions.rst)
-for details), where some functions might have restrictions in the input
-argument type.
+The data types \`date\` and \`time\` represent temporal values. The PPL plugin supports \`date\`, \`time\`, \`datetime\`, \`timestamp\`, and \`interval\`. By default, <a href="{{https://opensearch.org/docs/latest/query-dsl/index/}}">Query DSL</a> uses \`date\` for any date or time types. To integrate with PPL, each data type, excluding \`timestamp\`, carries temporal and time zone information. The use of \`datetime\` functions clarifies the date and time types, although certain functions may have limitations on the input argument type. See the [Functions](functions.rst) section in this manual for more information.
 
-#### **Date**
+#### Date
 
-Date represents the calendar date regardless of the time zone. A given
-date value represents a 24-hour period, or say a day, but this period
-varies in different timezones and might have flexible hours during
-Daylight Savings Time programs. Besides, the date type does not contain
-time information as well. The supported range is '1000-01-01' to
-'9999-12-31'.
+The \`date\` data type represents the calendar date regardless of time zone. A specific date value represents a 24-hour period, but this period differs across time zones and may be subject to variations due to daylight savings time adjustments. Additionally, the date alone does not contain time-sppecific information. The date values range from '1000-01-01' to '9999-12-31'.
 
-| Type | Syntax       | Range                        |
-|------|--------------|------------------------------|
-| Date | 'yyyy-MM-dd' | '0001-01-01' to '9999-12-31' |
+| Type     | Syntax       | Range                        |
+|----------|--------------|------------------------------|
+| \`date\` | 'yyyy-MM-dd' | '0001-01-01' to '9999-12-31' |
 
-#### **Time**
+#### Time
 
-Time represents the time on the clock or watch with no regard for which
-timezone it might be related with. Time type data does not have date
-information.
+The \`time\` data type represents the time of day as displayed on a clock or watch, without specifying a particular time zone. It does not include any information about the calendar date.
 
-| Type | Syntax                  | Range                                  |
-|------|-------------------------|----------------------------------------|
-| Time | 'hh:mm&#58;ss\[.fraction\]' | '00:00:00.000000' to '23:59:59.999999' |
+| Type     | Syntax       | Range                        |
+|----------|--------------|------------------------------|
+| \`time\` | 'hh:mm&#58;ss\[.fraction\]' | '00:00:00.000000' to '23:59:59.999999' |
 
-#### **Datetime**
+#### Datetime
 
-Datetime type is the combination of date and time. The conversion rule
-of date or time to datetime is described in [Conversion between date and
-time types](#conversion-between-date-and-time-types). Datetime type does
-not contain timezone information. For an absolute time point that
-contains both date time and timezone information, see
-[Timestamp](#timestamp).
+The \`datetime\` data type represents a combination of \`date\` and \`time\`.  The \`datetime\` data type does not contain time zone information. For an absolute time point that contains both datetime and time zone information, see the [Timestamp](#timestamp) section. 
 
-| Type     | Syntax                             | Range                                                        |
-|----------|------------------------------------|--------------------------------------------------------------|
-| Datetime | 'yyyy-MM-dd hh:mm&#58;ss\[.fraction\]' | '0001-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999' |
+See the[Conversion between date and time types(#conversion-between-date-and-time-types) section for information about the conversion rule for \`date\` or \`time\` to \`datetime\`.
 
-#### **Timestamp**
+| Type     | Syntax | Range |
+|----------|--------|-------|
+| \`datetime\` | 'yyyy-MM-dd hh:mm&#58;ss\[.fraction\]' | '0001-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999' |
 
-A timestamp instance is an absolute instant independent of timezone or
-convention. For example, for a given point of time, if we set the
-timestamp of this time point into another timezone, the value should
-also be different accordingly. Besides, the storage of timestamp type is
-also different from the other types. The timestamp is converted from the
-current timezone to UTC for storage, and is converted back to the set
-timezone from UTC when retrieving.
+#### Timestamp
 
-| Type      | Syntax                             | Range                                                            |
-|-----------|------------------------------------|------------------------------------------------------------------|
+The \`timestamp\` data type repreents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sotred, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures the timestamp values remain consistent and comparable across different time zones.
+
+| Type      | Syntax | Range |
+|-----------|--------|-------|
 | Timestamp | 'yyyy-MM-dd hh:mm&#58;ss\[.fraction\]' | '0001-01-01 00:00&#58;01.000000' UTC to '9999-12-31 23:59:59.999999' |
 
-####  **Interval**
+####  Interval
 
-Interval data type represents a temporal duration or a period. The
-syntax is as follows:
+The \`interval\` data type represents a span of time, encompassing a specified duration or period.
 
 | Type     | Syntax             |
 |----------|--------------------|
 | Interval | INTERVAL expr unit |
 
-The expr is any expression that can be iterated to a quantity value
-eventually, see [Expressions](expressions.rst) for details. The unit
-represents the unit for interpreting the quantity, including
-MICROSECOND, SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER and
-YEAR.The INTERVAL keyword and the unit specifier are not case sensitive.
-Note that there are two classes of intervals. Year-week intervals can
-store years, quarters, months and weeks. Day-time intervals can store
-days, hours, minutes, seconds and microseconds. Year-week intervals are
-comparable only with another year-week intervals. These two types of
-intervals can only comparable with the same type of themselves.
+the expression \`expr\` is configured to be repeatedly evaluated to produce a quantitative value. See the [Expressions](expressions.rst) section of this maniual for more information. The unit represents the unit for interpreting the quantity, including MICROSECOND, SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER and YEAR.The INTERVAL keyword and the unit specifier are not case sensitive. 
 
-### **Conversion between date and time types**
+Interval consist of two classes: day-time and year-week. Day-time intervals store days, hours, minutes, seconds, and microseconds. Year-week intervals store years, quarters, months, and weeks. Each type can only be compare to the same type: day-time to day-time and year-week to year-week. 
 
-Basically the date and time types except interval can be converted to
-each other, but might suffer some alteration of the value or some
-information loss, for example extracting the time value from a datetime
-value, or convert a date value to a datetime value and so forth. Here
-lists the summary of the conversion rules that PPL plugin supports for
-each of the types:
+### Date and time conversion
 
-#### **Conversion from DATE**
+Date and time types, excluding  \`interval\` can be converted to
+each other, with some alteration of the value or some information loss, for example extracting the time value from a datetime value, or convert a date value to a datetime value and so forth. Here lists the summary of the conversion rules that PPL plugin supports for each of the types:
 
--   Since the date value does not have any time information, conversion
-    to [Time](#time) type is not useful, and will always return a zero
-    time value '00:00:00'.
--   Conversion from date to datetime has a data fill-up due to the lack
-    of time information, and it attaches the time '00:00:00' to the
-    original date by default and forms a datetime instance. For example,
-    the result to covert date '2020-08-17' to datetime type is datetime
-    '2020-08-17 00:00:00'.
--   Conversion to timestamp is to alternate both the time value and the
-    timezone information, and it attaches the zero time value '00:00:00'
-    and the session timezone (UTC by default) to the date. For example,
-    the result to covert date '2020-08-17' to datetime type with session
-    timezone UTC is datetime '2020-08-17 00:00:00' UTC.
+#### \`date\` conversion
 
-#### **Conversion from TIME**
+- Because \`date\` does not contain time information, conversion to \`time\` returns a zero time value \`00:00:00\`.
+- Converting from \`date\` to \`datetime\` sets to \`00:00:00\` if \`time\` is not provided, for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00\`.
+- Converting to \`timestamp\` sets \`time\` to \`00:00:00\` and the time zone(UTC by default), for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00 UTC\`.
 
--   Time value cannot be converted to any other date and time types
-    since it does not contain any date information, so it is not
-    meaningful to give no date info to a date/datetime/timestamp
-    instance.
+#### \`time\` conversion
 
-#### **Conversion from DATETIME**
+- A \`time\` value does not have any date information, so it cannot be converted to other date and time types.
 
--   Conversion from datetime to date is to extract the date part from
-    the datetime value. For example, the result to convert datetime
-    '2020-08-17 14&#58;09&#58;00' to date is date '2020-08-08'.
--   Conversion to time is to extract the time part from the datetime
-    value. For example, the result to convert datetime '2020-08-17
-    14&#58;09&#58;00' to time is time '14&#58;09&#58;00'.
--   Since the datetime type does not contain timezone information, the
-    conversion to timestamp needs to fill up the timezone part with the
-    session timezone. For example, the result to convert datetime
-    '2020-08-17 14&#58;09&#58;00' with system timezone of UTC, to timestamp is
-    timestamp '2020-08-17 14&#58;09&#58;00' UTC.
+#### \`datetime\` conversion
 
-#### **Conversion from TIMESTAMP**
+- Converting from \`datetime\` to \`date\` extracts the date component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`2020-08-08\`.
+- Comverting to \`time\` extracts the time component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`14&#58;09&#58;00\`.
+- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone the session's time zone, for example, \`2020-08-17 14&#58;09&#58;00\` with system time zone as UTC converts to \`2020-08-17 14&#58;09&#58;00 UTC\`.
 
--   Conversion from timestamp is much more straightforward. To convert
-    it to date is to extract the date value, and conversion to time is
-    to extract the time value. Conversion to datetime, it will extracts
-    the datetime value and leave the timezone information over. For
-    example, the result to convert datetime '2020-08-17 14&#58;09&#58;00' UTC to
-    date is date '2020-08-17', to time is '14&#58;09&#58;00' and to datetime is
-    datetime '2020-08-17 14&#58;09&#58;00'.
+#### \`timestamp\` conversion
 
-### **String Data Types**
+- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14&#58;09&#58;00 UTC\` converts to date and time as \`2020-08-17\` and \`14&#58;09&#58;00\` and to datetime as \`2020-08-17 14&#58;09&#58;00\`.
 
-A string is a sequence of characters enclosed in either single or double
-quotes. For example, both 'text' and "text" will be treated as string
-literal.
+### String data types
 
-### **Query Struct Data Types**
+A \`string\` data type is a series of characters enclosed within single or double quotation marks, serving as a data type for holding text data.
 
-In PPL, the Struct Data Types corresponding to the [Object field type in
-OpenSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/object.html).
-The "." is used as the path selector when access the inner attribute of
-the struct data.
+### Query struct data types
 
-#### **Example: People**
+In PPL, the \`struct\` data type corresponds to the [Object field type in
+OpenSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/object.html). The \`"."\` is used as the path selector for accessing the inner attribute of the struct data.
 
-There are three fields in test index \`people\`: 1) deep nested object
-field \`city\`; 2) object field of array value \`account\`; 3) nested field
-\`projects\`:
+#### Example: People
+
+The following struct example stores information about person attributes in an index \`peope\` with fields: deep-nested object field \`city\`, object field of array value \`account\`, and nested field \`projects\`.
 
     {
       "mappings": {
@@ -262,10 +178,9 @@ field \`city\`; 2) object field of array value \`account\`; 3) nested field
       }
     }
 
-#### **Example: Employees**
+#### Example: Employees
 
-Here is the mapping for test index \`employees_nested\`. Note that field
-\`projects\` is a nested field:
+The following struct example stores information about employees in an index named \`employees_nested\`. Note, the field \`projects\` is a nested field.
 
     {
       "mappings": {
@@ -365,13 +280,9 @@ Result set:
       ]
     }
 
-#### **Example 1: Select struct inner attribute**
+#### PPL query example: Select struct inner attribute
 
-The example show fetch city (top level), city.name (second level),
-city.location.latitude (deeper level) struct type data from people
-results.
-
-PPL query:
+The following PPL query example shows how to fetch city (top level), city.name (second level), city.location.latitude (deeper level) struct type data from the People results.
 
     os> source=people | fields city, city.name, city.location.latitude;
     fetched rows / total rows = 1/1
@@ -381,11 +292,9 @@ PPL query:
     | {'name': 'Seattle', 'location': {'latitude': 10.5}} | Seattle     | 10.5                     |
     +-----------------------------------------------------+-------------+--------------------------+
 
-#### **Example 2: Group by struct inner attribute**
+#### PPL query example: Group by struct inner attribute**
 
-The example show group by object field inner attribute.
-
-PPL query:
+The following PPL query example shows how to group by object field inner attribute.
 
     os> source=people | stats count() by city.name;
     fetched rows / total rows = 1/1
@@ -395,12 +304,10 @@ PPL query:
     | 1         | Seattle     |
     +-----------+-------------+
 
-#### **Example 3: Selecting Field of Array Value**
+#### PPL query example: Selecting field of array value
 
-Select deeper level for object fields of array value which returns the
-first element in the array. For example, because inner field
-\`accounts.id\` has three values instead of a tuple in this document, the
-first entry is returned.:
+Select a deeper level for object fields of array values that return the
+first element in the array. For example, because the document's inner field \`accounts.id\` has three values instead of a tuple, the first entry is returned.
 
     os> source = people | fields accounts, accounts.id;
     fetched rows / total rows = 1/1
