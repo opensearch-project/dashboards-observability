@@ -75,17 +75,14 @@ describe('Tests the add nginx integration instance flow', () => {
     createSamples();
     moveToAvailableNginxIntegration();
     cy.get('[data-test-subj="add-integration-button"]').click();
-    cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx');
-    cy.get('[data-test-subj="createInstanceButton"]').should('be.disabled')
-    cy.get('[data-test-subj="addIntegrationFlyoutTitle"]').should('exist')
+    cy.get('[data-test-subj="new-instance-name"]').should('have.value', 'nginx Integration');
+    cy.get('[data-test-subj="create-instance-button"]').should('be.disabled')
     // Modifies the name of the integration
-    cy.get('[data-test-subj="new-instance-name"]').type(testInstance.substring(5));
-    // validates the created sample index
-    cy.get('[data-test-subj="data-source-name"]').type('ss4o_logs-nginx-sample-sample');
-    cy.get('[data-test-subj="validateIndex"]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'valid');
-    cy.get('[data-test-subj="createInstanceButton"]').click();
-    cy.get('.euiToastHeader__title').should('contain', 'successfully');
+    cy.get('[data-test-subj="new-instance-name"]').clear().type(testInstance);
+    // Validates the created sample index
+    cy.get('[data-test-subj="data-source-name"]').type('ss4o_logs-nginx-sample-sample{enter}');
+    cy.get('[data-test-subj="create-instance-button"]').click();
+    cy.get('[data-test-subj="eventHomePageTitle"]').should('contain', 'nginx');
   })
 
   it('Navigates to installed integrations page and verifies that nginx-test exists', () => {
