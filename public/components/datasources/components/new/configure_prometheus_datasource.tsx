@@ -106,7 +106,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           <EuiText>
             <h3>Data source details</h3>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer />
           <NameRow
             currentName={currentName}
             setNameForRequest={setNameForRequest}
@@ -131,7 +131,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           <EuiText>
             <h3>Prometheus data location</h3>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer />
 
           <EuiFormRow label="Prometheus URI">
             <>
@@ -156,7 +156,7 @@ export const ConfigurePrometheusDatasource = (props: ConfigurePrometheusDatasour
           <EuiText>
             <h3>Authentication details</h3>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer />
 
           <EuiFormRow label="Authentication method">
             <EuiSelect

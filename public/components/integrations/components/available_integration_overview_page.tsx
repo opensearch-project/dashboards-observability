@@ -32,9 +32,9 @@ export interface AvailableIntegrationType {
   version?: string | undefined;
   displayName?: string;
   integrationType: string;
-  statics: unknown;
-  components: Array<{ name: string }>;
-  displayAssets: unknown[];
+  statics: any;
+  components: any[];
+  displayAssets: any[];
 }
 
 export interface AvailableIntegrationsTableProps {
@@ -117,9 +117,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
     http.get(`${INTEGRATIONS_BASE}/repository`).then((exists) => {
       setData(exists.data);
 
-      let newItems = exists.data.hits.flatMap(
-        (hit: { labels?: string[] }) => hit.labels?.sort() ?? []
-      );
+      let newItems = exists.data.hits.flatMap((hit: { labels?: string[] }) => hit.labels ?? []);
       newItems = [...new Set(newItems)].sort().map((newItem) => {
         return {
           name: newItem,
@@ -184,7 +182,9 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
         {isCardView
           ? AvailableIntegrationsCardView({
               data: {
-                hits: data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag))),
+                hits: data.hits.filter((hit) =>
+                  helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
+                ),
               },
               isCardView,
               setCardView,
@@ -196,7 +196,9 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
           : AvailableIntegrationsTable({
               loading: false,
               data: {
-                hits: data.hits.filter((hit) => helper.every((tag) => hit.labels?.includes(tag))),
+                hits: data.hits.filter((hit) =>
+                  helper.every((compon) => hit.components.map((x) => x.name).includes(compon))
+                ),
               },
               isCardView,
               setCardView,

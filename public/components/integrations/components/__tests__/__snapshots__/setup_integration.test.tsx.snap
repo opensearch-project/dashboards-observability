@@ -31,7 +31,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                         Object {
                           "connectionDataSource": "",
                           "connectionLocation": "",
-                          "connectionTableName": "sample",
                           "connectionType": "index",
                           "displayName": "sample Integration",
                         }
@@ -41,11 +40,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           "assets": Object {},
                           "name": "sample",
                           "type": "",
-                        }
-                      }
-                      setupCallout={
-                        Object {
-                          "show": false,
                         }
                       }
                       updateConfig={[Function]}
@@ -61,11 +55,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               Set Up Integration
                             </h1>
                           </EuiTitle>
-                          <EuiSpacer>
-                            <div
-                              className="euiSpacer euiSpacer--l"
-                            />
-                          </EuiSpacer>
                           <EuiSpacer>
                             <div
                               className="euiSpacer euiSpacer--l"
@@ -88,15 +77,9 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                           <EuiFormRow
                             describedByIds={Array []}
                             display="row"
-                            error={
-                              Array [
-                                "Must be at least 1 character.",
-                              ]
-                            }
                             fullWidth={false}
                             hasChildLabel={true}
                             hasEmptyLabelSpace={false}
-                            isInvalid={false}
                             label="Display Name"
                             labelType="label"
                           >
@@ -108,15 +91,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                 className="euiFormRow__labelWrapper"
                               >
                                 <EuiFormLabel
-                                  aria-invalid={false}
                                   className="euiFormRow__label"
                                   htmlFor="random_html_id"
                                   isFocused={false}
-                                  isInvalid={false}
                                   type="label"
                                 >
                                   <label
-                                    aria-invalid={false}
                                     className="euiFormLabel euiFormRow__label"
                                     htmlFor="random_html_id"
                                   >
@@ -129,7 +109,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               >
                                 <EuiFieldText
                                   id="random_html_id"
-                                  isInvalid={false}
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
@@ -146,9 +125,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                       <div
                                         className="euiFormControlLayout__childrenWrapper"
                                       >
-                                        <EuiValidatableControl
-                                          isInvalid={false}
-                                        >
+                                        <EuiValidatableControl>
                                           <input
                                             className="euiFieldText"
                                             id="random_html_id"
@@ -367,14 +344,12 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   aria-describedby="random_html_id-help-0"
                                   async={false}
                                   compressed={false}
-                                  customOptionText="Select {searchValue} as your index"
                                   fullWidth={false}
                                   id="random_html_id"
                                   isClearable={true}
                                   isLoading={true}
                                   onBlur={[Function]}
                                   onChange={[Function]}
-                                  onCreateOption={[Function]}
                                   onFocus={[Function]}
                                   options={Array []}
                                   selectedOptions={
@@ -695,7 +670,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
               Object {
                 "connectionDataSource": "",
                 "connectionLocation": "",
-                "connectionTableName": "sample",
                 "connectionType": "index",
                 "displayName": "sample Integration",
               }
@@ -708,8 +682,9 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
               }
             }
             loading={false}
+            loadingProgress={0}
             setLoading={[Function]}
-            setSetupCallout={[Function]}
+            setProgress={[Function]}
           >
             <EuiBottomBar>
               <EuiPortal>
@@ -732,11 +707,11 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButtonEmpty euiButtonEmpty--text"
+                              class="euiButton euiButton--secondary"
                               type="button"
                             >
                               <span
-                                class="euiButtonContent euiButtonEmpty__content"
+                                class="euiButtonContent euiButton__content"
                               >
                                 <svg
                                   aria-hidden="true"
@@ -749,7 +724,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   xmlns="http://www.w3.org/2000/svg"
                                 />
                                 <span
-                                  class="euiButtonEmpty__text"
+                                  class="euiButton__text"
                                 >
                                   Discard
                                 </span>
@@ -760,8 +735,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <button
-                              class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
-                              disabled=""
+                              class="euiButton euiButton--primary euiButton--fill"
                               type="button"
                             >
                               <span
@@ -831,67 +805,81 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiButtonEmpty
-                                color="text"
-                                disabled={false}
+                              <EuiButton
+                                color="secondary"
                                 iconType="cross"
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--text"
+                                <EuiButtonDisplay
+                                  baseClassName="euiButton"
+                                  color="secondary"
                                   disabled={false}
+                                  element="button"
+                                  iconType="cross"
+                                  isDisabled={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="m"
-                                    iconType="cross"
-                                    textProps={
+                                  <button
+                                    className="euiButton euiButton--secondary"
+                                    disabled={false}
+                                    onClick={[Function]}
+                                    style={
                                       Object {
-                                        "className": "euiButtonEmpty__text",
+                                        "minWidth": undefined,
                                       }
                                     }
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      iconType="cross"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <EuiIcon
-                                        className="euiButtonContent__icon"
-                                        color="inherit"
-                                        size="m"
-                                        type="cross"
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
+                                        <EuiIcon
+                                          className="euiButtonContent__icon"
+                                          color="inherit"
+                                          size="m"
+                                          type="cross"
                                         >
-                                          <svg
+                                          <EuiIconEmpty
                                             aria-hidden={true}
                                             className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                             focusable="false"
-                                            height={16}
                                             role="img"
                                             style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        Discard
+                                          >
+                                            <svg
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                              focusable="false"
+                                              height={16}
+                                              role="img"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                          </EuiIconEmpty>
+                                        </EuiIcon>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          Discard
+                                        </span>
                                       </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
+                              </EuiButton>
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
@@ -901,7 +889,6 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButton
-                                disabled={true}
                                 fill={true}
                                 iconSide="right"
                                 iconType="arrowRight"
@@ -910,19 +897,19 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                               >
                                 <EuiButtonDisplay
                                   baseClassName="euiButton"
-                                  disabled={true}
+                                  disabled={false}
                                   element="button"
                                   fill={true}
                                   iconSide="right"
                                   iconType="arrowRight"
-                                  isDisabled={true}
+                                  isDisabled={false}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
                                   <button
-                                    className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
-                                    disabled={true}
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
                                     onClick={[Function]}
                                     style={
                                       Object {
@@ -1040,11 +1027,6 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
       "version": "2.0.0",
     }
   }
-  setupCallout={
-    Object {
-      "show": false,
-    }
-  }
   updateConfig={[Function]}
 >
   <EuiForm>
@@ -1058,11 +1040,6 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           Set Up Integration
         </h1>
       </EuiTitle>
-      <EuiSpacer>
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiSpacer>
         <div
           className="euiSpacer euiSpacer--l"
@@ -1085,15 +1062,9 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        error={
-          Array [
-            "Must be at least 1 character.",
-          ]
-        }
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
-        isInvalid={false}
         label="Display Name"
         labelType="label"
       >
@@ -1105,15 +1076,12 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
             className="euiFormRow__labelWrapper"
           >
             <EuiFormLabel
-              aria-invalid={false}
               className="euiFormRow__label"
               htmlFor="random_html_id"
               isFocused={false}
-              isInvalid={false}
               type="label"
             >
               <label
-                aria-invalid={false}
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="random_html_id"
               >
@@ -1126,7 +1094,6 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
           >
             <EuiFieldText
               id="random_html_id"
-              isInvalid={false}
               onBlur={[Function]}
               onChange={[Function]}
               onFocus={[Function]}
@@ -1143,9 +1110,7 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
                   <div
                     className="euiFormControlLayout__childrenWrapper"
                   >
-                    <EuiValidatableControl
-                      isInvalid={false}
-                    >
+                    <EuiValidatableControl>
                       <input
                         className="euiFieldText"
                         id="random_html_id"
@@ -1383,14 +1348,12 @@ exports[`Integration Setup Page Renders the form as expected 1`] = `
               aria-describedby="random_html_id-help-0"
               async={false}
               compressed={false}
-              customOptionText="Select {searchValue} as your index"
               fullWidth={false}
               id="random_html_id"
               isClearable={true}
               isLoading={true}
               onBlur={[Function]}
               onChange={[Function]}
-              onCreateOption={[Function]}
               onFocus={[Function]}
               options={Array []}
               selectedOptions={

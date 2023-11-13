@@ -30,8 +30,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
     },
     {
       id: QUERY_ALL,
-      label: 'Admin only - only accessible by the admin',
-      disabled: !hasSecurityAccess,
+      label: 'Everyone - accessible by all users on this cluster',
     },
   ];
 
@@ -83,12 +82,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
           <EuiRadioGroup
             options={accessLevelOptions}
             idSelected={selectedAccessLevel}
-            onChange={(id) => {
-              if (id === QUERY_ALL) {
-                setSelectedRoles([]);
-              }
-              setSelectedAccessLevel(id);
-            }}
+            onChange={(id) => setSelectedAccessLevel(id)}
             name="query-radio-group"
             legend={{
               children: <span>Query access level</span>,

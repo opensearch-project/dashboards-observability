@@ -9,7 +9,6 @@ import { NewDatasourceDescription } from './new_datasource_description';
 import s3Svg from '../../icons/s3-logo.svg';
 import prometheusSvg from '../../icons/prometheus-logo.svg';
 import { DatasourceType } from '../../../../../common/types/data_connections';
-import { AmazonS3URL, PrometheusURL } from '../../../../../common/constants/data_connections';
 
 export interface DatasourceCard {
   name: DatasourceType;
@@ -23,17 +22,17 @@ export function NewDatasourceCardView() {
   const Datasources: DatasourceCard[] = [
     {
       name: 'S3GLUE',
-      displayName: 'Amazon S3',
+      displayName: 'S3',
       description: 'Connect to Amazon S3 via AWS Glue Data Catalog',
       displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${AmazonS3URL}`),
+      onClick: () => (window.location.hash = `#/configure/S3GLUE`),
     },
     {
       name: 'PROMETHEUS',
       displayName: 'Prometheus',
       description: 'Connect to Prometheus',
       displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${PrometheusURL}`),
+      onClick: () => (window.location.hash = `#/configure/PROMETHEUS`),
     },
   ];
 

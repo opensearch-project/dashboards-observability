@@ -15,8 +15,6 @@ export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
 export const DATACONNECTIONS_BASE = '/api/dataconnections';
-export const EDIT = '/edit';
-export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EVENT_ANALYTICS = '/event_analytics';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
@@ -242,11 +240,6 @@ export const WAITING_TIME_ON_USER_ACTIONS = 300;
 export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
-  NO_SERIES: 'Add a field to start',
 };
 
 export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';
-
-export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
-
-export const DIRECT_DUMMY_QUERY = 'select 1';

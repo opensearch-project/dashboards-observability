@@ -34,8 +34,6 @@ interface CommonParams {
   subType: string;
   unitsOfMeasure: string;
   selectedLabels: string;
-  dataSources: string; // list of type SelectedDataSources that is stringified
-  queryLang: string;
 }
 
 type CreateParams = CommonParams & { applicationId: string };
@@ -64,8 +62,6 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       subType: params.subType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
-      dataSources: params.dataSources,
-      queryLang: params.queryLang,
     });
 
     const response = await this.client.create<VisualizationSavedObjectAttributes>(
@@ -103,8 +99,6 @@ export class OSDSavedVisualizationClient extends OSDSavedObjectClient {
       subType: params.subType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
-      dataSources: params.dataSources,
-      queryLang: params.queryLang,
     });
 
     const response = await this.client.update<Partial<VisualizationSavedObjectAttributes>>(

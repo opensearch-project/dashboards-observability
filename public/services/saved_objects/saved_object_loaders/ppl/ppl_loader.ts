@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
+import { has, isEmpty } from 'lodash';
+import { updateFields as updateFieldsAction } from 'public/components/event_analytics/redux/slices/field_slice';
+import { changeQuery as changeQueryAction } from 'public/components/event_analytics/redux/slices/query_slice';
+import { updateTabName as updateTabNameAction } from 'public/components/event_analytics/redux/slices/query_tab_slice';
+import { change as updateVizConfigAction } from 'public/components/event_analytics/redux/slices/viualization_config_slice';
 import { batch as Batch } from 'react-redux';
-import { update } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
-import { updateFields as updateFieldsAction } from '../../../../components/event_analytics/redux/slices/field_slice';
-import { changeQuery as changeQueryAction } from '../../../../components/event_analytics/redux/slices/query_slice';
-import { updateTabName as updateTabNameAction } from '../../../../components/event_analytics/redux/slices/query_tab_slice';
-import { change as updateVizConfigAction } from '../../../../components/event_analytics/redux/slices/viualization_config_slice';
-import { update as updateSearchMetaData } from '../../../../components/event_analytics/redux/slices/search_meta_data_slice';
 import { NotificationsStart } from '../../../../../../../src/core/public';
 import {
   AGGREGATIONS,
@@ -61,7 +59,6 @@ interface LoadContext {
   setSubType: (type: string) => void;
   setSelectedContentTab: (curTab: string) => void;
   fetchData: () => void;
-  dataSources: SelectedDataSource[];
 }
 
 interface Dispatchers {
@@ -180,15 +177,6 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
         updateTabName({
           tabId,
           tabName: objectData.name,
-        })
-      );
-      await dispatch(
-        updateSearchMetaData({
-          tabId,
-          data: {
-            datasources: [JSON.parse(objectData.data_sources)],
-            lang: objectData.query_lang,
-          },
         })
       );
       if (isInnerObjectSavedVisualization(objectData)) {

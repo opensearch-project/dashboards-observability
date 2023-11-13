@@ -31,23 +31,15 @@ export const EventAnalytics = ({
   ...props
 }: EventAnalyticsProps) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [toastLifeTime, setToastLifeTime] = useState(6000);
 
   const eventAnalyticsBreadcrumb = {
     text: 'Logs',
     href: '#/',
   };
 
-  const setToast = (
-    title: string,
-    color = 'success',
-    text?: ReactChild,
-    side?: string,
-    toastLifeTimeMs?: number
-  ) => {
+  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-    if (toastLifeTimeMs) setToastLifeTime(toastLifeTimeMs);
   };
 
   return (
@@ -57,7 +49,7 @@ export const EventAnalytics = ({
         dismissToast={(removedToast) => {
           setToasts(toasts.filter((toast) => toast.id !== removedToast.id));
         }}
-        toastLifeTimeMs={toastLifeTime}
+        toastLifeTimeMs={6000}
       />
       <HashRouter>
         <Switch>

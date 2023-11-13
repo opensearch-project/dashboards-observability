@@ -18,18 +18,13 @@ import {
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEqual, lowerCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { batch, useDispatch, useSelector } from 'react-redux';
-import { ASYNC_POLLING_INTERVAL, QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { APP_ANALYTICS_TAB_ID_REGEX, RAW_QUERY } from '../../../../common/constants/explorer';
-import { PPL_NEWLINE_REGEX, PPL_SPAN_REGEX } from '../../../../common/constants/shared';
-import { DirectQueryLoadingStatus, DirectQueryRequest } from '../../../../common/types/explorer';
+import { useDispatch, useSelector } from 'react-redux';
+import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
+import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
-import { getAsyncSessionId, setAsyncSessionId } from '../../../../common/utils/query_session_utils';
-import { get as getObjValue } from '../../../../common/utils/shared';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
-import { changeQuery } from '../../../components/event_analytics/redux/slices/query_slice';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
@@ -64,7 +59,13 @@ export const DirectSearch = (props: any) => {
     query,
     tempQuery,
     handleQueryChange,
+    handleTimePickerChange,
     dslService,
+    startTime,
+    endTime,
+    setStartTime,
+    setEndTime,
+    setIsOutputStale,
     selectedPanelName,
     selectedCustomPanelOptions,
     setSelectedPanelName,
@@ -74,24 +75,33 @@ export const DirectSearch = (props: any) => {
     savedObjects,
     showSavePanelOptionsList,
     showSaveButton = true,
+    handleTimeRangePickerRefresh,
+    isLiveTailPopoverOpen,
+    closeLiveTailPopover,
+    popoverItems,
+    isLiveTailOn,
     selectedSubTabId,
     searchBarConfigs = {},
     getSuggestions,
     onItemSelect,
     tabId = '',
     baseQuery = '',
+    stopLive,
+    setIsLiveTailPopoverOpen,
+    liveTailName,
     curVisId,
     setSubType,
     setIsQueryRunning,
   } = props;
 
-  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId] || {};
+  const explorerSearchMetadata = useSelector(selectSearchMetaData)[tabId];
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isLanguagePopoverOpen, setLanguagePopoverOpen] = useState(false);
-  const [queryLang, setQueryLang] = useState(explorerSearchMetadata.lang || QUERY_LANGUAGE.SQL);
+  const [queryLang, setQueryLang] = useState('SQL');
+  const [jobId, setJobId] = useState('');
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -103,10 +113,10 @@ export const DirectSearch = (props: any) => {
     stopPolling,
   } = usePolling<any, any>((params) => {
     return sqlService.fetchWithJobId(params);
-  }, ASYNC_POLLING_INTERVAL);
+  }, 5000);
 
   const requestParams = { tabId };
-  const { dispatchOnGettingHis } = useFetchEvents({
+  const { getLiveTail, getEvents, getAvailableFields, dispatchOnGettingHis } = useFetchEvents({
     pplService: new SQLService(coreRefs.http),
     requestParams,
   });
@@ -141,10 +151,16 @@ export const DirectSearch = (props: any) => {
 
   const handleQueryLanguageChange = (lang: string) => {
     if (lang === 'DQL') {
-      application!.navigateToUrl('../app/data-explorer/discover');
-      return;
+      return application!.navigateToUrl(
+        `../app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${explorerSearchMetadata.datasources[0].value}',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(language:kuery,query:''))`
+      );
     }
-    dispatch(updateSearchMetaData({ tabId, data: { lang } }));
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: { lang },
+      })
+    );
     setQueryLang(lang);
     closeLanguagePopover();
   };
@@ -158,16 +174,10 @@ export const DirectSearch = (props: any) => {
   };
 
   const languagePopOverItems = [
-    <EuiContextMenuItem
-      key={QUERY_LANGUAGE.SQL}
-      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.SQL)}
-    >
+    <EuiContextMenuItem key="SQL" onClick={() => handleQueryLanguageChange('SQL')}>
       SQL
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key={QUERY_LANGUAGE.PPL}
-      onClick={() => handleQueryLanguageChange(QUERY_LANGUAGE.PPL)}
-    >
+    <EuiContextMenuItem key="PPL" onClick={() => handleQueryLanguageChange('PPL')}>
       PPL
     </EuiContextMenuItem>,
   ];
@@ -184,31 +194,25 @@ export const DirectSearch = (props: any) => {
     </EuiButton>
   );
 
-  const onQuerySearch = (lang: string) => {
+  const onQuerySearch = (lang) => {
     setIsQueryRunning(true);
-    batch(() => {
-      dispatch(
-        changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
-      );
-      dispatch(updateSearchMetaData({ tabId, data: { isPolling: true, lang } }));
-    });
-    const sessionId = getAsyncSessionId();
-    const requestPayload = {
-      lang: lang.toLowerCase(),
-      query: tempQuery || query,
-      datasource: explorerSearchMetadata.datasources[0].label,
-    } as DirectQueryRequest;
-
-    if (sessionId) {
-      requestPayload.sessionId = sessionId;
-    }
-
+    dispatch(
+      updateSearchMetaData({
+        tabId,
+        data: {
+          isPolling: true,
+        },
+      })
+    );
     sqlService
-      .fetch(requestPayload)
+      .fetch({
+        lang: lowerCase(lang),
+        query: tempQuery || query,
+        datasource: explorerSearchMetadata.datasources[0].name,
+      })
       .then((result) => {
-        setAsyncSessionId(getObjValue(result, 'sessionId', null));
         if (result.queryId) {
-          dispatch(updateSearchMetaData({ tabId, data: { queryId: result.queryId } }));
+          setJobId(result.queryId);
           startPolling({
             queryId: result.queryId,
           });
@@ -219,15 +223,13 @@ export const DirectSearch = (props: any) => {
       .catch((e) => {
         setIsQueryRunning(false);
         console.error(e);
-      });
+      })
+      .finally(() => {});
   };
 
   useEffect(() => {
     // cancel direct query
-    if (!pollingResult) return;
-    const { status, datarows } = pollingResult;
-
-    if (status === DirectQueryLoadingStatus.SUCCESS || datarows) {
+    if (pollingResult && (pollingResult.status === 'SUCCESS' || pollingResult.datarows)) {
       // stop polling
       stopPolling();
       setIsQueryRunning(false);
@@ -236,30 +238,16 @@ export const DirectSearch = (props: any) => {
           tabId,
           data: {
             isPolling: false,
-            status: undefined,
           },
         })
       );
       // update page with data
       dispatchOnGettingHis(pollingResult, '');
-      return;
     }
-    dispatch(
-      updateSearchMetaData({
-        tabId,
-        data: { status },
-      })
-    );
   }, [pollingResult, pollingError]);
 
   useEffect(() => {
-    return () => {
-      stopPolling();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!explorerSearchMetadata.isPolling) {
+    if (explorerSearchMetadata.isPolling === false) {
       stopPolling();
       setIsQueryRunning(false);
     }
@@ -267,7 +255,7 @@ export const DirectSearch = (props: any) => {
 
   return (
     <div className="globalQueryBar">
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart" wrap>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
         {appLogEvents && (
           <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
             <EuiToolTip position="top" content={baseQuery}>
@@ -277,21 +265,19 @@ export const DirectSearch = (props: any) => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {!appLogEvents && (
-          <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
-            <EuiPopover
-              id="smallContextMenuExample"
-              button={languagePopOverButton}
-              isOpen={isLanguagePopoverOpen}
-              closePopover={closeLanguagePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel size="s" items={languagePopOverItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem key="search-bar" className="search-area" grow={5} style={{ minWidth: 400 }}>
+        <EuiFlexItem key="lang-selector" className="search-area" grow={false}>
+          <EuiPopover
+            id="smallContextMenuExample"
+            button={languagePopOverButton}
+            isOpen={isLanguagePopoverOpen}
+            closePopover={closeLanguagePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel size="s" items={languagePopOverItems} />
+          </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem key="search-bar" className="search-area" grow={5}>
           <Autocomplete
             key={'autocomplete-search-bar'}
             query={query}
@@ -308,7 +294,7 @@ export const DirectSearch = (props: any) => {
             isSuggestionDisabled={queryLang === 'SQL'}
             isDisabled={explorerSearchMetadata.isPolling}
           />
-          {queryLang === QUERY_LANGUAGE.PPL && (
+          {queryLang === 'PPL' && (
             <EuiBadge
               className={`ppl-link ${
                 uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'

@@ -73,7 +73,6 @@ export const Home = (props: HomeProps) => {
     chrome,
     notifications,
     queryManager,
-    dataSourcePluggables,
   } = props;
   const [triggerSwitchToEvent, setTriggerSwitchToEvent] = useState(0);
   const dispatch = useDispatch();
@@ -141,7 +140,6 @@ export const Home = (props: HomeProps) => {
     setEndTime,
     mode: 'data_prepper',
     dataPrepperIndicesExist: indicesExist,
-    dataSourcePluggables,
   };
 
   const setToast = (title: string, color = 'success', text?: ReactChild) => {

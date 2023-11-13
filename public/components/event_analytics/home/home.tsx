@@ -230,6 +230,16 @@ const EventAnalyticsHome = (props: IHomeProps) => {
       Delete
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      key="redirect"
+      onClick={() => {
+        setIsActionsPopoverOpen(false);
+        history.push(`/explorer`);
+      }}
+      data-test-subj="eventHomeAction__explorer"
+    >
+      Event Explorer
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
       key="addSample"
       onClick={() => {
         setIsActionsPopoverOpen(false);
@@ -283,19 +293,6 @@ const EventAnalyticsHome = (props: IHomeProps) => {
                     >
                       <EuiContextMenuPanel items={popoverItems} />
                     </EuiPopover>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton
-                      key="redirect"
-                      onClick={() => {
-                        setIsActionsPopoverOpen(false);
-                        history.push(`/explorer`);
-                      }}
-                      data-test-subj="eventHomeAction__explorer"
-                      fill
-                    >
-                      Event Explorer
-                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>

@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { ConfigureS3Datasource } from './configure_s3_datasource';
 import { coreRefs } from '../../../../../public/framework/core_refs';
-import { DATACONNECTIONS_BASE, SECURITY_ROLES } from '../../../../../common/constants/shared';
+import { DATACONNECTIONS_BASE } from '../../../../../common/constants/shared';
 import { ReviewS3Datasource } from './review_s3_datasource_configuration';
 import { useToast } from '../../../../../public/components/common/toast';
 import { DatasourceType, Role } from '../../../../../common/types/data_connections';
@@ -27,18 +27,17 @@ import { ReviewPrometheusDatasource } from './review_prometheus_datasource_confi
 import {
   AuthMethod,
   DatasourceTypeToDisplayName,
-  UrlToDatasourceType,
 } from '../../../../../common/constants/data_connections';
 import { formatError } from '../../../../../public/components/event_analytics/utils';
 import { NotificationsStart } from '../../../../../../../src/core/public';
 
 interface ConfigureDatasourceProps {
-  urlType: string;
+  type: DatasourceType;
   notifications: NotificationsStart;
 }
 
 export function Configure(props: ConfigureDatasourceProps) {
-  const { urlType, notifications } = props;
+  const { type, notifications } = props;
   const { http, chrome } = coreRefs;
   const { setToast } = useToast();
   const [error, setError] = useState<string>('');
@@ -56,7 +55,6 @@ export function Configure(props: ConfigureDatasourceProps) {
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
   const [page, setPage] = useState<'configure' | 'review'>('configure');
-  const type = UrlToDatasourceType[urlType];
   const ConfigureDatasourceSteps = [
     {
       title: 'Configure data source',
@@ -69,7 +67,7 @@ export function Configure(props: ConfigureDatasourceProps) {
 
   useEffect(() => {
     http!
-      .get(SECURITY_ROLES)
+      .get('/api/v1/configuration/roles')
       .then((data) =>
         setRoles(
           Object.keys(data.data).map((key) => {
