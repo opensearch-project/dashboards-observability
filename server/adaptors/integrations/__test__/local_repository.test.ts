@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { RepositoryReader } from '../repository/repository';
+import { TemplateManager } from '../repository/repository';
 import { IntegrationReader } from '../repository/integration';
 import path from 'path';
 import * as fs from 'fs/promises';
@@ -27,7 +27,7 @@ describe('The local repository', () => {
   });
 
   it('Should pass deep validation for all local integrations.', async () => {
-    const repository: RepositoryReader = new RepositoryReader(
+    const repository: TemplateManager = new TemplateManager(
       path.join(__dirname, '../__data__/repository')
     );
     const integrations: IntegrationReader[] = await repository.getIntegrationList();
