@@ -16,6 +16,7 @@ import { patternsReducer } from '../../../components/event_analytics/redux/slice
 import { metricsReducers } from '../../../components/metrics/redux/slices/metrics_slice';
 import { panelReducer } from '../../../components/custom_panels/redux/panel_slice';
 import { searchMetaDataSliceReducer } from '../../../components/event_analytics/redux/slices/search_meta_data_slice';
+import { summarizationReducer } from '../../../components/event_analytics/redux/slices/query_assistant_summarization_slice';
 
 const combinedReducer = combineReducers({
   // explorer reducers
@@ -30,6 +31,7 @@ const combinedReducer = combineReducers({
   metrics: metricsReducers,
   customPanel: panelReducer,
   searchMetadata: searchMetaDataSliceReducer,
+  queryAssistantSummarization: summarizationReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

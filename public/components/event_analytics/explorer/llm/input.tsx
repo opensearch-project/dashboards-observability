@@ -28,6 +28,7 @@ import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
+import { changeSummary } from '../../redux/slices/query_assistant_summarization_slice';
 
 interface SummarizationContext {
   question: string;
@@ -40,9 +41,6 @@ interface SummarizationContext {
 interface Props {
   handleQueryChange: (query: string) => void;
   handleTimeRangePickerRefresh: () => void;
-  setSummarizedText: React.Dispatch<React.SetStateAction<string>>;
-  setSummaryLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsPPLError: React.Dispatch<React.SetStateAction<boolean>>;
   tabId: string;
 }
 export const LLMInput: React.FC<Props> = (props) => {
@@ -123,7 +121,14 @@ export const LLMInput: React.FC<Props> = (props) => {
         isError: false,
         response: '',
       };
-      props.setSummaryLoading(true);
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summaryLoading: true,
+          },
+        })
+      );
       if (generatePPLError === undefined) {
         const queryResponse = await getOSDHttp()
           .post(CONSOLE_PROXY, {
@@ -131,11 +136,25 @@ export const LLMInput: React.FC<Props> = (props) => {
             query: { path: '_plugins/_ppl', method: 'POST' },
           })
           .then((resp) => {
-            props.setIsPPLError(false);
+            dispatch(
+              changeSummary({
+                tabId: props.tabId,
+                data: {
+                  isPPLError: false,
+                },
+              })
+            );
             return resp;
           })
           .catch((error) => {
-            props.setIsPPLError(true);
+            dispatch(
+              changeSummary({
+                tabId: props.tabId,
+                data: {
+                  isPPLError: true,
+                },
+              })
+            );
             summarizationContext.isError = true;
             return String(JSON.parse(error.body).error.details);
           });
@@ -148,11 +167,25 @@ export const LLMInput: React.FC<Props> = (props) => {
       const summarized = await getOSDHttp().post('/api/assistant/summarize', {
         body: JSON.stringify(summarizationContext),
       });
-      props.setSummarizedText(summarized);
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summary: summarized,
+          },
+        })
+      );
     } catch (error) {
       coreRefs.toasts?.addError(error.body, { title: 'Failed to summarize results' });
     } finally {
-      props.setSummaryLoading(false);
+      await dispatch(
+        changeSummary({
+          tabId: props.tabId,
+          data: {
+            summaryLoading: false,
+          },
+        })
+      );
     }
   };
 
@@ -226,7 +259,6 @@ export const LLMInput: React.FC<Props> = (props) => {
               </EuiFlexItem> */}
             </EuiFlexGroup>
           </EuiForm>
-          {/* </EuiAccordion> */}
           {isFeedbackOpen && (
             <EuiModal onClose={() => setIsFeedbackOpen(false)}>
               <FeedbackModalContent
