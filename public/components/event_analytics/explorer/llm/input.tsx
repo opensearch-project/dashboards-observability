@@ -243,9 +243,9 @@ export const LLMInput: React.FC<Props> = (props) => {
                   iconType="returnKey"
                   iconSide="right"
                   fill
-                  style={{ width: 100 }}
+                  style={{ width: 170 }}
                 >
-                  Go
+                  Generate query
                 </EuiButton>
               </EuiFlexItem>
               {/* <EuiFlexItem grow={false}>

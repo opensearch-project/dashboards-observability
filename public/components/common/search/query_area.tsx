@@ -17,6 +17,7 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiIcon,
+  EuiButton,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { LLMInput } from '../../event_analytics/explorer/llm/input';
@@ -34,6 +35,7 @@ export function QueryArea({
   tempQuery,
   showFlyout,
   handleQueryLanguageChange,
+  runChanges,
 }: any) {
   // TODO: REMOVE ALL BELOW
   const options = [
@@ -93,12 +95,22 @@ export function QueryArea({
             }}
             aria-label="Code Editor"
             onChange={(query) => {
-              console.log(query);
               handleQueryChange(query);
             }}
             value={tempQuery}
             wrapEnabled={true}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={runChanges}
+            iconType="refresh"
+            iconSide="left"
+            fill
+            style={{ width: 100 }}
+          >
+            Update
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

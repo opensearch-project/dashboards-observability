@@ -222,6 +222,12 @@ export const Search = (props: any) => {
     }
   }, [pollingResult, pollingError]);
 
+  const runChanges = () => {
+    onQuerySearch(queryLang);
+    handleTimePickerChange(timeRange);
+    setNeedsUpdate(false);
+  };
+
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -298,11 +304,7 @@ export const Search = (props: any) => {
                   color={needsUpdate ? 'success' : 'primary'}
                   iconType={needsUpdate ? 'kqlFunction' : 'play'}
                   fill={true}
-                  onClick={() => {
-                    onQuerySearch(queryLang);
-                    handleTimePickerChange(timeRange);
-                    setNeedsUpdate(false);
-                  }}
+                  onClick={runChanges}
                 >
                   {needsUpdate ? 'Update' : 'Run'}
                 </EuiButton>
@@ -395,6 +397,7 @@ export const Search = (props: any) => {
               tempQuery={tempQuery}
               showFlyout={showFlyout}
               handleQueryLanguageChange={handleQueryLanguageChange}
+              runChanges={runChanges}
             />
           </EuiFlexItem>
         )}
