@@ -10,7 +10,12 @@ import { initialTabId } from '../../../../framework/redux/store/shared_state';
 
 const searchMetaInitialState = {
   lang: 'PPL',
-  datasources: [],
+  datasources: [{
+    "label": "Default cluster",
+    "value": "Default cluster",
+    "type": "DEFAULT_INDEX_PATTERNS",
+    "name": "Default cluster"
+  }],
   queryId: '',
   isPolling: false,
 };

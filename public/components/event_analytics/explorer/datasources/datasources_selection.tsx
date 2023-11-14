@@ -225,11 +225,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       dataSources={activeDataSources}
       dataSourceOptionList={memorizedDataSourceOptionList}
       setDataSourceOptionList={setDataSourceOptionList}
-      selectedSources={
-        selectedSources?.length > 0
-          ? selectedSources
-          : memorizedDataSourceOptionList[0]?.options ?? []
-      }
+      selectedSources={selectedSources}
       onDataSourceSelect={handleSourceChange}
       onFetchDataSetError={handleDataSetFetchError}
       singleSelection={{ asPlainText: true }}
