@@ -199,11 +199,9 @@ export const preprocessQuery = ({
 
   if (isEmpty(tokens)) return finalQuery;
 
-  // TODO: reintroduce timepicker
   finalQuery = `${tokens![1]}=${
     tokens![2]
-  }`
-  // | where ${timeField} >= '${start}' and ${timeField} <= '${end}'`;
+  } | where ${timeField} >= '${start}' and ${timeField} <= '${end}'`;
 
   if (whereClause) {
     finalQuery += ` AND ${whereClause}`;

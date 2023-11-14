@@ -105,6 +105,8 @@ export const Search = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isQueryBarVisible, setIsQueryBarVisible] = useState(!coreRefs.assistantEnabled);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
+  const [timeRange, setTimeRange] = useState(['', '']);
+  const [needsUpdate, setNeedsUpdate] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -268,7 +270,7 @@ export const Search = (props: any) => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} />
-            {/* <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
+            <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
               {!isLiveTailOn && (
                 <DatePicker
                   startTime={startTime}
@@ -278,27 +280,33 @@ export const Search = (props: any) => {
                   setIsOutputStale={setIsOutputStale}
                   liveStreamChecked={props.liveStreamChecked}
                   onLiveStreamChange={props.onLiveStreamChange}
-                  handleTimePickerChange={(timeRange: string[]) => setTimePicker(timeRange)}
+                  handleTimePickerChange={(tRange: string[]) => {
+                    // modifies run button to look like the update button, if there is a time change
+                    setNeedsUpdate(!(tRange[0] === startTime && tRange[1] === endTime));
+                    // keeps the time range change local, to be used when update pressed
+                    setTimeRange(tRange);
+                  }}
                   handleTimeRangePickerRefresh={() => {
                     onQuerySearch(queryLang);
                   }}
                 />
               )}
-            </EuiFlexItem> */}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType={'play'}
-                fill={true}
-                onClick={() => {
-                  // onQuerySearch(queryLang);
-                  // handleTimeRangePickerRefresh();
-                  // console.log(tempQuery);
-                  handleQuerySearch();
-                  // handleTimePickerChange(['now-5y', 'now']);
-                }}
-              >
-                Run
-              </EuiButton>
+              <EuiToolTip position="bottom" content={needsUpdate ? 'Click to apply' : false}>
+                <EuiButton
+                  color={needsUpdate ? 'success' : 'primary'}
+                  iconType={needsUpdate ? 'kqlFunction' : 'play'}
+                  fill={true}
+                  onClick={() => {
+                    onQuerySearch(queryLang);
+                    handleTimePickerChange(timeRange);
+                    setNeedsUpdate(false);
+                  }}
+                >
+                  {needsUpdate ? 'Update' : 'Run'}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
             {showSaveButton && !showSavePanelOptionsList && (
               <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
