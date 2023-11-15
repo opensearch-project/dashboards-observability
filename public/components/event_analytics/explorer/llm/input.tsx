@@ -53,6 +53,7 @@ export const LLMInput: React.FC<Props> = (props) => {
   const questionRef = useRef<HTMLInputElement>(null);
 
   const [generating, setGenerating] = useState(false);
+  const [generatingRun, setGeneratingRun] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackFormData, setFeedbackFormData] = useState<FeedbackFormData>({
     input: '',
@@ -71,33 +72,54 @@ export const LLMInput: React.FC<Props> = (props) => {
   // hide if not in a tab
   if (props.tabId === '') return <>{props.children}</>;
 
+  // generic method for generating ppl from natural language
   const request = async () => {
+    let generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
+      body: JSON.stringify({
+        question: questionRef.current?.value,
+        index: props.selectedIndex[0].label,
+      }),
+    });
+    setFeedbackFormData({
+      ...feedbackFormData,
+      input: questionRef.current?.value || '',
+      output: generatedPPL,
+    });
+    await props.handleQueryChange(generatedPPL);
+    console.log('generatedPPL', generatedPPL);
+    await dispatch(
+      changeQuery({
+        tabId: props.tabId,
+        query: {
+          [RAW_QUERY]: generatedPPL,
+        },
+      })
+    );
+    return generatedPPL;
+  };
+  // used by generate query button
+  const generate = async () => {
+    if (!props.selectedIndex.length) return;
+    try {
+      setGenerating(true);
+      console.log('generated query is', await request());
+    } catch (error) {
+      setFeedbackFormData({
+        ...feedbackFormData,
+        input: questionRef.current?.value || '',
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+  // used by generate and run button
+  const runAndSummarize = async () => {
     if (!props.selectedIndex.length) return;
     let generatedPPL: string = '';
     let generatePPLError: string | undefined;
     try {
-      setGenerating(true);
-      generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
-        body: JSON.stringify({
-          question: questionRef.current?.value,
-          index: props.selectedIndex[0].label,
-        }),
-      });
-      setFeedbackFormData({
-        ...feedbackFormData,
-        input: questionRef.current?.value || '',
-        output: generatedPPL,
-      });
-      await props.handleQueryChange(generatedPPL);
-      await dispatch(
-        changeQuery({
-          tabId: props.tabId,
-          data: {
-            [RAW_QUERY]: generatedPPL,
-          },
-        })
-      );
-      await props.handleTimeRangePickerRefresh();
+      setGeneratingRun(true);
+      generatedPPL = await request();
     } catch (error) {
       setFeedbackFormData({
         ...feedbackFormData,
@@ -105,9 +127,10 @@ export const LLMInput: React.FC<Props> = (props) => {
       });
       generatePPLError = String(error.body);
     } finally {
-      setGenerating(false);
+      setGeneratingRun(false);
     }
     try {
+      await props.handleTimeRangePickerRefresh();
       const summarizationContext: SummarizationContext = {
         question: questionRef.current?.value || 'unable to retrieve question',
         index: props.selectedIndex[0].label,
@@ -235,7 +258,8 @@ export const LLMInput: React.FC<Props> = (props) => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     isLoading={generating}
-                    onClick={request}
+                    onClick={generate}
+                    isDisabled={generating || generatingRun}
                     type="submit"
                     iconType="returnKey"
                     iconSide="right"
@@ -247,8 +271,9 @@ export const LLMInput: React.FC<Props> = (props) => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    // isLoading={generating}
-                    // onClick={request}
+                    isLoading={generatingRun}
+                    onClick={runAndSummarize}
+                    isDisabled={generating || generatingRun}
                     // type="submit"
                     iconType="returnKey"
                     iconSide="right"
