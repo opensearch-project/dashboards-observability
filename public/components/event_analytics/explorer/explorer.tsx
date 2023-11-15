@@ -535,6 +535,8 @@ export const Explorer = ({
                               <small>
                                 The OpenSearch Assistant may produce inaccurate information. Verify
                                 all information before using it in any environment or workload.
+                                Share feedback via <EuiLink>Email</EuiLink> or{' '}
+                                <EuiLink>Slack</EuiLink>
                               </small>
                             </EuiText>
                           </>

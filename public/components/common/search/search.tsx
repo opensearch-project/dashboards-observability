@@ -113,6 +113,7 @@ export const Search = (props: any) => {
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
   const [timeRange, setTimeRange] = useState(['now-5y', 'now']); // default time range
   const [needsUpdate, setNeedsUpdate] = useState(false);
+  const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
 
@@ -365,7 +366,7 @@ export const Search = (props: any) => {
                 <EuiButton
                   color={needsUpdate ? 'success' : 'primary'}
                   iconType={needsUpdate ? 'kqlFunction' : 'play'}
-                  fill={true}
+                  fill={fillRun}
                   onClick={runChanges}
                 >
                   {needsUpdate ? 'Update' : 'Run'}
@@ -455,6 +456,8 @@ export const Search = (props: any) => {
               runQuery={query}
               tempQuery={tempQuery}
               setNeedsUpdate={setNeedsUpdate}
+              setFillRun={setFillRun}
+              selectedIndex={selectedIndex}
             />
           </EuiFlexItem>
         )}

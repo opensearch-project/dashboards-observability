@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiIcon,
+  EuiLink,
   EuiModal,
   EuiPanel,
   EuiText,
@@ -183,7 +184,7 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   return (
     <>
-      <EuiPanel paddingSize="s">
+      <EuiPanel paddingSize="m" color="subdued">
         <EuiForm
           component="form"
           id="nlq-form"
@@ -192,41 +193,33 @@ export const LLMInput: React.FC<Props> = (props) => {
             request();
           }}
         >
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={chatLogo} size="l" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge>New!</EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFieldText
-                placeholder="Ask a question"
-                // prepend={['Question']}
-                disabled={generating}
-                fullWidth
-                inputRef={questionRef}
-                onFocus={() => {
-                  setBarSelected(true);
-                  props.setNeedsUpdate(false);
-                }}
-                onBlur={() => setBarSelected(false)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={generating}
-                onClick={request}
-                type="submit"
-                iconType="returnKey"
-                iconSide="right"
-                fill={barSelected}
-                style={{ width: 170 }}
-              >
-                Generate query
-              </EuiButton>
-            </EuiFlexItem>
-            {/* <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={chatLogo} size="l" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>Query Assistant</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>New!</EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFieldText
+                    placeholder="Ask a question"
+                    // prepend={['Question']}
+                    disabled={generating}
+                    fullWidth
+                    inputRef={questionRef}
+                    onFocus={() => {
+                      setBarSelected(true);
+                      props.setNeedsUpdate(false);
+                    }}
+                    onBlur={() => setBarSelected(false)}
+                  />
+                </EuiFlexItem>
+                {/* <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => setIsFeedbackOpen(true)}
                   iconType="faceHappy"
@@ -235,6 +228,45 @@ export const LLMInput: React.FC<Props> = (props) => {
                   Feedback
                 </EuiButton>
               </EuiFlexItem> */}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    isLoading={generating}
+                    onClick={request}
+                    type="submit"
+                    iconType="returnKey"
+                    iconSide="right"
+                    fill={barSelected}
+                    style={{ width: 170 }}
+                  >
+                    Generate query
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    // isLoading={generating}
+                    // onClick={request}
+                    // type="submit"
+                    iconType="returnKey"
+                    iconSide="right"
+                    fill={false}
+                    style={{ width: 200 }}
+                  >
+                    Generate and run
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText>
+                    <small>
+                      Share feedback via <EuiLink>Email</EuiLink> or <EuiLink>Slack</EuiLink>
+                    </small>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiForm>
         {isFeedbackOpen && (

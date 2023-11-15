@@ -14,6 +14,7 @@ export function QueryArea({
   runQuery,
   tempQuery,
   setNeedsUpdate,
+  setFillRun,
   selectedIndex,
 }: any) {
   return (
@@ -35,6 +36,8 @@ export function QueryArea({
               // setUpdatedQuery(runQuery !== query);
               setNeedsUpdate(runQuery !== query);
             }}
+            onFocus={() => setFillRun(true)}
+            onBlur={() => setFillRun(false)}
             value={tempQuery}
             wrapEnabled={true}
           />
