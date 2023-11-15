@@ -8,16 +8,13 @@ export const stringFunction = `## String
 
 ### CONCAT
 
-**Description**
-
-Usage: CONCAT(str1, str2) returns str1 and str strings concatenated
-together.
+\`CONCAT(str1, str2)\` returns \`str1\` and \`str\` concatenated strings.
 
 Argument type: STRING, STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`CONCAT('hello', 'world')\` = CONCAT('hello', 'world') | fields \`CONCAT('hello', 'world')\`
     fetched rows / total rows = 1/1
@@ -29,16 +26,13 @@ Example:
 
 ### CONCAT\_WS
 
-**Description**
-
-Usage: CONCAT\_WS(sep, str1, str2) returns str1 concatenated with str2
-using sep as a separator between them.
+\`CONCAT\_WS(sep, str1, str2)\` is a function that concatenates two strings together, using \`sep\` as a separator between them.
 
 Argument type: STRING, STRING, STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`CONCAT_WS(',', 'hello', 'world')\` = CONCAT_WS(',', 'hello', 'world') | fields \`CONCAT_WS(',', 'hello', 'world')\`
     fetched rows / total rows = 1/1
@@ -50,19 +44,15 @@ Example:
 
 ### LENGTH
 
-**Description**
+\`length(str)\` is a function that returns the length of a string that is measured in number of bytes.
 
-Specifications:
-
-1.  LENGTH(STRING) -&gt; INTEGER
-
-Usage: length(str) returns length of string measured in bytes.
+Specification: LENGTH(STRING) -&gt; INTEGER
 
 Argument type: STRING
 
 Return type: INTEGER
 
-Example:
+**Example**
 
     os> source=people | eval \`LENGTH('helloworld')\` = LENGTH('helloworld') | fields \`LENGTH('helloworld')\`
     fetched rows / total rows = 1/1
@@ -74,18 +64,14 @@ Example:
 
 ### LIKE
 
-**Description**
+\`like(string, PATTERN)\` is a function that returns \`true\` if the string matches the \`PATTERN\` value.
 
-Usage: like(string, PATTERN) return true if the string match the
-PATTERN.
+Two wildcards commonly used with the \`like\` operator:
 
-There are two wildcards often used in conjunction with the LIKE
-operator:
+- \`%\`: A percent sign represents zero, one, or multiple characters.
+- \`_\`: An underscore represents a single character.
 
--   \`%\` - The percent sign represents zero, one, or multiple characters
--   \`_\` - The underscore represents a single character
-
-Example:
+**Example**
 
     os> source=people | eval \`LIKE('hello world', '_ello%')\` = LIKE('hello world', '_ello%') | fields \`LIKE('hello world', '_ello%')\`
     fetched rows / total rows = 1/1
@@ -97,15 +83,13 @@ Example:
 
 ### LOWER
 
-**Description**
-
-Usage: lower(string) converts the string to lowercase.
+\`lower(string)\` is a function that converts a string to lowercase.
 
 Argument type: STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`LOWER('helloworld')\` = LOWER('helloworld'), \`LOWER('HELLOWORLD')\` = LOWER('HELLOWORLD') | fields \`LOWER('helloworld')\`, \`LOWER('HELLOWORLD')\`
     fetched rows / total rows = 1/1
@@ -117,15 +101,13 @@ Example:
 
 ### LTRIM
 
-**Description**
-
-Usage: ltrim(str) trims leading space characters from the string.
+\`ltrim(str)\` is a function that trims leading space characters from a string.
 
 Argument type: STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`LTRIM('   hello')\` = LTRIM('   hello'), \`LTRIM('hello   ')\` = LTRIM('hello   ') | fields \`LTRIM('   hello')\`, \`LTRIM('hello   ')\`
     fetched rows / total rows = 1/1
@@ -137,16 +119,13 @@ Example:
 
 ### RIGHT
 
-**Description**
-
-Usage: right(str, len) returns the rightmost len characters from the
-string str, or NULL if any argument is NULL.
+\`right(str, len)\` is a function that returns the rightmost \`len\` characters from a \`str\` value. \`NULL\` is returned if any argument is null.
 
 Argument type: STRING, INTEGER
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`RIGHT('helloworld', 5)\` = RIGHT('helloworld', 5), \`RIGHT('HELLOWORLD', 0)\` = RIGHT('HELLOWORLD', 0) | fields \`RIGHT('helloworld', 5)\`, \`RIGHT('HELLOWORLD', 0)\`
     fetched rows / total rows = 1/1
@@ -158,15 +137,13 @@ Example:
 
 ### RTRIM
 
-**Description**
-
-Usage: rtrim(str) trims trailing space characters from the string.
+\`rtrim(str)\` is a function that trims trailing space characters from a string.
 
 Argument type: STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`RTRIM('   hello')\` = RTRIM('   hello'), \`RTRIM('hello   ')\` = RTRIM('hello   ') | fields \`RTRIM('   hello')\`, \`RTRIM('hello   ')\`
     fetched rows / total rows = 1/1
@@ -178,11 +155,7 @@ Example:
 
 ### SUBSTRING
 
-**Description**
-
-Usage: substring(str, start) or substring(str, start, length) returns
-substring using start and length. With no length, entire string from
-start is returned.
+\`substring(str, start)\` or \`substring(str, start, length)\` is a function that returns a substring of the input string \`str\`. If \`length\` is not specified, the function returns the entire string from the \`start\` index.
 
 Argument type: STRING, INTEGER, INTEGER
 
@@ -190,7 +163,7 @@ Return type: STRING
 
 Synonyms: SUBSTR
 
-Example:
+**Example**
 
     os> source=people | eval \`SUBSTRING('helloworld', 5)\` = SUBSTRING('helloworld', 5), \`SUBSTRING('helloworld', 5, 3)\` = SUBSTRING('helloworld', 5, 3) | fields \`SUBSTRING('helloworld', 5)\`, \`SUBSTRING('helloworld', 5, 3)\`
     fetched rows / total rows = 1/1
@@ -202,13 +175,13 @@ Example:
 
 ### TRIM
 
-**Description**
+\`trim\` is a function used to remove leading and trailing whitespace of a string.
 
 Argument Type: STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`TRIM('   hello')\` = TRIM('   hello'), \`TRIM('hello   ')\` = TRIM('hello   ') | fields \`TRIM('   hello')\`, \`TRIM('hello   ')\`
     fetched rows / total rows = 1/1
@@ -220,15 +193,13 @@ Example:
 
 ### UPPER
 
-**Description**
-
-Usage: upper(string) converts the string to uppercase.
+\`upper(string)\` is a function that converts a string to uppercase.
 
 Argument type: STRING
 
 Return type: STRING
 
-Example:
+**Example**
 
     os> source=people | eval \`UPPER('helloworld')\` = UPPER('helloworld'), \`UPPER('HELLOWORLD')\` = UPPER('HELLOWORLD') | fields \`UPPER('helloworld')\`, \`UPPER('HELLOWORLD')\`
     fetched rows / total rows = 1/1
