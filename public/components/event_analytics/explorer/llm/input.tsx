@@ -42,17 +42,16 @@ interface Props {
   handleQueryChange: (query: string) => void;
   handleTimeRangePickerRefresh: () => void;
   tabId: string;
+  setNeedsUpdate: any;
+  selectedIndex: EuiComboBoxOptionOption<string | number | string[] | undefined>[];
 }
 export const LLMInput: React.FC<Props> = (props) => {
+  const [barSelected, setBarSelected] = useState(false);
+
   const dispatch = useDispatch();
   const questionRef = useRef<HTMLInputElement>(null);
 
-  const { data: indices, loading: indicesLoading } = useCatIndices();
-  const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
   const [generating, setGenerating] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: 'opensearch_dashboards_sample_data_logs' },
-  ]);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackFormData, setFeedbackFormData] = useState<FeedbackFormData>({
     input: '',
@@ -61,13 +60,6 @@ export const LLMInput: React.FC<Props> = (props) => {
     expectedOutput: '',
     comment: '',
   });
-  const data =
-    indexPatterns && indices
-      ? [...indexPatterns, ...indices].filter(
-          (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
-        )
-      : undefined;
-  const loading = indicesLoading || indexPatternsLoading;
 
   useEffect(() => {
     if (questionRef.current) {
@@ -79,7 +71,7 @@ export const LLMInput: React.FC<Props> = (props) => {
   if (props.tabId === '') return <>{props.children}</>;
 
   const request = async () => {
-    if (!selectedIndex.length) return;
+    if (!props.selectedIndex.length) return;
     let generatedPPL: string = '';
     let generatePPLError: string | undefined;
     try {
@@ -87,7 +79,7 @@ export const LLMInput: React.FC<Props> = (props) => {
       generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
         body: JSON.stringify({
           question: questionRef.current?.value,
-          index: selectedIndex[0].label,
+          index: props.selectedIndex[0].label,
         }),
       });
       setFeedbackFormData({
@@ -117,7 +109,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     try {
       const summarizationContext: SummarizationContext = {
         question: questionRef.current?.value || 'unable to retrieve question',
-        index: selectedIndex[0].label,
+        index: props.selectedIndex[0].label,
         isError: false,
         response: '',
       };
@@ -191,64 +183,50 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   return (
     <>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {props.children}
-          <EuiFlexItem>
-            <EuiComboBox
-              placeholder="Select an index"
-              isClearable={true}
-              prepend={<EuiText>Index</EuiText>}
-              singleSelection={true}
-              isLoading={loading}
-              options={data}
-              selectedOptions={selectedIndex}
-              onChange={(index) => setSelectedIndex(index)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel paddingSize="s">
-          {/* <EuiAccordion id="ppl-assistant" buttonContent="Query assist" initialIsOpen={true}> */}
-          <EuiForm
-            component="form"
-            id="nlq-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              request();
-            }}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={chatLogo} size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge>New!</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFieldText
-                  placeholder="Ask a question"
-                  // prepend={['Question']}
-                  disabled={generating}
-                  fullWidth
-                  inputRef={questionRef}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  isLoading={generating}
-                  onClick={request}
-                  type="submit"
-                  iconType="returnKey"
-                  iconSide="right"
-                  fill
-                  style={{ width: 170 }}
-                >
-                  Generate query
-                </EuiButton>
-              </EuiFlexItem>
-              {/* <EuiFlexItem grow={false}>
+      <EuiPanel paddingSize="s">
+        <EuiForm
+          component="form"
+          id="nlq-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            request();
+          }}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={chatLogo} size="l" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge>New!</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFieldText
+                placeholder="Ask a question"
+                // prepend={['Question']}
+                disabled={generating}
+                fullWidth
+                inputRef={questionRef}
+                onFocus={() => {
+                  setBarSelected(true);
+                  props.setNeedsUpdate(false);
+                }}
+                onBlur={() => setBarSelected(false)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isLoading={generating}
+                onClick={request}
+                type="submit"
+                iconType="returnKey"
+                iconSide="right"
+                fill={barSelected}
+                style={{ width: 170 }}
+              >
+                Generate query
+              </EuiButton>
+            </EuiFlexItem>
+            {/* <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => setIsFeedbackOpen(true)}
                   iconType="faceHappy"
@@ -257,23 +235,22 @@ export const LLMInput: React.FC<Props> = (props) => {
                   Feedback
                 </EuiButton>
               </EuiFlexItem> */}
-            </EuiFlexGroup>
-          </EuiForm>
-          {isFeedbackOpen && (
-            <EuiModal onClose={() => setIsFeedbackOpen(false)}>
-              <FeedbackModalContent
-                metadata={{ type: 'event_analytics', selectedIndex: selectedIndex[0].label }}
-                formData={feedbackFormData}
-                setFormData={setFeedbackFormData}
-                onClose={() => setIsFeedbackOpen(false)}
-                displayLabels={{
-                  correct: 'Did the results from the generated query answer your question?',
-                }}
-              />
-            </EuiModal>
-          )}
-        </EuiPanel>
-      </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
+        {isFeedbackOpen && (
+          <EuiModal onClose={() => setIsFeedbackOpen(false)}>
+            <FeedbackModalContent
+              metadata={{ type: 'event_analytics', selectedIndex: props.selectedIndex[0].label }}
+              formData={feedbackFormData}
+              setFormData={setFeedbackFormData}
+              onClose={() => setIsFeedbackOpen(false)}
+              displayLabels={{
+                correct: 'Did the results from the generated query answer your question?',
+              }}
+            />
+          </EuiModal>
+        )}
+      </EuiPanel>
     </>
   );
 };

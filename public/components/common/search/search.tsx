@@ -10,13 +10,18 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
-  EuiSpacer,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
@@ -38,6 +43,7 @@ import { DatePicker } from './date_picker';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { QueryArea } from './query_area';
 import './search.scss';
+import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -105,7 +111,7 @@ export const Search = (props: any) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isQueryBarVisible, setIsQueryBarVisible] = useState(!coreRefs.assistantEnabled);
   const [queryLang, setQueryLang] = useState(QUERY_LANGUAGE.PPL);
-  const [timeRange, setTimeRange] = useState(['', '']);
+  const [timeRange, setTimeRange] = useState(['now-5y', 'now']); // default time range
   const [needsUpdate, setNeedsUpdate] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
@@ -187,6 +193,11 @@ export const Search = (props: any) => {
     setLanguagePopoverOpen(false);
   };
 
+  const languageOptions: EuiSuperSelectOption<QUERY_LANGUAGE>[] = [
+    { value: QUERY_LANGUAGE.PPL, inputDisplay: <EuiText>PPL</EuiText> },
+    { value: QUERY_LANGUAGE.DQL, inputDisplay: <EuiText>DQL</EuiText> },
+  ];
+
   const languagePopOverItems = [
     <EuiContextMenuItem
       key={QUERY_LANGUAGE.PPL}
@@ -228,52 +239,103 @@ export const Search = (props: any) => {
     setNeedsUpdate(false);
   };
 
+  //  STATE FOR LANG PICKER AND INDEX PICKER
+  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
+    { label: 'opensearch_dashboards_sample_data_logs' },
+  ]);
+  const { data: indices, loading: indicesLoading } = useCatIndices();
+  const { data: indexPatterns, loading: indexPatternsLoading } = useGetIndexPatterns();
+  const data =
+    indexPatterns && indices
+      ? [...indexPatterns, ...indices].filter(
+          (v1, index, array) => array.findIndex((v2) => v1.label === v2.label) === index
+        )
+      : undefined;
+  const loading = indicesLoading || indexPatternsLoading;
+
   return (
     <div className="globalQueryBar">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="flexStart" wrap>
-            {appLogEvents && (
-              <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
-                <EuiToolTip position="top" content={baseQuery}>
-                  <EuiBadge className="base-query-popover" color="hollow">
-                    Base Query
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {appLogEvents && (
-              <EuiFlexItem
-                key="search-bar"
-                className="search-area"
-                grow={5}
-                style={{ minWidth: 400 }}
-              >
-                <Autocomplete
-                  key={'autocomplete-search-bar'}
-                  query={query}
-                  tempQuery={tempQuery}
-                  baseQuery={baseQuery}
-                  handleQueryChange={handleQueryChange}
-                  handleQuerySearch={() => {
-                    onQuerySearch(queryLang);
-                  }}
-                  dslService={dslService}
-                  getSuggestions={getSuggestions}
-                  onItemSelect={onItemSelect}
-                  tabId={tabId}
-                />
-                <EuiBadge
-                  className={`ppl-link ${
-                    uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
-                  }`}
-                  color="hollow"
-                  onClick={() => showFlyout()}
-                  onClickAriaLabel={'pplLinkShowFlyout'}
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center" wrap>
+            {appLogEvents ? (
+              <>
+                <EuiFlexItem style={{ minWidth: 110 }} grow={false}>
+                  <EuiToolTip position="top" content={baseQuery}>
+                    <EuiBadge className="base-query-popover" color="hollow">
+                      Base Query
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  key="search-bar"
+                  className="search-area"
+                  grow={5}
+                  style={{ minWidth: 400 }}
                 >
-                  PPL
-                </EuiBadge>
-              </EuiFlexItem>
+                  <Autocomplete
+                    key={'autocomplete-search-bar'}
+                    query={query}
+                    tempQuery={tempQuery}
+                    baseQuery={baseQuery}
+                    handleQueryChange={handleQueryChange}
+                    handleQuerySearch={() => {
+                      onQuerySearch(queryLang);
+                    }}
+                    dslService={dslService}
+                    getSuggestions={getSuggestions}
+                    onItemSelect={onItemSelect}
+                    tabId={tabId}
+                  />
+                  <EuiBadge
+                    className={`ppl-link ${
+                      uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+                    }`}
+                    color="hollow"
+                    onClick={() => showFlyout()}
+                    onClickAriaLabel={'pplLinkShowFlyout'}
+                  >
+                    PPL
+                  </EuiBadge>
+                </EuiFlexItem>
+              </>
+            ) : (
+              <>
+                <EuiFlexItem key="lang-selector" className="search-area lang-selector" grow={false}>
+                  <EuiSuperSelect
+                    options={languageOptions}
+                    valueOfSelected={queryLang}
+                    onChange={(lang: QUERY_LANGUAGE) => {
+                      handleQueryLanguageChange(lang);
+                      setQueryLang(lang);
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    className={`${
+                      uiSettingsService.get('theme:darkMode') ? 'ppl-link-dark' : 'ppl-link-light'
+                    }`}
+                    type="questionInCircle"
+                    size="l"
+                    onClick={() => showFlyout()}
+                    color="#159D8D"
+                    // onClickAriaLabel={'pplLinkShowFlyout'}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiComboBox
+                    placeholder="Select an index"
+                    isClearable={true}
+                    prepend={<EuiText>Index</EuiText>}
+                    singleSelection={true}
+                    isLoading={loading}
+                    options={data}
+                    selectedOptions={selectedIndex}
+                    onChange={(index) => setSelectedIndex(index)}
+                  />
+                </EuiFlexItem>
+              </>
             )}
             <EuiFlexItem grow={false} />
             <EuiFlexItem className="euiFlexItem--flexGrowZero event-date-picker" grow={false}>
@@ -387,17 +449,12 @@ export const Search = (props: any) => {
         {!appLogEvents && (
           <EuiFlexItem>
             <QueryArea
-              languagePopOverButton={languagePopOverButton}
-              isLanguagePopoverOpen={isLanguagePopoverOpen}
-              closeLanguagePopover={closeLanguagePopover}
-              languagePopOverItems={languagePopOverItems}
               tabId={tabId}
               handleQueryChange={handleQueryChange}
               handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
+              runQuery={query}
               tempQuery={tempQuery}
-              showFlyout={showFlyout}
-              handleQueryLanguageChange={handleQueryLanguageChange}
-              runChanges={runChanges}
+              setNeedsUpdate={setNeedsUpdate}
             />
           </EuiFlexItem>
         )}
