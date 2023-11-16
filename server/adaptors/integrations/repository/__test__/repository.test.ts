@@ -4,7 +4,7 @@
  */
 
 import * as fs from 'fs/promises';
-import { RepositoryReader } from '../repository';
+import { TemplateManager } from '../repository';
 import { IntegrationReader } from '../integration';
 import { Dirent, Stats } from 'fs';
 import path from 'path';
@@ -12,10 +12,14 @@ import path from 'path';
 jest.mock('fs/promises');
 
 describe('Repository', () => {
-  let repository: RepositoryReader;
+  let repository: TemplateManager;
 
   beforeEach(() => {
-    repository = new RepositoryReader('path/to/directory');
+    repository = new TemplateManager('path/to/directory');
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('getIntegrationList', () => {

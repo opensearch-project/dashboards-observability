@@ -5,14 +5,14 @@
 
 import { IntegrationsManager } from '../integrations_manager';
 import { SavedObject, SavedObjectsClientContract } from '../../../../../../src/core/server/types';
-import { RepositoryReader } from '../repository/repository';
+import { TemplateManager } from '../repository/repository';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
 import { IntegrationReader } from '../repository/integration';
 import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
 
 describe('IntegrationsKibanaBackend', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockRepository: jest.Mocked<RepositoryReader>;
+  let mockRepository: jest.Mocked<TemplateManager>;
   let backend: IntegrationsManager;
 
   beforeEach(() => {

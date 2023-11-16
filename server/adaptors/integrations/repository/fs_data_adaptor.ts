@@ -109,10 +109,29 @@ export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
 
   async findIntegrations(dirname: string = '.'): Promise<Result<string[]>> {
     try {
-      const files = await fs.readdir(path.join(this.directory, dirname));
-      return { ok: true, value: files };
+      const integrations: string[] = [];
+      await this.collectIntegrationsRecursive(dirname, integrations);
+      return { ok: true, value: integrations };
     } catch (err: any) {
       return { ok: false, error: err };
+    }
+  }
+
+  private async collectIntegrationsRecursive(
+    dirname: string,
+    integrations: string[]
+  ): Promise<void> {
+    const entries = await fs.readdir(path.join(this.directory, dirname));
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirname, entry);
+      const isDirectory = (await this.getDirectoryType(fullPath)) === 'integration';
+
+      if (isDirectory) {
+        integrations.push(fullPath);
+      } else if ((await this.getDirectoryType(fullPath)) === 'repository') {
+        await this.collectIntegrationsRecursive(fullPath, integrations);
+      }
     }
   }
 
