@@ -15,3 +15,4 @@ Nginx integration includes dashboards, visualisations, queries and an index mapp
 ### Dashboards
 
 ![](../static/dashboard1.png)
+![](../static/dashboard2.png)
