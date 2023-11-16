@@ -1,2 +1,7 @@
 # This should match the owning team set up in https://github.com/orgs/opensearch-project/teams
-*   @pjfitzgibbons @ps48 @kavithacm @derek-ho @joshuali925 @dai-chen @YANG-DB @rupal-bq @mengweieric @vamsi-amazon @swiddis @penghuo @seankao-az @anirudha @paulstn @sumukhswamy
+*   @opensearch-project/Observability
+
+# Integrations
+server/adaptors/integrations @Swiddis @YANG-DB
+server/routes/integrations @Swiddis @YANG-DB
+public/components/integrations @Swiddis
