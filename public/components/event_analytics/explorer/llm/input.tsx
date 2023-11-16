@@ -289,7 +289,7 @@ export const LLMInput: React.FC<Props> = (props) => {
                     }}
                   >
                     <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-                      {hardcodedSuggestions[props.selectedIndex[0].label].map((question) => (
+                      {hardcodedSuggestions[props.selectedIndex[0].label]?.map((question) => (
                         <EuiListGroupItem
                           onClick={() => {
                             props.setNlqInput(question);
