@@ -16,16 +16,20 @@ import {
   EuiModal,
   EuiPanel,
   EuiText,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiInputPopover,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
 import { CONSOLE_PROXY, DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
+import { selectQueries } from '../../redux/slices/query_slice';
 import { changeSummary } from '../../redux/slices/query_assistant_summarization_slice';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
@@ -48,10 +52,37 @@ interface Props {
   setNlqInput: React.Dispatch<React.SetStateAction<string>>;
 }
 export const LLMInput: React.FC<Props> = (props) => {
+  const queryRedux = useSelector(selectQueries)[props.tabId];
+
+  // HARDCODED QUESTION SUGGESTIONS:
+  const hardcodedSuggestions = {
+    opensearch_datashboards_sample_data_ecommerce: [
+      'How many unique customers placed orders this week?',
+      'Count the number of orders grouped by manufacturer and category',
+      'find customers with first names like Eddie',
+    ],
+    opensearch_dashboards_sample_data_logs: [
+      'Are there any errors in my logs?',
+      'How many requests were there grouped by response code last week?',
+      "What's the average request size by week?",
+    ],
+    opensearch_dashboards_sample_data_flights: [
+      'how many flights were there this week grouped by destination country?',
+      'what were the longest flight delays this week?',
+      'what carriers have the furthest flights?',
+    ],
+    'sso_logs-*.*': [
+      'show me the most recent 10 logs',
+      'how many requests were there grouped by status code',
+      'how many request failures were there by week?',
+    ],
+  };
+
   const [barSelected, setBarSelected] = useState(false);
 
   const dispatch = useDispatch();
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generatingRun, setGeneratingRun] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -62,6 +93,12 @@ export const LLMInput: React.FC<Props> = (props) => {
     expectedOutput: '',
     comment: '',
   });
+
+  useEffect(() => {
+    if (queryRedux.ollyQueryAssistant.length > 0) {
+      runAndSummarize();
+    }
+  }, [queryRedux.ollyQueryAssistant]);
 
   // hide if not in a tab
   if (props.tabId === '') return <>{props.children}</>;
@@ -228,19 +265,41 @@ export const LLMInput: React.FC<Props> = (props) => {
                   <EuiBadge>New!</EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFieldText
-                    placeholder="Ask a question"
-                    // prepend={['Question']}
-                    disabled={generating}
-                    value={props.nlqInput}
-                    onChange={(e) => props.setNlqInput(e.target.value)}
-                    fullWidth
-                    onFocus={() => {
-                      setBarSelected(true);
-                      props.setNeedsUpdate(false);
+                  <EuiInputPopover
+                    input={
+                      <EuiFieldText
+                        placeholder="Ask a question"
+                        // prepend={['Question']}
+                        disabled={generating}
+                        value={props.nlqInput}
+                        onChange={(e) => props.setNlqInput(e.target.value)}
+                        fullWidth
+                        onFocus={() => {
+                          setBarSelected(true);
+                          props.setNeedsUpdate(false);
+                          if (props.nlqInput.length === 0) setIsPopoverOpen(true);
+                        }}
+                        onBlur={() => setBarSelected(false)}
+                      />
+                    }
+                    fullWidth={true}
+                    isOpen={isPopoverOpen}
+                    closePopover={() => {
+                      setIsPopoverOpen(false);
                     }}
-                    onBlur={() => setBarSelected(false)}
-                  />
+                  >
+                    <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
+                      {hardcodedSuggestions[props.selectedIndex[0].label].map((question) => (
+                        <EuiListGroupItem
+                          onClick={() => {
+                            props.setNlqInput(question);
+                            setIsPopoverOpen(false);
+                          }}
+                          label={question}
+                        />
+                      ))}
+                    </EuiListGroup>
+                  </EuiInputPopover>
                 </EuiFlexItem>
                 {/* <EuiFlexItem grow={false}>
                 <EuiButton

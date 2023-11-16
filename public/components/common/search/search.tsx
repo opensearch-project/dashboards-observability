@@ -126,7 +126,7 @@ export const Search = (props: any) => {
   const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
-  const [nlqInput, setNlqInput] = useState('Are there any errors in my logs?');
+  const [nlqInput, setNlqInput] = useState('');
 
   const {
     data: pollingResult,
