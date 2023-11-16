@@ -102,6 +102,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         ...feedbackFormData,
         input: props.nlqInput,
       });
+      coreRefs.toasts?.addError(error.body || error, { title: 'Failed to generate results' });
     } finally {
       setGenerating(false);
     }
