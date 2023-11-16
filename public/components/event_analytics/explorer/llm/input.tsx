@@ -6,7 +6,6 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
@@ -27,9 +26,9 @@ import { CONSOLE_PROXY, DSL_BASE, DSL_CAT } from '../../../../../common/constant
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
+import { changeSummary } from '../../redux/slices/query_assistant_summarization_slice';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
-import { changeSummary } from '../../redux/slices/query_assistant_summarization_slice';
 
 interface SummarizationContext {
   question: string;
@@ -44,13 +43,14 @@ interface Props {
   handleTimeRangePickerRefresh: () => void;
   tabId: string;
   setNeedsUpdate: any;
-  selectedIndex: EuiComboBoxOptionOption<string | number | string[] | undefined>[];
+  selectedIndex: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
+  nlqInput: string;
+  setNlqInput: React.Dispatch<React.SetStateAction<string>>;
 }
 export const LLMInput: React.FC<Props> = (props) => {
   const [barSelected, setBarSelected] = useState(false);
 
   const dispatch = useDispatch();
-  const questionRef = useRef<HTMLInputElement>(null);
 
   const [generating, setGenerating] = useState(false);
   const [generatingRun, setGeneratingRun] = useState(false);
@@ -63,26 +63,20 @@ export const LLMInput: React.FC<Props> = (props) => {
     comment: '',
   });
 
-  useEffect(() => {
-    if (questionRef.current) {
-      questionRef.current.value = 'Are there any errors in my logs?';
-    }
-  }, []);
-
   // hide if not in a tab
   if (props.tabId === '') return <>{props.children}</>;
 
   // generic method for generating ppl from natural language
   const request = async () => {
-    let generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
+    const generatedPPL = await getOSDHttp().post('/api/assistant/generate_ppl', {
       body: JSON.stringify({
-        question: questionRef.current?.value,
+        question: props.nlqInput,
         index: props.selectedIndex[0].label,
       }),
     });
     setFeedbackFormData({
       ...feedbackFormData,
-      input: questionRef.current?.value || '',
+      input: props.nlqInput,
       output: generatedPPL,
     });
     await props.handleQueryChange(generatedPPL);
@@ -106,7 +100,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     } catch (error) {
       setFeedbackFormData({
         ...feedbackFormData,
-        input: questionRef.current?.value || '',
+        input: props.nlqInput,
       });
     } finally {
       setGenerating(false);
@@ -123,7 +117,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     } catch (error) {
       setFeedbackFormData({
         ...feedbackFormData,
-        input: questionRef.current?.value || '',
+        input: props.nlqInput,
       });
       generatePPLError = String(error.body);
     } finally {
@@ -132,7 +126,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     try {
       await props.handleTimeRangePickerRefresh();
       const summarizationContext: SummarizationContext = {
-        question: questionRef.current?.value || 'unable to retrieve question',
+        question: props.nlqInput,
         index: props.selectedIndex[0].label,
         isError: false,
         response: '',
@@ -180,19 +174,23 @@ export const LLMInput: React.FC<Props> = (props) => {
         summarizationContext.isError = true;
         summarizationContext.response = generatePPLError;
       }
-      const summarized = await getOSDHttp().post('/api/assistant/summarize', {
+      const summary = await getOSDHttp().post<{
+        summary: string;
+        suggestedQuestions: string[];
+      }>('/api/assistant/summarize', {
         body: JSON.stringify(summarizationContext),
       });
       await dispatch(
         changeSummary({
           tabId: props.tabId,
           data: {
-            summary: summarized,
+            summary: summary.summary,
+            suggestedQuestions: summary.suggestedQuestions,
           },
         })
       );
     } catch (error) {
-      coreRefs.toasts?.addError(error.body, { title: 'Failed to summarize results' });
+      coreRefs.toasts?.addError(error.body || error, { title: 'Failed to summarize results' });
     } finally {
       await dispatch(
         changeSummary({
@@ -233,8 +231,9 @@ export const LLMInput: React.FC<Props> = (props) => {
                     placeholder="Ask a question"
                     // prepend={['Question']}
                     disabled={generating}
+                    value={props.nlqInput}
+                    onChange={(e) => props.setNlqInput(e.target.value)}
                     fullWidth
-                    inputRef={questionRef}
                     onFocus={() => {
                       setBarSelected(true);
                       props.setNeedsUpdate(false);

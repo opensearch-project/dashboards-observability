@@ -16,6 +16,8 @@ export function QueryArea({
   setNeedsUpdate,
   setFillRun,
   selectedIndex,
+  nlqInput,
+  setNlqInput,
 }: any) {
   return (
     <EuiPanel paddingSize="m">
@@ -49,6 +51,8 @@ export function QueryArea({
             handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}
             setNeedsUpdate={setNeedsUpdate}
             selectedIndex={selectedIndex}
+            nlqInput={nlqInput}
+            setNlqInput={setNlqInput}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

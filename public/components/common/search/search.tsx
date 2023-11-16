@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './search.scss';
-
 import '@algolia/autocomplete-theme-classic';
 import {
   EuiAccordion,
@@ -33,6 +31,7 @@ import {
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
@@ -40,18 +39,18 @@ import { useFetchEvents } from '../../../components/event_analytics/hooks';
 import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
+import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
+import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
-import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { selectQueryAssistantSummarization } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
+import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
-import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import { QueryArea } from './query_area';
 import './search.scss';
-import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
-import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
+
 export interface IQueryBarProps {
   query: string;
   tempQuery: string;
@@ -125,6 +124,7 @@ export const Search = (props: any) => {
   const [fillRun, setFillRun] = useState(false);
   const sqlService = new SQLService(coreRefs.http);
   const { application } = coreRefs;
+  const [nlqInput, setNlqInput] = useState('Are there any errors in my logs?');
 
   const {
     data: pollingResult,
@@ -203,7 +203,7 @@ export const Search = (props: any) => {
     setLanguagePopoverOpen(false);
   };
 
-  const languageOptions: EuiSuperSelectOption<QUERY_LANGUAGE>[] = [
+  const languageOptions: Array<EuiSuperSelectOption<QUERY_LANGUAGE>> = [
     { value: QUERY_LANGUAGE.PPL, inputDisplay: <EuiText>PPL</EuiText> },
     { value: QUERY_LANGUAGE.DQL, inputDisplay: <EuiText>DQL</EuiText> },
   ];
@@ -468,6 +468,8 @@ export const Search = (props: any) => {
                 setNeedsUpdate={setNeedsUpdate}
                 setFillRun={setFillRun}
                 selectedIndex={selectedIndex}
+                nlqInput={nlqInput}
+                setNlqInput={setNlqInput}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -495,15 +497,47 @@ export const Search = (props: any) => {
                     <>
                       <EuiSpacer size="m" />
                       {queryAssistantSummarization?.isPPLError ? (
-                        <EuiCallOut title="There was an error" color="danger" iconType="alert">
-                          <EuiMarkdownFormat>
-                            {queryAssistantSummarization?.summary}
-                          </EuiMarkdownFormat>
-                        </EuiCallOut>
+                        <>
+                          <EuiCallOut title="There was an error" color="danger" iconType="alert">
+                            <EuiMarkdownFormat>
+                              {queryAssistantSummarization.summary}
+                            </EuiMarkdownFormat>
+                          </EuiCallOut>
+                          <EuiSpacer size="s" />
+                          <EuiFlexGroup wrap gutterSize="s">
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="s">Suggestions:</EuiText>
+                            </EuiFlexItem>
+                            {queryAssistantSummarization.suggestedQuestions.map((question) => (
+                              <EuiFlexItem grow={false}>
+                                <EuiBadge
+                                  color="hollow"
+                                  iconType="chatRight"
+                                  iconSide="left"
+                                  onClick={() => setNlqInput(question)}
+                                  onClickAriaLabel="Set input to the suggested question"
+                                >
+                                  {question}
+                                </EuiBadge>
+                              </EuiFlexItem>
+                            ))}
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge
+                                color="hollow"
+                                iconType="questionInCircle"
+                                iconSide="left"
+                                onClick={showFlyout}
+                                onClickAriaLabel="Show PPL documentation"
+                              >
+                                PPL Documentation
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
                       ) : (
                         <EuiPanel color="subdued" style={{ marginLeft: 16, marginRight: 16 }}>
                           <EuiMarkdownFormat>
-                            {queryAssistantSummarization?.summary}
+                            {queryAssistantSummarization.summary}
                           </EuiMarkdownFormat>
                         </EuiPanel>
                       )}
