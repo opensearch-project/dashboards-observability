@@ -45,7 +45,6 @@ import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { selectQueries } from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { selectQueryAssistantSummarization } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
-import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';
@@ -248,7 +247,8 @@ export const Search = (props: any) => {
 
   useEffect(() => {
     if (queryRedux.index.length > 0) setSelectedIndex([{ label: queryRedux.index }]);
-  }, [queryRedux.index]);
+    if (queryRedux.ollyQueryAssistant.length > 0) setNlqInput(query.ollyQueryAssistant);
+  }, [queryRedux.index, queryRedux.ollyQueryAssistant]);
 
   const runChanges = () => {
     onQuerySearch(queryLang);
@@ -553,7 +553,11 @@ export const Search = (props: any) => {
                         <small>
                           The OpenSearch Assistant may produce inaccurate information. Verify all
                           information before using it in any environment or workload. Share feedback
-                          via <EuiLink>Email</EuiLink> or <EuiLink>Slack</EuiLink>
+                          via{' '}
+                          <EuiLink href="mailto:opensearch-assistant@amazon.com?subject=OpenSearch%20Observability%20Query%20Generator">
+                            Email
+                          </EuiLink>{' '}
+                          or <EuiLink>Slack</EuiLink>
                         </small>
                       </EuiText>
                     </>
