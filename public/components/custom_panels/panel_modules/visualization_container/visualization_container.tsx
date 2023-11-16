@@ -290,9 +290,10 @@ export const VisualizationContainer = ({
         className="panel-full-width"
         grow={false}
       >
-        <div className={editMode ? 'mouseGrabber' : ''}>
+        <div>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem
+              className={editMode ? 'mouseGrabber' : ''}
               style={{
                 width: '35%',
               }}

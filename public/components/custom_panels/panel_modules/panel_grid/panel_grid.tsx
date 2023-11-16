@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -203,6 +202,7 @@ export const PanelGrid = (props: PanelGridProps) => {
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
       cols={{ lg: 12, md: 12, sm: 12, xs: 1, xxs: 1 }}
       onLayoutChange={layoutChanged}
+      draggableHandle=".mouseGrabber"
     >
       {panelVisualizations.map((panelVisualization: VisualizationType, index) => (
         <div key={panelVisualization.id}>{gridData[index]}</div>
