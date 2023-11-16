@@ -42,6 +42,8 @@ import { SQLService } from '../../../services/requests/sql';
 import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
+import { selectQueries } from '../../event_analytics/redux/slices/query_slice';
+import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { selectQueryAssistantSummarization } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import { PPLReferenceFlyout } from '../helpers';
@@ -111,6 +113,7 @@ export const Search = (props: any) => {
     setIsQueryRunning,
   } = props;
 
+  const queryRedux = useSelector(selectQueries)[tabId];
   const queryAssistantSummarization = useSelector(selectQueryAssistantSummarization)[tabId];
   const dispatch = useDispatch();
   const appLogEvents = tabId.match(APP_ANALYTICS_TAB_ID_REGEX);
@@ -242,6 +245,10 @@ export const Search = (props: any) => {
       setIsQueryRunning(false);
     }
   }, [pollingResult, pollingError]);
+
+  useEffect(() => {
+    if (queryRedux.index.length > 0) setSelectedIndex([{ label: queryRedux.index }]);
+  }, [queryRedux.index]);
 
   const runChanges = () => {
     onQuerySearch(queryLang);

@@ -100,7 +100,7 @@ import {
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
-import { changeDateRange, changeQuery, selectQueries } from '../redux/slices/query_slice';
+import { changeData, changeQuery, selectQueries } from '../redux/slices/query_slice';
 import { updateTabName } from '../redux/slices/query_tab_slice';
 import { selectExplorerVisualization } from '../redux/slices/visualization_slice';
 import {
@@ -417,7 +417,7 @@ export const Explorer = ({
       setEndTime(timeRange[1]);
     }
     await dispatch(
-      changeDateRange({
+      changeData({
         tabId: requestParams.tabId,
         data: { [RAW_QUERY]: queryRef.current![RAW_QUERY], [SELECTED_DATE_RANGE]: timeRange },
       })

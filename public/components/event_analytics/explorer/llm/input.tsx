@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
 import { CONSOLE_PROXY, DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
@@ -27,7 +27,7 @@ import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 import { changeSummary } from '../../redux/slices/query_assistant_summarization_slice';
-import { changeQuery } from '../../redux/slices/query_slice';
+import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
 
 interface SummarizationContext {
@@ -48,6 +48,8 @@ interface Props {
   setNlqInput: React.Dispatch<React.SetStateAction<string>>;
 }
 export const LLMInput: React.FC<Props> = (props) => {
+  const query = useSelector(selectQueries)[props.tabId];
+
   const [barSelected, setBarSelected] = useState(false);
 
   const dispatch = useDispatch();
@@ -62,6 +64,16 @@ export const LLMInput: React.FC<Props> = (props) => {
     expectedOutput: '',
     comment: '',
   });
+
+  useEffect(() => {
+    if (questionRef.current) {
+      console.log(query.ollyQueryAssistant);
+      questionRef.current.value =
+        query.ollyQueryAssistant.length > 0
+          ? query.ollyQueryAssistant
+          : 'Are there any errors in my logs?';
+    }
+  }, [query.ollyQueryAssistant]);
 
   // hide if not in a tab
   if (props.tabId === '') return <>{props.children}</>;

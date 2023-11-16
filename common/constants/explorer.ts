@@ -18,6 +18,7 @@ export const RAW_QUERY = 'rawQuery';
 export const FINAL_QUERY = 'finalQuery';
 export const SELECTED_DATE_RANGE = 'selectedDateRange';
 export const INDEX = 'index';
+export const OLLY_QUERY_ASSISTANT = 'ollyQueryAssistant';
 export const SELECTED_PATTERN_FIELD = 'selectedPatternField';
 export const PATTERN_REGEX = 'patternRegex';
 export const FILTERED_PATTERN = 'filteredPattern';
