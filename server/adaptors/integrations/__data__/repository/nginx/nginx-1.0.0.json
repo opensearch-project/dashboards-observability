@@ -17,6 +17,10 @@
       {
         "annotation": "NginX Dashboard",
         "path": "dashboard1.png"
+      },
+      {
+        "annotation": "NginX Dashboard view",
+        "path": "dashboard2.png"
       }
     ]
   },
