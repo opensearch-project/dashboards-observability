@@ -42,9 +42,13 @@ import { SQLService } from '../../../services/requests/sql';
 import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
+import { reset } from '../../event_analytics/redux/slices/query_result_slice';
 import { selectQueries } from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
-import { selectQueryAssistantSummarization } from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
+import {
+  selectQueryAssistantSummarization,
+  resetSummary,
+} from '../../event_analytics/redux/slices/query_assistant_summarization_slice';
 import { PPLReferenceFlyout } from '../helpers';
 import { LiveTailButton, StopLiveButton } from '../live_tail/live_tail_button';
 import { Autocomplete } from './autocomplete';
@@ -251,6 +255,8 @@ export const Search = (props: any) => {
   }, [queryRedux.index, queryRedux.ollyQueryAssistant]);
 
   const runChanges = () => {
+    dispatch(reset({ tabId }));
+    dispatch(resetSummary({ tabId }));
     onQuerySearch(queryLang);
     handleTimePickerChange(timeRange);
     setNeedsUpdate(false);

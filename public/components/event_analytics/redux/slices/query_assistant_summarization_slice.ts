@@ -20,13 +20,13 @@ export const summarizationSlice = createSlice({
         ...payload.data,
       };
     },
-    reset: (state, { payload }) => {
+    resetSummary: (state, { payload }) => {
       state[payload.tabId] = {};
     },
   },
 });
 
-export const { changeSummary, reset } = summarizationSlice.actions;
+export const { changeSummary, resetSummary } = summarizationSlice.actions;
 
 export const selectQueryAssistantSummarization = createSelector(
   (state) => state.queryAssistantSummarization,

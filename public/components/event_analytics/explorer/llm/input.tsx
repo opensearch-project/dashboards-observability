@@ -30,7 +30,11 @@ import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
 import { selectQueries } from '../../redux/slices/query_slice';
-import { changeSummary } from '../../redux/slices/query_assistant_summarization_slice';
+import {
+  changeSummary,
+  resetSummary,
+} from '../../redux/slices/query_assistant_summarization_slice';
+import { reset } from '../../redux/slices/query_result_slice';
 import { changeQuery } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
 
@@ -130,6 +134,8 @@ export const LLMInput: React.FC<Props> = (props) => {
   };
   // used by generate query button
   const generate = async () => {
+    dispatch(reset({ tabId: props.tabId }));
+    dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
     try {
       setGenerating(true);
@@ -146,6 +152,8 @@ export const LLMInput: React.FC<Props> = (props) => {
   };
   // used by generate and run button
   const runAndSummarize = async () => {
+    dispatch(reset({ tabId: props.tabId }));
+    dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
     let generatedPPL: string = '';
     let generatePPLError: string | undefined;
