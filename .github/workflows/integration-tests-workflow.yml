@@ -91,7 +91,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
         id: versions_step
         run: |
-          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d\".\" -f1)"
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
           echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/.nvmrc').engines.yarn).match(/[.0-9]+/)[0]")"
 
       - name: Setup node
