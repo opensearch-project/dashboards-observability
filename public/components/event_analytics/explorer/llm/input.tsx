@@ -90,6 +90,8 @@ export const LLMInput: React.FC<Props> = (props) => {
   const [generating, setGenerating] = useState(false);
   const [generatingRun, setGeneratingRun] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  // below is only used for url redirection
+  const [autoRun, setAutoRun] = useState(false);
   const [feedbackFormData, setFeedbackFormData] = useState<FeedbackFormData>({
     input: '',
     output: '',
@@ -99,8 +101,11 @@ export const LLMInput: React.FC<Props> = (props) => {
   });
 
   useEffect(() => {
-    if (queryRedux.ollyQueryAssistant.length > 0) {
+    if (autoRun) {
+      setAutoRun(false);
       runAndSummarize();
+    } else if (queryRedux.ollyQueryAssistant.length > 0) {
+      setAutoRun(true);
     }
   }, [queryRedux.ollyQueryAssistant]);
 
@@ -322,19 +327,16 @@ export const LLMInput: React.FC<Props> = (props) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="m">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={generatingRun}
-                    onClick={runAndSummarize}
-                    isDisabled={generating || generatingRun}
-                    iconType="returnKey"
-                    iconSide="right"
-                    type="submit"
-                    fill={barSelected}
-                    style={{ width: 175 }}
-                  >
-                    Generate and run
-                  </EuiButton>
+                <EuiFlexItem>
+                  <EuiText>
+                    <small>
+                      Share feedback via{' '}
+                      <EuiLink href="mailto:opensearch-assistant@amazon.com?subject=OpenSearch%20Observability%20Query%20Generator">
+                        Email
+                      </EuiLink>{' '}
+                      or <EuiLink>Slack</EuiLink>
+                    </small>
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -348,16 +350,19 @@ export const LLMInput: React.FC<Props> = (props) => {
                     Generate query
                   </EuiButton>
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText>
-                    <small>
-                      Share feedback via{' '}
-                      <EuiLink href="mailto:opensearch-assistant@amazon.com?subject=OpenSearch%20Observability%20Query%20Generator">
-                        Email
-                      </EuiLink>{' '}
-                      or <EuiLink>Slack</EuiLink>
-                    </small>
-                  </EuiText>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    isLoading={generatingRun}
+                    onClick={runAndSummarize}
+                    isDisabled={generating || generatingRun}
+                    iconType="returnKey"
+                    iconSide="right"
+                    type="submit"
+                    fill={barSelected}
+                    style={{ width: 175 }}
+                  >
+                    Generate and run
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

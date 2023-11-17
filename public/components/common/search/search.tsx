@@ -32,7 +32,11 @@ import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
-import { APP_ANALYTICS_TAB_ID_REGEX } from '../../../../common/constants/explorer';
+import {
+  APP_ANALYTICS_TAB_ID_REGEX,
+  INDEX,
+  OLLY_QUERY_ASSISTANT,
+} from '../../../../common/constants/explorer';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
 import { useFetchEvents } from '../../../components/event_analytics/hooks';
@@ -43,7 +47,7 @@ import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { reset } from '../../event_analytics/redux/slices/query_result_slice';
-import { selectQueries } from '../../event_analytics/redux/slices/query_slice';
+import { changeData, selectQueries } from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   selectQueryAssistantSummarization,
@@ -250,8 +254,21 @@ export const Search = (props: any) => {
   }, [pollingResult, pollingError]);
 
   useEffect(() => {
+    // set index and olly query assistant question if changed elsewhere
     if (queryRedux.index.length > 0) setSelectedIndex([{ label: queryRedux.index }]);
-    if (queryRedux.ollyQueryAssistant.length > 0) setNlqInput(queryRedux.ollyQueryAssistant);
+    if (queryRedux.ollyQueryAssistant.length > 0) {
+      setNlqInput(queryRedux.ollyQueryAssistant);
+      // remove index and olly query assistant
+      dispatch(
+        changeData({
+          tabId: props.tabId,
+          data: {
+            [INDEX]: '',
+            [OLLY_QUERY_ASSISTANT]: '',
+          },
+        })
+      );
+    }
   }, [queryRedux.index, queryRedux.ollyQueryAssistant]);
 
   const runChanges = () => {
