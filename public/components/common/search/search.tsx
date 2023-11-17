@@ -30,12 +30,13 @@ import {
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { batch, useDispatch, useSelector } from 'react-redux';
 import { QUERY_LANGUAGE } from '../../../../common/constants/data_sources';
 import {
   APP_ANALYTICS_TAB_ID_REGEX,
   INDEX,
   OLLY_QUERY_ASSISTANT,
+  RAW_QUERY,
 } from '../../../../common/constants/explorer';
 import { PPL_SPAN_REGEX } from '../../../../common/constants/shared';
 import { uiSettingsService } from '../../../../common/utils';
@@ -47,7 +48,11 @@ import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
 import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { reset } from '../../event_analytics/redux/slices/query_result_slice';
-import { changeData, selectQueries } from '../../event_analytics/redux/slices/query_slice';
+import {
+  changeData,
+  changeQuery,
+  selectQueries,
+} from '../../event_analytics/redux/slices/query_slice';
 import { update as updateSearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   selectQueryAssistantSummarization,
@@ -272,8 +277,12 @@ export const Search = (props: any) => {
   }, [queryRedux.index, queryRedux.ollyQueryAssistant]);
 
   const runChanges = () => {
-    dispatch(reset({ tabId }));
-    dispatch(resetSummary({ tabId }));
+    console.log(tempQuery);
+    batch(() => {
+      dispatch(reset({ tabId }));
+      dispatch(resetSummary({ tabId }));
+      dispatch(changeQuery({ tabId, query: { [RAW_QUERY]: tempQuery } }));
+    });
     onQuerySearch(queryLang);
     handleTimePickerChange(timeRange);
     setNeedsUpdate(false);

@@ -419,7 +419,7 @@ export const Explorer = ({
     await dispatch(
       changeData({
         tabId: requestParams.tabId,
-        data: { [RAW_QUERY]: queryRef.current![RAW_QUERY], [SELECTED_DATE_RANGE]: timeRange },
+        data: { [SELECTED_DATE_RANGE]: timeRange },
       })
     );
   };
