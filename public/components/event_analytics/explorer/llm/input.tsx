@@ -295,6 +295,7 @@ export const LLMInput: React.FC<Props> = (props) => {
                         onBlur={() => setBarSelected(false)}
                       />
                     }
+                    disableFocusTrap
                     fullWidth={true}
                     isOpen={isPopoverOpen}
                     closePopover={() => {
