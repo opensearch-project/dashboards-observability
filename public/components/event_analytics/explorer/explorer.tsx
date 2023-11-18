@@ -292,7 +292,11 @@ export const Explorer = ({
     };
   };
 
-  const fetchData = async (startingTime?: string, endingTime?: string) => {
+  const fetchData = async (
+    startingTime?: string,
+    endingTime?: string,
+    setSummaryStatus?: boolean
+  ) => {
     const curQuery: IQuery = queryRef.current!;
     new PPLDataFetcher(
       { ...curQuery },
@@ -312,6 +316,7 @@ export const Explorer = ({
         queryManager,
         getDefaultVisConfig,
         getAvailableFields,
+        setSummaryStatus,
       },
       {
         appBaseQuery,
@@ -434,8 +439,11 @@ export const Explorer = ({
     );
   };
 
-  const handleTimeRangePickerRefresh = async (availability?: boolean) => {
-    handleQuerySearch(availability);
+  const handleTimeRangePickerRefresh = async (
+    availability?: boolean,
+    setSummaryStatus?: boolean
+  ) => {
+    handleQuerySearch(availability, setSummaryStatus);
     if (availability !== true && query.rawQuery.match(PATTERNS_REGEX)) {
       let currQuery = query.rawQuery;
       const currPattern = currQuery.match(PATTERNS_EXTRACTOR_REGEX)!.groups!.pattern;
@@ -691,7 +699,7 @@ export const Explorer = ({
     );
   };
 
-  const handleQuerySearch = async (availability?: boolean) => {
+  const handleQuerySearch = async (availability?: boolean, setSummaryStatus: boolean) => {
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
     if (isIndexPatternChanged(searchedQuery, query[RAW_QUERY])) {
@@ -708,7 +716,7 @@ export const Explorer = ({
     if (availability !== true) {
       await updateQueryInStore(searchedQuery);
     }
-    await fetchData();
+    await fetchData(undefined, undefined, setSummaryStatus);
   };
 
   const handleQueryChange = async (newQuery: string) => setTempQuery(newQuery);

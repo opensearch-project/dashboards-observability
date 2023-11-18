@@ -240,7 +240,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     try {
       setGeneratingRun(true);
       await request();
-      await props.handleTimeRangePickerRefresh();
+      await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (error) {
       setFeedbackFormData({
         ...feedbackFormData,

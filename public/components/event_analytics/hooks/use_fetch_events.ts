@@ -193,7 +193,11 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
     );
   };
 
-  const getEvents = (query: string = '', errorHandler?: (error: any) => void) => {
+  const getEvents = (
+    query: string = '',
+    errorHandler?: (error: any) => void,
+    setSummaryStatus?: boolean
+  ) => {
     if (isEmpty(query)) return;
     const cur = queriesRef.current;
     const searchQuery = isEmpty(query) ? cur![requestParams.tabId][FINAL_QUERY] : query;
@@ -209,12 +213,13 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
           // when no hits and needs to get available fields to override default timestamp
           dispatchOnNoHis(res);
         }
-        dispatch(
-          setResponseForSummaryStatus({
-            tabId: requestParams.tabId,
-            responseForSummaryStatus: 'success',
-          })
-        );
+        if (setSummaryStatus)
+          dispatch(
+            setResponseForSummaryStatus({
+              tabId: requestParams.tabId,
+              responseForSummaryStatus: 'success',
+            })
+          );
       },
       (error) => {
         errorHandler?.(error);
@@ -230,12 +235,13 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
               error,
             })
           );
-          dispatch(
-            setResponseForSummaryStatus({
-              tabId: requestParams.tabId,
-              responseForSummaryStatus: 'failure',
-            })
-          );
+          if (setSummaryStatus)
+            dispatch(
+              setResponseForSummaryStatus({
+                tabId: requestParams.tabId,
+                responseForSummaryStatus: 'failure',
+              })
+            );
         });
       }
     );
