@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { fetchSuccess } from './fetch_reducers';
+export { fetchSuccess, fetchFailure } from './fetch_reducers';

@@ -3,17 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice, createSelector } from '@reduxjs/toolkit';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 import { initialTabId } from '../../../../framework/redux/store/shared_state';
 
 const initialState = {
-  [initialTabId]: {},
+  [initialTabId]: {
+    responseForSummaryStatus: 'false' as 'false' | 'success' | 'failure',
+  },
 };
 
 export const summarizationSlice = createSlice({
-  name: "queryAssistantSummarization",
+  name: 'queryAssistantSummarization',
   initialState,
   reducers: {
+    setResponseForSummaryStatus: (state, { payload }) => {
+      state[payload.tabId] = {
+        ...state[payload.tabId],
+        responseForSummaryStatus: payload.responseForSummaryStatus,
+      };
+    },
     changeSummary: (state, { payload }) => {
       state[payload.tabId] = {
         ...state[payload.tabId],
@@ -21,12 +29,18 @@ export const summarizationSlice = createSlice({
       };
     },
     resetSummary: (state, { payload }) => {
-      state[payload.tabId] = {};
+      state[payload.tabId] = {
+        responseForSummaryStatus: initialState[initialTabId].responseForSummaryStatus,
+      };
     },
   },
 });
 
-export const { changeSummary, resetSummary } = summarizationSlice.actions;
+export const {
+  setResponseForSummaryStatus,
+  changeSummary,
+  resetSummary,
+} = summarizationSlice.actions;
 
 export const selectQueryAssistantSummarization = createSelector(
   (state) => state.queryAssistantSummarization,

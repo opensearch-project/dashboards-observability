@@ -12,30 +12,31 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiIcon,
+  EuiInputPopover,
   EuiLink,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiModal,
   EuiPanel,
   EuiText,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiInputPopover,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
-import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
+import React, { Reducer, useEffect, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
-import { CONSOLE_PROXY, DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
+import { DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
-import { selectQueries } from '../../redux/slices/query_slice';
 import {
   changeSummary,
   resetSummary,
+  selectQueryAssistantSummarization,
+  setResponseForSummaryStatus,
 } from '../../redux/slices/query_assistant_summarization_slice';
-import { reset } from '../../redux/slices/query_result_slice';
-import { changeQuery } from '../../redux/slices/query_slice';
+import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
+import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
 import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
 
 interface SummarizationContext {
@@ -57,6 +58,27 @@ interface Props {
 }
 export const LLMInput: React.FC<Props> = (props) => {
   const queryRedux = useSelector(selectQueries)[props.tabId];
+  const explorerData = useSelector(selectQueryResult)[props.tabId];
+  const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
+
+  useEffect(() => {
+    if (
+      summaryData.responseForSummaryStatus === 'success' ||
+      summaryData.responseForSummaryStatus === 'failure'
+    ) {
+      void (async () => {
+        await dispatch(
+          changeSummary({
+            tabId: props.tabId,
+            data: {
+              summaryLoading: false,
+            },
+          })
+        );
+        generateSummary();
+      })();
+    }
+  }, [summaryData.responseForSummaryStatus]);
 
   // HARDCODED QUESTION SUGGESTIONS:
   const hardcodedSuggestions = {
@@ -138,7 +160,7 @@ export const LLMInput: React.FC<Props> = (props) => {
     return generatedPPL;
   };
   // used by generate query button
-  const generate = async () => {
+  const generatePPL = async () => {
     dispatch(reset({ tabId: props.tabId }));
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
@@ -155,76 +177,27 @@ export const LLMInput: React.FC<Props> = (props) => {
       setGenerating(false);
     }
   };
-  // used by generate and run button
-  const runAndSummarize = async () => {
-    dispatch(reset({ tabId: props.tabId }));
-    dispatch(resetSummary({ tabId: props.tabId }));
-    if (!props.selectedIndex.length) return;
-    let generatedPPL: string = '';
-    let generatePPLError: string | undefined;
+  const generateSummary = async (context?: Partial<SummarizationContext>) => {
     try {
-      setGeneratingRun(true);
-      generatedPPL = await request();
-    } catch (error) {
-      setFeedbackFormData({
-        ...feedbackFormData,
-        input: props.nlqInput,
-      });
-      generatePPLError = String(error.body);
-    } finally {
-      setGeneratingRun(false);
-    }
-    try {
-      await props.handleTimeRangePickerRefresh();
+      const isError = summaryData.responseForSummaryStatus === 'failure';
       const summarizationContext: SummarizationContext = {
         question: props.nlqInput,
         index: props.selectedIndex[0].label,
-        isError: false,
-        response: '',
+        isError,
+        response: isError
+          ? String(JSON.parse(explorerData.error.body.message).error.details)
+          : JSON.stringify(explorerData),
+        ...context,
       };
       await dispatch(
         changeSummary({
           tabId: props.tabId,
           data: {
             summaryLoading: true,
+            isPPLError: isError,
           },
         })
       );
-      if (generatePPLError === undefined) {
-        const queryResponse = await getOSDHttp()
-          .post(CONSOLE_PROXY, {
-            body: JSON.stringify({ query: generatedPPL }),
-            query: { path: '_plugins/_ppl', method: 'POST' },
-          })
-          .then((resp) => {
-            dispatch(
-              changeSummary({
-                tabId: props.tabId,
-                data: {
-                  isPPLError: false,
-                },
-              })
-            );
-            return resp;
-          })
-          .catch((error) => {
-            dispatch(
-              changeSummary({
-                tabId: props.tabId,
-                data: {
-                  isPPLError: true,
-                },
-              })
-            );
-            summarizationContext.isError = true;
-            return String(JSON.parse(error.body).error.details);
-          });
-        summarizationContext.response = JSON.stringify(queryResponse);
-        summarizationContext.query = generatedPPL;
-      } else {
-        summarizationContext.isError = true;
-        summarizationContext.response = generatePPLError;
-      }
       const summary = await getOSDHttp().post<{
         summary: string;
         suggestedQuestions: string[];
@@ -251,6 +224,31 @@ export const LLMInput: React.FC<Props> = (props) => {
           },
         })
       );
+      dispatch(
+        setResponseForSummaryStatus({
+          tabId: props.tabId,
+          responseForSummaryStatus: 'false',
+        })
+      );
+    }
+  };
+  // used by generate and run button
+  const runAndSummarize = async () => {
+    dispatch(reset({ tabId: props.tabId }));
+    dispatch(resetSummary({ tabId: props.tabId }));
+    if (!props.selectedIndex.length) return;
+    try {
+      setGeneratingRun(true);
+      await request();
+      await props.handleTimeRangePickerRefresh();
+    } catch (error) {
+      setFeedbackFormData({
+        ...feedbackFormData,
+        input: props.nlqInput,
+      });
+      generateSummary({ isError: false, response: String(error.body) });
+    } finally {
+      setGeneratingRun(false);
     }
   };
 
@@ -342,7 +340,7 @@ export const LLMInput: React.FC<Props> = (props) => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     isLoading={generating}
-                    onClick={generate}
+                    onClick={generatePPL}
                     isDisabled={generating || generatingRun}
                     iconSide="right"
                     fill={false}
