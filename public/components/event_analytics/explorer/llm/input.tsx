@@ -82,7 +82,7 @@ export const LLMInput: React.FC<Props> = (props) => {
 
   // HARDCODED QUESTION SUGGESTIONS:
   const hardcodedSuggestions = {
-    opensearch_datashboards_sample_data_ecommerce: [
+    opensearch_dashboards_sample_data_ecommerce: [
       'How many unique customers placed orders this week?',
       'Count the number of orders grouped by manufacturer and category',
       'find customers with first names like Eddie',

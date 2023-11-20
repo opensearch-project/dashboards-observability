@@ -302,13 +302,12 @@ export const Search = (props: any) => {
       : undefined;
   const loading = indicesLoading || indexPatternsLoading;
   // HARDCODED INDEXES BELOW
-  const onlyInclude = [
-    'opensearch_datashboards_sample_data_ecommerce',
-    'opensearch_dashboards_sample_data_logs',
-    'opensearch_dashboards_sample_data_flights',
-    'sso_logs-*.*',
+  const filteredData = [
+    { label: 'opensearch_dashboards_sample_data_ecommerce' },
+    { label: 'opensearch_dashboards_sample_data_logs' },
+    { label: 'opensearch_dashboards_sample_data_flights' },
+    { label: 'sso_logs-*.*' },
   ];
-  const filteredData = data?.filter((obj) => onlyInclude.some((index) => index === obj.label));
 
   return (
     <div className="globalQueryBar">
