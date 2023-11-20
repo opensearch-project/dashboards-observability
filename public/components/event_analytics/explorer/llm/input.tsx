@@ -186,7 +186,12 @@ export const LLMInput: React.FC<Props> = (props) => {
         isError,
         response: isError
           ? String(JSON.parse(explorerData.error.body.message).error.details)
-          : JSON.stringify(explorerData),
+          : JSON.stringify({
+              datarows: explorerData.datarows,
+              schema: explorerData.schema,
+              size: explorerData.size,
+              total: explorerData.total,
+            }),
         ...context,
       };
       await dispatch(
