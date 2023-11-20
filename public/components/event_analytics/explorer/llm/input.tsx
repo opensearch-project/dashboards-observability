@@ -330,10 +330,13 @@ export const LLMInput: React.FC<Props> = (props) => {
                   <EuiText>
                     <small>
                       Share feedback via{' '}
-                      <EuiLink href="mailto:opensearch-assistant@amazon.com?subject=OpenSearch%20Observability%20Query%20Generator">
-                        Email
+                      <EuiLink href="https://forum.opensearch.org/t/feedback-opensearch-assistant/16741">
+                        Forum
                       </EuiLink>{' '}
-                      or <EuiLink>Slack</EuiLink>
+                      or{' '}
+                      <EuiLink href="https://opensearch.slack.com/channels/assistant-feedback">
+                        Slack
+                      </EuiLink>
                     </small>
                   </EuiText>
                 </EuiFlexItem>

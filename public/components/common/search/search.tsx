@@ -594,10 +594,13 @@ export const Search = (props: any) => {
                           The OpenSearch Assistant may produce inaccurate information. Verify all
                           information before using it in any environment or workload. Share feedback
                           via{' '}
-                          <EuiLink href="mailto:opensearch-assistant@amazon.com?subject=OpenSearch%20Observability%20Query%20Generator">
-                            Email
+                          <EuiLink href="https://forum.opensearch.org/t/feedback-opensearch-assistant/16741">
+                            Forum
                           </EuiLink>{' '}
-                          or <EuiLink>Slack</EuiLink>
+                          or{' '}
+                          <EuiLink href="https://opensearch.slack.com/channels/assistant-feedback">
+                            Slack
+                          </EuiLink>
                         </small>
                       </EuiText>
                     </>
