@@ -978,6 +978,7 @@ export const Explorer = ({
                   setSubType={setSubType}
                   http={http}
                   setIsQueryRunning={setIsQueryRunning}
+                  isAppAnalytics={appLogEvents}
                 />
                 {explorerSearchMeta.isPolling ? (
                   <DirectQueryRunning tabId={tabId} />

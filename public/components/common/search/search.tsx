@@ -82,6 +82,7 @@ export interface IDatePickerProps {
   setIsOutputStale: () => void;
   handleTimePickerChange: (timeRange: string[]) => any;
   handleTimeRangePickerRefresh: () => any;
+  isAppAnalytics: boolean;
 }
 
 export const Search = (props: any) => {
@@ -123,6 +124,7 @@ export const Search = (props: any) => {
     curVisId,
     setSubType,
     setIsQueryRunning,
+    isAppAnalytics,
   } = props;
 
   const queryRedux = useSelector(selectQueries)[tabId];
@@ -413,6 +415,7 @@ export const Search = (props: any) => {
                   handleTimeRangePickerRefresh={() => {
                     onQuerySearch(queryLang);
                   }}
+                  isAppAnalytics={isAppAnalytics}
                 />
               )}
             </EuiFlexItem>

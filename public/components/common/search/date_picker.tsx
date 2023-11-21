@@ -10,7 +10,13 @@ import { coreRefs } from '../../../framework/core_refs';
 import { IDatePickerProps } from './search';
 
 export function DatePicker(props: IDatePickerProps) {
-  const { startTime, endTime, handleTimePickerChange, handleTimeRangePickerRefresh } = props;
+  const {
+    startTime,
+    endTime,
+    handleTimePickerChange,
+    handleTimeRangePickerRefresh,
+    isAppAnalytics,
+  } = props;
   const fixedStartTime = 'now-40y';
   const fixedEndTime = 'now';
 
@@ -22,7 +28,7 @@ export function DatePicker(props: IDatePickerProps) {
     }
   };
 
-  return coreRefs.assistantEnabled ? (
+  return coreRefs.assistantEnabled || isAppAnalytics ? (
     <EuiSuperDatePicker
       data-test-subj="pplSearchDatePicker"
       start={startTime}
