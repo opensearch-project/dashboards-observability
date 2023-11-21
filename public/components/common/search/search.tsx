@@ -260,6 +260,7 @@ export const Search = (props: any) => {
 
   useEffect(() => {
     // set index and olly query assistant question if changed elsewhere
+    if (!queryRedux.ollyQueryAssistant) return;
     if (queryRedux.index.length > 0) setSelectedIndex([{ label: queryRedux.index }]);
     if (queryRedux.ollyQueryAssistant.length > 0) {
       setNlqInput(queryRedux.ollyQueryAssistant);
