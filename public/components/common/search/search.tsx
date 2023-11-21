@@ -76,8 +76,8 @@ export interface IQueryBarProps {
 export interface IDatePickerProps {
   startTime: string;
   endTime: string;
-  setStartTime: () => void;
-  setEndTime: () => void;
+  setStartTime: (start: string) => void;
+  setEndTime: (end: string) => void;
   setTimeRange: () => void;
   setIsOutputStale: () => void;
   handleTimePickerChange: (timeRange: string[]) => any;
@@ -411,6 +411,8 @@ export const Search = (props: any) => {
                     setNeedsUpdate(!(tRange[0] === startTime && tRange[1] === endTime));
                     // keeps the time range change local, to be used when update pressed
                     setTimeRange(tRange);
+                    setStartTime(tRange[0]);
+                    setEndTime(tRange[1]);
                   }}
                   handleTimeRangePickerRefresh={() => {
                     onQuerySearch(queryLang);

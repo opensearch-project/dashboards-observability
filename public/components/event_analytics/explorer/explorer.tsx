@@ -145,10 +145,6 @@ export const Explorer = ({
   appId = '',
   appBaseQuery = '',
   addVisualizationToPanel,
-  startTime,
-  endTime,
-  setStartTime,
-  setEndTime,
   callback,
   callbackInApp,
   queryManager = new QueryManager(),
@@ -237,6 +233,10 @@ export const Explorer = ({
   liveTailTabIdRef.current = liveTailTabId;
   liveTailNameRef.current = liveTailName;
   tempQueryRef.current = tempQuery;
+
+  const dateRange = getDateRange(undefined, undefined, query);
+  const [startTime, setStartTime] = useState(dateRange[0]);
+  const [endTime, setEndTime] = useState(dateRange[1]);
 
   const findAutoInterval = (start: string = '', end: string = '') => {
     const momentStart = dateMath.parse(start)!;
@@ -485,7 +485,6 @@ export const Explorer = ({
     return 0;
   }, [countDistribution?.data]);
 
-  const dateRange = getDateRange(startTime, endTime, query);
   const mainContent = useMemo(() => {
     return (
       <div className="dscWrapper">
@@ -519,8 +518,8 @@ export const Explorer = ({
                           stateInterval={
                             countDistribution.selectedInterval || selectedIntervalRef.current?.value
                           }
-                          startTime={appLogEvents ? startTime : dateRange[0]}
-                          endTime={appLogEvents ? endTime : dateRange[1]}
+                          startTime={startTime}
+                          endTime={endTime}
                         />
                         <EuiSpacer size="s" />
                         <CountDistribution
@@ -528,8 +527,8 @@ export const Explorer = ({
                           selectedInterval={
                             countDistribution.selectedInterval || selectedIntervalRef.current?.value
                           }
-                          startTime={appLogEvents ? startTime : dateRange[0]}
-                          endTime={appLogEvents ? endTime : dateRange[1]}
+                          startTime={startTime}
+                          endTime={endTime}
                         />
                       </EuiPanel>
                     )}
@@ -595,8 +594,8 @@ export const Explorer = ({
                             : explorerData.datarows.length
                         }
                         requestParams={requestParams}
-                        startTime={appLogEvents ? startTime : dateRange[0]}
-                        endTime={appLogEvents ? endTime : dateRange[1]}
+                        startTime={startTime}
+                        endTime={endTime}
                       />
                     )}
                     <a tabIndex={0} id="discoverBottomMarker">
@@ -947,8 +946,10 @@ export const Explorer = ({
                   handleQueryChange={handleQueryChange}
                   handleQuerySearch={handleQuerySearch}
                   dslService={dslService}
-                  startTime={appLogEvents ? startTime : dateRange[0]}
-                  endTime={appLogEvents ? endTime : dateRange[1]}
+                  startTime={startTime}
+                  endTime={endTime}
+                  setStartTime={setStartTime}
+                  setEndTime={setEndTime}
                   handleTimePickerChange={(timeRange: string[]) =>
                     handleTimePickerChange(timeRange)
                   }
