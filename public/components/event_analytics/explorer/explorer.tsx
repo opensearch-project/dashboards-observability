@@ -701,7 +701,10 @@ export const Explorer = ({
   const handleQuerySearch = async (availability?: boolean, setSummaryStatus: boolean) => {
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
-    if (isIndexPatternChanged(searchedQuery, query[RAW_QUERY])) {
+    if (
+      isIndexPatternChanged(searchedQuery, query[RAW_QUERY]) &&
+      query[SELECTED_TIMESTAMP] !== ''
+    ) {
       await dispatch(
         changeQuery({
           tabId,

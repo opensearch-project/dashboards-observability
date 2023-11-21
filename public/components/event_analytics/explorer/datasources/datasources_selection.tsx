@@ -45,7 +45,11 @@ import {
   getAsyncSessionId,
 } from '../../../../../common/utils/query_session_utils';
 import { DIRECT_DUMMY_QUERY } from '../../../../../common/constants/shared';
-import { INDEX, OLLY_QUERY_ASSISTANT } from '../../../../../common/constants/explorer';
+import {
+  INDEX,
+  OLLY_QUERY_ASSISTANT,
+  SELECTED_TIMESTAMP,
+} from '../../../../../common/constants/explorer';
 
 const getDataSourceState = (selectedSourceState: SelectedDataSource[]) => {
   if (selectedSourceState.length === 0) return [];
@@ -75,6 +79,7 @@ const removeDataSourceFromURLParams = (currURL: string) => {
     hashParams.delete(DATA_SOURCE_TYPE_URL_PARAM_KEY);
     hashParams.delete(OLLY_QUESTION_URL_PARAM_KEY);
     hashParams.delete(INDEX_URL_PARAM_KEY);
+    hashParams.delete('timestamp');
 
     // Reconstruct the hash
     currentURL.hash = hashParams.toString() ? `${hashBase}?${hashParams.toString()}` : hashBase;
@@ -187,6 +192,7 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
     const idxPattern = routerContext?.searchParams.get(INDEX_URL_PARAM_KEY);
     const ollyQuestion = routerContext?.searchParams.get(OLLY_QUESTION_URL_PARAM_KEY) || '';
     const decodedOllyQ = decodeURIComponent(ollyQuestion);
+    const parsedTimeStamp = routerContext?.searchParams.get('timestamp') || '';
     if (datasourceName && datasourceType) {
       // remove datasourceName and datasourceType from URL for a clean search state
       removeDataSourceFromURLParams(window.location.href);
@@ -202,10 +208,11 @@ export const DataSourceSelection = ({ tabId }: { tabId: string }) => {
       if (idxPattern && decodedOllyQ) {
         dispatch(
           changeData({
-            tabId: tabId,
+            tabId,
             data: {
               [INDEX]: idxPattern,
               [OLLY_QUERY_ASSISTANT]: decodedOllyQ,
+              [SELECTED_TIMESTAMP]: parsedTimeStamp,
             },
           })
         );
