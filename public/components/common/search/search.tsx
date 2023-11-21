@@ -431,23 +431,6 @@ export const Search = (props: any) => {
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>
-            {showSaveButton && !showSavePanelOptionsList && (
-              <EuiFlexItem className="euiFlexItem--flexGrowZero live-tail">
-                <EuiPopover
-                  panelPaddingSize="none"
-                  button={liveButton}
-                  isOpen={isLiveTailPopoverOpen}
-                  closePopover={closeLiveTailPopover}
-                >
-                  <EuiContextMenuPanel items={popoverItems} />
-                </EuiPopover>
-              </EuiFlexItem>
-            )}
-            {isLiveTailOn && (
-              <EuiFlexItem grow={false}>
-                <StopLiveButton StopLive={stopLive} dataTestSubj="eventLiveTail__off" />
-              </EuiFlexItem>
-            )}
             {showSaveButton && searchBarConfigs[selectedSubTabId]?.showSaveButton && (
               <>
                 <EuiFlexItem key={'search-save-'} className="euiFlexItem--flexGrowZero">
