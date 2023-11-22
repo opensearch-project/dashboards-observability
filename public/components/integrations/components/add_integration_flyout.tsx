@@ -63,28 +63,17 @@ export const doNestedPropertyValidation = (
 };
 
 export const doPropertyValidation = (
-  rootType: string,
   dataSourceProps: { [key: string]: { properties?: any } },
   requiredMappings: { [key: string]: { template: { mappings: { properties?: any } } } }
 ): boolean => {
-  // Check root object type (without dependencies)
-  for (const [key, value] of Object.entries(
-    requiredMappings[rootType].template.mappings.properties
-  )) {
-    if (!dataSourceProps[key] || !doNestedPropertyValidation(dataSourceProps[key], value as any)) {
-      return false;
-    }
-  }
-  // Check nested dependencies
-  for (const [key, value] of Object.entries(requiredMappings)) {
-    if (key === rootType) {
-      continue;
-    }
-    if (
-      !dataSourceProps[key] ||
-      !doNestedPropertyValidation(dataSourceProps[key], value.template.mappings.properties)
-    ) {
-      return false;
+  for (const mapping of Object.values(requiredMappings)) {
+    for (const [key, value] of Object.entries(mapping.template.mappings.properties)) {
+      if (
+        !dataSourceProps[key] ||
+        !doNestedPropertyValidation(dataSourceProps[key], value as any)
+      ) {
+        return false;
+      }
     }
   }
   return true;
@@ -188,7 +177,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
       return false;
     }
     const validationResult = Object.values(dataSourceMappings).every((value) =>
-      doPropertyValidation(integrationType, value.properties, integrationMappings)
+      doPropertyValidation(value.properties, integrationMappings)
     );
     if (!validationResult) {
       validationErrors.push('The provided index does not match the schema');

@@ -103,7 +103,6 @@ describe('Validation', () => {
 
   describe('doPropertyValidation', () => {
     it('should return true if all properties pass validation', () => {
-      const rootType = 'root';
       const dataSourceProps = {
         prop1: { type: 'string' },
         prop2: { type: 'number' },
@@ -121,13 +120,12 @@ describe('Validation', () => {
         },
       };
 
-      const result = doPropertyValidation(rootType, dataSourceProps as any, requiredMappings);
+      const result = doPropertyValidation(dataSourceProps as any, requiredMappings);
 
       expect(result).toBe(true);
     });
 
     it('should return false if a property fails validation', () => {
-      const rootType = 'root';
       const dataSourceProps = {
         prop1: { type: 'string' },
         prop2: { type: 'number' },
@@ -145,13 +143,12 @@ describe('Validation', () => {
         },
       };
 
-      const result = doPropertyValidation(rootType, dataSourceProps as any, requiredMappings);
+      const result = doPropertyValidation(dataSourceProps as any, requiredMappings);
 
       expect(result).toBe(false);
     });
 
     it('should return false if a required nested property is missing', () => {
-      const rootType = 'root';
       const dataSourceProps = {
         prop1: { type: 'string' },
       };
@@ -168,9 +165,40 @@ describe('Validation', () => {
         },
       };
 
-      const result = doPropertyValidation(rootType, dataSourceProps as any, requiredMappings);
+      const result = doPropertyValidation(dataSourceProps as any, requiredMappings);
 
       expect(result).toBe(false);
+    });
+
+    it('should correctly handle if the properties in a mapping mismatch with the mapping name', () => {
+      const dataSourceProps = {
+        prop1: { type: 'string' },
+        prop2: { type: 'number' },
+      };
+      const requiredMappings = {
+        root: {
+          template: {
+            mappings: {
+              properties: {
+                prop1: { type: 'string' },
+              },
+            },
+          },
+        },
+        child: {
+          template: {
+            mappings: {
+              properties: {
+                prop2: { type: 'number' },
+              },
+            },
+          },
+        },
+      };
+
+      const result = doPropertyValidation(dataSourceProps as any, requiredMappings);
+
+      expect(result).toBe(true);
     });
   });
 });
