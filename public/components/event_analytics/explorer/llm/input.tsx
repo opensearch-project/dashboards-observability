@@ -184,6 +184,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         question: props.nlqInput,
         index: props.selectedIndex[0].label,
         isError,
+        query: queryRedux.rawQuery,
         response: isError
           ? String(JSON.parse(explorerData.error.body.message).error.details)
           : JSON.stringify({
@@ -251,6 +252,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         ...feedbackFormData,
         input: props.nlqInput,
       });
+      // do not show as error callout if query couldn't be generated, just explain why
       generateSummary({ isError: false, response: String(error.body) });
     } finally {
       setGeneratingRun(false);
