@@ -87,15 +87,11 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-      # While bootstrap requires node >= 16.14.0, OSD hasn't yet updated their version number in
-      # package.json, so we need to hardcode it for now. When it's fixed, this line can dynamically
-      # pull the value:
-      # $(node -p "(require('./OpenSearch-Dashboards/package.json').engines.node).match(/[.0-9]+/)[0]")
       - name: Get node and yarn versions
         working-directory: ${{ env.WORKING_DIR }}
         id: versions_step
         run: |
-          echo "::set-output name=node_version::16"
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
           echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
 
       - name: Setup node
