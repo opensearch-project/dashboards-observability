@@ -2,10 +2,6 @@
 
 Compatible with OpenSearch and OpenSearch Dashboards Version 2.11.0
 
-### Features
-
-- [Feature] Match discover look and feel by @opensearch-trigger-bot in ([#1179](https://github.com/opensearch-project/dashboards-observability/pull/1179)
-
 ### Bug Fixes
 
 - fix for explorer data grid not paginating by @opensearch-trigger-bot in ([#1141](https://github.com/opensearch-project/dashboards-observability/pull/1141)
