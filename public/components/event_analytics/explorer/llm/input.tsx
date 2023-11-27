@@ -192,7 +192,7 @@ export const LLMInput: React.FC<Props> = (props) => {
               schema: explorerData.schema,
               size: explorerData.size,
               total: explorerData.total,
-            }),
+            }).slice(0, 7000),
         ...context,
       };
       await dispatch(
