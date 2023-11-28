@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
+import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import React, { Reducer, useEffect, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
@@ -159,6 +160,17 @@ export const LLMInput: React.FC<Props> = (props) => {
     );
     return generatedPPL;
   };
+  const formatError = (error: ResponseError): Error => {
+    if (error.body) {
+      if (error.body.statusCode === 429)
+        return {
+          ...error.body,
+          message: 'Request is throttled. Try again later or contact your administrator',
+        } as Error;
+      return error.body as Error;
+    }
+    return error;
+  };
   // used by generate query button
   const generatePPL = async () => {
     dispatch(reset({ tabId: props.tabId }));
@@ -172,7 +184,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         ...feedbackFormData,
         input: props.nlqInput,
       });
-      coreRefs.toasts?.addError(error.body || error, { title: 'Failed to generate results' });
+      coreRefs.toasts?.addError(formatError(error), { title: 'Failed to generate results' });
     } finally {
       setGenerating(false);
     }
@@ -220,7 +232,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         })
       );
     } catch (error) {
-      coreRefs.toasts?.addError(error.body || error, { title: 'Failed to summarize results' });
+      coreRefs.toasts?.addError(formatError(error), { title: 'Failed to summarize results' });
     } finally {
       await dispatch(
         changeSummary({
