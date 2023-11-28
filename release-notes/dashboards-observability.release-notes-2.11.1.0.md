@@ -20,16 +20,6 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.11.0
 - Saved object datasource backward compatibility fixes by @opensearch-trigger-bot in ([#1210](https://github.com/opensearch-project/dashboards-observability/pull/1210)
 - disabling inspect and default pattern/timestamp buttons when using async data sources by @opensearch-trigger-bot in ([#1212](https://github.com/opensearch-project/dashboards-observability/pull/1212)
 
-### Refactoring
-
-- [Explorer] Modify text in empty prompt by @opensearch-trigger-bot in ([#1182](https://github.com/opensearch-project/dashboards-observability/pull/1182)
-- [Explorer] Supports session for s3 direct query by @opensearch-trigger-bot in ([#1183](https://github.com/opensearch-project/dashboards-observability/pull/1183)
-- Support cancellation of async queries by @opensearch-trigger-bot in ([#1186](https://github.com/opensearch-project/dashboards-observability/pull/1186)
-- Add integrations queries for Flint by @opensearch-trigger-bot in ([#1195](https://github.com/opensearch-project/dashboards-observability/pull/1195)
-- Link integrations from datasources UI by @opensearch-trigger-bot in ([#1207](https://github.com/opensearch-project/dashboards-observability/pull/1207)
-- Add S3 integration for Nginx and VPC by @opensearch-trigger-bot in ([#1216](https://github.com/opensearch-project/dashboards-observability/pull/1216)
-- Update empty allowed roles to admin only by @opensearch-trigger-bot in ([#1220](https://github.com/opensearch-project/dashboards-observability/pull/1220)
-
 ### Maintenance
 
 - Switch heading types on integrations setup page by @opensearch-trigger-bot in ([#1137](https://github.com/opensearch-project/dashboards-observability/pull/1137)
