@@ -8,21 +8,30 @@ export const pplDatatypes = `## Data Types
 
 ### Data Types
 
-A data type defines a collection of data type values and a set of predefined operations on those values. The data types supported PPL are listed in the following table:
+A data type defines a collection of data type values and a set of predefined operations on those values. PPL supports the following data types:
 
-| Data type |
-|------------|-----------|
-| array      | interval  | 
-| binary     | ip        | 
-| boolean    | long      | 
-| byte       | short     | 
-| date       | string    |
-| datetime   | struct    |
-| double     | text      |  
-| float      | time      | 
-| geo\_point | timestammp|
-| integer    |           | 
+.. hlist::
+   :columns: 3
 
+   * array 
+   * binary
+   * boolean 
+   * byte 
+   * date
+   * datetime
+   * double
+   * float
+   * geo\_point
+   * integer
+   * interval
+   * ip
+   * long
+   * short
+   * string
+   * struct
+   * text
+   * time
+   * timestamp
 
 ### Data type mapping
 
@@ -82,7 +91,7 @@ See the[Conversion between date and time types(#conversion-between-date-and-time
 
 | Type     | Syntax | Range |
 |----------|--------|-------|
-| \`datetime\` | 'yyyy-MM-dd hh:mm&#58;ss\[.fraction\]' | '0001-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999' |
+| \`datetime\` | 'yyyy-MM-dd hh:mm:ss\[.fraction\]' | '0001-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999' |
 
 #### Timestamp
 
