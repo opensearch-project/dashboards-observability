@@ -9,7 +9,7 @@ import { min } from 'lodash';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {
-  metricsList: [];
+  metricsList: any;
   headerName: string;
   handleClick: (props: any) => void;
   dataTestSubj: string;
@@ -17,6 +17,8 @@ interface IMetricNameProps {
 
 export const MetricsAccordion = (props: IMetricNameProps) => {
   const { metricsList, headerName, handleClick, dataTestSubj } = props;
+  // console.log('mertcs list type: ', typeof metricsList);
+  // console.log('mertcs list: ', metricsList);
 
   return (
     <EuiAccordion

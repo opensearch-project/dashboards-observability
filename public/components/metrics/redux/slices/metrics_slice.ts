@@ -6,18 +6,22 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { keyBy, mergeWith, pick, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
+import { Dispatch, SetStateAction, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   OBSERVABILITY_CUSTOM_METRIC,
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
+  OBSERVABILITY_CUSTOM_METRIC,
+  DOCUMENT_NAMES_QUERY,
 } from '../../../../../common/constants/metrics';
 import { MetricType } from '../../../../../common/types/metrics';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
 import { pplServiceRequestor } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
-import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE, OBSERVABILITY_BASE } from '../../../../../common/constants/shared';
 import { getPPLService } from '../../../../../common/utils';
 
 export interface IconAttributes {
@@ -63,6 +67,10 @@ const initialState = {
     recentlyUsedRanges: [],
   },
   refresh: 0, // set to new Date() to trigger
+  selectedDataSource: '',
+  otelIndices: [],
+  // selectedOtelIndex: [],
+  otelDocumentNames: [],
 };
 
 const mergeMetricCustomizer = function (objValue, srcValue) {
@@ -87,6 +95,8 @@ export const loadMetrics = () => async (dispatch) => {
   const customDataRequest = fetchCustomMetrics();
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
+  const fetchOTindices = await fetchOpenTelemetryIndices();
+  // const fetchOTDocuments = await fetchOpenTelemetryDocuments();
 
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
@@ -102,7 +112,21 @@ export const loadMetrics = () => async (dispatch) => {
   dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  dispatch(setSortedIds(sortedIds));
+  await dispatch(setSortedIds(sortedIds));
+  await dispatch(setOtelIndices(fetchOTindices));
+};
+export const loadOtelDocuments = (
+  dispatch: Dispatch<any>,
+  setAvailableTestOtelDocuments: { (value: SetStateAction<undefined> | any) },
+  selectedOTIndex: string
+) => async () => {
+  // const fetchOTindices = await fetchOpenTelemetryIndices();
+  console.log('does it work in loadOtelDoc');
+  const fetchOTDocuments = await fetchOpenTelemetryDocuments(selectedOTIndex)();
+  // dispatch(setOtelIndices(fetchOTindices));
+  console.log('here fetchOTDocuments: ', fetchOTDocuments);
+  setAvailableTestOtelDocuments(fetchOTDocuments.aggregations);
+  dispatch(setOtelDocumentNames(fetchOTDocuments.aggregations));
 };
 
 const fetchCustomMetrics = async () => {
@@ -158,6 +182,35 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
       }))
     )
   );
+};
+
+const fetchOpenTelemetryIndices = async () => {
+  const { http } = coreRefs;
+  console.log(`Fetching open telemetry indices`);
+  return http
+    .get(`${OBSERVABILITY_BASE}/search/indices`, {
+      query: {
+        format: 'json',
+      },
+    })
+    .catch((error) => console.error(error));
+};
+
+export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async () => {
+  const { http } = coreRefs;
+  // const otelIndex = useSelector(selectedOtelIndexSelector);
+  console.log(`Fetching open telemetry indices`);
+  // const otelIndex = 'ss4o_metrics-sample1-us';
+  return http
+    .get(`${OBSERVABILITY_BASE}/metrics/otel/documents`, {
+      query: {
+        format: 'json',
+      },
+      index: selectedOtelIndex,
+    })
+    .catch((error) => console.error(error));
+  // dispatch(setOtelDocumentNames(resp.aggregations));
+};
 
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
@@ -213,6 +266,18 @@ export const metricSlice = createSlice({
     setRefresh: (state) => {
       state.refresh = Date.now();
     },
+    setSelectedDataSource: (state, { payload }) => {
+      state.selectedDataSource = payload;
+    },
+    setOtelIndices: (state, { payload }) => {
+      state.otelIndices = payload;
+    },
+    // setSelectedOtelIndex: (state, { payload }) => {
+    //   state.selectedOtelIndex = payload;
+    // },
+    setOtelDocumentNames: (state, { payload }) => {
+      state.otelDocumentNames = payload;
+    },
   },
 });
 
@@ -227,6 +292,10 @@ export const {
   setDataSourceTitles,
   setDataSourceIcons,
   updateMetric,
+  setSelectedDataSource,
+  setOtelIndices,
+  // setSelectedOtelIndex,
+  setOtelDocumentNames,
 } = metricSlice.actions;
 
 /** private actions */
@@ -320,5 +389,13 @@ export const metricQuerySelector = (id) => (state) =>
     attributesGroupBy: [],
     availableAttributes: [],
   };
+
+export const selectedDataSourcesSelector = (state) => state.metrics.selectedDataSource;
+
+export const otelIndexSelector = (state) => state.metrics.otelIndices;
+
+// export const selectedOtelIndexSelector = (state) => state.metrics.selectedOtelIndex;
+
+export const otelDocumentNamesSelector = (state) => state.metrics.otelDocumentNames;
 
 export const metricsReducers = metricSlice.reducer;

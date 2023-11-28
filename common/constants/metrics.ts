@@ -33,3 +33,29 @@ export const AGGREGATION_OPTIONS = [
   { value: 'min', text: 'min()' },
   { value: 'max', text: 'max()' },
 ];
+
+export const DATASOURCE_OPTIONS = [
+  {
+    label: 'Prometheus',
+    'data-test-subj': 'prometheusOption',
+  },
+  {
+    label: 'OpenTelemetry',
+    'data-test-subj': 'openTelemetryOption',
+  },
+];
+export const DATA_PREPPER_INDEX_NAME = 'ss4o-metrics-*-*';
+export const METRICS_ANALYTICS_DATA_PREPPER_INDICES_ROUTE =
+  '/api/observability/metrics_analytics/data_prepper_indices';
+
+export const DOCUMENT_NAMES_QUERY = {
+  size: 0,
+  aggs: {
+    distinct_names: {
+      terms: {
+        field: 'name.keyword',
+        size: 500,
+      },
+    },
+  },
+};

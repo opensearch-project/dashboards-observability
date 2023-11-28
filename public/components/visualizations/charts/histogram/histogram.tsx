@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty, take } from 'lodash';
-import React, { useMemo } from 'react';
+import { forEach, isEmpty, take } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
 import { GROUPBY } from '../../../../../common/constants/explorer';
 import {
   DEFAULT_CHART_STYLES,
@@ -16,6 +16,7 @@ import {
 import { IVisualizationContainerProps } from '../../../../../common/types/explorer';
 import { hexToRgb } from '../../../../components/event_analytics/utils/utils';
 import { Plt } from '../../plotly/plot';
+import { sampleDataPrepperMetrics } from '../../../metrics/helpers/sample_data';
 
 export const Histogram = ({ visualizations, layout, config }: any) => {
   const { LineWidth, FillOpacity, LegendPosition, ShowLegend } = DEFAULT_CHART_STYLES;
@@ -42,6 +43,29 @@ export const Histogram = ({ visualizations, layout, config }: any) => {
     },
     vis: visMetaData,
   }: IVisualizationContainerProps = visualizations;
+  // console.log('sampleDataPrepperMetrics: ', sampleDataPrepperMetrics.data);
+
+  // const combineBuckets = (sampleDataPrepperMetrics: any) => {
+  //   console.log('enters');
+  //   let accmulativeBins;
+  //   if (!isEmpty(sampleDataPrepperMetrics)) {
+  //     accmulativeBins = sampleDataPrepperMetrics.data[0];
+  //     sampleDataPrepperMetrics.data.slice(1).forEach(function (value) {
+  //       console.log(value);
+  //     });
+  //   }
+  //   return accmulativeBins;
+  // };
+
+  useEffect(() => {
+    console.log('enters mayeb');
+  }, []);
+
+  useEffect(() => {
+    console.log('enters mayeb');
+    console.log('queriedVizData', queriedVizData);
+    console.log('fields', fields);
+  }, [fields, queriedVizData]);
 
   const lastIndex = fields.length - 1;
   const lineWidth = chartStyles.lineWidth || LineWidth;

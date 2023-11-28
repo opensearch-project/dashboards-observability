@@ -135,7 +135,7 @@ export const Bar = ({ visualizations, layout, config }: any) => {
       x_coordinate: 'x',
       y_coordinate: 'y',
     };
-
+    console.log('jsonData: ', jsonData);
     return addStylesToTraces(
       transformPreprocessedDataToTraces(
         preprocessJsonData(jsonData, visPanelConfig),

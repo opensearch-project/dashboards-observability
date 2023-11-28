@@ -12,6 +12,8 @@ import { Sidebar } from './sidebar/sidebar';
 import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricsGrid } from './view/metrics_grid';
+import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
+import { resolutionOptions, DATASOURCE_OPTIONS } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 
 interface MetricsProps {
@@ -23,6 +25,35 @@ interface MetricsProps {
 }
 
 export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
+  // Redux tools
+  const selectedMetrics = useSelector(selectedMetricsSelector);
+  const metricsLayout = useSelector(metricsLayoutSelector);
+
+  // Top panel
+  const [IsTopPanelDisabled, setIsTopPanelDisabled] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editActionType, setEditActionType] = useState('');
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toastRightSide, setToastRightSide] = useState<boolean>(true);
+
+  // Metrics constants
+  const [panelVisualizations, setPanelVisualizations] = useState<MetricType[]>([]);
+
+  // Side bar constants
+  const [selectedDataSource, setSelectedDataSource] = useState([]);
+  const [selectedOTIndex, setSelectedOTIndex] = useState([]);
+  const [availableTestOtelDocuments, setAvailableTestOtelDocuments] = useState([]);
+
+  const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
+    if (!text) text = '';
+    setToastRightSide(!side);
+    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
+  };
+
+  const onEditClick = (savedVisualizationId: string) => {
+    window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
+  };
+
   useEffect(() => {
     chrome.setBreadcrumbs([
       parentBreadcrumb,
@@ -49,7 +80,15 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                       {(EuiResizablePanel, EuiResizableButton) => (
                         <>
                           <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
-                            <Sidebar additionalSelectedMetricId={routerProps.match.params.id} />
+                            <Sidebar
+                              additionalSelectedMetricId={routerProps.match.params.id}
+                              selectedDataSource={selectedDataSource}
+                              setSelectedDataSource={setSelectedDataSource}
+                              selectedOTIndex={selectedOTIndex}
+                              setSelectedOTIndex={setSelectedOTIndex}
+                              availableTestOtelDocuments={availableTestOtelDocuments}
+                              setAvailableTestOtelDocuments={setAvailableTestOtelDocuments}
+                            />
                           </EuiResizablePanel>
 
                           <EuiResizableButton />
