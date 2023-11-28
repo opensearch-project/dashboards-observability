@@ -7,6 +7,9 @@ import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui
 import React from 'react';
 import { useEffect } from 'react';
 import { LLMInput } from '../../event_analytics/explorer/llm/input';
+import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
+import { coreRefs } from '../../../framework/core_refs';
+import PPLService from '../../../services/requests/ppl';
 
 export function QueryArea({
   tabId,
@@ -20,9 +23,18 @@ export function QueryArea({
   nlqInput,
   setNlqInput,
 }: any) {
+  const requestParams = { tabId };
+  const { getAvailableFields } = useFetchEvents({
+    pplService: new PPLService(coreRefs.http),
+    requestParams,
+  });
+
+  // use effect that sets the editor text and populates sidebar field for a particular index upon initialization
   useEffect(() => {
-    handleQueryChange(`source = ${selectedIndex[0].label}`);
-  }, []);
+    const indexQuery = `source = ${selectedIndex[0].label}`;
+    handleQueryChange(indexQuery);
+    getAvailableFields(indexQuery);
+  });
 
   return (
     <EuiPanel paddingSize="m">

@@ -64,6 +64,7 @@ import { Autocomplete } from './autocomplete';
 import { DatePicker } from './date_picker';
 import { QueryArea } from './query_area';
 import './search.scss';
+import PPLService from '../../../services/requests/ppl';
 
 export interface IQueryBarProps {
   query: string;
@@ -156,6 +157,10 @@ export const Search = (props: any) => {
   const requestParams = { tabId };
   const { dispatchOnGettingHis } = useFetchEvents({
     pplService: new SQLService(coreRefs.http),
+    requestParams,
+  });
+  const { getAvailableFields } = useFetchEvents({
+    pplService: new PPLService(coreRefs.http),
     requestParams,
   });
 
@@ -263,7 +268,14 @@ export const Search = (props: any) => {
   useEffect(() => {
     // set index and olly query assistant question if changed elsewhere
     if (!queryRedux.ollyQueryAssistant) return;
-    if (queryRedux.index.length > 0) setSelectedIndex([{ label: queryRedux.index }]);
+    if (queryRedux.index.length > 0) {
+      const reduxIndex = [{ label: queryRedux.index }];
+      setSelectedIndex(reduxIndex);
+      // sets the editor text and populates sidebar field for a particular index upon initialization
+      const indexQuery = `source = ${reduxIndex[0].label}`;
+      handleQueryChange(indexQuery);
+      getAvailableFields(indexQuery);
+    }
     if (queryRedux.ollyQueryAssistant.length > 0) {
       setNlqInput(queryRedux.ollyQueryAssistant);
       // remove index and olly query assistant
@@ -397,7 +409,10 @@ export const Search = (props: any) => {
                         dispatch(resetSummary({ tabId }));
                       });
                       // change the query in the editor to be just source=
-                      handleQueryChange(`source = ${index[0].label}`);
+                      const indexQuery = `source = ${index[0].label}`;
+                      handleQueryChange(indexQuery);
+                      // get the fields into the sidebar
+                      getAvailableFields(indexQuery);
                       setSelectedIndex(index);
                     }}
                   />

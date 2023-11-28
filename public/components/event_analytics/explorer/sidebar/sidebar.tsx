@@ -32,8 +32,6 @@ interface ISidebarProps {
   isFieldToggleButtonDisabled: boolean;
   handleOverridePattern: (pattern: IField) => void;
   handleOverrideTimestamp: (timestamp: IField) => void;
-  storedExplorerFields: IExplorerFields;
-  setStoredExplorerFields: (explorer: IExplorerFields) => void;
   tabId: string;
 }
 
