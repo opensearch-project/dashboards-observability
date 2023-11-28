@@ -254,4 +254,64 @@ export class IntegrationReader {
   async getStatic(staticPath: string): Promise<Result<Buffer>> {
     return await this.reader.readFileRaw(staticPath, 'static');
   }
+
+  async getAllStatics(version?: string): Promise<Result<{ [key: string]: string }>> {
+    const configResult = await this.getConfig(version);
+    if (!configResult.ok) {
+      return configResult;
+    }
+    const config: IntegrationConfig = configResult.value;
+
+    const allStatics: StaticAsset[] = [
+      config.statics?.logo ?? null,
+      config.statics?.darkModeLogo ?? null,
+      ...(config.statics?.gallery ?? [null]),
+      ...(config.statics?.darkModeGallery ?? [null]),
+    ].filter((s) => s !== null) as StaticAsset[];
+
+    const staticsData = await Promise.all(
+      allStatics.map(async (s: StaticAsset) => {
+        return {
+          path: s.path,
+          result: await this.getStatic(s.path),
+        };
+      })
+    );
+
+    for (const data of staticsData) {
+      if (!data.result.ok) {
+        return data.result;
+      }
+    }
+
+    return {
+      ok: true,
+      value: Object.fromEntries(
+        staticsData.map((data) => [
+          data.path,
+          (data.result as { value: Buffer }).value.toString('base64'),
+        ])
+      ),
+    };
+  }
+
+  /**
+   * Serialize the referenced integration as a flat JSON object.
+   * Useful for normalizing the format for sending to other locations.
+   *
+   * @param version The version of the integration to serialize.
+   * @returns A large object which includes all of the integration's data.
+   */
+  async serialize(version?: string): Promise<Result<object>> {
+    const configResult = await this.getConfig(version);
+    if (!configResult.ok) {
+      return configResult;
+    }
+    const config: IntegrationConfig = configResult.value;
+    const result = { config };
+
+    const staticsData = await this.getAllStatics(version);
+
+    return { ok: true, value: result };
+  }
 }
