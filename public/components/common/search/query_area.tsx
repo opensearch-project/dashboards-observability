@@ -5,6 +5,7 @@
 
 import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { useEffect } from 'react';
 import { LLMInput } from '../../event_analytics/explorer/llm/input';
 
 export function QueryArea({
@@ -19,6 +20,10 @@ export function QueryArea({
   nlqInput,
   setNlqInput,
 }: any) {
+  useEffect(() => {
+    handleQueryChange(`source = ${selectedIndex[0].label}`);
+  }, []);
+
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup gutterSize="m" direction="column">

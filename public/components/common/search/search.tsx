@@ -390,7 +390,16 @@ export const Search = (props: any) => {
                     isLoading={loading}
                     options={filteredData}
                     selectedOptions={selectedIndex}
-                    onChange={(index) => setSelectedIndex(index)}
+                    onChange={(index) => {
+                      // clear previous state
+                      batch(() => {
+                        dispatch(reset({ tabId }));
+                        dispatch(resetSummary({ tabId }));
+                      });
+                      // change the query in the editor to be just source=
+                      handleQueryChange(`source = ${index[0].label}`);
+                      setSelectedIndex(index);
+                    }}
                   />
                 </EuiFlexItem>
               </>
