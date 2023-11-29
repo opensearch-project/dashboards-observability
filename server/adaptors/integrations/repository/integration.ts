@@ -255,13 +255,9 @@ export class IntegrationReader {
     return await this.reader.readFileRaw(staticPath, 'static');
   }
 
-  async getAllStatics(version?: string): Promise<Result<{ [key: string]: string }>> {
-    const configResult = await this.getConfig(version);
-    if (!configResult.ok) {
-      return configResult;
-    }
-    const config: IntegrationConfig = configResult.value;
-
+  private async getAllStatics(
+    config: IntegrationConfig
+  ): Promise<Result<{ [key: string]: string }>> {
     const allStatics: StaticAsset[] = [
       config.statics?.logo ?? null,
       config.statics?.darkModeLogo ?? null,
@@ -308,10 +304,23 @@ export class IntegrationReader {
       return configResult;
     }
     const config: IntegrationConfig = configResult.value;
-    const result = { config };
 
-    const staticsData = await this.getAllStatics(version);
+    const staticsResult = await this.getAllStatics(config);
+    if (!staticsResult.ok) {
+      return staticsResult;
+    }
+    const statics = staticsResult.value;
 
-    return { ok: true, value: result };
+    const components = null; // TODO
+
+    const assets = null; // TODO
+
+    const sampleDataResult = await this.getSampleData(version);
+    if (!sampleDataResult.ok) {
+      return sampleDataResult;
+    }
+    const sampleData = JSON.stringify(sampleDataResult.value.sampleData);
+
+    return { ok: true, value: { config, statics, components, assets, sampleData } };
   }
 }
