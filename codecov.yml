@@ -1,4 +1,4 @@
 ignore:
-  - "**/common/query_manager/antlr/output"
+  - "common/query_manager/antlr/output"
 fixes:
   - "OpenSearch-Dashboards/plugins/dashboards-observability/::"
