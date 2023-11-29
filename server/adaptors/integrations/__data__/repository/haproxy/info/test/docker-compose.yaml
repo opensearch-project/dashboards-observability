@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+  opensearch:
+    image: opensearchstaging/opensearch:3.0.0
+    container_name: opensearch
+    environment:
+      - cluster.name=opensearch-cluster # Name the cluster
+      - node.name=opensearch # Name the node that will run in this container
+      - discovery.seed_hosts=opensearch # Nodes to look for when discovering the cluster
+      - cluster.initial_cluster_manager_nodes=opensearch # Nodes eligibile to serve as cluster manager
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+      - "DISABLE_INSTALL_DEMO_CONFIG=true" # Prevents execution of bundled demo script which installs demo certificates and security configurations to OpenSearch
+      - "DISABLE_SECURITY_PLUGIN=true" # Disables security plugin
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+    volumes:
+      - opensearch:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+    ports:
+      - 9200:9200
+      - 9600:9600
+    expose:
+      - "9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 5s
+      timeout: 25s
+      retries: 4
+    networks:
+      - opensearch-net # All of the containers will join the same Docker bridge network
+  haproxy:
+    container_name: haproxy
+    image: haproxytech/haproxy-alpine:2.4
+    volumes:
+      # - ./haproxy-otel/opentelemetry_module.conf:/etc/nginx/conf.d/opentelemetry_module.conf
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports: 
+      - 8405:8405
+    depends_on:
+      - flask-app
+      - fluentbit
+    networks:
+      - opensearch-net # All of the containers will join the same Docker bridge network
+    links:
+      - fluentbit
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: haproxy.access
+  fluentbit:
+    container_name: fluentbit
+    image: fluent/fluent-bit:latest
+    volumes:
+      - ./fluent-bit:/fluent-bit/etc
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      - opensearch
+    networks:
+      - opensearch-net
+  redis:
+    image: redis
+    ports:
+      - 6357:6357
+    networks:
+      - opensearch-net
+  flask-app:
+    build: flask-app
+    ports:
+      - 5000:5000
+    depends_on:
+      - redis
+    volumes:
+      - ./flask-app/app.py:/code/app.py
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch:
+
+networks:
+  opensearch-net:
