@@ -264,8 +264,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         ...feedbackFormData,
         input: props.nlqInput,
       });
-      // do not show as error callout if query couldn't be generated, just explain why
-      generateSummary({ isError: false, response: String(error.body) });
+      generateSummary({ isError: true, response: JSON.stringify(error.body) });
     } finally {
       setGeneratingRun(false);
     }
