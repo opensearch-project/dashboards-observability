@@ -126,6 +126,7 @@ export const Search = (props: any) => {
     setSubType,
     setIsQueryRunning,
     isAppAnalytics,
+    pplService,
   } = props;
 
   const queryRedux = useSelector(selectQueries)[tabId];
@@ -160,7 +161,7 @@ export const Search = (props: any) => {
     requestParams,
   });
   const { getAvailableFields } = useFetchEvents({
-    pplService: new PPLService(coreRefs.http),
+    pplService: pplService,
     requestParams,
   });
 
@@ -528,6 +529,7 @@ export const Search = (props: any) => {
                 selectedIndex={selectedIndex}
                 nlqInput={nlqInput}
                 setNlqInput={setNlqInput}
+                pplService={pplService}
               />
             </EuiFlexItem>
             {(queryAssistantSummarization?.summary?.length > 0 ||

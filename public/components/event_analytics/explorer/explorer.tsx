@@ -983,6 +983,7 @@ export const Explorer = ({
                   http={http}
                   setIsQueryRunning={setIsQueryRunning}
                   isAppAnalytics={appLogEvents}
+                  pplService={pplService}
                 />
                 {explorerSearchMeta.isPolling ? (
                   <DirectQueryRunning tabId={tabId} />

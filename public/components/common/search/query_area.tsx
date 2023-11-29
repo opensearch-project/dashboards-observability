@@ -22,10 +22,11 @@ export function QueryArea({
   selectedIndex,
   nlqInput,
   setNlqInput,
+  pplService,
 }: any) {
   const requestParams = { tabId };
   const { getAvailableFields } = useFetchEvents({
-    pplService: new PPLService(coreRefs.http),
+    pplService,
     requestParams,
   });
 
@@ -34,7 +35,7 @@ export function QueryArea({
     const indexQuery = `source = ${selectedIndex[0].label}`;
     handleQueryChange(indexQuery);
     getAvailableFields(indexQuery);
-  });
+  }, []);
 
   return (
     <EuiPanel paddingSize="m">
