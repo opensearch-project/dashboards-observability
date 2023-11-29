@@ -25,6 +25,12 @@ import {
   selectedDataSourcesSelector,
   setOtelDocumentNames,
   fetchOpenTelemetryDocuments,
+  setDataSourceIcons,
+  coloredIconsFrom,
+  setMetrics,
+  fetchOpenTelemetryIndices,
+  setOtelIndices,
+  loadOTIndices,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
@@ -54,18 +60,14 @@ export const Sidebar = ({
   const [availableOTDocuments, setAvailableOTDocuments] = useState([]);
   const availableOTDocumentsRef = useRef();
   availableOTDocumentsRef.current = availableOTDocuments;
-  // const [selectedDataSource, setSelectedDataSource] = useState();
 
-  const availableMetrics = useSelector(availableMetricsSelector);
+  const promethuesMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
 
   const additionalMetric = useSelector(selectMetricByIdSelector(additionalSelectedMetricId));
 
   const dataSource = useSelector(selectedDataSourcesSelector);
-  // let isOpenTelemetry: boolean;
-  // console.log('dataSourceeee: ', dataSource.label);
-  // console.log('dataSourceeeeee.label: ', dataSource.label);
   const otelIndices = useSelector(otelIndexSelector);
   // const selectedOtelIndex = useSelector(selectedOtelIndexSelector);
   const otelDocuments = useSelector(otelDocumentNamesSelector);
@@ -75,7 +77,13 @@ export const Sidebar = ({
     batch(() => {
       dispatch(loadMetrics());
     });
-  }, [dispatch]);
+  }, [dispatch, selectedDataSource]);
+
+  useEffect(() => {
+    batch(() => {
+      dispatch(loadOTIndices());
+    });
+  }, [dispatch, selectedDataSource]);
 
   useEffect(() => {
     if (additionalMetric) {
@@ -110,27 +118,28 @@ export const Sidebar = ({
 
   useEffect(() => {
     console.log('hereeeee');
-    if (selectedOTIndex.length > 0 && selectedDataSource) {
+    if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
       const fetchOtelDocuments = async () => {
         try {
-          console.log('selectedOtelIndex: ', selectedOTIndex);
           console.log('selectedOtelIndex label: ', selectedOTIndex[0]?.label);
           const documents = await fetchOpenTelemetryDocuments(selectedOTIndex[0]?.label)();
-          console.log('1');
+          // console.log('1');
           // setAvailableTestOtelDocuments(documents.aggregations);
-          console.log('2');
+          // console.log('2');
           // dispatch(setOtelDocumentNames(documents.aggregations));
-          console.log('3');
-          console.log('docs after 3: ', documents);
+          // console.log('3');
+          // console.log('docs after 3: ', documents);
           const availableOtelDocuments = documents?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
-              return { id: item.key, name: item.key, catalog: 'OpenTelemetry' };
+              return { id: item.key, name: item.key, catalog: 'OpenTelemetry', type: 'Histogram' };
             }
           );
-          console.log('4');
+          // console.log('4');
           console.log('otel metrics after 4: ', availableOtelDocuments);
           setAvailableOTDocuments(availableOtelDocuments);
-          console.log('5');
+          dispatch(setMetrics(availableOtelDocuments));
+          dispatch(setDataSourceIcons(coloredIconsFrom(['OpenTelemetry'])));
+          // console.log('5');
           console.log('otel metrics: ', availableOtelDocuments);
         } catch (error) {
           console.error('Error fetching OpenTelemetry documents:', error);
@@ -146,26 +155,32 @@ export const Sidebar = ({
     console.log('selectedDataSource: ', selectedDataSource);
     console.log('selectedDataSource with label: ', selectedDataSource[0]?.label);
     const isOpenTelemetry = selectedDataSource[0]?.label === 'OpenTelemetry' ? true : false;
-    console.log('isOpenTelemetry: ', isOpenTelemetry);
     if (isOpenTelemetry) {
-      console.log('otelIndices: ', otelIndices);
+      // console.log('otelIndices: ', otelIndices);
       return <IndexPicker otelIndices={otelIndices} setSelectedOTIndex={setSelectedOTIndex} />;
     }
   }, [selectedDataSource]);
 
-  // useEffect(() => {
-  //   if (availableOTDocuments === undefined) setAvailableOTDocuments([]);
-  //   console.log('availableOTDocuments in useEff: ', availableOTDocumentsRef.current);
-  // }, [availableOTDocuments]);
+  const availableMetrics = useMemo(() => {
+    if (selectedDataSource[0]?.label === 'OpenTelemetry' && selectedOTIndex.length > 0)
+      return promethuesMetrics;
+    else if (selectedDataSource[0]?.label === 'Prometheus') return promethuesMetrics;
+    else return [];
+    console.log('promethuesMetrics: ', promethuesMetrics);
+    // return selectedDataSource[0]?.label === 'Prometheus' ? promethuesMetrics : promethuesMetrics;
+  }, [promethuesMetrics, selectedDataSource, availableOTDocuments, selectedOTIndex]);
 
   // console.log('availableTestOtelDocuments: ', availableTestOtelDocuments);
 
-  console.log('available metrics: ', availableMetrics);
-  console.log('availableOTDocuments outside: ', availableOTDocumentsRef.current);
+  // console.log('selected metrics: ', selectedMetrics);
+  // console.log('availableOTDocuments outside: ', availableOTDocumentsRef.current);
 
   // console.log('otel metrics: ', availableOtelDocuments);
 
-  const handleAddMetric = (metric: any) => dispatch(selectMetric(metric));
+  const handleAddMetric = (metric: any) => {
+    console.log('handle add metrics: ', metric);
+    dispatch(selectMetric(metric));
+  };
 
   const handleRemoveMetric = (metric: any) => {
     dispatch(removeSelectedMetric(metric));

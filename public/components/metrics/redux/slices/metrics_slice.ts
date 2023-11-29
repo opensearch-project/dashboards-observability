@@ -95,13 +95,13 @@ export const loadMetrics = () => async (dispatch) => {
   const customDataRequest = fetchCustomMetrics();
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
-  const fetchOTindices = await fetchOpenTelemetryIndices();
-  // const fetchOTDocuments = await fetchOpenTelemetryDocuments();
-
+  // const fetchOTindices = await fetchOpenTelemetryIndices();
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
   dispatch(
-    setDataSourceIcons(coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources]))
+    setDataSourceIcons(
+      coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources, 'OpenTelemetry'])
+    )
   );
 
   const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
@@ -115,6 +115,12 @@ export const loadMetrics = () => async (dispatch) => {
   await dispatch(setSortedIds(sortedIds));
   await dispatch(setOtelIndices(fetchOTindices));
 };
+
+export const loadOTIndices = () => async (dispatch) => {
+  const fetchOTindices = await fetchOpenTelemetryIndices();
+  dispatch(setOtelIndices(fetchOTindices));
+};
+
 export const loadOtelDocuments = (
   dispatch: Dispatch<any>,
   setAvailableTestOtelDocuments: { (value: SetStateAction<undefined> | any) },
@@ -184,7 +190,7 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
   );
 };
 
-const fetchOpenTelemetryIndices = async () => {
+export const fetchOpenTelemetryIndices = async () => {
   const { http } = coreRefs;
   console.log(`Fetching open telemetry indices`);
   return http
@@ -211,6 +217,53 @@ export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async 
     .catch((error) => console.error(error));
   // dispatch(setOtelDocumentNames(resp.aggregations));
 };
+
+// const updateLayoutBySelection = (state: any, newMetric: any) => {
+//   console.log('state in updateLayoutBySelection: ', state);
+//   console.log('newMetric in updateLayoutBySelection: ', newMetric);
+//   console.log('state in updateLayoutBySelection: ', state.metricsLayout);
+//   const newDimensions = getNewVizDimensions(state.metricsLayout);
+//   console.log('newDimensions: ', newDimensions);
+
+//   const metricCatalog = (catalog: string) => {
+//     if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
+//       return 'savedCustomMetric';
+//     } else if (catalog === 'OpenTelemetry') {
+//       return 'openTelemetryMetric';
+//     } else {
+//       return 'prometheusMetric';
+//     }
+//   };
+//   const metricVisualization: MetricType = {
+//     id: newMetric.id,
+//     savedVisualizationId: newMetric.id,
+//     x: newDimensions.x,
+//     y: newDimensions.y,
+//     h: newDimensions.h,
+//     w: newDimensions.w,
+//     metricType: metricCatalog(newMetric.catalog),
+//   };
+//   console.log('metricVisualization: ', metricVisualization);
+//   state.metricsLayout = [...state.metricsLayout, metricVisualization];
+//   console.log('state after metricVisualization: ', state.metricsLayout);
+// };
+
+// const updateLayoutByDeSelection = (state: any, newMetric: any) => {
+//   const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);
+
+//   const newMetricsLayout = [] as MetricType[];
+//   let heightSubtract = 0;
+
+//   sortedMetricsLayout.map((metricLayout: MetricType) => {
+//     if (metricLayout.id !== newMetric.id) {
+//       metricLayout.y = metricLayout.y - heightSubtract;
+//       newMetricsLayout.push(metricLayout);
+//     } else {
+//       heightSubtract = metricLayout.h;
+//     }
+//   });
+//   state.metricsLayout = newMetricsLayout;
+// };
 
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,

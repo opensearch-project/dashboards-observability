@@ -11,10 +11,15 @@ import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metric
 
 const MetricIcon = ({ metric }) => {
   const metricIcons = useSelector(metricIconsSelector);
-  const iconMeta = metricIcons[metric.catalog];
-  if (metric.catalog === OBSERVABILITY_CUSTOM_METRIC)
+  const iconMeta = metricIcons[metric?.catalog];
+  console.log('iconMeta: ', iconMeta);
+  const metricCatalog = metric?.catalog;
+  console.log('metricCatalog: ', metricCatalog);
+  if (metric?.catalog === OBSERVABILITY_CUSTOM_METRIC || metric?.catalog === 'OpenTelemetry') {
+    console.log('satisfies this condition');
     return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
-  else return <EuiAvatar name={metric.catalog} size="s" type="space" {...iconMeta} />;
+  } else return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
+  // } else return <EuiAvatar name={metricCatalog} size="s" type="space" {...iconMeta} />;
 };
 
 interface IMetricNameProps {
@@ -25,16 +30,17 @@ interface IMetricNameProps {
 export const MetricName = (props: IMetricNameProps) => {
   const { metric, handleClick } = props;
 
-  const name = () => {
-    if (metric.catalog === 'CUSTOM_METRICS' || metric.catalog === 'OpenTelemetry')
-      return metric.name;
-    else return metric.name.split('.')[1].replace(/^prometheus_/, 'p.._');
+  const name = (metricDetails: any) => {
+    console.log('inside name metric catalog', metricDetails?.catalog, metricDetails?.name);
+    if (metricDetails?.catalog === 'CUSTOM_METRICS' || metricDetails?.catalog === 'OpenTelemetry')
+      return metricDetails?.name;
+    else return metricDetails?.name.split('.')[1].replace(/^prometheus_/, 'p.._');
   };
 
   return (
     <EuiFacetButton
       className="obsMetric-Name eui-textTruncate"
-      title={metric.name}
+      title={metric?.name}
       onClick={() => handleClick(metric)}
       icon={<MetricIcon metric={metric} />}
     >
