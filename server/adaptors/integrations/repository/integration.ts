@@ -298,7 +298,17 @@ export class IntegrationReader {
    * @param version The version of the integration to serialize.
    * @returns A large object which includes all of the integration's data.
    */
-  async serialize(version?: string): Promise<Result<object>> {
+  async serialize(
+    version?: string
+  ): Promise<
+    Result<{
+      config: IntegrationConfig;
+      statics: unknown;
+      components: unknown;
+      assets: unknown;
+      sampleData: unknown;
+    }>
+  > {
     const configResult = await this.getConfig(version);
     if (!configResult.ok) {
       return configResult;
@@ -311,9 +321,17 @@ export class IntegrationReader {
     }
     const statics = staticsResult.value;
 
-    const components = null; // TODO
+    const componentsResult = await this.getSchemas(version);
+    if (!componentsResult.ok) {
+      return componentsResult;
+    }
+    const components = componentsResult.value;
 
-    const assets = null; // TODO
+    const assetsResult = await this.getAssets(version); // TODO
+    if (!assetsResult.ok) {
+      return assetsResult;
+    }
+    const assets = assetsResult.value;
 
     const sampleDataResult = await this.getSampleData(version);
     if (!sampleDataResult.ok) {
@@ -321,6 +339,9 @@ export class IntegrationReader {
     }
     const sampleData = JSON.stringify(sampleDataResult.value.sampleData);
 
-    return { ok: true, value: { config, statics, components, assets, sampleData } };
+    return {
+      ok: true,
+      value: { config, statics, components, assets, sampleData },
+    };
   }
 }

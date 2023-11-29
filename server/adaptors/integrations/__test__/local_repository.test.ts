@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * This file is used as integration tests for Integrations Repository functionality.
+ */
+
 import { TemplateManager } from '../repository/repository';
 import { IntegrationReader } from '../repository/integration';
 import path from 'path';
@@ -40,5 +44,33 @@ describe('The local repository', () => {
         expect(result.ok).toBe(true);
       })
     );
+  });
+});
+
+describe('Local Nginx Integration', () => {
+  it('Should serialize without errors', async () => {
+    const repository: TemplateManager = new TemplateManager(
+      path.join(__dirname, '../__data__/repository')
+    );
+    const integration = await repository.getIntegration('nginx');
+
+    expect(integration?.serialize()).resolves.toHaveProperty('ok', true);
+  });
+
+  it('Should serialize to include the config', async () => {
+    const repository: TemplateManager = new TemplateManager(
+      path.join(__dirname, '../__data__/repository')
+    );
+    const integration = await repository.getIntegration('nginx');
+    const config = await integration!.getConfig();
+    const serialized = await integration!.serialize();
+
+    expect(serialized).toHaveProperty('value');
+    expect(config).toHaveProperty('value');
+    // Manual if-statement check wrapping expects to satisfy TS check
+    if (!('value' in serialized) || !('value' in config)) {
+      return;
+    }
+    expect(serialized.value.config).toEqual(config.value);
   });
 });
