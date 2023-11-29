@@ -37,3 +37,13 @@
     background-color: #25262d !important;
   }
 }
+
+// Temporary fix for OUI issue https://github.com/opensearch-project/oui/issues/1166
+#queryDataGrid {
+  .euiDataGrid--fullScreen {
+    .euiDataGrid__pagination {
+      margin-bottom: 100px;
+    }
+    margin-top: 98px;
+  }
+}
