@@ -35,7 +35,7 @@ export function QueryArea({
     const indexQuery = `source = ${selectedIndex[0].label}`;
     handleQueryChange(indexQuery);
     getAvailableFields(indexQuery);
-  }, []);
+  }, [selectedIndex[0]]);
 
   return (
     <EuiPanel paddingSize="m">
