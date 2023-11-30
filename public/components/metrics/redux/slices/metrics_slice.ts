@@ -4,7 +4,7 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import { keyBy, pick, sortBy } from 'lodash';
+import _, { difference, keyBy, merge, pick, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PPL_DATASOURCES_REQUEST,
@@ -66,7 +66,9 @@ const initialState = {
 
 export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
   const { metrics } = getState().metrics;
-  const mergedMetrics = { ...metrics, ...newMetricMap };
+
+  const mergedMetrics = merge(metrics, newMetricMap);
+  console.log('mergeMetrics', mergedMetrics);
   dispatch(setMetrics(mergedMetrics));
 };
 
