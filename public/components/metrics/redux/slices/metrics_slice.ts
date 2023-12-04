@@ -4,7 +4,7 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import _, { difference, keyBy, merge, pick, sortBy } from 'lodash';
+import _, { difference, keyBy, merge, mergeWith, pick, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PPL_DATASOURCES_REQUEST,
@@ -64,11 +64,23 @@ const initialState = {
   refresh: 0, // set to new Date() to trigger
 };
 
+const mergeMetricCustomizer = function (objValue, srcValue) {
+  // console.log(`mergeCustomizer ${objValue?.id}`, { objValue, srcValue });
+
+  return {
+    ...srcValue,
+    availableAttributes:
+      objValue?.availableAttributes.length > 0
+        ? objValue.availableAttributes
+        : srcValue.availableAttributes,
+  };
+};
 export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
   const { metrics } = getState().metrics;
+  const modifiableMetricsMap = { ...metrics };
 
-  const mergedMetrics = merge(metrics, newMetricMap);
-  console.log('mergeMetrics', mergedMetrics);
+  const mergedMetrics = mergeWith(modifiableMetricsMap, newMetricMap, mergeMetricCustomizer);
+  console.log('mergeMetrics', { mergedMetrics, modifiableMetricsMap, newMetricMap });
   dispatch(setMetrics(mergedMetrics));
 };
 
