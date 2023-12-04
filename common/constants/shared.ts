@@ -78,6 +78,10 @@ export const PPL_PATTERNS_DOCUMENTATION_URL =
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
 export const SPAN_REGEX = /span/;
+
+export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
+export const PPL_METRIC_SUBTYPE = 'metric';
+
 export const PPL_SPAN_REGEX = /by\s*span/i;
 export const PPL_STATS_REGEX = /\|\s*stats/i;
 export const PPL_INDEX_INSERT_POINT_REGEX = /(search source|source|index)\s*=\s*([^|\s]+)(.*)/i;
@@ -210,7 +214,7 @@ export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
   FillOpacity: 100,
   MarkerSize: 5,
   ShowLegend: 'show',
-  LegendPosition: 'v',
+  LegendPosition: 'h',
   LabelAngle: 0,
   DefaultSortSectors: 'largest_to_smallest',
   DefaultModeScatter: 'markers',
@@ -243,6 +247,7 @@ export const VISUALIZATION_ERROR = {
   NO_DATA: 'No data found.',
   INVALID_DATA: 'Invalid visualization data',
   NO_SERIES: 'Add a field to start',
+  NO_METRIC: 'Invalid Metric MetaData',
 };
 
 export const S3_DATASOURCE_TYPE = 'S3_DATASOURCE';

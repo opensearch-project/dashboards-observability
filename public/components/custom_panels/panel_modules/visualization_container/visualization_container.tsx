@@ -193,6 +193,19 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
+  const showPPLQueryPanel = [
+    <EuiContextMenuItem
+      data-test-subj="showCatalogPPLQuery"
+      key="view_query"
+      onClick={() => {
+        closeActionsMenu();
+        showModal('catalogModal');
+      }}
+    >
+      View query
+    </EuiContextMenuItem>,
+  ];
+
   const showModelPanel = [
     <EuiContextMenuItem
       data-test-subj="showCatalogPPLQuery"
@@ -207,12 +220,14 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
+  if (visualizationMetaData?.sub_type === PROMQL_METRIC_SUBTYPE) {
+    popoverPanel = [showPPLQueryPanel];
+  } else if (usedInNotebooks) {
+    popoverPanel = [popoverPanel[0]];
   }
 
   const loadVisaulization = async () => {
-    if (catalogVisualization)
+    if (visualization.sub_type === PROMQL_METRIC_SUBTYPE)
       await renderCatalogVisualization({
         http,
         pplService,
