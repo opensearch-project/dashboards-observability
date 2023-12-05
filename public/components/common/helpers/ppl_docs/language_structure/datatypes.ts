@@ -140,7 +140,7 @@ each other, with some alteration of the value or some information loss, for exam
 
 ### String data types
 
-A \`string\` data type is a series of characters enclosed within single or double quotation marks, serving as a data type for holding text data.
+A \`string\` data type is a series of characters enclosed within single or double quotation marks that serves as a data type for holding text data.
 
 ### Query struct data types
 
