@@ -16,7 +16,7 @@ head \[N\]
 
 -   \`N\`: Optional. The number of results you want to see. Default is 10.
 
-#### Example 1: Get first 10 results
+#### Example 1: Get the first 10 results
 
 The following PPL query example shows how to use \`head\` to get the first 10 search results. 
     os> source=accounts | fields firstname, age | head;
