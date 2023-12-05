@@ -14,7 +14,7 @@ Use the \`sort\` command to sort search results by a specified field.
 sort &lt;\[+\|-\] sort-field&gt;...
 
 -   \`sort-field\`: Required. The field to sort.
--   \[+\|-\]: Optional. A plus sign  \[+\] indicates ascending order, with null and missing values first. A minus sign \[-\] indicates descending order, with null andm issing last. Default is ascending order with null and missing first.
+-   \[+\|-\]: Optional. A plus sign \[+\] indicates ascending order, with null and missing values first. A minus sign \[-\] indicates descending order, with null and missing values last. Default is ascending order.
 
 #### Example 1: Sort by one field
 
