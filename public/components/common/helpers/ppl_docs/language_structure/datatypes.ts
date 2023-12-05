@@ -301,7 +301,7 @@ The following example PPL query shows how to fetch city (top level), city.name (
     | {'name': 'Seattle', 'location': {'latitude': 10.5}} | Seattle     | 10.5                     |
     +-----------------------------------------------------+-------------+--------------------------+
 
-#### PPL query example: Group by struct inner attribute**
+#### Example PPL query: Group by struct inner attribute**
 
 The following PPL query example shows how to group by object field inner attribute.
 
