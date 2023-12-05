@@ -5,6 +5,7 @@
 
 import * as fs from 'fs/promises';
 import path from 'path';
+import { compareVersions, CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 
 function tryParseNDJson(content: string): object[] | null {
   try {

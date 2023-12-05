@@ -90,3 +90,11 @@ interface IntegrationInstanceQuery {
   added?: boolean;
   id?: string;
 }
+
+interface SerializedIntegration {
+  config: IntegrationConfig;
+  statics?: unknown;
+  components?: unknown;
+  assets?: unknown;
+  sampleData?: unknown;
+}

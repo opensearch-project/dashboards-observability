@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
+export type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
 
 /**
  * Helper function to compare version numbers.
@@ -13,7 +13,7 @@ type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
  * @param b Right-hand number
  * @returns -1 if a > b, 1 if a < b, 0 otherwise.
  */
-function compareVersions(a: string, b: string): number {
+export function compareVersions(a: string, b: string): number {
   const aParts = a.split('.').map(Number.parseInt);
   const bParts = b.split('.').map(Number.parseInt);
 
@@ -31,7 +31,7 @@ function compareVersions(a: string, b: string): number {
   return 0; // a == b
 }
 
-interface CatalogDataAdaptor {
+export interface CatalogDataAdaptor {
   /**
    * Reads a Json or NDJson file from the data source.
    *

@@ -3,22 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs/promises';
-import path from 'path';
+import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 
 /**
  * A CatalogDataAdaptor that reads from a provided list of JSON objects.
  * Used to read Integration information when the user uploads their own catalog.
  */
 export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
-  integrationsList: object[];
+  integrationsList: SerializedIntegration[];
 
   /**
    * Creates a new FileSystemCatalogDataAdaptor instance.
    *
    * @param directory The base directory from which to read files. This is not sanitized.
    */
-  constructor(integrationsList: object[]) {
+  constructor(integrationsList: SerializedIntegration[]) {
     this.integrationsList = integrationsList;
   }
 
@@ -51,12 +50,27 @@ export class JsonCatalogDataAdaptor implements CatalogDataAdaptor {
   }
 
   async getDirectoryType(dirname?: string): Promise<'integration' | 'repository' | 'unknown'> {
-    // TODO
-    return 'unknown';
+    // First, filter list by dirname if available
+    const integrationsList = dirname
+      ? this.integrationsList.filter((i) => i.config.name === dirname)
+      : this.integrationsList;
+    if (integrationsList.length === 0) {
+      return 'unknown';
+    }
+    // The list is an integration iff all of its names match
+    for (let i = 0; i < integrationsList.length - 1; i++) {
+      if (integrationsList[i].config.name !== integrationsList[i + 1].config.name) {
+        return 'repository';
+      }
+    }
+    return 'integration';
   }
 
   join(filename: string): JsonCatalogDataAdaptor {
-    // Since the integration list is flat, joining is a no-op.
-    return this;
+    // In other adaptors, joining moves from directories to integrations.
+    // Since for JSON adapting we use a flat structure, we just filter.
+    return new JsonCatalogDataAdaptor(
+      this.integrationsList.filter((i) => i.config.name === filename)
+    );
   }
 }

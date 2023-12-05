@@ -6,6 +6,7 @@
 import path from 'path';
 import { validateTemplate } from '../validators';
 import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
+import { CatalogDataAdaptor } from './catalog_data_adaptor';
 
 /**
  * The Integration class represents the data for Integration Templates.
@@ -298,17 +299,7 @@ export class IntegrationReader {
    * @param version The version of the integration to serialize.
    * @returns A large object which includes all of the integration's data.
    */
-  async serialize(
-    version?: string
-  ): Promise<
-    Result<{
-      config: IntegrationConfig;
-      statics: unknown;
-      components: unknown;
-      assets: unknown;
-      sampleData: unknown;
-    }>
-  > {
+  async serialize(version?: string): Promise<Result<SerializedIntegration>> {
     const configResult = await this.getConfig(version);
     if (!configResult.ok) {
       return configResult;
