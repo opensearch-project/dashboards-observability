@@ -8,7 +8,7 @@ export const pplDatatypes = `## Data Types
 
 ### Data Types
 
-A data type defines a collection of data type values and a set of predefined operations on those values. PPL supports the following data types:
+A data type defines a collection of data type values and a set of predefined operations for those values. PPL supports the following data types:
 
 .. hlist::
    :columns: 3
