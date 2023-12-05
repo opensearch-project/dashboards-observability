@@ -44,7 +44,7 @@ Return type: DOUBLE
 
 ### ASIN
 
-\`asin(x)\` is an arc sine function. The function expects the values in the range of \`-1\` to \`1\`, and returns \`NULL\` if the values aren't in that range.
+\`asin(x)\` is an arc sine function. The function expects values in the range of \`-1\` to \`1\` and returns \`NULL\` if the values aren't in that range.
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
