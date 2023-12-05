@@ -189,7 +189,7 @@ The following example struct stores information about person attributes in an in
 
 #### Example: Employees
 
-The following struct example stores information about employees in an index named \`employees_nested\`. Note, the field \`projects\` is a nested field.
+The following example struct stores information about employees in an index named \`employees_nested\`. Note that the field \`projects\` is a nested field.
 
     {
       "mappings": {
