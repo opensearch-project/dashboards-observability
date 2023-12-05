@@ -44,5 +44,5 @@ The following PPL query example finds the most common age grouped by gender.
     +----------+----------+
 
 #### Limitation
-The \`top\` command is not rewritten to Query DSL. It's only run on the coordinating node.
+The \`top\` command is not rewritten to query DSL. It is only run on the coordinating node.
 `;
