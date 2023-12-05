@@ -63,5 +63,5 @@ The following PPL query example shows how to find a least common value in the \`
     +----------+----------+
 
 #### Limitation
-The \`rare\` command is not rewritten to Query DSL. It's only run on the coordinating node.
+The \`rare\` command is not rewritten to query DSL. It is only run on the coordinating node.
 `;
