@@ -122,7 +122,7 @@ each other, with some alteration of the value or some information loss, for exam
 
 - Because \`date\` does not contain time information, conversion to \`time\` returns a zero time value \`00:00:00\`.
 - Converting from \`date\` to \`datetime\` sets to \`00:00:00\` if \`time\` is not provided, for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00\`.
-- Converting to \`timestamp\` sets \`time\` to \`00:00:00\` and the time zone(UTC by default), for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00 UTC\`.
+- Converting to \`timestamp\` sets \`time\` to \`00:00:00\` and the time zone (UTC by default), for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00 UTC\`.
 
 #### \`time\` conversion
 
