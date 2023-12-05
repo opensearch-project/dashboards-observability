@@ -175,7 +175,7 @@ Synonyms: SUBSTR
 
 ### TRIM
 
-\`trim\` is a function used to remove leading and trailing whitespace of a string.
+\`trim\` is a function used to remove leading and trailing white space from a string.
 
 Argument Type: STRING
 
