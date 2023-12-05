@@ -50,7 +50,7 @@ The following PPL example shows how to use \`eval\` to override an existing fiel
 
 #### Example 3: Create new fields based on the fields defined in the \`eval\` expression
 
-The following PPL example shows how to use \`eval\` to create a new field based on the fields defined in the \`eval\` esperession. In this example, the new field \`ddAge\` is the evaluation result of the \`doubleAge\` field multiplied by 2. The doubleAge is defined in the eval command.
+The following PPL example shows how to use \`eval\` to create a new field based on the fields defined in the \`eval\` expression. In this example, the new field \`ddAge\` is the evaluation result of the \`doubleAge\` field multiplied by 2. The doubleAge is defined in the eval command.
 
     os> source=accounts | eval doubleAge = age * 2, ddAge = doubleAge * 2 | fields age, doubleAge, ddAge ;
     fetched rows / total rows = 4/4
