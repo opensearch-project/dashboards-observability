@@ -64,5 +64,5 @@ The following PPL example shows how to use \`eval\` to create a new field based 
     +-------+-------------+---------+
 
 ### Limitation
-The \`eval\` command is not rewritten to Query DSL. It's only run on the coordinating node.
+The \`eval\` command is not rewritten to query DSL. It is only run on the coordinating node.
 `;
