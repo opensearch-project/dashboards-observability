@@ -23,7 +23,7 @@ The following identifiers are supported extensionally in OpenSearch:
 - **Identifiers prefixed by dot \`.\`:** This is called a hidden index. An example is \`.opensearch_dashboards\`.
 - **Identifiers prefixed by the at symbol \`@\`:** This is common in meta fields generated for data ingestion.
 - **Identifiers with \`-\` in the middle:** This is common in index naming convertions with date information.
-- **Identifiers with the asterik \`*\` symbol:** This is common for wildcard matches in an index pattern.
+- **Identifiers with the asterisk \`*\` symbol:** This is common in wildcard matches in an index pattern.
 
 Index names with a date suffix separated by dashes or dots, such as
 \`cwl-2020.01.11\` or \`logs-7.0-2020.01.11\` are common for data ingestion. Identifers used as index names need not be enclosed in quotation marks. Additionally, wildcards within date patterns are accepted, enabling data retrieval across indexes convering different data ranges. For example, you can use \`logs-2020.1*\` to search in indices for October, November,
