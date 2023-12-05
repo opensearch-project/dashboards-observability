@@ -144,7 +144,7 @@ STDDEV\_POP(expr): Returns the population standard deviation of a set of values 
 
 The \`by\` clause can contain fields, expressions, scalar functions, or aggregation functions. The \`span\` clause can be used in the \`by\` clause to split specific fields into buckets of the same interval. The \`stats\` command then performs the aggregation on these buckets.
 
-The span syntax is \`span(field_expr, interval_expr)\`. By default, the interval expression in the \`span\` clause if interpreted in natural untis. If the field is a date and time type field and the interval is in date and time units, you must specify the unit in the interval expression. For example, tp split the \`age\` field into buckets of 10 years, you would use \`span(age, 10y). To split a timestamp field into hourly intervals, you would use \`span(timestamp, 1h)\`.
+The span syntax is \`span(field_expr, interval_expr)\`. By default, the interval expression in the \`span\` clause is interpreted in natural units. If the field is a date and time type field and the interval is in date and time units, you must specify the unit in the interval expression. For example, to split the \`age\` field into buckets of 10 years, you would use \`span(age, 10y). To split a timestamp field into hourly intervals, you would use \`span(timestamp, 1h)\`.
 
 The following table lists the available time units.
 
