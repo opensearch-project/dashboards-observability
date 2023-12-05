@@ -66,6 +66,7 @@ export const InnerGridVisualization = ({
   const metric = allMetrics[id];
   if (!metric) return <></>;
 
+  console.log('vis', { metric });
   return (
     <EuiDraggable key={id} index={idx} draggableId={id}>
       <VisualizationContainer

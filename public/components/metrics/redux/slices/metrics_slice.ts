@@ -70,7 +70,7 @@ const mergeMetricCustomizer = function (objValue, srcValue) {
   return {
     ...srcValue,
     availableAttributes:
-      objValue?.availableAttributes.length > 0
+      objValue?.availableAttributes?.length > 0
         ? objValue.availableAttributes
         : srcValue.availableAttributes,
   };
@@ -121,6 +121,11 @@ const fetchCustomMetrics = async () => {
     name: obj.savedVisualization.name,
     catalog: OBSERVABILITY_CUSTOM_METRIC,
     type: obj.savedVisualization.type,
+    sub_type: obj.savedVisualization.sub_type,
+    aggregation: obj.savedVisualization.query_meta_data?.aggregation ?? 'avg',
+    availableAttributes: [],
+    attributesGroupBy: obj.savedVisualization.query_meta_data?.attributesGroupBy ?? [],
+    index: `${obj.savedVisualization.query_meta_data?.catalogSourceName}.${obj.savedVisualization.query_meta_data?.catalogTableName}`,
     recentlyCreated: (Date.now() - obj.createdTimeMs) / 36e5 <= 12,
   }));
 };
