@@ -62,7 +62,7 @@ Return type: DOUBLE
 
 ### ATAN
 
-\`atan(x)\` is an arc tangent function that returns arc tangent of a value \`x\`.
+\`atan(x)\` is an arc tangent function that returns an arc tangent of a value \`x\`.
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
