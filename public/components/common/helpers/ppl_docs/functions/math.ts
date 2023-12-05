@@ -80,7 +80,7 @@ Return type: DOUBLE
 
 ### ATAN2
 
-\`atan2(y, x)\` is an arc tangent function that calculates the angle from a specified point to the coordinate oriign as measured from the positive x-axis.
+\`atan2(y, x)\` is an arc tangent function that calculates the angle from a specified point to the coordinate origin as measured from the positive x-axis.
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
