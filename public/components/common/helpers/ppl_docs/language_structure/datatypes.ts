@@ -303,7 +303,7 @@ The following example PPL query shows how to fetch city (top level), city.name (
 
 #### Example PPL query: Group by struct inner attribute**
 
-The following PPL query example shows how to group by object field inner attribute.
+The following example PPL query shows how to group by object field inner attribute.
 
     os> source=people | stats count() by city.name;
     fetched rows / total rows = 1/1
