@@ -313,7 +313,7 @@ The following example PPL query shows how to group by object field inner attribu
     | 1         | Seattle     |
     +-----------+-------------+
 
-#### PPL query example: Selecting field of array value
+#### Example PPL query: Selecting field of array value
 
 Select a deeper level for object fields of array values that return the
 first element in the array. For example, because the document's inner field \`accounts.id\` has three values instead of a tuple, the first entry is returned.
