@@ -22,7 +22,7 @@ dedup \[int\] &lt;field-list&gt; \[keepempty=&lt;bool&gt;\]
 
 #### Example 1: Dedup by one field
 
-The following PPL query example shows how to use \`dedup\` to remove duplicate documents based on the \`gender\` field.
+The following example PPL query shows how to use \`dedup\` to remove duplicate documents based on the \`gender\` field.
 
     os> source=accounts | dedup gender | fields account_number, gender;
     fetched rows / total rows = 2/2
