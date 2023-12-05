@@ -14,7 +14,7 @@ Use the \`parse\` command to extract information from a text field using a regul
 parse &lt;field&gt; &lt;regular-expression&gt;
 
 - \`field\`: Required. Must be a text field.
-- \`regular-expression\`: Required. The regular expression to extract new fields from a text field. It replaces the original field if a new field name exists.
+- \`regular-expression\`: Required. The regular expression used to extract new fields from a text field. It replaces the original field if a new field name exists.
 
 ### Regular expression
 
