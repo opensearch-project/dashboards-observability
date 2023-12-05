@@ -56,7 +56,7 @@ The following table is a reference guide for the mapping between an OpenSearch d
 | short           | byte      | SMALLINT  |
 | text            | text      | VARCHAR   |
 
-Some PPL types do not correspond with an OpenSearch type, for example, date and time. To use functions that require these data types, data type conversion must be performed.
+Some PPL types do not correspond to an OpenSearch type, for example, date and time. To use functions that require these data types, data type conversion must be performed.
 
 ### Numeric data types
 
