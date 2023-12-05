@@ -5,7 +5,7 @@
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { IntegrationInstanceBuilder } from '../integrations_builder';
-import { IntegrationReader } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration_reader';
 
 const mockSavedObjectsClient: SavedObjectsClientContract = ({
   bulkCreate: jest.fn(),

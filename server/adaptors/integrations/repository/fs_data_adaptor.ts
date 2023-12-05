@@ -6,32 +6,6 @@
 import * as fs from 'fs/promises';
 import path from 'path';
 
-/**
- * Helper function to compare version numbers.
- * Assumes that the version numbers are valid, produces undefined behavior otherwise.
- *
- * @param a Left-hand number
- * @param b Right-hand number
- * @returns -1 if a > b, 1 if a < b, 0 otherwise.
- */
-function compareVersions(a: string, b: string): number {
-  const aParts = a.split('.').map(Number.parseInt);
-  const bParts = b.split('.').map(Number.parseInt);
-
-  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-    const aValue = i < aParts.length ? aParts[i] : 0;
-    const bValue = i < bParts.length ? bParts[i] : 0;
-
-    if (aValue > bValue) {
-      return -1; // a > b
-    } else if (aValue < bValue) {
-      return 1; // a < b
-    }
-  }
-
-  return 0; // a == b
-}
-
 function tryParseNDJson(content: string): object[] | null {
   try {
     const objects = [];
@@ -59,7 +33,7 @@ const safeIsDirectory = async (maybeDirectory: string): Promise<boolean> => {
 
 /**
  * A CatalogDataAdaptor that reads from the local filesystem.
- * Used to read Integration information when the user uploads their own catalog.
+ * Used to read default Integrations shipped in the in-product catalog at `__data__`.
  */
 export class FileSystemCatalogDataAdaptor implements CatalogDataAdaptor {
   directory: string;

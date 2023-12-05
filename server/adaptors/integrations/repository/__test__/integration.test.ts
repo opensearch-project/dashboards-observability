@@ -4,7 +4,7 @@
  */
 
 import * as fs from 'fs/promises';
-import { IntegrationReader } from '../integration';
+import { IntegrationReader } from '../integration_reader';
 import { Dirent, Stats } from 'fs';
 import * as path from 'path';
 import { TEST_INTEGRATION_CONFIG } from '../../../../../test/constants';

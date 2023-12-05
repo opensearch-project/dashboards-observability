@@ -5,6 +5,32 @@
 
 type IntegrationPart = 'assets' | 'data' | 'schemas' | 'static';
 
+/**
+ * Helper function to compare version numbers.
+ * Assumes that the version numbers are valid, produces undefined behavior otherwise.
+ *
+ * @param a Left-hand number
+ * @param b Right-hand number
+ * @returns -1 if a > b, 1 if a < b, 0 otherwise.
+ */
+function compareVersions(a: string, b: string): number {
+  const aParts = a.split('.').map(Number.parseInt);
+  const bParts = b.split('.').map(Number.parseInt);
+
+  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+    const aValue = i < aParts.length ? aParts[i] : 0;
+    const bValue = i < bParts.length ? bParts[i] : 0;
+
+    if (aValue > bValue) {
+      return -1; // a > b
+    } else if (aValue < bValue) {
+      return 1; // a < b
+    }
+  }
+
+  return 0; // a == b
+}
+
 interface CatalogDataAdaptor {
   /**
    * Reads a Json or NDJson file from the data source.

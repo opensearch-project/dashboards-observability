@@ -5,7 +5,7 @@
 
 import * as fs from 'fs/promises';
 import { TemplateManager } from '../repository';
-import { IntegrationReader } from '../integration';
+import { IntegrationReader } from '../integration_reader';
 import { Dirent, Stats } from 'fs';
 import path from 'path';
 

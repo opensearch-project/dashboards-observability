@@ -8,7 +8,7 @@
  */
 
 import { TemplateManager } from '../repository/repository';
-import { IntegrationReader } from '../repository/integration';
+import { IntegrationReader } from '../repository/integration_reader';
 import path from 'path';
 import * as fs from 'fs/promises';
 

@@ -4,7 +4,7 @@
  */
 
 import * as path from 'path';
-import { IntegrationReader } from './integration';
+import { IntegrationReader } from './integration_reader';
 import { FileSystemCatalogDataAdaptor } from './fs_data_adaptor';
 
 export class TemplateManager {

@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { uuidRx } from 'public/components/custom_panels/redux/panel_slice';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
-import { IntegrationReader } from './repository/integration';
+import { IntegrationReader } from './repository/integration_reader';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 
 interface BuilderOptions {
