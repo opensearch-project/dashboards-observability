@@ -50,7 +50,7 @@ A delimited identifier is an identifier enclosed in backticks \`\` that contain 
 
 #### Use cases
 
-Common use case for delimited identifiers include:
+Common use cases for delimited identifiers include the following:
 
 - Identifiers that coincide with reserved keywords
 - Identifiers that contain a dot \`.\` or a dash \`-\` need to be distinguished from regular identifiers with qualifiers. Enclosing such identifiers in backticks \`\` allows the parser to differentiate them from qualified identifiers and enables date information within index names.
