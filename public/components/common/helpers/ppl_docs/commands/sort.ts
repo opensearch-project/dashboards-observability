@@ -63,7 +63,7 @@ The following PPL query example shows how to sort all documents, with the \`age\
 
 #### Example 4: Sort multiple fields in both ascending and descending order 
 
-The following PPL query example shows how to sort all documents in ascending and descending order, with the \`gender\` field in ascending order and the \`age\` field in descending order.
+The following PPL query example shows how to sort all documents in both ascending and descending order, with the \`gender\` field in ascending order and the \`age\` field in descending order.
 
     os> source=accounts | sort + gender, - age | fields account_number, gender, age;
     fetched rows / total rows = 4/4
