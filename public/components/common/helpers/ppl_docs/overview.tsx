@@ -16,7 +16,7 @@ PPL is the primary language used with observability in OpenSearch, and it suppor
 - Find all log messages that contain a specific error code. 
 - Identify trends in your data over time. 
 - Group similar data points.
-- Caluculate statistics on your data.
+- Calculate statistics for your data.
 
 PPL is available in OpenSearch Dashboards and in a standalone command-line tool. Within OpenSearch Dashboards, you can use [Query Workbench](https://opensearch.org/docs/latest/dashboards/query-workbench/) to run on-demand PPL commands and view and save the results as text and JSON. The [PPL command line interface (CLI)](https://opensearch.org/docs/latest/search-plugins/sql/cli/) is a standalone Python application that you can launch with the \`opensearchsql\` command. The PPL CLI is useful for running on-demand PPL commands and viewing  and saving the results as text and JSON.
 
