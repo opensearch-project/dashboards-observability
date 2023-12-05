@@ -203,7 +203,7 @@ The following PPL query example calculates the average age grouped by gender.
 
 #### Example 4: Calculate the average, sum, and count of a field by group
 
-The following PPL query example calculates the average age, sum age and count of events by gender.
+The following example PPL query calculates the average age, sum age, and count of events by gender.
 
     os> source=accounts | stats avg(age), sum(age), count() grouped by gender;
     fetched rows / total rows = 2/2
