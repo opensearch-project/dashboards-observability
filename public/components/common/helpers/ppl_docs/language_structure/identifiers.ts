@@ -26,7 +26,7 @@ The following identifiers are supported extensionally in OpenSearch:
 - **Identifiers with the asterisk \`*\` symbol:** This is common in wildcard matches in an index pattern.
 
 Index names with a date suffix separated by dashes or dots, such as
-\`cwl-2020.01.11\` or \`logs-7.0-2020.01.11\` are common for data ingestion. Identifers used as index names need not be enclosed in quotation marks. Additionally, wildcards within date patterns are accepted, enabling data retrieval across indexes convering different data ranges. For example, you can use \`logs-2020.1*\` to search in indices for October, November,
+\`cwl-2020.01.11\` or \`logs-7.0-2020.01.11\`, are common in data ingestion. Identifiers used as index names do not need to be enclosed in quotation marks. Additionally, wildcards within date patterns are accepted, enabling data retrieval across indexes covering different date ranges. For example, you can use \`logs-2020.1*\` to search in indexes for October, November,
 and December 2020.
 
 #### PPL query example
