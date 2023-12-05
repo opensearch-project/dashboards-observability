@@ -18,7 +18,7 @@ head \[N\]
 
 #### Example 1: Get first 10 results
 
-The following PPL query example shows how to use \`head\` to see the first 10 search results. 
+The following PPL query example shows how to use \`head\` to get the first 10 search results. 
     os> source=accounts | fields firstname, age | head;
     fetched rows / total rows = 10/10
     +---------------+-----------+
