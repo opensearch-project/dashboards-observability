@@ -31,7 +31,7 @@ and December 2020.
 
 #### Example PPL query
 
-The following PPL query example uses an index pattern directly without quotes.
+The following example PPL query uses an index pattern directly without quotes.
 
     os> source=accounts | fields account_number, firstname, lastname;
     fetched rows / total rows = 4/4
