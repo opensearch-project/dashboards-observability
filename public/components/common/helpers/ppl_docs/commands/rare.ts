@@ -8,7 +8,7 @@ export const rareCmd = `## rare
 
 ### Description
 
-Use the \`rare\` command to find the least common tuple of values across all fields in the \`field-list\` field. Maximum of 10 results are returned for each distinct tuple of group-by field values.
+Use the \`rare\` command to find the least common tuple of values across all fields in the \`field-list\` field. A maximum of 10 results are returned for each distinct tuple of group-by field values.
 
 ### Syntax
 
