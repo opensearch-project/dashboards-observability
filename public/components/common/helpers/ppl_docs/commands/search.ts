@@ -34,7 +34,7 @@ The following PPL query example shows how to fetch all documents from the \`acco
     | 18             | Dale      | 467 Hutchinson Court | 4180    | M      | Orick  | null     | MD    | 33  | daleadams@boink.com   | Adams    |
     +----------------+-----------+----------------------+---------+--------+--------+----------+-------+-----+-----------------------+----------+
 
-#### Example 2: Fetch data with condition
+#### Example 2: Fetch data with a condition
 
 The following PPL query example shows how to fetch all documents from the \`accounts\` index by using an \`or\` condition.
 
