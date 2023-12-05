@@ -423,7 +423,7 @@ Return type: DOUBLE
 ### RAND
 
 \`RAND()/RAND(N)\` is a function that returns a random floating-point value in the range \`0 &lt;= value &lt; 1.0\`. If integer \`N\` is specified, the seed is
-initialized prior to execution. One implication of this behavior is with
+initialized prior to execution. One implication of this behavior is that with
 identical argument \`N\`, \`rand(N)\` returns the same value each time and thus
 produces a repeatable sequence of column values.
 
