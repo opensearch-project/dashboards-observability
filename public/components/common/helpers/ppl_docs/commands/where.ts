@@ -16,7 +16,7 @@ where &lt;boolean-expression&gt;
 
 -   \`bool-expression\`: Optional. Any expression that can be evaluated to a Boolean expression.
 
-#### Example 1: Filter result set with condition
+#### Example 1: Filter the result set with a condition
 
 The following PPL query example fetches all documents from the \`accounts\` index using an \`or\ condition.
 
