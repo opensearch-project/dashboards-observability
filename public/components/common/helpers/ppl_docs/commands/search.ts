@@ -16,7 +16,7 @@ command can only be used as the first command in a PPL query.
 search source=&lt;index&gt; \[boolean-expression\]
 
 -   \`search\`: Search keywords, which can be ignored.
--   \`index\`: Requires. Search commands must specify the index to query.
+-   \`index\`: Required. Search commands must specify the index to query.
 -   \`bool-expression\`: Optional. Any expression that can be evaluated to a Boolean value.
 
 #### Example 1: Fetch all data from an index
