@@ -36,7 +36,7 @@ The following PPL query example shows how to use \`head\` to get the first 10 se
     | Fulton        | 23        |
     +---------------+-----------+
 
-#### Example 2: Get first N results
+#### Example 2: Get the first N results
 
 The following PPL query example shows how to use \`head\` to get a speficied number of search results. In this example, N is 3. 
 
