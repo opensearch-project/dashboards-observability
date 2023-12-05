@@ -69,7 +69,7 @@ The data types \`date\` and \`time\` represent temporal values. The PPL plugin s
 
 #### Date
 
-The \`date\` data type represents the calendar date regardless of time zone. A specific date value represents a 24-hour period, but this period differs across time zones and may be subject to variations due to daylight savings time adjustments. Additionally, the date alone does not contain time-sppecific information. The date values range from '1000-01-01' to '9999-12-31'.
+The \`date\` data type represents the calendar date, regardless of time zone. A specific date value represents a 24-hour period, but this period differs across time zones and may be subject to variations due to daylight saving time adjustments. Additionally, the date alone does not contain time-specific information. The date values range from '1000-01-01' to '9999-12-31'.
 
 | Type     | Syntax       | Range                        |
 |----------|--------------|------------------------------|
