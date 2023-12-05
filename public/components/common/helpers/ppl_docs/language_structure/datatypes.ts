@@ -115,7 +115,7 @@ Intervals consist of two classes: day-time and year-week. Day-time intervals sto
 
 ### Date and time conversion
 
-Date and time types, excluding  \`interval\` can be converted to
+Date and time types, excluding \`interval\`, can be converted to
 each other, with some alteration of the value or some information loss, for example extracting the time value from a datetime value, or convert a date value to a datetime value and so forth. Here lists the summary of the conversion rules that PPL plugin supports for each of the types:
 
 #### \`date\` conversion
