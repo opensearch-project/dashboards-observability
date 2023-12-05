@@ -5,7 +5,7 @@
 
 export const overview = `## Overview
 ---
-Piped Processing Language (PPL) is a query language for OpenSearch that processes data in a sequential, step-by-step manner. PPL uses a set of commands, connected by pipes (|), to process data and return results. (Note that the requests and results are read only.) 
+Piped Processing Language (PPL) is a query language for OpenSearch that processes data in a sequential, step-by-step manner. PPL uses a set of commands, connected by pipes (|), to process data and return results (note that the requests and results are read-only). 
 
 You can query data in OpenSearch using [PPL](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/), [Query DSL](https://opensearch.org/docs/latest/query-dsl/index/), or [SQL](https://opensearch.org/docs/latest/search-plugins/sql/sql/index/).
 
