@@ -85,7 +85,7 @@ The \`time\` data type represents the time of day as displayed on a clock or wat
 
 #### Datetime
 
-The \`datetime\` data type represents a combination of \`date\` and \`time\`.  The \`datetime\` data type does not contain time zone information. For an absolute time point that contains both datetime and time zone information, see the [Timestamp](#timestamp) section. 
+The \`datetime\` data type represents a combination of \`date\` and \`time\`. The \`datetime\` data type does not contain time zone information. For an absolute time point that contains both datetime and time zone information, see the [Timestamp](#timestamp) section. 
 
 See the[Conversion between date and time types(#conversion-between-date-and-time-types) section for information about the conversion rule for \`date\` or \`time\` to \`datetime\`.
 
