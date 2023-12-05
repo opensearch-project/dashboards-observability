@@ -160,7 +160,7 @@ The following table lists the available time units.
 | quarter (q)                |
 | year (y)                   |
 
-### PPL query examples
+### Example PPL queries
 
 The following examples show how to use the \`stats\` command in various PPL queries.
 
