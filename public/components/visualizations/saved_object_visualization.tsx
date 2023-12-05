@@ -40,7 +40,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
       queryMetaData: props.savedVisualization.query_meta_data,
       isMetric,
     };
-    const userConfigs = metaData.user_configs ? JSON.parse(metaData.user_configs) : {};
+    const userConfigs = JSON.parse(metaData.user_configs || metaData.userConfigs || '{}');
     const dataConfig = { ...(userConfigs.dataConfig || {}) };
     const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
     const realTimeParsedStats = isMetric

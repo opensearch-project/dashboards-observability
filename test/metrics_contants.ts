@@ -51,7 +51,7 @@ export const sampleMetric = {
     text: '',
     tokens: [],
   },
-  user_configs: '{}',
+  userConfigs: '{}',
   sub_type: 'metric',
 };
 
@@ -99,7 +99,7 @@ export const sampleVisualizationById = {
   timeField: 'timestamp',
   selected_date_range: {},
   selected_fields: {},
-  user_configs: {},
+  userConfigs: {},
   sub_type: 'metric',
 };
 
@@ -202,7 +202,7 @@ export const samplePrometheusVisualizationComponent = {
     tokens: [],
   },
   sub_type: 'metric',
-  user_configs: {},
+  userConfigs: {},
 };
 
 export const sampleVisualizationsList = [
@@ -277,7 +277,7 @@ export const sampleSavedMetric = {
     text: '',
     tokens: [],
   },
-  user_configs: {
+  userConfigs: {
     dataConfig: {
       series: [
         {

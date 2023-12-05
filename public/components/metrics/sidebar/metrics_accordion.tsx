@@ -32,11 +32,13 @@ export const MetricsAccordion = (props: IMetricNameProps) => {
       paddingSize="none"
     >
       <ul className="metricsList">
-        {metricsList.map((metric: any) => (
-          <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>
-            <MetricName metric={metric} handleClick={handleClick} />
-          </li>
-        ))}
+        {metricsList
+          .map((m) => m)
+          .map((metric: any) => (
+            <li key={metric.id} className="metricsListContainer" data-test-subj={dataTestSubj}>
+              <MetricName metric={metric} handleClick={handleClick} />
+            </li>
+          ))}
       </ul>
     </EuiAccordion>
   );

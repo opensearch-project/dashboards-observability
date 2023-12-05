@@ -22,6 +22,7 @@ const ObservabilityEmbeddableComponentInner: React.FC<ObservabilityEmbeddableCom
   props
 ) => {
   const visualization = props.output.attributes?.savedVisualization;
+  console.log('ObservabilityEmbeddableComponentInner', visualization);
   return visualization ? (
     <SavedObjectVisualization
       savedVisualization={visualization}

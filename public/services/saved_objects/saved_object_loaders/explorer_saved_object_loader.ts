@@ -241,7 +241,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
     let visConfig = {};
-    const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
+    const customConfig = objectData.userConfigs ? JSON.parse(objectData.user_configs || objectData.userConfigs) : {};
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {

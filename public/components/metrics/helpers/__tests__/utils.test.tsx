@@ -7,7 +7,6 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import {
-  createPrometheusMetricById,
   getNewVizDimensions,
   mergeLayoutAndMetrics,
   onTimeChange,
@@ -78,12 +77,6 @@ describe('Utils helper functions', () => {
   it('validates mergeLayoutAndMetrics function', () => {
     expect(mergeLayoutAndMetrics(sampleLayout, sampleVisualizationsList)).toStrictEqual(
       sampleMergedVisualizations
-    );
-  });
-
-  it('validates createPrometheusMetricById function', () => {
-    expect(createPrometheusMetricById(samplePrometheusVisualizationId)).toStrictEqual(
-      samplePrometheusVisualizationComponent
     );
   });
 });

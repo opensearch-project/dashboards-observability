@@ -91,7 +91,7 @@ export default class SavedObjects {
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {

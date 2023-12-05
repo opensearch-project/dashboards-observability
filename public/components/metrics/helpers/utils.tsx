@@ -13,6 +13,7 @@ import { VISUALIZATION, SAVED_VISUALIZATION } from '../../../../common/constants
 import {
   EVENT_ANALYTICS,
   OBSERVABILITY_BASE,
+  PROMQL_METRIC_SUBTYPE,
   SAVED_OBJECTS,
 } from '../../../../common/constants/shared';
 import PPLService from '../../../services/requests/ppl';
@@ -170,22 +171,6 @@ export const sortMetricLayout = (metricsLayout: MetricType[]) => {
   });
 };
 
-export const createPrometheusMetricById = (metricId: string) => {
-  return {
-    name: '[Prometheus Metric] ' + metricId,
-    description: '',
-    query: 'source = ' + metricId + ' | stats avg(@value) by span(@timestamp,1h)',
-    type: 'line',
-    timeField: '@timestamp',
-    selected_fields: {
-      text: '@value',
-      tokens: [],
-    },
-    sub_type: 'metric',
-    user_configs: {},
-  };
-};
-
 export const visualizationFromMetric = (metric, span, resolution): SavedVisualizationType => {
   const userConfigs = JSON.stringify({
     dataConfig: {
@@ -197,6 +182,7 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
     },
   });
 
+  console.error('WIP Correctly set subtype for visualizationFromMetric');
   return {
     ...metric,
     timeField: '@timestamp',
@@ -207,8 +193,7 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
       resolution,
     },
     type: 'line',
-    sub_type: 'metric',
-    user_configs: userConfigs,
-    userConfigs, // this is necessary to save configs with OSDSavedObjectClient.create()
+    sub_type: PROMQL_METRIC_SUBTYPE,
+    userConfigs: JSON.stringify(userConfigs),
   };
 };

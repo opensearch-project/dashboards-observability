@@ -217,9 +217,14 @@ export class CustomPanelsAdaptor {
       timeField: visualization.savedVisualization.selected_timestamp.name,
       selected_date_range: visualization.savedVisualization.selected_date_range,
       selected_fields: visualization.savedVisualization.selected_fields,
-      user_configs: visualization.savedVisualization.hasOwnProperty('user_configs')
-        ? JSON.parse(visualization.savedVisualization.user_configs)
-        : {},
+      userConfigs:
+        visualization.savedVisualization.hasOwnProperty('userConfigs') ||
+        visualization.savedVisualization.hasOwnProperty('user_configs')
+          ? JSON.parse(
+              visualization.savedVisualization.user_configs ||
+                visualization.savedVisualization.userConfigs
+            )
+          : {},
       sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
         ? visualization.savedVisualization.sub_type
         : '',

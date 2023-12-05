@@ -111,7 +111,7 @@ export abstract class OSDSavedObjectClient extends SavedObjectClientBase {
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {

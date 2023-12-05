@@ -407,13 +407,18 @@ export const renderCatalogVisualization = async ({
     visualizationTimeField
   );
 
-  visualization.user_configs = {
+  visualizationMetaData.userConfigs = {
     layoutConfig: {
       height: 390,
       margin: { t: 5 },
       legend: { visible: false },
     },
   };
+
+  console.error('WIP correctly set metadata for createCatalogVisualizationMetaData', {
+    visualization,
+    visualizationMetaData,
+  });
 
   setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
@@ -464,7 +469,7 @@ export const parseSavedVisualizations = (
     timeField: visualization.savedVisualization.selected_timestamp.name,
     selected_date_range: visualization.savedVisualization.selected_date_range,
     selected_fields: visualization.savedVisualization.selected_fields,
-    user_configs: visualization.savedVisualization.user_configs || {},
+    userConfigs: visualization.savedVisualization.userConfigs || {},
     sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
       ? visualization.savedVisualization.sub_type
       : '',
@@ -564,7 +569,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     return <></>;
   }
 
-  const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
+  const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
@@ -591,13 +596,13 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   const mixedUserConfigs = {
     availabilityConfig: {
-      ...(metaData.user_configs?.availabilityConfig || {}),
+      ...(metaData.userConfigs?.availabilityConfig || {}),
     },
     dataConfig: {
       ...finalDataConfig,
     },
     layoutConfig: {
-      ...(metaData.user_configs?.layoutConfig || {}),
+      ...(metaData.userConfigs?.layoutConfig || {}),
     },
   };
 

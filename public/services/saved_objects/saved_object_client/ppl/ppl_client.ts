@@ -108,7 +108,7 @@ export class PPLSavedObjectClient extends SavedObjectClientBase implements ISave
     }
 
     if (!isEmpty(userConfigs)) {
-      objRequest.object.user_configs = userConfigs;
+      objRequest.object.userConfigs = userConfigs;
     }
 
     if (!isEmpty(subType)) {
