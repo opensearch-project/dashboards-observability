@@ -7,7 +7,7 @@ export const fieldsCmd = `## fields
 ---
 ### Description
 
-Use the \`fields\` command to specify the fields that should be included or excluded in the search results.
+Use the \`fields\` command to specify the fields that should be included in or excluded from the search results.
 
 ### Syntax
 
