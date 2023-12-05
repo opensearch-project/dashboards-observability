@@ -10,7 +10,7 @@ export const statsCmd = `## stats
 
 Use the \`stats\` command to calculate the aggregation from the search results.
 
-The following table catalogs the aggregation functions and defines how the null and missing values are handled:
+The following table catalogs the aggregation functions and defines how the null and missing values are handled.
 
 |          |             |             |
 |----------|-------------|-------------|
