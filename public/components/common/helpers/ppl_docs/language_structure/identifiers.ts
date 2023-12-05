@@ -16,7 +16,7 @@ identifiers are _regular identifiers_ and _delimited identifiers_.
 
 A regular identifier is a string of characters that starts with an
 ASCII letter (lowercase or uppercase). The subsequent characters can be a
-combination of letters, digits, or underscores (\`_\`). A regular identifier cannot be a reversed keyword, and whitespace or other special characters are not allowed.
+combination of letters, digits, or underscores (\`_\`). A regular identifier cannot be a reversed keyword, and white space or other special characters are not allowed.
 
 The following identifiers are supported extensionally in OpenSearch:
 
