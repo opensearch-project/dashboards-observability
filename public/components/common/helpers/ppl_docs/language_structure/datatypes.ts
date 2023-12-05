@@ -95,7 +95,7 @@ See the [Conversion between date and time types](#conversion-between-date-and-ti
 
 #### Timestamp
 
-The \`timestamp\` data type repreents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sotred, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures the timestamp values remain consistent and comparable across different time zones.
+The \`timestamp\` data type represents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sotred, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures that the timestamp values remain consistent and comparable across different time zones.
 
 | Type      | Syntax | Range |
 |-----------|--------|-------|
