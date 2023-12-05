@@ -44,7 +44,7 @@ Return type: STRING
 
 ### LENGTH
 
-\`length(str)\` is a function that returns the length of a string that is measured in number of bytes.
+\`length(str)\` is a function that returns the length of a string, measured in number of bytes.
 
 Specification: LENGTH(STRING) -&gt; INTEGER
 
