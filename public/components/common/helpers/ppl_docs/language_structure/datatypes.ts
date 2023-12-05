@@ -289,7 +289,7 @@ Result set:
       ]
     }
 
-#### PPL query example: Select struct inner attribute
+#### Example PPL query: Select a struct inner attribute
 
 The following PPL query example shows how to fetch city (top level), city.name (second level), city.location.latitude (deeper level) struct type data from the People results.
 
