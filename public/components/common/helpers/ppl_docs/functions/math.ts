@@ -500,7 +500,7 @@ Return type: DOUBLE
 
 ### SQRT
 
-\`sqrt\` is a function that salculates the square root of a non-negative value \`x\`.
+\`sqrt\` is a function that calculates the square root of a non-negative value \`x\`.
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
