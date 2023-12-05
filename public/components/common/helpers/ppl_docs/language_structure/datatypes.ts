@@ -109,7 +109,7 @@ The \`interval\` data type represents a span of time, encompassing a specified d
 |----------|--------------------|
 | Interval | INTERVAL expr unit |
 
-the expression \`expr\` is configured to be repeatedly evaluated to produce a quantitative value. See the [Expressions](expressions.rst) section of this maniual for more information. The unit represents the unit for interpreting the quantity, including MICROSECOND, SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER and YEAR.The INTERVAL keyword and the unit specifier are not case sensitive. 
+The expression \`expr\` is configured to be repeatedly evaluated to produce a quantitative value. See the [Expressions](expressions.rst) section of this manual for more information. The unit represents the unit used to interpret the quantity, including MICROSECOND, SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER, and YEAR. The INTERVAL keyword and the unit specifier are not case sensitive. 
 
 Interval consist of two classes: day-time and year-week. Day-time intervals store days, hours, minutes, seconds, and microseconds. Year-week intervals store years, quarters, months, and weeks. Each type can only be compare to the same type: day-time to day-time and year-week to year-week. 
 
