@@ -26,7 +26,7 @@ Return type: INTEGER/LONG/FLOAT/DOUBLE
 
 ### ACOS
 
-\`acos(x)\` is an arc cosine function. The function expects the values in the range of \`-1\` to \`1\`, and returns \`NULL\` if the values aren't in that range.
+\`acos(x)\` is an arc cosine function. The function expects values in the range of \`-1\` to \`1\` and returns \`NULL\` if the values aren't in that range.
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
