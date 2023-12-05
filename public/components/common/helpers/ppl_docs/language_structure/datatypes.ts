@@ -132,7 +132,7 @@ each other, with some alteration of the value or some information loss, for exam
 
 - Converting from \`datetime\` to \`date\` extracts the date component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`2020-08-08\`.
 - Converting to \`time\` extracts the time component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`14&#58;09&#58;00\`.
-- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone the session's time zone, for example, \`2020-08-17 14&#58;09&#58;00\` with system time zone as UTC converts to \`2020-08-17 14&#58;09&#58;00 UTC\`.
+- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone to the session's time zone, for example, \`2020-08-17 14&#58;09&#58;00\` with system time zone as UTC converts to \`2020-08-17 14&#58;09&#58;00 UTC\`.
 
 #### \`timestamp\` conversion
 
