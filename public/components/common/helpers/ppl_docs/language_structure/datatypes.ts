@@ -136,7 +136,7 @@ each other, with some alteration of the value or some information loss, for exam
 
 #### \`timestamp\` conversion
 
-- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14&#58;09&#58;00 UTC\` converts to date and time as \`2020-08-17\` and \`14&#58;09&#58;00\` and to datetime as \`2020-08-17 14&#58;09&#58;00\`.
+- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14&#58;09&#58;00 UTC\` converts the date and time to \`2020-08-17\` and \`14&#58;09&#58;00\` and datetime to \`2020-08-17 14&#58;09&#58;00\`.
 
 ### String data types
 
