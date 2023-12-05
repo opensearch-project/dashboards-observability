@@ -443,7 +443,7 @@ Return type: FLOAT
 
 ### ROUND
 
-\`ROUND(x, d)\` is a function that rounds the argument \`x\` to \`d\` decimal places. \`d\` defaults to \`0\` if value is not specified.
+\`ROUND(x, d)\` is a function that rounds the argument \`x\` to \`d\` decimal places. \`d\` defaults to \`0\` if a value is not specified.
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
