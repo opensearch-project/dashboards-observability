@@ -149,7 +149,7 @@ OpenSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/obje
 
 #### Example: People
 
-The following struct example stores information about person attributes in an index \`peope\` with fields: deep-nested object field \`city\`, object field of array value \`account\`, and nested field \`projects\`.
+The following example struct stores information about person attributes in an index \`peope\` containing the following fields: deep-nested object field \`city\`, object field of array value \`account\`, and nested field \`projects\`.
 
     {
       "mappings": {
