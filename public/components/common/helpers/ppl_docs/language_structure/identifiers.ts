@@ -29,7 +29,7 @@ Index names with a date suffix separated by dashes or dots, such as
 \`cwl-2020.01.11\` or \`logs-7.0-2020.01.11\`, are common in data ingestion. Identifiers used as index names do not need to be enclosed in quotation marks. Additionally, wildcards within date patterns are accepted, enabling data retrieval across indexes covering different date ranges. For example, you can use \`logs-2020.1*\` to search in indexes for October, November,
 and December 2020.
 
-#### PPL query example
+#### Example PPL query
 
 The following PPL query example uses an index pattern directly without quotes.
 
