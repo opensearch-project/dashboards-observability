@@ -51,5 +51,5 @@ The following PPL query example shows how to use \`head\` to get a speficied num
     +---------------+-----------+
 
 #### Limitation
-The \`head\` command is not rewritten to Query DSL. It's only run on the coordinating node.
+The \`head\` command is not rewritten to query DSL. It is only run on the coordinating node.
 `;
