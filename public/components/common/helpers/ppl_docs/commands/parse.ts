@@ -22,7 +22,7 @@ Use the Java regular expression engine to match the entire text field of each do
 
 #### Example 1: Create a new field
 
-The following PPL query example shows how to create new field \`host\` for each document. \`host\` becomes the host name after the at symbol (\`@\`) in the \`email\` field. Parsing a null field returns an empty string.
+The following PPL query example shows how to create a new field \`host\` for each document. \`host\` becomes the host name after the \`@\` symbol in the \`email\` field. Parsing a null field returns an empty string.
 
     os> source=accounts | parse email '.+@(?<host>.+)' | fields email, host ;
     fetched rows / total rows = 4/4
