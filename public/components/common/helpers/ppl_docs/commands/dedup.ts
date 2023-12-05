@@ -18,7 +18,7 @@ dedup \[int\] &lt;field-list&gt; \[keepempty=&lt;bool&gt;\]
 -   \`field-list\`: Required. The comma-delimited field list. At least one field is required.
 -   \`consecutive\`: Optional. If set to \`true\`, removes duplicate events, where the duplicate events have consecutive timestamps. **Default:** \`false\`
 -   \`int\`: Optional. The \'dedup\' command retains multiple events for each combination when you specify \`&lt;int&gt;\`. The number for \`&lt;int&gt;\` must be greater than 0. If you do not specify a number, only the first occurring event is kept. All other duplicates are removed from the results. Default is \`1\`.
--   \`keepempty\`: Optional. If set to \`true\`, keep the document if any field in the \`field-list\` is null or missing. Default is \`false\`.
+-   \`keepempty\`: Optional. If set to \`true\`, keeps the document if any field in the \`field-list\` is null or missing. Default is \`false\`.
 
 #### Example 1: Dedup by one field
 
