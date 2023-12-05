@@ -48,5 +48,5 @@ The following PPL query example renames two or more fields.
     +------+---------+
 
 #### Limitation
-The \`rename\` command is not rewritten to Query DSL. It's only run on the coordinating node.
+The \`rename\` command is not rewritten to query DSL. It is only run on the coordinating node.
 `;
