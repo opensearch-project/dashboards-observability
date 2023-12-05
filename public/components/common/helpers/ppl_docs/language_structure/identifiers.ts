@@ -10,7 +10,7 @@ export const pplIdentifiers = `## Indentifiers
 
 Identifiers are used for naming database objects, such as an index
 name, a field name, or a custom label. The two types of
-identifiers are regular identifiers and delimited identifiers.
+identifiers are _regular identifiers_ and _delimited identifiers_.
 
 #### Regular identifiers
 
