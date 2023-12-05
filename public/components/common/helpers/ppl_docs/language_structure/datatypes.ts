@@ -103,7 +103,7 @@ The \`timestamp\` data type represents absolute points in time, unaffected by ti
 
 ####  Interval
 
-The \`interval\` data type represents a span of time, encompassing a specified duration or period.
+The \`interval\` data type represents a span of time encompassing a specified duration or period.
 
 | Type     | Syntax             |
 |----------|--------------------|
