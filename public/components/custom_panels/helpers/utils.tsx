@@ -10,7 +10,12 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
 import { CoreStart } from '../../../../../../src/core/public';
-import { PPL_INDEX_REGEX, PPL_WHERE_CLAUSE_REGEX } from '../../../../common/constants/shared';
+import {
+  OBSERVABILITY_BASE,
+  PPL_DATE_FORMAT,
+  PPL_INDEX_REGEX,
+  PPL_WHERE_CLAUSE_REGEX,
+} from '../../../../common/constants/shared';
 import { QueryManager } from '../../../../common/query_manager';
 import {
   SavedVisualizationType,
@@ -27,6 +32,7 @@ import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
 import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
+import { coreRefs } from '../../../framework/core_refs';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
@@ -382,6 +388,125 @@ export const renderCatalogVisualization = async ({
   }
 
   setIsLoading(false);
+};
+
+const fetchAggregatedBinCount = (
+  minimumBound: string,
+  maximumBound: string,
+  startTime: string,
+  endTime: string,
+  documentName: string,
+  http: CoreStart['http'],
+  selectedOtelIndex: string
+) => async () => {
+  console.log(`Fetching sample document`);
+  console.log(`query: `, selectedOtelIndex);
+  // const otelIndex = 'ss4o_metrics-sample1-us';
+  return http
+    .post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
+      body: JSON.stringify({
+        min: minimumBound,
+        max: maximumBound,
+        startTime,
+        endTime,
+        documentName,
+        index: selectedOtelIndex,
+      }),
+    })
+    .catch((error) => console.error(error));
+};
+
+// const fetchSampleOTDocument = (
+//   selectedOtelIndex: string,
+//   http: CoreStart['http'],
+//   documentName: string
+// ) => async () => {
+//   console.log(`Fetching sample document`);
+//   // const otelIndex = 'ss4o_metrics-sample1-us';
+//   return http
+//     .get(`${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`, {
+//       query: {
+//         format: 'json',
+//       },
+//       index: selectedOtelIndex,
+//     })
+//     .catch((error) => console.error(error));
+// };
+
+const fetchSampleOTDocument = (
+  selectedOtelIndex: string,
+  http: CoreStart['http'],
+  documentName: string
+) => async () => {
+  console.log(`Fetching sample document`);
+  // const otelIndex = 'ss4o_metrics-sample1-us';
+  return http
+    .post(`${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`, {
+      body: JSON.stringify({
+        documentName,
+        index: selectedOtelIndex,
+      }),
+    })
+    .catch((error) => console.error(error));
+};
+
+export const renderOpenTelemetryVisualization = async (
+  savedVisualizationId: string,
+  startTime: string,
+  endTime: string,
+  spanParam: string | undefined,
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
+  panelVisualization: any,
+  spanResolution?: string
+) => {
+  const { http } = coreRefs;
+  console.log('savedVisualizationId: ', savedVisualizationId);
+  console.log('spanParam: ', spanParam);
+  console.log('panelVisualization?.metric?.index: ', panelVisualization?.metric?.index);
+  console.log('panelVisualization in render: ', panelVisualization);
+  const fetchSampleDocument = await fetchSampleOTDocument(
+    panelVisualization?.metric?.index,
+    http,
+    savedVisualizationId
+  )();
+  console.log('fetchSampleDocument: ', fetchSampleDocument);
+  const source = fetchSampleDocument.hits[0]._source;
+  const dataBins: any[] = [];
+  source.buckets.forEach(async (bucket: any) => {
+    console.log('source: ', source);
+    const formattedStartTime = convertDateTime(startTime, false, false, false, true);
+    const formattedEndTime = convertDateTime(endTime, false, false, false, true);
+    const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
+      bucket.min.toString(),
+      bucket.max.toString(),
+      formattedStartTime,
+      formattedEndTime,
+      savedVisualizationId,
+      http,
+      panelVisualization?.metric?.index
+    )();
+    // push values in bin
+    dataBins.push({
+      minimumBound: bucket.min,
+      maximumBound: bucket.max,
+      count: fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+    });
+    console.log('bucket: ', bucket);
+    console.log('fetchingAggregatedBinCount: ', fetchingAggregatedBinCount);
+    console.log(
+      'fetchingAggregatedBinCount: ',
+      fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value
+    );
+  });
+  console.log('dataBins: ', dataBins);
+  setVisualizationType('histogram');
+  setVisualizationTitle(source.name);
+  setVisualizationData(dataBins);
 };
 
 // Function to store recently used time filters and set start and end time.

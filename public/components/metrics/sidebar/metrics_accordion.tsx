@@ -19,16 +19,11 @@ interface IMetricNameProps {
 export const MetricsAccordion = (props: IMetricNameProps) => {
   const { metricsList, headerName, handleClick, dataTestSubj } = props;
   // console.log('mertcs list type: ', typeof metricsList);
-  console.log('mertcs list: ', metricsList);
+  // console.log('mertcs list: ', metricsList);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const test = () => {
-    metricsList.slice(0, 100).map((metric: any) => console.log('metric.id in test: ', metric?.id));
-  };
-
-  useEffect(() => {
-    test();
-  }, [metricsList, test]);
+  // useEffect(() => {
+  //   test();
+  // }, [metricsList, test]);
 
   return (
     <EuiAccordion

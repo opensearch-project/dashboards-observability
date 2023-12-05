@@ -32,6 +32,7 @@ import {
   fetchVisualizationById,
   renderCatalogVisualization,
   renderSavedVisualization,
+  renderOpenTelemetryVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
@@ -60,6 +61,7 @@ import {
  * showFlyout: function to show the flyout
  * removeVisualization: function to remove all the visualizations
  * catalogVisualization: boolean pointing if the container is used for catalog metrics
+ * metricType: string to mention the type of metric visualization
  * spanParam: Override the span(timestamp, 1h) in visualization to span(timestamp, spanParam)
  */
 
@@ -82,6 +84,8 @@ interface Props {
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
   actionMenuType?: string;
+  metricType?: string;
+  panelVisualization?: any;
 }
 
 export const VisualizationContainer = ({
@@ -103,6 +107,8 @@ export const VisualizationContainer = ({
   catalogVisualization,
   inlineEditor,
   actionMenuType,
+  metricType,
+  panelVisualization,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -247,8 +253,22 @@ export const VisualizationContainer = ({
 
     if (!visualization && !savedVisualizationId) return;
 
-    if (visualization.subType === PROMQL_METRIC_SUBTYPE) {
-      renderCatalogVisualization({
+    if (metricType === 'openTelemetryMetric')
+      await renderOpenTelemetryVisualization(
+        savedVisualizationId,
+        fromTime,
+        toTime,
+        spanParam,
+        setVisualizationTitle,
+        setVisualizationType,
+        setVisualizationData,
+        setVisualizationMetaData,
+        setIsLoading,
+        setIsError,
+        panelVisualization
+      );
+    else if (visualization.subType === PROMQL_METRIC_SUBTYPE)
+       renderCatalogVisualization({
         visualization,
         http,
         pplService,
@@ -266,7 +286,7 @@ export const VisualizationContainer = ({
         setIsError,
         queryMetaData,
       });
-    } else
+     else
       await renderSavedVisualization({
         visualization,
         http,

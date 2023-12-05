@@ -59,3 +59,20 @@ export const DOCUMENT_NAMES_QUERY = {
     },
   },
 };
+
+export const FETCH_SAMPLE_DOCUMENT_QUERY = {
+  size: 1,
+  query: {
+    bool: {
+      must: [
+        {
+          term: {
+            'name.keyword': {
+              value: 'histogram',
+            },
+          },
+        },
+      ],
+    },
+  },
+};

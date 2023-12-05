@@ -5,15 +5,12 @@
 
 import { VisualizationType } from './custom_panels';
 
-<<<<<<< HEAD
-=======
-export interface MetricData {
-  metricId: string;
-  metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
-  metricName: string;
-}
+// export interface MetricData {
+//   metricId: string;
+//   metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
+//   metricName: string;
+// }
 
->>>>>>> 62e43d7a (Upgraded)
 export interface MetricType extends VisualizationType {
   id: string;
   savedVisualizationId: string;
@@ -21,15 +18,12 @@ export interface MetricType extends VisualizationType {
   y: number;
   w: number;
   h: number;
-<<<<<<< HEAD
   query: {
-    type: 'savedCustomMetric' | 'prometheusMetric';
+    type: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
     aggregation: string;
     attributesGroupBy: string[];
     catalog: string;
     availableAttributes?: string[];
   };
-=======
-  metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
->>>>>>> 62e43d7a (Upgraded)
+  // metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
 }

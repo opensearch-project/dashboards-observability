@@ -94,6 +94,8 @@ export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refres
           metric.subType === PROMQL_METRIC_SUBTYPE && <MetricsEditInline visualization={metric} />
         }
         actionMenuType="metricsGrid"
+        metricType={metric.metricType}
+        panelVisualization={metric}
       />
     </EuiDraggable>
   );

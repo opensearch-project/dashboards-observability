@@ -225,15 +225,15 @@ export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async 
 //   const newDimensions = getNewVizDimensions(state.metricsLayout);
 //   console.log('newDimensions: ', newDimensions);
 
-//   const metricCatalog = (catalog: string) => {
-//     if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
-//       return 'savedCustomMetric';
-//     } else if (catalog === 'OpenTelemetry') {
-//       return 'openTelemetryMetric';
-//     } else {
-//       return 'prometheusMetric';
-//     }
-//   };
+  // const metricCatalog = (catalog: string) => {
+  //   if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
+  //     return 'savedCustomMetric';
+  //   } else if (catalog === 'OpenTelemetry') {
+  //     return 'openTelemetryMetric';
+  //   } else {
+  //     return 'prometheusMetric';
+  //   }
+  // };
 //   const metricVisualization: MetricType = {
 //     id: newMetric.id,
 //     savedVisualizationId: newMetric.id,
@@ -242,6 +242,7 @@ export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async 
 //     h: newDimensions.h,
 //     w: newDimensions.w,
 //     metricType: metricCatalog(newMetric.catalog),
+//     metric: newMetric.catalog === 'OpenTelemetry' ? newMetric : '',
 //   };
 //   console.log('metricVisualization: ', metricVisualization);
 //   state.metricsLayout = [...state.metricsLayout, metricVisualization];

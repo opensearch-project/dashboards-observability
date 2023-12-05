@@ -131,7 +131,13 @@ export const Sidebar = ({
           // console.log('docs after 3: ', documents);
           const availableOtelDocuments = documents?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
-              return { id: item.key, name: item.key, catalog: 'OpenTelemetry', type: 'Histogram' };
+              return {
+                id: item.key,
+                name: item.key,
+                catalog: 'OpenTelemetry',
+                type: 'Histogram',
+                index: selectedOTIndex[0]?.label,
+              };
             }
           );
           // console.log('4');
@@ -166,7 +172,6 @@ export const Sidebar = ({
       return promethuesMetrics;
     else if (selectedDataSource[0]?.label === 'Prometheus') return promethuesMetrics;
     else return [];
-    console.log('promethuesMetrics: ', promethuesMetrics);
     // return selectedDataSource[0]?.label === 'Prometheus' ? promethuesMetrics : promethuesMetrics;
   }, [promethuesMetrics, selectedDataSource, availableOTDocuments, selectedOTIndex]);
 

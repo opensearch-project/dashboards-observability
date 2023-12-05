@@ -18,6 +18,7 @@ import {
   PPL_INDEX_INSERT_POINT_REGEX,
   PPL_INDEX_REGEX,
   PPL_NEWLINE_REGEX,
+  OTEL_DATE_FORMAT,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
 
@@ -61,7 +62,8 @@ export const convertDateTime = (
   datetime: string,
   isStart = true,
   formatted = true,
-  isMetrics: boolean = false
+  isMetrics: boolean = false,
+  isOtel: boolean = false
 ) => {
   let returnTime: undefined | Moment;
   if (isStart) {
@@ -69,6 +71,14 @@ export const convertDateTime = (
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
+
+  if (isOtel) {
+    const formattedDate = returnTime!.utc().format(OTEL_DATE_FORMAT);
+    const milliseconds = returnTime!.millisecond();
+    const formattedMilliseconds = String(milliseconds).padEnd(6, '0');
+    return `${formattedDate}.${formattedMilliseconds}Z`;
+  }
+
   if (isMetrics) {
     const myDate = new Date(returnTime._d); // Your timezone!
     const epochTime = myDate.getTime() / 1000.0;

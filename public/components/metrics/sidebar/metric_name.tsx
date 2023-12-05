@@ -12,11 +12,11 @@ import { OBSERVABILITY_CUSTOM_METRIC } from '../../../../common/constants/metric
 const MetricIcon = ({ metric }) => {
   const metricIcons = useSelector(metricIconsSelector);
   const iconMeta = metricIcons[metric?.catalog];
-  console.log('iconMeta: ', iconMeta);
+  // console.log('iconMeta: ', iconMeta);
   const metricCatalog = metric?.catalog;
-  console.log('metricCatalog: ', metricCatalog);
+  // console.log('metricCatalog: ', metricCatalog);
   if (metric?.catalog === OBSERVABILITY_CUSTOM_METRIC || metric?.catalog === 'OpenTelemetry') {
-    console.log('satisfies this condition');
+    // console.log('satisfies this condition');
     return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
   } else return <EuiIcon title="OpenSearch" type="logoOpenSearch" size="l" />;
   // } else return <EuiAvatar name={metricCatalog} size="s" type="space" {...iconMeta} />;
@@ -31,7 +31,7 @@ export const MetricName = (props: IMetricNameProps) => {
   const { metric, handleClick } = props;
 
   const name = (metricDetails: any) => {
-    console.log('inside name metric catalog', metricDetails?.catalog, metricDetails?.name);
+    // console.log('inside name metric catalog', metricDetails?.catalog, metricDetails?.name);
     if (metricDetails?.catalog === 'CUSTOM_METRICS' || metricDetails?.catalog === 'OpenTelemetry')
       return metricDetails?.name;
     else return metricDetails?.name.split('.')[1].replace(/^prometheus_/, 'p.._');

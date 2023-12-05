@@ -77,6 +77,7 @@ export const PPL_PATTERNS_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/sql/blob/2.x/docs/user/ppl/cmd/patterns.rst#description';
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
+export const OTEL_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export const SPAN_REGEX = /span/;
 
 export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
