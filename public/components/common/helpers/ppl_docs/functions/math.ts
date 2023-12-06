@@ -334,7 +334,7 @@ Return type: DOUBLE
 
 Argument type: INTEGER/LONG/FLOAT/DOUBLE
 
-Return type: Wider type between types \`n\` and \`m\` if \`m\` is a nonzero value. \`NULL\` is returned if \`m\` equals \`0\`.
+Return type: If \`m\` is a nonzero value, a type greater in size between types \`n\` and \`m\` is returned. If \`m\` equals \`0\`, \`NULL\` is returned.
 
 **Example**
 
@@ -422,10 +422,7 @@ Return type: DOUBLE
 
 ### RAND
 
-\`RAND()/RAND(N)\` is a function that returns a random floating-point value in the range \`0 &lt;= value &lt; 1.0\`. If integer \`N\` is specified, the seed is
-initialized prior to execution. One implication of this behavior is that with
-identical argument \`N\`, \`rand(N)\` returns the same value each time and thus
-produces a repeatable sequence of column values.
+\`RAND()/RAND(N)\` is a function that returns a random floating-point value in the range \`0 &lt;= value &lt; 1.0\`. If integer \`N\` is specified, the seed is initialized prior to execution. One implication of this behavior is that with identical argument \`N\`, \`rand(N)\` returns the same value each time and thus produces a repeatable sequence of column values.
 
 Argument type: INTEGER
 
