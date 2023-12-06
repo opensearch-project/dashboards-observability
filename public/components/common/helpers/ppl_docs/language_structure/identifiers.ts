@@ -58,7 +58,7 @@ Common use cases for delimited identifiers include the following:
 
 #### Example PPL query
 
-The following PPL query example uses an index name enclosed in backticks \`\`.
+The following example PPL query uses an index name enclosed in backticks \`\`.
 
     os> source=\`accounts\` | fields \`account_number\`;
     fetched rows / total rows = 4/4
