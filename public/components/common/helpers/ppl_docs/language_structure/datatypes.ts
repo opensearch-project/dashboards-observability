@@ -56,7 +56,7 @@ The following table is a reference guide for the mapping between an OpenSearch d
 | short           | byte      | SMALLINT  |
 | text            | text      | VARCHAR   |
 
-Some PPL types do not correspond to an OpenSearch type, for example, date and time. To use functions that require these data types, data type conversion must be performed.
+Some PPL types do not correspond to an OpenSearch type. To use functions that require date and time data types, data type conversion must be performed, as described in the following sections.
 
 ### Numeric data types
 
@@ -95,11 +95,11 @@ See the [Conversion between date and time types](#conversion-between-date-and-ti
 
 #### Timestamp
 
-The \`timestamp\` data type represents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sorted, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures the timestamp values remain consistent and comparable across different time zones.
+The \`timestamp\` data type represents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sorted, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures that the timestamp values remain consistent and comparable across different time zones.
 
 | Type      | Syntax | Range |
 |-----------|--------|-------|
-| Timestamp | 'yyyy-MM-dd hh:mm&#58;ss\[.fraction\]' | '0001-01-01 00:00&#58;01.000000' UTC to '9999-12-31 23:59:59.999999' |
+| Timestamp | 'yyyy-MM-dd hh:mm:ss\[.fraction\]' | '0001-01-01 00:00&#58;01.000000' UTC to '9999-12-31 23:59:59.999999' |
 
 ####  Interval
 
@@ -111,18 +111,17 @@ The \`interval\` data type represents a span of time encompassing a specified du
 
 The expression \`expr\` is configured to be repeatedly evaluated to produce a quantitative value. See the [Expressions](expressions.rst) section of this manual for more information. The unit represents the unit used to interpret the quantity, including MICROSECOND, SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER, and YEAR. The INTERVAL keyword and the unit specifier are not case sensitive. 
 
-Intervals consist of two classes: day-time and year-week. Day-time intervals store days, hours, minutes, seconds, and microseconds. Year-week intervals store years, quarters, months, and weeks. Each type can only be compared to the same type: day-time to day-time and year-week to year-week. 
+Intervals consist of two classes: day-time and year-week. Day-time intervals store days, hours, minutes, seconds, and microseconds. Year-week intervals store years, quarters, months, and weeks. Each type can only be compared to the same type. 
 
 ### Date and time conversion
 
-Date and time types, excluding \`interval\`, can be converted to
-each other, with some alteration of the value or some information loss, for example, when extracting the time value from a datetime value or converting a date value to a datetime value. The PPL plugin supports the following conversion rules for each of the types.
+Date and time types, excluding \`interval\`, can be mutually converted, with some alteration of the value or some information loss, for example, when extracting the \`time\` value from a \`datetime\` value or converting a \`date\` value to a \`datetime\` value. The PPL plugin supports the following conversion rules for each of the types.
 
 #### \`date\` conversion
 
 - Because \`date\` does not contain time information, conversion to \`time\` returns a zero time value \`00:00:00\`.
-- Converting from \`date\` to \`datetime\` sets to \`00:00:00\` if \`time\` is not provided, for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00\`.
-- Converting to \`timestamp\` sets \`time\` to \`00:00:00\` and the time zone (UTC by default), for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00 UTC\`.
+- Converting from \`date\` to \`datetime\` sets the time value to \`00:00:00\` if \`time\` is not provided, for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00\`.
+- Converting to \`timestamp\` sets \`time\` to \`00:00:00\` and time zone (UTC by default), for example, \`2020-08-17\` converts to \`2020-08-17 00:00:00 UTC\`.
 
 #### \`time\` conversion
 
@@ -132,24 +131,24 @@ each other, with some alteration of the value or some information loss, for exam
 
 - Converting from \`datetime\` to \`date\` extracts the date component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`2020-08-08\`.
 - Converting to \`time\` extracts the time component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`14&#58;09&#58;00\`.
-- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone to the session's time zone, for example, \`2020-08-17 14&#58;09&#58;00\` with system time zone as UTC converts to \`2020-08-17 14&#58;09&#58;00 UTC\`.
+- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone to the session's time zone, for example, \`2020-08-17 14&#58;09&#58;00\`, with the system time zone set to UTC, for example, \`2020-08-17 14&#58;09&#58;00 UTC\`.
 
 #### \`timestamp\` conversion
 
-- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14&#58;09&#58;00 UTC\` converts the date and time to \`2020-08-17\` and \`14&#58;09&#58;00\` and datetime to \`2020-08-17 14&#58;09&#58;00\`.
+- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14&#58;09&#58;00 UTC\` converts \`date\` and \`time\` to \`2020-08-17\` and \`14&#58;09&#58;00\` and \`datetime\` to \`2020-08-17 14&#58;09&#58;00\`.
 
 ### String data types
 
-A \`string\` data type is a series of characters enclosed within single or double quotation marks that serves as a data type for holding text data.
+A \`string\` data type is a series of characters enclosed within single or double quotation marks that serves as a data type for storing text data.
 
 ### Query struct data type
 
 In PPL, the \`struct\` data type corresponds to the [Object field type in
 OpenSearch](https://opensearch.org/docs/latest/field-types/supported-field-types/object-fields/). The \`"."\` is used as the path selector for accessing the inner attribute of the struct data.
 
-#### Example 1: Struct for storing population information
+#### Example 1: Struct to store population data
 
-The following example struct stores information about person attributes in an index \`peope\` containing the following fields: deep-nested object field \`city\`, object field of array value \`account\`, and nested field \`projects\`.
+The following example struct stores population data in an index containing the following fields: deep-nested object field \`city\`, object field of array value \`account\`, and nested field \`projects\`.
 
     {
       "mappings": {
@@ -187,10 +186,9 @@ The following example struct stores information about person attributes in an in
       }
     }
 
-#### Example 2: Struct for storing employee information
+#### Example 2: Struct to store employee data
 
-The following example struct stores information about employees in an index named \`employees_nested\`. Note that the field \`projects\` is a nested field.
-The following example struct stores information about employees in an index named \`employees_nested\`. Note that the field \`projects\` is a nested field.
+The following example struct stores employee data and includes a nested field:
 
     {
       "mappings": {
@@ -290,9 +288,9 @@ Result set:
       ]
     }
 
-#### Example 3: PPL query for selecting a struct inner attribute
+#### Example 3: Select a struct inner attribute
 
-The following example PPL query shows how to fetch city (top level), city.name (second level), and city.location.latitude (deeper level) struct data from the People results.
+The following example PPL query shows how to fetch \`city\` (top level), \`city.name\` (second level), and \`city.location.latitude\` (deeper level) struct data from the results:
 
     os> source=people | fields city, city.name, city.location.latitude;
     fetched rows / total rows = 1/1
@@ -302,9 +300,9 @@ The following example PPL query shows how to fetch city (top level), city.name (
     | {'name': 'Seattle', 'location': {'latitude': 10.5}} | Seattle     | 10.5                     |
     +-----------------------------------------------------+-------------+--------------------------+
 
-#### Example 4: PPL query for grouping by a struct inner attribute
+#### Example 4: Group by a struct inner attribute
 
-The following example PPL query shows how to group by object field inner attribute.
+The following example PPL query shows how to group by a struct inner attribute:
 
     os> source=people | stats count() by city.name;
     fetched rows / total rows = 1/1
@@ -314,9 +312,9 @@ The following example PPL query shows how to group by object field inner attribu
     | 1         | Seattle     |
     +-----------+-------------+
 
-#### Example 5: PPL query for selecting field of array value
+#### Example 5: Select an object field of an array value
 
-The following PPL query shows how to select a deeper level for object fields of array values that return the first element in the array. In this example, the document's inner field \`accounts.id\` has three values instead of a tuple: 
+The following example PPL query shows how to select a deeper level for object fields of array values that return the first element in the array. In this example, the document's inner field \`accounts.id\` has three values instead of a tuple: 
 
     os> source = people | fields accounts, accounts.id;
     fetched rows / total rows = 1/1
