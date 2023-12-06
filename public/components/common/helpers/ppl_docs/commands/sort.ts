@@ -13,12 +13,12 @@ Use the \`sort\` command to sort search results by a specified field.
 
 sort &lt;\[+\|-\] sort-field&gt;...
 
--   \`sort-field\`: Required. The field to sort.
--   \[+\|-\]: Optional. A plus sign \[+\] indicates ascending order, with null and missing values first. A minus sign \[-\] indicates descending order, with null and missing values last. Default is ascending order.
+-   \`sort-field\`: Required. The field to sort by.
+-   \[+\|-\]: Optional. The symbols used to indicate the sorting order. A plus sign \[+\] indicates ascending order, with null and missing values first. A minus sign \[-\] indicates descending order, with null and missing last. Default is \[+\], with null and missing first.
 
 #### Example 1: Sort by one field
 
-The following PPL query example shows how to sort documents, with the \`age\` field in ascending order.
+The following example PPL query shows how to sort documents by one field in ascending order:
 
     os> source=accounts | sort age | fields account_number, age;
     fetched rows / total rows = 4/4
@@ -33,7 +33,7 @@ The following PPL query example shows how to sort documents, with the \`age\` fi
 
 #### Example 2: Sort by one field and return all results
 
-The following PPL query example shows how to sort and return all documents, with the \`age\` field in ascending order.
+The following example PPL query shows how to sort by one field and return all results in ascending order:
 
     os> source=accounts | sort age | fields account_number, age;
     fetched rows / total rows = 4/4
@@ -48,7 +48,7 @@ The following PPL query example shows how to sort and return all documents, with
 
 #### Example 3: Sort by one field in descending order
 
-The following PPL query example shows how to sort all documents, with the \`age\` field in descending order.
+The following example PPL query shows how to sort by one field in descending order:
 
     os> source=accounts | sort - age | fields account_number, age;
     fetched rows / total rows = 4/4
@@ -63,7 +63,7 @@ The following PPL query example shows how to sort all documents, with the \`age\
 
 #### Example 4: Sort multiple fields in both ascending and descending order 
 
-The following PPL query example shows how to sort all documents in both ascending and descending order, with the \`gender\` field in ascending order and the \`age\` field in descending order.
+The following example PPL query shows how to sort by multiple fields in both ascending and descending order. In this example, the \`gender\` field is in ascending order and the \`age\` field is in descending order.
 
     os> source=accounts | sort + gender, - age | fields account_number, gender, age;
     fetched rows / total rows = 4/4
@@ -78,7 +78,7 @@ The following PPL query example shows how to sort all documents in both ascendin
 
 #### Example 5: Sort by field, including null values
 
-The following PPL query example shows how to sort by the \`employer\` field using the default order (ascending order, with null first).
+The following PPL query example shows how to sort by the \`employer\` field using the default order (\[+\] with null and missing first):
 
     os> source=accounts | sort employer | fields employer;
     fetched rows / total rows = 4/4

@@ -14,11 +14,11 @@ Use the \`fields\` command to specify the fields that should be included in or e
 fields \[+\|-\] &lt;field-list&gt;
 
 -   \`field-list\`: Required. Comma-separated list of fields to keep or remove.
--   \`index\`: Optional. If the plus sign \`+\` is used, only the fields specified in the field list will be included. If the minus sign \`-\` is used, all the fields specified in the field list will be excluded. **Default** \`+\`
+-   \`index\`: Optional. If the plus sign \`+\` is used, only the fields specified in the field list will be included. If the minus \`-\` is used, all the fields specified in the field list will be excluded. Default is \`+\`.
 
 #### Example 1: Select specified fields from the search result
 
-The following PPL query example shows how to retrieve the \`account\_number\`,\`firstname\`, and \`lastname\` fields\` from the search results.
+The following example PPL query shows how to retrieve the \`account\_number\`, \`firstname\`, and \`lastname\` fields from the search results:
 
     os> source=accounts | fields account_number, firstname, lastname;
     fetched rows / total rows = 4/4
@@ -33,9 +33,9 @@ The following PPL query example shows how to retrieve the \`account\_number\`,\`
 
 #### Example 2: Remove specified fields from the search results
 
-The following PPL query example shows how to remove the \`account\_number\` field from the search results.
+The following example PPL query shows how to remove the \`account\_number\` field from the search results:
 
-    os> source=accounts | fields account_number, firstname, lastname | fields - account_number ;
+    os> source=accounts | fields account_number, firstname, lastname | fields - account_number;
     fetched rows / total rows = 4/4
     +-------------+------------+
     | firstname   | lastname   |

@@ -19,7 +19,7 @@ rename &lt;source-field&gt; AS &lt;target-field&gt;\[","
 
 #### Example 1: Rename one field
 
-The following PPL query example renames a field.
+The following example PPL query renames a field:
 
     os> source=accounts | rename account_number as an | fields an;
     fetched rows / total rows = 4/4
@@ -34,7 +34,7 @@ The following PPL query example renames a field.
 
 #### Example 2: Rename two or more fields
 
-The following PPL query example renames two or more fields.
+The following example PPL query renames two or more fields:
 
     os> source=accounts | rename account_number as an, employer as emp | fields an, emp;
     fetched rows / total rows = 4/4
@@ -48,5 +48,5 @@ The following PPL query example renames two or more fields.
     +------+---------+
 
 #### Limitation
-The \`rename\` command is not rewritten to query DSL. It is only run on the coordinating node.
+The \`rename\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;

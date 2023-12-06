@@ -22,9 +22,10 @@ Use the Java regular expression engine to match the entire text field of each do
 
 #### Example 1: Create a new field
 
+The following example PPL query shows how to create new field \`host\` for each document. \`host\` becomes the hostname after the @ symbol in the \`email\` field. Parsing a null field returns an empty string.
 The following PPL query example shows how to create a new field \`host\` for each document. \`host\` becomes the host name after the \`@\` symbol in the \`email\` field. Parsing a null field returns an empty string.
 
-    os> source=accounts | parse email '.+@(?<host>.+)' | fields email, host ;
+    os> source=accounts | parse email '.+@(?<host>.+)' | fields email, host;
     fetched rows / total rows = 4/4
     +-----------------------+------------+
     | email                 | host       |
@@ -37,9 +38,9 @@ The following PPL query example shows how to create a new field \`host\` for eac
 
 #### Example 2: Override an existing field
 
-The following PPL query example shows how to override the existing \`address\` field while excluding the street number.
+The following example PPL query shows how to override the existing \`address\` field while excluding the street number:
 
-    os> source=accounts | parse address '\\d+ (?<address>.+)' | fields address ;
+    os> source=accounts | parse address '\\d+ (?<address>.+)' | fields address;
     fetched rows / total rows = 4/4
     +------------------+
     | address          |
@@ -52,9 +53,9 @@ The following PPL query example shows how to override the existing \`address\` f
 
 #### Example 3: Filter and sort by casted-parsed field
 
-The following PPL query example shows how to sort street numbers that are greater than 500 in the \`address\` field.
+The following example PPL query shows how to sort street numbers that are greater than 500 in the \`address\` field:
 
-    os> source=accounts | parse address '(?<streetNumber>\d+) (?<street>.+)' | where cast(streetNumber as int) > 500 | sort num(streetNumber) | fields streetNumber, street ;
+    os> source=accounts | parse address '(?<streetNumber>\d+) (?<street>.+)' | where cast(streetNumber as int) > 500 | sort num(streetNumber) | fields streetNumber, street;
     fetched rows / total rows = 3/3
     +----------------+----------------+
     | streetNumber   | street         |
@@ -68,19 +69,19 @@ The following PPL query example shows how to sort street numbers that are greate
 
 The following limitations apply:
 
-- Parsed fields cannpt be parsed again. For example, the following command isn't valid:
+- Parsed fields cannot be parsed again. For example, the following command is not valid:
 
-      source=accounts | parse address '\\d+ (?<street>.+)' | parse street '\\w+ (?<road>\\w+)' ;
+      source=accounts | parse address '\\d+ (?<street>.+)' | parse street '\\w+ (?<road>\\w+)';
 
-- Other commands cannot overwrite fields created by parsing. For example, in the following query, \`where\` doesn't match any documents because \`street\` cannot be overridden:
+- Other commands cannot overwrite fields created by parsing. For example, in the following query, \`where\` does not match any documents because \`street\` cannot be overridden:
 
-      source=accounts | parse address '\\d+ (?<street>.+)' | eval street='1' | where street='1' ;
+      source=accounts | parse address '\\d+ (?<street>.+)' | eval street='1' | where street='1';
 
 - The text field that is parsed cannot be overridden. For example, in the following query, \`street\` is not successfully parsed because \`address\` is overridden:
 
-      source=accounts | parse address '\\d+ (?<street>.+)' | eval address='1' ;
+      source=accounts | parse address '\\d+ (?<street>.+)' | eval address='1';
 
-- Fields created by parsing cannot be filtered or sorted after using them in the \`stats\` command. For example, in the following query, \`where\` isn't valid:
+- Fields created by parsing cannot be filtered or sorted after using them in the \`stats\` command. For example, in the following query, \`where\` is not valid:
 
-      source=accounts | parse email '.+@(?<host>.+)' | stats avg(age) by host | where host=pyrami.com ;
+      source=accounts | parse email '.+@(?<host>.+)' | stats avg(age) by host | where host=pyrami.com;
 `;

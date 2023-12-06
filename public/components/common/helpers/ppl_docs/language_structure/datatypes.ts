@@ -6,7 +6,7 @@
 export const pplDatatypes = `## Data Types
 ---
 
-### Data Types
+### Data types
 
 A data type defines a collection of data type values and a set of predefined operations for those values. PPL supports the following data types:
 
@@ -35,7 +35,7 @@ A data type defines a collection of data type values and a set of predefined ope
 
 ### Data type mapping
 
-The following table is a reference guide for the mapping between an OpenSearch data type, a PPL data type, and a SQL type.
+The following table is a reference guide for the mapping between an OpenSearch data type, a PPL data type, and a SQL data type.
 
 | OpenSearch type | PPL type  | SQL type  |
 |-----------------|-----------|-----------|
@@ -61,11 +61,11 @@ Some PPL types do not correspond to an OpenSearch type, for example, date and ti
 ### Numeric data types
 
 Numeric values ranging from -2147483648 to +2147483647 are recognized as
-integers, with data type name \`INTEGER\`. For values that fall beyond the specified range, the data type \`LONG\` integer is assigned during parsing.
+integers, with data type name \`INTEGER\`. For values that fall beyond the specified range, the \`LONG\` data type is assigned during parsing.
 
 ### Date and time data types
 
-The data types \`date\` and \`time\` represent temporal values. The PPL plugin supports \`date\`, \`time\`, \`datetime\`, \`timestamp\`, and \`interval\`. By default, <a href="{{https://opensearch.org/docs/latest/query-dsl/index/}}">Query DSL</a> uses \`date\` for any date or time types. To integrate with PPL, each data type, excluding \`timestamp\`, carries temporal and time zone information. The use of \`datetime\` functions clarifies the date and time types, although certain functions may have limitations on the input argument type. See the [Functions](functions.rst) section in this manual for more information.
+The data types \`date\` and \`time\` represent temporal values. The PPL plugin supports \`date\`, \`time\`, \`datetime\`, \`timestamp\`, and \`interval\`. By default, [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/) uses \`date\` for any date or time types. To integrate with PPL, each data type, excluding \`timestamp\`, contains temporal and time zone information. Use \`datetime\` functions to clarify the date and time types. Note that certain functions may have limitations on the input argument type. See the [Functions](functions.rst) section in this manual for more information.
 
 #### Date
 
@@ -95,7 +95,7 @@ See the [Conversion between date and time types](#conversion-between-date-and-ti
 
 #### Timestamp
 
-The \`timestamp\` data type represents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sotred, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures that the timestamp values remain consistent and comparable across different time zones.
+The \`timestamp\` data type represents absolute points in time, unaffected by time zones or conventions. The \`timestamp\` data type differs from other data types in its storage and retrieval behavior. When a timestamp is sorted, it is converted from Coordinated Universal Time (UTC) to the specified time zone. Conversely, when a timestamp is retrieved, it is converted back to UTC before being displayed or used in calculations. This ensures the timestamp values remain consistent and comparable across different time zones.
 
 | Type      | Syntax | Range |
 |-----------|--------|-------|
@@ -142,12 +142,12 @@ each other, with some alteration of the value or some information loss, for exam
 
 A \`string\` data type is a series of characters enclosed within single or double quotation marks that serves as a data type for holding text data.
 
-### Query struct data types
+### Query struct data type
 
 In PPL, the \`struct\` data type corresponds to the [Object field type in
-OpenSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/object.html). The \`"."\` is used as the path selector for accessing the inner attribute of the struct data.
+OpenSearch](https://opensearch.org/docs/latest/field-types/supported-field-types/object-fields/). The \`"."\` is used as the path selector for accessing the inner attribute of the struct data.
 
-#### Example: People
+#### Example 1: Struct for storing population information
 
 The following example struct stores information about person attributes in an index \`peope\` containing the following fields: deep-nested object field \`city\`, object field of array value \`account\`, and nested field \`projects\`.
 
@@ -187,8 +187,9 @@ The following example struct stores information about person attributes in an in
       }
     }
 
-#### Example: Employees
+#### Example 2: Struct for storing employee information
 
+The following example struct stores information about employees in an index named \`employees_nested\`. Note that the field \`projects\` is a nested field.
 The following example struct stores information about employees in an index named \`employees_nested\`. Note that the field \`projects\` is a nested field.
 
     {
@@ -289,7 +290,7 @@ Result set:
       ]
     }
 
-#### Example PPL query: Select a struct inner attribute
+#### Example 3: PPL query for selecting a struct inner attribute
 
 The following example PPL query shows how to fetch city (top level), city.name (second level), and city.location.latitude (deeper level) struct data from the People results.
 
@@ -301,7 +302,7 @@ The following example PPL query shows how to fetch city (top level), city.name (
     | {'name': 'Seattle', 'location': {'latitude': 10.5}} | Seattle     | 10.5                     |
     +-----------------------------------------------------+-------------+--------------------------+
 
-#### Example PPL query: Group by struct inner attribute**
+#### Example 4: PPL query for grouping by a struct inner attribute
 
 The following example PPL query shows how to group by object field inner attribute.
 
@@ -313,10 +314,9 @@ The following example PPL query shows how to group by object field inner attribu
     | 1         | Seattle     |
     +-----------+-------------+
 
-#### Example PPL query: Selecting field of array value
+#### Example 5: PPL query for selecting field of array value
 
-Select a deeper level for object fields of array values that return the
-first element in the array. For example, because the document's inner field \`accounts.id\` has three values instead of a tuple, the first entry is returned.
+The following PPL query shows how to select a deeper level for object fields of array values that return the first element in the array. In this example, the document's inner field \`accounts.id\` has three values instead of a tuple: 
 
     os> source = people | fields accounts, accounts.id;
     fetched rows / total rows = 1/1

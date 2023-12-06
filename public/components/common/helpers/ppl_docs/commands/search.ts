@@ -8,7 +8,7 @@ export const searchCmd = `## search
 
 ### Description
 
-Use the \`search\` command to retrieve document from the index. The \`search\`
+Use the \`search\` command to retrieve a document from the index. The \`search\`
 command can only be used as the first command in a PPL query.
 
 ### Syntax
@@ -21,7 +21,7 @@ search source=&lt;index&gt; \[boolean-expression\]
 
 #### Example 1: Fetch all data from an index
 
-The following PPL query example shows how to fetch all documents from the \`accounts\` index.
+The following example PPL query shows how to fetch all documents from the \`accounts\` index:
 
     os> source=accounts;
     fetched rows / total rows = 4/4
@@ -36,7 +36,7 @@ The following PPL query example shows how to fetch all documents from the \`acco
 
 #### Example 2: Fetch data with a condition
 
-The following PPL query example shows how to fetch all documents from the \`accounts\` index by using an \`or\` condition.
+The following example PPL query shows how to fetch all documents from the \`accounts\` index by using the \`or\` condition.
 
     os> source=accounts account_number=1 or gender="F";
     fetched rows / total rows = 2/2

@@ -14,11 +14,12 @@ Use the \`head\` command to return the first N number of lines from a search res
 
 head \[N\]
 
--   \`N\`: Optional. The number of results you want to see. Default is 10.
+-   \`N\`: Optional. The number of results you want to return. Default is 10.
 
 #### Example 1: Get the first 10 results
 
-The following PPL query example shows how to use \`head\` to get the first 10 search results. 
+The following example PPL query shows how to use \`head\` to return the first 10 search results:
+
     os> source=accounts | fields firstname, age | head;
     fetched rows / total rows = 10/10
     +---------------+-----------+
@@ -38,7 +39,7 @@ The following PPL query example shows how to use \`head\` to get the first 10 se
 
 #### Example 2: Get the first N results
 
-The following PPL query example shows how to use \`head\` to get a speficied number of search results. In this example, N is 3. 
+The following example PPL query shows how to use \`head\` to get a specified number of search results. In this example, N is equal to 3: 
 
     os> source=accounts | fields firstname, age | head 3;
     fetched rows / total rows = 3/3
@@ -51,5 +52,5 @@ The following PPL query example shows how to use \`head\` to get a speficied num
     +---------------+-----------+
 
 #### Limitation
-The \`head\` command is not rewritten to query DSL. It is only run on the coordinating node.
+The \`head\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;
