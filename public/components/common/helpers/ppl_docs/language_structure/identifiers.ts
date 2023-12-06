@@ -73,5 +73,5 @@ The following example PPL query uses an index name enclosed in backticks \`\`.
 
 ### Case sensitivity
 
-Identifiers are case sensitive and must match what is stored in OpenSearch. For example, if you run \`source=Accounts\`, an eror occurs \`index not found\` because the index name is lowercase \`accounts\`.
+Identifiers are case sensitive and must match what is stored in OpenSearch. For example, if you run \`source=Accounts\`, an error \`index not found\` occurs \` because the index name \`accounts\` is lowercase.
 `;
