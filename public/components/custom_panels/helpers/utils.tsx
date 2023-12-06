@@ -409,21 +409,15 @@ export const renderCatalogVisualization = async ({
 
   visualizationMetaData.userConfigs = {
     layoutConfig: {
-      height: 390,
-      margin: { t: 5 },
-      legend: { visible: false },
+      height: 280,
+      legend: { orientation: 'h', y: -0.3 },
     },
   };
-
-  console.error('WIP correctly set metadata for createCatalogVisualizationMetaData', {
-    visualization,
-    visualizationMetaData,
-  });
 
   setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
 
-  setVisualizationMetaData(visualization);
+  setVisualizationMetaData(visualizationMetaData);
 
   getQueryResponse(
     pplService,

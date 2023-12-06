@@ -182,7 +182,6 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
     },
   });
 
-  console.error('WIP Correctly set subtype for visualizationFromMetric');
   return {
     ...metric,
     timeField: '@timestamp',

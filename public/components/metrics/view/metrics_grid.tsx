@@ -25,6 +25,7 @@ import { coreRefs } from '../../../framework/core_refs';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
 import { EmptyMetricsView } from './empty_view';
+import { Suspense } from 'react';
 
 // HOC container to provide dynamic width for Grid layout
 
@@ -51,19 +52,15 @@ const visualizationFromMetric = (metric, dateSpanFilter): SavedVisualizationType
       fillOpacity: 0,
       lineWidth: 2,
     },
+    layout: { height: 280 },
   },
 });
 
-export const InnerGridVisualization = ({
-  id,
-  idx,
-  dateSpanFilter,
-  refresh,
-  moveToEvents,
-  // metric,
-  allMetrics,
-}) => {
-  const metric = allMetrics[id];
+const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
+  window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
+};
+
+export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
   if (!metric) return <></>;
 
   console.log('vis', { metric });
@@ -79,7 +76,7 @@ export const InnerGridVisualization = ({
         fromTime={dateSpanFilter.start}
         toTime={dateSpanFilter.end}
         onRefresh={refresh}
-        onEditClick={moveToEvents}
+        onEditClick={navigateToEventExplorerVisualization}
         // usedInNotebooks={true}
         pplFilterValue=""
         span={dateSpanFilter.span}
@@ -97,16 +94,14 @@ export const InnerGridVisualization = ({
 const GridVisualization = React.memo(InnerGridVisualization);
 
 export const InnerMetricsGrid = ({
-  chrome,
-  moveToEvents,
   dateSpanFilter,
   selectedMetrics,
   selectedMetricsIds,
-  refresh,
   moveMetric,
   allMetrics,
 }: MetricsGridProps) => {
-  const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
+  const { chrome } = coreRefs;
+  const isLocked = useObservable(chrome!.getIsNavDrawerLocked$());
 
   const onDragEnd = ({ source, destination }) => {
     moveMetric({ source, destination });
@@ -122,15 +117,13 @@ export const InnerMetricsGrid = ({
         <GridVisualization
           id={id}
           idx={idx}
+          key={id}
           dateSpanFilter={dateSpanFilter}
-          refresh={refresh}
-          moveToEvents={moveToEvents}
           metric={metric}
-          allMetrics={allMetrics}
         />
       );
     });
-  }, [selectedMetrics, refresh, dateSpanFilter]);
+  }, [selectedMetrics, dateSpanFilter]);
 
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {

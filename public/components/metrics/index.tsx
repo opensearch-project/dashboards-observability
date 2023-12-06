@@ -34,7 +34,6 @@ import {
 } from './redux/slices/metrics_slice';
 import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
-import { observabilityLogsID } from '../../../common/constants/shared';
 
 interface MetricsProps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -45,11 +44,6 @@ interface MetricsProps {
 }
 
 export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: MetricsProps) => {
-  const dashboardsLoader = dashboard.getSavedDashboardLoader();
-
-  // Redux tools
-  const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
-
   // Date picker constants
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
   const [startTime, setStartTime] = useState<ShortDate>('now-1d');
@@ -93,10 +87,6 @@ export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: Met
       setEndTime
     );
     onRefreshFilters();
-  };
-
-  const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
   };
 
   useEffect(() => {
@@ -156,7 +146,7 @@ export const Home = ({ DepsStart: { dashboard }, chrome, parentBreadcrumb }: Met
                           <EuiResizableButton />
 
                           <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
-                            <MetricsGrid chrome={chrome} moveToEvents={onEditClick} />
+                            <MetricsGrid key="metricGrid" />
                           </EuiResizablePanel>
                         </>
                       )}
