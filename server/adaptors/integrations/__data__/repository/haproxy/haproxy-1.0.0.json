@@ -1,8 +1,8 @@
 {
     "name": "haproxy",
     "version": "1.0.0",
-    "displayName": "Haproxy Dashboard",
-    "description": "Haproxy logs collector",
+    "displayName": "HAProxy Dashboard",
+    "description": "HAProxy logs collector",
     "license": "Apache-2.0",
     "type": "logs",
     "labels": ["Observability", "Logs"],
@@ -10,16 +10,16 @@
     "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/haproxy/info",
     "statics": {
         "logo": {
-          "annotation": "Haproxy Logo",
+          "annotation": "HAProxy Logo",
           "path": "logo.svg"
         },
         "gallery": [
           {
-            "annotation": "Haproxy Dashboard",
+            "annotation": "HAProxy Dashboard",
             "path": "dashboard1.png"
           },
           {
-            "annotation": "Haproxy Dashboard view",
+            "annotation": "HAProxy Dashboard view",
             "path": "dashboard2.png"
           }
         ]
