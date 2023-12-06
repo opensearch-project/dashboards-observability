@@ -54,7 +54,7 @@ Common use cases for delimited identifiers include the following:
 
 - Identifiers that coincide with reserved keywords.
 - Identifiers that contain a dot \`.\` or a dash \`-\` need to be distinguished from regular identifiers with qualifiers. Enclosing such identifiers in backticks \`\` allows the parser to differentiate them from qualified identifiers and enables date information within index names.
-- Identifiers with special characters, as OpenSearch permits the use of special characters, including Unicode characters, in index names.
+- Identifiers with special characters, including Unicode characters, in index names.
 
 #### PPL query example
 
