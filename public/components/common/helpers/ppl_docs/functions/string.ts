@@ -66,7 +66,7 @@ Return type: INTEGER
 
 \`like(string, PATTERN)\` is a function that returns \`true\` if the string matches the \`PATTERN\` value.
 
-Two wildcards commonly used with the \`like\` operator:
+The following two wildcards are commonly used with the \`like\` operator:
 
 - \`%\`: A percent sign represents zero, one, or multiple characters.
 - \`_\`: An underscore represents a single character.
