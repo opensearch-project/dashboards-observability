@@ -136,7 +136,7 @@ jobs:
       - name: Install Cypress
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          npx cypress install
+          npm install cypress --save-dev
         shell: bash
 
       - name: Get Cypress version
@@ -145,26 +145,15 @@ jobs:
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
           echo "::set-output name=cypress_version::$(cat ./package.json | jq '.dependencies.cypress' | tr -d '"')"
 
-      - name: Cache Cypress
-        id: cache-cypress
-        uses: actions/cache@v2
-        with:
-          path: ${{ matrix.cypress_cache_folder }}
-          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('OpenSearch-Dashboards/plugins/dashboards-observability/package.json') }}
-
       - name: Reset npm's script shell
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           npm config delete script-shell
 
-      - name: Cypress tests
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: OpenSearch-Dashboards/plugins/dashboards-observability
-          command: yarn cypress:parallel --browser chrome
-          wait-on: 'http://localhost:5601'
-        env:
-          CYPRESS_CACHE_FOLDER: ${{ matrix.cypress_cache_folder }}
+      - name: Run Cypress tests
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn cypress:parallel --browser chrome
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v1
