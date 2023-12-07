@@ -66,7 +66,7 @@ describe('Basic sanity test for integrations plugin', () => {
     moveToAvailableNginxIntegration();
     cy.get('.euiFilterGroup').trigger('mouseover').click();
     cy.get('.euiFilterSelectItem').contains('visualization').click();
-    cy.get('.euiTableRow').should('have.length', 4);//Filters correctly to visualization types
+    cy.get('.euiTableRow').should('have.length', 6);//Filters correctly to visualization types
   })
 });
 
