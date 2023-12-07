@@ -8,11 +8,11 @@ export const whereCmd = `## where
 
 ### Description
 
-Use the \`where\` command to filter search results. The \`where\` command only returns the result when the \`bool-expression\` is \`true\`.
+Use the \`where\` command to filter search results. The \`where\` command only returns the result when the \`bool-expression\` is set to \`true\`.
 
 ### Syntax
 
-where &lt;boolean-expression&gt;
+\`where &lt;boolean-expression&gt;\`
 
 -   \`bool-expression\`: Optional. Any expression that can be evaluated to a Boolean expression.
 
