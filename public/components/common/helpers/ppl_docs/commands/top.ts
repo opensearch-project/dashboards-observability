@@ -14,7 +14,7 @@ fields in the field list.
 
 top \[N\] &lt;field-list&gt; \[by-clause\]
 
--   \`N\`: The number of results you want to see. Default is 10.
+-   \`N\`: The number of results you want to return. Default is 10.
 -   \`field-list\`: Required. The comma-delimited field list.
 -   \`by-clause\`: Optional. One or more fields to group by.
 
@@ -44,5 +44,5 @@ The following PPL query example finds the most common age grouped by gender.
     +----------+----------+
 
 #### Limitation
-The \`top\` command is not rewritten to query DSL. It is only run on the coordinating node.
+The \`top\` command is not rewritten to [query domain-specific language (DSL)](https://opensearch.org/docs/latest/query-dsl/index/). It is only run on the coordinating node.
 `;
