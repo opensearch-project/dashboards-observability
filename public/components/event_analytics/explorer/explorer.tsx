@@ -263,11 +263,16 @@ export const Explorer = ({
       { text: 'Auto', value: 'auto_' + minInterval },
       ...TIME_INTERVAL_OPTIONS,
     ]);
-    selectedIntervalRef.current = { text: 'Auto', value: 'auto_' + minInterval };
+    selectedIntervalRef.current = {
+      text: 'Auto',
+      value: 'auto_' + minInterval,
+    };
     dispatch(
       updateCountDistribution({
         tabId,
-        data: { selectedInterval: selectedIntervalRef.current.value.replace(/^auto_/, '') },
+        data: {
+          selectedInterval: selectedIntervalRef.current.value.replace(/^auto_/, ''),
+        },
       })
     );
   };
@@ -465,7 +470,12 @@ export const Explorer = ({
 
   const handleOverrideTimestamp = async (timestamp: IField) => {
     setIsOverridingTimestamp(true);
-    await dispatch(changeQuery({ tabId, query: { [SELECTED_TIMESTAMP]: timestamp?.name || '' } }));
+    await dispatch(
+      changeQuery({
+        tabId,
+        query: { [SELECTED_TIMESTAMP]: timestamp?.name || '' },
+      })
+    );
     setIsOverridingTimestamp(false);
     handleQuerySearch();
   };
@@ -509,7 +519,10 @@ export const Explorer = ({
                             );
                             const intrv = selectedIntrv.replace(/^auto_/, '');
                             dispatch(
-                              updateCountDistribution({ tabId, data: { selectedInterval: intrv } })
+                              updateCountDistribution({
+                                tabId,
+                                data: { selectedInterval: intrv },
+                              })
                             );
                             getCountVisualizations(intrv);
                             selectedIntervalRef.current = timeIntervalOptions[intervalOptionsIndex];
@@ -607,7 +620,7 @@ export const Explorer = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <NoResults />
+          <NoResults tabId={tabId} />
         )}
       </div>
     );
@@ -694,7 +707,10 @@ export const Explorer = ({
 
   const updateQueryInStore = async (updateQuery: string) => {
     await dispatch(
-      changeQuery({ tabId, query: { [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, '') } })
+      changeQuery({
+        tabId,
+        query: { [RAW_QUERY]: updateQuery.replaceAll(PPL_NEWLINE_REGEX, '') },
+      })
     );
   };
 
