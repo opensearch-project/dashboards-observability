@@ -8,7 +8,7 @@ export const mathFunction = `## Math
 
 ### Math functions
 
-PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitte the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause. 
+PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitate the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause. 
 
 The following sections describe the \`math\` PPL functions.
 

@@ -8,7 +8,7 @@ export const fullTextSearchFunction = `## Full-text search
 
 ### Full-text search function
 
-PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitte the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause.
+PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitate the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause.
 
 Full-text search allows for searching by full-text queries. For details about full-text search in OpenSearch, see the [Full-text search](https://opensearch.org/docs/latest/search-plugins/sql/full-text/) documentation.
 
