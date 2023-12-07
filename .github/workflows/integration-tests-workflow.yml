@@ -136,7 +136,7 @@ jobs:
       - name: Install Cypress
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          npm install cypress --save-dev
+          npx cypress install
         shell: bash
 
       - name: Get Cypress version
