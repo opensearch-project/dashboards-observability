@@ -6,25 +6,19 @@
 export const fullTextSearchFunction = `## Full-text search
 ---
 
+### Full-text search function
+
+PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitte the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause.
+
 Full-text search allows for searching by full-text queries. For details about full-text search in OpenSearch, see the [Full-text search](https://opensearch.org/docs/latest/search-plugins/sql/full-text/) documentation.
 
-### Functions
-
-PPL functions use the search capabilities of the OpenSearch engine. However, these functions don't execute directly within the OpenSearch plugin's memory. Instead, they facilitte the global filtering of query results based on specific conditions, such as a \`WHERE\` or \`HAVING\` clause. 
-
-#### MATCH
+### MATCH
 
 The \`match\` function maps user-defined criteria to OpenSearch queries, returning documents that match specific text, number, date, or Boolean values. 
 
-#### Function signature
+The function signature is \`match(field_expression, query_expression[, option=<option_value>]*)\`.
 
-The function signature is as follows:
-
-\`match(field_expression, query_expression[, option=<option_value>]*)\`
-
-#### Available 
-
-The available parameters are as follows:
+The available parameters are:
 
 -   analyzer
 -   auto\_generate\_synonyms\_phrase
@@ -70,7 +64,7 @@ The full-text search functions can be executed only in [query domain-specific la
 
 To ensure optimal performance and avoid translation issues with complex full-text searhes, place them as clauses within the search command.
 
-**Example: 
+#### Example
 
 The following is an example complex query that could fail because it is difficult to translate to query DSL: 
 
