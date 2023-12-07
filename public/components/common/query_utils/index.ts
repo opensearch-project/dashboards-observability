@@ -51,12 +51,8 @@ export const findMinInterval = (start: string = '', end: string = '') => {
   else if (diffSeconds <= 86400 * 2) minInterval = 'h';
   // less than 1 month
   else if (diffSeconds <= 86400 * 31) minInterval = 'd';
-  // less than 3 months
-  else if (diffSeconds <= 86400 * 93) minInterval = 'w';
   // less than 2 year
-  else if (diffSeconds <= 86400 * 366) minInterval = 'w';
-
-  console.log('findMinInterval', { momentStart, momentEnd, diffSeconds, minInterval });
+  else if (diffSeconds <= 86400 * 366 * 2) minInterval = 'w';
 
   return minInterval;
 };

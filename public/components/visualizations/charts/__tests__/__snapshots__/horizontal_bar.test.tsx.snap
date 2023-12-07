@@ -480,7 +480,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
                       "props": Object {
                         "defaultSelections": Array [
                           Object {
-                            "id": "h",
+                            "id": "v",
                             "name": "Right",
                           },
                         ],
@@ -643,7 +643,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
         "id": "horizontal_bar",
         "label": "Horizontal bar",
         "labelangle": 0,
-        "legendposition": "h",
+        "legendposition": "v",
         "linewidth": 0,
         "mode": "group",
         "name": "horizontal_bar",
@@ -703,7 +703,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
         "height": 220,
         "hovermode": "closest",
         "legend": Object {
-          "orientation": "h",
+          "orientation": "v",
         },
         "margin": Object {
           "b": 30,
@@ -761,7 +761,7 @@ exports[`Horizontal bar component Renders horizontal bar component 1`] = `
           "height": 220,
           "hovermode": "closest",
           "legend": Object {
-            "orientation": "h",
+            "orientation": "v",
           },
           "margin": Object {
             "b": 30,

@@ -480,7 +480,7 @@ exports[`Line component Renders line component 1`] = `
                       "props": Object {
                         "defaultSelections": Array [
                           Object {
-                            "id": "h",
+                            "id": "v",
                             "name": "Right",
                           },
                         ],
@@ -643,7 +643,7 @@ exports[`Line component Renders line component 1`] = `
         "id": "bar",
         "label": "Vertical bar",
         "labelangle": 0,
-        "legendposition": "h",
+        "legendposition": "v",
         "linewidth": 0,
         "mode": "group",
         "name": "bar",
@@ -701,7 +701,7 @@ exports[`Line component Renders line component 1`] = `
         ],
         "height": 220,
         "legend": Object {
-          "orientation": "h",
+          "orientation": "v",
         },
         "margin": Object {
           "b": 30,
@@ -754,7 +754,7 @@ exports[`Line component Renders line component 1`] = `
           "height": 220,
           "hovermode": "closest",
           "legend": Object {
-            "orientation": "h",
+            "orientation": "v",
           },
           "margin": Object {
             "b": 30,

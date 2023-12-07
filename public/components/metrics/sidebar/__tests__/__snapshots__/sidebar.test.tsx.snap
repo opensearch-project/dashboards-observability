@@ -111,7 +111,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                   box={
                     Object {
                       "incremental": true,
-                      "placeholder": "Search for metrics",
+                      "placeholder": "Search to filter Available Metrics",
                     }
                   }
                   defaultQuery=""
@@ -137,7 +137,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                             incremental={true}
                             isInvalid={false}
                             onSearch={[Function]}
-                            placeholder="Search for metrics"
+                            placeholder="Search to filter Available Metrics"
                             query=""
                           >
                             <EuiFieldSearch
@@ -151,7 +151,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                               isInvalid={false}
                               isLoading={false}
                               onSearch={[Function]}
-                              placeholder="Search for metrics"
+                              placeholder="Search to filter Available Metrics"
                             >
                               <EuiFormControlLayout
                                 compressed={false}
@@ -173,7 +173,7 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
                                         className="euiFieldSearch euiFieldSearch--fullWidth"
                                         defaultValue=""
                                         onKeyUp={[Function]}
-                                        placeholder="Search for metrics"
+                                        placeholder="Search to filter Available Metrics"
                                         type="search"
                                       />
                                     </EuiValidatableControl>

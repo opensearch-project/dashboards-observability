@@ -42,9 +42,7 @@ exports[`Visualization Container Component renders add visualization container 1
         className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width "
         data-test-subj="VisualizationPanel"
       >
-        <div
-          className="mouseGrabber"
-        >
+        <div>
           <EuiFlexGroup
             justifyContent="spaceBetween"
           >
@@ -52,6 +50,7 @@ exports[`Visualization Container Component renders add visualization container 1
               className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <EuiFlexItem
+                className="mouseGrabber"
                 style={
                   Object {
                     "width": "35%",
@@ -59,7 +58,7 @@ exports[`Visualization Container Component renders add visualization container 1
                 }
               >
                 <div
-                  className="euiFlexItem"
+                  className="euiFlexItem mouseGrabber"
                   style={
                     Object {
                       "width": "35%",

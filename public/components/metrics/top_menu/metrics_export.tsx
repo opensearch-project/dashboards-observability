@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 import { max } from 'lodash';
 import semver from 'semver';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@osd/i18n/react';
 import { MetricsExportPanel } from './metrics_export_panel';
 import { OSDSavedVisualizationClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_visualization';
 import { getSavedObjectsClient } from '../../../services/saved_objects/saved_object_client/client_factory';
@@ -35,7 +36,6 @@ import { updateCatalogVisualizationQuery } from '../../common/query_utils';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import { MountPoint } from '../../../../../../src/core/public';
-import { I18nProvider } from '../../../../../../packages/osd-i18n/src/react/provider';
 
 const Savebutton = ({
   setIsPanelOpen,

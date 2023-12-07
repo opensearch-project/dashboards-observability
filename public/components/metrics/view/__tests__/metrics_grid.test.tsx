@@ -16,6 +16,7 @@ import { Provider } from 'react-redux';
 import PPLService from '../../../../services/requests/ppl';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { coreRefs } from '../../../../framework/core_refs';
+import { of } from 'rxjs';
 
 describe('Metrics Grid Component', () => {
   configure({ adapter: new Adapter() });
@@ -48,6 +49,7 @@ describe('Metrics Grid Component', () => {
         then: () => Promise.resolve(),
       })
     );
+    coreRefs.chrome = { getIsNavDrawerLocked$: () => of(false) };
 
     const wrapper = mount(
       <Provider store={store}>

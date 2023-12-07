@@ -55,6 +55,53 @@ export const sampleMetric = {
   subType: 'metric',
 };
 
+export const sampleAvailableDashboards = [
+  {
+    attributes: {
+      title: '[Flights] Global Flight Dashboard',
+    },
+    id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+    type: 'dashboard',
+
+    title: '[Flights] Global Flight Dashboard',
+  },
+  {
+    id: 'fdf2bb60-7a5b-11ee-929a-5f1a2dc08039',
+    type: 'observability-panel',
+    objectId: 'observability-panel:fdf2bb60-7a5b-11ee-929a-5f1a2dc08039',
+    name: '[Logs] Web traffic Panel',
+    title: '[Logs] Web traffic Panel',
+    savedObject: true,
+  },
+];
+
+export const sampleMetricsToExport: MetricType[] = [
+  {
+    id: 'my_prometheus.go_memstats_alloc_bytes',
+    name: 'my_prometheus.go_memstats_alloc_bytes',
+    catalog: 'my_prometheus',
+    catalogSourceName: 'my_prometheus',
+    catalogTableName: 'go_memstats_alloc_bytes',
+    index: 'my_prometheus.go_memstats_alloc_bytes',
+    aggregation: 'avg',
+    attributesGroupBy: [],
+    availableAttributes: [],
+    type: 'line',
+    sub_type: 'promqlmetric',
+    recentlyCreated: false,
+  },
+  {
+    id: 'observability-visualization:84c73aa0-84aa-11ee-96e0-7bfa0b41d0fc',
+    savedVisualizationId: 'observability-visualization:84c73aa0-84aa-11ee-96e0-7bfa0b41d0fc',
+    query:
+      "source = my_prometheus.query_range('sum by(instance,job) (go_memstats_alloc_bytes_total)', 1700071440, 1700157840, '1h')",
+    name: 'my_prometheus.go_memstats_alloc_bytes_total',
+    catalog: 'CUSTOM_METRICS',
+    type: 'line',
+    recentlyCreated: false,
+  },
+];
+
 export const sampleSortedMetricsLayout = [
   {
     h: 2,

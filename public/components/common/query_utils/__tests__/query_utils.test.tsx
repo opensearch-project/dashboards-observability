@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { parsePromQLIntoKeywords } from '../';
+import { findMinInterval, parsePromQLIntoKeywords } from '../';
 
 describe('Query Utils', () => {
   describe('parsePromQLIntoKeywords', () => {
@@ -41,6 +41,21 @@ describe('Query Utils', () => {
         connection: 'test_catalog',
         metric: 'metric',
       });
+    });
+  });
+  describe('findMinInterval by moment strings', () => {
+    it.each([
+      ['now-3y', 'y'],
+      ['now-23M', 'w'],
+      ['now-4M', 'w'],
+      ['now-3w', 'd'],
+      ['now-40h', 'h'], // less than 2 days
+      ['now-119m', 'm'],
+      ['now-59s', 's'],
+      ['now-900ms', 'ms'],
+    ])("when input is '{0}' expect span '{3}'", (start, span) => {
+      const minInterval = findMinInterval(start, 'now');
+      expect(minInterval).toEqual(span);
     });
   });
 });

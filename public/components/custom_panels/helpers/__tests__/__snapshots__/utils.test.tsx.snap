@@ -257,7 +257,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                         "props": Object {
                           "defaultSelections": Array [
                             Object {
-                              "id": "h",
+                              "id": "v",
                               "name": "Right",
                             },
                           ],
@@ -420,7 +420,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
           "id": "bar",
           "label": "Vertical bar",
           "labelangle": 0,
-          "legendposition": "h",
+          "legendposition": "v",
           "linewidth": 0,
           "mode": "group",
           "name": "bar",
@@ -712,7 +712,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                           "props": Object {
                             "defaultSelections": Array [
                               Object {
-                                "id": "h",
+                                "id": "v",
                                 "name": "Right",
                               },
                             ],
@@ -875,7 +875,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
             "id": "bar",
             "label": "Vertical bar",
             "labelangle": 0,
-            "legendposition": "h",
+            "legendposition": "v",
             "linewidth": 0,
             "mode": "group",
             "name": "bar",
@@ -1190,7 +1190,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "h",
+                                  "id": "v",
                                   "name": "Right",
                                 },
                               ],
@@ -1353,7 +1353,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               "id": "bar",
               "label": "Vertical bar",
               "labelangle": 0,
-              "legendposition": "h",
+              "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
               "name": "bar",
@@ -1452,7 +1452,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               "height": 1180,
               "hovermode": "closest",
               "legend": Object {
-                "orientation": "h",
+                "orientation": "v",
                 "traceorder": "normal",
               },
               "margin": Object {
@@ -1547,7 +1547,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 "height": 1180,
                 "hovermode": "closest",
                 "legend": Object {
-                  "orientation": "h",
+                  "orientation": "v",
                   "traceorder": "normal",
                 },
                 "margin": Object {
@@ -1812,7 +1812,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                         "props": Object {
                           "defaultSelections": Array [
                             Object {
-                              "id": "h",
+                              "id": "v",
                               "name": "Right",
                             },
                           ],
@@ -2328,7 +2328,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                           "props": Object {
                             "defaultSelections": Array [
                               Object {
-                                "id": "h",
+                                "id": "v",
                                 "name": "Right",
                               },
                             ],
@@ -2652,7 +2652,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
           Object {
             "colorway": Array [
               "#3CA1C7",
-              "#8C55A3",
+              "#54B399",
               "#DB748A",
               "#F2BE4B",
               "#68CCC2",
@@ -2898,7 +2898,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "h",
+                                  "id": "v",
                                   "name": "Right",
                                 },
                               ],
@@ -3267,7 +3267,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               "autosize": true,
               "colorway": Array [
                 "#3CA1C7",
-                "#8C55A3",
+                "#54B399",
                 "#DB748A",
                 "#F2BE4B",
                 "#68CCC2",
@@ -3279,7 +3279,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               ],
               "height": 1180,
               "legend": Object {
-                "orientation": "h",
+                "orientation": "v",
                 "traceorder": "normal",
               },
               "margin": Object {
@@ -3373,7 +3373,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 "barmode": "stack",
                 "colorway": Array [
                   "#3CA1C7",
-                  "#8C55A3",
+                  "#54B399",
                   "#DB748A",
                   "#F2BE4B",
                   "#68CCC2",
@@ -3386,7 +3386,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 "height": 1180,
                 "hovermode": "closest",
                 "legend": Object {
-                  "orientation": "h",
+                  "orientation": "v",
                   "traceorder": "normal",
                 },
                 "margin": Object {
@@ -3694,7 +3694,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                         "props": Object {
                           "defaultSelections": Array [
                             Object {
-                              "id": "h",
+                              "id": "v",
                               "name": "Right",
                             },
                           ],
@@ -3857,7 +3857,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
           "id": "horizontal_bar",
           "label": "Horizontal bar",
           "labelangle": 0,
-          "legendposition": "h",
+          "legendposition": "v",
           "linewidth": 0,
           "mode": "group",
           "name": "horizontal_bar",
@@ -4149,7 +4149,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                           "props": Object {
                             "defaultSelections": Array [
                               Object {
-                                "id": "h",
+                                "id": "v",
                                 "name": "Right",
                               },
                             ],
@@ -4312,7 +4312,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
             "id": "horizontal_bar",
             "label": "Horizontal bar",
             "labelangle": 0,
-            "legendposition": "h",
+            "legendposition": "v",
             "linewidth": 0,
             "mode": "group",
             "name": "horizontal_bar",
@@ -4627,7 +4627,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                             "props": Object {
                               "defaultSelections": Array [
                                 Object {
-                                  "id": "h",
+                                  "id": "v",
                                   "name": "Right",
                                 },
                               ],
@@ -4790,7 +4790,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               "id": "horizontal_bar",
               "label": "Horizontal bar",
               "labelangle": 0,
-              "legendposition": "h",
+              "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
               "name": "horizontal_bar",
@@ -4889,7 +4889,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               "height": 1180,
               "hovermode": "closest",
               "legend": Object {
-                "orientation": "h",
+                "orientation": "v",
                 "traceorder": "normal",
               },
               "margin": Object {
@@ -4984,7 +4984,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 "height": 1180,
                 "hovermode": "closest",
                 "legend": Object {
-                  "orientation": "h",
+                  "orientation": "v",
                   "traceorder": "normal",
                 },
                 "margin": Object {
