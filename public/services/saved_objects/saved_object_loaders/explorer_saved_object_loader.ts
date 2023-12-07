@@ -131,6 +131,7 @@ const parseStringDataSource = (
 
 export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements ISavedObjectLoader {
   private pollingInstance: UsePolling<any, any> | undefined;
+
   constructor(
     protected readonly savedObjectClient: ISavedObjectsClient,
     protected readonly notifications: NotificationsStart,
@@ -246,7 +247,9 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
     let visConfig = {};
-    const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
+    const customConfig = objectData.userConfigs
+      ? JSON.parse(objectData.user_configs || objectData.userConfigs)
+      : {};
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {
@@ -279,11 +282,11 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
       return objectData?.query || staleTempQuery;
     });
     if (isInnerObjectSavedVisualization(objectData)) {
-      if (objectData.sub_type === 'metric') {
+      if (objectData.subType === 'metric') {
         setMetricChecked(true);
         setMetricMeasure(objectData.units_of_measure || '');
       }
-      setSubType(objectData.sub_type);
+      setSubType(objectData.subType);
     }
     const tabToBeFocused = isInnerObjectSavedVisualization(objectData)
       ? TYPE_TAB_MAPPING[SAVED_VISUALIZATION]

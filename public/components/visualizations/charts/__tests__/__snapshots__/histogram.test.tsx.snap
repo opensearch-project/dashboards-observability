@@ -480,7 +480,7 @@ exports[`Histogram component Renders histogram component 1`] = `
                       "props": Object {
                         "defaultSelections": Array [
                           Object {
-                            "id": "v",
+                            "id": "h",
                             "name": "Right",
                           },
                         ],
@@ -643,7 +643,7 @@ exports[`Histogram component Renders histogram component 1`] = `
         "id": "bar",
         "label": "Vertical bar",
         "labelangle": 0,
-        "legendposition": "v",
+        "legendposition": "h",
         "linewidth": 0,
         "mode": "group",
         "name": "bar",
@@ -715,7 +715,7 @@ exports[`Histogram component Renders histogram component 1`] = `
         ],
         "height": 220,
         "legend": Object {
-          "orientation": "v",
+          "orientation": "h",
         },
         "margin": Object {
           "b": 30,
@@ -772,7 +772,7 @@ exports[`Histogram component Renders histogram component 1`] = `
           "height": 220,
           "hovermode": "closest",
           "legend": Object {
-            "orientation": "v",
+            "orientation": "h",
           },
           "margin": Object {
             "b": 30,

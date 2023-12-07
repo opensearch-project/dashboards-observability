@@ -50,7 +50,7 @@ export interface SavedVisualizationType {
   selected_date_range: { start: string; end: string; text: string };
   timeField: string;
   application_id?: string;
-  user_configs: any;
+  userConfigs: any;
 }
 
 export interface PPLResponse {

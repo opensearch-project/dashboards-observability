@@ -8,7 +8,6 @@ import MarkdownRender from '@nteract/markdown';
 import { Media } from '@nteract/outputs';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { set } from '@elastic/safer-lodash-set';
 import { VisualizationContainer } from '../../../../components/custom_panels/panel_modules/visualization_container';
 import PPLService from '../../../../services/requests/ppl';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -20,29 +19,23 @@ import { ParaType } from '../../../../../common/types/notebooks';
 import { uiSettingsService } from '../../../../../common/utils';
 import { QueryDataGridMemo } from './para_query_grid';
 
-const OutputBody = ({
-  key,
-  typeOut,
-  val,
-  inp,
-  visInput,
-  setVisInput,
-  DashboardContainerByValueRenderer,
-}: {
-  key: string;
-  typeOut: string;
-  val: string;
-  inp: string;
+/*
+ * "ParaOutput" component is used by notebook to populate paragraph outputs for an open notebook.
+ *
+ * Props taken in as params are:
+ * para - parsed paragraph from notebook
+ *
+ * Outputs component of nteract used as a container for notebook UI.
+ * https://components.nteract.io/#outputs
+ */
+export const ParaOutput = (props: {
+  http: CoreStart['http'];
+  pplService: PPLService;
+  para: ParaType;
   visInput: DashboardContainerInput;
   setVisInput: (input: DashboardContainerInput) => void;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
 }) => {
-  /* Returns a component to render paragraph outputs using the para.typeOut property
-   * Currently supports HTML, TABLE, IMG
-   * TODO: add table rendering
-   */
-  const dateFormat = uiSettingsService.get('dateFormat');
-
   const createQueryColumns = (jsonColumns: any[]) => {
     let index = 0;
     const datagridColumns = [];
@@ -77,118 +70,114 @@ const OutputBody = ({
     return data;
   };
 
-  if (typeOut !== undefined) {
-    switch (typeOut) {
-      case 'QUERY':
-        const inputQuery = inp.substring(4, inp.length);
-        const queryObject = JSON.parse(val);
-        if (queryObject.hasOwnProperty('error')) {
-          return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
-        } else {
-          const columns = createQueryColumns(queryObject.schema);
-          const data = getQueryOutputData(queryObject);
-          return (
-            <div>
-              <EuiText key={'query-input-key'}>
-                <b>{inputQuery}</b>
-              </EuiText>
-              <EuiSpacer />
-              <QueryDataGridMemo
-                key={key}
-                rowCount={queryObject.datarows.length}
-                queryColumns={columns}
-                dataValues={data}
-              />
-            </div>
-          );
-        }
-      case 'MARKDOWN':
-        return (
-          <EuiText className="wrapAll markdown-output-text">
-            <MarkdownRender source={val} />
+  const QueryOutput = ({ typeOut, val }: { typeOut: string; val: string }) => {
+    const inputQuery = para.inp.substring(4, para.inp.length);
+    const queryObject = JSON.parse(val);
+    const columns = createQueryColumns(queryObject.schema);
+    const data = getQueryOutputData(queryObject);
+    const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
+    if (queryObject.hasOwnProperty('error')) {
+      return <EuiCodeBlock>{val}</EuiCodeBlock>;
+    } else {
+      return (
+        <div>
+          <EuiText className="wrapAll">
+            <b>{inputQuery}</b>
           </EuiText>
-        );
-      case 'VISUALIZATION':
-        let from = moment(visInput?.timeRange?.from).format(dateFormat);
-        let to = moment(visInput?.timeRange?.to).format(dateFormat);
-        from = from === 'Invalid date' ? visInput.timeRange.from : from;
-        to = to === 'Invalid date' ? visInput.timeRange.to : to;
-        return (
-          <>
-            <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${from} - ${to}`}
-            </EuiText>
-            <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
-          </>
-        );
-      case 'OBSERVABILITY_VISUALIZATION':
-        let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
-        let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
-        fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
-        toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
-        const onEditClick = (savedVisualizationId: string) => {
-          window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
-        };
-        return (
-          <>
-            <EuiText size="s" style={{ marginLeft: 9 }}>
-              {`${fromObs} - ${toObs}`}
-            </EuiText>
-            <div style={{ height: '300px', width: '100%' }}>
-              <VisualizationContainer
-                http={props.http}
-                editMode={false}
-                visualizationId={''}
-                onEditClick={onEditClick}
-                savedVisualizationId={para.visSavedObjId}
-                pplService={props.pplService}
-                fromTime={para.visStartTime}
-                toTime={para.visEndTime}
-                onRefresh={false}
-                pplFilterValue={''}
-                usedInNotebooks={true}
-                contextMenuId="notebook"
-              />
-            </div>
-          </>
-        );
-      case 'HTML':
-        return (
-          <EuiText>
-            {/* eslint-disable-next-line react/jsx-pascal-case */}
-            <Media.HTML data={val} />
-          </EuiText>
-        );
-      case 'TABLE':
-        return <pre>{val}</pre>;
-      case 'IMG':
-        return <img alt="" src={'data:image/gif;base64,' + val} />;
-      default:
-        return <pre>{val}</pre>;
+          <EuiSpacer />
+          <QueryDataGridMemo
+            rowCount={queryObject.datarows.length}
+            queryColumns={columns}
+            visibleColumns={visibleColumns}
+            setVisibleColumns={setVisibleColumns}
+            dataValues={data}
+          />
+        </div>
+      );
     }
-  } else {
-    console.log('output not supported', typeOut);
-    return <pre />;
-  }
-};
+  };
 
-/*
- * "ParaOutput" component is used by notebook to populate paragraph outputs for an open notebook.
- *
- * Props taken in as params are:
- * para - parsed paragraph from notebook
- *
- * Outputs component of nteract used as a container for notebook UI.
- * https://components.nteract.io/#outputs
- */
-export const ParaOutput = (props: {
-  http: CoreStart['http'];
-  pplService: PPLService;
-  para: ParaType;
-  visInput: DashboardContainerInput;
-  setVisInput: (input: DashboardContainerInput) => void;
-  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
-}) => {
+  const OutputBody = ({ typeOut, val }: { typeOut: string; val: string }) => {
+    /* Returns a component to render paragraph outputs using the para.typeOut property
+     * Currently supports HTML, TABLE, IMG
+     * TODO: add table rendering
+     */
+    const dateFormat = uiSettingsService.get('dateFormat');
+
+    if (typeOut !== undefined) {
+      switch (typeOut) {
+        case 'QUERY':
+          return <QueryOutput typeOut={typeOut} val={val} />;
+        case 'MARKDOWN':
+          return (
+            <EuiText className="wrapAll markdown-output-text">
+              <MarkdownRender source={val} />
+            </EuiText>
+          );
+        case 'VISUALIZATION':
+          let from = moment(visInput?.timeRange?.from).format(dateFormat);
+          let to = moment(visInput?.timeRange?.to).format(dateFormat);
+          from = from === 'Invalid date' ? visInput.timeRange.from : from;
+          to = to === 'Invalid date' ? visInput.timeRange.to : to;
+          return (
+            <>
+              <EuiText size="s" style={{ marginLeft: 9 }}>
+                {`${from} - ${to}`}
+              </EuiText>
+              <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
+            </>
+          );
+        case 'OBSERVABILITY_VISUALIZATION':
+          let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
+          let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
+          fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
+          toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
+          const onEditClick = (savedVisualizationId: string) => {
+            window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
+          };
+          return (
+            <>
+              <EuiText size="s" style={{ marginLeft: 9 }}>
+                {`${fromObs} - ${toObs}`}
+              </EuiText>
+              <div style={{ height: '300px', width: '100%' }}>
+                <VisualizationContainer
+                  http={props.http}
+                  editMode={false}
+                  visualizationId={''}
+                  onEditClick={onEditClick}
+                  savedVisualizationId={para.visSavedObjId}
+                  pplService={props.pplService}
+                  fromTime={para.visStartTime}
+                  toTime={para.visEndTime}
+                  onRefresh={false}
+                  pplFilterValue={''}
+                  usedInNotebooks={true}
+                  contextMenuId="notebook"
+                />
+              </div>
+            </>
+          );
+        case 'HTML':
+          return (
+            <EuiText>
+              {/* eslint-disable-next-line react/jsx-pascal-case */}
+              <Media.HTML data={val} />
+            </EuiText>
+          );
+        case 'TABLE':
+          return <pre>{val}</pre>;
+        case 'IMG':
+          return <img alt="" src={'data:image/gif;base64,' + val} />;
+        default:
+          return <pre>{val}</pre>;
+      }
+    } else {
+      console.log('output not supported', typeOut);
+      return <pre />;
+    }
+  };
+
   const { para, DashboardContainerByValueRenderer, visInput, setVisInput } = props;
 
   return !para.isOutputHidden ? (
@@ -199,10 +188,6 @@ export const ParaOutput = (props: {
             key={para.uniqueId + '_paraOutputBody_' + tIdx}
             typeOut={typeOut}
             val={para.out[tIdx]}
-            inp={para.inp}
-            visInput={visInput}
-            setVisInput={setVisInput}
-            DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
           />
         );
       })}

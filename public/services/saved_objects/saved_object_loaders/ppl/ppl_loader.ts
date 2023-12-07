@@ -5,7 +5,6 @@
 
 import { isEmpty } from 'lodash';
 import { batch as Batch } from 'react-redux';
-import { update } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
 import { updateFields as updateFieldsAction } from '../../../../components/event_analytics/redux/slices/field_slice';
 import { changeQuery as changeQueryAction } from '../../../../components/event_analytics/redux/slices/query_slice';
 import { updateTabName as updateTabNameAction } from '../../../../components/event_analytics/redux/slices/query_tab_slice';
@@ -202,7 +201,9 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
     let visConfig = {};
-    const customConfig = objectData.user_configs ? JSON.parse(objectData.user_configs) : {};
+    const customConfig = objectData.userConfigs
+      ? JSON.parse(objectData.user_configs || objectData.userConfigs)
+      : {};
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {
@@ -235,11 +236,11 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
       return objectData?.query || staleTempQuery;
     });
     if (isInnerObjectSavedVisualization(objectData)) {
-      if (objectData.sub_type === 'metric') {
+      if (objectData.subType === 'metric') {
         setMetricChecked(true);
         setMetricMeasure(objectData.units_of_measure || '');
       }
-      setSubType(objectData.sub_type);
+      setSubType(objectData.subType);
     }
     const tabToBeFocused = isInnerObjectSavedVisualization(objectData)
       ? TYPE_TAB_MAPPING[SAVED_VISUALIZATION]

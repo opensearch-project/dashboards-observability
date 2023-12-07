@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
 import { isEmpty } from 'lodash';
-import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
+import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
@@ -20,6 +20,7 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
+import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -33,6 +34,32 @@ import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
  */
 const escapeQuotes = (literal: string) => {
   return literal.replaceAll("'", "''");
+};
+
+export const findMinInterval = (start: string = '', end: string = '') => {
+  const momentStart = dateMath.parse(start)!;
+  const momentEnd = dateMath.parse(end, { roundUp: true })!;
+  const diffSeconds = momentEnd.unix() - momentStart.unix();
+  let minInterval = 'y';
+
+  // less than 1 second
+  if (diffSeconds <= 1) minInterval = 'ms';
+  // less than 2 minutes
+  else if (diffSeconds <= 60 * 2) minInterval = 's';
+  // less than 2 hours
+  else if (diffSeconds <= 3600 * 2) minInterval = 'm';
+  // less than 2 days
+  else if (diffSeconds <= 86400 * 2) minInterval = 'h';
+  // less than 1 month
+  else if (diffSeconds <= 86400 * 31) minInterval = 'd';
+  // less than 3 months
+  else if (diffSeconds <= 86400 * 93) minInterval = 'w';
+  // less than 2 year
+  else if (diffSeconds <= 86400 * 366) minInterval = 'w';
+
+  console.log('findMinInterval', { momentStart, momentEnd, diffSeconds, minInterval });
+
+  return minInterval;
 };
 
 export const convertDateTime = (
@@ -128,13 +155,6 @@ export const updatePromQLQueryFilters = (
   const { connection, metric, aggregation, attributesGroupBy } = parsePromQLIntoKeywords(
     promQLQuery
   );
-  console.log('updatePromQLQueryFilters', {
-    connection,
-    metric,
-    aggregation,
-    attributesGroupBy,
-    promQLQuery,
-  });
   const promQLPart = buildPromQLFromMetricQuery({
     metric,
     attributesGroupBy: attributesGroupBy.split(','),
@@ -155,6 +175,24 @@ const getPPLIndex = (query: string): string => {
 
 export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
+};
+
+export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
+  // convert to moment
+  const start = convertDateTime(startTime, true);
+  const end = convertDateTime(endTime, false);
+
+  const resolution = findMinInterval(start, end);
+
+  const visualizationQuery = updateCatalogVisualizationQuery({
+    ...metaData.queryMetaData,
+    start,
+    end,
+    span: '1',
+    resolution,
+  });
+
+  return visualizationQuery;
 };
 
 // insert time filter command and additional commands based on raw query

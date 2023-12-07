@@ -8,6 +8,7 @@
     cursor: -webkit-grab;
     cursor: grab;
   }
+
   & :active {
     cursor: -webkit-grabbing;
     cursor: grabbing;
@@ -34,6 +35,43 @@
   text-align: center;
 }
 
+.metricVis {
+  #metricsEditInline {
+    /* for ... reasons (?), margin here causes
+       other rules to activate... providing
+       a more-correct display.
+     */
+    margin: 0 0;
+  }
+
+
+  #aggregation__field {
+    .euiFormLabel {
+      width: 130px
+    }
+  }
+
+  //  #explorerPlotComponent {
+  //    //overflow: hidden;
+  //  }
+  //
+  .svg-container {
+    //height: 425px !important;
+    margin-top: -25px !important;
+  }
+
+  //  .main-svg {
+  //    //margin-top: -10px;
+  //    //height: calc(100% - 10px);
+  //  }
+  //
+
+  .main-svg {
+    margin-top: -10px;
+    //height: calc(100% - 60px);
+  }
+}
+
 %center-div {
   top: 50%;
   left: 50%;
@@ -45,8 +83,7 @@
 }
 
 .visualization-loading-chart {
-  margin: 0;
-  position: absolute;
+  margin: 122px 0;
   @extend %center-div;
 }
 

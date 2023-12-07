@@ -7,7 +7,7 @@ export const sampleMetricsVisualizations = [
   {
     h: 2,
     id: 'Y4muP4QBiaYaSxpXk7r8',
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'Y4muP4QBiaYaSxpXk7r8',
     w: 12,
     x: 0,
@@ -25,7 +25,7 @@ export const sampleMetricsVisualizations = [
   {
     h: 2,
     id: 'prometheus.process_resident_memory_bytes',
-    metricType: 'prometheusMetric',
+    query: { type: 'prometheusMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'prometheus.process_resident_memory_bytes',
     w: 12,
     x: 0,
@@ -51,15 +51,15 @@ export const sampleMetric = {
     text: '',
     tokens: [],
   },
-  user_configs: '{}',
-  sub_type: 'metric',
+  userConfigs: '{}',
+  subType: 'metric',
 };
 
 export const sampleSortedMetricsLayout = [
   {
     h: 2,
     id: 'Y4muP4QBiaYaSxpXk7r8',
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'Y4muP4QBiaYaSxpXk7r8',
     w: 12,
     x: 0,
@@ -68,7 +68,7 @@ export const sampleSortedMetricsLayout = [
   {
     h: 2,
     id: 'prometheus.process_resident_memory_bytes',
-    metricType: 'prometheusMetric',
+    query: { type: 'prometheusMetric', aggregation: 'avg', attributesGroupBy: [] },
     savedVisualizationId: 'prometheus.process_resident_memory_bytes',
     w: 12,
     x: 0,
@@ -99,8 +99,8 @@ export const sampleVisualizationById = {
   timeField: 'timestamp',
   selected_date_range: {},
   selected_fields: {},
-  user_configs: {},
-  sub_type: 'metric',
+  userConfigs: {},
+  subType: 'metric',
 };
 
 export const sampleAllAvailableMetrics = [
@@ -157,7 +157,7 @@ export const samplenewDimensions1 = {
   x: 0,
   y: 2,
   w: 12,
-  h: 2,
+  h: 3,
 };
 
 export const samplePanelVisualizations2 = [
@@ -168,7 +168,7 @@ export const samplePanelVisualizations2 = [
     y: 0,
     h: 2,
     w: 12,
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
   },
   {
     id: 'tomAP4QBiaYaSxpXALls',
@@ -177,7 +177,7 @@ export const samplePanelVisualizations2 = [
     y: 2,
     h: 2,
     w: 12,
-    metricType: 'savedCustomMetric',
+    query: { type: 'savedCustomMetric', aggregation: 'avg', attributesGroupBy: [] },
   },
 ];
 
@@ -185,7 +185,7 @@ export const samplenewDimensions2 = {
   x: 0,
   y: 4,
   w: 12,
-  h: 2,
+  h: 3,
 };
 
 export const samplePrometheusVisualizationId = 'prometheus.process_resident_memory_bytes';
@@ -201,8 +201,8 @@ export const samplePrometheusVisualizationComponent = {
     text: '',
     tokens: [],
   },
-  sub_type: 'metric',
-  user_configs: {},
+  subType: 'metric',
+  userConfigs: {},
 };
 
 export const sampleVisualizationsList = [
@@ -258,7 +258,7 @@ export const samplePrometheusSampleUpdateWithSelections = {
   subType: 'metric',
   timestamp: '@timestamp',
   type: 'line',
-  userConfigs: '{}',
+  userConfigs: {},
 };
 
 export const sampleSavedMetric = {
@@ -277,7 +277,7 @@ export const sampleSavedMetric = {
     text: '',
     tokens: [],
   },
-  user_configs: {
+  userConfigs: {
     dataConfig: {
       series: [
         {
@@ -307,7 +307,7 @@ export const sampleSavedMetric = {
       },
     },
   },
-  sub_type: 'metric',
+  subType: 'metric',
 };
 
 export const sampleSavedMetricUpdate = {
@@ -320,6 +320,22 @@ export const sampleSavedMetricUpdate = {
   subType: 'metric',
   timestamp: 'timestamp',
   type: 'line',
-  userConfigs:
-    '{"dataConfig":{"series":[{"label":"machine.ram","name":"machine.ram","aggregation":"avg","customLabel":""}],"dimensions":[],"span":{"time_field":[{"name":"timestamp","type":"timestamp","label":"timestamp"}],"unit":[{"text":"Day","value":"d","label":"Day"}],"interval":"1"}}}',
+  userConfigs: {
+    dataConfig: {
+      series: [
+        {
+          label: 'machine.ram',
+          name: 'machine.ram',
+          aggregation: 'avg',
+          customLabel: '',
+        },
+      ],
+      dimensions: [],
+      span: {
+        time_field: [{ name: 'timestamp', type: 'timestamp', label: 'timestamp' }],
+        unit: [{ text: 'Day', value: 'd', label: 'Day' }],
+        interval: '1',
+      },
+    },
+  },
 };

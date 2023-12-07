@@ -4,30 +4,16 @@
  */
 
 import './index.scss';
-import {
-  EuiGlobalToastList,
-  EuiPage,
-  EuiPageBody,
-  EuiResizableContainer,
-  htmlIdGenerator,
-  OnTimeChangeProps,
-  ShortDate,
-} from '@elastic/eui';
+import { EuiGlobalToastList, EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
 import React, { ReactChild, useEffect, useState } from 'react';
-import { HashRouter, Route, RouteComponentProps } from 'react-router-dom';
-import { StaticContext } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { HashRouter, Route, RouteComponentProps, StaticContext } from 'react-router-dom';
 import { ChromeBreadcrumb, Toast } from '../../../../../src/core/public';
 import { Sidebar } from './sidebar/sidebar';
-import { EmptyMetricsView } from './view/empty_view';
 import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
 import { MetricType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
-import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
-import { resolutionOptions } from '../../../common/constants/metrics';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
-import { observabilityLogsID } from '../../../common/constants/shared';
 
 interface MetricsProps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -38,14 +24,12 @@ interface MetricsProps {
 }
 
 export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
-  // Redux tools
-  const selectedMetrics = useSelector(selectedMetricsSelector);
-  const metricsLayout = useSelector(metricsLayoutSelector);
+  // Date picker constants
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
+  const [onRefresh, setOnRefresh] = useState(false);
 
   // Top panel
-  const [IsTopPanelDisabled, setIsTopPanelDisabled] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editActionType, setEditActionType] = useState('');
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [toastRightSide, setToastRightSide] = useState<boolean>(true);
 
@@ -58,10 +42,6 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
     setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
   };
 
-  const onEditClick = (savedVisualizationId: string) => {
-    window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
-  };
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       parentBreadcrumb,
@@ -71,18 +51,6 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
       },
     ]);
   }, [chrome, parentBreadcrumb]);
-
-  useEffect(() => {
-    if (!editMode) {
-      selectedMetrics.length > 0 ? setIsTopPanelDisabled(false) : setIsTopPanelDisabled(true); // eslint-disable-line
-    } else {
-      setIsTopPanelDisabled(true);
-    }
-  }, [selectedMetrics, editMode]);
-
-  useEffect(() => {
-    setPanelVisualizations(metricsLayout);
-  }, [metricsLayout]);
 
   return (
     <>
@@ -97,13 +65,12 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
       <HashRouter>
         <Route
           exact
-          path="/"
-          render={() => (
+          path={['/:id', '/']}
+          render={(routerProps) => (
             <div>
               <EuiPage>
                 <EuiPageBody component="div">
                   <TopMenu
-                    IsTopPanelDisabled={IsTopPanelDisabled}
                     editMode={editMode}
                     setEditMode={setEditMode}
                     setEditActionType={setEditActionType}
@@ -116,25 +83,13 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                       {(EuiResizablePanel, EuiResizableButton) => (
                         <>
                           <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
-                            <Sidebar />
+                            <Sidebar additionalSelectedMetricId={routerProps.match.params.id} />
                           </EuiResizablePanel>
 
                           <EuiResizableButton />
 
                           <EuiResizablePanel mode="main" initialSize={80} minSize="50px">
-                            {selectedMetrics.length > 0 ? (
-                              <MetricsGrid
-                                chrome={chrome}
-                                panelVisualizations={panelVisualizations}
-                                setPanelVisualizations={setPanelVisualizations}
-                                editMode={editMode}
-                                moveToEvents={onEditClick}
-                                editActionType={editActionType}
-                                setEditActionType={setEditActionType}
-                              />
-                            ) : (
-                              <EmptyMetricsView />
-                            )}
+                            <MetricsGrid key="metricGrid" />
                           </EuiResizablePanel>
                         </>
                       )}

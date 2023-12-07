@@ -2,7 +2,7 @@
 
 exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
 <div
-  class="euiText euiText--medium wrapAll markdown-output-text"
+  class="euiText euiText--medium markdown-output-text"
 >
   <div
     class="markdown-body "

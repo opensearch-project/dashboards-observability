@@ -80,11 +80,12 @@ export const mergeLayoutAndVisualizations = (
 export const updateQuerySpanInterval = (
   query: string,
   timestampField: string,
-  spanParam: string
+  span: number | string = '1',
+  resolution: string = 'h'
 ) => {
   return query.replace(
     new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`),
-    `span(${timestampField},${spanParam})`
+    `span(${timestampField},${span}${resolution})`
   );
 };
 
@@ -210,28 +211,37 @@ export const getQueryResponse = (
 };
 
 // Fetches savedVisualization by Id and runs getQueryResponse
-export const renderSavedVisualization = async (
-  http: CoreStart['http'],
-  pplService: PPLService,
-  savedVisualizationId: string,
-  startTime: string,
-  endTime: string,
-  filterQuery: string,
-  spanParam: string | undefined,
-  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationType: React.Dispatch<React.SetStateAction<string>>,
-  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>,
-  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
-) => {
+export const renderSavedVisualization = async ({
+  pplService,
+  startTime,
+  endTime,
+  filterQuery,
+  span = '1',
+  resolution = 'h',
+  setVisualizationTitle,
+  setVisualizationType,
+  setVisualizationData,
+  setVisualizationMetaData,
+  setIsLoading,
+  setIsError,
+  visualization,
+}: {
+  pplService: PPLService;
+  startTime: string;
+  endTime: string;
+  filterQuery: string;
+  span?: number | string;
+  resolution?: string;
+  setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
+  setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
+  setVisualizationMetaData: React.Dispatch<React.SetStateAction<undefined>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
+  visualization: SavedVisualizationType;
+}) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
-
-  let visualization: SavedVisualizationType = {};
-  let updatedVisualizationQuery = '';
-
-  visualization = await fetchVisualizationById(http, savedVisualizationId, setIsError);
 
   if (_.isEmpty(visualization)) {
     setIsLoading(false);
@@ -246,15 +256,10 @@ export const renderSavedVisualization = async (
     setVisualizationType(visualization.type);
   }
 
-  if (spanParam !== undefined) {
-    updatedVisualizationQuery = updateQuerySpanInterval(
-      visualization.query,
-      visualization.timeField,
-      spanParam
-    );
-  } else {
-    updatedVisualizationQuery = visualization.query;
-  }
+  const updatedVisualizationQuery =
+    span !== undefined
+      ? updateQuerySpanInterval(visualization.query, visualization.timeField, span, resolution)
+      : visualization.query;
 
   setVisualizationMetaData({ ...visualization, query: updatedVisualizationQuery });
 
@@ -299,34 +304,35 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
-const updateCatalogVisualizationQuery = ({
+export const updateCatalogVisualizationQuery = ({
   catalogSourceName,
   catalogTableName,
   aggregation,
   attributesGroupBy,
-  startTime,
-  endTime,
-  spanParam,
+  start,
+  end,
+  span = '1',
+  resolution = 'h',
 }: {
   catalogSourceName: string;
   catalogTableName: string;
   aggregation: string;
   attributesGroupBy: string[];
-  startTime: string;
-  endTime: string;
-  spanParam: string | undefined;
+  start: string;
+  end: string;
+  span: string;
+  resolution: string;
 }) => {
-  const attributesGroupString = attributesGroupBy.toString();
-  const startEpochTime = convertDateTime(startTime, true, false, true);
-  const endEpochTime = convertDateTime(endTime, false, false, true);
-  // const promQuery =
-  //   attributesGroupBy.length === 0
-  //     ? `${aggregation} (${catalogTableName})`
-  //     : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+  const attributesGroupString = attributesGroupBy.join(',');
+  const startEpochTime = convertDateTime(start, true, false, true);
+  const endEpochTime = convertDateTime(end, false, false, true);
+  const promQuery =
+    attributesGroupBy.length === 0
+      ? `${aggregation} (${catalogTableName})`
+      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
 
-  const promQuery = `${aggregation} (${catalogTableName})`;
-
-  return `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${spanParam}')`;
+  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${span}${resolution}')`;
+  return newQuery;
 };
 
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
@@ -337,7 +343,8 @@ export const renderCatalogVisualization = async ({
   startTime,
   endTime,
   filterQuery,
-  spanParam,
+  span,
+  resolution,
   setVisualizationTitle,
   setVisualizationType,
   setVisualizationData,
@@ -345,7 +352,7 @@ export const renderCatalogVisualization = async ({
   setIsLoading,
   setIsError,
   spanResolution,
-  queryMetaData,
+  visualization,
 }: {
   http: CoreStart['http'];
   pplService: PPLService;
@@ -353,7 +360,8 @@ export const renderCatalogVisualization = async ({
   startTime: string;
   endTime: string;
   filterQuery: string;
-  spanParam: string | undefined;
+  span?: number | string;
+  resolution?: string;
   setVisualizationTitle: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationType: React.Dispatch<React.SetStateAction<string>>;
   setVisualizationData: React.Dispatch<React.SetStateAction<Plotly.Data[]>>;
@@ -362,6 +370,7 @@ export const renderCatalogVisualization = async ({
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>;
   spanResolution?: string;
   queryMetaData?: MetricType;
+  visualization: SavedVisualizationType;
 }) => {
   setIsLoading(true);
   setIsError({} as VizContainerError);
@@ -369,20 +378,12 @@ export const renderCatalogVisualization = async ({
   const visualizationType = 'line';
   const visualizationTimeField = '@timestamp';
 
-  const catalogSourceName = catalogSource.split('.')[0];
-  const catalogTableName = catalogSource.split('.')[1];
-
-  const defaultAggregation = 'avg'; // pass in attributes to this function
-  const attributes: string[] = [];
-
   const visualizationQuery = updateCatalogVisualizationQuery({
-    catalogSourceName,
-    catalogTableName,
-    aggregation: defaultAggregation,
-    attributesGroupBy: attributes,
-    startTime,
-    endTime,
-    spanParam,
+    ...visualization.queryMetaData,
+    start: startTime,
+    end: endTime,
+    span,
+    resolution,
   });
 
   const visualizationMetaData = createCatalogVisualizationMetaData(
@@ -392,18 +393,17 @@ export const renderCatalogVisualization = async ({
     visualizationTimeField
   );
 
-  visualizationMetaData.user_configs = {
+  visualizationMetaData.userConfigs = {
     layoutConfig: {
-      height: 390,
-      margin: { t: 5 },
-      legend: { visible: false },
+      height: 280,
+      legend: { orientation: 'h', y: -0.3 },
     },
   };
 
-  setVisualizationTitle(catalogSource);
+  setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
 
-  setVisualizationMetaData({ ...visualizationMetaData, query: visualizationQuery });
+  setVisualizationMetaData(visualizationMetaData);
 
   getQueryResponse(
     pplService,
@@ -449,9 +449,9 @@ export const parseSavedVisualizations = (
     timeField: visualization.savedVisualization.selected_timestamp.name,
     selected_date_range: visualization.savedVisualization.selected_date_range,
     selected_fields: visualization.savedVisualization.selected_fields,
-    user_configs: visualization.savedVisualization.user_configs || {},
-    sub_type: visualization.savedVisualization.hasOwnProperty('sub_type')
-      ? visualization.savedVisualization.sub_type
+    userConfigs: visualization.savedVisualization.userConfigs || {},
+    subType: visualization.savedVisualization.hasOwnProperty('subType')
+      ? visualization.savedVisualization.subType
       : '',
     units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
       ? visualization.savedVisualization.units_of_measure
@@ -549,7 +549,7 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     return <></>;
   }
 
-  const dataConfig = { ...(metaData.user_configs?.dataConfig || {}) };
+  const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
@@ -576,13 +576,13 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
 
   const mixedUserConfigs = {
     availabilityConfig: {
-      ...(metaData.user_configs?.availabilityConfig || {}),
+      ...(metaData.userConfigs?.availabilityConfig || {}),
     },
     dataConfig: {
       ...finalDataConfig,
     },
     layoutConfig: {
-      ...(metaData.user_configs?.layoutConfig || {}),
+      ...(metaData.userConfigs?.layoutConfig || {}),
     },
   };
 
