@@ -16,30 +16,23 @@ replacers:
 categories:
   - title: 'Breaking Changes'
     labels:
-      - 'Breaking Changes'
+      - 'breaking'
   - title: 'Features'
     labels:
       - 'feature'
-  - title: 'Enhancements'
-    labels:
       - 'enhancement'
   - title: 'Bug Fixes'
     labels:
       - 'bug'
   - title: 'Infrastructure'
     labels:
-      - 'infra'
-      - 'test'
-      - 'dependencies'
-      - 'github actions'
+      - 'infrastructure'
+      - 'testing'
+      - 'integ-test-failure'
+      - 'repository'
   - title: 'Documentation'
     labels:
       - 'documentation'
   - title: 'Maintenance'
     labels:
-      - "version compatibility"
       - "maintenance"
-  - title: 'Refactoring'
-    labels:
-      - 'refactor'
-      - 'code quality'
