@@ -304,37 +304,6 @@ const createCatalogVisualizationMetaData = (
   };
 };
 
-export const updateCatalogVisualizationQuery = ({
-  catalogSourceName,
-  catalogTableName,
-  aggregation,
-  attributesGroupBy,
-  start,
-  end,
-  span = '1',
-  resolution = 'h',
-}: {
-  catalogSourceName: string;
-  catalogTableName: string;
-  aggregation: string;
-  attributesGroupBy: string[];
-  start: string;
-  end: string;
-  span: string;
-  resolution: string;
-}) => {
-  const attributesGroupString = attributesGroupBy.join(',');
-  const startEpochTime = convertDateTime(start, true, false, true);
-  const endEpochTime = convertDateTime(end, false, false, true);
-  const promQuery =
-    attributesGroupBy.length === 0
-      ? `${aggregation} (${catalogTableName})`
-      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
-
-  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${span}${resolution}')`;
-  return newQuery;
-};
-
 // Creates a catalogVisualization for a runtime catalog based PPL query and runs getQueryResponse
 export const renderCatalogVisualization = async ({
   http,

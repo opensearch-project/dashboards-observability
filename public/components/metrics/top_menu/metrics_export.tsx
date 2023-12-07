@@ -31,7 +31,7 @@ import { coreRefs } from '../../../framework/core_refs';
 import { selectPanelList } from '../../../../public/components/custom_panels/redux/panel_slice';
 import { SavedVisualization } from '../../../../common/types/explorer';
 import { visualizationFromMetric } from '../helpers/utils';
-import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
+import { updateCatalogVisualizationQuery } from '../../common/query_utils';
 import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
 import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import { MountPoint } from '../../../../../../src/core/public';

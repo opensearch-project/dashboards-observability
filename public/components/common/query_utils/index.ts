@@ -20,7 +20,6 @@ import {
   PPL_NEWLINE_REGEX,
 } from '../../../../common/constants/shared';
 import { IExplorerFields, IQuery } from '../../../../common/types/explorer';
-import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
 
 /*
  * "Query Utils" This file contains different reused functions in operational panels
@@ -81,6 +80,37 @@ export const convertDateTime = (
   }
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
+};
+
+export const updateCatalogVisualizationQuery = ({
+  catalogSourceName,
+  catalogTableName,
+  aggregation,
+  attributesGroupBy,
+  start,
+  end,
+  span = '1',
+  resolution = 'h',
+}: {
+  catalogSourceName: string;
+  catalogTableName: string;
+  aggregation: string;
+  attributesGroupBy: string[];
+  start: string;
+  end: string;
+  span: string;
+  resolution: string;
+}) => {
+  const attributesGroupString = attributesGroupBy.join(',');
+  const startEpochTime = convertDateTime(start, true, false, true);
+  const endEpochTime = convertDateTime(end, false, false, true);
+  const promQuery =
+    attributesGroupBy.length === 0
+      ? `${aggregation} (${catalogTableName})`
+      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+
+  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${span}${resolution}')`;
+  return newQuery;
 };
 
 const PROMQL_DEFAULT_AGGREGATION = 'avg';

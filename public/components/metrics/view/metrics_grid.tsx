@@ -9,7 +9,7 @@ import { useObservable } from 'react-use';
 import { connect } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
-import { updateCatalogVisualizationQuery } from '../../custom_panels/helpers/utils';
+import { updateCatalogVisualizationQuery } from '../../common/query_utils';
 import {
   allMetricsSelector,
   dateSpanFilterSelector,
