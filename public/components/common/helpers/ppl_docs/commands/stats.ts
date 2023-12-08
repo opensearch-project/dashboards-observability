@@ -28,11 +28,11 @@ stats &lt;aggregation&gt;... \[by-clause\]...
 -   \`aggregation\`: Required. The aggregation function that must be applied to the field.
 -   \`by-clause\`: Optional. One or more fields to group by. Default: If \`&lt;by-clause&gt;\` is not specified, the \`stats\` command returns one row, which is the aggregation for the entire result set.
 
-### Aggregation Functions
+### Aggregation functions
 ---
 #### COUNT
 
-Returns a count of the number of rows in the result set. See the following example.
+The \`count\` function returns the number of rows in the result set. The following is an example PPL query:
 
     os> source=accounts | stats count();
     fetched rows / total rows = 1/1
@@ -44,7 +44,7 @@ Returns a count of the number of rows in the result set. See the following examp
 
 #### SUM
 
-SUM(expr): Returns the sum of the values in the expression \`expr\`. See the following example.
+The \`SUM(expr)\` function returns the sum of the values in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats sum(age) by gender;
     fetched rows / total rows = 2/2
@@ -57,7 +57,7 @@ SUM(expr): Returns the sum of the values in the expression \`expr\`. See the fol
 
 #### AVG
 
-AVG(expr): Returns the average of the values in the expression \`expr\`. See the following example.
+The \`AVG(expr)\` function returns the average of the values in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats avg(age) by gender;
     fetched rows / total rows = 2/2
@@ -70,7 +70,7 @@ AVG(expr): Returns the average of the values in the expression \`expr\`. See the
 
 #### MAX
 
-MAX(expr): Returns the largest value in the expression \`expr\`. See the following example.
+The \`MAX(expr)\` function returns the largest value in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats max(age);
     fetched rows / total rows = 1/1
@@ -82,7 +82,7 @@ MAX(expr): Returns the largest value in the expression \`expr\`. See the followi
 
 #### MIN
 
-MIN(expr): Returns the smallest value in the expression \`expr\`. See the following example.
+The \`MIN(expr)\` function returns the smallest value in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats min(age);
     fetched rows / total rows = 1/1
@@ -94,7 +94,7 @@ MIN(expr): Returns the smallest value in the expression \`expr\`. See the follow
 
 #### VAR\_SAMP
 
-VAR\_SAMP(expr): Returns the sample variance of a set of data in the expression \`expr\`. See the following example.
+The \`VAR\_SAMP(expr)\` function returns the sample variance of a selection of data in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats var_samp(age);
     fetched rows / total rows = 1/1
@@ -106,7 +106,7 @@ VAR\_SAMP(expr): Returns the sample variance of a set of data in the expression 
 
 #### VAR\_POP
 
-VAR\_POP(expr): Returns the population variance of a set of data in the expression \`expr\`. See the following example.
+The \`VAR\_POP(expr)\` function returns the population variance of a selection of data in the expression \`expr\`. See the following example.
 
     os> source=accounts | stats var_pop(age);
     fetched rows / total rows = 1/1
@@ -118,7 +118,7 @@ VAR\_POP(expr): Returns the population variance of a set of data in the expressi
 
 #### STDDEV\_SAMP
 
-STDDEV\_SAMP(expr): Returns the sample standard deviation of a set of values in the expression \`expr\`. See the follwoing example. 
+The \`STDDEV\_SAMP(expr)\` function returns the sample standard deviation of a set of values in the expression \`expr\`. The following is an example PPL query: 
 
     os> source=accounts | stats stddev_samp(age);
     fetched rows / total rows = 1/1
@@ -130,7 +130,7 @@ STDDEV\_SAMP(expr): Returns the sample standard deviation of a set of values in 
 
 #### STDDEV\_POP
 
-STDDEV\_POP(expr): Returns the population standard deviation of a set of values in the expression \`expr\`.
+The \`STDDEV\_POP(expr)\` function returns the population standard deviation of a set of values in the expression \`expr\`. The following is an example PPL query:
 
     os> source=accounts | stats stddev_pop(age);
     fetched rows / total rows = 1/1
@@ -160,13 +160,13 @@ The following table lists the available time units.
 | quarter (q)                |
 | year (y)                   |
 
-### Example PPL queries
+### PPL queries using the stats command
 
-The following examples show how to use the \`stats\` command in various PPL queries.
+The following example PPL queries show ways you can use the \`stats\` command in your queries.
 
 #### Example 1: Calculate event counts
 
-The following PPL query example calculates event counts.
+The following example PPL query calculates event counts:
 
     os> source=accounts | stats count();
     fetched rows / total rows = 1/1
@@ -178,7 +178,7 @@ The following PPL query example calculates event counts.
 
 #### Example 2: Calculate a field's average
 
-The following PPL query example calculates the average age.
+The following example PPL query calculates the average age:
 
     os> source=accounts | stats avg(age);
     fetched rows / total rows = 1/1
@@ -190,7 +190,7 @@ The following PPL query example calculates the average age.
 
 #### Example 3: Calculate the average of a field by group
 
-The following PPL query example calculates the average age grouped by gender.
+The following example PPL query calculates the average age grouped by gender:
 
     os> source=accounts | stats avg(age) by gender;
     fetched rows / total rows = 2/2
@@ -216,7 +216,7 @@ The following example PPL query calculates the average age, sum age, and count o
 
 #### Example 5: Calculate a field's maximum
 
-The following PPL query example calculates the maximum age.
+The following example PPL query calculates the maximum age:
 
     os> source=accounts | stats max(age);
     fetched rows / total rows = 1/1
@@ -228,7 +228,7 @@ The following PPL query example calculates the maximum age.
 
 #### Example 6: Calculate a field's min/max by group
 
-The following PPL query example calculates the min/max age grouped by gender.
+The following PPL query example calculates the min/max age grouped by gender:
 
     os> source=accounts | stats max(age), min(age) by gender;
     fetched rows / total rows = 2/2
