@@ -21,9 +21,10 @@ jobs:
       - name: Generate test files list
         id: set-matrix
         run: |
-          TEST_FILES=$(ls .cypress/integration/*.{js,ts} | xargs -n 1 basename | sed 's/.spec.js//; s/.spec.ts//')
-          TEST_FILES_JSON=$(echo $TEST_FILES | jq -R -s -c 'split("\n")[:-1]')
-          echo "::set-output name=matrix::{\"testfiles\": $TEST_FILES_JSON}"
+          TEST_FILES=$(ls .cypress/integration/*.{js,ts} | xargs -n 1 basename)
+          TEST_FILES_JSON=$(echo $TEST_FILES | jq -R -s -c 'split("\n") | map(select(length > 0)) | map("\"" + . + "\"") | join(", ")')
+          echo "::set-output name=matrix::{\"testfiles\": [$TEST_FILES_JSON]}"
+      
       
       - name: Print matrix output
         run: echo ${{ steps.set-matrix.outputs.matrix }}
