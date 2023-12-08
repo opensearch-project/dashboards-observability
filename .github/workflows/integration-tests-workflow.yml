@@ -10,6 +10,21 @@ env:
   OPENSEARCH_PLUGIN_VERSION: '3.0.0.0'
 
 jobs:
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Generate test files list
+        id: set-matrix
+        run: |
+          TEST_FILES=$(ls .cypress/integration/*.{js,ts} | xargs -n 1 basename | sed 's/.spec.js//; s/.spec.ts//')
+          TEST_FILES_JSON=$(echo $TEST_FILES | jq -R -s -c 'split("\n")[:-1]')
+          echo "::set-output name=matrix::{\"testfiles\": $TEST_FILES_JSON}"
+
   tests:
     env:
       # Prevents extra Cypress installation progress messages
@@ -23,10 +38,10 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         java: [11]
+        testfiles: ${{ fromJson(needs.prepare-matrix.outputs.matrix).testfiles }}
         include:
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
-
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -153,7 +168,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn cypress:parallel --browser chrome
+          yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testfiles }}'
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v1
