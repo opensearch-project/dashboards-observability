@@ -7,7 +7,7 @@
 
 import {
   TEST_INTEGRATION_INSTANCE, TEST_SAMPLE_INSTANCE,
-} from '../utils/constants';
+} from '../../utils/constants';
 
 let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
 let testInstance = `${TEST_INTEGRATION_INSTANCE}_${testInstanceSuffix}`;

@@ -11,9 +11,9 @@ import {
   PPL_METRICS_NAMES,
   VIS_TYPE_LINE,
   TESTING_PANEL,
-} from '../utils/metrics_constants';
-import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
-import { landOnPanels, clearQuerySearchBoxText } from '../utils/event_analytics/helpers';
+} from '../../utils/metrics_constants';
+import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
+import { landOnPanels, clearQuerySearchBoxText } from '../../utils/event_analytics/helpers';
 
 describe('Metrics Analytics', () => {
   beforeEach(() => {

@@ -23,17 +23,17 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         java: [11]
-        testfiles: [
-          10_datasources.spec.js,
+        testgroups: [
           1_event_analytics.spec.js,
-          2_notebooks.spec.js,
+          notebooks,
           3_panels.spec.ts,
           4_trace_analytics_dashboard.spec.js,
           5_trace_analytics_services.spec.js,
           6_trace_analytics_traces.spec.js,
           7_app_analytics.spec.js,
           8_metrics_analytics.spec.js,
-          9_integrations.spec.js
+          9_integrations.spec.js,
+          10_datasources.spec.js
         ]
         include:
           - os: ubuntu-latest
@@ -164,7 +164,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testfiles }}'
+          yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v1

@@ -5,8 +5,8 @@
 
 /// <reference types="cypress" />
 
-import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../utils/constants';
-import { suppressResizeObserverIssue } from '../utils/constants';
+import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../../utils/constants';
+import { suppressResizeObserverIssue } from '../../utils/constants';
 
 suppressResizeObserverIssue();//needs to be in file once
 

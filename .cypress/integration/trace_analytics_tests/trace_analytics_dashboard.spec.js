@@ -5,8 +5,8 @@
 
 /// <reference types="cypress" />
 
-import { testDataSet, delay, setTimeFilter, jaegerTestDataSet } from '../utils/constants';
-import { suppressResizeObserverIssue } from '../utils/constants';
+import { testDataSet, delay, setTimeFilter, jaegerTestDataSet } from '../../utils/constants';
+import { suppressResizeObserverIssue } from '../../utils/constants';
 
 suppressResizeObserverIssue();//needs to be in file once
 
