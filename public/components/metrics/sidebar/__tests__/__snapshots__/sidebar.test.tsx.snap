@@ -99,148 +99,148 @@ exports[`Side Bar Component renders Side Bar Component 1`] = `
         textComponent={Symbol(react.fragment)}
       >
         <PseudoLocaleWrapper>
-          <section
-            className="sidebarHeight"
-          >
-            <Component>
-              <div
-                className="metrics-search-bar-input"
-                data-test-subj="metricsSearch"
-              >
-                <EuiSearchBar
-                  box={
-                    Object {
-                      "incremental": true,
-                      "placeholder": "Search to filter Available Metrics",
-                    }
+          <Component>
+            <div
+              className="metrics-search-bar-input"
+              data-test-subj="metricsSearch"
+            >
+              <EuiSearchBar
+                box={
+                  Object {
+                    "incremental": true,
+                    "placeholder": "Search to filter Available Metrics",
                   }
-                  defaultQuery=""
-                  onChange={[Function]}
-                  query=""
+                }
+                defaultQuery=""
+                onChange={[Function]}
+                query=""
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="m"
+                  wrap={true}
                 >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="m"
-                    wrap={true}
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
                   >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                    <EuiFlexItem
+                      className="euiSearchBar__searchHolder"
+                      grow={true}
                     >
-                      <EuiFlexItem
-                        className="euiSearchBar__searchHolder"
-                        grow={true}
+                      <div
+                        className="euiFlexItem euiSearchBar__searchHolder"
                       >
-                        <div
-                          className="euiFlexItem euiSearchBar__searchHolder"
+                        <EuiSearchBox
+                          incremental={true}
+                          isInvalid={false}
+                          onSearch={[Function]}
+                          placeholder="Search to filter Available Metrics"
+                          query=""
                         >
-                          <EuiSearchBox
+                          <EuiFieldSearch
+                            aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                            compressed={false}
+                            defaultValue=""
+                            fullWidth={true}
                             incremental={true}
+                            inputRef={[Function]}
+                            isClearable={true}
                             isInvalid={false}
+                            isLoading={false}
                             onSearch={[Function]}
                             placeholder="Search to filter Available Metrics"
-                            query=""
                           >
-                            <EuiFieldSearch
-                              aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                            <EuiFormControlLayout
                               compressed={false}
-                              defaultValue=""
                               fullWidth={true}
-                              incremental={true}
-                              inputRef={[Function]}
-                              isClearable={true}
-                              isInvalid={false}
+                              icon="search"
                               isLoading={false}
-                              onSearch={[Function]}
-                              placeholder="Search to filter Available Metrics"
                             >
-                              <EuiFormControlLayout
-                                compressed={false}
-                                fullWidth={true}
-                                icon="search"
-                                isLoading={false}
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--fullWidth"
                               >
                                 <div
-                                  className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                                  className="euiFormControlLayout__childrenWrapper"
                                 >
-                                  <div
-                                    className="euiFormControlLayout__childrenWrapper"
+                                  <EuiValidatableControl
+                                    isInvalid={false}
                                   >
-                                    <EuiValidatableControl
-                                      isInvalid={false}
+                                    <input
+                                      aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                                      className="euiFieldSearch euiFieldSearch--fullWidth"
+                                      defaultValue=""
+                                      onKeyUp={[Function]}
+                                      placeholder="Search to filter Available Metrics"
+                                      type="search"
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons
+                                    compressed={false}
+                                    icon="search"
+                                    isLoading={false}
+                                  >
+                                    <div
+                                      className="euiFormControlLayoutIcons"
                                     >
-                                      <input
-                                        aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                        className="euiFieldSearch euiFieldSearch--fullWidth"
-                                        defaultValue=""
-                                        onKeyUp={[Function]}
-                                        placeholder="Search to filter Available Metrics"
+                                      <EuiFormControlLayoutCustomIcon
+                                        size="m"
                                         type="search"
-                                      />
-                                    </EuiValidatableControl>
-                                    <EuiFormControlLayoutIcons
-                                      compressed={false}
-                                      icon="search"
-                                      isLoading={false}
-                                    >
-                                      <div
-                                        className="euiFormControlLayoutIcons"
                                       >
-                                        <EuiFormControlLayoutCustomIcon
-                                          size="m"
-                                          type="search"
+                                        <span
+                                          className="euiFormControlLayoutCustomIcon"
                                         >
-                                          <span
-                                            className="euiFormControlLayoutCustomIcon"
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiFormControlLayoutCustomIcon__icon"
+                                            size="m"
+                                            type="search"
                                           >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFormControlLayoutCustomIcon__icon"
-                                              size="m"
-                                              type="search"
+                                            <EuiIconEmpty
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              focusable="false"
+                                              role="img"
+                                              style={null}
                                             >
-                                              <EuiIconEmpty
+                                              <svg
                                                 aria-hidden={true}
                                                 className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                 focusable="false"
+                                                height={16}
                                                 role="img"
                                                 style={null}
-                                              >
-                                                <svg
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                  focusable="false"
-                                                  height={16}
-                                                  role="img"
-                                                  style={null}
-                                                  viewBox="0 0 16 16"
-                                                  width={16}
-                                                  xmlns="http://www.w3.org/2000/svg"
-                                                />
-                                              </EuiIconEmpty>
-                                            </EuiIcon>
-                                          </span>
-                                        </EuiFormControlLayoutCustomIcon>
-                                      </div>
-                                    </EuiFormControlLayoutIcons>
-                                  </div>
+                                                viewBox="0 0 16 16"
+                                                width={16}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                            </EuiIconEmpty>
+                                          </EuiIcon>
+                                        </span>
+                                      </EuiFormControlLayoutCustomIcon>
+                                    </div>
+                                  </EuiFormControlLayoutIcons>
                                 </div>
-                              </EuiFormControlLayout>
-                            </EuiFieldSearch>
-                          </EuiSearchBox>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </EuiSearchBar>
-              </div>
-            </Component>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldSearch>
+                        </EuiSearchBox>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </EuiSearchBar>
+            </div>
+          </Component>
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
+            />
+          </EuiSpacer>
+          <section
+            className="sidebar"
+          >
             <Component
               dataTestSubj="metricsListItems_selectedMetrics"
               handleClick={[Function]}

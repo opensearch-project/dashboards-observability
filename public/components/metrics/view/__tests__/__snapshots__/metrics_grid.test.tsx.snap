@@ -348,71 +348,63 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
       spanParam="1h"
       startTime="now-30m"
     >
-      <EuiDragDropContext
-        onDragEnd={[Function]}
+      <section
+        className="metricsGrid"
       >
-        <DragDropContext
+        <EuiDragDropContext
           onDragEnd={[Function]}
-          onDragStart={[Function]}
         >
-          <ErrorBoundary>
-            <App
-              contextId="0"
-              dragHandleUsageInstructions="
+          <DragDropContext
+            onDragEnd={[Function]}
+            onDragStart={[Function]}
+          >
+            <ErrorBoundary>
+              <App
+                contextId="0"
+                dragHandleUsageInstructions="
   Press space bar to start a drag.
   When dragging you can use the arrow keys to move the item around and escape to cancel.
   Some screen readers may require you to be in focus mode or to use your pass through key
 "
-              onDragEnd={[Function]}
-              onDragStart={[Function]}
-              setCallbacks={[Function]}
-            >
-              <Provider
-                context={
-                  Object {
-                    "$$typeof": Symbol(react.context),
-                    "Consumer": Object {
-                      "$$typeof": Symbol(react.context),
-                      "_calculateChangedBits": null,
-                      "_context": [Circular],
-                    },
-                    "Provider": Object {
-                      "$$typeof": Symbol(react.provider),
-                      "_context": [Circular],
-                    },
-                    "_calculateChangedBits": null,
-                    "_currentRenderer": Object {},
-                    "_currentRenderer2": null,
-                    "_currentValue": null,
-                    "_currentValue2": null,
-                    "_threadCount": 0,
-                  }
-                }
-                store={
-                  Object {
-                    "dispatch": [Function],
-                    "getState": [Function],
-                    "replaceReducer": [Function],
-                    "subscribe": [Function],
-                    Symbol(Symbol.observable): [Function],
-                  }
-                }
+                onDragEnd={[Function]}
+                onDragStart={[Function]}
+                setCallbacks={[Function]}
               >
-                <EuiDroppable
-                  droppableId="DROPPABLE_AREA_BARE"
+                <Provider
+                  context={
+                    Object {
+                      "$$typeof": Symbol(react.context),
+                      "Consumer": Object {
+                        "$$typeof": Symbol(react.context),
+                        "_calculateChangedBits": null,
+                        "_context": [Circular],
+                      },
+                      "Provider": Object {
+                        "$$typeof": Symbol(react.provider),
+                        "_context": [Circular],
+                      },
+                      "_calculateChangedBits": null,
+                      "_currentRenderer": Object {},
+                      "_currentRenderer2": null,
+                      "_currentValue": null,
+                      "_currentValue2": null,
+                      "_threadCount": 0,
+                    }
+                  }
+                  store={
+                    Object {
+                      "dispatch": [Function],
+                      "getState": [Function],
+                      "replaceReducer": [Function],
+                      "subscribe": [Function],
+                      Symbol(Symbol.observable): [Function],
+                    }
+                  }
                 >
-                  <Connect(Droppable)
-                    direction="vertical"
+                  <EuiDroppable
                     droppableId="DROPPABLE_AREA_BARE"
-                    getContainerForClone={[Function]}
-                    ignoreContainerClipping={false}
-                    isCombineEnabled={false}
-                    isDropDisabled={false}
-                    mode="standard"
-                    renderClone={null}
-                    type="EUI_DEFAULT"
                   >
-                    <Droppable
+                    <Connect(Droppable)
                       direction="vertical"
                       droppableId="DROPPABLE_AREA_BARE"
                       getContainerForClone={[Function]}
@@ -420,44 +412,56 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       isCombineEnabled={false}
                       isDropDisabled={false}
                       mode="standard"
-                      placeholder={null}
                       renderClone={null}
-                      shouldAnimatePlaceholder={false}
-                      snapshot={
-                        Object {
-                          "draggingFromThisWith": null,
-                          "draggingOverWith": null,
-                          "isDraggingOver": false,
-                          "isUsingPlaceholder": false,
-                        }
-                      }
                       type="EUI_DEFAULT"
-                      updateViewportMaxScroll={[Function]}
-                      useClone={null}
                     >
-                      <div
-                        className="euiDroppable euiDroppable--noGrow"
-                        data-rbd-droppable-context-id="0"
-                        data-rbd-droppable-id="DROPPABLE_AREA_BARE"
-                        data-test-subj="droppable"
+                      <Droppable
+                        direction="vertical"
+                        droppableId="DROPPABLE_AREA_BARE"
+                        getContainerForClone={[Function]}
+                        ignoreContainerClipping={false}
+                        isCombineEnabled={false}
+                        isDropDisabled={false}
+                        mode="standard"
+                        placeholder={null}
+                        renderClone={null}
+                        shouldAnimatePlaceholder={false}
+                        snapshot={
+                          Object {
+                            "draggingFromThisWith": null,
+                            "draggingOverWith": null,
+                            "isDraggingOver": false,
+                            "isUsingPlaceholder": false,
+                          }
+                        }
+                        type="EUI_DEFAULT"
+                        updateViewportMaxScroll={[Function]}
+                        useClone={null}
                       >
                         <div
-                          className="euiDroppable__placeholder"
+                          className="euiDroppable euiDroppable--noGrow"
+                          data-rbd-droppable-context-id="0"
+                          data-rbd-droppable-id="DROPPABLE_AREA_BARE"
+                          data-test-subj="droppable"
                         >
-                          <AnimateInOut
-                            on={null}
-                            shouldAnimate={false}
-                          />
+                          <div
+                            className="euiDroppable__placeholder"
+                          >
+                            <AnimateInOut
+                              on={null}
+                              shouldAnimate={false}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </Droppable>
-                  </Connect(Droppable)>
-                </EuiDroppable>
-              </Provider>
-            </App>
-          </ErrorBoundary>
-        </DragDropContext>
-      </EuiDragDropContext>
+                      </Droppable>
+                    </Connect(Droppable)>
+                  </EuiDroppable>
+                </Provider>
+              </App>
+            </ErrorBoundary>
+          </DragDropContext>
+        </EuiDragDropContext>
+      </section>
     </Component>
   </Connect(Component)>
 </Provider>

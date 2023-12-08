@@ -147,7 +147,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               ],
               "span": undefined,
             },
-            "layoutConfig": Object {},
+            "layout": Object {},
           },
         },
         "vis": Object {
@@ -602,7 +602,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 ],
                 "span": undefined,
               },
-              "layoutConfig": Object {},
+              "layout": Object {},
             },
           },
           "vis": Object {
@@ -1080,7 +1080,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                   ],
                   "span": undefined,
                 },
-                "layoutConfig": Object {},
+                "layout": Object {},
               },
             },
             "vis": Object {
@@ -1761,7 +1761,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 ],
               },
             },
-            "layoutConfig": Object {},
+            "layout": Object {},
           },
         },
         "vis": Object {
@@ -2277,7 +2277,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                   ],
                 },
               },
-              "layoutConfig": Object {},
+              "layout": Object {},
             },
           },
           "vis": Object {
@@ -2847,7 +2847,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                     ],
                   },
                 },
-                "layoutConfig": Object {},
+                "layout": Object {},
               },
             },
             "vis": Object {
@@ -3584,7 +3584,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               ],
               "span": undefined,
             },
-            "layoutConfig": Object {},
+            "layout": Object {},
           },
         },
         "vis": Object {
@@ -4039,7 +4039,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 ],
                 "span": undefined,
               },
-              "layoutConfig": Object {},
+              "layout": Object {},
             },
           },
           "vis": Object {
@@ -4517,7 +4517,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                   ],
                   "span": undefined,
                 },
-                "layoutConfig": Object {},
+                "layout": Object {},
               },
             },
             "vis": Object {
