@@ -72,8 +72,8 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
       dataConfig: {
         ...finalDataConfig,
       },
-      layoutConfig: {
-        ...(userConfigs.layoutConfig || {}),
+      layout: {
+        ...userConfigs.layout,
       },
     };
 

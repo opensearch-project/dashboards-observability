@@ -127,9 +127,11 @@ export const InnerMetricsGrid = ({
   }, [isLocked]);
 
   return (
-    <EuiDragDropContext onDragEnd={onDragEnd}>
-      <EuiDroppable droppableId="DROPPABLE_AREA_BARE">{visualizationComponents}</EuiDroppable>
-    </EuiDragDropContext>
+    <section className="metricsGrid">
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiDroppable droppableId="DROPPABLE_AREA_BARE">{visualizationComponents}</EuiDroppable>
+      </EuiDragDropContext>
+    </section>
   );
 };
 

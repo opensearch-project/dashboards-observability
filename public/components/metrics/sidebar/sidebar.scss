@@ -7,6 +7,10 @@
   line-height: normal;
 }
 
+section.sidebar {
+  height: calc(100vh - 240px);
+}
+
 .metricsListContainer {
   margin-left: 15px;
   margin-right: 5px;

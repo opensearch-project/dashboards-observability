@@ -60,10 +60,10 @@ export const Sidebar = ({
 
   return (
     <I18nProvider>
-      <section className="sidebarHeight">
-        <SearchBar />
-        <EuiSpacer size="s" />
+      <SearchBar />
+      <EuiSpacer size="s" />
 
+      <section className="sidebar">
         <MetricsAccordion
           metricsList={selectedMetricsList}
           headerName="Selected Metrics"

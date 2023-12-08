@@ -5,7 +5,7 @@
 
 import { ShortDate } from '@elastic/eui';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import _, { forEach, isEmpty } from 'lodash';
+import _, { forEach, isEmpty, min } from 'lodash';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { Layout } from 'react-grid-layout';
@@ -26,19 +26,28 @@ import { ObservabilitySavedVisualization } from '../../../services/saved_objects
 import { getDefaultVisConfig } from '../../event_analytics/utils';
 import { Visualization } from '../../visualizations/visualization';
 import { MetricType } from '../../../../common/types/metrics';
-import { convertDateTime } from '../../common/query_utils';
+import { convertDateTime, updateCatalogVisualizationQuery } from '../../common/query_utils';
 
 /*
  * "Utils" This file contains different reused functions in operational panels
  *
- * isNameValid - Validates string to length > 0 and < 50
- * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
- * getQueryResponse - Get response of PPL query to load visualizations
- * renderSavedVisualization - Fetches savedVisualization by Id and runs getQueryResponse
- * onTimeChange - Function to store recently used time filters and set start and end time.
- * isDateValid - Function to check date validity
- * isPPLFilterValid - Validate if the panel PPL query doesn't contain any Index/Time/Field filters
+ * checkIndexExists - Function to test if query string includes an index
+ * checkWhereClauseExists - Function to test if query string includes where clause
+ * createCatalogVisualizationMetaData - create Visualization metaData from visualization, query details
  * displayVisualization - Function to render the visualzation based of its type
+ * fetchVisualizationById - Fetch visualization from SavedObject store by id
+ * getQueryResponse - Get response of PPL query to load visualizations
+ * isDateValid - Function to check date validity
+ * isNameValid - Validates string to length > 0 and < 50
+ * isPPLFilterValid - Validate if the panel PPL query doesn't contain any Index/Time/Field filters
+ * mergeLayoutAndVisualizations - Function to merge current panel layout into the visualizations list
+ * onTimeChange - Function to store recently used time filters and set start and end time.
+ * parseSavedVisualizations - Transform SavedObject visualization into mapped record object
+ * prepareMetricsData - Create visualization schema metadata from jsonData scheama list
+ * prependRecentlyUsedRange - Maintain MRU list of datePicker selected ranges
+ * processMetricsData - validate and transform jsonData schema into visualization schema metadata
+ * renderCatalogVisualization - Query OS for visualization Data from PromQL metric schema
+ * renderSavedVisualization - Query OS for visualization Data from PPL metric schema
  */
 
 // Name validation 0>Name<=50
@@ -77,7 +86,7 @@ export const mergeLayoutAndVisualizations = (
  * Updates the span command interval
  * Returns -> source = opensearch_dashboards_sample_data_logs | stats avg(bytes) by span(timestamp,1M)
  */
-export const updateQuerySpanInterval = (
+const updateQuerySpanInterval = (
   query: string,
   timestampField: string,
   span: number | string = '1',
@@ -119,35 +128,6 @@ const queryAccumulator = (
   return indexPartOfQuery + timeQueryFilter + pplFilterQuery + filterPartOfQuery;
 };
 
-// PPL Service requestor
-const pplServiceRequestor = async (
-  pplService: PPLService,
-  finalQuery: string,
-  type: string,
-  setVisualizationData: React.Dispatch<React.SetStateAction<any[]>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>
-) => {
-  await pplService
-    .fetch({ query: finalQuery, format: 'jdbc' })
-    .then((res) => {
-      if (res === undefined)
-        setIsError({ errorMessage: 'Please check the validity of PPL Filter' });
-      setVisualizationData(res);
-    })
-    .catch((error: Error) => {
-      const errorMessage = JSON.parse(error.body.message);
-      setIsError({
-        errorMessage: errorMessage.error.reason || 'Issue in fetching visualization',
-        errorDetails: errorMessage.error.details,
-      });
-      console.error(error.body);
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-};
-
 // Fetched Saved Visualization By Id
 export const fetchVisualizationById = async (
   http: CoreStart['http'],
@@ -176,38 +156,25 @@ export const fetchVisualizationById = async (
 };
 
 // Get PPL Query Response
-export const getQueryResponse = (
+export const getQueryResponse = async (
   pplService: PPLService,
   query: string,
   type: string,
   startTime: string,
   endTime: string,
-  setVisualizationData: React.Dispatch<React.SetStateAction<any[]>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   filterQuery = '',
   timestampField = 'timestamp',
   metricVisualization = false
 ) => {
-  setIsLoading(true);
-  setIsError({} as VizContainerError);
+  const finalQuery = metricVisualization
+    ? query
+    : queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
 
-  let finalQuery = '';
-  try {
-    if (!metricVisualization) {
-      finalQuery = queryAccumulator(query, timestampField, startTime, endTime, filterQuery);
-    } else {
-      finalQuery = query;
-    }
-  } catch (error) {
-    const errorMessage = 'Issue in building final query';
-    setIsError({ errorMessage });
-    console.error(errorMessage, error);
-    setIsLoading(false);
-    return;
-  }
+  const res = await pplService.fetch({ query: finalQuery, format: 'jdbc' });
 
-  pplServiceRequestor(pplService, finalQuery, type, setVisualizationData, setIsLoading, setIsError);
+  if (res === undefined) throw new Error('Please check the validity of PPL Filter');
+
+  return res;
 };
 
 // Fetches savedVisualization by Id and runs getQueryResponse
@@ -263,25 +230,41 @@ export const renderSavedVisualization = async ({
 
   setVisualizationMetaData({ ...visualization, query: updatedVisualizationQuery });
 
-  getQueryResponse(
-    pplService,
-    updatedVisualizationQuery,
-    visualization.type,
-    startTime,
-    endTime,
-    setVisualizationData,
-    setIsLoading,
-    setIsError,
-    filterQuery,
-    visualization.timeField
-  );
+  try {
+    const queryData = await getQueryResponse(
+      pplService,
+      updatedVisualizationQuery,
+      visualization.type,
+      startTime,
+      endTime,
+      filterQuery,
+      visualization.timeField
+    );
+    setVisualizationData(queryData);
+  } catch (error) {
+    setIsError({ error });
+  }
+  setIsLoading(false);
+};
+
+const dynamicLayoutFromQueryData = (queryData) => {
+  const labelCount = queryData.jsonData.length;
+  const legendLines = min([labelCount, 10]);
+
+  const height = 230 + legendLines * 30;
+  const y = -0.35 + -0.15 * legendLines;
+  return {
+    height,
+    legend: { orientation: 'h', x: 0, y },
+  };
 };
 
 const createCatalogVisualizationMetaData = (
   catalogSource: string,
   visualizationQuery: string,
   visualizationType: string,
-  visualizationTimeField: string
+  visualizationTimeField: string,
+  queryData: object
 ) => {
   return {
     name: catalogSource,
@@ -300,6 +283,9 @@ const createCatalogVisualizationMetaData = (
     selected_fields: {
       text: '',
       tokens: [],
+    },
+    userConfigs: {
+      layout: dynamicLayoutFromQueryData(queryData),
     },
   };
 };
@@ -355,38 +341,37 @@ export const renderCatalogVisualization = async ({
     resolution,
   });
 
-  const visualizationMetaData = createCatalogVisualizationMetaData(
-    catalogSource,
-    visualizationQuery,
-    visualizationType,
-    visualizationTimeField
-  );
-
-  visualizationMetaData.userConfigs = {
-    layoutConfig: {
-      height: 280,
-      legend: { orientation: 'h', y: -0.3 },
-    },
-  };
-
   setVisualizationTitle(visualization.name);
   setVisualizationType(visualizationType);
 
-  setVisualizationMetaData(visualizationMetaData);
+  try {
+    const queryData = await getQueryResponse(
+      pplService,
+      visualizationQuery,
+      visualizationType,
+      startTime,
+      endTime,
+      filterQuery,
+      visualizationTimeField,
+      true
+    );
+    setVisualizationData(queryData);
 
-  getQueryResponse(
-    pplService,
-    visualizationQuery,
-    visualizationType,
-    startTime,
-    endTime,
-    setVisualizationData,
-    setIsLoading,
-    setIsError,
-    filterQuery,
-    visualizationTimeField,
-    true
-  );
+    const visualizationMetaData = createCatalogVisualizationMetaData(
+      catalogSource,
+      visualizationQuery,
+      visualizationType,
+      visualizationTimeField,
+      queryData
+    );
+
+    console.log('renderCatalogVisualization', { visualizationMetaData });
+    setVisualizationMetaData(visualizationMetaData);
+  } catch (error) {
+    setIsError({ error });
+  }
+
+  setIsLoading(false);
 };
 
 // Function to store recently used time filters and set start and end time.
@@ -550,8 +535,8 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     dataConfig: {
       ...finalDataConfig,
     },
-    layoutConfig: {
-      ...(metaData.userConfigs?.layoutConfig || {}),
+    layout: {
+      ...(metaData.userConfigs?.layout || {}),
     },
   };
 

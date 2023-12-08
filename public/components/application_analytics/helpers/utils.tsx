@@ -218,6 +218,9 @@ export const calculateAvailability = async (
     const visData = await fetchVisualizationById(http, visualizationId, (value: string) =>
       console.error(value)
     );
+
+    // resolved mismatched use of user_configs/userConfigs.  This fall-back
+    // silently loads legacy configs.  They will be stored in new userConfigs upon save.
     const userConfigs = visData.userConfigs
       ? JSON.parse(visData.user_configs || visData.userConfigs)
       : {};
