@@ -160,7 +160,7 @@ jobs:
         run: |
           npm config delete script-shell
 
-      - name: Run Cypress tests for test gourp of ${{ matrix.testgroups }}
+      - name: Run Cypress tests for test group of ${{ matrix.testgroups }}
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
           yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
