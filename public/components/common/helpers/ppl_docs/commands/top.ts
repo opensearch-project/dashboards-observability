@@ -20,7 +20,7 @@ top \[N\] &lt;field-list&gt; \[by-clause\]
 
 #### Example 1: Find the most common values in a field
 
-The following PPL query example finds the most common gender.
+The following example PPL query finds the most common gender.
 
     os> source=accounts | top 1 gender;
     fetched rows / total rows = 1/1
@@ -32,7 +32,7 @@ The following PPL query example finds the most common gender.
 
 #### Example 2: Find the most common values grouped by gender
 
-The following PPL query example finds the most common age grouped by gender.
+The following example PPL query finds the most common age grouped by gender.
 
     os> source=accounts | top 1 age by gender;
     fetched rows / total rows = 2/2

@@ -78,7 +78,7 @@ The following example PPL query shows how to sort by multiple fields in both asc
 
 #### Example 5: Sort by field, including null values
 
-The following PPL query example shows how to sort by the \`employer\` field using the default order (\[+\] with null and missing first):
+The following example PPL query shows how to sort by the \`employer\` field using the default order (\[+\] with null and missing first):
 
     os> source=accounts | sort employer | fields employer;
     fetched rows / total rows = 4/4

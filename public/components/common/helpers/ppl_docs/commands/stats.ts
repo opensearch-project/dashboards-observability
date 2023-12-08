@@ -228,7 +228,7 @@ The following example PPL query calculates the maximum age:
 
 #### Example 6: Calculate a field's min/max by group
 
-The following PPL query example calculates the min/max age grouped by gender:
+The following example PPL query calculates the min/max age grouped by gender:
 
     os> source=accounts | stats max(age), min(age) by gender;
     fetched rows / total rows = 2/2
