@@ -18,4 +18,5 @@ search source=accounts
 
 ### Required and optional arguments
 
-Required arguments are enclosed in angle brackets \< \>, and optional arguments are enclosed in square brackets \[ \].`;
+Required arguments are enclosed in angle brackets \< \>, and optional arguments are enclosed in square brackets \[ \]`.
+;
