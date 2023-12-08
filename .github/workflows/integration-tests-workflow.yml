@@ -10,23 +10,7 @@ env:
   OPENSEARCH_PLUGIN_VERSION: '3.0.0.0'
 
 jobs:
-  prepare-matrix:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Generate test files list
-        id: set-matrix
-        run: |
-          TEST_FILES=$(ls .cypress/integration/*.{js,ts} | xargs -n 1 basename | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "TEST_FILES_MATRIX=$TEST_FILES" >> $GITHUB_ENV
-      
-      - name: Print matrix output
-        run: echo ${{ env.TEST_FILES_MATRIX }}
-
   tests:
-    needs: prepare-matrix
     env:
       # Prevents extra Cypress installation progress messages
       CI: 1
@@ -39,7 +23,18 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         java: [11]
-        testfiles: ${{ env.TEST_FILES_MATRIX }}
+        testfiles: [
+          10_datasources.spec.js,
+          1_event_analytics.spec.js,
+          2_notebooks.spec.js,
+          3_panels.spec.ts,
+          4_trace_analytics_dashboard.spec.js,
+          5_trace_analytics_services.spec.js,
+          6_trace_analytics_traces.spec.js,
+          7_app_analytics.spec.js,
+          8_metrics_analytics.spec.js,
+          9_integrations.spec.js
+        ]
         include:
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
