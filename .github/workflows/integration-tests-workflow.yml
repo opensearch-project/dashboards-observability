@@ -24,16 +24,15 @@ jobs:
         os: [ubuntu-latest]
         java: [11]
         testgroups: [
-          1_event_analytics.spec.js,
-          notebooks,
-          3_panels.spec.ts,
-          4_trace_analytics_dashboard.spec.js,
-          5_trace_analytics_services.spec.js,
-          6_trace_analytics_traces.spec.js,
-          7_app_analytics.spec.js,
-          8_metrics_analytics.spec.js,
-          9_integrations.spec.js,
-          10_datasources.spec.js
+          app_analytics_test,
+          notebook,
+          datasources_test,
+          event_analytics_test,
+          integrations_test,
+          metrics_analytics_test,
+          notebooks_test,
+          panels_test,
+          trace_analytics_test
         ]
         include:
           - os: ubuntu-latest
@@ -161,7 +160,7 @@ jobs:
         run: |
           npm config delete script-shell
 
-      - name: Run Cypress tests
+      - name: Run Cypress tests for test gourp of ${{ matrix.testgroups }}
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
           yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
