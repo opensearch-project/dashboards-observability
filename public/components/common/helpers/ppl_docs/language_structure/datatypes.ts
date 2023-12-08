@@ -81,7 +81,7 @@ The \`time\` data type represents the time of day as displayed on a clock or wat
 
 | Type     | Syntax       | Range                        |
 |----------|--------------|------------------------------|
-| \`time\` | 'hh:mm&#58;ss\[.fraction\]' | '00:00:00.000000' to '23:59:59.999999' |
+| \`time\` | 'hh:mm:ss\[.fraction\]' | '00:00:00.000000' to '23:59:59.999999' |
 
 #### Datetime
 
@@ -99,7 +99,7 @@ The \`timestamp\` data type represents absolute points in time, unaffected by ti
 
 | Type      | Syntax | Range |
 |-----------|--------|-------|
-| Timestamp | 'yyyy-MM-dd hh:mm:ss\[.fraction\]' | '0001-01-01 00:00&#58;01.000000' UTC to '9999-12-31 23:59:59.999999' |
+| Timestamp | 'yyyy-MM-dd hh:mm:ss\[.fraction\]' | '0001-01-01 00:00:01.000000' UTC to '9999-12-31 23:59:59.999999' |
 
 ####  Interval
 
@@ -129,13 +129,13 @@ Date and time types, excluding \`interval\`, can be mutually converted, with som
 
 #### \`datetime\` conversion
 
-- Converting from \`datetime\` to \`date\` extracts the date component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`2020-08-08\`.
-- Converting to \`time\` extracts the time component from the \`datetime\` value, for example, \`2020-08-17 14&#58;09&#58;00\` converts to \`14&#58;09&#58;00\`.
-- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone to the session's time zone, for example, \`2020-08-17 14&#58;09&#58;00\`, with the system time zone set to UTC, for example, \`2020-08-17 14&#58;09&#58;00 UTC\`.
+- Converting from \`datetime\` to \`date\` extracts the date component from the \`datetime\` value, for example, \`2020-08-17 14:09:00\` converts to \`2020-08-08\`.
+- Converting to \`time\` extracts the time component from the \`datetime\` value, for example, \`2020-08-17 14:09:00\` converts to \`14:09:00\`.
+- Because \`datetime\` does not contain time zone information, conversion to \`timestamp\` sets the time zone to the session's time zone, for example, \`2020-08-17 14:09:00\`, with the system time zone set to UTC, for example, \`2020-08-17 14:09:00 UTC\`.
 
 #### \`timestamp\` conversion
 
-- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14&#58;09&#58;00 UTC\` converts \`date\` and \`time\` to \`2020-08-17\` and \`14&#58;09&#58;00\` and \`datetime\` to \`2020-08-17 14&#58;09&#58;00\`.
+- Converting from \`timestamp\` to \`date\ extracts the \`date\` and \`time\` values. Converting from \`timestamp\` to \`datetime\` extracts the \`datetime\` value and retains the time zone information. For example, \`2020-08-17 14:09:00 UTC\` converts \`date\` and \`time\` to \`2020-08-17\` and \`14:09:00\` and \`datetime\` to \`2020-08-17 14:09:00\`.
 
 ### String data types
 
