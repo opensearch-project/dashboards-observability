@@ -50,7 +50,6 @@ const visualizationFromMetric = (metric, dateSpanFilter): SavedVisualizationType
       fillOpacity: 0,
       lineWidth: 2,
     },
-    layout: { height: 280 },
   },
 });
 
@@ -61,7 +60,6 @@ const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
 export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
   if (!metric) return <></>;
 
-  console.log('vis', { metric });
   return (
     <EuiDraggable key={id} index={idx} draggableId={id}>
       <VisualizationContainer
@@ -75,7 +73,6 @@ export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refres
         toTime={dateSpanFilter.end}
         onRefresh={refresh}
         onEditClick={navigateToEventExplorerVisualization}
-        // usedInNotebooks={true}
         pplFilterValue=""
         span={dateSpanFilter.span}
         resolution={dateSpanFilter.resolution}

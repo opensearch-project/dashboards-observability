@@ -303,12 +303,8 @@ const MetricsExportPopOver = () => {
       savedMetrics = await Promise.all(
         metricsToExport.map(async (metric, index) => {
           if (metric.savedVisualizationId === undefined) {
-            console.log('createSavedVisualization', metric);
-
             return createSavedVisualization(metric);
           } else {
-            console.log('updateSavedVisualization', metric);
-
             return updateSavedVisualization(metric);
           }
         })
@@ -333,7 +329,6 @@ const MetricsExportPopOver = () => {
       try {
         if (observabilityDashboards.length > 0) {
           const savedVisualizationIds = savedMetrics.map((p) => p.objectId);
-          console.log(savedMetrics);
           await addMultipleVizToPanels(observabilityDashboards, savedVisualizationIds);
         }
         if (osdCoreSelectedDashboards.length > 0)
