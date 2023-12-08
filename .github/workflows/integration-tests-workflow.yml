@@ -12,8 +12,6 @@ env:
 jobs:
   prepare-matrix:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -22,12 +20,13 @@ jobs:
         id: set-matrix
         run: |
           TEST_FILES=$(ls .cypress/integration/*.{js,ts} | xargs -n 1 basename | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "::set-output name=matrix::{\"testfiles\": $TEST_FILES}"
+          echo "TEST_FILES_MATRIX=$TEST_FILES" >> $GITHUB_ENV
       
       - name: Print matrix output
-        run: echo ${{ steps.set-matrix.outputs.matrix }}
+        run: echo ${{ env.TEST_FILES_MATRIX }}
 
   tests:
+    needs: prepare-matrix
     env:
       # Prevents extra Cypress installation progress messages
       CI: 1
@@ -40,7 +39,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         java: [11]
-        testfiles: ${{ fromJson(needs.prepare-matrix.outputs.matrix).testfiles }}
+        testfiles: ${{ env.TEST_FILES_MATRIX }}
         include:
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
