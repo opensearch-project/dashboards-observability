@@ -234,6 +234,7 @@ export const renderSavedVisualization = async ({
       ? updateQuerySpanInterval(visualization.query, visualization.timeField, span, resolution)
       : visualization.query;
 
+  console.log('visualization in sved viz: ', visualization);
   setVisualizationMetaData({ ...visualization, query: updatedVisualizationQuery });
 
   try {
@@ -390,6 +391,34 @@ export const renderCatalogVisualization = async ({
   setIsLoading(false);
 };
 
+const createOtelVisualizationMetaData = (
+  documentName: string,
+  visualizationType: string,
+  startTime: string,
+  endTime: string
+) => {
+  return {
+    name: documentName,
+    description: '',
+    query: '',
+    type: visualizationType,
+    metricType: 'otel',
+    selected_date_range: {
+      start: startTime,
+      end: endTime,
+      text: '',
+    },
+    selected_timestamp: {
+      name: 'timestamp',
+      type: 'timestamp',
+    },
+    selected_fields: {
+      text: '',
+      tokens: [],
+    },
+  };
+};
+
 const fetchAggregatedBinCount = (
   minimumBound: string,
   maximumBound: string,
@@ -397,10 +426,12 @@ const fetchAggregatedBinCount = (
   endTime: string,
   documentName: string,
   http: CoreStart['http'],
-  selectedOtelIndex: string
+  selectedOtelIndex: string,
+  setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => async () => {
-  console.log(`Fetching sample document`);
-  console.log(`query: `, selectedOtelIndex);
+  // console.log(`Fetching sample document`);
+  // console.log(`query: `, selectedOtelIndex);
   // const otelIndex = 'ss4o_metrics-sample1-us';
   return http
     .post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
@@ -413,7 +444,17 @@ const fetchAggregatedBinCount = (
         index: selectedOtelIndex,
       }),
     })
-    .catch((error) => console.error(error));
+    .catch((error: Error) => {
+      const errorMessage = JSON.parse(error.body.message);
+      setIsError({
+        errorMessage: errorMessage.error.reason || 'Issue in fetching visualization',
+        errorDetails: errorMessage.error.details,
+      });
+      console.error(error.body);
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
 };
 
 // const fetchSampleOTDocument = (
@@ -438,7 +479,7 @@ const fetchSampleOTDocument = (
   http: CoreStart['http'],
   documentName: string
 ) => async () => {
-  console.log(`Fetching sample document`);
+  // console.log(`Fetching sample document`);
   // const otelIndex = 'ss4o_metrics-sample1-us';
   return http
     .post(`${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`, {
@@ -465,48 +506,73 @@ export const renderOpenTelemetryVisualization = async (
   spanResolution?: string
 ) => {
   const { http } = coreRefs;
-  console.log('savedVisualizationId: ', savedVisualizationId);
-  console.log('spanParam: ', spanParam);
-  console.log('panelVisualization?.metric?.index: ', panelVisualization?.metric?.index);
-  console.log('panelVisualization in render: ', panelVisualization);
+  const visualizationType = 'bar';
+  // console.log('savedVisualizationId: ', savedVisualizationId);
+  // console.log('spanParam: ', spanParam);
+  // console.log('panelVisualization?.metric?.index: ', panelVisualization?.metric?.index);
+  // console.log('panelVisualization in render: ', panelVisualization);
   const fetchSampleDocument = await fetchSampleOTDocument(
     panelVisualization?.metric?.index,
     http,
     savedVisualizationId
   )();
-  console.log('fetchSampleDocument: ', fetchSampleDocument);
+  // console.log('fetchSampleDocument: ', fetchSampleDocument);
   const source = fetchSampleDocument.hits[0]._source;
-  const dataBins: any[] = [];
-  source.buckets.forEach(async (bucket: any) => {
-    console.log('source: ', source);
-    const formattedStartTime = convertDateTime(startTime, false, false, false, true);
-    const formattedEndTime = convertDateTime(endTime, false, false, false, true);
-    const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
-      bucket.min.toString(),
-      bucket.max.toString(),
-      formattedStartTime,
-      formattedEndTime,
-      savedVisualizationId,
-      http,
-      panelVisualization?.metric?.index
-    )();
-    // push values in bin
-    dataBins.push({
-      minimumBound: bucket.min,
-      maximumBound: bucket.max,
-      count: fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
-    });
-    console.log('bucket: ', bucket);
-    console.log('fetchingAggregatedBinCount: ', fetchingAggregatedBinCount);
-    console.log(
-      'fetchingAggregatedBinCount: ',
-      fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value
-    );
+  const dataBinsPromises = source.buckets.map(async (bucket: any) => {
+    try {
+      const formattedStartTime = convertDateTime(startTime, false, false, true);
+      const formattedEndTime = convertDateTime(endTime, false, false, true);
+      const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
+        bucket.min.toString(),
+        bucket.max.toString(),
+        formattedStartTime,
+        formattedEndTime,
+        savedVisualizationId,
+        http,
+        panelVisualization?.metric?.index,
+        setIsError,
+        setIsLoading
+      )();
+      function getRandomInt(min: number, max: number) {
+        // The maximum is exclusive and the minimum is inclusive
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+
+      return {
+        xAxis: bucket.min + ' - ' + bucket.max,
+        // minimumBound: bucket.min,
+        // maximumBound: bucket.max,
+        // 'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+        'count()': getRandomInt(1, 100),
+      };
+    } catch (error) {
+      console.error('Error processing bucket:', error);
+      return null;
+    }
   });
-  console.log('dataBins: ', dataBins);
-  setVisualizationType('histogram');
+  const jsonData = await Promise.all(dataBinsPromises);
+  console.log('dataBins: ', jsonData);
+  console.log('dataBins second: ', jsonData[1]);
+  const formatDataBinsName = () => {
+    return { dataBins: { jsonData } };
+  };
+  const formatedJsonData = formatDataBinsName().dataBins;
+  console.log('formaDataBins: ', formatDataBinsName().dataBins);
+
+  setVisualizationType(visualizationType);
   setVisualizationTitle(source.name);
-  setVisualizationData(dataBins);
+  setVisualizationData(formatedJsonData);
+
+  const visualizationMetaData = createOtelVisualizationMetaData(
+    savedVisualizationId,
+    visualizationType,
+    startTime,
+    endTime
+  );
+
+  setVisualizationMetaData(visualizationMetaData);
 };
 
 // Function to store recently used time filters and set start and end time.
@@ -632,17 +698,34 @@ export const prepareMetricsData = (schema: any, dataConfig: any) => {
   };
 };
 
+export const constructOtelMetricsMetaData = () => {
+  const otelMetricSeries: any[] = [];
+  const otelMetricDimension: any[] = [];
+
+  otelMetricDimension.push({ name: 'xAxis', label: 'xAxis', customLabel: '' });
+  otelMetricSeries.push({ name: '', label: '', aggregation: 'count', customLabel: '' });
+
+  return {
+    series: otelMetricSeries,
+    dimensions: otelMetricDimension,
+    span: {},
+  };
+};
+
 // Renders visualization in the vizualization container component
 export const displayVisualization = (metaData: any, data: any, type: string) => {
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
+  console.log('metaData: ', metaData);
+  console.log('data in display vis: ', data);
 
   const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
   };
+  console.log('realTimeParsedStats: ', realTimeParsedStats);
   let finalDimensions = [...(realTimeParsedStats.dimensions || [])];
   const breakdowns = [...(dataConfig.breakdowns || [])];
 
@@ -663,6 +746,11 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   // add metric specific overriding
   finalDataConfig = { ...finalDataConfig, ...processMetricsData(data.schema, finalDataConfig) };
 
+  // add otel metric specific overriding
+  if (metaData?.metricType === 'otel') {
+    finalDataConfig = { ...finalDataConfig, ...constructOtelMetricsMetaData() };
+  }
+
   const mixedUserConfigs = {
     availabilityConfig: {
       ...(metaData.userConfigs?.availabilityConfig || {}),
@@ -675,6 +763,8 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     },
   };
 
+  console.log('mixedUserConfigs: ', mixedUserConfigs);
+  console.log('data: ', data);
   return (
     <Visualization
       visualizations={getVizContainerProps({

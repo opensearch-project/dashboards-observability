@@ -119,6 +119,7 @@ export const Sidebar = ({
   useEffect(() => {
     console.log('hereeeee');
     if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
+      console.log('selectedOTIndex: ', selectedOTIndex);
       const fetchOtelDocuments = async () => {
         try {
           console.log('selectedOtelIndex label: ', selectedOTIndex[0]?.label);

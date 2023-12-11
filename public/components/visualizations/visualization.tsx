@@ -21,6 +21,7 @@ export const Visualization = ({
   visualizations: IVisualizationContainerProps;
 }) => {
   const isVisDataValid = (vs: IVisualizationContainerProps) => {
+    console.log(`Visualization vs: `, vs);
     const {
       data: {
         userConfigs: {
@@ -49,13 +50,15 @@ export const Visualization = ({
     if (isEmpty(series)) return [false, VISUALIZATION_ERROR.NO_SERIES]; // series is required to any visualization type
 
     // bars, pie
+    console.log('dimensions.length: ', dimensions.length);
+    console.log('isEmpty(span): ', isEmpty(span));
     if (dimensions.length < 1 && isEmpty(span)) return [false, VISUALIZATION_ERROR.INVALID_DATA];
 
     return [true, ''];
   };
 
   const [isValid, erroInfo] = isVisDataValid(visualizations);
-
+  console.log('inside visualization is Valid', isValid);
   return (
     <>
       {isValid ? (

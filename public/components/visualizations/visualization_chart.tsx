@@ -9,7 +9,7 @@ export const VisualizationChart = ({ visualizations }) => {
   const { vis } = visualizations;
   const { layout = {}, config = {} } = visualizations?.data?.userConfigs;
   const Visualization = visualizations?.vis?.component;
-
+  console.log('inside VisualizationChart');
   const finalFigureConfig = useMemo(() => {
     return {
       ...vis.visconfig?.config,

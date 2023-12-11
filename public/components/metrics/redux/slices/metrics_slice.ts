@@ -127,10 +127,10 @@ export const loadOtelDocuments = (
   selectedOTIndex: string
 ) => async () => {
   // const fetchOTindices = await fetchOpenTelemetryIndices();
-  console.log('does it work in loadOtelDoc');
+  // console.log('does it work in loadOtelDoc');
   const fetchOTDocuments = await fetchOpenTelemetryDocuments(selectedOTIndex)();
   // dispatch(setOtelIndices(fetchOTindices));
-  console.log('here fetchOTDocuments: ', fetchOTDocuments);
+  // console.log('here fetchOTDocuments: ', fetchOTDocuments);
   setAvailableTestOtelDocuments(fetchOTDocuments.aggregations);
   dispatch(setOtelDocumentNames(fetchOTDocuments.aggregations));
 };
@@ -209,15 +209,13 @@ export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async 
   // const otelIndex = 'ss4o_metrics-sample1-us';
   return http
     .get(`${OBSERVABILITY_BASE}/metrics/otel/documents`, {
-      query: {
-        format: 'json',
-      },
       index: selectedOtelIndex,
     })
     .catch((error) => console.error(error));
   // dispatch(setOtelDocumentNames(resp.aggregations));
 };
 
+<<<<<<< HEAD
 // const updateLayoutBySelection = (state: any, newMetric: any) => {
 //   console.log('state in updateLayoutBySelection: ', state);
 //   console.log('newMetric in updateLayoutBySelection: ', newMetric);
@@ -248,6 +246,38 @@ export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async 
 //   state.metricsLayout = [...state.metricsLayout, metricVisualization];
 //   console.log('state after metricVisualization: ', state.metricsLayout);
 // };
+=======
+const updateLayoutBySelection = (state: any, newMetric: any) => {
+  // console.log('state in updateLayoutBySelection: ', state);
+  // console.log('newMetric in updateLayoutBySelection: ', newMetric);
+  // console.log('state in updateLayoutBySelection: ', state.metricsLayout);
+  const newDimensions = getNewVizDimensions(state.metricsLayout);
+  // console.log('newDimensions: ', newDimensions);
+
+  const metricCatalog = (catalog: string) => {
+    if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
+      return 'savedCustomMetric';
+    } else if (catalog === 'OpenTelemetry') {
+      return 'openTelemetryMetric';
+    } else {
+      return 'prometheusMetric';
+    }
+  };
+  const metricVisualization: MetricType = {
+    id: newMetric.id,
+    savedVisualizationId: newMetric.id,
+    x: newDimensions.x,
+    y: newDimensions.y,
+    h: newDimensions.h,
+    w: newDimensions.w,
+    metricType: metricCatalog(newMetric.catalog),
+    metric: newMetric.catalog === 'OpenTelemetry' ? newMetric : '',
+  };
+  // console.log('metricVisualization: ', metricVisualization);
+  state.metricsLayout = [...state.metricsLayout, metricVisualization];
+  // console.log('state after metricVisualization: ', state.metricsLayout);
+};
+>>>>>>> c8de70e1 (Histogram working)
 
 // const updateLayoutByDeSelection = (state: any, newMetric: any) => {
 //   const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);

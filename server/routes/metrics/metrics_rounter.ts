@@ -108,7 +108,11 @@ export function registerMetricsRoute(router: IRouter) {
   router.get(
     {
       path: `${OBSERVABILITY_BASE}/metrics/otel/documents`,
-      validate: {},
+      validate: {
+        // body: schema.object({
+        //   index: schema.string(),
+        // }),
+      },
     },
     async (context, request, response) => {
       const indexPattern = 'ss4o_metrics-*-*';
@@ -133,45 +137,6 @@ export function registerMetricsRoute(router: IRouter) {
       }
     }
   );
-
-  // router.get(
-  //   {
-  //     path: `${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`,
-  //     validate: {},
-  //   },
-  //   async (context, request, response) => {
-  //     const indexPattern = 'ss4o_metrics-*-*';
-  //     const { index, size, FETCH_SAMPLE_DOCUMENT_QUERY, ...rest } = request.body;
-  //     // const opensearchNotebooksClient: ILegacyScopedClusterClient = context.core.opensearch.legacy.client.callAsCurrentUser(
-  //     //   request
-  //     // );
-  //     // console.log('Constructed query 1:', rest);
-  //     console.log('request.body 1:', request.body);
-  //     // console.log('index 1:', index);
-  //     const params: RequestParams.Search = {
-  //       index: indexPattern,
-  //       body: rest,
-  //       size: 1,
-  //     };
-  //     console.log('params 1:', params);
-  //     console.log('params 1:', params.body);
-  //     try {
-  //       const resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
-  //         'search',
-  //         params
-  //       );
-  //       return response.ok({
-  //         body: resp.hits,
-  //       });
-  //     } catch (error) {
-  //       if (error.statusCode !== 404) console.error(error);
-  //       return response.custom({
-  //         statusCode: error.statusCode || 500,
-  //         body: error.message,
-  //       });
-  //     }
-  //   }
-  // );
 
   router.post(
     {
