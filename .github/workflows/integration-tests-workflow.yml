@@ -23,10 +23,20 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         java: [11]
+        testgroups: [
+          app_analytics_test,
+          notebooks_test,
+          datasources_test,
+          event_analytics_test,
+          integrations_test,
+          metrics_analytics_test,
+          notebooks_test,
+          panels_test,
+          trace_analytics_test
+        ]
         include:
           - os: ubuntu-latest
             cypress_cache_folder: ~/.cache/Cypress
-
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -114,8 +124,24 @@ jobs:
       - name: Run OpenSearch Dashboards server
         run: |
           cd OpenSearch-Dashboards
-          yarn start --no-base-path --no-watch &
-          sleep 200
+          nohup yarn start --no-base-path --no-watch | tee dashboard.log &
+
+      - name : Check If OpenSearch Dashboards Is Ready
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          cd ./OpenSearch-Dashboards
+          echo "Start checking OpenSearch Dashboards."
+          for i in {1..60}; do
+            if grep -q "bundles compiled successfully after" "dashboard.log"; then
+              echo "OpenSearch Dashboards compiled successfully."
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Timeout for 600 seconds reached. OpenSearch Dashboards did not finish compiling."
+              exit 1
+            fi
+            sleep 10
+          done
 
       - name: Install Cypress
         run: |
@@ -129,26 +155,15 @@ jobs:
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
           echo "::set-output name=cypress_version::$(cat ./package.json | jq '.dependencies.cypress' | tr -d '"')"
 
-      - name: Cache Cypress
-        id: cache-cypress
-        uses: actions/cache@v2
-        with:
-          path: ${{ matrix.cypress_cache_folder }}
-          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('OpenSearch-Dashboards/plugins/dashboards-observability/package.json') }}
-
       - name: Reset npm's script shell
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           npm config delete script-shell
 
-      - name: Cypress tests
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: OpenSearch-Dashboards/plugins/dashboards-observability
-          command: yarn cypress:parallel --browser chrome
-          wait-on: 'http://localhost:5601'
-        env:
-          CYPRESS_CACHE_FOLDER: ${{ matrix.cypress_cache_folder }}
+      - name: Run Cypress tests for test group of ${{ matrix.testgroups }}
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn cypress:run --browser chrome --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v1

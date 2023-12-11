@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { delay, setTimeFilter, SPAN_ID, TRACE_ID } from '../utils/constants';
+import { delay, setTimeFilter, SPAN_ID, TRACE_ID } from '../../utils/constants';
 
 describe('Testing traces table empty state', () => {
   beforeEach(() => {
