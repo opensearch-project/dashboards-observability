@@ -66,8 +66,6 @@ export const Bar = ({ visualizations, layout, config }: any) => {
   /**
    * determine stylings
    */
-  console.log('jsonData in baar: ', jsonData);
-  console.log('visualizations in bar: ', visualizations);
   const barOrientation = chartStyles.orientation || orientation;
   const isVertical = barOrientation === BarOrientation.vertical;
   const tickAngle = chartStyles.rotateBarLabels || labelangle;
@@ -137,8 +135,7 @@ export const Bar = ({ visualizations, layout, config }: any) => {
       x_coordinate: 'x',
       y_coordinate: 'y',
     };
-    console.log('jsonData: ', jsonData);
-    console.log('visPanelConfig in bar: ', visPanelConfig);
+
     return addStylesToTraces(
       transformPreprocessedDataToTraces(
         preprocessJsonData(jsonData, visPanelConfig),

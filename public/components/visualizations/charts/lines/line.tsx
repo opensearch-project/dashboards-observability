@@ -299,7 +299,6 @@ export const Line = ({ visualizations, layout, config }: any) => {
     }),
     [config, layoutConfig.config]
   );
-  console.log('lines: ', lines);
-  console.log('mergedLayout: ', mergedLayout);
+
   return <Plt data={lines} layout={mergedLayout} config={mergedConfigs} />;
 };

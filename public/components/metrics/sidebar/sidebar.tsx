@@ -19,24 +19,16 @@ import {
   selectedMetricsSelector,
   selectMetricByIdSelector,
   otelIndexSelector,
-  otelDocumentNamesSelector,
-  loadOtelDocuments,
-  // selectedOtelIndexSelector,
-  selectedDataSourcesSelector,
-  setOtelDocumentNames,
-  fetchOpenTelemetryDocuments,
   setDataSourceIcons,
   coloredIconsFrom,
   setMetrics,
-  fetchOpenTelemetryIndices,
-  setOtelIndices,
   loadOTIndices,
+  fetchOpenTelemetryDocumentNames,
 } from '../redux/slices/metrics_slice';
 import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 import { DataSourcePicker } from './data_source_picker';
 import { IndexPicker } from './index_picker';
-import { DATASOURCE_OPTIONS } from '../../../../common/constants/metrics';
 
 interface SideBarMenuProps {
   selectedDataSource: React.SetStateAction<Array<{ label: string; 'data-test-subj': string }>>;
@@ -60,7 +52,6 @@ export const Sidebar = ({
   const [availableOTDocuments, setAvailableOTDocuments] = useState([]);
   const availableOTDocumentsRef = useRef();
   availableOTDocumentsRef.current = availableOTDocuments;
-
   const promethuesMetrics = useSelector(availableMetricsSelector);
   const selectedMetrics = useSelector(selectedMetricsSelector);
   const selectedMetricsIds = useSelector(selectedMetricsIdsSelector);
@@ -69,9 +60,6 @@ export const Sidebar = ({
 
   const dataSource = useSelector(selectedDataSourcesSelector);
   const otelIndices = useSelector(otelIndexSelector);
-  // const selectedOtelIndex = useSelector(selectedOtelIndexSelector);
-  const otelDocuments = useSelector(otelDocumentNamesSelector);
-  // console.log('selectedOtelIndex after useSelc: ', selectedOtelIndex);
 
   useEffect(() => {
     batch(() => {
@@ -117,20 +105,11 @@ export const Sidebar = ({
   // }, [selectedOtelIndex]);
 
   useEffect(() => {
-    console.log('hereeeee');
     if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
-      console.log('selectedOTIndex: ', selectedOTIndex);
       const fetchOtelDocuments = async () => {
         try {
-          console.log('selectedOtelIndex label: ', selectedOTIndex[0]?.label);
-          const documents = await fetchOpenTelemetryDocuments(selectedOTIndex[0]?.label)();
-          // console.log('1');
-          // setAvailableTestOtelDocuments(documents.aggregations);
-          // console.log('2');
-          // dispatch(setOtelDocumentNames(documents.aggregations));
-          // console.log('3');
-          // console.log('docs after 3: ', documents);
-          const availableOtelDocuments = documents?.aggregations?.distinct_names?.buckets.map(
+          const documentNames = await fetchOpenTelemetryDocumentNames(selectedOTIndex[0]?.label)();
+          const availableOtelDocuments = documentNames?.aggregations?.distinct_names?.buckets.map(
             (item: any) => {
               return {
                 id: item.key,
@@ -141,16 +120,11 @@ export const Sidebar = ({
               };
             }
           );
-          // console.log('4');
-          console.log('otel metrics after 4: ', availableOtelDocuments);
           setAvailableOTDocuments(availableOtelDocuments);
           dispatch(setMetrics(availableOtelDocuments));
           dispatch(setDataSourceIcons(coloredIconsFrom(['OpenTelemetry'])));
-          // console.log('5');
-          console.log('otel metrics: ', availableOtelDocuments);
         } catch (error) {
           console.error('Error fetching OpenTelemetry documents:', error);
-          // Handle errors if needed
         }
       };
 
@@ -159,11 +133,8 @@ export const Sidebar = ({
   }, [dispatch, selectedDataSource, selectedOTIndex, setAvailableTestOtelDocuments]);
 
   const indexPicker = useMemo(() => {
-    console.log('selectedDataSource: ', selectedDataSource);
-    console.log('selectedDataSource with label: ', selectedDataSource[0]?.label);
     const isOpenTelemetry = selectedDataSource[0]?.label === 'OpenTelemetry' ? true : false;
     if (isOpenTelemetry) {
-      // console.log('otelIndices: ', otelIndices);
       return <IndexPicker otelIndices={otelIndices} setSelectedOTIndex={setSelectedOTIndex} />;
     }
   }, [selectedDataSource]);
@@ -173,15 +144,7 @@ export const Sidebar = ({
       return promethuesMetrics;
     else if (selectedDataSource[0]?.label === 'Prometheus') return promethuesMetrics;
     else return [];
-    // return selectedDataSource[0]?.label === 'Prometheus' ? promethuesMetrics : promethuesMetrics;
   }, [promethuesMetrics, selectedDataSource, availableOTDocuments, selectedOTIndex]);
-
-  // console.log('availableTestOtelDocuments: ', availableTestOtelDocuments);
-
-  // console.log('selected metrics: ', selectedMetrics);
-  // console.log('availableOTDocuments outside: ', availableOTDocumentsRef.current);
-
-  // console.log('otel metrics: ', availableOtelDocuments);
 
   const handleAddMetric = (metric: any) => {
     console.log('handle add metrics: ', metric);
@@ -201,7 +164,6 @@ export const Sidebar = ({
         />
         <EuiSpacer size="s" />
         {indexPicker}
-        {/* <IndexPicker otelIndices={otelIndices} isDisabled={isDisabled} /> */}
         <EuiSpacer size="s" />
         <SearchBar />
         <EuiSpacer size="s" />

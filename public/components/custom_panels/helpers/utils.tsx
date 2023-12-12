@@ -234,7 +234,6 @@ export const renderSavedVisualization = async ({
       ? updateQuerySpanInterval(visualization.query, visualization.timeField, span, resolution)
       : visualization.query;
 
-  console.log('visualization in sved viz: ', visualization);
   setVisualizationMetaData({ ...visualization, query: updatedVisualizationQuery });
 
   try {
@@ -430,9 +429,6 @@ const fetchAggregatedBinCount = (
   setIsError: React.Dispatch<React.SetStateAction<VizContainerError>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => async () => {
-  // console.log(`Fetching sample document`);
-  // console.log(`query: `, selectedOtelIndex);
-  // const otelIndex = 'ss4o_metrics-sample1-us';
   return http
     .post(`${OBSERVABILITY_BASE}/metrics/otel/aggregatedBinCount`, {
       body: JSON.stringify({
@@ -447,7 +443,7 @@ const fetchAggregatedBinCount = (
     .catch((error: Error) => {
       const errorMessage = JSON.parse(error.body.message);
       setIsError({
-        errorMessage: errorMessage.error.reason || 'Issue in fetching visualization',
+        errorMessage: errorMessage.error.reason || 'Issue in fetching bucket count',
         errorDetails: errorMessage.error.details,
       });
       console.error(error.body);
@@ -457,30 +453,11 @@ const fetchAggregatedBinCount = (
     });
 };
 
-// const fetchSampleOTDocument = (
-//   selectedOtelIndex: string,
-//   http: CoreStart['http'],
-//   documentName: string
-// ) => async () => {
-//   console.log(`Fetching sample document`);
-//   // const otelIndex = 'ss4o_metrics-sample1-us';
-//   return http
-//     .get(`${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`, {
-//       query: {
-//         format: 'json',
-//       },
-//       index: selectedOtelIndex,
-//     })
-//     .catch((error) => console.error(error));
-// };
-
 const fetchSampleOTDocument = (
   selectedOtelIndex: string,
   http: CoreStart['http'],
   documentName: string
 ) => async () => {
-  // console.log(`Fetching sample document`);
-  // const otelIndex = 'ss4o_metrics-sample1-us';
   return http
     .post(`${OBSERVABILITY_BASE}/metrics/otel/sampleDocument`, {
       body: JSON.stringify({
@@ -507,16 +484,12 @@ export const renderOpenTelemetryVisualization = async (
 ) => {
   const { http } = coreRefs;
   const visualizationType = 'bar';
-  // console.log('savedVisualizationId: ', savedVisualizationId);
-  // console.log('spanParam: ', spanParam);
-  // console.log('panelVisualization?.metric?.index: ', panelVisualization?.metric?.index);
-  // console.log('panelVisualization in render: ', panelVisualization);
   const fetchSampleDocument = await fetchSampleOTDocument(
     panelVisualization?.metric?.index,
     http,
     savedVisualizationId
   )();
-  // console.log('fetchSampleDocument: ', fetchSampleDocument);
+
   const source = fetchSampleDocument.hits[0]._source;
   const dataBinsPromises = source.buckets.map(async (bucket: any) => {
     try {
@@ -533,6 +506,7 @@ export const renderOpenTelemetryVisualization = async (
         setIsError,
         setIsLoading
       )();
+
       function getRandomInt(min: number, max: number) {
         // The maximum is exclusive and the minimum is inclusive
         min = Math.ceil(min);
@@ -542,8 +516,6 @@ export const renderOpenTelemetryVisualization = async (
 
       return {
         xAxis: bucket.min + ' - ' + bucket.max,
-        // minimumBound: bucket.min,
-        // maximumBound: bucket.max,
         // 'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
         'count()': getRandomInt(1, 100),
       };
@@ -553,13 +525,10 @@ export const renderOpenTelemetryVisualization = async (
     }
   });
   const jsonData = await Promise.all(dataBinsPromises);
-  console.log('dataBins: ', jsonData);
-  console.log('dataBins second: ', jsonData[1]);
   const formatDataBinsName = () => {
     return { dataBins: { jsonData } };
   };
   const formatedJsonData = formatDataBinsName().dataBins;
-  console.log('formaDataBins: ', formatDataBinsName().dataBins);
 
   setVisualizationType(visualizationType);
   setVisualizationTitle(source.name);
@@ -717,15 +686,12 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
   if (metaData === undefined || isEmpty(metaData)) {
     return <></>;
   }
-  console.log('metaData: ', metaData);
-  console.log('data in display vis: ', data);
 
   const dataConfig = { ...(metaData.userConfigs?.dataConfig || {}) };
   const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
   const realTimeParsedStats = {
     ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
   };
-  console.log('realTimeParsedStats: ', realTimeParsedStats);
   let finalDimensions = [...(realTimeParsedStats.dimensions || [])];
   const breakdowns = [...(dataConfig.breakdowns || [])];
 
@@ -763,8 +729,6 @@ export const displayVisualization = (metaData: any, data: any, type: string) => 
     },
   };
 
-  console.log('mixedUserConfigs: ', mixedUserConfigs);
-  console.log('data: ', data);
   return (
     <Visualization
       visualizations={getVizContainerProps({

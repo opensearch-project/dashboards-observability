@@ -3,18 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox, EuiSearchBar, EuiTitle } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { EuiComboBoxOptionOption } from '@opensearch-project/oui';
-import { useDispatch, useSelector } from 'react-redux';
+import { EuiComboBox, EuiTitle } from '@elastic/eui';
+import React, { useState } from 'react';
 
 export const IndexPicker = (props) => {
   const { otelIndices, setSelectedOTIndex } = props;
-  const dispatch = useDispatch();
   const otelIndex = otelIndices.map((item: any) => {
     return { label: item.index };
   });
-  //  const dataSource = useSelector(selectedDataSourcesSelector);
   const [selectedIndex, setSelectedIndex] = useState();
 
   const onChange = (
@@ -22,9 +18,7 @@ export const IndexPicker = (props) => {
     selectedIndex: React.SetStateAction<Array<{ label: string }>>
   ) => {
     setSelectedIndex(selectedIndex);
-    console.log('it does come here: ', selectedIndex);
     setSelectedOTIndex(selectedIndex);
-    // dispatch(setSelectedOtelIndex(selectedIndex));
   };
 
   return (

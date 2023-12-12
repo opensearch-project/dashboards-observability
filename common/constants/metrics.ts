@@ -47,32 +47,3 @@ export const DATASOURCE_OPTIONS = [
 export const DATA_PREPPER_INDEX_NAME = 'ss4o-metrics-*-*';
 export const METRICS_ANALYTICS_DATA_PREPPER_INDICES_ROUTE =
   '/api/observability/metrics_analytics/data_prepper_indices';
-
-export const DOCUMENT_NAMES_QUERY = {
-  size: 0,
-  aggs: {
-    distinct_names: {
-      terms: {
-        field: 'name.keyword',
-        size: 500,
-      },
-    },
-  },
-};
-
-export const FETCH_SAMPLE_DOCUMENT_QUERY = {
-  size: 1,
-  query: {
-    bool: {
-      must: [
-        {
-          term: {
-            'name.keyword': {
-              value: 'histogram',
-            },
-          },
-        },
-      ],
-    },
-  },
-};

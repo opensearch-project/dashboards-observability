@@ -6,15 +6,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { keyBy, mergeWith, pick, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
-import { Dispatch, SetStateAction, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   OBSERVABILITY_CUSTOM_METRIC,
   PPL_DATASOURCES_REQUEST,
   REDUX_SLICE_METRICS,
   SAVED_VISUALIZATION,
   OBSERVABILITY_CUSTOM_METRIC,
-  DOCUMENT_NAMES_QUERY,
 } from '../../../../../common/constants/metrics';
 import { MetricType } from '../../../../../common/types/metrics';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
@@ -69,7 +66,6 @@ const initialState = {
   refresh: 0, // set to new Date() to trigger
   selectedDataSource: '',
   otelIndices: [],
-  // selectedOtelIndex: [],
   otelDocumentNames: [],
 };
 
@@ -95,7 +91,6 @@ export const loadMetrics = () => async (dispatch) => {
   const customDataRequest = fetchCustomMetrics();
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
-  // const fetchOTindices = await fetchOpenTelemetryIndices();
   dispatch(setDataSources(remoteDataSources));
   dispatch(setDataSourceTitles(remoteDataSources));
   dispatch(
@@ -119,20 +114,6 @@ export const loadMetrics = () => async (dispatch) => {
 export const loadOTIndices = () => async (dispatch) => {
   const fetchOTindices = await fetchOpenTelemetryIndices();
   dispatch(setOtelIndices(fetchOTindices));
-};
-
-export const loadOtelDocuments = (
-  dispatch: Dispatch<any>,
-  setAvailableTestOtelDocuments: { (value: SetStateAction<undefined> | any) },
-  selectedOTIndex: string
-) => async () => {
-  // const fetchOTindices = await fetchOpenTelemetryIndices();
-  // console.log('does it work in loadOtelDoc');
-  const fetchOTDocuments = await fetchOpenTelemetryDocuments(selectedOTIndex)();
-  // dispatch(setOtelIndices(fetchOTindices));
-  // console.log('here fetchOTDocuments: ', fetchOTDocuments);
-  setAvailableTestOtelDocuments(fetchOTDocuments.aggregations);
-  dispatch(setOtelDocumentNames(fetchOTDocuments.aggregations));
 };
 
 const fetchCustomMetrics = async () => {
@@ -192,7 +173,6 @@ const fetchRemoteMetrics = (remoteDataSources: string[]) =>
 
 export const fetchOpenTelemetryIndices = async () => {
   const { http } = coreRefs;
-  console.log(`Fetching open telemetry indices`);
   return http
     .get(`${OBSERVABILITY_BASE}/search/indices`, {
       query: {
@@ -202,36 +182,29 @@ export const fetchOpenTelemetryIndices = async () => {
     .catch((error) => console.error(error));
 };
 
-export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async () => {
+export const fetchOpenTelemetryDocumentNames = (selectedOtelIndex: string) => async () => {
   const { http } = coreRefs;
-  // const otelIndex = useSelector(selectedOtelIndexSelector);
-  console.log(`Fetching open telemetry indices`);
-  // const otelIndex = 'ss4o_metrics-sample1-us';
   return http
-    .get(`${OBSERVABILITY_BASE}/metrics/otel/documents`, {
-      index: selectedOtelIndex,
+    .post(`${OBSERVABILITY_BASE}/metrics/otel/documentNames`, {
+      body: JSON.stringify({
+        index: selectedOtelIndex,
+      }),
     })
     .catch((error) => console.error(error));
-  // dispatch(setOtelDocumentNames(resp.aggregations));
 };
 
-<<<<<<< HEAD
 // const updateLayoutBySelection = (state: any, newMetric: any) => {
-//   console.log('state in updateLayoutBySelection: ', state);
-//   console.log('newMetric in updateLayoutBySelection: ', newMetric);
-//   console.log('state in updateLayoutBySelection: ', state.metricsLayout);
 //   const newDimensions = getNewVizDimensions(state.metricsLayout);
-//   console.log('newDimensions: ', newDimensions);
 
-  // const metricCatalog = (catalog: string) => {
-  //   if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
-  //     return 'savedCustomMetric';
-  //   } else if (catalog === 'OpenTelemetry') {
-  //     return 'openTelemetryMetric';
-  //   } else {
-  //     return 'prometheusMetric';
-  //   }
-  // };
+//   const metricCatalog = (catalog: string) => {
+//     if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
+//       return 'savedCustomMetric';
+//     } else if (catalog === 'OpenTelemetry') {
+//       return 'openTelemetryMetric';
+//     } else {
+//       return 'prometheusMetric';
+//     }
+//   };
 //   const metricVisualization: MetricType = {
 //     id: newMetric.id,
 //     savedVisualizationId: newMetric.id,
@@ -242,42 +215,8 @@ export const fetchOpenTelemetryDocuments = (selectedOtelIndex: string) => async 
 //     metricType: metricCatalog(newMetric.catalog),
 //     metric: newMetric.catalog === 'OpenTelemetry' ? newMetric : '',
 //   };
-//   console.log('metricVisualization: ', metricVisualization);
 //   state.metricsLayout = [...state.metricsLayout, metricVisualization];
-//   console.log('state after metricVisualization: ', state.metricsLayout);
 // };
-=======
-const updateLayoutBySelection = (state: any, newMetric: any) => {
-  // console.log('state in updateLayoutBySelection: ', state);
-  // console.log('newMetric in updateLayoutBySelection: ', newMetric);
-  // console.log('state in updateLayoutBySelection: ', state.metricsLayout);
-  const newDimensions = getNewVizDimensions(state.metricsLayout);
-  // console.log('newDimensions: ', newDimensions);
-
-  const metricCatalog = (catalog: string) => {
-    if (catalog === OBSERVABILITY_CUSTOM_METRIC) {
-      return 'savedCustomMetric';
-    } else if (catalog === 'OpenTelemetry') {
-      return 'openTelemetryMetric';
-    } else {
-      return 'prometheusMetric';
-    }
-  };
-  const metricVisualization: MetricType = {
-    id: newMetric.id,
-    savedVisualizationId: newMetric.id,
-    x: newDimensions.x,
-    y: newDimensions.y,
-    h: newDimensions.h,
-    w: newDimensions.w,
-    metricType: metricCatalog(newMetric.catalog),
-    metric: newMetric.catalog === 'OpenTelemetry' ? newMetric : '',
-  };
-  // console.log('metricVisualization: ', metricVisualization);
-  state.metricsLayout = [...state.metricsLayout, metricVisualization];
-  // console.log('state after metricVisualization: ', state.metricsLayout);
-};
->>>>>>> c8de70e1 (Histogram working)
 
 // const updateLayoutByDeSelection = (state: any, newMetric: any) => {
 //   const sortedMetricsLayout = sortMetricLayout(state.metricsLayout);
@@ -356,9 +295,6 @@ export const metricSlice = createSlice({
     setOtelIndices: (state, { payload }) => {
       state.otelIndices = payload;
     },
-    // setSelectedOtelIndex: (state, { payload }) => {
-    //   state.selectedOtelIndex = payload;
-    // },
     setOtelDocumentNames: (state, { payload }) => {
       state.otelDocumentNames = payload;
     },
@@ -378,7 +314,6 @@ export const {
   updateMetric,
   setSelectedDataSource,
   setOtelIndices,
-  // setSelectedOtelIndex,
   setOtelDocumentNames,
 } = metricSlice.actions;
 
@@ -477,8 +412,6 @@ export const metricQuerySelector = (id) => (state) =>
 export const selectedDataSourcesSelector = (state) => state.metrics.selectedDataSource;
 
 export const otelIndexSelector = (state) => state.metrics.otelIndices;
-
-// export const selectedOtelIndexSelector = (state) => state.metrics.selectedOtelIndex;
 
 export const otelDocumentNamesSelector = (state) => state.metrics.otelDocumentNames;
 

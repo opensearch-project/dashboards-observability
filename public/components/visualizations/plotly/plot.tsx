@@ -62,7 +62,7 @@ export function Plt(props: PltProps) {
     displayModeBar: false,
     ...props.config,
   };
-  console.log('props.data: ', props.data);
+
   return (
     <PlotComponent
       divId="explorerPlotComponent"

@@ -40,9 +40,6 @@ export const transformPreprocessedDataToTraces = (
   { breakdowns, isVertical = true }: Partial<ConfigList>,
   visTypeMetaData: VisSpecificMetaData
 ): PlotlyTrace[] => {
-  console.log('intermediateVisData trasn: ', intermediateVisData);
-  console.log('breakdowns trnas: ', breakdowns);
-  console.log('visTypeMetaData trans: ', visTypeMetaData);
   const traceMap = new Map<string, any>();
   const hasBreakdown = !isEmpty(breakdowns);
   forEach(intermediateVisData, (entry) => {
@@ -100,7 +97,6 @@ export const preprocessJsonData = (
         aggName: '',
       };
       const serieKey = sr[CUSTOM_LABEL] ? sr[CUSTOM_LABEL] : `${sr.aggregation}(${sr.name})`;
-      console.log('serieKey: ', serieKey);
       if (!isEmpty(serieKey)) {
         const concatedXaxisLabel = [
           ...(!isEmpty(span) ? [getCompleteTimespanKey(span)] : []),

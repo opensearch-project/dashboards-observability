@@ -14,7 +14,7 @@ export class MetricsAnalyticsAdaptor {
       });
       return response;
     } catch (error) {
-      throw new Error('Index Panel Error:' + error);
+      throw new Error('Fetch Otel Metrics Error:' + error);
     }
   };
 
@@ -27,10 +27,6 @@ export class MetricsAnalyticsAdaptor {
     documentName: string,
     index: string
   ) => {
-    console.log('min in adaptor: ', min);
-    console.log('min in adaptor type: ', typeof min);
-    console.log('max in adaptor: ', max);
-    console.log('max in adaptor type: ', typeof max);
     const metricsQuery = {
       size: 0,
       query: {
@@ -116,7 +112,28 @@ export class MetricsAnalyticsAdaptor {
       const response = await this.fetch(client, metricsQuery, index);
       return response;
     } catch (error) {
-      throw new Error('Fetch Bin count Error:' + error);
+      throw new Error('Fetch Sample Document Error:' + error);
+    }
+  };
+
+  queryToFetchDocumentNames = async (client: ILegacyScopedClusterClient, index: string) => {
+    const metricsQuery = {
+      size: 0,
+      aggs: {
+        distinct_names: {
+          terms: {
+            field: 'name.keyword',
+            size: 500,
+          },
+        },
+      },
+    };
+
+    try {
+      const response = await this.fetch(client, metricsQuery, index);
+      return response;
+    } catch (error) {
+      throw new Error('Fetch Document Names Error:' + error);
     }
   };
 }

@@ -6,7 +6,6 @@
 import React from 'react';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { min } from 'lodash';
-import { useEffect } from 'react';
 import { MetricName } from './metric_name';
 
 interface IMetricNameProps {
@@ -18,12 +17,6 @@ interface IMetricNameProps {
 
 export const MetricsAccordion = (props: IMetricNameProps) => {
   const { metricsList, headerName, handleClick, dataTestSubj } = props;
-  // console.log('mertcs list type: ', typeof metricsList);
-  // console.log('mertcs list: ', metricsList);
-
-  // useEffect(() => {
-  //   test();
-  // }, [metricsList, test]);
 
   return (
     <EuiAccordion

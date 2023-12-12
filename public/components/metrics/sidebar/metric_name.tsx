@@ -31,7 +31,6 @@ export const MetricName = (props: IMetricNameProps) => {
   const { metric, handleClick } = props;
 
   const name = (metricDetails: any) => {
-    // console.log('inside name metric catalog', metricDetails?.catalog, metricDetails?.name);
     if (metricDetails?.catalog === 'CUSTOM_METRICS' || metricDetails?.catalog === 'OpenTelemetry')
       return metricDetails?.name;
     else return metricDetails?.name.split('.')[1].replace(/^prometheus_/, 'p.._');

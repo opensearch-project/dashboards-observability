@@ -13,10 +13,6 @@ import {
 } from '../../../../../src/core/server';
 import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import { addClickToMetric, getMetrics } from '../../common/metrics/metrics_helper';
-import {
-  DOCUMENT_NAMES_QUERY,
-  FETCH_SAMPLE_DOCUMENT_QUERY,
-} from '../../../common/constants/metrics';
 import { MetricsAnalyticsAdaptor } from '../../adaptors/metrics/metrics_analytics_adaptor';
 
 export function registerMetricsRoute(router: IRouter) {
@@ -34,7 +30,6 @@ export function registerMetricsRoute(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const metrics = getMetrics();
-        console.log(metrics);
         return response.ok({
           body: metrics,
         });
@@ -105,25 +100,28 @@ export function registerMetricsRoute(router: IRouter) {
     }
   );
 
-  router.get(
+  router.post(
     {
-      path: `${OBSERVABILITY_BASE}/metrics/otel/documents`,
+      path: `${OBSERVABILITY_BASE}/metrics/otel/documentNames`,
       validate: {
-        // body: schema.object({
-        //   index: schema.string(),
-        // }),
+        body: schema.object({
+          index: schema.string(),
+        }),
       },
     },
-    async (context, request, response) => {
-      const indexPattern = 'ss4o_metrics-*-*';
-      const params: RequestParams.Search = {
-        index: indexPattern,
-        body: DOCUMENT_NAMES_QUERY,
-      };
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
+
       try {
-        const resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
-          'search',
-          params
+        const resp = await metricsAnalyticsBackend.queryToFetchDocumentNames(
+          opensearchNotebooksClient,
+          request.body.index
         );
         return response.ok({
           body: resp,
@@ -156,15 +154,13 @@ export function registerMetricsRoute(router: IRouter) {
       const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
         request
       );
-      console.log('comes here');
+
       try {
-        // console.log('index:', request.body.index);
         const resp = await metricsAnalyticsBackend.queryToFetchSampleDocument(
           opensearchNotebooksClient,
           request.body.documentName,
           request.body.index
         );
-        console.log('resp: ', resp);
         return response.ok({
           body: resp.hits,
         });
@@ -197,13 +193,11 @@ export function registerMetricsRoute(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      // console.log('index beofre:', request.body.index);
       const opensearchNotebooksClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
         request
       );
-      console.log('comes here');
+
       try {
-        // console.log('index:', request.body.index);
         const resp = await metricsAnalyticsBackend.queryToFetchBinCount(
           opensearchNotebooksClient,
           request.body.min,
@@ -213,7 +207,6 @@ export function registerMetricsRoute(router: IRouter) {
           request.body.documentName,
           request.body.index
         );
-        console.log('resp: ', resp);
         return response.ok({
           body: resp,
         });
