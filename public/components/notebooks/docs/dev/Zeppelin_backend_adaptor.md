@@ -75,7 +75,7 @@
 
       - Change transport.type to http
       - host → localhost (if running on same machine as Zeppelin) & port → 9200
-      - username: admin & password: admin
+      - username: `admin` & password: `<admin password>`
       - Once configured the screen should look like this:
         ![OpenSearch Interpreter](images/opensearch-zeppelin.png)
 
