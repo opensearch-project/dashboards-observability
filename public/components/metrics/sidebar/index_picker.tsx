@@ -11,7 +11,7 @@ export const IndexPicker = (props) => {
   const otelIndex = otelIndices.map((item: any) => {
     return { label: item.index };
   });
-  const [selectedIndex, setSelectedIndex] = useState();
+  const [selectedIndex, setSelectedIndex] = useState([]);
 
   const onChange = (
     // eslint-disable-next-line no-shadow
@@ -20,6 +20,7 @@ export const IndexPicker = (props) => {
     setSelectedIndex(selectedIndex);
     setSelectedOTIndex(selectedIndex);
   };
+  // console.log('inside index picker');
 
   return (
     <div className="metrics-index-picker" data-test-subj="metricsIndexPicker">

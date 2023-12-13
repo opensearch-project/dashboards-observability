@@ -6,17 +6,32 @@
 import { EuiComboBox, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { DATASOURCE_OPTIONS } from '../../../../common/constants/metrics';
+import { OptionType } from '../../../../common/types/metrics';
 
-export const DataSourcePicker = (props) => {
-  const { selectedDataSource, setSelectedDataSource } = props;
+interface DataSourcePickerMenuProps {
+  selectedDataSource: OptionType[];
+  setSelectedDataSource: (sources: OptionType[]) => void;
+}
+
+export const DataSourcePicker = ({
+  selectedDataSource,
+  setSelectedDataSource,
+}: DataSourcePickerMenuProps) => {
+  // const { selectedDataSource, setSelectedDataSource } = DataSourcePickerMenuProps;
 
   const onChange = (
     // eslint-disable-next-line no-shadow
-    selectedDataSource: React.SetStateAction<Array<{ label: string; 'data-test-subj': string }>>
+    selectedDataSource
   ) => {
-    setSelectedDataSource(selectedDataSource);
+    const selectedArray = Array.isArray(selectedDataSource)
+      ? selectedDataSource
+      : [selectedDataSource];
+
+    // console.log('Selected Data Source:', selectedDataSource);
+    setSelectedDataSource(selectedArray);
   };
 
+  // console.log('inside DataSourcePicker');
   return (
     <div className="metrics-data-source-picker" data-test-subj="metricsDataSourcePicker">
       <EuiTitle size="xxxs">

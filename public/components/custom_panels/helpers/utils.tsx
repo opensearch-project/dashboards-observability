@@ -491,6 +491,7 @@ export const renderOpenTelemetryVisualization = async (
   )();
 
   const source = fetchSampleDocument.hits[0]._source;
+  console.log('source: ', source);
   const dataBinsPromises = source.buckets.map(async (bucket: any) => {
     try {
       const formattedStartTime = convertDateTime(startTime, false, false, true);
@@ -513,11 +514,11 @@ export const renderOpenTelemetryVisualization = async (
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min;
       }
-
+      console.log('fetchingAggregatedBinCount: ', fetchingAggregatedBinCount);
       return {
         xAxis: bucket.min + ' - ' + bucket.max,
-        // 'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
-        'count()': getRandomInt(1, 100),
+        'count()': fetchingAggregatedBinCount?.nested_buckets?.bucket_range?.bucket_count?.value,
+        // 'count()': getRandomInt(1, 100),
       };
     } catch (error) {
       console.error('Error processing bucket:', error);

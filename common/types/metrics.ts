@@ -27,3 +27,10 @@ export interface MetricType extends VisualizationType {
   };
   // metricType: 'savedCustomMetric' | 'prometheusMetric' | 'openTelemetryMetric';
 }
+
+export interface OptionType {
+  label: string;
+  'data-test-subj': string;
+}
+// selectedDataSource: React.SetStateAction<Array<{ label: string; 'data-test-subj': string }>>;
+//   setSelectedDataSource: React.Dispatch<React.SetStateAction<unknown>>;

@@ -29,10 +29,11 @@ import { MetricsAccordion } from './metrics_accordion';
 import { SearchBar } from './search_bar';
 import { DataSourcePicker } from './data_source_picker';
 import { IndexPicker } from './index_picker';
+import { OptionType } from '../../../../common/types/metrics';
 
 interface SideBarMenuProps {
-  selectedDataSource: React.SetStateAction<Array<{ label: string; 'data-test-subj': string }>>;
-  setSelectedDataSource: React.Dispatch<React.SetStateAction<unknown>>;
+  selectedDataSource: OptionType[];
+  setSelectedDataSource: (sources: OptionType[]) => void;
   selectedOTIndex: React.SetStateAction<Array<{}>>;
   setSelectedOTIndex: React.Dispatch<React.SetStateAction<unknown>>;
   availableTestOtelDocuments: Array<{}>;
@@ -130,7 +131,7 @@ export const Sidebar = ({
 
       fetchOtelDocuments();
     }
-  }, [dispatch, selectedDataSource, selectedOTIndex, setAvailableTestOtelDocuments]);
+  }, [dispatch, selectedDataSource, selectedOTIndex]);
 
   const indexPicker = useMemo(() => {
     const isOpenTelemetry = selectedDataSource[0]?.label === 'OpenTelemetry' ? true : false;

@@ -22,6 +22,10 @@ jest.mock('../../../../services/requests/ppl');
 describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
+  const selectedDataSource = jest.fn();
+  const setSelectedDataSource = jest.fn();
+  const selectedOTIndex = jest.fn();
+  const setSelectedOTIndex = jest.fn();
 
   beforeAll(() => {
     PPLService.mockImplementation(() => {
@@ -50,7 +54,12 @@ describe('Side Bar Component', () => {
 
     const wrapper = mount(
       <Provider store={store}>
-        <Sidebar />
+        <Sidebar
+          selectedDataSource={selectedDataSource}
+          setSelectedDataSource={setSelectedDataSource}
+          selectedOTIndex={selectedOTIndex}
+          setSelectedOTIndex={setSelectedOTIndex}
+        />
       </Provider>
     );
 

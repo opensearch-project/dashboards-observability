@@ -11,6 +11,7 @@ import { ChromeBreadcrumb } from '../../../../../src/core/public';
 import { Sidebar } from './sidebar/sidebar';
 import PPLService from '../../services/requests/ppl';
 import { TopMenu } from './top_menu/top_menu';
+import { MetricType, OptionType } from '../../../common/types/metrics';
 import { MetricsGrid } from './view/metrics_grid';
 import { metricsLayoutSelector, selectedMetricsSelector } from './redux/slices/metrics_slice';
 import { resolutionOptions, DATASOURCE_OPTIONS } from '../../../common/constants/metrics';
@@ -40,9 +41,8 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
   const [panelVisualizations, setPanelVisualizations] = useState<MetricType[]>([]);
 
   // Side bar constants
-  const [selectedDataSource, setSelectedDataSource] = useState([]);
+  const [selectedDataSource, setSelectedDataSource] = useState<OptionType[]>([]);
   const [selectedOTIndex, setSelectedOTIndex] = useState([]);
-  const [availableTestOtelDocuments, setAvailableTestOtelDocuments] = useState([]);
 
   const setToast = (title: string, color = 'success', text?: ReactChild, side?: string) => {
     if (!text) text = '';
@@ -86,8 +86,6 @@ export const Home = ({ chrome, parentBreadcrumb }: MetricsProps) => {
                               setSelectedDataSource={setSelectedDataSource}
                               selectedOTIndex={selectedOTIndex}
                               setSelectedOTIndex={setSelectedOTIndex}
-                              availableTestOtelDocuments={availableTestOtelDocuments}
-                              setAvailableTestOtelDocuments={setAvailableTestOtelDocuments}
                             />
                           </EuiResizablePanel>
 

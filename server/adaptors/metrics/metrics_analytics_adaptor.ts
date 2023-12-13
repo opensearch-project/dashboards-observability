@@ -119,6 +119,17 @@ export class MetricsAnalyticsAdaptor {
   queryToFetchDocumentNames = async (client: ILegacyScopedClusterClient, index: string) => {
     const metricsQuery = {
       size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                kind: 'HISTOGRAM',
+              },
+            },
+          ],
+        },
+      },
       aggs: {
         distinct_names: {
           terms: {
