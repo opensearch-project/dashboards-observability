@@ -27,11 +27,9 @@ export const DataSourcePicker = ({
       ? selectedDataSource
       : [selectedDataSource];
 
-    // console.log('Selected Data Source:', selectedDataSource);
     setSelectedDataSource(selectedArray);
   };
 
-  // console.log('inside DataSourcePicker');
   return (
     <div className="metrics-data-source-picker" data-test-subj="metricsDataSourcePicker">
       <EuiTitle size="xxxs">
@@ -42,7 +40,7 @@ export const DataSourcePicker = ({
         placeholder="Select a data source"
         singleSelection={{ asPlainText: true }}
         options={DATASOURCE_OPTIONS}
-        selectedOptions={selectedDataSource}
+        selectedOptions={selectedDataSource || []}
         onChange={onChange}
       />
     </div>

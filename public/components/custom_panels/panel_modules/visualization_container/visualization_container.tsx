@@ -33,6 +33,7 @@ import {
   renderCatalogVisualization,
   renderSavedVisualization,
   renderOpenTelemetryVisualization,
+  fetchVisualizationById,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
@@ -253,6 +254,15 @@ export const VisualizationContainer = ({
 
     if (!visualization && !savedVisualizationId) return;
 
+    // console.log('panelViz: ', panelVisualization);
+    // if (panelVisualization.metricType === undefined) {
+    //   const fetchedVisualization = await fetchVisualizationById(
+    //     http,
+    //     savedVisualizationId,
+    //     setIsError
+    //   );
+    //   console.log('fetchedVisualization in if: ', fetchedVisualization);
+    // }
     if (metricType === 'openTelemetryMetric')
       await renderOpenTelemetryVisualization(
         savedVisualizationId,

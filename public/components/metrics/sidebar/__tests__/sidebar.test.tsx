@@ -19,12 +19,21 @@ import { sampleSavedMetric } from '../../../../../test/metrics_constants';
 
 jest.mock('../../../../services/requests/ppl');
 
+// Mocked http object
+const mockHttpObject = {
+  get: jest.fn().mockResolvedValue({}),
+};
+
+// Mocked coreRefs object with the mocked http
+const mockCoreRefs = {
+  http: mockHttpObject,
+  pplService: new PPLService(mockHttpObject),
+};
+
 describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
-  const selectedDataSource = jest.fn();
   const setSelectedDataSource = jest.fn();
-  const selectedOTIndex = jest.fn();
   const setSelectedOTIndex = jest.fn();
 
   beforeAll(() => {
@@ -51,13 +60,24 @@ describe('Side Bar Component', () => {
         },
       ],
     });
+    // SavedObjectsActions.getBulk = jest
+    //   .fn()
+    //   .mockResolvedValue({ observabilityObjectList: [{ savedVisualization: sampleSavedMetric }] });
+
+    // coreRefs = mockCoreRefs;
+    // coreRefs.pplService.fetch = jest.fn(() =>
+    //   Promise.resolve({
+    //     data: { DATA_SOURCES: ['datasource1', 'datasource2'] },
+    //     then: () => Promise.resolve(),
+    //   })
+    // );
 
     const wrapper = mount(
       <Provider store={store}>
         <Sidebar
-          selectedDataSource={selectedDataSource}
+          selectedDataSource={''}
           setSelectedDataSource={setSelectedDataSource}
-          selectedOTIndex={selectedOTIndex}
+          selectedOTIndex={''}
           setSelectedOTIndex={setSelectedOTIndex}
         />
       </Provider>

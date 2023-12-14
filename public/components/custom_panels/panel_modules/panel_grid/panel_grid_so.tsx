@@ -88,6 +88,7 @@ export const PanelGridSO = (props: PanelGridProps) => {
   };
 
   const loadVizComponents = () => {
+    console.log('panelVisualizations[0] so: ', panelVisualizations[0]);
     const gridDataComps = panelVisualizations.map(
       (panelVisualization: VisualizationType, index) => (
         <VisualizationContainer
@@ -106,6 +107,8 @@ export const PanelGridSO = (props: PanelGridProps) => {
           showFlyout={showFlyout}
           removeVisualization={removeVisualization}
           contextMenuId="visualization"
+          metricType={panelVisualization?.metricType ? panelVisualization.metricType : ''}
+          panelVisualization={panelVisualization}
         />
       )
     );

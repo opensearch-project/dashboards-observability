@@ -20,7 +20,6 @@ export const IndexPicker = (props) => {
     setSelectedIndex(selectedIndex);
     setSelectedOTIndex(selectedIndex);
   };
-  // console.log('inside index picker');
 
   return (
     <div className="metrics-index-picker" data-test-subj="metricsIndexPicker">
