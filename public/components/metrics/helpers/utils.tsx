@@ -99,3 +99,45 @@ export const visualizationFromMetric = (metric, span, resolution): SavedVisualiz
     userConfigs: JSON.stringify(userConfigs),
   };
 };
+
+export const createOtelMetric = (metric: any) => {
+  return {
+    name: '[Otel Metric] ' + metric.index + '.' + metric.name,
+    index: metric.index,
+    documentName: metric.name,
+    description: '',
+    query: '',
+    type: 'bar',
+    selected_fields: {
+      text: '',
+      tokens: [],
+    },
+    sub_type: 'metric',
+    metricType: 'openTelemetryMetric',
+    user_configs: {},
+  };
+};
+
+export const updateOpenTelemetryMetricsWithSelections = (
+  savedVisualization: any,
+  startTime: ShortDate,
+  endTime: ShortDate
+) => {
+  console.log(
+    'savedVisualization in updateOpenTelemetryMetricsWithSelections: ',
+    savedVisualization
+  );
+  return {
+    query: '',
+    index: savedVisualization.index,
+    documentName: savedVisualization.documentName,
+    fields: savedVisualization.selected_fields.tokens,
+    dateRange: [startTime, endTime],
+    name: savedVisualization.name,
+    description: savedVisualization.description,
+    type: 'bar',
+    subType: 'metric',
+    metricType: 'openTelemetryMetric',
+    userConfigs: JSON.stringify(savedVisualization.user_configs),
+  };
+};

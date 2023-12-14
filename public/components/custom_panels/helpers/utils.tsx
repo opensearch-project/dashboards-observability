@@ -482,6 +482,9 @@ export const renderOpenTelemetryVisualization = async (
   panelVisualization: any,
   spanResolution?: string
 ) => {
+  startTime = 'now-15y';
+  endTime = 'now';
+  console.log('render: ', startTime, endTime);
   const { http } = coreRefs;
   const visualizationType = 'bar';
   const fetchSampleDocument = await fetchSampleOTDocument(
@@ -494,8 +497,8 @@ export const renderOpenTelemetryVisualization = async (
   console.log('source: ', source);
   const dataBinsPromises = source.buckets.map(async (bucket: any) => {
     try {
-      const formattedStartTime = convertDateTime(startTime, false, false, true);
-      const formattedEndTime = convertDateTime(endTime, false, false, true);
+      const formattedStartTime = convertDateTime(startTime, false, false, false, true);
+      const formattedEndTime = convertDateTime(endTime, false, false, false, true);
       const fetchingAggregatedBinCount = await fetchAggregatedBinCount(
         bucket.min.toString(),
         bucket.max.toString(),

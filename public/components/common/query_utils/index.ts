@@ -5,8 +5,8 @@
 
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
-import { isEmpty } from 'lodash';
-import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
+import _, { isEmpty } from 'lodash';
+import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
@@ -65,13 +65,17 @@ export const convertDateTime = (
   isMetrics: boolean = false,
   isOtel: boolean = false
 ) => {
-  let returnTime: undefined | Moment;
+  console.log('elements: ', datetime, isStart, formatted, isMetrics, isOtel);
+  let returnTime: Moment = '';
+  console.log('returnTime: ', returnTime);
+
   if (isStart) {
     returnTime = dateMath.parse(datetime);
   } else {
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
 
+  console.log('returnTime after: ', returnTime);
   if (isOtel) {
     const formattedDate = returnTime!.utc().format(OTEL_DATE_FORMAT);
     const milliseconds = returnTime!.millisecond();
