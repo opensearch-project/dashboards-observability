@@ -34,7 +34,7 @@ import {
   landOnEventVisualizations,
   landOnPanels,
   clearQuerySearchBoxText,
-} from '../utils/event_analytics/helpers';
+} from '../../utils/event_analytics/helpers';
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for event analytics', () => {
