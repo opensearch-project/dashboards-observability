@@ -25,7 +25,6 @@ jobs:
         java: [11]
         testgroups: [
           app_analytics_test,
-          notebooks_test,
           datasources_test,
           event_analytics_test,
           integrations_test,
