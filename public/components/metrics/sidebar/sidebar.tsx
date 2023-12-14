@@ -60,24 +60,26 @@ export const Sidebar = ({
 
   return (
     <I18nProvider>
-      <SearchBar />
-      <EuiSpacer size="s" />
-
-      <section className="sidebar">
-        <MetricsAccordion
-          metricsList={selectedMetricsList}
-          headerName="Selected Metrics"
-          handleClick={handleRemoveMetric}
-          dataTestSubj="metricsListItems_selectedMetrics"
-        />
+      <div id="sidebar">
+        <SearchBar />
         <EuiSpacer size="s" />
-        <MetricsAccordion
-          metricsList={availableMetrics}
-          headerName="Available Metrics"
-          handleClick={handleAddMetric}
-          dataTestSubj="metricsListItems_availableMetrics"
-        />
-      </section>
+
+        <section className="sidebar">
+          <MetricsAccordion
+            metricsList={selectedMetricsList}
+            headerName="Selected Metrics"
+            handleClick={handleRemoveMetric}
+            dataTestSubj="metricsListItems_selectedMetrics"
+          />
+          <EuiSpacer size="s" />
+          <MetricsAccordion
+            metricsList={availableMetrics}
+            headerName="Available Metrics"
+            handleClick={handleAddMetric}
+            dataTestSubj="metricsListItems_availableMetrics"
+          />
+        </section>
+      </div>
     </I18nProvider>
   );
 };

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { OBSERVABILITY_CUSTOM_METRIC } from '../common/constants/metrics';
+
 export const sampleMetricsVisualizations = [
   {
     h: 2,
@@ -313,6 +315,10 @@ export const sampleSavedMetric = {
   name: '[Logs] Average ram usage per day by windows os ',
   query:
     "source = opensearch_dashboards_sample_data_logs | where match(machine.os,'win')  |  stats avg(machine.ram) by span(timestamp,1h)",
+  aggregation: 'avg',
+  attributesGroupBy: [],
+  catalog: OBSERVABILITY_CUSTOM_METRIC,
+  index: 'opensearch_dashboards_sample_data_logs',
   type: 'line',
   timeField: 'timestamp',
   selected_date_range: {

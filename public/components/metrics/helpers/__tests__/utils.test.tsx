@@ -11,7 +11,7 @@ import {
   sampleMergedVisualizations,
   sampleMetricsVisualizations,
   sampleVisualizationsList,
-} from '../../../../../test/metrics_contants';
+} from '../../../../../test/metrics_constants';
 import _ from 'lodash';
 
 describe('Utils helper functions', () => {

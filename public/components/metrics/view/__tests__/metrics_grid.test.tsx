@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { MetricsGrid } from '../metrics_grid';
 import { coreStartMock } from '../../../../../test/__mocks__/coreMocks';
-import { sampleMetric, sampleMetricsVisualizations } from '../../../../../test/metrics_contants';
+import { sampleMetric, sampleMetricsVisualizations } from '../../../../../test/metrics_constants';
 import { createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';

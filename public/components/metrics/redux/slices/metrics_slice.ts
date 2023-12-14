@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSlice } from '@reduxjs/toolkit';
-import { keyBy, mergeWith, pick, sortBy } from 'lodash';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { keyBy, mergeWith, pick, sortBy, merge } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   OBSERVABILITY_CUSTOM_METRIC,
@@ -18,6 +18,7 @@ import { ObservabilitySavedVisualization } from '../../../../services/saved_obje
 import { pplServiceRequestor } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import { getOSDHttp, getPPLService } from '../../../../../common/utils';
 
 export interface IconAttributes {
   color: string;
@@ -65,17 +66,12 @@ const mergeMetricCustomizer = function (objValue, srcValue) {
         : srcValue.availableAttributes,
   };
 };
-export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
-  const { metrics } = getState().metrics;
-  const modifiableMetricsMap = { ...metrics };
 
-  const mergedMetrics = mergeWith(modifiableMetricsMap, newMetricMap, mergeMetricCustomizer);
-  dispatch(setMetrics(mergedMetrics));
-};
+const now = () => new Date().getMilliseconds();
 
 export const loadMetrics = () => async (dispatch) => {
-  const { http, pplService } = coreRefs;
-  const customDataRequest = fetchCustomMetrics(http);
+  const pplService = getPPLService();
+  const customDataRequest = fetchCustomMetrics();
   const remoteDataSourcesResponse = await pplServiceRequestor(pplService!, PPL_DATASOURCES_REQUEST);
   const remoteDataSources = remoteDataSourcesResponse.data.DATASOURCE_NAME;
 
@@ -85,15 +81,15 @@ export const loadMetrics = () => async (dispatch) => {
     setDataSourceIcons(coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources]))
   );
 
-  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
+  const remoteDataRequests = fetchRemoteMetrics(remoteDataSources);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
   const metricsResult = metricsResultSet.flat();
 
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
-  dispatch(mergeMetrics(metricsMapById));
+  await dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  dispatch(setSortedIds(sortedIds));
+  await dispatch(setSortedIds(sortedIds));
 };
 
 const fetchCustomMetrics = async () => {
@@ -103,6 +99,7 @@ const fetchCustomMetrics = async () => {
   const savedMetrics = dataSet.observabilityObjectList.filter((obj) =>
     [PROMQL_METRIC_SUBTYPE, PPL_METRIC_SUBTYPE].includes(obj.savedVisualization?.subType)
   );
+
   return savedMetrics.map((obj: any) => ({
     id: obj.objectId,
     savedVisualizationId: obj.objectId,
@@ -120,8 +117,7 @@ const fetchCustomMetrics = async () => {
 };
 
 const fetchRemoteDataSource = async (dataSource) => {
-  const { pplService } = coreRefs;
-
+  const pplService = getPPLService();
   const response = await pplServiceRequestor(
     pplService,
     `source = ${dataSource}.information_schema.tables`
@@ -129,8 +125,8 @@ const fetchRemoteDataSource = async (dataSource) => {
   return { jsonData: response.jsonData, dataSource };
 };
 
-const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => {
-  return remoteDataSources.map((dataSource) =>
+const fetchRemoteMetrics = (remoteDataSources: string[]) =>
+  remoteDataSources.map((dataSource) =>
     fetchRemoteDataSource(dataSource).then(({ jsonData }) =>
       jsonData.map((obj: any) => ({
         id: `${obj.TABLE_CATALOG}.${obj.TABLE_NAME}`,
@@ -149,15 +145,22 @@ const fetchRemoteMetrics = async (remoteDataSources: string[]): Promise<any> => 
       }))
     )
   );
-};
 
 export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
   initialState,
   reducers: {
-    setMetrics: (state, { payload }) => {
-      state.metrics = payload;
+    mergeMetrics: (state, { payload }) => {
+      const { metrics } = state;
+      const modifiableMetricsMap = { ...metrics };
+
+      const mergedMetrics = mergeWith(modifiableMetricsMap, payload, mergeMetricCustomizer);
+      state.metrics = mergedMetrics;
     },
+
+    // setMetrics: (state, { payload }) => {
+    //   state.metrics = payload;
+    // },
     setMetric: (state, { payload }) => {
       state.metrics[payload.id] = payload;
     },
@@ -211,7 +214,8 @@ export const metricSlice = createSlice({
 export const {
   deSelectMetric,
   clearSelectedMetrics,
-  selectMetric,
+
+  mergeMetrics,
   moveMetric,
   setSearch,
   setDateSpan,
@@ -223,7 +227,7 @@ export const {
 
 /** private actions */
 
-const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
+const { selectMetric, setMetric, setSortedIds } = metricSlice.actions;
 
 const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
   const { pplService, toasts } = coreRefs;
@@ -249,9 +253,9 @@ export const addSelectedMetric = (metric: MetricType) => async (dispatch, getSta
   if (currentSelectedIds.includes(metric.id)) return;
 
   if (metric.subType === PROMQL_METRIC_SUBTYPE) {
-    dispatch(getAvailableAttributes(metric.id, metric.index));
+    await dispatch(getAvailableAttributes(metric.id, metric.index));
   }
-  dispatch(selectMetric(metric));
+  await dispatch(selectMetric(metric));
 };
 
 export const removeSelectedMetric = ({ id }) => async (dispatch, getState) => {
@@ -270,7 +274,7 @@ export const updateMetricQuery = (id, { availableAttributes, aggregation, attrib
     attributesGroupBy: attributesGroupBy || staticMetric.attributesGroupBy || [],
     availableAttributes: availableAttributes || staticMetric.availableAttributes || [],
   };
-  dispatch(setMetric(metric));
+  return dispatch(setMetric(metric));
 };
 
 export const searchOrTrue = (search, metric) => {

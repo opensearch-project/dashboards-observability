@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Filter, Query, TimeRange } from '../../../../../src/plugins/data/common';
 import { QueryManager } from '../../../common/query_manager';
 import { IVisualizationContainerProps, SavedVisualization } from '../../../common/types/explorer';
+import { getUserConfigFrom } from '../../../common/utils/visualization_helpers';
 import { getPPLService, preprocessQuery, removeBacktick } from '../../../common/utils';
 import { getDefaultVisConfig } from '../event_analytics/utils';
 import { getVizContainerProps } from './charts/helpers';
@@ -39,7 +40,7 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
       queryMetaData: props.savedVisualization.queryMetaData,
       isMetric,
     };
-    const userConfigs = JSON.parse(metaData.user_configs || metaData.userConfigs || '{}');
+    const userConfigs = getUserConfigFrom(metaData);
     const dataConfig = { ...(userConfigs.dataConfig || {}) };
     const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
     const realTimeParsedStats = isMetric

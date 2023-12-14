@@ -51,6 +51,7 @@ import {
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../common/constants/data_sources';
+import { getUserConfigFrom } from '../../../../common/utils/visualization_helpers';
 
 enum DIRECT_DATA_SOURCE_TYPES {
   DEFAULT_INDEX_PATTERNS = 'DEFAULT_INDEX_PATTERNS',
@@ -247,9 +248,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
     let visConfig = {};
-    const customConfig = objectData.userConfigs
-      ? JSON.parse(objectData.user_configs || objectData.userConfigs)
-      : {};
+    const customConfig = getUserConfigFrom(objectData);
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {

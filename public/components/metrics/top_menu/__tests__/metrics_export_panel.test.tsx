@@ -13,7 +13,7 @@ import {
   sampleMetricsToExport,
   sampleSavedMetric,
   sampleSortedMetricsLayout,
-} from '../../../../../test/metrics_contants';
+} from '../../../../../test/metrics_constants';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';

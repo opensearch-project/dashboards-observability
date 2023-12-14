@@ -16,6 +16,7 @@ import { NEW_SELECTED_QUERY_TAB, TAB_CREATED_TYPE } from '../../../../common/con
 import { SPAN_REGEX } from '../../../../common/constants/shared';
 import { VisualizationType } from '../../../../common/types/custom_panels';
 import { IField } from '../../../../common/types/explorer';
+import { getUserConfigFrom } from '../../../../common/utils/visualization_helpers';
 import { preprocessQuery } from '../../common/query_utils';
 import { fetchVisualizationById } from '../../../components/custom_panels/helpers/utils';
 import {
@@ -221,9 +222,8 @@ export const calculateAvailability = async (
 
     // resolved mismatched use of user_configs/userConfigs.  This fall-back
     // silently loads legacy configs.  They will be stored in new userConfigs upon save.
-    const userConfigs = visData.userConfigs
-      ? JSON.parse(visData.user_configs || visData.userConfigs)
-      : {};
+    const userConfigs = getUserConfigFrom(visData);
+
     // If there are levels, we get the current value
     if (userConfigs.availabilityConfig?.hasOwnProperty('level')) {
       // For every saved visualization with availability levels we push it to visWithAvailability

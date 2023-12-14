@@ -28,6 +28,7 @@ import {
 import { QueryManager } from '../../../../../common/query_manager';
 import { statsChunk } from '../../../../../common/query_manager/ast/types/stats';
 import { IField, SavedQuery, SavedVisualization } from '../../../../../common/types/explorer';
+import { getUserConfigFrom } from '../../../../common/utils/helpers';
 import { AppDispatch } from '../../../../framework/redux/store';
 import { ISavedObjectsClient } from '../../saved_object_client/client_interface';
 import { ObservabilitySavedObject, ObservabilitySavedQuery } from '../../saved_object_client/types';
@@ -201,9 +202,8 @@ export class PPLSavedObjectLoader extends SavedObjectLoaderBase implements ISave
     const { tabId, queryManager, getDefaultVisConfig } = this.loadContext;
     // fill saved user configs
     let visConfig = {};
-    const customConfig = objectData.userConfigs
-      ? JSON.parse(objectData.user_configs || objectData.userConfigs)
-      : {};
+    const customConfig = getUserConfigFrom(objectData);
+
     if (!isEmpty(customConfig.dataConfig) && !isEmpty(customConfig.dataConfig?.series)) {
       visConfig = { ...customConfig };
     } else {
