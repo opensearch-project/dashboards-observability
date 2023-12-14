@@ -12,7 +12,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
     }
   }
 >
-  <Component
+  <MetricsGrid
     chrome={
       Object {
         "addApplicationClass": [MockFunction],
@@ -731,7 +731,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   }
                 }
               >
-                <Component
+                <VisualizationContainer
                   editMode={false}
                   fromTime="now-1d"
                   key="Y4muP4QBiaYaSxpXk7r8"
@@ -913,7 +913,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
-                </Component>
+                </VisualizationContainer>
               </div>
             </GridItem>
             <GridItem
@@ -974,7 +974,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   }
                 }
               >
-                <Component
+                <VisualizationContainer
                   editMode={false}
                   fromTime="now-1d"
                   key="tomAP4QBiaYaSxpXALls"
@@ -1156,7 +1156,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
-                </Component>
+                </VisualizationContainer>
               </div>
             </GridItem>
             <GridItem
@@ -1217,7 +1217,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                   }
                 }
               >
-                <Component
+                <VisualizationContainer
                   catalogVisualization={true}
                   editMode={false}
                   fromTime="now-1d"
@@ -1402,13 +1402,13 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
                       </div>
                     </div>
                   </EuiPanel>
-                </Component>
+                </VisualizationContainer>
               </div>
             </GridItem>
           </div>
         </ReactGridLayout>
       </ResponsiveReactGridLayout>
     </WidthProvider>
-  </Component>
+  </MetricsGrid>
 </Provider>
 `;

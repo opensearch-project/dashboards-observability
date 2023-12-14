@@ -12,7 +12,7 @@ exports[`Panels View Component renders panel view container with visualizations 
     }
   }
 >
-  <Component
+  <CustomPanelView
     chrome={
       Object {
         "addApplicationClass": [MockFunction],
@@ -730,7 +730,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <Component
+                              <AddVisualizationPopover
                                 addVizDisabled={false}
                                 showFlyout={[Function]}
                               >
@@ -849,7 +849,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Component>
+                              </AddVisualizationPopover>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -872,7 +872,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         <div
                           className="euiFlexItem"
                         >
-                          <Component
+                          <Autocomplete
                             append={
                               <EuiLink
                                 aria-label="ppl-info"
@@ -1051,7 +1051,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                 </EuiFormControlLayout>
                               </EuiFieldText>
                             </div>
-                          </Component>
+                          </Autocomplete>
                         </div>
                       </EuiFlexItem>
                       <EuiFlexItem
@@ -1588,7 +1588,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                       className="euiSpacer euiSpacer--l"
                     />
                   </EuiSpacer>
-                  <Component
+                  <EmptyPanelView
                     addVizDisabled={false}
                     showFlyout={[Function]}
                   >
@@ -1666,7 +1666,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <Component
+                              <AddVisualizationPopover
                                 addVizDisabled={false}
                                 showFlyout={[Function]}
                               >
@@ -1785,7 +1785,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Component>
+                              </AddVisualizationPopover>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -1798,8 +1798,8 @@ exports[`Panels View Component renders panel view container with visualizations 
                         />
                       </EuiSpacer>
                     </div>
-                  </Component>
-                  <Component
+                  </EmptyPanelView>
+                  <PanelGrid
                     chrome={
                       Object {
                         "addApplicationClass": [MockFunction],
@@ -2330,7 +2330,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         </ReactGridLayout>
                       </ResponsiveReactGridLayout>
                     </WidthProvider>
-                  </Component>
+                  </PanelGrid>
                 </div>
               </EuiPageContentBody>
             </div>
@@ -2338,7 +2338,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         </div>
       </EuiPage>
     </div>
-  </Component>
+  </CustomPanelView>
 </Provider>
 `;
 
@@ -2354,7 +2354,7 @@ exports[`Panels View Component renders panel view container without visualizatio
     }
   }
 >
-  <Component
+  <CustomPanelView
     chrome={
       Object {
         "addApplicationClass": [MockFunction],
@@ -2952,7 +2952,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <Component
+                              <AddVisualizationPopover
                                 addVizDisabled={false}
                                 showFlyout={[Function]}
                               >
@@ -3066,7 +3066,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Component>
+                              </AddVisualizationPopover>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -3089,7 +3089,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         <div
                           className="euiFlexItem"
                         >
-                          <Component
+                          <Autocomplete
                             append={
                               <EuiLink
                                 aria-label="ppl-info"
@@ -3268,7 +3268,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                 </EuiFormControlLayout>
                               </EuiFieldText>
                             </div>
-                          </Component>
+                          </Autocomplete>
                         </div>
                       </EuiFlexItem>
                       <EuiFlexItem
@@ -3791,7 +3791,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                       className="euiSpacer euiSpacer--l"
                     />
                   </EuiSpacer>
-                  <Component
+                  <EmptyPanelView
                     addVizDisabled={false}
                     showFlyout={[Function]}
                   >
@@ -3869,7 +3869,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <Component
+                              <AddVisualizationPopover
                                 addVizDisabled={false}
                                 showFlyout={[Function]}
                               >
@@ -3983,7 +3983,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                                     </div>
                                   </div>
                                 </EuiPopover>
-                              </Component>
+                              </AddVisualizationPopover>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -3996,8 +3996,8 @@ exports[`Panels View Component renders panel view container without visualizatio
                         />
                       </EuiSpacer>
                     </div>
-                  </Component>
-                  <Component
+                  </EmptyPanelView>
+                  <PanelGrid
                     chrome={
                       Object {
                         "addApplicationClass": [MockFunction],
@@ -4417,7 +4417,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         </ReactGridLayout>
                       </ResponsiveReactGridLayout>
                     </WidthProvider>
-                  </Component>
+                  </PanelGrid>
                 </div>
               </EuiPageContentBody>
             </div>
@@ -4425,6 +4425,6 @@ exports[`Panels View Component renders panel view container without visualizatio
         </div>
       </EuiPage>
     </div>
-  </Component>
+  </CustomPanelView>
 </Provider>
 `;

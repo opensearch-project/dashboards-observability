@@ -12,7 +12,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
     }
   }
 >
-  <Component
+  <TopMenu
     IsTopPanelDisabled={true}
     editMode={true}
     endTime="now"
@@ -1188,7 +1188,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled in 
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </Component>
+  </TopMenu>
 </Provider>
 `;
 
@@ -1204,7 +1204,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
     }
   }
 >
-  <Component
+  <TopMenu
     IsTopPanelDisabled={true}
     editMode={false}
     endTime="now"
@@ -2270,7 +2270,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when disabled wit
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </Component>
+  </TopMenu>
 </Provider>
 `;
 
@@ -2286,7 +2286,7 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
     }
   }
 >
-  <Component
+  <TopMenu
     IsTopPanelDisabled={false}
     editMode={false}
     endTime="now"
@@ -3348,6 +3348,6 @@ exports[`Metrics Top Menu Component renders Top Menu Component when enabled 1`] 
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </Component>
+  </TopMenu>
 </Provider>
 `;

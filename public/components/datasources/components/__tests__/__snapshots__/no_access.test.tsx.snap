@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`No access test Renders no access view of data source 1`] = `
-<Component>
+<NoAccess>
   <EuiPage>
     <div
       className="euiPage euiPage--paddingMedium euiPage--grow"
@@ -159,5 +159,5 @@ exports[`No access test Renders no access view of data source 1`] = `
       </EuiEmptyPrompt>
     </div>
   </EuiPage>
-</Component>
+</NoAccess>
 `;
