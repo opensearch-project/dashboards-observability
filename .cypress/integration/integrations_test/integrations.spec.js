@@ -7,7 +7,7 @@
 
 import {
   TEST_INTEGRATION_INSTANCE, TEST_SAMPLE_INSTANCE,
-} from '../utils/constants';
+} from '../../utils/constants';
 
 let testInstanceSuffix = (Math.random() + 1).toString(36).substring(7);
 let testInstance = `${TEST_INTEGRATION_INSTANCE}_${testInstanceSuffix}`;
@@ -66,7 +66,7 @@ describe('Basic sanity test for integrations plugin', () => {
     moveToAvailableNginxIntegration();
     cy.get('.euiFilterGroup').trigger('mouseover').click();
     cy.get('.euiFilterSelectItem').contains('visualization').click();
-    cy.get('.euiTableRow').should('have.length', 4);//Filters correctly to visualization types
+    cy.get('.euiTableRow').should('have.length', 6);//Filters correctly to visualization types
   })
 });
 
