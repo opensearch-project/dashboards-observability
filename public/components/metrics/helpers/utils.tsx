@@ -36,7 +36,6 @@ export const pplServiceRequestor = (pplService: PPLService, finalQuery: string) 
   return pplService
     .fetch({ query: finalQuery, format: VISUALIZATION })
     .then((res) => {
-      console.log('pplService resolved value', { res });
       return res;
     })
     .catch((error: Error) => {

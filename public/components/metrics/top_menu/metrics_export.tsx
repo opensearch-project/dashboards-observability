@@ -103,7 +103,6 @@ const MetricsExportPopOver = () => {
   }, [osdCoreDashboards, availableObservabilityDashboards]);
 
   useEffect(() => {
-    console.log('effect', { selectedMetrics, selectedMetricsIds });
     if (selectedMetrics && selectedMetricsIds) {
       const metricsArray = selectedMetricsIds.map((id) => selectedMetrics[id]);
       setMetricsToExport(metricsArray);

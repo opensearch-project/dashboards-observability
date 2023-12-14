@@ -176,7 +176,7 @@ describe('Export Metrics Panel Component', () => {
     // Assert
     const saveButton = await screen.findByText(/Save/);
     expect(saveButton).toBeInTheDocument();
-    act(async () => {
+    await act(async () => {
       fireEvent.click(saveButton);
 
       expect(await screen.findByTestId('metrics__querySaveName')).toBeInTheDocument();
