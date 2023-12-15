@@ -20,16 +20,22 @@ import {
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
 import { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import { PPLParsers } from './parsers/ppl_parser';
 
 export class ObservabilityPlugin
-  implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
+  implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart, {
+    assistantDashboards?: {
+      registerMessageParser: () => void
+    }
+  }> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, deps) {
+    const { assistantDashboards } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
@@ -121,6 +127,8 @@ export class ObservabilityPlugin
       },
     }));
 
+    assistantDashboards.registerMessageParser(PPLParsers);
+
     return {};
   }
 
@@ -129,5 +137,5 @@ export class ObservabilityPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }

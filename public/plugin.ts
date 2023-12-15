@@ -79,6 +79,7 @@ import { S3DataSource } from './framework/datasources/s3_datasource';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { DirectSearch } from './components/common/search/sql_search';
 import { Search } from './components/common/search/search';
+import { registerAsssitantDependencies } from './dependencies/register_assistant';
 
 export class ObservabilityPlugin
   implements
@@ -305,6 +306,8 @@ export class ObservabilityPlugin
         },
       },
     });
+
+    registerAsssitantDependencies(setupDeps.assistantDashboards);
 
     // Return methods that should be available to other plugins
     return {};
