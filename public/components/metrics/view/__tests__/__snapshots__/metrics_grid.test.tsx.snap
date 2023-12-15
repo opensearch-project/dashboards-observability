@@ -12,7 +12,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
     }
   }
 >
-  <Component
+  <Connect(Component)
     chrome={
       Object {
         "addApplicationClass": [MockFunction],
@@ -26,165 +26,7 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         "getCustomNavLink$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHelpExtension$": [MockFunction],
-        "getIsNavDrawerLocked$": [MockFunction] {
-          "calls": Array [
-            Array [],
-            Array [],
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              },
-            },
-            Object {
-              "type": "return",
-              "value": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              },
-            },
-            Object {
-              "type": "return",
-              "value": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              },
-            },
-          ],
-        },
+        "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
         "logos": Object {
           "AnimatedMark": Object {
@@ -292,7 +134,11 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         Object {
           "h": 2,
           "id": "Y4muP4QBiaYaSxpXk7r8",
-          "metricType": "savedCustomMetric",
+          "query": Object {
+            "aggregation": "avg",
+            "attributesGroupBy": Array [],
+            "type": "savedCustomMetric",
+          },
           "savedVisualizationId": "Y4muP4QBiaYaSxpXk7r8",
           "w": 12,
           "x": 0,
@@ -310,7 +156,11 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         Object {
           "h": 2,
           "id": "prometheus.process_resident_memory_bytes",
-          "metricType": "prometheusMetric",
+          "query": Object {
+            "aggregation": "avg",
+            "attributesGroupBy": Array [],
+            "type": "prometheusMetric",
+          },
           "savedVisualizationId": "prometheus.process_resident_memory_bytes",
           "w": 12,
           "x": 0,
@@ -318,1097 +168,301 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         },
       ]
     }
-    setEditActionType={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            "",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setEditActionType={[MockFunction]}
     setPanelVisualizations={[MockFunction]}
     spanParam="1h"
     startTime="now-30m"
   >
-    <WidthProvider
-      breakpoints={
+    <Component
+      allMetrics={Object {}}
+      chrome={
         Object {
-          "lg": 1200,
-          "md": 996,
-          "sm": 768,
-          "xs": 480,
-          "xxs": 0,
+          "addApplicationClass": [MockFunction],
+          "docTitle": Object {
+            "change": [MockFunction],
+            "reset": [MockFunction],
+          },
+          "getApplicationClasses$": [MockFunction],
+          "getBadge$": [MockFunction],
+          "getBreadcrumbs$": [MockFunction],
+          "getCustomNavLink$": [MockFunction],
+          "getHeaderComponent": [MockFunction],
+          "getHelpExtension$": [MockFunction],
+          "getIsNavDrawerLocked$": [MockFunction],
+          "getIsVisible$": [MockFunction],
+          "logos": Object {
+            "AnimatedMark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_spinner_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+            },
+            "Application": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+            },
+            "CenterMark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+            },
+            "Mark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_mark_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_mark_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_light.svg",
+            },
+            "OpenSearch": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_light.svg",
+            },
+            "colorScheme": "light",
+          },
+          "navControls": Object {
+            "getCenter$": [MockFunction],
+            "getLeft$": [MockFunction],
+            "getRight$": [MockFunction],
+            "registerCenter": [MockFunction],
+            "registerLeft": [MockFunction],
+            "registerRight": [MockFunction],
+          },
+          "navLinks": Object {
+            "enableForcedAppSwitcherNavigation": [MockFunction],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
+            "getForceAppSwitcherNavigation$": [MockFunction],
+            "getNavLinks$": [MockFunction],
+            "has": [MockFunction],
+            "showOnly": [MockFunction],
+            "update": [MockFunction],
+          },
+          "recentlyAccessed": Object {
+            "add": [MockFunction],
+            "get": [MockFunction],
+            "get$": [MockFunction],
+          },
+          "removeApplicationClass": [MockFunction],
+          "setAppTitle": [MockFunction],
+          "setBadge": [MockFunction],
+          "setBreadcrumbs": [MockFunction],
+          "setCustomNavLink": [MockFunction],
+          "setHelpExtension": [MockFunction],
+          "setHelpSupportUrl": [MockFunction],
+          "setIsVisible": [MockFunction],
         }
       }
-      className="layout full-width"
-      cols={
+      dateSpanFilter={
         Object {
-          "lg": 12,
-          "md": 12,
-          "sm": 12,
-          "xs": 1,
-          "xxs": 1,
+          "end": "now",
+          "recentlyUsedRanges": Array [],
+          "resolution": "h",
+          "span": 1,
+          "start": "now-1d",
         }
       }
-      layouts={
-        Object {
-          "lg": Array [
-            Object {
-              "h": 2,
-              "i": "Y4muP4QBiaYaSxpXk7r8",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 0,
+      editActionType="save"
+      editMode={false}
+      endTime="now"
+      moveMetric={[Function]}
+      moveToEvents={[MockFunction]}
+      onRefresh={true}
+      panelVisualizations={
+        Array [
+          Object {
+            "h": 2,
+            "id": "Y4muP4QBiaYaSxpXk7r8",
+            "query": Object {
+              "aggregation": "avg",
+              "attributesGroupBy": Array [],
+              "type": "savedCustomMetric",
             },
-            Object {
-              "h": 2,
-              "i": "tomAP4QBiaYaSxpXALls",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 2,
+            "savedVisualizationId": "Y4muP4QBiaYaSxpXk7r8",
+            "w": 12,
+            "x": 0,
+            "y": 0,
+          },
+          Object {
+            "h": 2,
+            "id": "tomAP4QBiaYaSxpXALls",
+            "metricType": "savedCustomMetric",
+            "savedVisualizationId": "tomAP4QBiaYaSxpXALls",
+            "w": 12,
+            "x": 0,
+            "y": 2,
+          },
+          Object {
+            "h": 2,
+            "id": "prometheus.process_resident_memory_bytes",
+            "query": Object {
+              "aggregation": "avg",
+              "attributesGroupBy": Array [],
+              "type": "prometheusMetric",
             },
-            Object {
-              "h": 2,
-              "i": "prometheus.process_resident_memory_bytes",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 4,
-            },
-          ],
-          "md": Array [
-            Object {
-              "h": 2,
-              "i": "Y4muP4QBiaYaSxpXk7r8",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 0,
-            },
-            Object {
-              "h": 2,
-              "i": "tomAP4QBiaYaSxpXALls",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 2,
-            },
-            Object {
-              "h": 2,
-              "i": "prometheus.process_resident_memory_bytes",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 4,
-            },
-          ],
-          "sm": Array [
-            Object {
-              "h": 2,
-              "i": "Y4muP4QBiaYaSxpXk7r8",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 0,
-            },
-            Object {
-              "h": 2,
-              "i": "tomAP4QBiaYaSxpXALls",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 2,
-            },
-            Object {
-              "h": 2,
-              "i": "prometheus.process_resident_memory_bytes",
-              "maxW": 12,
-              "minW": 12,
-              "static": true,
-              "w": 12,
-              "x": 0,
-              "y": 4,
-            },
-          ],
-        }
+            "savedVisualizationId": "prometheus.process_resident_memory_bytes",
+            "w": 12,
+            "x": 0,
+            "y": 4,
+          },
+        ]
       }
-      measureBeforeMount={false}
-      onLayoutChange={[Function]}
+      refresh={0}
+      selectedMetrics={Object {}}
+      selectedMetricsIds={Array []}
+      setEditActionType={[MockFunction]}
+      setPanelVisualizations={[MockFunction]}
+      spanParam="1h"
+      startTime="now-30m"
     >
-      <ResponsiveReactGridLayout
-        breakpoints={
-          Object {
-            "lg": 1200,
-            "md": 996,
-            "sm": 768,
-            "xs": 480,
-            "xxs": 0,
-          }
-        }
-        className="layout full-width"
-        cols={
-          Object {
-            "lg": 12,
-            "md": 12,
-            "sm": 12,
-            "xs": 1,
-            "xxs": 1,
-          }
-        }
-        layouts={
-          Object {
-            "lg": Array [
-              Object {
-                "h": 2,
-                "i": "Y4muP4QBiaYaSxpXk7r8",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 0,
-              },
-              Object {
-                "h": 2,
-                "i": "tomAP4QBiaYaSxpXALls",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 2,
-              },
-              Object {
-                "h": 2,
-                "i": "prometheus.process_resident_memory_bytes",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 4,
-              },
-            ],
-            "md": Array [
-              Object {
-                "h": 2,
-                "i": "Y4muP4QBiaYaSxpXk7r8",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 0,
-              },
-              Object {
-                "h": 2,
-                "i": "tomAP4QBiaYaSxpXALls",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 2,
-              },
-              Object {
-                "h": 2,
-                "i": "prometheus.process_resident_memory_bytes",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 4,
-              },
-            ],
-            "sm": Array [
-              Object {
-                "h": 2,
-                "i": "Y4muP4QBiaYaSxpXk7r8",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 0,
-              },
-              Object {
-                "h": 2,
-                "i": "tomAP4QBiaYaSxpXALls",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 2,
-              },
-              Object {
-                "h": 2,
-                "i": "prometheus.process_resident_memory_bytes",
-                "maxW": 12,
-                "minW": 12,
-                "static": true,
-                "w": 12,
-                "x": 0,
-                "y": 4,
-              },
-            ],
-          }
-        }
-        onBreakpointChange={[Function]}
-        onLayoutChange={[Function]}
-        onWidthChange={[Function]}
-        width={0}
+      <section
+        className="metricsGrid"
       >
-        <ReactGridLayout
-          autoSize={true}
-          className="layout full-width"
-          cols={1}
-          compactType="vertical"
-          containerPadding={null}
-          draggableCancel=""
-          draggableHandle=""
-          isDraggable={true}
-          isResizable={true}
-          layout={
-            Array [
-              Object {
-                "h": 2,
-                "i": "Y4muP4QBiaYaSxpXk7r8",
-                "isDraggable": undefined,
-                "isResizable": undefined,
-                "maxH": undefined,
-                "maxW": 12,
-                "minH": undefined,
-                "minW": 12,
-                "moved": false,
-                "static": true,
-                "w": 1,
-                "x": 0,
-                "y": 0,
-              },
-              Object {
-                "h": 2,
-                "i": "tomAP4QBiaYaSxpXALls",
-                "isDraggable": undefined,
-                "isResizable": undefined,
-                "maxH": undefined,
-                "maxW": 12,
-                "minH": undefined,
-                "minW": 12,
-                "moved": false,
-                "static": true,
-                "w": 1,
-                "x": 0,
-                "y": 2,
-              },
-              Object {
-                "h": 2,
-                "i": "prometheus.process_resident_memory_bytes",
-                "isDraggable": undefined,
-                "isResizable": undefined,
-                "maxH": undefined,
-                "maxW": 12,
-                "minH": undefined,
-                "minW": 12,
-                "moved": false,
-                "static": true,
-                "w": 1,
-                "x": 0,
-                "y": 4,
-              },
-            ]
-          }
-          margin={
-            Array [
-              10,
-              10,
-            ]
-          }
-          maxRows={Infinity}
-          onDrag={[Function]}
-          onDragStart={[Function]}
-          onDragStop={[Function]}
-          onLayoutChange={[Function]}
-          onResize={[Function]}
-          onResizeStart={[Function]}
-          onResizeStop={[Function]}
-          preventCollision={false}
-          rowHeight={150}
-          style={Object {}}
-          useCSSTransforms={true}
-          verticalCompact={true}
-          width={0}
+        <EuiDragDropContext
+          onDragEnd={[Function]}
         >
-          <div
-            className="react-grid-layout layout full-width"
-            style={
-              Object {
-                "height": "970px",
-              }
-            }
+          <DragDropContext
+            onDragEnd={[Function]}
+            onDragStart={[Function]}
           >
-            <GridItem
-              cancel=""
-              className=""
-              cols={1}
-              containerPadding={
-                Array [
-                  10,
-                  10,
-                ]
-              }
-              containerWidth={0}
-              h={2}
-              handle=""
-              i="Y4muP4QBiaYaSxpXk7r8"
-              isDraggable={false}
-              isResizable={false}
-              key=".$Y4muP4QBiaYaSxpXk7r8"
-              margin={
-                Array [
-                  10,
-                  10,
-                ]
-              }
-              maxH={Infinity}
-              maxRows={Infinity}
-              maxW={12}
-              minH={1}
-              minW={12}
-              onDrag={[Function]}
-              onDragStart={[Function]}
-              onDragStop={[Function]}
-              onResize={[Function]}
-              onResizeStart={[Function]}
-              onResizeStop={[Function]}
-              rowHeight={150}
-              static={true}
-              useCSSTransforms={true}
-              usePercentages={false}
-              w={1}
-              x={0}
-              y={0}
-            >
-              <div
-                className="react-grid-item static cssTransforms"
-                key="Y4muP4QBiaYaSxpXk7r8"
-                style={
-                  Object {
-                    "MozTransform": "translate(10px,10px)",
-                    "OTransform": "translate(10px,10px)",
-                    "WebkitTransform": "translate(10px,10px)",
-                    "height": "310px",
-                    "msTransform": "translate(10px,10px)",
-                    "position": "absolute",
-                    "transform": "translate(10px,10px)",
-                    "width": "-20px",
-                  }
-                }
+            <ErrorBoundary>
+              <App
+                contextId="0"
+                dragHandleUsageInstructions="
+  Press space bar to start a drag.
+  When dragging you can use the arrow keys to move the item around and escape to cancel.
+  Some screen readers may require you to be in focus mode or to use your pass through key
+"
+                onDragEnd={[Function]}
+                onDragStart={[Function]}
+                setCallbacks={[Function]}
               >
-                <Component
-                  editMode={false}
-                  fromTime="now-30m"
-                  key="Y4muP4QBiaYaSxpXk7r8"
-                  onEditClick={[MockFunction]}
-                  onRefresh={true}
-                  pplFilterValue=""
-                  removeVisualization={[Function]}
-                  savedVisualizationId="Y4muP4QBiaYaSxpXk7r8"
-                  spanParam="1h"
-                  toTime="now"
-                  usedInNotebooks={true}
-                  visualizationId="Y4muP4QBiaYaSxpXk7r8"
+                <Provider
+                  context={
+                    Object {
+                      "$$typeof": Symbol(react.context),
+                      "Consumer": Object {
+                        "$$typeof": Symbol(react.context),
+                        "_calculateChangedBits": null,
+                        "_context": [Circular],
+                      },
+                      "Provider": Object {
+                        "$$typeof": Symbol(react.provider),
+                        "_context": [Circular],
+                      },
+                      "_calculateChangedBits": null,
+                      "_currentRenderer": Object {},
+                      "_currentRenderer2": null,
+                      "_currentValue": null,
+                      "_currentValue2": null,
+                      "_threadCount": 0,
+                    }
+                  }
+                  store={
+                    Object {
+                      "dispatch": [Function],
+                      "getState": [Function],
+                      "replaceReducer": [Function],
+                      "subscribe": [Function],
+                      Symbol(Symbol.observable): [Function],
+                    }
+                  }
                 >
-                  <EuiPanel
-                    className="panel-full-width"
-                    data-test-subj="VisualizationPanel"
-                    grow={false}
+                  <EuiDroppable
+                    droppableId="DROPPABLE_AREA_BARE"
                   >
-                    <div
-                      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
-                      data-test-subj="VisualizationPanel"
+                    <Connect(Droppable)
+                      direction="vertical"
+                      droppableId="DROPPABLE_AREA_BARE"
+                      getContainerForClone={[Function]}
+                      ignoreContainerClipping={false}
+                      isCombineEnabled={false}
+                      isDropDisabled={false}
+                      mode="standard"
+                      renderClone={null}
+                      type="EUI_DEFAULT"
                     >
-                      <div
-                        className=""
+                      <Droppable
+                        direction="vertical"
+                        droppableId="DROPPABLE_AREA_BARE"
+                        getContainerForClone={[Function]}
+                        ignoreContainerClipping={false}
+                        isCombineEnabled={false}
+                        isDropDisabled={false}
+                        mode="standard"
+                        placeholder={null}
+                        renderClone={null}
+                        shouldAnimatePlaceholder={false}
+                        snapshot={
+                          Object {
+                            "draggingFromThisWith": null,
+                            "draggingOverWith": null,
+                            "isDraggingOver": false,
+                            "isUsingPlaceholder": false,
+                          }
+                        }
+                        type="EUI_DEFAULT"
+                        updateViewportMaxScroll={[Function]}
+                        useClone={null}
                       >
-                        <EuiFlexGroup
-                          justifyContent="spaceBetween"
+                        <div
+                          className="euiDroppable euiDroppable--noGrow"
+                          data-rbd-droppable-context-id="0"
+                          data-rbd-droppable-id="DROPPABLE_AREA_BARE"
+                          data-test-subj="droppable"
                         >
                           <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            className="euiDroppable__placeholder"
                           >
-                            <EuiFlexItem
-                              style={
-                                Object {
-                                  "width": "35%",
-                                }
-                              }
-                            >
-                              <div
-                                className="euiFlexItem"
-                                style={
-                                  Object {
-                                    "width": "35%",
-                                  }
-                                }
-                              >
-                                <EuiText
-                                  className="panels-title-text"
-                                  grow={false}
-                                >
-                                  <div
-                                    className="euiText euiText--medium panels-title-text euiText--constrainedWidth"
-                                  >
-                                    <EuiToolTip
-                                      content=""
-                                      delay="long"
-                                      position="top"
-                                    >
-                                      <span
-                                        className="euiToolTipAnchor"
-                                        onKeyUp={[Function]}
-                                        onMouseOut={[Function]}
-                                        onMouseOver={[Function]}
-                                      >
-                                        <h5
-                                          data-test-subj="visualizationHeader"
-                                          onBlur={[Function]}
-                                          onFocus={[Function]}
-                                        />
-                                      </span>
-                                    </EuiToolTip>
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              className="visualization-action-button"
-                              grow={false}
-                            >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
-                              >
-                                <EuiPopover
-                                  anchorPosition="downLeft"
-                                  button={
-                                    <EuiButtonIcon
-                                      aria-label="actionMenuButton"
-                                      iconType="boxesHorizontal"
-                                      onClick={[Function]}
-                                    />
-                                  }
-                                  closePopover={[Function]}
-                                  display="inlineBlock"
-                                  hasArrow={true}
-                                  isOpen={false}
-                                  ownFocus={true}
-                                  panelPaddingSize="m"
-                                >
-                                  <div
-                                    className="euiPopover euiPopover--anchorDownLeft"
-                                  >
-                                    <div
-                                      className="euiPopover__anchor"
-                                    >
-                                      <EuiButtonIcon
-                                        aria-label="actionMenuButton"
-                                        iconType="boxesHorizontal"
-                                        onClick={[Function]}
-                                      >
-                                        <button
-                                          aria-label="actionMenuButton"
-                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                          disabled={false}
-                                          onClick={[Function]}
-                                          type="button"
-                                        >
-                                          <EuiIcon
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            size="m"
-                                            type="boxesHorizontal"
-                                          >
-                                            <EuiIconEmpty
-                                              aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                              focusable="false"
-                                              role="img"
-                                              style={null}
-                                            >
-                                              <svg
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                                focusable="false"
-                                                height={16}
-                                                role="img"
-                                                style={null}
-                                                viewBox="0 0 16 16"
-                                                width={16}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              />
-                                            </EuiIconEmpty>
-                                          </EuiIcon>
-                                        </button>
-                                      </EuiButtonIcon>
-                                    </div>
-                                  </div>
-                                </EuiPopover>
-                              </div>
-                            </EuiFlexItem>
+                            <AnimateInOut
+                              on={null}
+                              shouldAnimate={false}
+                            />
                           </div>
-                        </EuiFlexGroup>
-                      </div>
-                      <div
-                        className="visualization-div"
-                      >
-                        <EuiLoadingChart
-                          className="visualization-loading-chart"
-                          mono={true}
-                          size="xl"
-                        >
-                          <span
-                            className="euiLoadingChart euiLoadingChart--mono visualization-loading-chart euiLoadingChart--xLarge"
-                          >
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                          </span>
-                        </EuiLoadingChart>
-                      </div>
-                    </div>
-                  </EuiPanel>
-                </Component>
-              </div>
-            </GridItem>
-            <GridItem
-              cancel=""
-              className=""
-              cols={1}
-              containerPadding={
-                Array [
-                  10,
-                  10,
-                ]
-              }
-              containerWidth={0}
-              h={2}
-              handle=""
-              i="tomAP4QBiaYaSxpXALls"
-              isDraggable={false}
-              isResizable={false}
-              key=".$tomAP4QBiaYaSxpXALls"
-              margin={
-                Array [
-                  10,
-                  10,
-                ]
-              }
-              maxH={Infinity}
-              maxRows={Infinity}
-              maxW={12}
-              minH={1}
-              minW={12}
-              onDrag={[Function]}
-              onDragStart={[Function]}
-              onDragStop={[Function]}
-              onResize={[Function]}
-              onResizeStart={[Function]}
-              onResizeStop={[Function]}
-              rowHeight={150}
-              static={true}
-              useCSSTransforms={true}
-              usePercentages={false}
-              w={1}
-              x={0}
-              y={2}
-            >
-              <div
-                className="react-grid-item static cssTransforms"
-                key="tomAP4QBiaYaSxpXALls"
-                style={
-                  Object {
-                    "MozTransform": "translate(10px,330px)",
-                    "OTransform": "translate(10px,330px)",
-                    "WebkitTransform": "translate(10px,330px)",
-                    "height": "310px",
-                    "msTransform": "translate(10px,330px)",
-                    "position": "absolute",
-                    "transform": "translate(10px,330px)",
-                    "width": "-20px",
-                  }
-                }
-              >
-                <Component
-                  editMode={false}
-                  fromTime="now-30m"
-                  key="tomAP4QBiaYaSxpXALls"
-                  onEditClick={[MockFunction]}
-                  onRefresh={true}
-                  pplFilterValue=""
-                  removeVisualization={[Function]}
-                  savedVisualizationId="tomAP4QBiaYaSxpXALls"
-                  spanParam="1h"
-                  toTime="now"
-                  usedInNotebooks={true}
-                  visualizationId="tomAP4QBiaYaSxpXALls"
-                >
-                  <EuiPanel
-                    className="panel-full-width"
-                    data-test-subj="VisualizationPanel"
-                    grow={false}
-                  >
-                    <div
-                      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
-                      data-test-subj="VisualizationPanel"
-                    >
-                      <div
-                        className=""
-                      >
-                        <EuiFlexGroup
-                          justifyContent="spaceBetween"
-                        >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                          >
-                            <EuiFlexItem
-                              style={
-                                Object {
-                                  "width": "35%",
-                                }
-                              }
-                            >
-                              <div
-                                className="euiFlexItem"
-                                style={
-                                  Object {
-                                    "width": "35%",
-                                  }
-                                }
-                              >
-                                <EuiText
-                                  className="panels-title-text"
-                                  grow={false}
-                                >
-                                  <div
-                                    className="euiText euiText--medium panels-title-text euiText--constrainedWidth"
-                                  >
-                                    <EuiToolTip
-                                      content=""
-                                      delay="long"
-                                      position="top"
-                                    >
-                                      <span
-                                        className="euiToolTipAnchor"
-                                        onKeyUp={[Function]}
-                                        onMouseOut={[Function]}
-                                        onMouseOver={[Function]}
-                                      >
-                                        <h5
-                                          data-test-subj="visualizationHeader"
-                                          onBlur={[Function]}
-                                          onFocus={[Function]}
-                                        />
-                                      </span>
-                                    </EuiToolTip>
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              className="visualization-action-button"
-                              grow={false}
-                            >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
-                              >
-                                <EuiPopover
-                                  anchorPosition="downLeft"
-                                  button={
-                                    <EuiButtonIcon
-                                      aria-label="actionMenuButton"
-                                      iconType="boxesHorizontal"
-                                      onClick={[Function]}
-                                    />
-                                  }
-                                  closePopover={[Function]}
-                                  display="inlineBlock"
-                                  hasArrow={true}
-                                  isOpen={false}
-                                  ownFocus={true}
-                                  panelPaddingSize="m"
-                                >
-                                  <div
-                                    className="euiPopover euiPopover--anchorDownLeft"
-                                  >
-                                    <div
-                                      className="euiPopover__anchor"
-                                    >
-                                      <EuiButtonIcon
-                                        aria-label="actionMenuButton"
-                                        iconType="boxesHorizontal"
-                                        onClick={[Function]}
-                                      >
-                                        <button
-                                          aria-label="actionMenuButton"
-                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                          disabled={false}
-                                          onClick={[Function]}
-                                          type="button"
-                                        >
-                                          <EuiIcon
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            size="m"
-                                            type="boxesHorizontal"
-                                          >
-                                            <EuiIconEmpty
-                                              aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                              focusable="false"
-                                              role="img"
-                                              style={null}
-                                            >
-                                              <svg
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                                focusable="false"
-                                                height={16}
-                                                role="img"
-                                                style={null}
-                                                viewBox="0 0 16 16"
-                                                width={16}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              />
-                                            </EuiIconEmpty>
-                                          </EuiIcon>
-                                        </button>
-                                      </EuiButtonIcon>
-                                    </div>
-                                  </div>
-                                </EuiPopover>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </div>
-                      <div
-                        className="visualization-div"
-                      >
-                        <EuiLoadingChart
-                          className="visualization-loading-chart"
-                          mono={true}
-                          size="xl"
-                        >
-                          <span
-                            className="euiLoadingChart euiLoadingChart--mono visualization-loading-chart euiLoadingChart--xLarge"
-                          >
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                          </span>
-                        </EuiLoadingChart>
-                      </div>
-                    </div>
-                  </EuiPanel>
-                </Component>
-              </div>
-            </GridItem>
-            <GridItem
-              cancel=""
-              className=""
-              cols={1}
-              containerPadding={
-                Array [
-                  10,
-                  10,
-                ]
-              }
-              containerWidth={0}
-              h={2}
-              handle=""
-              i="prometheus.process_resident_memory_bytes"
-              isDraggable={false}
-              isResizable={false}
-              key=".$prometheus.process_resident_memory_bytes"
-              margin={
-                Array [
-                  10,
-                  10,
-                ]
-              }
-              maxH={Infinity}
-              maxRows={Infinity}
-              maxW={12}
-              minH={1}
-              minW={12}
-              onDrag={[Function]}
-              onDragStart={[Function]}
-              onDragStop={[Function]}
-              onResize={[Function]}
-              onResizeStart={[Function]}
-              onResizeStop={[Function]}
-              rowHeight={150}
-              static={true}
-              useCSSTransforms={true}
-              usePercentages={false}
-              w={1}
-              x={0}
-              y={4}
-            >
-              <div
-                className="react-grid-item static cssTransforms"
-                key="prometheus.process_resident_memory_bytes"
-                style={
-                  Object {
-                    "MozTransform": "translate(10px,650px)",
-                    "OTransform": "translate(10px,650px)",
-                    "WebkitTransform": "translate(10px,650px)",
-                    "height": "310px",
-                    "msTransform": "translate(10px,650px)",
-                    "position": "absolute",
-                    "transform": "translate(10px,650px)",
-                    "width": "-20px",
-                  }
-                }
-              >
-                <Component
-                  catalogVisualization={true}
-                  editMode={false}
-                  fromTime="now-30m"
-                  key="prometheus.process_resident_memory_bytes"
-                  onEditClick={[MockFunction]}
-                  onRefresh={true}
-                  pplFilterValue=""
-                  removeVisualization={[Function]}
-                  savedVisualizationId="prometheus.process_resident_memory_bytes"
-                  spanParam="1h"
-                  toTime="now"
-                  usedInNotebooks={true}
-                  visualizationId="prometheus.process_resident_memory_bytes"
-                >
-                  <EuiPanel
-                    className="panel-full-width"
-                    data-test-subj="prometheus.process_resident_memory_bytesVisualizationPanel"
-                    grow={false}
-                  >
-                    <div
-                      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width"
-                      data-test-subj="prometheus.process_resident_memory_bytesVisualizationPanel"
-                    >
-                      <div
-                        className=""
-                      >
-                        <EuiFlexGroup
-                          justifyContent="spaceBetween"
-                        >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                          >
-                            <EuiFlexItem
-                              style={
-                                Object {
-                                  "width": "35%",
-                                }
-                              }
-                            >
-                              <div
-                                className="euiFlexItem"
-                                style={
-                                  Object {
-                                    "width": "35%",
-                                  }
-                                }
-                              >
-                                <EuiText
-                                  className="panels-title-text"
-                                  grow={false}
-                                >
-                                  <div
-                                    className="euiText euiText--medium panels-title-text euiText--constrainedWidth"
-                                  >
-                                    <EuiToolTip
-                                      content="prometheus.process_resident_memory_bytes"
-                                      delay="long"
-                                      position="top"
-                                    >
-                                      <span
-                                        className="euiToolTipAnchor"
-                                        onKeyUp={[Function]}
-                                        onMouseOut={[Function]}
-                                        onMouseOver={[Function]}
-                                      >
-                                        <h5
-                                          data-test-subj="visualizationHeader"
-                                          onBlur={[Function]}
-                                          onFocus={[Function]}
-                                        >
-                                          prometheus.process_resident_memory_bytes
-                                        </h5>
-                                      </span>
-                                    </EuiToolTip>
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              className="visualization-action-button"
-                              grow={false}
-                            >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
-                              >
-                                <EuiPopover
-                                  anchorPosition="downLeft"
-                                  button={
-                                    <EuiButtonIcon
-                                      aria-label="actionMenuButton"
-                                      iconType="boxesHorizontal"
-                                      onClick={[Function]}
-                                    />
-                                  }
-                                  closePopover={[Function]}
-                                  display="inlineBlock"
-                                  hasArrow={true}
-                                  isOpen={false}
-                                  ownFocus={true}
-                                  panelPaddingSize="m"
-                                >
-                                  <div
-                                    className="euiPopover euiPopover--anchorDownLeft"
-                                  >
-                                    <div
-                                      className="euiPopover__anchor"
-                                    >
-                                      <EuiButtonIcon
-                                        aria-label="actionMenuButton"
-                                        iconType="boxesHorizontal"
-                                        onClick={[Function]}
-                                      >
-                                        <button
-                                          aria-label="actionMenuButton"
-                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                          disabled={false}
-                                          onClick={[Function]}
-                                          type="button"
-                                        >
-                                          <EuiIcon
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            size="m"
-                                            type="boxesHorizontal"
-                                          >
-                                            <EuiIconEmpty
-                                              aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                              focusable="false"
-                                              role="img"
-                                              style={null}
-                                            >
-                                              <svg
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                                focusable="false"
-                                                height={16}
-                                                role="img"
-                                                style={null}
-                                                viewBox="0 0 16 16"
-                                                width={16}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              />
-                                            </EuiIconEmpty>
-                                          </EuiIcon>
-                                        </button>
-                                      </EuiButtonIcon>
-                                    </div>
-                                  </div>
-                                </EuiPopover>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </div>
-                      <div
-                        className="visualization-div"
-                      >
-                        <EuiLoadingChart
-                          className="visualization-loading-chart"
-                          mono={true}
-                          size="xl"
-                        >
-                          <span
-                            className="euiLoadingChart euiLoadingChart--mono visualization-loading-chart euiLoadingChart--xLarge"
-                          >
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                            <span
-                              className="euiLoadingChart__bar"
-                            />
-                          </span>
-                        </EuiLoadingChart>
-                      </div>
-                    </div>
-                  </EuiPanel>
-                </Component>
-              </div>
-            </GridItem>
-          </div>
-        </ReactGridLayout>
-      </ResponsiveReactGridLayout>
-    </WidthProvider>
-  </Component>
+                        </div>
+                      </Droppable>
+                    </Connect(Droppable)>
+                  </EuiDroppable>
+                </Provider>
+              </App>
+            </ErrorBoundary>
+          </DragDropContext>
+        </EuiDragDropContext>
+      </section>
+    </Component>
+  </Connect(Component)>
 </Provider>
 `;

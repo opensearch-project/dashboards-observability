@@ -13,33 +13,53 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
   }
 >
   <Component
-    http={[MockFunction]}
-    selectedPanelOptions={Array []}
-    setSelectedPanelOptions={[MockFunction]}
-    setVisualizationsMetaData={[MockFunction]}
-    sortedMetricsLayout={
+    availableDashboards={
       Array [
         Object {
-          "h": 2,
-          "id": "Y4muP4QBiaYaSxpXk7r8",
-          "metricType": "savedCustomMetric",
-          "savedVisualizationId": "Y4muP4QBiaYaSxpXk7r8",
-          "w": 12,
-          "x": 0,
-          "y": 0,
+          "attributes": Object {
+            "title": "[Flights] Global Flight Dashboard",
+          },
+          "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+          "title": "[Flights] Global Flight Dashboard",
+          "type": "dashboard",
         },
         Object {
-          "h": 2,
-          "id": "prometheus.process_resident_memory_bytes",
-          "metricType": "prometheusMetric",
-          "savedVisualizationId": "prometheus.process_resident_memory_bytes",
-          "w": 12,
-          "x": 0,
-          "y": 2,
+          "id": "fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
+          "name": "[Logs] Web traffic Panel",
+          "objectId": "observability-panel:fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
+          "savedObject": true,
+          "title": "[Logs] Web traffic Panel",
+          "type": "observability-panel",
         },
       ]
     }
-    visualizationsMetaData={Array []}
+    metricsToExport={
+      Array [
+        Object {
+          "aggregation": "avg",
+          "attributesGroupBy": Array [],
+          "availableAttributes": Array [],
+          "catalog": "my_prometheus",
+          "catalogSourceName": "my_prometheus",
+          "catalogTableName": "go_memstats_alloc_bytes",
+          "id": "my_prometheus.go_memstats_alloc_bytes",
+          "index": "my_prometheus.go_memstats_alloc_bytes",
+          "name": "my_prometheus.go_memstats_alloc_bytes",
+          "recentlyCreated": false,
+          "sub_type": "promqlmetric",
+          "type": "line",
+        },
+        Object {
+          "catalog": "CUSTOM_METRICS",
+          "id": "observability-visualization:84c73aa0-84aa-11ee-96e0-7bfa0b41d0fc",
+          "name": "my_prometheus.go_memstats_alloc_bytes_total",
+          "query": "source = my_prometheus.query_range('sum by(instance,job) (go_memstats_alloc_bytes_total)', 1700071440, 1700157840, '1h')",
+          "recentlyCreated": false,
+          "savedVisualizationId": "observability-visualization:84c73aa0-84aa-11ee-96e0-7bfa0b41d0fc",
+          "type": "line",
+        },
+      ]
+    }
   >
     <div
       style={
@@ -93,7 +113,32 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
               onBlur={[Function]}
               onChange={[Function]}
               onFocus={[Function]}
-              options={Array []}
+              options={
+                Array [
+                  Object {
+                    "label": "[Flights] Global Flight Dashboard",
+                    "panel": Object {
+                      "attributes": Object {
+                        "title": "[Flights] Global Flight Dashboard",
+                      },
+                      "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+                      "title": "[Flights] Global Flight Dashboard",
+                      "type": "dashboard",
+                    },
+                  },
+                  Object {
+                    "label": "[Logs] Web traffic Panel",
+                    "panel": Object {
+                      "id": "fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
+                      "name": "[Logs] Web traffic Panel",
+                      "objectId": "observability-panel:fdf2bb60-7a5b-11ee-929a-5f1a2dc08039",
+                      "savedObject": true,
+                      "title": "[Logs] Web traffic Panel",
+                      "type": "observability-panel",
+                    },
+                  },
+                ]
+              }
               placeholder="Select dashboards/applications"
               selectedOptions={Array []}
               singleSelection={false}
@@ -308,6 +353,203 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
           </div>
         </div>
       </EuiFormRow>
+      <div
+        style={
+          Object {
+            "maxHeight": "30vh",
+            "overflowX": "hidden",
+            "overflowY": "scroll",
+            "width": "auto",
+          }
+        }
+      >
+        <EuiForm
+          component="form"
+          key="save-panel-id-0"
+        >
+          <form
+            className="euiForm"
+          >
+            <EuiFlexGroup>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <EuiFormRow
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={false}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      label="Metric Name #1"
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            className="euiFormRow__label"
+                            htmlFor="random_html_id"
+                            isFocused={false}
+                            type="label"
+                          >
+                            <label
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="random_html_id"
+                            >
+                              Metric Name #1
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFieldText
+                            data-test-subj="metrics__querySaveName"
+                            id="random_html_id"
+                            key="metric-name-input-id-0"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            value="my_prometheus.go_memstats_alloc_bytes"
+                          >
+                            <EuiFormControlLayout
+                              fullWidth={false}
+                              inputId="random_html_id"
+                            >
+                              <div
+                                className="euiFormControlLayout"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      className="euiFieldText"
+                                      data-test-subj="metrics__querySaveName"
+                                      id="random_html_id"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      type="text"
+                                      value="my_prometheus.go_memstats_alloc_bytes"
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </form>
+        </EuiForm>
+        <EuiForm
+          component="form"
+          key="save-panel-id-1"
+        >
+          <form
+            className="euiForm"
+          >
+            <EuiFlexGroup>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <EuiFormRow
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={false}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      label="Metric Name #2"
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow"
+                        id="random_html_id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            className="euiFormRow__label"
+                            htmlFor="random_html_id"
+                            isFocused={false}
+                            type="label"
+                          >
+                            <label
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="random_html_id"
+                            >
+                              Metric Name #2
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFieldText
+                            data-test-subj="metrics__querySaveName"
+                            id="random_html_id"
+                            key="metric-name-input-id-1"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            value="my_prometheus.go_memstats_alloc_bytes_total"
+                          >
+                            <EuiFormControlLayout
+                              fullWidth={false}
+                              inputId="random_html_id"
+                            >
+                              <div
+                                className="euiFormControlLayout"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      className="euiFieldText"
+                                      data-test-subj="metrics__querySaveName"
+                                      id="random_html_id"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      type="text"
+                                      value="my_prometheus.go_memstats_alloc_bytes_total"
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </form>
+        </EuiForm>
+      </div>
     </div>
   </Component>
 </Provider>
