@@ -33,7 +33,9 @@ export const PPLParsers = {
 
         return statsPPLs.map((query) => ({
             type: 'output',
-            content: query,
+            content: query
+                .replace(/`/g, '')  // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
+                .replace(/\bSPAN\(/g, 'span('),  // workaround for https://github.com/opensearch-project/dashboards-observability/issues/759
             contentType: 'ppl_visualization',
             suggestedActions: [
                 {
