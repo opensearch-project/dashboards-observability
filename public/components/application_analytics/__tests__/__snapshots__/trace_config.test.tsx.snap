@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Trace Config component renders empty trace config 1`] = `
-<Component
+<TraceConfig
   chrome={
     Object {
       "addApplicationClass": [MockFunction],
@@ -895,11 +895,11 @@ exports[`Trace Config component renders empty trace config 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</Component>
+</TraceConfig>
 `;
 
 exports[`Trace Config component renders with one trace selected 1`] = `
-<Component
+<TraceConfig
   chrome={
     Object {
       "addApplicationClass": [MockFunction],
@@ -1817,5 +1817,5 @@ exports[`Trace Config component renders with one trace selected 1`] = `
       </div>
     </EuiAccordion>
   </div>
-</Component>
+</TraceConfig>
 `;

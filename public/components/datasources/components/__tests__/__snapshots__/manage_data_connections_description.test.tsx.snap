@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Manage Data Connections Description test Renders manage data connections description 1`] = `
-<Component
+<DataConnectionsDescription
   refresh={[Function]}
 >
   <div>
@@ -157,5 +157,5 @@ exports[`Manage Data Connections Description test Renders manage data connection
       />
     </EuiHorizontalRule>
   </div>
-</Component>
+</DataConnectionsDescription>
 `;

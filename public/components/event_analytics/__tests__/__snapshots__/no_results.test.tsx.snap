@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`No result component Renders No result component 1`] = `
-<Component>
+<NoResults>
   <EuiPage
     paddingSize="s"
   >
@@ -134,5 +134,5 @@ exports[`No result component Renders No result component 1`] = `
       </EuiFlexGroup>
     </div>
   </EuiPage>
-</Component>
+</NoResults>
 `;

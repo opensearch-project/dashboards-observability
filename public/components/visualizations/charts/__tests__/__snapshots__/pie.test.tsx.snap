@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Pie component Renders pie component 1`] = `
-<Component
+<Pie
   config={Object {}}
   layout={
     Object {
@@ -799,5 +799,5 @@ exports[`Pie component Renders pie component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Component>
+</Pie>
 `;

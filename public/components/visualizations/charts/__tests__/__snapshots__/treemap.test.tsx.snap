@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Treemap component Renders treemap component 1`] = `
-<Component
+<TreeMap
   config={Object {}}
   layout={
     Object {
@@ -843,5 +843,5 @@ exports[`Treemap component Renders treemap component 1`] = `
       />
     </PlotlyComponent>
   </Plt>
-</Component>
+</TreeMap>
 `;

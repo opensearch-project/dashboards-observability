@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Config panel component Renders config panel with visualization data 1`] = `
-<Component
+<ConfigPanel
   changeIsValidConfigOptionState={[MockFunction]}
   setCurVisId={[MockFunction]}
   visualizations={
@@ -4473,7 +4473,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         onTabClick={[Function]}
         selectedTab={
           Object {
-            "content": <Unknown
+            "content": <VizDataPanel
               curVisId="bar"
               onConfigChange={[Function]}
               tabProps={
@@ -5415,7 +5415,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         tabs={
           Array [
             Object {
-              "content": <Unknown
+              "content": <VizDataPanel
                 curVisId="bar"
                 onConfigChange={[Function]}
                 tabProps={
@@ -6398,7 +6398,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
             id="random_html_id"
             role="tabpanel"
           >
-            <Component
+            <VizDataPanel
               curVisId="bar"
               onConfigChange={[Function]}
               tabProps={
@@ -7357,7 +7357,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigPanelOptions
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -8259,7 +8259,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigPanelOptions>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -8278,7 +8278,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigTooltip
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -9078,7 +9078,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         <div
                                           id="random_html_id"
                                         >
-                                          <Component
+                                          <ButtonGroupItem
                                             defaultSelections={
                                               Array [
                                                 Object {
@@ -9345,7 +9345,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 </fieldset>
                                               </EuiButtonGroup>
                                             </div>
-                                          </Component>
+                                          </ButtonGroupItem>
                                           <EuiSpacer
                                             size="s"
                                           >
@@ -9357,7 +9357,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                         <div
                                           id="random_html_id"
                                         >
-                                          <Component
+                                          <ButtonGroupItem
                                             defaultSelections={
                                               Array [
                                                 Object {
@@ -9718,7 +9718,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 </fieldset>
                                               </EuiButtonGroup>
                                             </div>
-                                          </Component>
+                                          </ButtonGroupItem>
                                           <EuiSpacer
                                             size="s"
                                           >
@@ -9733,7 +9733,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigTooltip>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -9752,7 +9752,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigLegend
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -10552,7 +10552,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       <div
                                         className="euiAccordion__padding--s"
                                       >
-                                        <Component
+                                        <ButtonGroupItem
                                           defaultSelections={
                                             Array [
                                               Object {
@@ -10818,7 +10818,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </fieldset>
                                             </EuiButtonGroup>
                                           </div>
-                                        </Component>
+                                        </ButtonGroupItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -10826,7 +10826,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <ButtonGroupItem
                                           defaultSelections={
                                             Array [
                                               Object {
@@ -11092,7 +11092,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </fieldset>
                                             </EuiButtonGroup>
                                           </div>
-                                        </Component>
+                                        </ButtonGroupItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -11100,7 +11100,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <InputFieldItem
                                           currentValue=""
                                           handleInputChange={[Function]}
                                           numValue=""
@@ -11164,7 +11164,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiFormControlLayout>
                                           </EuiFieldNumber>
-                                        </Component>
+                                        </InputFieldItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -11178,7 +11178,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigLegend>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -11197,7 +11197,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigBarChartStyles
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -12050,7 +12050,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       <div
                                         className="euiAccordion__padding--s"
                                       >
-                                        <Component
+                                        <ButtonGroupItem
                                           defaultSelections={
                                             Array [
                                               Object {
@@ -12316,7 +12316,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </fieldset>
                                             </EuiButtonGroup>
                                           </div>
-                                        </Component>
+                                        </ButtonGroupItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -12324,7 +12324,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <InputFieldItem
                                           handleInputChange={[Function]}
                                           numValue=""
                                           title="Label size"
@@ -12387,7 +12387,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiFormControlLayout>
                                           </EuiFieldNumber>
-                                        </Component>
+                                        </InputFieldItem>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -12395,7 +12395,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0}
                                           handleSliderChange={[Function]}
                                           max={90}
@@ -13372,7 +13372,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -13380,7 +13380,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0.7}
                                           handleSliderChange={[Function]}
                                           max={1}
@@ -13613,7 +13613,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -13621,7 +13621,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0.97}
                                           handleSliderChange={[Function]}
                                           max={1}
@@ -13854,7 +13854,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -13862,7 +13862,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={0}
                                           handleSliderChange={[Function]}
                                           max={10}
@@ -14095,7 +14095,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -14103,7 +14103,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                             className="euiSpacer euiSpacer--s"
                                           />
                                         </EuiSpacer>
-                                        <Component
+                                        <SliderConfig
                                           currentRange={100}
                                           handleSliderChange={[Function]}
                                           max={100}
@@ -14336,7 +14336,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               </div>
                                             </EuiRangeWrapper>
                                           </EuiRange>
-                                        </Component>
+                                        </SliderConfig>
                                         <EuiSpacer
                                           size="s"
                                         >
@@ -14350,7 +14350,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigBarChartStyles>
                         </div>
                       </div>
                     </EuiFormRow>
@@ -14369,7 +14369,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <Component
+                          <ConfigColorTheme
                             handleConfigChange={[Function]}
                             id="random_html_id"
                             onBlur={[Function]}
@@ -15174,18 +15174,18 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 </div>
                               </div>
                             </EuiAccordion>
-                          </Component>
+                          </ConfigColorTheme>
                         </div>
                       </div>
                     </EuiFormRow>
                   </div>
                 </EuiForm>
               </div>
-            </Component>
+            </VizDataPanel>
           </div>
         </div>
       </EuiTabbedContent>
     </div>
   </div>
-</Component>
+</ConfigPanel>
 `;

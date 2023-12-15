@@ -12,7 +12,7 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
     }
   }
 >
-  <Component
+  <MetricsExportPanel
     http={[MockFunction]}
     selectedPanelOptions={Array []}
     setSelectedPanelOptions={[MockFunction]}
@@ -309,6 +309,6 @@ exports[`Export Metrics Panel Component renders Export Metrics Panel Component 1
         </div>
       </EuiFormRow>
     </div>
-  </Component>
+  </MetricsExportPanel>
 </Provider>
 `;

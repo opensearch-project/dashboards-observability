@@ -12,7 +12,7 @@ exports[`Saved query table component Renders saved query table 1`] = `
     }
   }
 >
-  <Component
+  <SavePanel
     curVisId="line"
     handleNameChange={[MockFunction]}
     handleOptionChange={[MockFunction]}
@@ -641,6 +641,6 @@ exports[`Saved query table component Renders saved query table 1`] = `
         </div>
       </div>
     </EuiFormRow>
-  </Component>
+  </SavePanel>
 </Provider>
 `;
