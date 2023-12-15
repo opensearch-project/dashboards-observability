@@ -24,8 +24,8 @@ import {
   VIS_TYPE_VBAR,
   FIELD_HOST,
   FIELD_AGENT
-} from '../utils/event_analytics/constants';
-import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../utils/constants';
+} from '../../utils/event_analytics/constants';
+import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
 
 import {
   querySearch,
@@ -34,7 +34,7 @@ import {
   landOnEventVisualizations,
   landOnPanels,
   clearQuerySearchBoxText,
-} from '../utils/event_analytics/helpers';
+} from '../../utils/event_analytics/helpers';
 
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for event analytics', () => {

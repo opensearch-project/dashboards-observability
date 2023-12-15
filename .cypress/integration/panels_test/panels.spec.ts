@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { suppressResizeObserverIssue } from '../utils/constants';
+import { suppressResizeObserverIssue } from '../../utils/constants';
 import {
   delay,
   NEW_VISUALIZATION_NAME,
@@ -14,7 +14,7 @@ import {
   PPL_VISUALIZATIONS,
   PPL_VISUALIZATIONS_NAMES,
   TEST_PANEL,
-} from '../utils/panel_constants';
+} from '../../utils/panel_constants';
 
 describe('Panels testing with Sample Data', () => {
   suppressResizeObserverIssue();//needs to be in file once
