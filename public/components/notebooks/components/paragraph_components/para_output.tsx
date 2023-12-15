@@ -80,14 +80,13 @@ export const ParaOutput = (props: {
     if (typeOut !== undefined) {
       switch (typeOut) {
         case 'QUERY':
-          const inputQuery = para.inp.substring(4, para.inp.length);
+          const inputQuery = inp.substring(4, inp.length);
           const queryObject = JSON.parse(val);
           if (queryObject.hasOwnProperty('error')) {
             return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
           } else {
             const columns = createQueryColumns(queryObject.schema);
             const data = getQueryOutputData(queryObject);
-            const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
             return (
               <div>
                 <EuiText key={'query-input-key'}>
@@ -98,8 +97,6 @@ export const ParaOutput = (props: {
                   key={key}
                   rowCount={queryObject.datarows.length}
                   queryColumns={columns}
-                  visibleColumns={visibleColumns}
-                  setVisibleColumns={setVisibleColumns}
                   dataValues={data}
                 />
               </div>
@@ -107,7 +104,7 @@ export const ParaOutput = (props: {
           }
         case 'MARKDOWN':
           return (
-            <EuiText key={key} className="markdown-output-text">
+            <EuiText className="wrapAll markdown-output-text">
               <MarkdownRender source={val} />
             </EuiText>
           );
@@ -121,11 +118,7 @@ export const ParaOutput = (props: {
               <EuiText size="s" style={{ marginLeft: 9 }}>
                 {`${from} - ${to}`}
               </EuiText>
-              <DashboardContainerByValueRenderer
-                key={key}
-                input={visInput}
-                onInputUpdated={setVisInput}
-              />
+              <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
             </>
           );
         case 'OBSERVABILITY_VISUALIZATION':
@@ -154,23 +147,24 @@ export const ParaOutput = (props: {
                   onRefresh={false}
                   pplFilterValue={''}
                   usedInNotebooks={true}
+                  contextMenuId="notebook"
                 />
               </div>
             </>
           );
         case 'HTML':
           return (
-            <EuiText key={key}>
+            <EuiText>
               {/* eslint-disable-next-line react/jsx-pascal-case */}
               <Media.HTML data={val} />
             </EuiText>
           );
         case 'TABLE':
-          return <pre key={key}>{val}</pre>;
+          return <pre>{val}</pre>;
         case 'IMG':
-          return <img alt="" src={'data:image/gif;base64,' + val} key={key} />;
+          return <img alt="" src={'data:image/gif;base64,' + val} />;
         default:
-          return <pre key={key}>{val}</pre>;
+          return <pre>{val}</pre>;
       }
     } else {
       console.log('output not supported', typeOut);
@@ -183,7 +177,13 @@ export const ParaOutput = (props: {
   return !para.isOutputHidden ? (
     <>
       {para.typeOut.map((typeOut: string, tIdx: number) => {
-        return outputBody(para.uniqueId + '_paraOutputBody', typeOut, para.out[tIdx]);
+        return (
+          <OutputBody
+            key={para.uniqueId + '_paraOutputBody_' + tIdx}
+            typeOut={typeOut}
+            val={para.out[tIdx]}
+          />
+        );
       })}
     </>
   ) : null;

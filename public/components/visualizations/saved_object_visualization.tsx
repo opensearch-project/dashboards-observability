@@ -5,14 +5,17 @@
 
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { SizeMe } from 'react-sizeme';
 import { Filter, Query, TimeRange } from '../../../../../src/plugins/data/common';
 import { QueryManager } from '../../../common/query_manager';
 import { IVisualizationContainerProps, SavedVisualization } from '../../../common/types/explorer';
+import { getUserConfigFrom } from '../../../common/utils/visualization_helpers';
 import { getPPLService, preprocessQuery, removeBacktick } from '../../../common/utils';
 import { getDefaultVisConfig } from '../event_analytics/utils';
 import { getVizContainerProps } from './charts/helpers';
 import { Visualization } from './visualization';
+import { PROMQL_METRIC_SUBTYPE } from '../../../common/constants/shared';
+import { getMetricVisConfig } from '../event_analytics/utils/utils';
+import { preprocessMetricQuery } from '../common/query_utils';
 
 interface SavedObjectVisualizationProps {
   savedVisualization: SavedVisualization;
@@ -30,13 +33,22 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
 
   useEffect(() => {
     const pplService = getPPLService();
-    const metaData = { ...props.savedVisualization, query: props.savedVisualization.query };
-    const userConfigs = metaData.user_configs ? JSON.parse(metaData.user_configs) : {};
+    const isMetric = props.savedVisualization?.subType === PROMQL_METRIC_SUBTYPE;
+    const metaData = {
+      ...props.savedVisualization,
+      query: props.savedVisualization.query,
+      queryMetaData: props.savedVisualization.queryMetaData,
+      isMetric,
+    };
+    const userConfigs = getUserConfigFrom(metaData);
     const dataConfig = { ...(userConfigs.dataConfig || {}) };
     const hasBreakdowns = !_.isEmpty(dataConfig.breakdowns);
-    const realTimeParsedStats = {
-      ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
-    };
+    const realTimeParsedStats = isMetric
+      ? getMetricVisConfig(metaData)
+      : {
+          ...getDefaultVisConfig(new QueryManager().queryParser().parse(metaData.query).getStats()),
+        };
+
     let finalDimensions = [...(realTimeParsedStats.dimensions || [])];
     const breakdowns = [...(dataConfig.breakdowns || [])];
 
@@ -61,22 +73,30 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
       dataConfig: {
         ...finalDataConfig,
       },
-      layoutConfig: {
-        ...(userConfigs.layoutConfig || {}),
+      layout: {
+        ...userConfigs.layout,
       },
     };
 
     let query = metaData.query;
 
     if (props.timeRange) {
-      query = preprocessQuery({
-        rawQuery: metaData.query,
-        startTime: props.timeRange.from,
-        endTime: props.timeRange.to,
-        timeField: props.savedVisualization.selected_timestamp.name,
-        isLiveQuery: false,
-        whereClause: props.whereClause,
-      });
+      if (isMetric) {
+        query = preprocessMetricQuery({
+          metaData,
+          startTime: props.timeRange.from,
+          endTime: props.timeRange.to,
+        });
+      } else {
+        query = preprocessQuery({
+          rawQuery: metaData.query,
+          startTime: props.timeRange.from,
+          endTime: props.timeRange.to,
+          timeField: props.savedVisualization.selected_timestamp.name,
+          isLiveQuery: false,
+          whereClause: props.whereClause,
+        });
+      }
     }
 
     pplService
@@ -97,7 +117,5 @@ export const SavedObjectVisualization: React.FC<SavedObjectVisualizationProps> =
       });
   }, [props]);
 
-  return visContainerProps ? (
-    <SizeMe>{({ size }) => <Visualization visualizations={visContainerProps} />}</SizeMe>
-  ) : null;
+  return visContainerProps ? <Visualization visualizations={visContainerProps} /> : null;
 };

@@ -5,12 +5,6 @@
 
 import { VisualizationType } from './custom_panels';
 
-export interface MetricData {
-  metricId: string;
-  metricType: 'savedCustomMetric' | 'prometheusMetric';
-  metricName: string;
-}
-
 export interface MetricType extends VisualizationType {
   id: string;
   savedVisualizationId: string;
@@ -18,5 +12,11 @@ export interface MetricType extends VisualizationType {
   y: number;
   w: number;
   h: number;
-  metricType: 'savedCustomMetric' | 'prometheusMetric';
+  query: {
+    type: 'savedCustomMetric' | 'prometheusMetric';
+    aggregation: string;
+    attributesGroupBy: string[];
+    catalog: string;
+    availableAttributes?: string[];
+  };
 }

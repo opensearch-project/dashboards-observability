@@ -4,31 +4,24 @@
  */
 
 import { createSelector, createSlice } from '@reduxjs/toolkit';
-import { async, concat, from, Observable, of } from 'rxjs';
-import { map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { forEach, last } from 'lodash';
+import { concat, from, Observable, of } from 'rxjs';
+import { map, mergeMap, toArray } from 'rxjs/operators';
+import { forEach } from 'lodash';
 import {
+  createDemoPanel,
   CUSTOM_PANELS_API_PREFIX,
   CUSTOM_PANELS_SAVED_OBJECT_TYPE,
-  CUSTOM_PANEL_SLICE,
-  createDemoPanel,
+  samplePanelName,
 } from '../../../../common/constants/custom_panels';
 import {
   CustomPanelListType,
   CustomPanelType,
   ObservabilityPanelAttrs,
   PanelType,
-  VisualizationType,
 } from '../../../../common/types/custom_panels';
 import { coreRefs } from '../../../framework/core_refs';
 import { SavedObject, SimpleSavedObject } from '../../../../../../src/core/public';
-import { isNameValid } from '../helpers/utils';
-import { samplePanelName } from '../../../../common/constants/custom_panels';
-import {
-  addMultipleVisualizations,
-  addVisualizationPanel,
-} from '../helpers/add_visualization_helper';
-import { useToast } from '../../../../public/components/common/toast';
+import { addVisualizationPanel } from '../helpers/add_visualization_helper';
 
 interface InitialState {
   id: string;
@@ -84,8 +77,6 @@ const normalizedPanel = (panel: CustomPanelType): CustomPanelType => ({
 
 export const selectPanelList = (rootState): CustomPanelType[] => rootState.customPanel.panelList;
 
-const {setToast} = useToast();
-
 /*
  ** ASYNC DISPATCH FUNCTIONS
  */
@@ -100,7 +91,12 @@ const fetchObservabilityPanels$ = () =>
   of(coreRefs.http.get(`${CUSTOM_PANELS_API_PREFIX}/panels`)).pipe(
     mergeMap((res) => res),
     mergeMap((res) => res.panels as ObservabilityPanelAttrs[]),
-    map((p: ObservabilityPanelAttrs) => ({ ...p, title: p.name, savedObject: false }))
+    map((p: ObservabilityPanelAttrs) => ({
+      ...p,
+      title: p.name,
+      savedObject: false,
+      type: 'observability-savedObject',
+    }))
   );
 
 // Fetches all saved Custom Panels
@@ -141,19 +137,25 @@ export const uuidRx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a
 
 export const isUuid = (id) => !!id.match(uuidRx);
 
-export const updatePanel = (panel: CustomPanelType, successMsg: string, failureMsg: string) => async (dispatch, getState) => {
+export const updatePanel = (
+  panel: CustomPanelType,
+  successMsg: string,
+  failureMsg: string
+) => async (dispatch, getState) => {
+  const { toasts } = coreRefs;
+
   try {
     if (isUuid(panel.id)) await updateSavedObjectPanel(panel);
     else await updateLegacyPanel(panel);
     if (successMsg) {
-      setToast(successMsg)
+      toasts!.add(successMsg);
     }
     dispatch(setPanel(panel));
     const panelList = getState().customPanel.panelList.map((p) => (p.id === panel.id ? panel : p));
     dispatch(setPanelList(panelList));
-  } catch (e) {    
+  } catch (e) {
     if (failureMsg) {
-      setToast(failureMsg, 'danger')
+      toasts!.addDanger(failureMsg);
     }
     console.error(e);
   }
@@ -172,20 +174,39 @@ export const addVizToPanels = (panels, vizId) => async (dispatch, getState) => {
   });
 };
 
-export const addMultipleVizToPanels = (panels, vizIds) => async (dispatch, getState) => {
-  forEach(panels, (oldPanel) => {
-    const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.panel.id);
+export const addMultipleVizToPanels = async (panels, vizIds) => {
+  await Promise.all(
+    panels.map(async ({ panel: { id } }) => {
+      const soPanel = await savedObjectPanelsClient.get(id);
+      const oldPanel = savedObjectToCustomPanel(soPanel);
 
-    const allVisualizations = panel!.visualizations;
+      const allVisualizations = oldPanel!.visualizations;
 
-    const visualizationsWithNewPanel = addMultipleVisualizations(vizIds, allVisualizations);
+      let visualizationsWithNewPanel = allVisualizations;
 
-    const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-    dispatch(updatePanel(updatedPanel, '', ''));
-  });
+      forEach(vizIds, (vizId) => {
+        visualizationsWithNewPanel = addVisualizationPanel(
+          vizId,
+          undefined,
+          visualizationsWithNewPanel
+        );
+      });
+
+      const updatedPanel = { ...oldPanel, visualizations: visualizationsWithNewPanel };
+
+      if (isUuid(updatedPanel.id)) {
+        await updateSavedObjectPanel(updatedPanel);
+      } else {
+        await updateLegacyPanel(updatedPanel);
+      }
+    })
+  );
 };
 
-export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTitle) => async (dispatch, getState) => {
+export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTitle) => async (
+  dispatch,
+  getState
+) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === oldPanel.id);
 
   const allVisualizations = panel!.visualizations;
@@ -193,8 +214,14 @@ export const replaceVizInPanel = (oldPanel, oldVizId, vizId, newVisualizationTit
   const visualizationsWithNewPanel = addVisualizationPanel(vizId, oldVizId, allVisualizations);
 
   const updatedPanel = { ...panel, visualizations: visualizationsWithNewPanel };
-  
-  dispatch(updatePanel(updatedPanel, `Visualization ${newVisualizationTitle} successfully added!`, `Error in adding ${newVisualizationTitle} visualization to the panel`));
+
+  dispatch(
+    updatePanel(
+      updatedPanel,
+      `Visualization ${newVisualizationTitle} successfully added!`,
+      `Error in adding ${newVisualizationTitle} visualization to the panel`
+    )
+  );
 };
 
 const deletePanelSO = (customPanelIdList: string[]) => {
@@ -211,6 +238,8 @@ const deleteLegacyPanels = (customPanelIdList: string[]) => {
 };
 
 export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispatch, getState) => {
+  const { toasts } = coreRefs;
+
   const toastMessage = `Observability Dashboard${
     panelsToDelete.length > 1 ? 's' : ' ' + panelsToDelete[0].title
   } successfully deleted!`;
@@ -222,28 +251,27 @@ export const deletePanels = (panelsToDelete: CustomPanelType[]) => async (dispat
       (p) => !ids.includes(p.id)
     );
     dispatch(setPanelList(panelList));
-    setToast(toastMessage);
+    toasts!.add(toastMessage);
   } catch (e) {
-    setToast(
-      'Error deleting Observability Dashboards, please make sure you have the correct permission.',
-      'danger'
+    toasts!.addDanger(
+      'Error deleting Observability Dashboards, please make sure you have the correct permission.'
     );
     console.error(e);
   }
 };
 
 export const createPanel = (panel) => async (dispatch, getState) => {
+  const { toasts } = coreRefs;
   try {
     const newSOPanel = await savedObjectPanelsClient.create(panel);
     const newPanel = savedObjectToCustomPanel(newSOPanel);
     const panelList = getState().customPanel.panelList;
     dispatch(setPanelList([...panelList, newPanel]));
-    setToast(`Observability Dashboard "${newPanel.title}" successfully created!`);
+    toasts!.add(`Observability Dashboard "${newPanel.title}" successfully created!`);
     window.location.replace(`#/${newPanel.id}`);
   } catch (e) {
-    setToast(
-      'Error occurred while creating Observability Dashboard, please make sure you have the correct permission.',
-      'danger'
+    toasts!.addDanger(
+      'Error occurred while creating Observability Dashboard, please make sure you have the correct permission.'
     );
     console.error(e);
   }
@@ -263,6 +291,8 @@ export const createPanelSample = (vizIds) => async (dispatch, getState) => {
 };
 
 export const clonePanel = (panel, newPanelName) => async (dispatch, getState) => {
+  const { toasts } = coreRefs;
+
   try {
     const { id, ...panelCopy } = {
       ...panel,
@@ -277,12 +307,11 @@ export const clonePanel = (panel, newPanelName) => async (dispatch, getState) =>
     const panelList = getState().customPanel.panelList;
     dispatch(setPanelList([...panelList, newPanel]));
     dispatch(setPanel(newPanel));
-    setToast(`Observability Dashboard "${newPanel.title}" successfully created!`);
+    toasts!.add(`Observability Dashboard "${newPanel.title}" successfully created!`);
     window.location.replace(`#/${newPanel.id}`);
   } catch (e) {
-    setToast(
-      'Error cloning Observability Dashboard, please make sure you have the correct permission.',
-      'danger'
+    toasts!.addDanger(
+      'Error cloning Observability Dashboard, please make sure you have the correct permission.'
     );
     console.error(e);
   }
@@ -315,7 +344,13 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
 ) => {
   const panel = getState().customPanel.panelList.find((p) => p.id === id);
   const updatedPanel = { ...panel, title: editedCustomPanelName };
-  dispatch(updatePanel(updatedPanel, `Operational Panel successfully renamed into "${editedCustomPanelName}"`, 'Error renaming Operational Panel, please make sure you have the correct permission.'))
+  dispatch(
+    updatePanel(
+      updatedPanel,
+      `Operational Panel successfully renamed into "${editedCustomPanelName}"`,
+      'Error renaming Operational Panel, please make sure you have the correct permission.'
+    )
+  );
 };
 
 /*
@@ -323,6 +358,8 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
  */
 const savedObjectToCustomPanel = (so: SimpleSavedObject<PanelType>): CustomPanelType => ({
   id: so.id,
+  type: so.type,
+  objectId: so.type + ':' + so.id,
   ...so.attributes,
   savedObject: true,
 });

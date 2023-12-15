@@ -3,29 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
+import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import { createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
-import { TopMenu } from '../top_menu';
+import { Search } from '../search';
 
-describe('Metrics Top Menu Component', () => {
+describe('Explorer Search component', () => {
   configure({ adapter: new Adapter() });
   const store = createStore(rootReducer);
 
-  it('renders Top Menu Component when enabled', async () => {
+  it('renders basic component', () => {
     const wrapper = mount(
       <Provider store={store}>
-        <TopMenu />
+        <Search />
       </Provider>
     );
     wrapper.update();
-
-    await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
-    });
+    expect(wrapper).toMatchSnapshot();
   });
 });

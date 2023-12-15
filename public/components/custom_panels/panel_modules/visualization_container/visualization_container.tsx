@@ -25,15 +25,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
+import { useSelector } from 'react-redux';
 import {
   displayVisualization,
+  fetchVisualizationById,
   renderCatalogVisualization,
   renderSavedVisualization,
 } from '../../helpers/utils';
 import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
+import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
+import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -60,8 +64,11 @@ interface Props {
   editMode: boolean;
   visualizationId: string;
   savedVisualizationId: string;
+  inputMetaData: object;
   fromTime: string;
   toTime: string;
+  span?: number | string;
+  resolution?: string;
   onRefresh: boolean;
   pplFilterValue: string;
   usedInNotebooks?: boolean;
@@ -70,15 +77,18 @@ interface Props {
   showFlyout?: (isReplacement?: boolean | undefined, replaceVizId?: string | undefined) => void;
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
-  spanParam?: string;
+  inlineEditor?: JSX.Element;
 }
 
 export const VisualizationContainer = ({
   editMode,
   visualizationId,
   savedVisualizationId,
+  inputMetaData,
   fromTime,
   toTime,
+  span,
+  resolution,
   onRefresh,
   pplFilterValue,
   usedInNotebooks,
@@ -87,7 +97,7 @@ export const VisualizationContainer = ({
   showFlyout,
   removeVisualization,
   catalogVisualization,
-  spanParam,
+  inlineEditor,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -103,6 +113,7 @@ export const VisualizationContainer = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
 
+  const queryMetaData = useSelector(metricQuerySelector(visualizationId));
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {
     if (modalType === 'catalogModal')
@@ -193,11 +204,10 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  const showModelPanel = [
+  const showPPLQueryPanel = [
     <EuiContextMenuItem
       data-test-subj="showCatalogPPLQuery"
       key="view_query"
-      disabled={editMode}
       onClick={() => {
         closeActionsMenu();
         showModal('catalogModal');
@@ -207,20 +217,54 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (usedInNotebooks) {
-    popoverPanel = catalogVisualization ? [showModelPanel] : [popoverPanel[0]];
+  if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+    popoverPanel = [showPPLQueryPanel];
+  } else if (usedInNotebooks) {
+    popoverPanel = [popoverPanel[0]];
   }
 
+  const fetchVisualization = async () => {
+    return savedVisualizationId
+      ? await fetchVisualizationById(http, savedVisualizationId, setIsError)
+      : inputMetaData;
+  };
+
   const loadVisaulization = async () => {
-    if (catalogVisualization)
-      await renderCatalogVisualization({
+    const visualization = await fetchVisualization();
+    setVisualizationMetaData(visualization);
+
+    if (!visualization && !savedVisualizationId) return;
+
+    if (visualization.subType === PROMQL_METRIC_SUBTYPE) {
+      renderCatalogVisualization({
+        visualization,
         http,
         pplService,
-        catalogSource: savedVisualizationId,
+        catalogSource: visualizationId,
         startTime: fromTime,
         endTime: toTime,
+        span,
+        resolution,
         filterQuery: pplFilterValue,
-        spanParam,
+        setVisualizationTitle,
+        setVisualizationType,
+        setVisualizationData,
+        setVisualizationMetaData,
+        setIsLoading,
+        setIsError,
+        queryMetaData,
+      });
+    } else
+      await renderSavedVisualization({
+        visualization,
+        http,
+        pplService,
+        savedVisualizationId,
+        startTime: fromTime,
+        endTime: toTime,
+        pplFilterValue,
+        span,
+        resolution,
         setVisualizationTitle,
         setVisualizationType,
         setVisualizationData,
@@ -228,22 +272,6 @@ export const VisualizationContainer = ({
         setIsLoading,
         setIsError,
       });
-    else
-      await renderSavedVisualization(
-        http,
-        pplService,
-        savedVisualizationId,
-        fromTime,
-        toTime,
-        pplFilterValue,
-        spanParam,
-        setVisualizationTitle,
-        setVisualizationType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError
-      );
   };
 
   const memoisedVisualizationBox = useMemo(
@@ -251,7 +279,7 @@ export const VisualizationContainer = ({
       <div className="visualization-div">
         {isLoading ? (
           <EuiLoadingChart size="xl" mono className="visualization-loading-chart" />
-        ) : !_.isEmpty(isError) ? (
+        ) : !isEmpty(isError) ? (
           <div className="visualization-error-div">
             <EuiIcon type="alert" color="danger" size="s" />
             <EuiSpacer size="s" />
@@ -281,18 +309,21 @@ export const VisualizationContainer = ({
 
   useEffect(() => {
     loadVisaulization();
-  }, [onRefresh]);
+  }, [onRefresh, inputMetaData, span, resolution, fromTime, toTime]);
+
+  const metricVisCssClassName = catalogVisualization ? 'metricVis' : '';
 
   return (
     <>
       <EuiPanel
         data-test-subj={`${visualizationTitle}VisualizationPanel`}
-        className="panel-full-width"
+        className={`panel-full-width ${metricVisCssClassName}`}
         grow={false}
       >
-        <div className={editMode ? 'mouseGrabber' : ''}>
+        <div>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem
+              className={editMode ? 'mouseGrabber' : ''}
               style={{
                 width: '35%',
               }}
@@ -333,6 +364,7 @@ export const VisualizationContainer = ({
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          {inlineEditor}
         </div>
         {memoisedVisualizationBox}
       </EuiPanel>
