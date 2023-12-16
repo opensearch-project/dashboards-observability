@@ -90,8 +90,8 @@ describe('Add and Remove Selected Metrics', () => {
           .mockResolvedValueOnce({
             jsonData: [{ TABLE_CATALOG: 'datasource1', TABLE_NAME: 'testMetric' }],
           })
-          // datasource2 return schema (none)
-          .mockResolvedValueOnce({
+          // datasource2 return schema (none) plus getAvailableAttributes
+          .mockResolvedValue({
             jsonData: [],
           }),
       };

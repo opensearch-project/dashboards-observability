@@ -225,7 +225,8 @@ export const {
 const { selectMetric, setMetric, setSortedIds } = metricSlice.actions;
 
 const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
-  const { pplService, toasts } = coreRefs;
+  const { toasts } = coreRefs;
+  const pplService = getPPLService();
 
   try {
     const columnSchema = await pplService.fetch({

@@ -41,7 +41,7 @@ describe('<Paragraphs /> spec', () => {
         ref={jest.fn()}
         para={para}
         setPara={setPara}
-        dateModified={'modified-date'}
+        dateModified="2023-11-01 01:02:03"
         index={0}
         paraCount={2}
         paragraphSelector={paragraphSelector}
@@ -63,11 +63,11 @@ describe('<Paragraphs /> spec', () => {
     );
     expect(utils.container.firstChild).toMatchSnapshot();
 
-    utils.getByLabelText('Open paragraph menu').click()
-    utils.getByText('Run input').click()
-    utils.getByLabelText('Open paragraph menu').click()
-    utils.getByText('Duplicate').click()
-    utils.getByLabelText('Open paragraph menu').click()
-    utils.getByText('Delete').click()
+    utils.getByLabelText('Open paragraph menu').click();
+    utils.getByText('Run input').click();
+    utils.getByLabelText('Open paragraph menu').click();
+    utils.getByText('Duplicate').click();
+    utils.getByLabelText('Open paragraph menu').click();
+    utils.getByText('Delete').click();
   });
 });
