@@ -16,17 +16,13 @@ import {
   EuiLink,
   EuiListGroup,
   EuiListGroupItem,
-  EuiModal,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
-import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import React, { Reducer, useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common';
 import { RAW_QUERY } from '../../../../../common/constants/explorer';
-import { DSL_BASE, DSL_CAT } from '../../../../../common/constants/shared';
 import { getOSDHttp } from '../../../../../common/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import chatLogo from '../../../datasources/icons/query-assistant-logo.svg';
@@ -38,7 +34,6 @@ import {
 } from '../../redux/slices/query_assistant_summarization_slice';
 import { reset, selectQueryResult } from '../../redux/slices/query_result_slice';
 import { changeQuery, selectQueries } from '../../redux/slices/query_slice';
-import { FeedbackFormData, FeedbackModalContent } from './feedback_modal';
 
 interface SummarizationContext {
   question: string;
@@ -50,16 +45,43 @@ interface SummarizationContext {
 
 interface Props {
   handleQueryChange: (query: string) => void;
-  handleTimeRangePickerRefresh: () => void;
+  handleTimeRangePickerRefresh: (availability?: boolean, setSummaryStatus?: boolean) => void;
   tabId: string;
   setNeedsUpdate: any;
   selectedIndex: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
   nlqInput: string;
   setNlqInput: React.Dispatch<React.SetStateAction<string>>;
 }
-export const LLMInput: React.FC<Props> = (props) => {
+
+const HARDCODED_SUGGESTIONS: Record<string, string[]> = {
+  opensearch_dashboards_sample_data_ecommerce: [
+    'How many unique customers placed orders this week?',
+    'Count the number of orders grouped by manufacturer and category',
+    'find customers with first names like Eddie',
+  ],
+  opensearch_dashboards_sample_data_logs: [
+    'Are there any errors in my logs?',
+    'How many requests were there grouped by response code last week?',
+    "What's the average request size by week?",
+  ],
+  opensearch_dashboards_sample_data_flights: [
+    'how many flights were there this week grouped by destination country?',
+    'what were the longest flight delays this week?',
+    'what carriers have the furthest flights?',
+  ],
+  'sso_logs-*.*': [
+    'show me the most recent 10 logs',
+    'how many requests were there grouped by status code',
+    'how many request failures were there by week?',
+  ],
+};
+
+export const QueryAssistInput: React.FC<Props> = (props) => {
+  // @ts-ignore
   const queryRedux = useSelector(selectQueries)[props.tabId];
+  // @ts-ignore
   const explorerData = useSelector(selectQueryResult)[props.tabId];
+  // @ts-ignore
   const summaryData = useSelector(selectQueryAssistantSummarization)[props.tabId];
 
   useEffect(() => {
@@ -81,47 +103,15 @@ export const LLMInput: React.FC<Props> = (props) => {
     }
   }, [summaryData.responseForSummaryStatus]);
 
-  // HARDCODED QUESTION SUGGESTIONS:
-  const hardcodedSuggestions = {
-    opensearch_dashboards_sample_data_ecommerce: [
-      'How many unique customers placed orders this week?',
-      'Count the number of orders grouped by manufacturer and category',
-      'find customers with first names like Eddie',
-    ],
-    opensearch_dashboards_sample_data_logs: [
-      'Are there any errors in my logs?',
-      'How many requests were there grouped by response code last week?',
-      "What's the average request size by week?",
-    ],
-    opensearch_dashboards_sample_data_flights: [
-      'how many flights were there this week grouped by destination country?',
-      'what were the longest flight delays this week?',
-      'what carriers have the furthest flights?',
-    ],
-    'sso_logs-*.*': [
-      'show me the most recent 10 logs',
-      'how many requests were there grouped by status code',
-      'how many request failures were there by week?',
-    ],
-  };
-
   const [barSelected, setBarSelected] = useState(false);
 
   const dispatch = useDispatch();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [generatingRun, setGeneratingRun] = useState(false);
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [generatingOrRunning, setGeneratingOrRunning] = useState(false);
   // below is only used for url redirection
   const [autoRun, setAutoRun] = useState(false);
-  const [feedbackFormData, setFeedbackFormData] = useState<FeedbackFormData>({
-    input: '',
-    output: '',
-    correct: undefined,
-    expectedOutput: '',
-    comment: '',
-  });
 
   useEffect(() => {
     if (autoRun) {
@@ -143,13 +133,7 @@ export const LLMInput: React.FC<Props> = (props) => {
         index: props.selectedIndex[0].label,
       }),
     });
-    setFeedbackFormData({
-      ...feedbackFormData,
-      input: props.nlqInput,
-      output: generatedPPL,
-    });
     await props.handleQueryChange(generatedPPL);
-    console.log('generatedPPL', generatedPPL);
     await dispatch(
       changeQuery({
         tabId: props.tabId,
@@ -178,13 +162,11 @@ export const LLMInput: React.FC<Props> = (props) => {
     if (!props.selectedIndex.length) return;
     try {
       setGenerating(true);
-      console.log('generated query is', await request());
+      await request();
     } catch (error) {
-      setFeedbackFormData({
-        ...feedbackFormData,
-        input: props.nlqInput,
+      coreRefs.toasts?.addError(formatError(error as ResponseError), {
+        title: 'Failed to generate results',
       });
-      coreRefs.toasts?.addError(formatError(error), { title: 'Failed to generate results' });
     } finally {
       setGenerating(false);
     }
@@ -234,7 +216,9 @@ export const LLMInput: React.FC<Props> = (props) => {
         );
       }
     } catch (error) {
-      coreRefs.toasts?.addError(formatError(error), { title: 'Failed to summarize results' });
+      coreRefs.toasts?.addError(formatError(error as ResponseError), {
+        title: 'Failed to summarize results',
+      });
     } finally {
       await dispatch(
         changeSummary({
@@ -258,17 +242,13 @@ export const LLMInput: React.FC<Props> = (props) => {
     dispatch(resetSummary({ tabId: props.tabId }));
     if (!props.selectedIndex.length) return;
     try {
-      setGeneratingRun(true);
+      setGeneratingOrRunning(true);
       await request();
       await props.handleTimeRangePickerRefresh(undefined, true);
     } catch (error) {
-      setFeedbackFormData({
-        ...feedbackFormData,
-        input: props.nlqInput,
-      });
-      generateSummary({ isError: true, response: JSON.stringify(error.body) });
+      generateSummary({ isError: true, response: JSON.stringify((error as ResponseError).body) });
     } finally {
-      setGeneratingRun(false);
+      setGeneratingOrRunning(false);
     }
   };
 
@@ -300,7 +280,6 @@ export const LLMInput: React.FC<Props> = (props) => {
                     input={
                       <EuiFieldText
                         placeholder="Ask a question"
-                        // prepend={['Question']}
                         disabled={generating}
                         value={props.nlqInput}
                         onChange={(e) => props.setNlqInput(e.target.value)}
@@ -321,7 +300,7 @@ export const LLMInput: React.FC<Props> = (props) => {
                     }}
                   >
                     <EuiListGroup flush={true} bordered={false} wrapText={true} maxWidth={false}>
-                      {hardcodedSuggestions[props.selectedIndex[0]?.label]?.map((question) => (
+                      {HARDCODED_SUGGESTIONS[props.selectedIndex[0]?.label]?.map((question) => (
                         <EuiListGroupItem
                           onClick={() => {
                             props.setNlqInput(question);
@@ -333,15 +312,6 @@ export const LLMInput: React.FC<Props> = (props) => {
                     </EuiListGroup>
                   </EuiInputPopover>
                 </EuiFlexItem>
-                {/* <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => setIsFeedbackOpen(true)}
-                  iconType="faceHappy"
-                  iconSide="right"
-                >
-                  Feedback
-                </EuiButton>
-              </EuiFlexItem> */}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -364,7 +334,7 @@ export const LLMInput: React.FC<Props> = (props) => {
                   <EuiButton
                     isLoading={generating}
                     onClick={generatePPL}
-                    isDisabled={generating || generatingRun}
+                    isDisabled={generating || generatingOrRunning}
                     iconSide="right"
                     fill={false}
                     style={{ width: 160 }}
@@ -374,9 +344,9 @@ export const LLMInput: React.FC<Props> = (props) => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    isLoading={generatingRun}
+                    isLoading={generatingOrRunning}
                     onClick={runAndSummarize}
-                    isDisabled={generating || generatingRun}
+                    isDisabled={generating || generatingOrRunning}
                     iconType="returnKey"
                     iconSide="right"
                     type="submit"
@@ -390,143 +360,7 @@ export const LLMInput: React.FC<Props> = (props) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiForm>
-        {isFeedbackOpen && (
-          <EuiModal onClose={() => setIsFeedbackOpen(false)}>
-            <FeedbackModalContent
-              metadata={{ type: 'event_analytics', selectedIndex: props.selectedIndex[0].label }}
-              formData={feedbackFormData}
-              setFormData={setFeedbackFormData}
-              onClose={() => setIsFeedbackOpen(false)}
-              displayLabels={{
-                correct: 'Did the results from the generated query answer your question?',
-              }}
-            />
-          </EuiModal>
-        )}
       </EuiPanel>
-    </>
-  );
-};
-
-interface State<T> {
-  data?: T;
-  loading: boolean;
-  error?: Error;
-}
-
-type Action<T> =
-  | { type: 'request' }
-  | { type: 'success'; payload: State<T>['data'] }
-  | { type: 'failure'; error: NonNullable<State<T>['error']> };
-
-// TODO use instantiation expressions when typescript is upgraded to >= 4.7
-export type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;
-export const genericReducer: GenericReducer = (state, action) => {
-  switch (action.type) {
-    case 'request':
-      return { data: state.data, loading: true };
-    case 'success':
-      return { loading: false, data: action.payload };
-    case 'failure':
-      return { loading: false, error: action.error };
-    default:
-      return state;
-  }
-};
-
-export const useCatIndices = () => {
-  const reducer: GenericReducer<EuiComboBoxOptionOption[]> = genericReducer;
-  const [state, dispatch] = useReducer(reducer, { loading: false });
-  const [refresh, setRefresh] = useState({});
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    dispatch({ type: 'request' });
-    getOSDHttp()
-      .get(`${DSL_BASE}${DSL_CAT}`, { query: { format: 'json' }, signal: abortController.signal })
-      .then((payload: CatIndicesResponse) =>
-        dispatch({ type: 'success', payload: payload.map((meta) => ({ label: meta.index! })) })
-      )
-      .catch((error) => dispatch({ type: 'failure', error }));
-
-    return () => abortController.abort();
-  }, [refresh]);
-
-  return { ...state, refresh: () => setRefresh({}) };
-};
-
-export const useGetIndexPatterns = () => {
-  const reducer: GenericReducer<EuiComboBoxOptionOption[]> = genericReducer;
-  const [state, dispatch] = useReducer(reducer, { loading: false });
-  const [refresh, setRefresh] = useState({});
-
-  useEffect(() => {
-    let abort = false;
-    dispatch({ type: 'request' });
-
-    coreRefs
-      .savedObjectsClient!.find<IndexPatternAttributes>({ type: 'index-pattern', perPage: 10000 })
-      .then((payload) => {
-        if (!abort)
-          dispatch({
-            type: 'success',
-            payload: payload.savedObjects.map((meta) => ({ label: meta.attributes.title })),
-          });
-      })
-      .catch((error) => {
-        if (!abort) dispatch({ type: 'failure', error });
-      });
-
-    return () => {
-      abort = true;
-    };
-  }, [refresh]);
-
-  return { ...state, refresh: () => setRefresh({}) };
-};
-
-export const SubmitPPLButton: React.FC<{ pplQuery: string }> = (props) => {
-  const [isSubmitOpen, setIsSubmitOpen] = useState(false);
-  const [submitFormData, setSubmitFormData] = useState<FeedbackFormData>({
-    input: props.pplQuery,
-    output: '',
-    correct: true,
-    expectedOutput: '',
-    comment: '',
-  });
-
-  useEffect(() => {
-    setSubmitFormData({
-      input: props.pplQuery,
-      output: '',
-      correct: true,
-      expectedOutput: '',
-      comment: '',
-    });
-  }, [props.pplQuery]);
-
-  return (
-    <>
-      <EuiButton iconType="faceHappy" iconSide="right" onClick={() => setIsSubmitOpen(true)}>
-        Submit PPL Query
-      </EuiButton>
-      {isSubmitOpen && (
-        <EuiModal onClose={() => setIsSubmitOpen(false)}>
-          <FeedbackModalContent
-            metadata={{ type: 'ppl_submit' }}
-            formData={submitFormData}
-            setFormData={setSubmitFormData}
-            onClose={() => setIsSubmitOpen(false)}
-            displayLabels={{
-              formHeader: 'Submit PPL Query',
-              input: 'Your PPL Query',
-              inputPlaceholder: 'PPL Query',
-              output: 'Please write a Natural Language Question for the above Query',
-              outputPlaceholder: 'Natural Language Question',
-            }}
-          />
-        </EuiModal>
-      )}
     </>
   );
 };

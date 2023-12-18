@@ -45,7 +45,10 @@ import { usePolling } from '../../../components/hooks/use_polling';
 import { coreRefs } from '../../../framework/core_refs';
 import { SQLService } from '../../../services/requests/sql';
 import chatLogo from '../../datasources/icons/query-assistant-logo.svg';
-import { useCatIndices, useGetIndexPatterns } from '../../event_analytics/explorer/llm/input';
+import {
+  useCatIndices,
+  useGetIndexPatterns,
+} from '../../event_analytics/explorer/query_assist/hooks';
 import { SavePanel } from '../../event_analytics/explorer/save_panel';
 import { reset } from '../../event_analytics/redux/slices/query_result_slice';
 import {
@@ -161,7 +164,7 @@ export const Search = (props: any) => {
     requestParams,
   });
   const { getAvailableFields } = useFetchEvents({
-    pplService: pplService,
+    pplService,
     requestParams,
   });
 

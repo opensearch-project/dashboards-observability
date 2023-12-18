@@ -4,12 +4,9 @@
  */
 
 import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React from 'react';
-import { useEffect } from 'react';
-import { LLMInput } from '../../event_analytics/explorer/llm/input';
+import React, { useEffect } from 'react';
+import { QueryAssistInput } from '../../event_analytics/explorer/query_assist/input';
 import { useFetchEvents } from '../../event_analytics/hooks/use_fetch_events';
-import { coreRefs } from '../../../framework/core_refs';
-import PPLService from '../../../services/requests/ppl';
 
 export function QueryArea({
   tabId,
@@ -63,7 +60,7 @@ export function QueryArea({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <LLMInput
+          <QueryAssistInput
             tabId={tabId}
             handleQueryChange={handleQueryChange}
             handleTimeRangePickerRefresh={handleTimeRangePickerRefresh}

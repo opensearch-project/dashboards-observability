@@ -714,7 +714,7 @@ export const Explorer = ({
     );
   };
 
-  const handleQuerySearch = async (availability?: boolean, setSummaryStatus: boolean) => {
+  const handleQuerySearch = async (availability?: boolean, setSummaryStatus?: boolean) => {
     // clear previous selected timestamp when index pattern changes
     const searchedQuery = tempQueryRef.current;
     if (
