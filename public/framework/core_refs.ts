@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApplicationStart, ChromeStart, HttpStart, IToasts } from '../../../../src/core/public';
+import { ApplicationStart, ChromeStart, CoreStart, HttpStart, IToasts } from '../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../src/core/public';
 import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
   private static _instance: CoreRefs;
 
+  public core?: CoreStart;
   public http?: HttpStart;
   public savedObjectsClient?: SavedObjectsClientContract;
   public pplService?: PPLService;

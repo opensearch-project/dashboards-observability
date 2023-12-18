@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from '../../../src/core/public';
 import { SavedObjectsClient } from '../../../src/core/server';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
@@ -21,12 +20,6 @@ export interface AppPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
-export interface AssistantSetup {
-  registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
-  registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
-  assistantEnabled: () => Promise<boolean>;
-}
-
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -40,3 +33,11 @@ export interface ObservabilitySetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityStart {}
+
+/**
+ * Introduce a compile dependency on dashboards-assistant
+ * as observerability need some types from the plugin.
+ * It will gives an type error when dashboards-assistant is not installed so add a ts-ignore to suppress the error.
+ */
+// @ts-ignore
+export type { AssistantSetup } from "../../dashboards-assistant/public";

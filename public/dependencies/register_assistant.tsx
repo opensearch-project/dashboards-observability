@@ -17,7 +17,6 @@ export const registerAsssitantDependencies = (setup?: AssistantSetup) => {
 
   setup.registerContentRenderer('ppl_visualization', (content) => {
     const params = content as Partial<SavedVisualization>;
-    console.log(params);
     const savedVisualization = createSavedVisualization(params);
     return (
       <SavedObjectVisualization
