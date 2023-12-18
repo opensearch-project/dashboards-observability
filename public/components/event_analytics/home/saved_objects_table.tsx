@@ -6,6 +6,8 @@
 import { Criteria, EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { FILTER_OPTIONS, LOG_EXPLORER_BASE_PATH } from '../../../../common/constants/explorer';
+import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { METRIC_EXPLORER_BASE_PATH } from '../../../../common/constants/metrics';
 
 interface SavedQueryTableProps {
   savedHistories: any[];
@@ -64,7 +66,14 @@ export function SavedQueryTable({
       sortable: true,
       truncateText: true,
       render: (item: any) => {
-        return (
+        return item.subType === PROMQL_METRIC_SUBTYPE ? (
+          <EuiLink
+            href={`${METRIC_EXPLORER_BASE_PATH}${item.objectId}`}
+            data-test-subj="eventHome__savedQueryTableName"
+          >
+            {item.name}
+          </EuiLink>
+        ) : (
           <EuiLink
             href={`${LOG_EXPLORER_BASE_PATH}${item.objectId}`}
             data-test-subj="eventHome__savedQueryTableName"
@@ -86,7 +95,7 @@ export function SavedQueryTable({
     const curType = isSavedVisualization ? 'savedVisualization' : 'savedQuery';
     const displayType = !isSavedVisualization
       ? 'Query'
-      : savedObject?.sub_type === 'metric'
+      : [PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE].includes(savedObject?.subType)
       ? 'Metric'
       : 'Visualization';
     const record = {
@@ -98,6 +107,7 @@ export function SavedQueryTable({
       date_end: savedObject.selected_date_range.end,
       timestamp: savedObject.selected_timestamp?.name,
       fields: savedObject.selected_fields?.tokens || [],
+      subType: savedObject.subType,
     };
     return {
       id: h.objectId,

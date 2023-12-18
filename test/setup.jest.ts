@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom/extend-expect';
 import { configure } from '@testing-library/react';
 import { setOSDHttp, setOSDSavedObjectsClient } from '../common/utils';
 import { coreRefs } from '../public/framework/core_refs';

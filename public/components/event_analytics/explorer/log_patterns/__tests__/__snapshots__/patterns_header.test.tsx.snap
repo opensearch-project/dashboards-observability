@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Patterns header component Renders header of log patterns 1`] = `
-<PatternsHeader
+<Component
   isPatternConfigPopoverOpen={true}
   onPatternApply={[MockFunction]}
   patternRegexInput="[a-zA-Zd]"
@@ -773,5 +773,5 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
       </EuiFlexItem>
     </div>
   </EuiFlexGroup>
-</PatternsHeader>
+</Component>
 `;

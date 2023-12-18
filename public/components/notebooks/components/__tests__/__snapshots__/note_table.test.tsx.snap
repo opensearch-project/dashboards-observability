@@ -447,7 +447,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/02/2023 12:00 PM
                     </div>
                   </td>
                   <td
@@ -461,7 +461,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/01/2023 12:00 PM
                     </div>
                   </td>
                 </tr>
@@ -522,7 +522,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/02/2023 12:00 PM
                     </div>
                   </td>
                   <td
@@ -536,7 +536,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/01/2023 12:00 PM
                     </div>
                   </td>
                 </tr>
@@ -597,7 +597,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/02/2023 12:00 PM
                     </div>
                   </td>
                   <td
@@ -611,7 +611,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/01/2023 12:00 PM
                     </div>
                   </td>
                 </tr>
@@ -672,7 +672,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/02/2023 12:00 PM
                     </div>
                   </td>
                   <td
@@ -686,7 +686,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/01/2023 12:00 PM
                     </div>
                   </td>
                 </tr>
@@ -747,7 +747,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/02/2023 12:00 PM
                     </div>
                   </td>
                   <td
@@ -761,7 +761,7 @@ exports[`<NoteTable /> spec renders the component 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Invalid date
+                      01/01/2023 12:00 PM
                     </div>
                   </td>
                 </tr>

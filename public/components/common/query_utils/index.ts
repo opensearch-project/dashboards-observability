@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { Moment } from 'moment-timezone';
 import { isEmpty } from 'lodash';
-import { SearchMetaData } from 'public/components/event_analytics/redux/slices/search_meta_data_slice';
+import { SearchMetaData } from '../../event_analytics/redux/slices/search_meta_data_slice';
 import {
   PPL_DEFAULT_PATTERN_REGEX_FILETER,
   SELECTED_DATE_RANGE,
@@ -35,6 +35,28 @@ const escapeQuotes = (literal: string) => {
   return literal.replaceAll("'", "''");
 };
 
+export const findMinInterval = (start: string = '', end: string = '') => {
+  const momentStart = dateMath.parse(start)!;
+  const momentEnd = dateMath.parse(end, { roundUp: true })!;
+  const diffSeconds = momentEnd.unix() - momentStart.unix();
+  let minInterval = 'y';
+
+  // less than 1 second
+  if (diffSeconds <= 1) minInterval = 'ms';
+  // less than 2 minutes
+  else if (diffSeconds <= 60 * 2) minInterval = 's';
+  // less than 2 hours
+  else if (diffSeconds <= 3600 * 2) minInterval = 'm';
+  // less than 2 days
+  else if (diffSeconds <= 86400 * 2) minInterval = 'h';
+  // less than 1 month
+  else if (diffSeconds <= 86400 * 31) minInterval = 'd';
+  // less than 2 year
+  else if (diffSeconds <= 86400 * 366 * 2) minInterval = 'w';
+
+  return minInterval;
+};
+
 export const convertDateTime = (
   datetime: string,
   isStart = true,
@@ -54,6 +76,37 @@ export const convertDateTime = (
   }
   if (formatted) return returnTime!.utc().format(PPL_DATE_FORMAT);
   return returnTime;
+};
+
+export const updateCatalogVisualizationQuery = ({
+  catalogSourceName,
+  catalogTableName,
+  aggregation,
+  attributesGroupBy,
+  start,
+  end,
+  span = '1',
+  resolution = 'h',
+}: {
+  catalogSourceName: string;
+  catalogTableName: string;
+  aggregation: string;
+  attributesGroupBy: string[];
+  start: string;
+  end: string;
+  span: string;
+  resolution: string;
+}) => {
+  const attributesGroupString = attributesGroupBy.join(',');
+  const startEpochTime = convertDateTime(start, true, false, true);
+  const endEpochTime = convertDateTime(end, false, false, true);
+  const promQuery =
+    attributesGroupBy.length === 0
+      ? `${aggregation} (${catalogTableName})`
+      : `${aggregation} by(${attributesGroupString}) (${catalogTableName})`;
+
+  const newQuery = `source = ${catalogSourceName}.query_range('${promQuery}', ${startEpochTime}, ${endEpochTime}, '${span}${resolution}')`;
+  return newQuery;
 };
 
 const PROMQL_DEFAULT_AGGREGATION = 'avg';
@@ -128,13 +181,6 @@ export const updatePromQLQueryFilters = (
   const { connection, metric, aggregation, attributesGroupBy } = parsePromQLIntoKeywords(
     promQLQuery
   );
-  console.log('updatePromQLQueryFilters', {
-    connection,
-    metric,
-    aggregation,
-    attributesGroupBy,
-    promQLQuery,
-  });
   const promQLPart = buildPromQLFromMetricQuery({
     metric,
     attributesGroupBy: attributesGroupBy.split(','),
@@ -155,6 +201,24 @@ const getPPLIndex = (query: string): string => {
 
 export const getIndexPatternFromRawQuery = (query: string): string => {
   return getPromQLIndex(query) || getPPLIndex(query);
+};
+
+export const preprocessMetricQuery = ({ metaData, startTime, endTime }) => {
+  // convert to moment
+  const start = convertDateTime(startTime, true);
+  const end = convertDateTime(endTime, false);
+
+  const resolution = findMinInterval(start, end);
+
+  const visualizationQuery = updateCatalogVisualizationQuery({
+    ...metaData.queryMetaData,
+    start,
+    end,
+    span: '1',
+    resolution,
+  });
+
+  return visualizationQuery;
 };
 
 // insert time filter command and additional commands based on raw query

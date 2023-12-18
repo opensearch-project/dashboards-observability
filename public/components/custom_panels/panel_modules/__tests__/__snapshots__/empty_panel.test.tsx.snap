@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Empty panel view component renders empty panel view with disabled popover 1`] = `
-<EmptyPanelView
+<Component
   addVizDisabled={true}
   showFlyout={[MockFunction]}
 >
@@ -79,7 +79,7 @@ exports[`Empty panel view component renders empty panel view with disabled popov
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <AddVisualizationPopover
+            <Component
               addVizDisabled={true}
               showFlyout={[MockFunction]}
             >
@@ -193,7 +193,7 @@ exports[`Empty panel view component renders empty panel view with disabled popov
                   </div>
                 </div>
               </EuiPopover>
-            </AddVisualizationPopover>
+            </Component>
           </div>
         </EuiFlexItem>
       </div>
@@ -206,11 +206,11 @@ exports[`Empty panel view component renders empty panel view with disabled popov
       />
     </EuiSpacer>
   </div>
-</EmptyPanelView>
+</Component>
 `;
 
 exports[`Empty panel view component renders empty panel view with enabled popover 1`] = `
-<EmptyPanelView
+<Component
   addVizDisabled={false}
   showFlyout={[MockFunction]}
 >
@@ -288,7 +288,7 @@ exports[`Empty panel view component renders empty panel view with enabled popove
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <AddVisualizationPopover
+            <Component
               addVizDisabled={false}
               showFlyout={[MockFunction]}
             >
@@ -407,7 +407,7 @@ exports[`Empty panel view component renders empty panel view with enabled popove
                   </div>
                 </div>
               </EuiPopover>
-            </AddVisualizationPopover>
+            </Component>
           </div>
         </EuiFlexItem>
       </div>
@@ -420,5 +420,5 @@ exports[`Empty panel view component renders empty panel view with enabled popove
       />
     </EuiSpacer>
   </div>
-</EmptyPanelView>
+</Component>
 `;

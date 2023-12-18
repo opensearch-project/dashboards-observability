@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
-<VisaulizationFlyout
+<Component
   closeFlyout={[MockFunction]}
   end="now"
   http={[MockFunction]}
@@ -18,7 +18,7 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
   setToast={[MockFunction]}
   start="now-15m"
 >
-  <FlyoutContainers
+  <Component
     ariaLabel="addVisualizationFlyout"
     closeFlyout={[MockFunction]}
     flyoutBody={
@@ -1240,12 +1240,12 @@ exports[`Visualization Flyout Component renders add visualization Flyout 1`] = `
         </EuiPortal>
       </EuiFlyout>
     </div>
-  </FlyoutContainers>
-</VisaulizationFlyout>
+  </Component>
+</Component>
 `;
 
 exports[`Visualization Flyout Component renders replace visualization Flyout 1`] = `
-<VisaulizationFlyout
+<Component
   closeFlyout={[MockFunction]}
   end="2011-08-12T01:23:45.678Z"
   http={[MockFunction]}
@@ -1263,7 +1263,7 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
   setToast={[MockFunction]}
   start="2011-08-11T01:23:45.678Z"
 >
-  <FlyoutContainers
+  <Component
     ariaLabel="addVisualizationFlyout"
     closeFlyout={[MockFunction]}
     flyoutBody={
@@ -2509,6 +2509,6 @@ exports[`Visualization Flyout Component renders replace visualization Flyout 1`]
         </EuiPortal>
       </EuiFlyout>
     </div>
-  </FlyoutContainers>
-</VisaulizationFlyout>
+  </Component>
+</Component>
 `;
