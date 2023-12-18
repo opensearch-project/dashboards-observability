@@ -19,22 +19,20 @@ import {
   searchSavedObject,
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
-import { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import { ObservabilityPluginSetup, ObservabilityPluginStart, AssistantPluginSetup } from './types';
 import { PPLParsers } from './parsers/ppl_parser';
 
 export class ObservabilityPlugin
-  implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart, {
-    assistantDashboards?: {
-      registerMessageParser: () => void
-    }
-  }> {
+  implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps) {
+  public setup(core: CoreSetup, deps: {
+    assistantDashboards?: AssistantPluginSetup
+  }) {
     const { assistantDashboards } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
@@ -127,7 +125,7 @@ export class ObservabilityPlugin
       },
     }));
 
-    assistantDashboards.registerMessageParser(PPLParsers);
+    assistantDashboards?.registerMessageParser(PPLParsers);
 
     return {};
   }

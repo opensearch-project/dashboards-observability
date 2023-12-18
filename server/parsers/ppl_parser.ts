@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { MessageParser } from '../types';
+
 const extractPPLQueries = (content: string) => {
     return Array.from(content.matchAll(/(^|[\n\r]|:)\s*(source\s*=\s*.+)/gi)).map(
         (match) => match[2]
     );
 };
 
-export const PPLParsers = {
+export const PPLParsers: MessageParser = {
     id: 'ppl_visualization_message',
     async parserProvider(interaction) {
-        const ppls: string[] = interaction.additional_info?.["PPLTool.output"]?.flatMap((item: string) => {
+        const ppls: string[] = (interaction.additional_info?.["PPLTool.output"] as string[] | null)?.flatMap((item: string) => {
             let ppl: string = ""
             try {
                 const outputResp = JSON.parse(item);
@@ -22,7 +24,7 @@ export const PPLParsers = {
             }
 
             return extractPPLQueries(ppl);
-        });
+        }) || [];
 
         if (!ppls.length) return [];
 
