@@ -11,6 +11,7 @@ import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_o
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
+import { AssistantSetup } from './types';
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -26,6 +27,7 @@ export interface SetupDependencies {
   data: DataPublicPluginSetup;
   uiActions: UiActionsStart;
   managementOverview?: ManagementOverViewPluginSetup;
+  assistantDashboards?: AssistantSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
