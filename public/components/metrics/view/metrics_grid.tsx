@@ -3,142 +3,121 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
+import React, { useEffect, useMemo } from 'react';
+import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { useObservable } from 'react-use';
-import _ from 'lodash';
-import { useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { CoreStart } from '../../../../../../src/core/public';
 import { VisualizationContainer } from '../../custom_panels/panel_modules/visualization_container';
-import { MetricType } from '../../../../common/types/metrics';
-import { mergeLayoutAndVisualizations } from '../../custom_panels/helpers/utils';
-import { updateMetricsLayout, deSelectMetric } from '../redux/slices/metrics_slice';
-import { mergeLayoutAndMetrics } from '../helpers/utils';
+import { updateCatalogVisualizationQuery } from '../../common/query_utils';
+import {
+  allMetricsSelector,
+  dateSpanFilterSelector,
+  moveMetric as moveMetricAction,
+  refreshSelector,
+  selectedMetricsIdsSelector,
+  selectedMetricsSelector,
+} from '../redux/slices/metrics_slice';
 
 import './metrics_grid.scss';
+import { coreRefs } from '../../../framework/core_refs';
+import { PROMQL_METRIC_SUBTYPE } from '../../../../common/constants/shared';
+import { MetricsEditInline } from '../sidebar/metrics_edit_inline';
+import { EmptyMetricsView } from './empty_view';
 
 // HOC container to provide dynamic width for Grid layout
-const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface MetricsGridProps {
   chrome: CoreStart['chrome'];
-  panelVisualizations: MetricType[];
-  setPanelVisualizations: React.Dispatch<React.SetStateAction<MetricType[]>>;
-  editMode: boolean;
-  startTime: string;
-  endTime: string;
   moveToEvents: (savedVisualizationId: string) => any;
-  onRefresh: boolean;
-  editActionType: string;
-  setEditActionType: React.Dispatch<React.SetStateAction<string>>;
-  spanParam: string;
 }
 
-export const MetricsGrid = ({
-  chrome,
-  panelVisualizations,
-  setPanelVisualizations,
-  editMode,
-  startTime,
-  endTime,
-  moveToEvents,
-  onRefresh,
-  editActionType,
-  setEditActionType,
-  spanParam,
-}: MetricsGridProps) => {
-  // Redux tools
-  const dispatch = useDispatch();
-  const updateLayout = (metric: any) => dispatch(updateMetricsLayout(metric));
-  const handleRemoveMetric = (metric: any) => {
-    dispatch(deSelectMetric(metric));
-  };
+const visualizationFromMetric = (metric, dateSpanFilter): SavedVisualizationType => ({
+  ...metric,
+  query: updateCatalogVisualizationQuery({ ...metric, ...dateSpanFilter }),
+  queryMetaData: {
+    catalogSourceName: metric.catalogSourceName,
+    catalogTableName: metric.catalogTableName,
+    aggregation: metric.aggregation,
+    attributesGroupBy: metric.attributesGroupBy,
+  },
 
-  const [currentLayout, setCurrentLayout] = useState<Layout[]>([]);
-  const [postEditLayout, setPostEditLayout] = useState<Layout[]>([]);
-  const [gridData, setGridData] = useState(panelVisualizations.map(() => <></>));
-  const [removeMetricsList, setRemoveMetricsList] = useState<Array<{ id: string }>>([]);
-  const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
+  timeField: '@timestamp',
+  selected_date_range: dateSpanFilter,
+  userConfigs: {
+    dataConfig: {
+      type: 'line',
+      fillOpacity: 0,
+      lineWidth: 2,
+    },
+  },
+});
 
-  // Reset Size of Visualizations when layout is changed
-  const layoutChanged = (currLayouts: Layout[], allLayouts: Layouts) => {
-    window.dispatchEvent(new Event('resize'));
-    setPostEditLayout(currLayouts);
-  };
+const navigateToEventExplorerVisualization = (savedVisualizationId: string) => {
+  window.location.assign(`${observabilityLogsID}#/explorer/${savedVisualizationId}`);
+};
 
-  const loadVizComponents = () => {
-    const gridDataComps = panelVisualizations.map((panelVisualization: MetricType, index) => (
+export const InnerGridVisualization = ({ id, idx, dateSpanFilter, metric, refresh }) => {
+  if (!metric) return <></>;
+
+  return (
+    <EuiDraggable key={id} index={idx} draggableId={id}>
       <VisualizationContainer
-        key={panelVisualization.id}
-        editMode={editMode}
-        visualizationId={panelVisualization.id}
-        savedVisualizationId={panelVisualization.savedVisualizationId}
-        fromTime={startTime}
-        toTime={endTime}
-        onRefresh={onRefresh}
-        onEditClick={moveToEvents}
-        usedInNotebooks={true}
-        pplFilterValue=""
-        removeVisualization={removeVisualization}
-        catalogVisualization={
-          panelVisualization.metricType === 'savedCustomMetric' ? undefined : true
+        key={id}
+        visualizationId={id}
+        savedVisualizationId={metric.savedVisualizationId}
+        inputMetaData={
+          metric.savedVisualizationId ? undefined : visualizationFromMetric(metric, dateSpanFilter)
         }
-        spanParam={spanParam}
+        fromTime={dateSpanFilter.start}
+        toTime={dateSpanFilter.end}
+        onRefresh={refresh}
+        onEditClick={navigateToEventExplorerVisualization}
+        pplFilterValue=""
+        span={dateSpanFilter.span}
+        resolution={dateSpanFilter.resolution}
+        contextMenuId="metrics"
+        inlineEditor={
+          metric.subType === PROMQL_METRIC_SUBTYPE && <MetricsEditInline visualization={metric} />
+        }
       />
-    ));
-    setGridData(gridDataComps);
+    </EuiDraggable>
+  );
+};
+
+// Memoize each Grid Visualization panel
+const GridVisualization = React.memo(InnerGridVisualization);
+
+export const InnerMetricsGrid = ({
+  dateSpanFilter,
+  selectedMetrics,
+  selectedMetricsIds,
+  moveMetric,
+  allMetrics,
+}: MetricsGridProps) => {
+  const { chrome } = coreRefs;
+  const isLocked = useObservable(chrome!.getIsNavDrawerLocked$());
+
+  const onDragEnd = ({ source, destination }) => {
+    moveMetric({ source, destination });
   };
 
-  // Reload the Layout
-  const reloadLayout = () => {
-    const tempLayout: Layout[] = panelVisualizations.map((panelVisualization) => {
-      return {
-        i: panelVisualization.id,
-        x: panelVisualization.x,
-        y: panelVisualization.y,
-        w: panelVisualization.w,
-        h: panelVisualization.h,
-        minW: 12, // restricting width of the metric visualization
-        maxW: 12,
-        static: !editMode,
-      } as Layout;
+  const visualizationComponents = useMemo(() => {
+    if (selectedMetrics.length < 1) return <EmptyMetricsView />;
+
+    return selectedMetricsIds.map((id, idx) => {
+      const metric = allMetrics[id];
+      return (
+        <GridVisualization
+          id={id}
+          idx={idx}
+          key={id}
+          dateSpanFilter={dateSpanFilter}
+          metric={metric}
+        />
+      );
     });
-    setCurrentLayout(tempLayout);
-  };
-
-  // remove visualization from panel in edit mode
-  const removeVisualization = (visualizationId: string) => {
-    const newVisualizationList = _.reject(panelVisualizations, {
-      id: visualizationId,
-    });
-    setRemoveMetricsList([...removeMetricsList, { id: visualizationId }]);
-    mergeLayoutAndVisualizations(postEditLayout, newVisualizationList, setPanelVisualizations);
-  };
-
-  // Update layout whenever user edit gets completed
-  useEffect(() => {
-    if (editMode) {
-      reloadLayout();
-      loadVizComponents();
-    }
-  }, [editMode]);
-
-  useEffect(() => {
-    if (editActionType === 'cancel') {
-      setRemoveMetricsList([]);
-    }
-    if (editActionType === 'save') {
-      removeMetricsList.map((value) => handleRemoveMetric(value));
-      updateLayout(mergeLayoutAndMetrics(postEditLayout, panelVisualizations));
-      setEditActionType('');
-    }
-  }, [editActionType]);
-
-  // Update layout whenever visualizations are updated
-  useEffect(() => {
-    reloadLayout();
-    loadVizComponents();
-  }, [panelVisualizations]);
+  }, [selectedMetrics, dateSpanFilter]);
 
   // Reset Size of Panel Grid when Nav Dock is Locked
   useEffect(() => {
@@ -147,25 +126,25 @@ export const MetricsGrid = ({
     }, 300);
   }, [isLocked]);
 
-  useEffect(() => {
-    loadVizComponents();
-  }, [onRefresh]);
-
-  useEffect(() => {
-    loadVizComponents();
-  }, []);
-
   return (
-    <ResponsiveGridLayout
-      layouts={{ lg: currentLayout, md: currentLayout, sm: currentLayout }}
-      className="layout full-width"
-      breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-      cols={{ lg: 12, md: 12, sm: 12, xs: 1, xxs: 1 }}
-      onLayoutChange={layoutChanged}
-    >
-      {panelVisualizations.map((panelVisualization: MetricType, index) => (
-        <div key={panelVisualization.id}>{gridData[index]}</div>
-      ))}
-    </ResponsiveGridLayout>
+    <section className="metricsGrid">
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiDroppable droppableId="DROPPABLE_AREA_BARE">{visualizationComponents}</EuiDroppable>
+      </EuiDragDropContext>
+    </section>
   );
 };
+
+const mapStateToProps = (state) => ({
+  dateSpanFilter: dateSpanFilterSelector(state),
+  selectedMetrics: selectedMetricsSelector(state),
+  selectedMetricsIds: selectedMetricsIdsSelector(state),
+  allMetrics: allMetricsSelector(state),
+  refresh: refreshSelector(state),
+});
+
+const mapDispatchToProps = {
+  moveMetric: moveMetricAction,
+};
+
+export const MetricsGrid = connect(mapStateToProps, mapDispatchToProps)(InnerMetricsGrid);

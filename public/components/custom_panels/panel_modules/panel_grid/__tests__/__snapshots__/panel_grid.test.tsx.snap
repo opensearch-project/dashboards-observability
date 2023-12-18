@@ -311,6 +311,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
         "xxs": 1,
       }
     }
+    draggableHandle=".mouseGrabber"
     layouts={
       Object {
         "lg": Array [],
@@ -341,6 +342,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
           "xxs": 1,
         }
       }
+      draggableHandle=".mouseGrabber"
       layouts={
         Object {
           "lg": Array [],
@@ -360,7 +362,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
         compactType="vertical"
         containerPadding={null}
         draggableCancel=""
-        draggableHandle=""
+        draggableHandle=".mouseGrabber"
         isDraggable={true}
         isResizable={true}
         layout={Array []}

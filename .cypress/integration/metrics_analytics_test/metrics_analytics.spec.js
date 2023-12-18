@@ -281,7 +281,7 @@ const createSavedObjectMetric = ({ testMetricIndex }) => {
             name: PPL_METRICS_NAMES[testMetricIndex],
             description: '',
             type: 'line',
-            sub_type: 'metric',
+            subType: 'metric',
           },
         },
       },
