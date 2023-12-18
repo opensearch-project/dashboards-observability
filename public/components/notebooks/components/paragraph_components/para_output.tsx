@@ -20,7 +20,6 @@ import { ParaType } from '../../../../../common/types/notebooks';
 import { uiSettingsService } from '../../../../../common/utils';
 import { QueryDataGridMemo } from './para_query_grid';
 
-
 const createQueryColumns = (jsonColumns: any[]) => {
   let index = 0;
   const datagridColumns = [];
@@ -55,36 +54,32 @@ const getQueryOutputData = (queryObject: any) => {
   return data;
 };
 
-const QueryPara = ({inp, val}) => {
+const QueryPara = ({ inp, val }) => {
   const inputQuery = inp.substring(4, inp.length);
   const queryObject = JSON.parse(val);
-  
-  if (queryObject.hasOwnProperty('error')) 
-    return <EuiCodeBlock>{val}</EuiCodeBlock>;
 
+  if (queryObject.hasOwnProperty('error')) return <EuiCodeBlock>{val}</EuiCodeBlock>;
 
-  
-    const columns = createQueryColumns(queryObject.schema);
-    const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.id))
-    const data = getQueryOutputData(queryObject);
-    return (
-      <div>
-        <EuiText key={'query-input-key'} className={'wrapAll'}>
-          <b>{inputQuery}</b>
-        </EuiText>
-        <EuiSpacer />
-        <QueryDataGridMemo
-          rowCount={queryObject.datarows.length}
-          queryColumns={columns}
-          visibleColumns={visibleColumns}
-          setVisibleColumns={setVisibleColumns}
-          dataValues={data}
-        />
-      </div>
-    );
-  }
+  const columns = createQueryColumns(queryObject.schema);
+  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
+  const data = getQueryOutputData(queryObject);
+  return (
+    <div>
+      <EuiText key={'query-input-key'} className={'wrapAll'}>
+        <b>{inputQuery}</b>
+      </EuiText>
+      <EuiSpacer />
+      <QueryDataGridMemo
+        rowCount={queryObject.datarows.length}
+        queryColumns={columns}
+        visibleColumns={visibleColumns}
+        setVisibleColumns={setVisibleColumns}
+        dataValues={data}
+      />
+    </div>
+  );
+};
 
-}
 const OutputBody = ({
   typeOut,
   val,
@@ -109,7 +104,7 @@ const OutputBody = ({
   if (typeOut !== undefined) {
     switch (typeOut) {
       case 'QUERY':
-        return (<QueryPara inp={inp} val={val} />)
+        return <QueryPara inp={inp} val={val} />;
       case 'MARKDOWN':
         return (
           <EuiText className="wrapAll markdown-output-text">
