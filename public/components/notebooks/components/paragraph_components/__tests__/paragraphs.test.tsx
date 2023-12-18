@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { sampleParsedParagraghs1 } from '../../helpers/__tests__/sampleDefaultNotebooks';
+import { sampleParsedParagraghs1 } from '../../../../../../test/sampleDefaultNotebooks';
 import { Paragraphs } from '../paragraphs';
 
 jest.mock('../../../../../../../../src/plugins/embeddable/public', () => ({

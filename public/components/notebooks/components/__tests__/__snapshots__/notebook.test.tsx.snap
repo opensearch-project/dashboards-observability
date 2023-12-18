@@ -374,7 +374,48 @@ exports[`<Notebook /> spec renders the empty component 1`] = `
         </div>
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
-        />
+        >
+          <div>
+            <div
+              class="euiPopover euiPopover--anchorDownCenter"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButton euiButton--primary"
+                  id="reportingActionsButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                        fill-rule="non-zero"
+                      />
+                    </svg>
+                    <span
+                      class="euiButton__text"
+                    >
+                      Reporting actions
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
@@ -418,7 +459,9 @@ exports[`<Notebook /> spec renders the empty component 1`] = `
       />
       <h1
         class="euiTitle euiTitle--large"
-      />
+      >
+        sample-notebook-1
+      </h1>
       <div
         class="euiSpacer euiSpacer--m"
       />
@@ -436,7 +479,7 @@ exports[`<Notebook /> spec renders the empty component 1`] = `
                 Created 
                 <br />
                  
-                Invalid date
+                12/14/2023 06:49 PM
               </p>
             </div>
           </div>

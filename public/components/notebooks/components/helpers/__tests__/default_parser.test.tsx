@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defaultParagraphParser } from '../default_parser';
 import {
   sampleNotebook1,
   sampleNotebook2,
@@ -12,7 +11,8 @@ import {
   sampleNotebook5,
   sampleParsedParagraghs1,
   sampleParsedParagraghs2,
-} from './sampleDefaultNotebooks';
+} from '../../../../../../test/sampleDefaultNotebooks';
+import { defaultParagraphParser } from '../default_parser';
 
 // Perfect schema
 describe('Testing default backend parser function with perfect schema', () => {
