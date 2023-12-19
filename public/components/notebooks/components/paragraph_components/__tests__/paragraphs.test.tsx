@@ -8,7 +8,7 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { sampleParsedParagraghs1 } from '../../../../../../test/sampleDefaultNotebooks';
+import { sampleParsedParagraghs1 } from '../../../../../../test/sample_default_notebooks';
 import { Paragraphs } from '../paragraphs';
 
 jest.mock('../../../../../../../../src/plugins/embeddable/public', () => ({

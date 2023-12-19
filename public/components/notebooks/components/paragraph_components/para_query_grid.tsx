@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import $ from 'jquery';
 import { EuiDataGrid, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import $ from 'jquery';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface QueryDataGridProps {
   rowCount: number;

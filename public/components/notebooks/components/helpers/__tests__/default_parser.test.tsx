@@ -11,7 +11,7 @@ import {
   sampleNotebook5,
   sampleParsedParagraghs1,
   sampleParsedParagraghs2,
-} from '../../../../../../test/sampleDefaultNotebooks';
+} from '../../../../../../test/sample_default_notebooks';
 import { defaultParagraphParser } from '../default_parser';
 
 // Perfect schema

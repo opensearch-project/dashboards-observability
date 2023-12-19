@@ -4,15 +4,22 @@
  */
 
 import '@testing-library/jest-dom';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { HttpResponse } from '../../../../../../../src/core/public';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
-import { addCodeBlockResponse } from '../../../../../test/notebooks_constants';
+import {
+  addCodeBlockResponse,
+  clearOutputNotebook,
+  codeBlockNotebook,
+  codePlaceholderText,
+  notebookPutResponse,
+  runCodeBlockResponse,
+} from '../../../../../test/notebooks_constants';
 import { sampleSavedVisualization } from '../../../../../test/panels_constants';
-import { emptyNotebook, sampleNotebook1 } from '../../../../../test/sampleDefaultNotebooks';
+import { emptyNotebook, sampleNotebook1 } from '../../../../../test/sample_default_notebooks';
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { Notebook } from '../notebook';
@@ -75,9 +82,12 @@ describe('<Notebook /> spec', () => {
 
   it('renders the empty component and checks code block operations', async () => {
     httpClientMock.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    let postFlag = 1;
     httpClientMock.post = jest.fn(() => {
-      console.log('post called');
-      return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+      if (postFlag === 1) {
+        postFlag += 1;
+        return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+      } else return Promise.resolve((runCodeBlockResponse as unknown) as HttpResponse);
     });
     const utils = render(
       <Notebook
@@ -104,11 +114,7 @@ describe('<Notebook /> spec', () => {
     });
 
     await waitFor(() => {
-      expect(
-        utils.getByPlaceholderText(
-          'Type %md, %sql or %ppl on the first line to define the input type. Code block starts here.'
-        )
-      ).toBeInTheDocument();
+      expect(utils.getByPlaceholderText(codePlaceholderText)).toBeInTheDocument();
     });
 
     act(() => {
@@ -116,15 +122,227 @@ describe('<Notebook /> spec', () => {
     });
 
     await waitFor(() => {
-      expect(
-        utils.queryByPlaceholderText(
-          'Type %md, %sql or %ppl on the first line to define the input type. Code block starts here.'
-        )
-      ).toBeNull();
+      expect(utils.queryByPlaceholderText(codePlaceholderText)).toBeNull();
+    });
+
+    act(() => {
+      utils.getByLabelText('Toggle show input').click();
+    });
+
+    act(() => {
+      fireEvent.input(utils.getByPlaceholderText(codePlaceholderText), {
+        target: { value: '%md \\n hello' },
+      });
+      fireEvent.click(utils.getByText('Run'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByText('Run')).toBeNull();
+      expect(utils.getByText('hello')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('input_only'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByText('Refresh')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('output_only'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByText('Refresh')).toBeNull();
+      expect(utils.getByText('hello')).toBeInTheDocument();
     });
   });
 
-  it('renders the component', async () => {
+  it('renders a notebook and checks paragraph actions', async () => {
+    httpClientMock.get = jest.fn(() =>
+      Promise.resolve((codeBlockNotebook as unknown) as HttpResponse)
+    );
+    httpClientMock.put = jest.fn(() =>
+      Promise.resolve((clearOutputNotebook as unknown) as HttpResponse)
+    );
+    httpClientMock.delete = jest.fn(() =>
+      Promise.resolve(({ paragraphs: [] } as unknown) as HttpResponse)
+    );
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClientMock}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebook}
+        cloneNotebook={cloneNotebook}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Paragraph actions'));
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Clear all outputs'));
+    });
+
+    await waitFor(() => {
+      expect(
+        utils.queryByText(
+          'Are you sure you want to clear all outputs? The action cannot be undone.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByText('hello')).toBeNull();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Paragraph actions'));
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Delete all paragraphs'));
+    });
+
+    await waitFor(() => {
+      expect(
+        utils.queryByText(
+          'Are you sure you want to delete all paragraphs? The action cannot be undone.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByText('No paragraphs')).toBeInTheDocument();
+    });
+  });
+
+  it('renders a notebook and checks notebook actions', async () => {
+    const renameNotebookMock = jest.fn(() =>
+      Promise.resolve((notebookPutResponse as unknown) as HttpResponse)
+    );
+    const cloneNotebookMock = jest.fn(() => Promise.resolve('dummy-string'));
+    httpClientMock.get = jest.fn(() =>
+      Promise.resolve((codeBlockNotebook as unknown) as HttpResponse)
+    );
+
+    httpClientMock.put = jest.fn(() => {
+      return Promise.resolve((notebookPutResponse as unknown) as HttpResponse);
+    });
+
+    httpClientMock.post = jest.fn(() => {
+      return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+    });
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="mock-id"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClientMock}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={renameNotebookMock}
+        cloneNotebook={cloneNotebookMock}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Notebook actions'));
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Rename notebook'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByTestId('custom-input-modal-input')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.input(utils.getByTestId('custom-input-modal-input'), {
+        target: { value: 'test-notebook-newname' },
+      });
+      fireEvent.click(utils.getByTestId('custom-input-modal-confirm-button'));
+    });
+
+    await waitFor(() => {
+      expect(renameNotebookMock).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Notebook actions'));
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Duplicate notebook'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByTestId('custom-input-modal-input')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('custom-input-modal-confirm-button'));
+    });
+
+    expect(cloneNotebookMock).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      fireEvent.click(utils.getByText('Notebook actions'));
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByText('Delete notebook'));
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByTestId('delete-notebook-modal-input')).toBeInTheDocument();
+    });
+
+    act(() => {
+      fireEvent.input(utils.getByTestId('delete-notebook-modal-input'), {
+        target: { value: 'delete' },
+      });
+    });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('delete-notebook-modal-delete-button'));
+    });
+
+    expect(deleteNotebook).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the visualization component', async () => {
     SavedObjectsActions.getBulk = jest.fn().mockResolvedValue({
       observabilityObjectList: [{ savedVisualization: sampleSavedVisualization }],
     });

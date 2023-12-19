@@ -7,7 +7,7 @@ import { render } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { sampleParsedParagraghs1 } from '../../../../../../test/sampleDefaultNotebooks';
+import { sampleParsedParagraghs1 } from '../../../../../../test/sample_default_notebooks';
 import { ParaOutput } from '../para_output';
 import { uiSettingsService } from '../../../../../../common/utils/core_services';
 
