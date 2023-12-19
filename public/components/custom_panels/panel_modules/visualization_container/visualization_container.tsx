@@ -37,7 +37,10 @@ import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import {
+  PROMQL_METRIC_SUBTYPE,
+  observabilityMetricsID,
+} from '../../../../../common/constants/shared';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -175,7 +178,12 @@ export const VisualizationContainer = ({
       disabled={editMode}
       onClick={() => {
         closeActionsMenu();
-        onEditClick(savedVisualizationId);
+        console.log('Edit menu click', { savedVisualizationId, visualizationMetaData });
+        if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+          // window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
+        } else {
+          // onEditClick(savedVisualizationId);
+        }
       }}
     >
       Edit
@@ -235,6 +243,7 @@ export const VisualizationContainer = ({
 
     if (!visualization && !savedVisualizationId) return;
 
+    console.log('loadvisualization', { visualization });
     if (visualization.subType === PROMQL_METRIC_SUBTYPE) {
       renderCatalogVisualization({
         visualization,
