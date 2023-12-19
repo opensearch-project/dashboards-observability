@@ -38,8 +38,8 @@ import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
 import {
-  PROMQL_METRIC_SUBTYPE,
   observabilityMetricsID,
+  PROMQL_METRIC_SUBTYPE,
 } from '../../../../../common/constants/shared';
 
 /*
@@ -81,6 +81,7 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
+  actionMenuType?: string;
 }
 
 export const VisualizationContainer = ({
@@ -101,6 +102,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   inlineEditor,
+  actionMenuType,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -178,11 +180,10 @@ export const VisualizationContainer = ({
       disabled={editMode}
       onClick={() => {
         closeActionsMenu();
-        console.log('Edit menu click', { savedVisualizationId, visualizationMetaData });
         if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
-          // window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
+          window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
         } else {
-          // onEditClick(savedVisualizationId);
+          onEditClick(savedVisualizationId);
         }
       }}
     >
@@ -225,7 +226,10 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+  if (
+    visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE &&
+    actionMenuType === 'metricsGrid'
+  ) {
     popoverPanel = [showPPLQueryPanel];
   } else if (usedInNotebooks) {
     popoverPanel = [popoverPanel[0]];
@@ -243,7 +247,6 @@ export const VisualizationContainer = ({
 
     if (!visualization && !savedVisualizationId) return;
 
-    console.log('loadvisualization', { visualization });
     if (visualization.subType === PROMQL_METRIC_SUBTYPE) {
       renderCatalogVisualization({
         visualization,

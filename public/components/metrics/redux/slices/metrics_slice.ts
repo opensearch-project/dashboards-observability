@@ -79,7 +79,6 @@ export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
   const modifiableMetricsMap = { ...metrics };
 
   const mergedMetrics = mergeWith(modifiableMetricsMap, newMetricMap, mergeMetricCustomizer);
-  console.log('mergeMetrics', { mergedMetrics, modifiableMetricsMap, newMetricMap });
   dispatch(setMetrics(mergedMetrics));
 };
 
