@@ -262,6 +262,9 @@ export const VisualizationContainer = ({
     //     setIsError
     //   );
     //   console.log('fetchedVisualization in if: ', fetchedVisualization);
+        //  metricType = fetchedVisualization.metric_type;
+
+        //  if (metricType === 'openTelemetryMetric') panelVisualization = fetchedVisualization;
     // }
     if (metricType === 'openTelemetryMetric')
       await renderOpenTelemetryVisualization(

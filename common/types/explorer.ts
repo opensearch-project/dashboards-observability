@@ -180,6 +180,7 @@ export interface SavedVisualization extends SavedObjectAttributes {
   application_id?: string;
   dataSources: string; // list of type SelectedDataSources that is stringified
   queryLang: string;
+  metricType?: string; // exists if sub type is metric
 }
 
 export interface ExplorerDataType {

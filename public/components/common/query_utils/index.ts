@@ -67,7 +67,7 @@ export const convertDateTime = (
 ) => {
   console.log('elements: ', datetime, isStart, formatted, isMetrics, isOtel);
   let returnTime: Moment = '';
-  console.log('returnTime: ', returnTime);
+  // console.log('returnTime: ', returnTime);
 
   if (isStart) {
     returnTime = dateMath.parse(datetime);
@@ -75,7 +75,7 @@ export const convertDateTime = (
     returnTime = dateMath.parse(datetime, { roundUp: true });
   }
 
-  console.log('returnTime after: ', returnTime);
+  // console.log('returnTime after: ', returnTime);
   if (isOtel) {
     const formattedDate = returnTime!.utc().format(OTEL_DATE_FORMAT);
     const milliseconds = returnTime!.millisecond();

@@ -146,6 +146,7 @@ export const fetchVisualizationById = async (
     .then((res) => {
       const visualization = (res.observabilityObjectList[0] as ObservabilitySavedVisualization)
         .savedVisualization;
+      console.log('visualization in fetching visualization', visualization);
       savedVisualization = {
         ...visualization,
         id: res.observabilityObjectList[0].objectId,
@@ -468,6 +469,19 @@ const fetchSampleOTDocument = (
     .catch((error) => console.error(error));
 };
 
+const extractIndexAndDocumentName = (metricString: string): [string, string] | null => {
+  const pattern = /\[Otel Metric\]\s(\S+?-\S+?)\.(\S+)/;
+  const match = metricString.match(pattern);
+
+  if (match) {
+    const index = match[1];
+    const documentName = match[2];
+    return [index, documentName];
+  } else {
+    return null;
+  }
+};
+
 export const renderOpenTelemetryVisualization = async (
   savedVisualizationId: string,
   startTime: string,
@@ -484,14 +498,19 @@ export const renderOpenTelemetryVisualization = async (
 ) => {
   startTime = 'now-15y';
   endTime = 'now';
-  console.log('render: ', startTime, endTime);
+  console.log('render panelVisualization: ', panelVisualization);
   const { http } = coreRefs;
   const visualizationType = 'bar';
-  const fetchSampleDocument = await fetchSampleOTDocument(
-    panelVisualization?.metric?.index,
-    http,
-    savedVisualizationId
-  )();
+  let index = panelVisualization?.metric?.index;
+
+  if (index === undefined) {
+    const indexAndDocumentName = extractIndexAndDocumentName(panelVisualization.name);
+    console.log('test: ', indexAndDocumentName);
+    index = indexAndDocumentName[0];
+    savedVisualizationId = indexAndDocumentName[1];
+  }
+  console.log('index and documentName: ', index, savedVisualizationId);
+  const fetchSampleDocument = await fetchSampleOTDocument(index, http, savedVisualizationId)();
 
   const source = fetchSampleDocument.hits[0]._source;
   console.log('source: ', source);
@@ -506,7 +525,7 @@ export const renderOpenTelemetryVisualization = async (
         formattedEndTime,
         savedVisualizationId,
         http,
-        panelVisualization?.metric?.index,
+        index,
         setIsError,
         setIsLoading
       )();
@@ -580,6 +599,9 @@ export const parseSavedVisualizations = (
     userConfigs: visualization.savedVisualization.userConfigs || {},
     subType: visualization.savedVisualization.hasOwnProperty('subType')
       ? visualization.savedVisualization.subType
+      : '',
+    metric_type: visualization.savedVisualization.hasOwnProperty('metric_type')
+      ? visualization.savedVisualization.metricType
       : '',
     units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
       ? visualization.savedVisualization.units_of_measure

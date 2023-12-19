@@ -113,7 +113,7 @@ export const createOtelMetric = (metric: any) => {
       tokens: [],
     },
     sub_type: 'metric',
-    metricType: 'openTelemetryMetric',
+    metric_type: 'openTelemetryMetric',
     user_configs: {},
   };
 };

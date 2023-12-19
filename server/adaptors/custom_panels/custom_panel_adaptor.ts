@@ -228,6 +228,9 @@ export class CustomPanelsAdaptor {
       subType: visualization.savedVisualization.hasOwnProperty('subType')
         ? visualization.savedVisualization.subType
         : '',
+      metric_type: visualization.savedVisualization.hasOwnProperty('metric_type')
+        ? visualization.savedVisualization.metric_type
+        : '',
       units_of_measure: visualization.savedVisualization.hasOwnProperty('units_of_measure')
         ? visualization.savedVisualization.units_of_measure
         : '',

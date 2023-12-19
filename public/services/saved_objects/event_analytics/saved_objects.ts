@@ -58,6 +58,7 @@ export default class SavedObjects {
     applicationId = '',
     userConfigs = '',
     subType = '',
+    metricType = '',
     unitsOfMeasure = '',
     selectedLabels,
   }: any) {
@@ -96,6 +97,10 @@ export default class SavedObjects {
 
     if (!isEmpty(subType)) {
       objRequest.object.subType = subType;
+    }
+
+    if (!isEmpty(metricType)) {
+      objRequest.object.metric_type = metricType;
     }
 
     if (!isEmpty(unitsOfMeasure)) {
@@ -161,6 +166,7 @@ export default class SavedObjects {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
     });
@@ -224,6 +230,7 @@ export default class SavedObjects {
       userConfigs: params.userConfigs,
       description: params.description,
       subType: params.subType,
+      metricType: params.metricType,
       unitsOfMeasure: params.unitsOfMeasure,
       selectedLabels: params.selectedLabels,
     });
