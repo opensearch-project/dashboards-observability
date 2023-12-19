@@ -12,7 +12,7 @@ exports[`Visualization Container Component renders add visualization container 1
     }
   }
 >
-  <Component
+  <VisualizationContainer
     cloneVisualization={[MockFunction]}
     contextMenuId="visualization"
     editMode={true}
@@ -163,6 +163,6 @@ exports[`Visualization Container Component renders add visualization container 1
         </div>
       </div>
     </EuiPanel>
-  </Component>
+  </VisualizationContainer>
 </Provider>
 `;

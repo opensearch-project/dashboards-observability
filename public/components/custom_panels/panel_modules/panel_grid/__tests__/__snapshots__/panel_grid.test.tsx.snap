@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Panel Grid Component renders panel grid component with empty visualizations 1`] = `
-<Component
+<PanelGrid
   chrome={
     Object {
       "addApplicationClass": [MockFunction],
@@ -398,5 +398,5 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       </ReactGridLayout>
     </ResponsiveReactGridLayout>
   </WidthProvider>
-</Component>
+</PanelGrid>
 `;
