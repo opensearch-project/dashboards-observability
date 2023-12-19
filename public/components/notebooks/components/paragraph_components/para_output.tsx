@@ -17,7 +17,7 @@ import {
   DashboardStart,
 } from '../../../../../../../src/plugins/dashboard/public';
 import { ParaType } from '../../../../../common/types/notebooks';
-import { uiSettingsService } from '../../../../../common/utils';
+import { getOSDHttp, getPPLService, uiSettingsService } from '../../../../../common/utils';
 import { QueryDataGridMemo } from './para_query_grid';
 
 const createQueryColumns = (jsonColumns: any[]) => {
@@ -125,6 +125,8 @@ const OutputBody = ({
           </>
         );
       case 'OBSERVABILITY_VISUALIZATION':
+        let http = getOSDHttp();
+        let pplService = getPPLService();
         let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
         let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
         fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
@@ -139,14 +141,14 @@ const OutputBody = ({
             </EuiText>
             <div style={{ height: '300px', width: '100%' }}>
               <VisualizationContainer
-                http={props.http}
+                http={http}
                 editMode={false}
                 visualizationId={''}
                 onEditClick={onEditClick}
-                savedVisualizationId={para.visSavedObjId}
-                pplService={props.pplService}
-                fromTime={para.visStartTime}
-                toTime={para.visEndTime}
+                savedVisualizationId={visInput.visSavedObjId}
+                pplService={pplService}
+                fromTime={visInput?.timeRange?.from}
+                toTime={visInput?.timeRange?.to}
                 onRefresh={false}
                 pplFilterValue={''}
                 usedInNotebooks={true}
