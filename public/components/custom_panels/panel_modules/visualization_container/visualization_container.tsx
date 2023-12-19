@@ -37,7 +37,10 @@ import './visualization_container.scss';
 import { VizContainerError } from '../../../../../common/types/custom_panels';
 import { metricQuerySelector } from '../../../metrics/redux/slices/metrics_slice';
 import { coreRefs } from '../../../../framework/core_refs';
-import { PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
+import {
+  observabilityMetricsID,
+  PROMQL_METRIC_SUBTYPE,
+} from '../../../../../common/constants/shared';
 
 /*
  * Visualization container - This module is a placeholder to add visualizations in react-grid-layout
@@ -78,6 +81,7 @@ interface Props {
   removeVisualization?: (visualizationId: string) => void;
   catalogVisualization?: boolean;
   inlineEditor?: JSX.Element;
+  actionMenuType?: string;
 }
 
 export const VisualizationContainer = ({
@@ -98,6 +102,7 @@ export const VisualizationContainer = ({
   removeVisualization,
   catalogVisualization,
   inlineEditor,
+  actionMenuType,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [visualizationTitle, setVisualizationTitle] = useState('');
@@ -175,7 +180,11 @@ export const VisualizationContainer = ({
       disabled={editMode}
       onClick={() => {
         closeActionsMenu();
-        onEditClick(savedVisualizationId);
+        if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+          window.location.assign(`${observabilityMetricsID}#/${savedVisualizationId}`);
+        } else {
+          onEditClick(savedVisualizationId);
+        }
       }}
     >
       Edit
@@ -217,7 +226,10 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE) {
+  if (
+    visualizationMetaData?.subType === PROMQL_METRIC_SUBTYPE &&
+    actionMenuType === 'metricsGrid'
+  ) {
     popoverPanel = [showPPLQueryPanel];
   } else if (usedInNotebooks) {
     popoverPanel = [popoverPanel[0]];

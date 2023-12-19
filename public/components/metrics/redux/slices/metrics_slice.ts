@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { keyBy, mergeWith, pick, sortBy, merge } from 'lodash';
+import { createSlice } from '@reduxjs/toolkit';
+import { keyBy, mergeWith, pick, sortBy } from 'lodash';
 import { ouiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   OBSERVABILITY_CUSTOM_METRIC,
@@ -18,7 +18,7 @@ import { ObservabilitySavedVisualization } from '../../../../services/saved_obje
 import { pplServiceRequestor } from '../../helpers/utils';
 import { coreRefs } from '../../../../framework/core_refs';
 import { PPL_METRIC_SUBTYPE, PROMQL_METRIC_SUBTYPE } from '../../../../../common/constants/shared';
-import { getOSDHttp, getPPLService } from '../../../../../common/utils';
+import { getPPLService } from '../../../../../common/utils';
 
 export interface IconAttributes {
   color: string;
@@ -37,6 +37,14 @@ const coloredIconsFrom = (dataSources: string[]): { [dataSource: string]: IconAt
 
   return Object.fromEntries(keyedIcons);
 };
+
+export interface DateSpanFilter {
+  start: string;
+  end: string;
+  span: number;
+  resolution: string;
+  recentlyUsedRanges: string[];
+}
 
 const initialState = {
   metrics: {},
@@ -66,8 +74,13 @@ const mergeMetricCustomizer = function (objValue, srcValue) {
         : srcValue.availableAttributes,
   };
 };
+export const mergeMetrics = (newMetricMap) => (dispatch, getState) => {
+  const { metrics } = getState().metrics;
+  const modifiableMetricsMap = { ...metrics };
 
-const now = () => new Date().getMilliseconds();
+  const mergedMetrics = mergeWith(modifiableMetricsMap, newMetricMap, mergeMetricCustomizer);
+  dispatch(setMetrics(mergedMetrics));
+};
 
 export const loadMetrics = () => async (dispatch) => {
   const pplService = getPPLService();
@@ -81,15 +94,15 @@ export const loadMetrics = () => async (dispatch) => {
     setDataSourceIcons(coloredIconsFrom([OBSERVABILITY_CUSTOM_METRIC, ...remoteDataSources]))
   );
 
-  const remoteDataRequests = fetchRemoteMetrics(remoteDataSources);
+  const remoteDataRequests = await fetchRemoteMetrics(remoteDataSources);
   const metricsResultSet = await Promise.all([customDataRequest, ...remoteDataRequests]);
   const metricsResult = metricsResultSet.flat();
 
   const metricsMapById = keyBy(metricsResult.flat(), 'id');
-  await dispatch(mergeMetrics(metricsMapById));
+  dispatch(mergeMetrics(metricsMapById));
 
   const sortedIds = sortBy(metricsResult, 'catalog', 'id').map((m) => m.id);
-  await dispatch(setSortedIds(sortedIds));
+  dispatch(setSortedIds(sortedIds));
 };
 
 const fetchCustomMetrics = async () => {
@@ -150,17 +163,9 @@ export const metricSlice = createSlice({
   name: REDUX_SLICE_METRICS,
   initialState,
   reducers: {
-    mergeMetrics: (state, { payload }) => {
-      const { metrics } = state;
-      const modifiableMetricsMap = { ...metrics };
-
-      const mergedMetrics = mergeWith(modifiableMetricsMap, payload, mergeMetricCustomizer);
-      state.metrics = mergedMetrics;
+    setMetrics: (state, { payload }) => {
+      state.metrics = payload;
     },
-
-    // setMetrics: (state, { payload }) => {
-    //   state.metrics = payload;
-    // },
     setMetric: (state, { payload }) => {
       state.metrics[payload.id] = payload;
     },
@@ -202,15 +207,19 @@ export const metricSlice = createSlice({
     setDataSourceIcons: (state, { payload }) => {
       state.dataSourceIcons = payload;
     },
+    setDateSpan: (state, { payload }) => {
+      state.dateSpanFilter = { ...state.dateSpanFilter, ...payload };
+    },
+    setRefresh: (state) => {
+      state.refresh = Date.now();
+    },
   },
 });
 
 export const {
-  setMetrics,
   deSelectMetric,
   clearSelectedMetrics,
-
-  mergeMetrics,
+  selectMetric,
   moveMetric,
   setSearch,
   setDateSpan,
@@ -222,7 +231,7 @@ export const {
 
 /** private actions */
 
-const { selectMetric, setMetric, setSortedIds } = metricSlice.actions;
+const { setMetrics, setMetric, setSortedIds } = metricSlice.actions;
 
 const getAvailableAttributes = (id, metricIndex) => async (dispatch, getState) => {
   const { toasts } = coreRefs;
@@ -295,15 +304,11 @@ export const availableMetricsSelector = (state) => {
 export const selectedMetricsSelector = (state) =>
   pick(state.metrics.metrics, state.metrics.selectedIds) ?? {};
 
-export const selectedMetricByIdSelector = (id) => (state) => state.metrics.metrics[id];
-
 export const selectedMetricsIdsSelector = (state) => state.metrics.selectedIds ?? [];
 
 export const searchSelector = (state) => state.metrics.search;
 
 export const metricIconsSelector = (state) => state.metrics.dataSourceIcons;
-
-export const metricsLayoutSelector = (state) => state.metrics.metricsLayout;
 
 export const dateSpanFilterSelector = (state) => state.metrics.dateSpanFilter;
 
