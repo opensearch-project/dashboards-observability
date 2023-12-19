@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { PanelGrid } from '../panel_grid';
-import PPLService from '../../../../../services/requests/ppl';
 import { VisualizationType } from '../../../../../../common/types/custom_panels';
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
-import { waitFor } from '@testing-library/react';
+import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
+import PPLService from '../../../../../services/requests/ppl';
+import { PanelGrid } from '../panel_grid';
 
 describe('Panel Grid Component', () => {
   configure({ adapter: new Adapter() });
@@ -57,7 +58,11 @@ describe('Panel Grid Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

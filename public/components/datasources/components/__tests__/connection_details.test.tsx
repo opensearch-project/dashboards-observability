@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
 import {
   testPrometheusConnectionDetails,
@@ -18,12 +20,26 @@ describe('Connection Details test', () => {
   it('Renders connection details for s3 datasource', async () => {
     const wrapper = mount(<ConnectionDetails {...testS3ConnectionDetails} />);
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
   it('Renders connection details for prometheus datasource', async () => {
     const wrapper = mount(<ConnectionDetails {...testPrometheusConnectionDetails} />);
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { Bar } from '../bar/bar';
 import {
-  LAYOUT_CONFIG,
   HORIZONTAL_BAR_TEST_VISUALIZATIONS_DATA,
+  LAYOUT_CONFIG,
 } from '../../../../../test/event_analytics_constants';
+import { Bar } from '../bar/bar';
 
 describe('Horizontal bar component', () => {
   configure({ adapter: new Adapter() });
@@ -28,7 +29,11 @@ describe('Horizontal bar component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

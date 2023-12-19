@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { ServiceConfig } from '../components/config_components/service_config';
-import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import toJson from 'enzyme-to-json';
 import DSLService from 'public/services/requests/dsl';
+import React from 'react';
+import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import { ServiceConfig } from '../components/config_components/service_config';
 
 describe('Service Config component', () => {
   configure({ adapter: new Adapter() });
 
-  it('renders empty service config', () => {
+  it('renders empty service config', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -46,7 +48,7 @@ describe('Service Config component', () => {
         setStartTime={setStartTime}
         endTime="now"
         setEndTime={setEndTime}
-        mode='data_prepper'
+        mode="data_prepper"
         dslService={dslService}
         selectedServices={[]}
         setSelectedServices={setSelectedServices}
@@ -63,10 +65,17 @@ describe('Service Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
-  it('renders with one service selected', () => {
+  it('renders with one service selected', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -108,7 +117,7 @@ describe('Service Config component', () => {
         setStartTime={setStartTime}
         endTime="now"
         setEndTime={setEndTime}
-        mode='data_prepper'
+        mode="data_prepper"
         dslService={dslService}
         selectedServices={[]}
         setSelectedServices={setSelectedServices}
@@ -125,6 +134,13 @@ describe('Service Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

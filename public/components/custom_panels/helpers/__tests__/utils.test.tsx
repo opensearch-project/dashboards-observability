@@ -4,21 +4,24 @@
  */
 
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import moment from 'moment';
 import React from 'react';
 import { PPL_DATE_FORMAT } from '../../../../../common/constants/shared';
 import {
   sampleLayout,
   sampleMergedVisualizations,
-  samplePanelVisualizations,
   samplePPLEmptyResponse,
   samplePPLResponse,
+  samplePanelVisualizations,
   sampleSavedVisualization,
   sampleSavedVisualizationForHorizontalBar,
   sampleSavedVisualizationForLine,
 } from '../../../../../test/panels_constants';
+import { convertDateTime } from '../../../common/query_utils';
 import {
   displayVisualization,
   isDateValid,
@@ -27,7 +30,6 @@ import {
   mergeLayoutAndVisualizations,
   onTimeChange,
 } from '../utils';
-import { convertDateTime } from '../../../common/query_utils';
 
 describe('Utils helper functions', () => {
   configure({ adapter: new Adapter() });
@@ -103,18 +105,33 @@ describe('Utils helper functions', () => {
     expect(isPPLFilterValid('', setToast)).toBe(true);
   });
 
-  it('renders displayVisualization function', () => {
+  it('renders displayVisualization function', async () => {
     const wrapper1 = mount(
       <div>
         {displayVisualization(sampleSavedVisualization.visualization, samplePPLResponse, 'bar')}
       </div>
     );
-    expect(wrapper1).toMatchSnapshot();
+    wrapper1.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper1, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
 
     const wrapper2 = mount(
       <div>{displayVisualization(sampleSavedVisualizationForLine, samplePPLResponse, 'line')}</div>
     );
-    expect(wrapper2).toMatchSnapshot();
+
+    wrapper2.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper2, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
 
     const wrapper4 = mount(
       <div>
@@ -126,10 +143,26 @@ describe('Utils helper functions', () => {
       </div>
     );
     expect(wrapper4).toMatchSnapshot();
+    wrapper4.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper4, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
 
     const wrapper6 = mount(
       <div>{displayVisualization({}, samplePPLEmptyResponse, 'horizontal_bar')}</div>
     );
     expect(wrapper6).toMatchSnapshot();
+    wrapper6.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper6, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

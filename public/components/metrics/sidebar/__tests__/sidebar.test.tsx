@@ -3,20 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { applyMiddleware, createStore } from '@reduxjs/toolkit';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
-import PPLService from '../../../../services/requests/ppl';
-import { applyMiddleware, createStore } from '@reduxjs/toolkit';
-import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
-import { Sidebar } from '../sidebar';
 import thunk from 'redux-thunk';
-import { coreRefs } from '../../../../framework/core_refs';
+import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { sampleSavedMetric } from '../../../../../test/metrics_contants';
+import { coreRefs } from '../../../../framework/core_refs';
+import { rootReducer } from '../../../../framework/redux/reducers';
+import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
+import { Sidebar } from '../sidebar';
 
 describe('Side Bar Component', () => {
   configure({ adapter: new Adapter() });
@@ -46,7 +47,11 @@ describe('Side Bar Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

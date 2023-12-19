@@ -7,6 +7,7 @@ import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
@@ -68,7 +69,11 @@ describe('Panels Table Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 
@@ -103,7 +108,11 @@ describe('Panels Table Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 

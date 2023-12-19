@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { LogConfig } from '../components/config_components/log_config';
-import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import toJson from 'enzyme-to-json';
 import DSLService from 'public/services/requests/dsl';
+import React from 'react';
+import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import { LogConfig } from '../components/config_components/log_config';
 
 describe('Log Config component', () => {
   configure({ adapter: new Adapter() });
 
-  it('renders empty log config', () => {
+  it('renders empty log config', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -63,10 +65,17 @@ describe('Log Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
-  it('renders with query', () => {
+  it('renders with query', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -116,6 +125,13 @@ describe('Log Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

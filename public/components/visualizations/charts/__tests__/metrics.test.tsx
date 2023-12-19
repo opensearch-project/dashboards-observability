@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { Metrics } from '../metrics/metrics';
 import {
   LAYOUT_CONFIG,
   METRICS_TEST_VISUALIZATIONS_DATA,
 } from '../../../../../test/event_analytics_constants';
+import { Metrics } from '../metrics/metrics';
 
 describe('Metrics component', () => {
   configure({ adapter: new Adapter() });
@@ -28,7 +29,11 @@ describe('Metrics component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

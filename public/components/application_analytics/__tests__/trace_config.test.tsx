@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { TraceConfig } from '../components/config_components/trace_config';
-import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import toJson from 'enzyme-to-json';
 import DSLService from 'public/services/requests/dsl';
+import React from 'react';
+import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import { TraceConfig } from '../components/config_components/trace_config';
 
 describe('Trace Config component', () => {
   configure({ adapter: new Adapter() });
 
-  it('renders empty trace config', () => {
+  it('renders empty trace config', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -55,11 +57,17 @@ describe('Trace Config component', () => {
         setFiltersWithStorage={setFiltersWithStorage}
       />
     );
-
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
-  it('renders with one trace selected', () => {
+  it('renders with one trace selected', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -111,6 +119,13 @@ describe('Trace Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

@@ -7,11 +7,12 @@ import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
-import { SELECTED_PANELS_OPTIONS } from '../../../../../../test/event_analytics_constants';
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
+import { SELECTED_PANELS_OPTIONS } from '../../../../../../test/event_analytics_constants';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { rootReducer } from '../../../../../framework/redux/reducers';
 import SavedObjects from '../../../../../services/saved_objects/event_analytics/saved_objects';
@@ -56,7 +57,11 @@ describe('Saved query table component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

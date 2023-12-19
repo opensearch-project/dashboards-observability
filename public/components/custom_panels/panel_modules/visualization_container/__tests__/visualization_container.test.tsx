@@ -3,18 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import PPLService from '../../../../../services/requests/ppl';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { VisualizationContainer } from '../visualization_container';
-import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { HttpResponse } from '../../../../../../../../src/core/public';
-import { waitFor } from '@testing-library/react';
+import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import {
-  sampleSavedVisualization,
   samplePPLResponse,
+  sampleSavedVisualization,
 } from '../../../../../../test/panels_constants';
+import PPLService from '../../../../../services/requests/ppl';
+import { VisualizationContainer } from '../visualization_container';
 
 describe('Visualization Container Component', () => {
   configure({ adapter: new Adapter() });
@@ -63,7 +64,11 @@ describe('Visualization Container Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

@@ -3,27 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { CustomPanelView } from '../custom_panel_view';
-import { waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { applyMiddleware, createStore } from 'redux';
+import thunk from 'redux-thunk';
+import { HttpResponse } from '../../../../../../src/core/public';
+import DSLService from '../../../../public/services/requests/dsl';
+import PPLService from '../../../../public/services/requests/ppl';
+import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
+import httpClientMock from '../../../../test/__mocks__/httpClientMock';
 import {
   panelBreadCrumbs,
   sampleEmptyPanel,
-  samplePanel,
   samplePPLResponse,
+  samplePanel,
   sampleSavedVisualization,
 } from '../../../../test/panels_constants';
-import httpClientMock from '../../../../test/__mocks__/httpClientMock';
-import PPLService from '../../../../public/services/requests/ppl';
-import DSLService from '../../../../public/services/requests/dsl';
-import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
-import { HttpResponse } from '../../../../../../src/core/public';
-import { applyMiddleware, createStore } from 'redux';
 import { rootReducer } from '../../../framework/redux/reducers';
-import thunk from 'redux-thunk';
-import { Provider } from 'react-redux';
+import { CustomPanelView } from '../custom_panel_view';
 
 describe('Panels View Component', () => {
   configure({ adapter: new Adapter() });
@@ -77,7 +78,11 @@ describe('Panels View Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 
@@ -138,7 +143,11 @@ describe('Panels View Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

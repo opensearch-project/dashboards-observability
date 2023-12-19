@@ -3,17 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { Field } from '../field';
-import { AGENT_FIELD } from '../../../../../../test/event_analytics_constants';
-import { applyMiddleware, createStore } from 'redux';
-import { rootReducer } from '../../../../../framework/redux/reducers';
-import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
+import { applyMiddleware, createStore } from 'redux';
+import thunk from 'redux-thunk';
 import { DEFAULT_DATA_SOURCE_TYPE } from '../../../../../../common/constants/data_sources';
+import { AGENT_FIELD } from '../../../../../../test/event_analytics_constants';
+import { rootReducer } from '../../../../../framework/redux/reducers';
+import { Field } from '../field';
 
 describe('Field component', () => {
   configure({ adapter: new Adapter() });
@@ -44,7 +45,11 @@ describe('Field component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

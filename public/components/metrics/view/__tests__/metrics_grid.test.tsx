@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createStore } from '@reduxjs/toolkit';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { MetricsGrid } from '../metrics_grid';
-import { coreStartMock } from '../../../../../test/__mocks__/coreMocks';
-import { sampleMetric, sampleMetricsVisualizations } from '../../../../../test/metrics_contants';
-import { createStore } from '@reduxjs/toolkit';
-import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
-import PPLService from '../../../../services/requests/ppl';
+import { coreStartMock } from '../../../../../test/__mocks__/coreMocks';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
+import { sampleMetricsVisualizations } from '../../../../../test/metrics_contants';
 import { coreRefs } from '../../../../framework/core_refs';
+import { rootReducer } from '../../../../framework/redux/reducers';
+import PPLService from '../../../../services/requests/ppl';
+import { MetricsGrid } from '../metrics_grid';
 
 describe('Metrics Grid Component', () => {
   configure({ adapter: new Adapter() });
@@ -69,7 +70,11 @@ describe('Metrics Grid Component', () => {
     wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
     });
   });
 });

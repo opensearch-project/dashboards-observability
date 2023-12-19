@@ -3,18 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ShortDate } from '@elastic/eui';
+import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import PPLService from '../../../../../services/requests/ppl';
+import toJson from 'enzyme-to-json';
 import React from 'react';
-import { VisaulizationFlyout } from '../visualization_flyout';
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { ShortDate } from '@elastic/eui';
+import PPLService from '../../../../../services/requests/ppl';
+import { VisaulizationFlyout } from '../visualization_flyout';
 
 describe('Visualization Flyout Component', () => {
   configure({ adapter: new Adapter() });
 
-  it('renders add visualization Flyout', () => {
+  it('renders add visualization Flyout', async () => {
     const panelId = '';
     const pplFilterValue = '';
     const start: ShortDate = 'now-15m';
@@ -40,10 +42,17 @@ describe('Visualization Flyout Component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
-  it('renders replace visualization Flyout', () => {
+  it('renders replace visualization Flyout', async () => {
     const panelId = 'oiuccXwBYVazWqOO1e06';
     const pplFilterValue = "where Carrier='OpenSearch-Air'";
     const start: ShortDate = '2011-08-11T01:23:45.678Z';
@@ -71,6 +80,13 @@ describe('Visualization Flyout Component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+    await waitFor(() => {
+      expect(
+        toJson(wrapper, {
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });
